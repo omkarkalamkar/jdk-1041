@@ -15,11 +15,11 @@ import tango
 from tango import DevState
 from tango.test_context import DeviceTestContext
 from tmc.common.tango_client import TangoClient
-from centralnode.device_data import DeviceData
+from tmc.centralnode.device_data import DeviceData
 
 # Additional import
-from centralnode import CentralNode, const, release
-from centralnode.const import CMD_SET_STOW_MODE, STR_ON_CMD_ISSUED, STR_STOW_CMD_ISSUED_CN, STR_STANDBY_CMD_ISSUED
+from tmc.centralnode import CentralNode, const, release
+from tmc.centralnode.const import CMD_SET_STOW_MODE, STR_ON_CMD_ISSUED, STR_STOW_CMD_ISSUED_CN, STR_STANDBY_CMD_ISSUED
 from ska.base.control_model import HealthState, AdminMode, SimulationMode, ControlMode, TestMode
 from ska.base.control_model import LoggingLevel
 from ska.base.commands import ResultCode
