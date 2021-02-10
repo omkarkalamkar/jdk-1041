@@ -12,6 +12,9 @@ import os
 import sys
 from setuptools import setup, find_packages
 
+import setuptools
+
+
 setup_dir = os.path.dirname(os.path.abspath(__file__))
 
 # make sure we use latest info from local code
@@ -27,7 +30,7 @@ exec(open(release_filename).read())
 setup(name=name,
       version=version,
       description='Central Node is a coordinator of the complete M&C system.',
-      packages=find_packages(where='src'),
+      packages=setuptools.find_namespace_packages(where="src", include=["tmc.*"]),
       package_dir={'': 'src'},
       include_package_data=True,
       test_suite="test",
@@ -35,7 +38,7 @@ setup(name=name,
       author='Team NCRA',
       author_email='telmgt-internal@googlegroups.com',
       license='BSD-3-Clause',
-      long_description=long_description,
+    #   long_description=long_description,
       url='https://www.skatelescope.org',
       platforms="Linux",
       install_requires=['pytango==9.3.2', 'mock', 'katpoint', 'ska_logging==0.3.0', 'lmcbaseclasses==0.7.2',
