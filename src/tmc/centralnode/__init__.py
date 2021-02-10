@@ -12,9 +12,11 @@
 Central Node is a coordinator of the complete M&C system.
 """
 
-from . import release
-from . import const
-from .central_node import CentralNode
+from apprehensive import release
+from apprehensive import const
+from tmc.centralnode.central_node import CentralNode
+from tmc.centralnode import input_validator
+from tmc.centralnode import exceptions
 
 __all__ = ["release", "const", "CentralNode", "input_validator", "exceptions"]
 
