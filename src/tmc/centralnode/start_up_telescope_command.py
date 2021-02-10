@@ -9,8 +9,8 @@ from tango import DevState, DevFailed
 from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 from . import const
-from centralnode.device_data import DeviceData
-from centralnode.health_state_aggreegator import HealthStateAggreegator
+from tmc.centralnode.device_data import DeviceData
+from tmc.centralnode.health_state_aggreegator import HealthStateAggreegator
 from tmc.common.tango_client import TangoClient
 # PROTECTED REGION END #    //  CentralNode.additional_import
 

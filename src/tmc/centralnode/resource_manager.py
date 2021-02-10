@@ -2,7 +2,7 @@
 ResourceManager class for CentralNode.
 """
 import logging
-from centralnode.device_data import DeviceData
+from tmc.centralnode.device_data import DeviceData
 
 class ResourceManager:
     """

@@ -8,7 +8,7 @@ from ska.base.control_model import ObsState
 from . import const
 from tmc.common.tango_client import TangoClient
 import logging
-from centralnode.device_data import DeviceData
+from tmc.centralnode.device_data import DeviceData
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 # TODO: this class is created separate from CentralNode class. Data from DeviceData class is required here.

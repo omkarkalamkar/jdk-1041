@@ -13,8 +13,8 @@ from json import JSONDecodeError
 import logging
 
 # SKA specific imports
-from centralnode.exceptions import ResourceNotPresentError
-from centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
+from tmc.centralnode.exceptions import ResourceNotPresentError
+from tmc.centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
 from ska.cdm.schemas import CODEC
 from ska.cdm.messages.central_node.assign_resources import AssignResourcesRequest
 from marshmallow import ValidationError

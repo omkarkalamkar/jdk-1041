@@ -18,14 +18,14 @@ from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 from ska.base.control_model import HealthState
 from . import const, release
-from centralnode.start_up_telescope_command import StartUpTelescope
-from centralnode.stand_by_telescope_command import StandByTelescope
-from centralnode.assign_resources_command import AssignResources
-from centralnode.release_resources_command import ReleaseResources
-from centralnode.stow_antennas_command import StowAntennas
-from centralnode.resource_manager import ResourceManager
-from centralnode.device_data import DeviceData
-from centralnode.obs_state_check import ObsStateAggregator
+from tmc.centralnode.start_up_telescope_command import StartUpTelescope
+from tmc.centralnode.stand_by_telescope_command import StandByTelescope
+from tmc.centralnode.assign_resources_command import AssignResources
+from tmc.centralnode.release_resources_command import ReleaseResources
+from tmc.centralnode.stow_antennas_command import StowAntennas
+from tmc.centralnode.resource_manager import ResourceManager
+from tmc.centralnode.device_data import DeviceData
+from tmc.centralnode.obs_state_check import ObsStateAggregator
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 __all__ = ["CentralNode", "main", "AssignResources", "DeviceData", "const",

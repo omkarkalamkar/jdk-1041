@@ -11,11 +11,11 @@ from tango import DevState, DevFailed
 from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
 from . import const
-from centralnode.receptor_reassignment_checker import ReceptorReassignmentChecker
-from centralnode.input_validator import AssignResourceValidator
-from centralnode.device_data import DeviceData
-from centralnode.exceptions import ResourceReassignmentError, ResourceNotPresentError
-from centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
+from tmc.centralnode.receptor_reassignment_checker import ReceptorReassignmentChecker
+from tmc.centralnode.input_validator import AssignResourceValidator
+from tmc.centralnode.device_data import DeviceData
+from tmc.centralnode.exceptions import ResourceReassignmentError, ResourceNotPresentError
+from tmc.centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
 
 class AssignResources(BaseCommand):
     """
