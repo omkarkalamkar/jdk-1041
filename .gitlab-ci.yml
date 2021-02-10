@@ -63,26 +63,26 @@ build CentralNode wheel for publication: # Executed on a tag
   tags:
     - docker-executor
   script:
-    - cd ./centralnode
+    # - cd ./centralnode
     - python3 setup.py egg_info -b+$CI_COMMIT_SHORT_SHA sdist bdist_wheel
   only:
     - tags
   artifacts:
     paths:
-      - ./centralnode/dist/
+      - ./dist/
     
 build CentralNode wheel for development: # Executed on a commit
   stage: build
   tags:
     - docker-executor
   script:
-    - cd ./centralnode
+    # - cd ./centralnode
     - python3 setup.py egg_info -b+dev.$CI_COMMIT_SHORT_SHA sdist bdist_wheel
   except:
     - tags
   artifacts:
     paths:
-      - ./centralnode/dist/
+      - ./dist/
           
 unit tests:
   stage: test
