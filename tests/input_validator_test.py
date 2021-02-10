@@ -3,10 +3,10 @@ import pytest
 import json
 
 # other imports
-from centralnode.input_validator import AssignResourceValidator
-from centralnode.exceptions import ResourceReassignmentError, ResourceNotPresentError
-from centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
-from centralnode import const
+from tmc.centralnode.input_validator import AssignResourceValidator
+from tmc.centralnode.exceptions import ResourceReassignmentError, ResourceNotPresentError
+from tmc.centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
+from tmc.centralnode import const
 
 # Sample 'good' JSON
 sample_assign_resources_request = {
