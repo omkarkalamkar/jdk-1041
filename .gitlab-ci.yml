@@ -34,55 +34,55 @@ clean shell runner:
     # Gitlab CI badges creation
     - rm -rf build/*
 
-# build wheel for publication: # Executed on a tag
-#   stage: build
-#   tags:
-#     - docker-executor
-#   script:
-#     - python3 setup.py egg_info -b+$CI_COMMIT_SHORT_SHA sdist bdist_wheel
-#   rules:
-#     - if: '$CI_COMMIT_TAG'
-#   artifacts:
-#     paths:
-#       - ./dist/
-
-# build wheel for development: # Executed on non-tagged commit
-#   stage: build
-#   tags:
-#     - docker-executor
-#   script:
-#     - python3 setup.py egg_info -b+dev.$CI_COMMIT_SHORT_SHA sdist bdist_wheel
-#   # rules:
-#   #   - if: '$CI_COMMIT_TAG == null || $CI_COMMIT_TAG == ""'
-#   artifacts:
-#     paths:
-#       - ./dist/
-
-build CentralNode wheel for publication: # Executed on a tag
+build wheel for publication: # Executed on a tag
   stage: build
   tags:
     - docker-executor
   script:
-    # - cd ./centralnode
     - python3 setup.py egg_info -b+$CI_COMMIT_SHORT_SHA sdist bdist_wheel
-  only:
-    - tags
+  rules:
+    - if: '$CI_COMMIT_TAG'
   artifacts:
     paths:
       - ./dist/
-    
-build CentralNode wheel for development: # Executed on a commit
+
+build wheel for development: # Executed on non-tagged commit
   stage: build
   tags:
     - docker-executor
   script:
-    # - cd ./centralnode
     - python3 setup.py egg_info -b+dev.$CI_COMMIT_SHORT_SHA sdist bdist_wheel
-  except:
-    - tags
+  # rules:
+  #   - if: '$CI_COMMIT_TAG == null || $CI_COMMIT_TAG == ""'
   artifacts:
     paths:
       - ./dist/
+
+# build CentralNode wheel for publication: # Executed on a tag
+#   stage: build
+#   tags:
+#     - docker-executor
+#   script:
+#     # - cd ./centralnode
+#     - python3 setup.py egg_info -b+$CI_COMMIT_SHORT_SHA sdist bdist_wheel
+#   only:
+#     - tags
+#   artifacts:
+#     paths:
+#       - ./dist/
+    
+# build CentralNode wheel for development: # Executed on a commit
+#   stage: build
+#   tags:
+#     - docker-executor
+#   script:
+#     # - cd ./centralnode
+#     - python3 setup.py egg_info -b+dev.$CI_COMMIT_SHORT_SHA sdist bdist_wheel
+#   except:
+#     - tags
+#   artifacts:
+#     paths:
+#       - ./dist/
           
 unit tests:
   stage: test
