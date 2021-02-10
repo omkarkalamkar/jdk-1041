@@ -3,7 +3,7 @@ ReceptorReassignmentChecker class for CentralNode.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 import logging
-from . import const
+from tmc.centralnode import const
 from tmc.centralnode.exceptions import ResourceReassignmentError
 from tmc.centralnode.device_data import DeviceData
 

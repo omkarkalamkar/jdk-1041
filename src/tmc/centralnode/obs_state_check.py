@@ -5,7 +5,7 @@ ObsStateCheck class for CentralNode.
 import tango
 # Additional import
 from ska.base.control_model import ObsState
-from . import const
+from tmc.centralnode import const
 from tmc.common.tango_client import TangoClient
 import logging
 from tmc.centralnode.device_data import DeviceData

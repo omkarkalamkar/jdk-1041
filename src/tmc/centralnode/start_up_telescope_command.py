@@ -8,7 +8,7 @@ from tango import DevState, DevFailed
 # Additional import
 from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
-from . import const
+from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.health_state_aggreegator import HealthStateAggreegator
 from tmc.common.tango_client import TangoClient

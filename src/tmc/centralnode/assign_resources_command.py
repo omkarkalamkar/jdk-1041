@@ -10,7 +10,7 @@ from tango import DevState, DevFailed
 
 from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
-from . import const
+from tmc.centralnode import const
 from tmc.centralnode.receptor_reassignment_checker import ReceptorReassignmentChecker
 from tmc.centralnode.input_validator import AssignResourceValidator
 from tmc.centralnode.device_data import DeviceData

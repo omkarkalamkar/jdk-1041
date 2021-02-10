@@ -17,7 +17,7 @@ from tango.server import run, attribute, command, device_property
 from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 from ska.base.control_model import HealthState
-from . import const, release
+from tmc.centralnode import const, release
 from tmc.centralnode.start_up_telescope_command import StartUpTelescope
 from tmc.centralnode.stand_by_telescope_command import StandByTelescope
 from tmc.centralnode.assign_resources_command import AssignResources
