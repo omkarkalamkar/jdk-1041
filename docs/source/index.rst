@@ -4,13 +4,13 @@
    contain the root `toctree` directive.
 
 Welcome to ska-tmc-centralnode-mid documentation!
-============================================
+==================================================
 
 .. toctree::
   :caption: Table of Contents
   :maxdepth: 1
    
-   Central Node<CentralNode>
+   Central Node Mid<CentralNode>
    
 
 Indices and tables

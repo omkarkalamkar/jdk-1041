@@ -1,37 +1,42 @@
-.. TMC Prototype documentation master file, created by
+.. CentralNodemid documentation master file, created by
    sphinx-quickstart on Thu Jan 31 16:54:35 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Central Node
-************
-.. automodule:: tmcprototype.centralnode.src.centralnode.central_node
+Central Node Mid
+*****************
+
+.. toctree::
+   :maxdepth: 2
+
+.. automodule:: tmc.centralnode.central_node
+.. autoclass:: tmc.centralnode.CentralNode
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.assign_resources_command
+.. automodule:: tmc.centralnode.assign_resources_command
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.release_resources_command
+.. automodule:: tmc.centralnode.release_resources_command
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.standby_telescope_command
+.. automodule:: tmc.centralnode.standby_telescope_command
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.startup_telescope_command
+.. automodule:: tmc.centralnode.startup_telescope_command
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.stow_antennas_command
+.. automodule:: tmc.centralnode.stow_antennas_command
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.health_state_aggregator
+.. automodule:: tmc.centralnode.health_state_aggregator
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.receptor_reassignment_checker
+.. automodule:: tmc.centralnode.receptor_reassignment_checker
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.resource_manager
+.. automodule:: tmc.centralnode.resource_manager
    :members:
    :undoc-members:
-.. automodule:: tmcprototype.centralnode.src.centralnode.obs_state_check
+.. automodule:: tmc.centralnode.obs_state_check
    :members:
    :undoc-members:
