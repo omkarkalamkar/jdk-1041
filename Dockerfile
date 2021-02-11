@@ -17,8 +17,7 @@ RUN python3 -m pip install install ska-log-transactions
 # install ska tmc common package
 RUN python3 -m pip install skatmccommon==0.1.2+b01374cf
 # install centralnode mid package
-RUN python3 -m pip install \
-    /app/tmcprototype/centralnode
+RUN python3 -m pip install .
 
 USER tango
 
