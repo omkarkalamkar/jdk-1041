@@ -57,32 +57,6 @@ build wheel for development: # Executed on non-tagged commit
   artifacts:
     paths:
       - ./dist/
-
-# build CentralNode wheel for publication: # Executed on a tag
-#   stage: build
-#   tags:
-#     - docker-executor
-#   script:
-#     # - cd ./centralnode
-#     - python3 setup.py egg_info -b+$CI_COMMIT_SHORT_SHA sdist bdist_wheel
-#   only:
-#     - tags
-#   artifacts:
-#     paths:
-#       - ./dist/
-    
-# build CentralNode wheel for development: # Executed on a commit
-#   stage: build
-#   tags:
-#     - docker-executor
-#   script:
-#     # - cd ./centralnode
-#     - python3 setup.py egg_info -b+dev.$CI_COMMIT_SHORT_SHA sdist bdist_wheel
-#   except:
-#     - tags
-#   artifacts:
-#     paths:
-#       - ./dist/
           
 unit tests:
   stage: test
@@ -146,9 +120,13 @@ pages:
   tags:
     - docker-executor
   script:
-    - cp -R build public
+    # - cp -R build public
     # TODO: Setup the pages job
     # - mv public/skatmccentralnode_htmlcov/* public
+    - mv build public
+    - mv public/reports/centralnode_htmlcov/* public
+    - make build
+    - make push
   artifacts:
     paths:
       - public
