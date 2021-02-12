@@ -53,3 +53,15 @@ Central Node Mid
 .. autoclass:: src.tmc.centralnode.obs_state_check.ObsStateAggregator
    :members:
    :undoc-members:
+.. automodule:: src.tmc.centralnode.input_validator
+.. autoclass:: src.tmc.centralnode.input_validator.AssignResourceValidator
+   :members:
+   :undoc-members:
+.. automodule:: src.tmc.centralnode.exceptions
+.. autoclass:: src.tmc.centralnode.exceptions.InvalidObsStateError
+.. autoclass:: src.tmc.centralnode.exceptions.ResourceReassignmentError
+.. autoclass:: src.tmc.centralnode.exceptions.InvalidJSONError
+.. autoclass:: src.tmc.centralnode.exceptions.ResourceNotPresentError
+.. autoclass:: src.tmc.centralnode.exceptions.SubarrayNotPresentError
+   :members:
+   :undoc-members:
