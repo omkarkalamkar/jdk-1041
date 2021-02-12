@@ -37,8 +37,8 @@ Central Node Mid
 .. autoclass:: src.tmc.centralnode.stow_antennas_command.StowAntennas
    :members:
    :undoc-members:
-.. automodule:: src.tmc.centralnode.health_state_aggreegator
-.. autoclass:: src.tmc.centralnode.health_state_aggreegator.HealthStateAggreegator
+.. automodule:: src.tmc.centralnode.health_state_aggregator
+.. autoclass:: src.tmc.centralnode.health_state_aggreegator.HealthStateAggregator
    :members:
    :undoc-members:
 .. automodule:: src.tmc.centralnode.receptor_reassignment_checker
