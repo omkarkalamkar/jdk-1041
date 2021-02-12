@@ -13,7 +13,7 @@ from ska.base.control_model import ObsState
 
 from tmc.common.tango_client import TangoClient
 
-from tmc.centralNode import const
+from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
