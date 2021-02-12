@@ -166,7 +166,7 @@ class HealthStateAggregator:
                         self.logger.info(f"CSP Master health is....: {health_state}")
                     break
             else:
-                self.logger.debug(const.event_UNKNOWN)
+                self.logger.debug(const.EVT_UNKNOWN)
                 # TODO: update read_activity message for unknown events
 
         def _generate_health_state_log_msg(self, health_state):
