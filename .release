@@ -12,7 +12,7 @@ copyright=""""""
 
 release=0.1.0
 tag=0.1.0
-tag_description= Publish new docker image for tmc-centralnode-mid 
-release_notes=This release contains:<br/><ul><li>New version of tmc centralnode mid</li></ul><br/>
+tag_description= First release from a separate repository for CentralNodeMid
+release_notes=This release contains:<br/><ul><li>First version of tmc centralnode mid</li></ul><br/>
 gitlab_username=JayantKumbhar
 private_token=VKrB7zCeWE-L7362H_FG
