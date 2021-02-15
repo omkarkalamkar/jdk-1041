@@ -115,9 +115,16 @@ pages:
     - docker-executor
   script:
     - mv build public
-    - mv public/reports/centralnode_htmlcov/* public
+    - mv public/reports/htmlcov/* public
     - make build
     - make push
   artifacts:
     paths:
       - public
+
+# Standardised included jobs
+include:
+# Create Gitlab CI badges from CI metrics
+# https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
+- project: 'ska-telescope/templates-repository'
+  file: 'gitlab-ci/includes/post_step.yml'
