@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""centralnode"""
-version="9.9.0"
+version="0.1.0"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,9 +10,9 @@ license="""BSD-3-Clause"""
 url="""https://www.skatelescope.org"""
 copyright=""""""
 
-release=9.9.0
-tag=9.9.0
-tag_description= Test release from a separate repository for CentralNodeMid
-release_notes=This release contains:<br/><ul><li>Test version of tmc centralnode mid</li></ul><br/>
+release=0.1.0
+tag=0.1.0
+tag_description= First release from a separate repository for CentralNodeMid
+release_notes=This release contains:<br/><ul><li>First version of tmc centralnode mid</li></ul><br/>
 gitlab_username=kalyanithigale
 private_token=uqwK7WTp_wkTzw5o68nd
