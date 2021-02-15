@@ -117,6 +117,10 @@ check-release: .release
 	@. $(RELEASE_SUPPORT) ; tagExists $(TAG) || (echo "ERROR: version not yet tagged in git. make [minor,major,patch]-release." >&2 && exit 1) ;
 	@. $(RELEASE_SUPPORT) ; ! differsFromRelease $(TAG) || (echo "ERROR: current directory differs from tagged $(TAG). make [minor,major,patch]-release." ; exit 1)
 
+config-git:
+	git config --global user.email $(EMAILID)
+	git config --global user.name $(USERNAME)
+
 release-centralnode: config-git docker-build push-versioned-image create-publish-tag release-cn-if-no-error
 
 release-cn: .release
