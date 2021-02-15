@@ -101,6 +101,12 @@ minor-release: tag-minor-release release
 major-release: tag-major-release release
 	@echo $(VERSION)
 
+push-versioned-image:
+	docker push $(IMAGE):$(VERSION)
+
+create-publish-tag: create-tag push-tag
+
+
 tag: TAG=$(shell . $(RELEASE_SUPPORT); getTag $(VERSION))
 tag: check-status
 	@. $(RELEASE_SUPPORT) ; setRelease $(VERSION)
@@ -110,3 +116,17 @@ check-status:
 check-release: .release
 	@. $(RELEASE_SUPPORT) ; tagExists $(TAG) || (echo "ERROR: version not yet tagged in git. make [minor,major,patch]-release." >&2 && exit 1) ;
 	@. $(RELEASE_SUPPORT) ; ! differsFromRelease $(TAG) || (echo "ERROR: current directory differs from tagged $(TAG). make [minor,major,patch]-release." ; exit 1)
+
+release-centralnode: config-git docker-build push-versioned-image create-publish-tag release-cn-if-no-error
+
+release-cn: .release
+	@. $(RELEASE_SUPPORT) ; releaseCN
+
+delete-cn-release: .release
+	@. $(RELEASE_SUPPORT) ; deleteCNRelease
+
+delete-tag: .release
+	@. $(RELEASE_SUPPORT) ; deleteTag
+
+release-cn-if-no-error: .release
+	@. $(RELEASE_SUPPORT) ; releaseCNIfNoError
