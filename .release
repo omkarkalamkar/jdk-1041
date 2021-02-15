@@ -14,5 +14,5 @@ release=0.1.0
 tag=0.1.0
 tag_description= First release from a separate repository for CentralNodeMid
 release_notes=This release contains:<br/><ul><li>First version of tmc centralnode mid</li></ul><br/>
-gitlab_username=JayantKumbhar
-private_token=VKrB7zCeWE-L7362H_FG
+gitlab_username=kalyanithigale
+private_token=uqwK7WTp_wkTzw5o68nd
