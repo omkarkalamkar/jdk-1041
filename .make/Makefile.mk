@@ -106,12 +106,15 @@ push-versioned-image:
 
 create-publish-tag: create-tag push-tag
 
+push-tag: .release
+	@. $(RELEASE_SUPPORT) ; gitPush
+	
 create-tag: .release
 	@. $(RELEASE_SUPPORT) ; createGitTag || (echo "ERROR: Some error in creating tag" >&2 && exit 1) ;
 
 delete-image-from-nexus:
 	@. $(RELEASE_SUPPORT) ; deleteImageFromNexus
-	
+
 tag: TAG=$(shell . $(RELEASE_SUPPORT); getTag $(VERSION))
 tag: check-status
 	@. $(RELEASE_SUPPORT) ; setRelease $(VERSION)
