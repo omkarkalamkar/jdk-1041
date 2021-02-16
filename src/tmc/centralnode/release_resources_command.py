@@ -76,6 +76,7 @@ class ReleaseResources(BaseCommand):
                     "subarrayID": 1,
                     "releaseALL": true,
                     "receptorIDList": []
+
                 }
 
         Note: From Jive, enter input as: {"subarrayID":1,"releaseALL":true,"receptorIDList":[]} without any space.
@@ -94,10 +95,11 @@ class ReleaseResources(BaseCommand):
 
             Example:
                 argout =
-                {
-                    "ReleaseAll" : True,
-                    "receptorIDList" : []
-                }
+                    {
+                        "ReleaseAll" : True,
+                        "receptorIDList" : []
+
+                    }
 
         return:
             None

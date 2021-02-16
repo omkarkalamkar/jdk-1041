@@ -81,30 +81,30 @@ class AssignResources(BaseCommand):
                    Maximum length of the SBI in seconds.
                scan_types:
                    array of the blocks each consisting following parameters
-                   id:
+                    id:
                        DevString
                        The scan id.
-                   coordinate_system:
+                    coordinate_system:
                        DevString
-                   ra:
+                    ra:
                        DevString
-                   Dec:
+                    Dec:
                        DevString
 
                processing_blocks:
                    array of the blocks each consisting following parameters
-                   id:
-                       DevString
-                       The Processing Block id.
-                   workflow:
-                       type:
+                    id:
+                        DevString
+                        The Processing Block id.
+                    workflow:
+                        type:
                            DevString
-                       id:
+                        id:
                            DevString
-                       version:
+                        version:
                            DevString
-                   parameters:
-                       {}
+                    parameters:
+                        {}
 
         Example:
             {"subarrayID":1,"dish":{"receptorIDList":["0001","0002"]},"sdp":{"id":"sbi-mvp01-20200325-00001",
