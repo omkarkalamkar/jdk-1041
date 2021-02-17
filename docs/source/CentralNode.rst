@@ -19,26 +19,26 @@ Central Node Mid
    :undoc-members:
 .. automodule:: src.tmc.centralnode.assign_resources_command
 .. autoclass:: src.tmc.centralnode.assign_resources_command.AssignResources
-   :members:
+   :members: do
    :undoc-members:
 .. automodule:: src.tmc.centralnode.release_resources_command
 .. autoclass:: src.tmc.centralnode.release_resources_command.ReleaseResources
-   :members:
+   :members: do
    :undoc-members:
 .. automodule:: src.tmc.centralnode.stand_by_telescope_command
 .. autoclass:: src.tmc.centralnode.stand_by_telescope_command.StandByTelescope
-   :members:
+   :members: do
    :undoc-members:
 .. automodule:: src.tmc.centralnode.start_up_telescope_command
 .. autoclass:: src.tmc.centralnode.start_up_telescope_command.StartUpTelescope
-   :members:
+   :members: do
    :undoc-members:
 .. automodule:: src.tmc.centralnode.stow_antennas_command
 .. autoclass:: src.tmc.centralnode.stow_antennas_command.StowAntennas
-   :members:
+   :members: do
    :undoc-members:
 .. automodule:: src.tmc.centralnode.health_state_aggregator
-.. autoclass:: src.tmc.centralnode.health_state_aggreegator.HealthStateAggregator
+.. autoclass:: src.tmc.centralnode.health_state_aggregator.HealthStateAggregator
    :members:
    :undoc-members:
 .. automodule:: src.tmc.centralnode.receptor_reassignment_checker

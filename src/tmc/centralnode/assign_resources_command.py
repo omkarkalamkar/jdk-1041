@@ -20,6 +20,11 @@ from tmc.centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
 class AssignResources(BaseCommand):
     """
     A class for CentralNode's AssignResources() command.
+
+    Assigns resources to given subarray. It accepts the subarray id, receptor id list and SDP block in JSON
+    string format. Upon successful execution, the 'receptorIDList' attribute of the given subarray is populated
+    with the given receptors.Also checking for duplicate allocation of resources is done. If already allocated
+    it will throw error message regarding the prior existence of resource.
     """
 
     def check_allowed(self):
@@ -50,10 +55,7 @@ class AssignResources(BaseCommand):
 
     def do(self, argin):
         """
-        Assigns resources to given subarray. It accepts the subarray id, receptor id list and SDP block in JSON
-        string format. Upon successful execution, the 'receptorIDList' attribute of the given subarray is populated
-        with the given receptors. Also checking for duplicate allocation of resources is done. If already allocated
-        it will throw error message regarding the prior existence of resource.
+        Method to invoke AssignResources command on Subarray.
 
         :param argin: The string in JSON format. The JSON contains following values:
 
@@ -79,30 +81,30 @@ class AssignResources(BaseCommand):
                    Maximum length of the SBI in seconds.
                scan_types:
                    array of the blocks each consisting following parameters
-                   id:
+                    id:
                        DevString
                        The scan id.
-                   coordinate_system:
+                    coordinate_system:
                        DevString
-                   ra:
+                    ra:
                        DevString
-                   Dec:
+                    Dec:
                        DevString
 
                processing_blocks:
                    array of the blocks each consisting following parameters
-                   id:
-                       DevString
-                       The Processing Block id.
-                   workflow:
-                       type:
+                    id:
+                        DevString
+                        The Processing Block id.
+                    workflow:
+                        type:
                            DevString
-                       id:
+                        id:
                            DevString
-                       version:
+                        version:
                            DevString
-                   parameters:
-                       {}
+                    parameters:
+                        {}
 
         Example:
             {"subarrayID":1,"dish":{"receptorIDList":["0001","0002"]},"sdp":{"id":"sbi-mvp01-20200325-00001",
@@ -124,8 +126,9 @@ class AssignResources(BaseCommand):
 
         Note: From Jive, enter above input string without any space.
 
-        :return: A tuple containing a return code and a string in JSON format on successful assignment
-         of given resources. The JSON string contains following values:
+        return:
+            A tuple containing a return code and a string in JSON format on successful assignment
+            of given resources. The JSON string contains following values:
 
             dish:
                 Mandatory JSON object consisting of
@@ -143,11 +146,13 @@ class AssignResources(BaseCommand):
                 }
                 }
 
-        :rtype: None
-
-        :raises: DevFailed when the API fails to allocate resources.
-
         Note: Enter input without spaces as:{"dish":{"receptorIDList_success":["0001","0002"]}}
+
+        return:
+            None
+
+        raises:
+            DevFailed when the API fails to allocate resources.
 
         """
         device_data = DeviceData.get_instance()
