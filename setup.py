@@ -41,15 +41,14 @@ setup(name=name,
     #   long_description=long_description,
       url='https://www.skatelescope.org',
       platforms="Linux",
-      install_requires=['pytango==9.3.2', 'mock', 'ska-logging==0.3.0', 'lmcbaseclasses==0.7.2',
+      install_requires=['pytango==9.3.2', 'mock', 'ska_logging==0.3.0', 'lmcbaseclasses==0.7.2',
                         'skatmccommon==0.1.2+b01374cf'],
       setup_requires=[
           # dependency for `python setup.py test`
           'pytest-runner',
           # dependencies for `python setup.py build_sphinx`
-          'sphinx<2',
-          'recommonmark',
-          'sphinx-rtd-theme<0.5'
+          'sphinx',
+          'recommonmark'
       ],
       tests_require=[
           'pytest',
