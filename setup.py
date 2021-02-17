@@ -47,8 +47,9 @@ setup(name=name,
           # dependency for `python setup.py test`
           'pytest-runner',
           # dependencies for `python setup.py build_sphinx`
-          'sphinx',
-          'recommonmark'
+          'sphinx<2',
+          'recommonmark',
+          'sphinx-rtd-theme<0.5'
       ],
       tests_require=[
           'pytest',
