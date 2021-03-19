@@ -13,7 +13,7 @@ RUN python3 -m pip install cdm-shared-library==2.0.0
 # install transaction id
 RUN python3 -m pip install install ska-log-transactions
 # install ska tmc common package
-RUN python3 -m pip install skatmccommon==0.1.2+b01374cf
+RUN python3 -m pip install skatmccommon==0.1.3+1c307e75
 # install centralnode mid package
 RUN python3 -m pip install .
 
