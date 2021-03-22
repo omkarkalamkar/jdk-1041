@@ -175,6 +175,7 @@ class CentralNode(SKABaseDevice):
             self.this_server.device = device
             device.attr_map = {}
             #Initilise the attributes
+            device.attr_map["activityMessage"] = ""
             device.attr_map["subarray1HealthState"] = HealthState.UNKNOWN
             device.attr_map["subarray2HealthState"] = HealthState.UNKNOWN
             device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
@@ -274,9 +275,6 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(CentralNode.activity_message_write) ENABLED START #
         """Internal construct of TANGO. Sets the activity message. """
         #self.device_data._read_activity_message = value
-
-        # self.this_server = TangoServerHelper.get_instance()
-        # this_server.update_attr_map("activityMessage", value)
         self.update_attr_map("activityMessage", value)
         # PROTECTED REGION END #    //  CentralNode.activity_message_write
     
