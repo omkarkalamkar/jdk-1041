@@ -668,7 +668,6 @@ def fake_tango_system(
     initial_dut_properties={},
     proxies_to_mock={},
     device_proxy_import_path="tango.DeviceProxy",
-    DB = Database(),
 ):
 
     with mock.patch(device_proxy_import_path) as patched_constructor:
