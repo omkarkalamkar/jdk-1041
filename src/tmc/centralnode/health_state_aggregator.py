@@ -18,6 +18,7 @@ from tmc.centralnode.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
 
+
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 
@@ -26,7 +27,7 @@ class HealthStateAggregator:
     Aggrergator class for health state event supscription and health state
     callback.
     """
-
+    
     def __init__(self, logger=None):
         if logger is None:
             self.logger = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class HealthStateAggregator:
         self.csp_master_ln_fqdn = "ska_mid/tm_leaf_node/csp_master"
         self.sdp_master_ln_fqdn = "ska_mid/tm_leaf_node/sdp_master"
         self.health_state_event_map = {}
-
+                
     def subscribe_event(self):
         """
         Method for event subscription. Calls separate subscribe event methods for CSP Master, SDP Master and
@@ -190,16 +191,16 @@ class HealthStateAggregator:
         def _calculate_health_state(health_states):
             unique_states = set(health_states)
             if unique_states == set([HealthState.OK]):
-                device_data._telescope_health_state = HealthState.OK
+                self.this_server.write_attr("telescopeHealthState", HealthState.OK)
                 _generate_health_state_log_msg(self, HealthState.OK)
             elif HealthState.FAILED in unique_states:
-                device_data._telescope_health_state = HealthState.FAILED
+                self.this_server.write_attr("telescopeHealthState", HealthState.FAILED)
                 _generate_health_state_log_msg(self, HealthState.FAILED)
             elif HealthState.DEGRADED in unique_states:
-                device_data._telescope_health_state = HealthState.DEGRADED
+                self.this_server.write_attr("telescopeHealthState", HealthState.DEGRADED)
                 _generate_health_state_log_msg(self, HealthState.DEGRADED)
             else:
-                device_data._telescope_health_state = HealthState.UNKNOWN
+                self.this_server.write_attr("telescopeHealthState", HealthState.UNKNOWN)
                 _generate_health_state_log_msg(self, HealthState.UNKNOWN)
             
         if not event.err:

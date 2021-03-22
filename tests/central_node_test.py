@@ -480,7 +480,9 @@ def test_telescope_health_state_matches_csp_master_leaf_node_health_state_after_
             # updator = HealthStateAggreegator()
             tango_client_obj = TangoClient("ska_mid/tm_leaf_node/csp_master")
             device_proxy.StartUpTelescope()
-    assert device_data._telescope_health_state == health_state
+    #assert device_data._telescope_health_state == health_state
+    assert device_proxy.telescopeHealthState == health_state
+
 
 
 @pytest.fixture(scope="function")
@@ -520,7 +522,9 @@ def test_telescope_health_state_is_ok_when_sdp_master_leaf_node_is_ok_after_star
         ):
             tango_client_obj = TangoClient("ska_mid/tm_leaf_node/sdp_master")
             device_proxy.StartUpTelescope()
-    assert device_data._telescope_health_state == health_state
+    #assert device_data._telescope_health_state == health_state
+    assert device_proxy.telescopeHealthState == health_state
+
 
 
 @pytest.fixture(scope="function")
@@ -561,7 +565,9 @@ def test_telescope_health_state_is_ok_when_subarray1_is_ok_after_start(
             # updator = HealthStateAggreegator()
             tango_client_obj = TangoClient("ska_mid/tm_subarray_node/1")
             device_proxy.StartUpTelescope()
-    assert device_data._telescope_health_state == health_state
+    #assert device_data._telescope_health_state == health_state
+    assert device_proxy.telescopeHealthState == health_state
+
 
 
 def test_telescope_health_state_is_ok_when_subarray2_is_ok_after_start(
@@ -582,7 +588,7 @@ def test_telescope_health_state_is_ok_when_subarray2_is_ok_after_start(
         ):
             tango_client_obj = TangoClient("ska_mid/tm_subarray_node/2")
             device_proxy.StartUpTelescope()
-    assert device_data._telescope_health_state == health_state
+    assert device_proxy.telescopeHealthState == health_state
 
 
 @pytest.fixture(scope="function")
@@ -622,7 +628,8 @@ def test_telescope_health_state_is_ok_when_subarray3_is_ok_after_start(
         ):
             tango_client_obj = TangoClient("ska_mid/tm_subarray_node/3")
             device_proxy.StartUpTelescope()
-    assert device_data._telescope_health_state == health_state
+    #assert device_data._telescope_health_state == health_state
+    assert device_proxy.telescopeHealthState == health_state
 
 
 # # Throw Devfailed exception for command with argument
