@@ -13,6 +13,7 @@ from tango import DevState, DevFailed
 from ska.base.commands import BaseCommand
 
 from tmc.common.tango_client import TangoClient
+from tmc.centralnode.tango_server_helper import TangoServerHelper
 
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
@@ -113,7 +114,7 @@ class ReleaseResources(BaseCommand):
 
         """
         device_data = DeviceData.get_instance()
-
+        self.this_server = TangoServerHelper.get_instance()
         try:
             release_success = False
             jsonArgument = json.loads(argin)
@@ -127,7 +128,9 @@ class ReleaseResources(BaseCommand):
                 res_not_released = ast.literal_eval(return_val[1][0])
                 log_msg = const.STR_REL_RESOURCES
                 self.logger.debug(log_msg)
-                device_data._read_activity_message = log_msg
+                #device_data._read_activity_message = log_msg
+                self.this_server.write_attr("activityMessage", log_msg)
+
                 if not res_not_released:
                     release_success = True
                     device_data.resource_manager.update_resource_deallocation(
@@ -142,16 +145,20 @@ class ReleaseResources(BaseCommand):
                     return message
                 else:
                     log_msg = f"{const.STR_LIST_RES_NOT_REL}{res_not_released}"
-                    device_data._read_activity_message = log_msg
+                    #device_data._read_activity_message = log_msg
+                    self.this_server.write_attr("activityMessage", log_msg)
+
                     self.logger.debug(log_msg)
                     # release_success = False
             else:
-                device_data._read_activity_message = const.STR_FALSE_TAG
+                self.this_server.write_attr("activityMessage", const.STR_FALSE_TAG)
+                #device_data._read_activity_message = const.STR_FALSE_TAG
                 self.logger.debug(const.STR_FALSE_TAG)
 
         except ValueError as value_error:
             self.logger.error(const.ERR_INVALID_JSON)
-            device_data._read_activity_message = f"{const.ERR_INVALID_JSON}{value_error}"
+            self.this_server.write_attr("activityMessage", f"{const.ERR_INVALID_JSON}{value_error}")
+            #device_data._read_activity_message = f"{const.ERR_INVALID_JSON}{value_error}"
             log_msg = f"{const.ERR_INVALID_JSON}{value_error}"
             self.logger.exception(value_error)
             tango.Except.throw_exception(
@@ -163,7 +170,8 @@ class ReleaseResources(BaseCommand):
 
         except KeyError as key_error:
             self.logger.error(const.ERR_JSON_KEY_NOT_FOUND)
-            device_data._read_activity_message = f"{const.ERR_JSON_KEY_NOT_FOUND}{key_error}"
+            #device_data._read_activity_message = f"{const.ERR_JSON_KEY_NOT_FOUND}{key_error}"
+            self.this_server.write_attr("activityMessage", f"{const.ERR_JSON_KEY_NOT_FOUND}{key_error}")
             log_msg = f"{const.ERR_JSON_KEY_NOT_FOUND}{key_error}"
             self.logger.exception(key_error)
             tango.Except.throw_exception(
@@ -175,7 +183,8 @@ class ReleaseResources(BaseCommand):
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_RELEASE_RESOURCES}{dev_failed}"
-            device_data._read_activity_message = const.ERR_RELEASE_RESOURCES
+            #device_data._read_activity_message = const.ERR_RELEASE_RESOURCES
+            self.this_server.write_attr("activityMessage", const.ERR_RELEASE_RESOURCES)
             self.logger.exception(dev_failed)
             tango.Except.throw_exception(
                 const.STR_RELEASE_RES_EXEC,

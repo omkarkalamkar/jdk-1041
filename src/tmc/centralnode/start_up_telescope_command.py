@@ -14,6 +14,7 @@ from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 
 from tmc.common.tango_client import TangoClient
+from tmc.centralnode.tango_server_helper import TangoServerHelper
 
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
@@ -80,7 +81,10 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
-        device_data._read_activity_message = log_msg
+        #device_data._read_activity_message = log_msg
+        self.this_server = TangoServerHelper.get_instance()
+        self.this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED)
+
 
         # start obs state aggregation
         device_data.obs_state_aggregator.start_aggregation()
@@ -148,12 +152,16 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            device_data._read_activity_message = log_msg
+            self.this_server = TangoServerHelper.get_instance()
+            self.this_server.write_attr("activityMessage", log_msg)
+            #device_data._read_activity_message = log_msg
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            device_data._read_activity_message = const.ERR_EXE_ON_CMD
+            #device_data._read_activity_message = const.ERR_EXE_ON_CMD
+            self.this_server = TangoServerHelper.get_instance()
+            self.this_server.write_attr("activityMessage", const.ERR_EXE_ON_CMD)
             tango.Except.throw_exception(
                 const.STR_ON_EXEC,
                 log_msg,
@@ -172,32 +180,41 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
         device_data = DeviceData.get_instance()
+        self.this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(const.CMD_ON)
             log_msg = "ON command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            device_data._read_activity_message = log_msg
+            #device_data._read_activity_message = log_msg
+            self.this_server.write_attr("activityMessage", log_msg)
+
 
             tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
             log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            device_data._read_activity_message = log_msg
+            #device_data._read_activity_message = log_msg
+            self.this_server.write_attr("activityMessage", log_msg)
+
             time.sleep(0.5)
             tango_client.send_command(const.CMD_SET_OPERATE_MODE)
             log_msg = "SetOperateMode command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            device_data._read_activity_message = log_msg
+            #device_data._read_activity_message = log_msg
+            self.this_server.write_attr("activityMessage", log_msg)
+
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            device_data._read_activity_message = const.ERR_EXE_ON_CMD
+            #device_data._read_activity_message = const.ERR_EXE_ON_CMD
+            self.this_server.write_attr("activityMessage", log_msg)
+
             tango.Except.throw_exception(
                 const.STR_ON_EXEC,
                 log_msg,

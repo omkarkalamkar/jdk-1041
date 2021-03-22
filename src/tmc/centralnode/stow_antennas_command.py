@@ -10,6 +10,8 @@ from tango import DevState, DevFailed
 from ska.base.commands import BaseCommand
 
 from tmc.common.tango_client import TangoClient
+from tmc.centralnode.tango_server_helper import TangoServerHelper
+
 
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
@@ -68,12 +70,14 @@ class StowAntennas(BaseCommand):
         """
         device_data = DeviceData.get_instance()
         self.logger.info(type(self.target))
+        self.this_server = TangoServerHelper.get_instance()
         try:
             for leafId in range(0, len(argin)):
                 float(argin[leafId])
             log_msg = const.STR_STOW_CMD_ISSUED_CN
             self.logger.info(log_msg)
-            device_data._read_activity_message = log_msg
+            #device_data._read_activity_message = log_msg
+            self.this_server.write_attr("activityMessage", log_msg)
             for i in range(0, len(argin)):
                 device_name = device_data.dln_prefix + argin[i]
                 try:
@@ -83,7 +87,8 @@ class StowAntennas(BaseCommand):
                 except DevFailed as dev_failed:
                     log_msg = f"{const.ERR_EXE_STOW_CMD}{dev_failed}"
                     self.logger.exception(dev_failed)
-                    device_data._read_activity_message = const.ERR_EXE_STOW_CMD
+                    self.this_server.write_attr("activityMessage", const.ERR_EXE_STOW_CMD)
+                    #device_data._read_activity_message = const.ERR_EXE_STOW_CMD
                     tango.Except.throw_exception(
                         const.STR_CMD_FAILED,
                         log_msg,
@@ -94,7 +99,9 @@ class StowAntennas(BaseCommand):
         except ValueError as value_error:
             log_msg = f"{const.ERR_STOW_ARGIN}{value_error}"
             self.logger.exception(value_error)
-            device_data._read_activity_message = const.ERR_STOW_ARGIN
+            #device_data._read_activity_message = const.ERR_STOW_ARGIN
+            self.this_server.write_attr("activityMessage", const.ERR_STOW_ARGIN)
+
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
@@ -105,7 +112,9 @@ class StowAntennas(BaseCommand):
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_STOW_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            device_data._read_activity_message = const.ERR_EXE_STOW_CMD
+            #device_data._read_activity_message = const.ERR_EXE_STOW_CMD
+            self.this_server.write_attr("activityMessage", const.ERR_EXE_STOW_CMD)
+
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,

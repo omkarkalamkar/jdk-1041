@@ -16,6 +16,7 @@ from tango import DevState
 from tango.test_context import DeviceTestContext
 
 from tmc.common.tango_client import TangoClient
+from tmc.centralnode.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode import CentralNode, const, release
 from tmc.centralnode.const import (
@@ -183,6 +184,13 @@ def mock_subarray():
             yield tango_context.device, tango_client_obj
 
 
+# @pytest.fixture(scope="function")
+# def mock_subarray_server():
+#     with mock.patch.object(TangoServerHelper, '_get_instance', return_value=Mock()) as mock_obj:
+#         device_proxy = TangoServerHelper._get_instance()
+#         yield device_proxy
+
+
 def test_assign_resources(mock_subarray):
     device_proxy, tango_client_obj = mock_subarray
     # mocking subarray device state as ON as per new state model
@@ -268,7 +276,7 @@ def test_telescope_health_state():
 
 
 def test_activity_message():
-    device_data = DeviceData.get_instance()
+    #device_data = DeviceData.get_instance()
     with fake_tango_system(CentralNode) as tango_context:
         tango_context.device.activityMessage = ""
         assert tango_context.device.activityMessage == ""
@@ -660,6 +668,7 @@ def fake_tango_system(
     initial_dut_properties={},
     proxies_to_mock={},
     device_proxy_import_path="tango.DeviceProxy",
+    DB = Database(),
 ):
 
     with mock.patch(device_proxy_import_path) as patched_constructor:

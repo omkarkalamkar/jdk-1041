@@ -14,6 +14,8 @@ from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 
 from tmc.common.tango_client import TangoClient
+from tmc.centralnode.tango_server_helper import TangoServerHelper
+
 
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
@@ -76,7 +78,11 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         device_data.health_aggreegator.unsubscribe_event()
         log_msg = const.STR_STANDBY_CMD_ISSUED
         self.logger.info(log_msg)
-        device_data._read_activity_message = log_msg
+
+        self.this_server = TangoServerHelper.get_instance()
+
+        #device_data._read_activity_message = log_msg
+        self.this_server.write_attr("activityMessage", log_msg)
 
         # stop obs state aggregation
         device_data.obs_state_aggregator.stop_aggregation()
@@ -143,17 +149,21 @@ class StandByTelescope(SKABaseDevice.OffCommand):
 
         """
         device_data = DeviceData.get_instance()
+        self.this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(cmd_name, param)
             log_msg = "Command {} invoked successfully on {}".format(
                 cmd_name, tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            device_data._read_activity_message = log_msg
+            #device_data._read_activity_message = log_msg
+            self.this_server.write_attr("activityMessage", log_msg)
+
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_STANDBY_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            device_data._read_activity_message = const.ERR_EXE_STANDBY_CMD
+            self.this_server.write_attr("activityMessage", log_msg)
+            #device_data._read_activity_message = const.ERR_EXE_STANDBY_CMD
             tango.Except.throw_exception(
                 const.STR_STANDBY_EXEC,
                 log_msg,

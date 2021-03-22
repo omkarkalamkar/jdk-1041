@@ -10,6 +10,8 @@ from tango import DevState, DevFailed
 
 from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
+from tmc.centralnode.tango_server_helper import TangoServerHelper
+
 from tmc.centralnode import const
 from tmc.centralnode.receptor_reassignment_checker import ReceptorReassignmentChecker
 from tmc.centralnode.input_validator import AssignResourceValidator
@@ -160,6 +162,8 @@ class AssignResources(BaseCommand):
         argout = []
 
         ## Validate the input JSON string.
+
+        self.this_server = TangoServerHelper.get_instance()
         try:
             self.logger.info("Validating input string.")
             input_validator = AssignResourceValidator(
@@ -203,7 +207,8 @@ class AssignResources(BaseCommand):
             )
 
             # Allocation successful
-            device_data._read_activity_message = const.STR_ASSIGN_RESOURCES_SUCCESS
+            self.this_server.write_attr("activityMessage", const.STR_ASSIGN_RESOURCES_SUCCESS)
+            #device_data._read_activity_message = const.STR_ASSIGN_RESOURCES_SUCCESS
             self.logger.debug(const.STR_ASSIGN_RESOURCES_SUCCESS)
 
             # Prepare output argument
@@ -215,7 +220,9 @@ class AssignResources(BaseCommand):
             SubarrayNotPresentError,
         ) as error:
             self.logger.exception("Exception in AssignResource(): %s", str(error))
-            device_data._read_activity_message = f"Exception in validating input:{error}"
+            #device_data._read_activity_message = f"Exception in validating input:{error}"
+            self.this_server.write_attr("activityMessage", f"Exception in validating input:{error}")
+
             log_msg = f"{const.STR_ASSIGN_RES_EXEC}{error}"
             self.logger.exception(error)
             tango.Except.throw_exception(
@@ -230,7 +237,9 @@ class AssignResources(BaseCommand):
                 "List of the dishes that are already allocated: %s",
                 str(resource_error.resources_reallocation),
             )
-            device_data._read_activity_message = f"{const.STR_DISH_DUPLICATE}{resource_error.resources_reallocation}"
+            #device_data._read_activity_message = f"{const.STR_DISH_DUPLICATE}{resource_error.resources_reallocation}"
+            self.this_server.write_attr("activityMessage", f"{const.STR_DISH_DUPLICATE}{resource_error.resources_reallocation}")
+
             log_msg = f"{const.STR_DISH_DUPLICATE}{resource_error}"
             self.logger.exception(resource_error)
             tango.Except.throw_exception(
@@ -241,7 +250,9 @@ class AssignResources(BaseCommand):
             )
         except ValueError as ve:
             self.logger.exception("Exception in AssignResources command: %s", str(ve))
-            device_data._read_activity_message = f"Invalid value in input:{ve}" 
+            #device_data._read_activity_message = f"Invalid value in input:{ve}" 
+            self.this_server.write_attr("activityMessage", f"Invalid value in input:{ve}")
+
             log_msg = f"{const.STR_ASSIGN_RES_EXEC}{ve}"    
             self.logger.exception(ve)
             tango.Except.throw_exception(

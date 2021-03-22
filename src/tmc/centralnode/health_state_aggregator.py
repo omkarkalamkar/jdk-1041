@@ -13,7 +13,7 @@ from tango import DevFailed
 from ska.base.control_model import HealthState
 
 from tmc.common.tango_client import TangoClient
-from tmc.common.tango_server_helper import TangoServerHelper
+from tmc.centralnode.tango_server_helper import TangoServerHelper
 
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
@@ -64,7 +64,8 @@ class HealthStateAggregator:
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH}{dev_failed}"
             self.logger.exception(dev_failed)
-            self._read_activity_message = const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH
+            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH)
+            #self._read_activity_message = const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
@@ -87,7 +88,9 @@ class HealthStateAggregator:
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH}{dev_failed}"
             self.logger.exception(dev_failed)
-            self._read_activity_message = const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH
+            #self._read_activity_message = const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH
+            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH)
+
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
@@ -113,7 +116,8 @@ class HealthStateAggregator:
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_SA_HEALTH_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
-                self._read_activity_message = const.ERR_SUBSR_SA_HEALTH_STATE
+                #self._read_activity_message = const.ERR_SUBSR_SA_HEALTH_STATE
+                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SA_HEALTH_STATE)
                 tango.Except.throw_exception(
                     const.STR_CMD_FAILED,
                     log_msg,
@@ -145,8 +149,9 @@ class HealthStateAggregator:
         :return: None
         """
         device_data = DeviceData.get_instance()
-        self._read_activity_message = "Within health callback"
-        self.logger.info(self._read_activity_message)
+        #self._read_activity_message = "Within health callback"
+        self.this_server.write_attr("activityMessage", "Within health callback")
+        self.logger.info("Within health callback")
         log_msg = f'Health state attribute change event is : {event.attr_name}'
         self.logger.info(log_msg)
         log_msg = f'Health state attribute change event is .....................: {event.attr_value.value}'
@@ -178,7 +183,9 @@ class HealthStateAggregator:
             }
             log_msg = f"{const.STR_HEALTH_STATE}{event.device}{health_state_string_map[health_state]}"                       
             self.logger.info(log_msg)
-            self._read_activity_message = log_msg
+            #self._read_activity_message = log_msg
+            self.this_server.write_attr("activityMessage", log_msg)
+
 
         def _calculate_health_state(health_states):
             unique_states = set(health_states)
@@ -214,7 +221,9 @@ class HealthStateAggregator:
 
         else:
             # TODO: For future reference
-            self._read_activity_message = f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}"
-            log_msg = self._read_activity_message
-            self.logger.info(log_msg)
-            self.logger.critical(const.ERR_SUBSR_SA_HEALTH_STATE)
+            #self._read_activity_message = f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}"
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
+
+            # log_msg = self._read_activity_message
+            self.logger.info(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
+            self.logger.critical(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
