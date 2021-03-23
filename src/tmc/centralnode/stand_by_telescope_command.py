@@ -14,7 +14,9 @@ from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 
 from tmc.common.tango_client import TangoClient
-from tmc.centralnode.tango_server_helper import TangoServerHelper
+#from tmc.centralnode.tango_server_helper import TangoServerHelper
+from tmc.common.tango_server_helper import TangoServerHelper
+
 
 
 from tmc.centralnode import const
@@ -72,14 +74,15 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         self.logger.info(type(self.target))
         device_data = DeviceData.get_instance()
         self.standby_dish(device_data._dish_leaf_node_devices)
-        self.standby_csp(device_data.csp_master_ln_fqdn)
+        self.this_server = TangoServerHelper.get_instance()
+        csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
+        
+        self.standby_csp(csp_master_ln_fqdn)                                                               
         self.standby_sdp(device_data.sdp_master_ln_fqdn)
         self.standby_subarray(device_data.tm_mid_subarray)
         device_data.health_aggreegator.unsubscribe_event()
         log_msg = const.STR_STANDBY_CMD_ISSUED
         self.logger.info(log_msg)
-
-        self.this_server = TangoServerHelper.get_instance()
 
         #device_data._read_activity_message = log_msg
         self.this_server.write_attr("activityMessage", log_msg)

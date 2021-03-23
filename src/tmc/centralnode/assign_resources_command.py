@@ -10,7 +10,8 @@ from tango import DevState, DevFailed
 
 from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
-from tmc.centralnode.tango_server_helper import TangoServerHelper
+from tmc.common.tango_server_helper import TangoServerHelper
+
 
 from tmc.centralnode import const
 from tmc.centralnode.receptor_reassignment_checker import ReceptorReassignmentChecker
@@ -164,19 +165,21 @@ class AssignResources(BaseCommand):
         ## Validate the input JSON string.
 
         self.this_server = TangoServerHelper.get_instance()
+        tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
+        dln_prefix = self.this_server.read_property("DishLeafNodePrefix")
         try:
             self.logger.info("Validating input string.")
-            input_validator = AssignResourceValidator(
-                device_data.tm_mid_subarray,
+            input_validator = AssignResourceValidator(           
+                tm_mid_subarray,
                 device_data._dish_leaf_node_devices,
-                device_data.dln_prefix,
+                dln_prefix,
                 self.logger,
             )
             json_argument = input_validator.loads(argin)
 
             # Create subarray proxy
             subarrayID = int(json_argument["subarrayID"])
-            subarrayFqdn = device_data.subarray_FQDN_dict[subarrayID]
+            subarrayFqdn = device_data.subarray_FQDN_dict[subarrayID] 
             ## check for duplicate allocation
             self.logger.info("Checking for resource reallocation.")
             device_data.check_resources = ReceptorReassignmentChecker(self.logger)
@@ -208,7 +211,6 @@ class AssignResources(BaseCommand):
 
             # Allocation successful
             self.this_server.write_attr("activityMessage", const.STR_ASSIGN_RESOURCES_SUCCESS)
-            #device_data._read_activity_message = const.STR_ASSIGN_RESOURCES_SUCCESS
             self.logger.debug(const.STR_ASSIGN_RESOURCES_SUCCESS)
 
             # Prepare output argument
@@ -220,7 +222,6 @@ class AssignResources(BaseCommand):
             SubarrayNotPresentError,
         ) as error:
             self.logger.exception("Exception in AssignResource(): %s", str(error))
-            #device_data._read_activity_message = f"Exception in validating input:{error}"
             self.this_server.write_attr("activityMessage", f"Exception in validating input:{error}")
 
             log_msg = f"{const.STR_ASSIGN_RES_EXEC}{error}"
@@ -237,7 +238,6 @@ class AssignResources(BaseCommand):
                 "List of the dishes that are already allocated: %s",
                 str(resource_error.resources_reallocation),
             )
-            #device_data._read_activity_message = f"{const.STR_DISH_DUPLICATE}{resource_error.resources_reallocation}"
             self.this_server.write_attr("activityMessage", f"{const.STR_DISH_DUPLICATE}{resource_error.resources_reallocation}")
 
             log_msg = f"{const.STR_DISH_DUPLICATE}{resource_error}"
@@ -250,7 +250,6 @@ class AssignResources(BaseCommand):
             )
         except ValueError as ve:
             self.logger.exception("Exception in AssignResources command: %s", str(ve))
-            #device_data._read_activity_message = f"Invalid value in input:{ve}" 
             self.this_server.write_attr("activityMessage", f"Invalid value in input:{ve}")
 
             log_msg = f"{const.STR_ASSIGN_RES_EXEC}{ve}"    

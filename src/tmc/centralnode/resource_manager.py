@@ -5,6 +5,7 @@ ResourceManager class for CentralNode.
 import logging
 
 from tmc.centralnode.device_data import DeviceData
+from tmc.common.tango_server_helper import TangoServerHelper
 
 
 class ResourceManager:
@@ -32,10 +33,14 @@ class ResourceManager:
         :return: None
         """
         device_data = DeviceData.get_instance()
-        for dish in range(1, (device_data.num_dishes + 1)):
+        self.this_server = TangoServerHelper.get_instance()
+        num_dishes = self.this_server.read_property("NumDishes")
+        dln_prefix = self.this_server.read_property("DishLeafNodePrefix")
+
+        for dish in range(1, (num_dishes + 1)):
             # Update device._dish_leaf_node_devices variable
             device_data._dish_leaf_node_devices.append(
-                device_data.dln_prefix + f"000{dish}"
+                dln_prefix + f"000{dish}"
             )
             # Initialize device._subarray_allocation variable (map of Dish Id and allocation status)
             # to indicate availability of the dishes

@@ -14,7 +14,8 @@ import threading
 from tango import DebugIt, AttrWriteType
 from tango.server import run, attribute, command, device_property
 
-from tmc.centralnode.tango_server_helper import TangoServerHelper
+from tmc.common.tango_server_helper import TangoServerHelper
+
 
 # Additional import
 from ska.base import SKABaseDevice
@@ -172,7 +173,8 @@ class CentralNode(SKABaseDevice):
             self.logger.info("Device initialisating...")
             # Get Instance of TangoServerHelper class 
             self.this_server = TangoServerHelper.get_instance()
-            self.this_server.device = device
+            #self.this_server._device = device
+            self.this_server.set_tango_class(device)
             device.attr_map = {}
             #Initilise the attributes
             device.attr_map["activityMessage"] = ""
@@ -188,17 +190,19 @@ class CentralNode(SKABaseDevice):
             device._version_id = release.version
             device_data = DeviceData.get_instance()
             device.device_data = device_data
-            device_data.csp_master_ln_fqdn = device.CspMasterLeafNodeFQDN
-            device_data.sdp_master_ln_fqdn = device.SdpMasterLeafNodeFQDN
-            device_data.tm_mid_subarray = device.TMMidSubarrayNodes
-            device_data.dln_prefix = device.DishLeafNodePrefix
-            device_data.num_dishes = device.NumDishes
+
+            # csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
+            # sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")
+            # tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
+            # dln_prefix = self.this_server.read_property("DishLeafNodePrefix")
+            # num_dishes = self.this_server.read_property("NumDishes")
+
             self.logger.debug(const.STR_INIT_SUCCESS)
             device_data.resource_manager = ResourceManager.get_instance()
 
             # Initialization of ObsState aggregator object
             device_data.obs_state_aggregator = ObsStateAggregator(
-                device_data.tm_mid_subarray, self.logger
+                 device.TMMidSubarrayNodes, self.logger
             )
 
             device_data.resource_manager.initialize_resource_matrix()
@@ -212,12 +216,8 @@ class CentralNode(SKABaseDevice):
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
                 
-            # device_data._read_activity_message = (
-            #     "Central Node initialised successfully."
-            # )
             self.this_server.write_attr("activityMessage", "Central Node initialised successfully.")
             self.logger.info(device.attr_map["activityMessage"])
-            #return (ResultCode.OK, device_data._read_activity_message)
             return (ResultCode.OK, device.attr_map["activityMessage"])
 
     def always_executed_hook(self):

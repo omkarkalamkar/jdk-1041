@@ -59,6 +59,7 @@ class TangoServerHelper:
         """
         try:
             device_name = self.device.get_name()
+            self.database = Database()
             return self.database.get_device_property(device_name, property_name)
         except DevFailed as dev_failed:
             tango.Except.re_throw_exception(dev_failed,
@@ -230,12 +231,6 @@ class TangoServerHelper:
                 "TangoServerHelper.write_attr()",
                 tango.ErrSeverity.ERR)
         self._generate_change_event(attr_name, value)
-
-    # def update_attr_map(self, attr, val):
-    #     lock = threading.Lock()
-    #     lock.acquire()
-    #     self.device.attr_map[attr] = val
-    #     lock.release()
 
     def read_attr(self, attr_name):
         """

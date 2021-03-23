@@ -14,7 +14,9 @@ from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 
 from tmc.common.tango_client import TangoClient
-from tmc.centralnode.tango_server_helper import TangoServerHelper
+#from tmc.centralnode.tango_server_helper import TangoServerHelper
+from tmc.common.tango_server_helper import TangoServerHelper
+
 
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
@@ -74,14 +76,19 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         self.logger.info(type(self.target))
         device_data.health_aggreegator = HealthStateAggregator(self.logger)
         device_data.health_aggreegator.subscribe_event()
-        self.startup_sdp(device_data.sdp_master_ln_fqdn)
+
+        csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
+        sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")
+        tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
+        dln_prefix = self.this_server.read_property("DishLeafNodePrefix")
+
+        self.startup_sdp(sdp_master_ln_fqdn)
         self.startup_dish(device_data._dish_leaf_node_devices)
-        self.startup_csp(device_data.csp_master_ln_fqdn)
-        self.startup_subarray(device_data.tm_mid_subarray)
+        self.startup_csp(csp_master_ln_fqdn)
+        self.startup_subarray(tm_mid_subarray)
 
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
-        #device_data._read_activity_message = log_msg
         self.this_server = TangoServerHelper.get_instance()
         self.this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED)
 

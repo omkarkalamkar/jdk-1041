@@ -12,7 +12,8 @@ import tango
 from ska.base.control_model import ObsState
 
 from tmc.common.tango_client import TangoClient
-from tmc.centralnode.tango_server_helper import TangoServerHelper
+from tmc.common.tango_server_helper import TangoServerHelper
+
 
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData

@@ -101,6 +101,14 @@ def dummy_subscriber(attribute, callback_method):
     return 10
 
 
+@pytest.fixture(scope="function")
+def mock_tsh():
+    subarray1_fqdn = "ska_mid/tm_subarray_node/1"
+    tango_server_obj = TangoServerHelper.get_instance()
+    tango_server_obj.read_property = Mock(return_value = subarray1_fqdn)
+    yield tango_server_obj
+
+
 @pytest.fixture(
     scope="function",
     params=[
@@ -136,8 +144,9 @@ def central_node_test_info(request):
     return test_info
 
 
-def test_startup(mock_subarray):
+def test_startup(mock_subarray, mock_tsh):
     device_proxy, tango_client_obj = mock_subarray
+    tango_server_obj = mock_tsh
     assert device_proxy.StartUpTelescope() == [
         [ResultCode.OK],
         ["STARTUPTELESCOPE (ON) command invoked from Central node"],
@@ -145,8 +154,9 @@ def test_startup(mock_subarray):
     assert device_proxy.state() == DevState.ON
 
 
-def test_standby(mock_subarray):
+def test_standby(mock_subarray, mock_tsh):
     device_proxy, tango_client_obj = mock_subarray
+    tango_server_obj = mock_tsh
     device_proxy.StartUpTelescope()
     assert device_proxy.StandByTelescope() == [
         [ResultCode.OK],
@@ -184,15 +194,9 @@ def mock_subarray():
             yield tango_context.device, tango_client_obj
 
 
-# @pytest.fixture(scope="function")
-# def mock_subarray_server():
-#     with mock.patch.object(TangoServerHelper, '_get_instance', return_value=Mock()) as mock_obj:
-#         device_proxy = TangoServerHelper._get_instance()
-#         yield device_proxy
-
-
-def test_assign_resources(mock_subarray):
+def test_assign_resources(mock_subarray, mock_tsh):
     device_proxy, tango_client_obj = mock_subarray
+    tango_server_obj = mock_tsh
     # mocking subarray device state as ON as per new state model
     tango_client_obj.DevState = DevState.ON
     receptorIDList_success = []
@@ -209,9 +213,10 @@ def test_assign_resources(mock_subarray):
 
 
 def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_throws_devfailed_exception(
-    mock_subarray,
+    mock_subarray, mock_tsh
 ):
     device_proxy, tango_client_obj = mock_subarray
+    tango_server_obj = mock_tsh
     tango_client_obj.DevState = DevState.OFF
     tango_client_obj.deviceproxy.command_inout.side_effect = raise_devfailed_exception
     with pytest.raises(tango.DevFailed) as df:
@@ -219,14 +224,16 @@ def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_th
     assert "Error occurred while assigning resources to the Subarray" in str(df)
 
 
-def test_assign_resources_invalid_json_value():
+def test_assign_resources_invalid_json_value(mock_tsh):
+    tango_server_obj = mock_tsh
     with fake_tango_system(CentralNode) as tango_context:
         with pytest.raises(tango.DevFailed) as df:
             tango_context.device.AssignResources(assign_release_invalid_str)
         assert const.STR_RESOURCE_ALLOCATION_FAILED in str(df.value)
 
 
-def test_assign_resources_invalid_key():
+def test_assign_resources_invalid_key(mock_tsh):
+    tango_server_obj = mock_tsh
     with fake_tango_system(CentralNode) as tango_context:
         result = "test"
         with pytest.raises(tango.DevFailed):
@@ -234,7 +241,8 @@ def test_assign_resources_invalid_key():
         assert "test" in result
 
 
-def test_assign_resources_raise_devfailed_when_reseource_reallocation():
+def test_assign_resources_raise_devfailed_when_reseource_reallocation(mock_tsh):
+    tango_server_obj = mock_tsh
     subarray1_fqdn = "ska_mid/tm_subarray_node/1"
     subarray2_fqdn = "ska_mid/tm_subarray_node/2"
     tm_subarrays = []
@@ -321,7 +329,8 @@ def test_health_state():
 
 
 # # Test cases for commands
-def test_stow_antennas_should_set_stow_mode_on_leaf_nodes():
+def test_stow_antennas_should_set_stow_mode_on_leaf_nodes(mock_tsh):
+    tango_server_obj = mock_tsh
     dish_device_ids = [str(i).zfill(4) for i in range(1, 4)]
     fqdn_prefix = "ska_mid/tm_leaf_node/d"
     initial_dut_properties = {
@@ -344,7 +353,8 @@ def test_stow_antennas_should_set_stow_mode_on_leaf_nodes():
             )
 
 
-def test_stow_antennas_should_raise_devfailed_exception():
+def test_stow_antennas_should_raise_devfailed_exception(mock_tsh):
+    tango_server_obj = mock_tsh
     dish_device_ids = [str(i).zfill(4) for i in range(1, 4)]
     fqdn_prefix = "ska_mid/tm_leaf_node/d"
     initial_dut_properties = {
@@ -367,7 +377,8 @@ def test_stow_antennas_should_raise_devfailed_exception():
             assert const.ERR_EXE_STOW_CMD in str(df.value)
 
 
-def test_stow_antennas_invalid_value():
+def test_stow_antennas_invalid_value(mock_tsh):
+    tango_server_obj = mock_tsh
     #     """Negative Test for StowAntennas"""
     with fake_tango_system(CentralNode) as tango_context:
         argin = [
@@ -379,9 +390,9 @@ def test_stow_antennas_invalid_value():
         assert const.ERR_STOW_ARGIN in str(df.value)
 
 
-def test_release_resources(mock_subarray):
+def test_release_resources(mock_subarray, mock_tsh):
     device_proxy, tango_client_obj = mock_subarray
-
+    tango_server_obj = mock_tsh
     release_all_success = {"ReleaseAll": True, "receptorIDList": []}
     tango_client_obj.deviceproxy.command_inout.side_effect = (
         mock_subarray_call_release_resources_success
@@ -390,7 +401,8 @@ def test_release_resources(mock_subarray):
     assert json.dumps(release_all_success) in message
 
 
-def test_release_resources_should_raise_devfailed_exception():
+def test_release_resources_should_raise_devfailed_exception(mock_tsh):
+    tango_server_obj = mock_tsh
     subarray1_fqdn = "ska_mid/tm_subarray_node/1"
     dut_properties = {"TMMidSubarrayNodes": subarray1_fqdn}
     with fake_tango_system(
@@ -408,14 +420,16 @@ def test_release_resources_should_raise_devfailed_exception():
             assert const.ERR_DEVFAILED_MSG in str(df.value)
 
 
-def test_release_resources_invalid_json_value():
+def test_release_resources_invalid_json_value(mock_tsh):
+    tango_server_obj = mock_tsh
     with fake_tango_system(CentralNode) as tango_context:
         with pytest.raises(tango.DevFailed) as df:
             tango_context.device.ReleaseResources(assign_release_invalid_str)
         assert const.ERR_INVALID_JSON in str(df.value)
 
 
-def test_release_resources_invalid_key():
+def test_release_resources_invalid_key(mock_tsh):
+    tango_server_obj = mock_tsh
     with fake_tango_system(CentralNode) as tango_context:
         with pytest.raises(tango.DevFailed) as df:
             tango_context.device.ReleaseResources(release_invalid_key)
@@ -429,9 +443,11 @@ def command_without_arg_devfailed(request):
 
 
 def test_command_without_arg_should_raise_devfailed_exception(
-    mock_subarray, command_without_arg_devfailed
+    mock_subarray, command_without_arg_devfailed, mock_tsh
+
 ):
     device_proxy, tango_client = mock_subarray
+    tango_server_obj = mock_tsh
     cmd_name = command_without_arg_devfailed
     tango_client.deviceproxy.command_inout.side_effect = raise_devfailed_exception
     with pytest.raises(tango.DevFailed):
@@ -462,7 +478,8 @@ def mock_csp_master_proxy():
 
 
 def test_telescope_health_state_matches_csp_master_leaf_node_health_state_after_start(
-    mock_csp_master_proxy, health_state
+    mock_csp_master_proxy, health_state, mock_tsh
+
 ):
     (
         device_proxy,
@@ -471,6 +488,7 @@ def test_telescope_health_state_matches_csp_master_leaf_node_health_state_after_
         event_subscription_map,
     ) = mock_csp_master_proxy
     device_data = DeviceData.get_instance()
+    tango_server_obj = mock_tsh
     with mock.patch.object(
         TangoClient, "_get_deviceproxy", return_value=Mock()
     ) as mock_obj:
@@ -505,7 +523,7 @@ def mock_sdp_master_proxy():
 
 
 def test_telescope_health_state_is_ok_when_sdp_master_leaf_node_is_ok_after_start(
-    mock_sdp_master_proxy, health_state
+    mock_sdp_master_proxy, health_state, mock_tsh
 ):
     (
         device_proxy,
@@ -513,6 +531,7 @@ def test_telescope_health_state_is_ok_when_sdp_master_leaf_node_is_ok_after_star
         csp_master_fqdn,
         event_subscription_map,
     ) = mock_sdp_master_proxy
+    tango_server_obj = mock_tsh
     device_data = DeviceData.get_instance()
     with mock.patch.object(
         TangoClient, "_get_deviceproxy", return_value=Mock()
@@ -547,7 +566,7 @@ def mock_subarraynode2_proxy():
 
 
 def test_telescope_health_state_is_ok_when_subarray1_is_ok_after_start(
-    mock_subarraynode_device, health_state
+    mock_subarraynode_device, health_state, mock_tsh
 ):
     (
         device_proxy,
@@ -555,6 +574,7 @@ def test_telescope_health_state_is_ok_when_subarray1_is_ok_after_start(
         subarray1_fqdn,
         event_subscription_map,
     ) = mock_subarraynode_device
+    tango_server_obj = mock_tsh
     device_data = DeviceData.get_instance()
     with mock.patch.object(
         TangoClient, "_get_deviceproxy", return_value=Mock()
@@ -571,7 +591,7 @@ def test_telescope_health_state_is_ok_when_subarray1_is_ok_after_start(
 
 
 def test_telescope_health_state_is_ok_when_subarray2_is_ok_after_start(
-    mock_subarraynode2_proxy, health_state
+    mock_subarraynode2_proxy, health_state, mock_tsh
 ):
     (
         device_proxy,
@@ -579,6 +599,7 @@ def test_telescope_health_state_is_ok_when_subarray2_is_ok_after_start(
         subarray2_fqdn,
         event_subscription_map,
     ) = mock_subarraynode2_proxy
+    tango_server_obj = mock_tsh
     device_data = DeviceData.get_instance()
     with mock.patch.object(
         TangoClient, "_get_deviceproxy", return_value=Mock()
@@ -611,7 +632,7 @@ def mock_subarraynode3_proxy():
 
 
 def test_telescope_health_state_is_ok_when_subarray3_is_ok_after_start(
-    mock_subarraynode3_proxy, health_state
+    mock_subarraynode3_proxy, health_state, mock_tsh
 ):
     (
         device_proxy,
@@ -619,6 +640,7 @@ def test_telescope_health_state_is_ok_when_subarray3_is_ok_after_start(
         subarray3_fqdn,
         event_subscription_map,
     ) = mock_subarraynode3_proxy
+    tango_server_obj = mock_tsh
     device_data = DeviceData.get_instance()
     with mock.patch.object(
         TangoClient, "_get_deviceproxy", return_value=Mock()

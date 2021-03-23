@@ -13,7 +13,8 @@ from tango import DevState, DevFailed
 from ska.base.commands import BaseCommand
 
 from tmc.common.tango_client import TangoClient
-from tmc.centralnode.tango_server_helper import TangoServerHelper
+from tmc.common.tango_server_helper import TangoServerHelper
+
 
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
@@ -128,7 +129,6 @@ class ReleaseResources(BaseCommand):
                 res_not_released = ast.literal_eval(return_val[1][0])
                 log_msg = const.STR_REL_RESOURCES
                 self.logger.debug(log_msg)
-                #device_data._read_activity_message = log_msg
                 self.this_server.write_attr("activityMessage", log_msg)
 
                 if not res_not_released:
