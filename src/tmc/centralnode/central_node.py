@@ -172,9 +172,9 @@ class CentralNode(SKABaseDevice):
             device = self.target
             self.logger.info("Device initialisating...")
             # Get Instance of TangoServerHelper class 
-            self.this_server = TangoServerHelper.get_instance()
+            this_server = TangoServerHelper.get_instance()
             #self.this_server._device = device
-            self.this_server.set_tango_class(device)
+            this_server.set_tango_class(device)
             device.attr_map = {}
             #Initilise the attributes
             device.attr_map["activityMessage"] = ""
@@ -193,7 +193,7 @@ class CentralNode(SKABaseDevice):
 
             # csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
             # sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")
-            # tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
+            #tm_mid_subarray = this_server.read_property("TMMidSubarrayNodes")
             # dln_prefix = self.this_server.read_property("DishLeafNodePrefix")
             # num_dishes = self.this_server.read_property("NumDishes")
 
@@ -202,10 +202,10 @@ class CentralNode(SKABaseDevice):
 
             # Initialization of ObsState aggregator object
             device_data.obs_state_aggregator = ObsStateAggregator(
-                 device.TMMidSubarrayNodes, self.logger
+                device.TMMidSubarrayNodes, self.logger
             )
 
-            device_data.resource_manager.initialize_resource_matrix()
+            device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")
@@ -216,7 +216,7 @@ class CentralNode(SKABaseDevice):
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
                 
-            self.this_server.write_attr("activityMessage", "Central Node initialised successfully.")
+            this_server.write_attr("activityMessage", "Central Node initialised successfully.")
             self.logger.info(device.attr_map["activityMessage"])
             return (ResultCode.OK, device.attr_map["activityMessage"])
 

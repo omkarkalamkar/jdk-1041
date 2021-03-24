@@ -41,9 +41,9 @@ class HealthStateAggregator:
         #self.csp_master_ln_fqdn = "ska_mid/tm_leaf_node/csp_master"
         csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
         sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")
-        self.this_server.write_property("CspMasterLeafNodeFQDN", "ska_mid/tm_leaf_node/csp_master")
+        #self.this_server.write_property("CspMasterLeafNodeFQDN", "ska_mid/tm_leaf_node/csp_master")
         #self.sdp_master_ln_fqdn = "ska_mid/tm_leaf_node/sdp_master"
-        self.this_server.write_property("SdpMasterLeafNodeFQDN", "ska_mid/tm_leaf_node/csp_master")
+        #self.this_server.write_property("SdpMasterLeafNodeFQDN", "ska_mid/tm_leaf_node/csp_master")
         self.health_state_event_map = {}
                 
     def subscribe_event(self):
@@ -110,7 +110,9 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if erroe occures while subscribing event.
         """
-        for subarray_fqdn in self.device_data.tm_mid_subarray:
+        this_server = TangoServerHelper.get_instance()
+        tm_mid_subarray = this_server.read_property("TMMidSubarrayNodes")
+        for subarray_fqdn in tm_mid_subarray:
             subarray_client = TangoClient(subarray_fqdn)
             # updating the subarray_health_state_map with device name (as ska_mid/tm_subarray_node/1) and its value which is required in callback
             self.subarray_health_state_map[subarray_fqdn] = -1
@@ -155,11 +157,12 @@ class HealthStateAggregator:
         """
         device_data = DeviceData.get_instance()
         self.this_server.write_attr("activityMessage", "Within health callback")
-        self.logger.info("Within health callback")
         log_msg = f'Health state attribute change event is : {event.attr_name}'
         self.logger.info(log_msg)
         log_msg = f'Health state attribute change event is .....................: {event.attr_value.value}'
         self.logger.info(log_msg)
+        csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
+        sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")
 
         def _update_health_state(self, fqdn_device_health_state_map: dict):
             health_state = event.attr_value.value
@@ -211,8 +214,8 @@ class HealthStateAggregator:
                 const.PROP_DEF_VAL_TM_MID_SA1: "_subarray1_health_state",
                 const.PROP_DEF_VAL_TM_MID_SA2: "._subarray2_health_state",
                 const.PROP_DEF_VAL_TM_MID_SA3: "_subarray3_health_state",
-                self.csp_master_ln_fqdn: "_csp_master_leaf_health",             
-                self.sdp_master_ln_fqdn: "_sdp_master_leaf_health"
+                csp_master_ln_fqdn: "_csp_master_leaf_health",             
+                sdp_master_ln_fqdn: "_sdp_master_leaf_health"
             }
             _update_health_state(self, fqdn_device_health_state_map)
 

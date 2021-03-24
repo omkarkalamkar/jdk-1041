@@ -76,10 +76,12 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         self.standby_dish(device_data._dish_leaf_node_devices)
         self.this_server = TangoServerHelper.get_instance()
         csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
+        sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")
+        tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
         
         self.standby_csp(csp_master_ln_fqdn)                                                               
-        self.standby_sdp(device_data.sdp_master_ln_fqdn)
-        self.standby_subarray(device_data.tm_mid_subarray)
+        self.standby_sdp(sdp_master_ln_fqdn)
+        self.standby_subarray(tm_mid_subarray)
         device_data.health_aggreegator.unsubscribe_event()
         log_msg = const.STR_STANDBY_CMD_ISSUED
         self.logger.info(log_msg)
