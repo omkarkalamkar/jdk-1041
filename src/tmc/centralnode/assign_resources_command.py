@@ -165,8 +165,12 @@ class AssignResources(BaseCommand):
         ## Validate the input JSON string.
 
         self.this_server = TangoServerHelper.get_instance()
-        tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
-        dln_prefix = self.this_server.read_property("DishLeafNodePrefix")
+
+        self.tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
+        #self.tm_mid_subarray = self.tm_mid_subarray.join(property_value)
+
+        property_value = self.this_server.read_property("DishLeafNodePrefix")
+        self.dln_prefix = self.dln_prefix.join(property_value)
         try:
             self.logger.info("Validating input string.")
             input_validator = AssignResourceValidator(           

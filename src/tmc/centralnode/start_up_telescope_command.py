@@ -78,15 +78,29 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         device_data.health_aggreegator.subscribe_event()
         
         self.this_server = TangoServerHelper.get_instance()
-        csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
-        sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")
-        tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
-        dln_prefix = self.this_server.read_property("DishLeafNodePrefix")
 
-        self.startup_sdp(sdp_master_ln_fqdn)
+        self.csp_master_ln_fqdn = ""
+        self.sdp_master_ln_fqdn = ""
+        self.tm_mid_subarray = ""
+        self.dln_prefix = ""
+
+        property_value = self.this_server.read_property("CspMasterLeafNodeFQDN")
+        self.csp_master_ln_fqdn = self.csp_master_ln_fqdn.join(property_value)
+
+        property_value = self.this_server.read_property("SdpMasterLeafNodeFQDN")
+        self.sdp_master_ln_fqdn = self.sdp_master_ln_fqdn.join(property_value)
+
+        # property_value = self.this_server.read_property("TMMidSubarrayNodes")
+        # self.tm_mid_subarray = self.tm_mid_subarray.join(property_value)
+        self.tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
+
+        property_value = self.this_server.read_property("DishLeafNodePrefix")
+        self.dln_prefix = self.dln_prefix.join(property_value)   
+
+        self.startup_sdp(self.sdp_master_ln_fqdn)
         self.startup_dish(device_data._dish_leaf_node_devices)
-        self.startup_csp(csp_master_ln_fqdn)
-        self.startup_subarray(tm_mid_subarray)
+        self.startup_csp(self.csp_master_ln_fqdn)
+        self.startup_subarray(self.tm_mid_subarray)
 
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
@@ -160,13 +174,10 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
             self.logger.debug(log_msg)
             self.this_server = TangoServerHelper.get_instance()
             self.this_server.write_attr("activityMessage", log_msg)
-            #device_data._read_activity_message = log_msg
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            #device_data._read_activity_message = const.ERR_EXE_ON_CMD
-            self.this_server = TangoServerHelper.get_instance()
             self.this_server.write_attr("activityMessage", const.ERR_EXE_ON_CMD)
             tango.Except.throw_exception(
                 const.STR_ON_EXEC,

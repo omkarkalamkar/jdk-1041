@@ -33,10 +33,6 @@ class ResourceManager:
         :return: None
         """
         device_data = DeviceData.get_instance()
-        #this_server = TangoServerHelper.get_instance()
-        #num_dishes = this_server.read_property("NumDishes")
-        #dln_prefix = this_server.read_property("DishLeafNodePrefix")
-
         for dish in range(1, (num_dishes + 1)):
             # Update device._dish_leaf_node_devices variable
             device_data._dish_leaf_node_devices.append(
