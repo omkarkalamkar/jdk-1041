@@ -174,9 +174,9 @@ class AssignResources(BaseCommand):
         try:
             self.logger.info("Validating input string.")
             input_validator = AssignResourceValidator(           
-                tm_mid_subarray,
+                self.tm_mid_subarray,
                 device_data._dish_leaf_node_devices,
-                dln_prefix,
+                self.dln_prefix,
                 self.logger,
             )
             json_argument = input_validator.loads(argin)

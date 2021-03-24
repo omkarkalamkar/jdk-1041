@@ -12,7 +12,6 @@ from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
-from tmc.centralnode.device_data import DeviceData
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -66,7 +65,6 @@ class StowAntennas(BaseCommand):
             ValueError if error occurs if input argument json string contains invalid value
 
         """
-        device_data = DeviceData.get_instance()
         self.logger.info(type(self.target))
         self.dln_prefix = ""
         self.this_server = TangoServerHelper.get_instance()
