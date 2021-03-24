@@ -173,7 +173,6 @@ class CentralNode(SKABaseDevice):
             self.logger.info("Device initialisating...")
             # Get Instance of TangoServerHelper class 
             this_server = TangoServerHelper.get_instance()
-            #self.this_server._device = device
             this_server.set_tango_class(device)
             device.attr_map = {}
             #Initilise the attributes
@@ -190,12 +189,6 @@ class CentralNode(SKABaseDevice):
             device._version_id = release.version
             device_data = DeviceData.get_instance()
             device.device_data = device_data
-
-            # csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")
-            # sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")
-            #tm_mid_subarray = this_server.read_property("TMMidSubarrayNodes")
-            # dln_prefix = self.this_server.read_property("DishLeafNodePrefix")
-            # num_dishes = self.this_server.read_property("NumDishes")
 
             self.logger.debug(const.STR_INIT_SUCCESS)
             device_data.resource_manager = ResourceManager.get_instance()

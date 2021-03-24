@@ -103,16 +103,11 @@ def dummy_subscriber(attribute, callback_method):
 
 @pytest.fixture(scope="function")
 def mock_tsh():
-    #subarray1_fqdn = "ska_mid/tm_subarray_node/1"
-    # tango_server_obj = TangoServerHelper.get_instance()
-    # tango_server_obj.read_property = Mock(return_value = subarray1_fqdn)
-    # yield tango_server_obj
     with mock.patch.object(
                     TangoServerHelper, "read_property", return_value=Mock()
                     ) as mock_obj:
         tango_server_obj = TangoServerHelper.get_instance()
         yield tango_server_obj
-
 
 
 @pytest.fixture(
@@ -180,13 +175,6 @@ def mock_subarray_call_assign_resources_success(arg1, arg2):
     return [ResultCode.STARTED, argout]
 
 
-def mock_assign_resource_input(arg1, arg2, arg3, arg4):
-    arg = json.loads(assign_input_str)
-    arg1 = list(arg1)
-    arg2 = str(arg2)
-    return arg1, arg2
-
-
 # Mocking ReleaseResources command success response from SubarrayNode
 def mock_subarray_call_release_resources_success(arg1, arg2):
     argout = ["[]"]
@@ -208,95 +196,109 @@ def mock_subarray():
             tango_client_obj = TangoClient(dut_properties["TMMidSubarrayNodes"])
             yield tango_context.device, tango_client_obj
 
-
-# def test_assign_resources(mock_subarray, mock_tsh):
-#     device_proxy, tango_client_obj = mock_subarray
-#     tango_server_obj = mock_tsh
-#     #tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
-#     # mocking subarray device state as ON as per new state model
-#     tango_client_obj.DevState = DevState.ON
-#     receptorIDList_success = []
-#     receptorIDList_success.append("0001")
-#     dish = {}
-#     dish["receptorIDList_success"] = receptorIDList_success
-#     success_response = {}
-#     success_response["dish"] = dish
-#     tango_client_obj.deviceproxy.command_inout.side_effect = (
-#         mock_subarray_call_assign_resources_success
-#     )
-#     tango_server_obj.read_property.side_effect = Mock(return_value=(["ska_mid/tm_subarray_node/1", "ska_mid/tm_subarray_node/2"],"ska_mid/tm_subarray_node/1"))
-#     #tango_server_obj.read_property.side_effect = Mock(return_value="ska_mid/tm_subarray_node/1")
-#     message = device_proxy.AssignResources(assign_input_str)
-#     assert json.loads(message) == success_response
-
-
-# def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_throws_devfailed_exception(
-#     mock_subarray, mock_tsh
-# ):
-#     device_proxy, tango_client_obj = mock_subarray
-#     tango_server_obj = mock_tsh
-#     tango_server_obj.read_property.side_effect = mock_assign_resource_input
-#     tango_client_obj.DevState = DevState.OFF
-#     tango_client_obj.deviceproxy.command_inout.side_effect = raise_devfailed_exception
-#     with pytest.raises(tango.DevFailed) as df:
-#         device_proxy.AssignResources(assign_input_str)
-#     assert "Error occurred while assigning resources to the Subarray" in str(df)
+@pytest.mark.xfail(
+    reason="mocking for assignResource command is not working"
+)
+def test_assign_resources(mock_subarray, mock_tsh, mock_tsh_assign1, mock_tsh_assign2):
+    device_proxy, tango_client_obj = mock_subarray
+    tango_server_obj = mock_tsh
+    #tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
+    # mocking subarray device state as ON as per new state model
+    tango_client_obj.DevState = DevState.ON
+    receptorIDList_success = []
+    receptorIDList_success.append("0001")
+    dish = {}
+    dish["receptorIDList_success"] = receptorIDList_success
+    success_response = {}
+    success_response["dish"] = dish
+    tango_client_obj.deviceproxy.command_inout.side_effect = (
+        mock_subarray_call_assign_resources_success
+    )
+    tango_server_obj.read_property.side_effect = Mock(return_value=(["ska_mid/tm_subarray_node/1", "ska_mid/tm_subarray_node/2"]))
+    message = device_proxy.AssignResources(assign_input_str)
+    assert json.loads(message) == success_response
 
 
-# def test_assign_resources_invalid_json_value(mock_tsh):
-#     tango_server_obj = mock_tsh
-#     tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
-#     with fake_tango_system(CentralNode) as tango_context:
-#         with pytest.raises(tango.DevFailed) as df:
-#             tango_context.device.AssignResources(assign_release_invalid_str)
-#         assert const.STR_RESOURCE_ALLOCATION_FAILED in str(df.value)
+@pytest.mark.xfail(
+    reason="mocking for assignResource command is not working"
+)
+def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_throws_devfailed_exception(
+    mock_subarray, mock_tsh
+):
+    device_proxy, tango_client_obj = mock_subarray
+    tango_server_obj = mock_tsh
+    tango_server_obj.read_property.side_effect = mock_assign_resource_input
+    tango_client_obj.DevState = DevState.OFF
+    tango_client_obj.deviceproxy.command_inout.side_effect = raise_devfailed_exception
+    with pytest.raises(tango.DevFailed) as df:
+        device_proxy.AssignResources(assign_input_str)
+    assert "Error occurred while assigning resources to the Subarray" in str(df)
 
 
-# def test_assign_resources_invalid_key(mock_tsh):
-#     tango_server_obj = mock_tsh
-#     tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
-#     with fake_tango_system(CentralNode) as tango_context:
-#         result = "test"
-#         with pytest.raises(tango.DevFailed):
-#             result = tango_context.device.AssignResources(assign_invalid_key)
-#         assert "test" in result
+
+@pytest.mark.xfail(
+    reason="mocking for assignResource command is not working"
+)
+def test_assign_resources_invalid_json_value(mock_tsh):
+    tango_server_obj = mock_tsh
+    tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
+    with fake_tango_system(CentralNode) as tango_context:
+        with pytest.raises(tango.DevFailed) as df:
+            tango_context.device.AssignResources(assign_release_invalid_str)
+        assert const.STR_RESOURCE_ALLOCATION_FAILED in str(df.value)
 
 
-# def test_assign_resources_raise_devfailed_when_reseource_reallocation(mock_tsh):
-#     tango_server_obj = mock_tsh
-#     tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
-#     subarray1_fqdn = "ska_mid/tm_subarray_node/1"
-#     subarray2_fqdn = "ska_mid/tm_subarray_node/2"
-#     tm_subarrays = []
-#     tm_subarrays.append(subarray1_fqdn)
-#     tm_subarrays.append(subarray2_fqdn)
-#     dut_properties = {"TMMidSubarrayNodes": tm_subarrays, "NumDishes": 4}
+@pytest.mark.xfail(
+    reason="mocking for assignResource command is not working"
+)
+def test_assign_resources_invalid_key(mock_tsh):
+    tango_server_obj = mock_tsh
+    tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
+    with fake_tango_system(CentralNode) as tango_context:
+        result = "test"
+        with pytest.raises(tango.DevFailed):
+            result = tango_context.device.AssignResources(assign_invalid_key)
+        assert "test" in result
 
-#     with fake_tango_system(
-#         CentralNode, initial_dut_properties=dut_properties
-#     ) as tango_context:
-#         device_proxy = tango_context.device
-#         receptorIDList_success = []
-#         receptorIDList_success.append("0001")
-#         dish = {}
-#         dish["receptorIDList_success"] = receptorIDList_success
-#         success_response = {}
-#         success_response["dish"] = dish
-#         with mock.patch.object(
-#             TangoClient, "_get_deviceproxy", return_value=MagicMock()
-#         ) as mock_obj:
-#             tango_client_obj = TangoClient(subarray1_fqdn)
-#             # subarray1_proxy_mock.command_inout.side_effect = mock_subarray_call_assign_resources_success
-#             tango_client_obj.deviceproxy.command_inout.side_effect = (
-#                 mock_subarray_call_assign_resources_success
-#             )
-#             message = device_proxy.AssignResources(assign_input_str)
-#             assert json.loads(message) == success_response
-#             reallocation_request = json.loads(assign_input_str)
-#             reallocation_request["subarrayID"] = 2
-#             with pytest.raises(tango.DevFailed) as df:
-#                 device_proxy.AssignResources(json.dumps(reallocation_request))
-#             assert const.ERR_RECEPTOR_ID_REALLOCATION in str(df.value)
+
+@pytest.mark.xfail(
+    reason="mocking for assignResource command is not working"
+)
+def test_assign_resources_raise_devfailed_when_reseource_reallocation(mock_tsh):
+    tango_server_obj = mock_tsh
+    tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
+    subarray1_fqdn = "ska_mid/tm_subarray_node/1"
+    subarray2_fqdn = "ska_mid/tm_subarray_node/2"
+    tm_subarrays = []
+    tm_subarrays.append(subarray1_fqdn)
+    tm_subarrays.append(subarray2_fqdn)
+    dut_properties = {"TMMidSubarrayNodes": tm_subarrays, "NumDishes": 4}
+
+    with fake_tango_system(
+        CentralNode, initial_dut_properties=dut_properties
+    ) as tango_context:
+        device_proxy = tango_context.device
+        receptorIDList_success = []
+        receptorIDList_success.append("0001")
+        dish = {}
+        dish["receptorIDList_success"] = receptorIDList_success
+        success_response = {}
+        success_response["dish"] = dish
+        with mock.patch.object(
+            TangoClient, "_get_deviceproxy", return_value=MagicMock()
+        ) as mock_obj:
+            tango_client_obj = TangoClient(subarray1_fqdn)
+            # subarray1_proxy_mock.command_inout.side_effect = mock_subarray_call_assign_resources_success
+            tango_client_obj.deviceproxy.command_inout.side_effect = (
+                mock_subarray_call_assign_resources_success
+            )
+            message = device_proxy.AssignResources(assign_input_str)
+            assert json.loads(message) == success_response
+            reallocation_request = json.loads(assign_input_str)
+            reallocation_request["subarrayID"] = 2
+            with pytest.raises(tango.DevFailed) as df:
+                device_proxy.AssignResources(json.dumps(reallocation_request))
+            assert const.ERR_RECEPTOR_ID_REALLOCATION in str(df.value)
 
 
 # Test cases for Attributes
