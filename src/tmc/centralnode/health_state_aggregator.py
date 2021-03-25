@@ -115,8 +115,6 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if erroe occures while subscribing event.
         """
-        # property_value = self.this_server.read_property("TMMidSubarrayNodes")
-        # self.tm_mid_subarray = self.tm_mid_subarray.join(property_value)
         self.tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
         for subarray_fqdn in self.tm_mid_subarray:
             subarray_client = TangoClient(subarray_fqdn)
@@ -162,7 +160,6 @@ class HealthStateAggregator:
         :return: None
         """
         device_data = DeviceData.get_instance()
-        self.this_server.write_attr("activityMessage", "Within health callback")
         log_msg = f'Health state attribute change event is : {event.attr_name}'
         self.logger.info(log_msg)
         log_msg = f'Health state attribute change event is .....................: {event.attr_value.value}'
@@ -199,23 +196,20 @@ class HealthStateAggregator:
             }
             log_msg = f"{const.STR_HEALTH_STATE}{event.device}{health_state_string_map[health_state]}"                       
             self.logger.info(log_msg)
-            #self._read_activity_message = log_msg
-            self.this_server.write_attr("activityMessage", log_msg)
-
-
+          
         def _calculate_health_state(health_states):
             unique_states = set(health_states)
             if unique_states == set([HealthState.OK]):
-                self.this_server.write_attr("telescopeHealthState", HealthState.OK)
+                self.this_server.device.attr_map["telescopeHealthState"] = HealthState.OK
                 _generate_health_state_log_msg(self, HealthState.OK)
             elif HealthState.FAILED in unique_states:
-                self.this_server.write_attr("telescopeHealthState", HealthState.FAILED)
+                self.this_server.device.attr_map["telescopeHealthState"] = HealthState.FAILED
                 _generate_health_state_log_msg(self, HealthState.FAILED)
             elif HealthState.DEGRADED in unique_states:
-                self.this_server.write_attr("telescopeHealthState", HealthState.DEGRADED)
+                self.this_server.device.attr_map["telescopeHealthState"] = HealthState.DEGRADED
                 _generate_health_state_log_msg(self, HealthState.DEGRADED)
             else:
-                self.this_server.write_attr("telescopeHealthState", HealthState.UNKNOWN)
+                self.this_server.device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
                 _generate_health_state_log_msg(self, HealthState.UNKNOWN)
             
         if not event.err:

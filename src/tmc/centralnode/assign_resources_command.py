@@ -165,8 +165,8 @@ class AssignResources(BaseCommand):
         ## Validate the input JSON string.
 
         this_server = TangoServerHelper.get_instance()
-
         self.tm_mid_subarray = this_server.read_property("TMMidSubarrayNodes")
+        self.dln_prefix = ""
         property_value = this_server.read_property("DishLeafNodePrefix")
         self.dln_prefix = self.dln_prefix.join(property_value)
         try:
