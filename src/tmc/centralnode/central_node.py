@@ -209,7 +209,7 @@ class CentralNode(SKABaseDevice):
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
                 
-            this_server.write_attr("activityMessage", "Central Node initialised successfully.")
+            this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS)
             self.logger.info(device.attr_map["activityMessage"])
             return (ResultCode.OK, device.attr_map["activityMessage"])
 
