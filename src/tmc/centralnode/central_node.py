@@ -13,9 +13,7 @@ import threading
 # Tango imports
 from tango import DebugIt, AttrWriteType
 from tango.server import run, attribute, command, device_property
-
 from tmc.common.tango_server_helper import TangoServerHelper
-
 
 # Additional import
 from ska.base import SKABaseDevice

@@ -11,11 +11,8 @@ from tango import DevFailed
 
 # Additional import
 from ska.base.control_model import HealthState
-
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
-
-
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
 
