@@ -181,6 +181,11 @@ def mock_subarray_call_release_resources_success(arg1, arg2):
     return [ResultCode.STARTED, argout]
 
 
+# Mocking AssignResource command InputValidator class
+def mock_assignresource_call_for_inputvalidator(subarray_list, receptor_list, dish_prefix):
+    return  subarray_list, receptor_list, dish_prefix
+
+
 @pytest.fixture(scope="function")
 def mock_subarray():
     subarray1_fqdn = "ska_mid/tm_subarray_node/1"
@@ -199,10 +204,10 @@ def mock_subarray():
 @pytest.mark.xfail(
     reason="mocking for assignResource command is not working"
 )
-def test_assign_resources(mock_subarray, mock_tsh, mock_tsh_assign1, mock_tsh_assign2):
+def test_assign_resources(mock_subarray, mock_tsh):
     device_proxy, tango_client_obj = mock_subarray
     tango_server_obj = mock_tsh
-    #tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
+    # tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
     # mocking subarray device state as ON as per new state model
     tango_client_obj.DevState = DevState.ON
     receptorIDList_success = []
@@ -214,7 +219,7 @@ def test_assign_resources(mock_subarray, mock_tsh, mock_tsh_assign1, mock_tsh_as
     tango_client_obj.deviceproxy.command_inout.side_effect = (
         mock_subarray_call_assign_resources_success
     )
-    tango_server_obj.read_property.side_effect = Mock(return_value=(["ska_mid/tm_subarray_node/1", "ska_mid/tm_subarray_node/2"]))
+    tango_server_obj.read_property.side_effect = mock_assignresource_call_for_inputvalidator(["ska_mid/tm_subarray_node/1", "ska_mid/tm_subarray_node/1"], ["0001", "0002"], "dish")
     message = device_proxy.AssignResources(assign_input_str)
     assert json.loads(message) == success_response
 
@@ -227,7 +232,7 @@ def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_th
 ):
     device_proxy, tango_client_obj = mock_subarray
     tango_server_obj = mock_tsh
-    tango_server_obj.read_property.side_effect = mock_assign_resource_input
+    tango_server_obj.read_property.side_effect = mock_assignresource_call_for_inputvalidator(["ska_mid/tm_subarray_node/1", "ska_mid/tm_subarray_node/1"], ["0001", "0002"], "dish")
     tango_client_obj.DevState = DevState.OFF
     tango_client_obj.deviceproxy.command_inout.side_effect = raise_devfailed_exception
     with pytest.raises(tango.DevFailed) as df:
@@ -241,7 +246,7 @@ def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_th
 )
 def test_assign_resources_invalid_json_value(mock_tsh):
     tango_server_obj = mock_tsh
-    tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
+    tango_server_obj.read_property.side_effect = mock_assignresource_call_for_inputvalidator(["ska_mid/tm_subarray_node/1", "ska_mid/tm_subarray_node/1"], ["0001", "0002"], "dish")
     with fake_tango_system(CentralNode) as tango_context:
         with pytest.raises(tango.DevFailed) as df:
             tango_context.device.AssignResources(assign_release_invalid_str)
@@ -253,7 +258,7 @@ def test_assign_resources_invalid_json_value(mock_tsh):
 )
 def test_assign_resources_invalid_key(mock_tsh):
     tango_server_obj = mock_tsh
-    tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
+    tango_server_obj.read_property.side_effect = mock_assignresource_call_for_inputvalidator(["ska_mid/tm_subarray_node/1", "ska_mid/tm_subarray_node/1"], ["0001", "0002"], "dish")
     with fake_tango_system(CentralNode) as tango_context:
         result = "test"
         with pytest.raises(tango.DevFailed):
@@ -266,7 +271,7 @@ def test_assign_resources_invalid_key(mock_tsh):
 )
 def test_assign_resources_raise_devfailed_when_reseource_reallocation(mock_tsh):
     tango_server_obj = mock_tsh
-    tango_server_obj.read_property.side_effect = Mock(return_value="fqdn")
+    tango_server_obj.read_property.side_effect = mock_assignresource_call_for_inputvalidator(["ska_mid/tm_subarray_node/1", "ska_mid/tm_subarray_node/1"], ["0001", "0002"], "dish")
     subarray1_fqdn = "ska_mid/tm_subarray_node/1"
     subarray2_fqdn = "ska_mid/tm_subarray_node/2"
     tm_subarrays = []

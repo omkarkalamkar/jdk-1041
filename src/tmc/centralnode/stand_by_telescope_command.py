@@ -73,10 +73,8 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         self.csp_master_ln_fqdn = ""
         self.sdp_master_ln_fqdn = ""
         self.tm_mid_subarrays = ""
-        property_value = this_server.read_property("CspMasterLeafNodeFQDN")
-        self.csp_master_ln_fqdn = self.csp_master_ln_fqdn.join(property_value)
-        property_value = this_server.read_property("SdpMasterLeafNodeFQDN")
-        self.sdp_master_ln_fqdn = self.sdp_master_ln_fqdn.join(property_value)
+        self.csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
+        self.sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")        
         self.standby_csp(self.csp_master_ln_fqdn)                                                               
         self.standby_sdp(self.sdp_master_ln_fqdn)
