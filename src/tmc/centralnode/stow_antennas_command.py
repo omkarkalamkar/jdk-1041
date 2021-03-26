@@ -65,9 +65,9 @@ class StowAntennas(BaseCommand):
 
         """
         self.logger.info(type(self.target))
-        self.dln_prefix = ""
+        # self.dln_prefix = ""
         this_server = TangoServerHelper.get_instance()
-        property_value = this_server.read_property("DishLeafNodePrefix")
+        dln_prefix = this_server.read_property("DishLeafNodePrefix")
         try:
             for leafId in range(0, len(argin)):
                 float(argin[leafId])
@@ -75,7 +75,7 @@ class StowAntennas(BaseCommand):
             self.logger.info(log_msg)
             this_server.write_attr("activityMessage", log_msg)
             for i in range(0, len(argin)):
-                device_name = property_value + argin[i]
+                device_name = dln_prefix + argin[i]
                 try:
                     device_proxy = TangoClient(device_name)
                     device_proxy.send_command(const.CMD_SET_STOW_MODE)

@@ -73,15 +73,14 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         device_data.health_aggreegator = HealthStateAggregator(self.logger)
         device_data.health_aggreegator.subscribe_event()
         this_server = TangoServerHelper.get_instance()
-        self.csp_master_ln_fqdn = ""
-        self.sdp_master_ln_fqdn = ""
-        self.tm_mid_subarrays = ""
-        self.dln_prefix = ""
+        # self.csp_master_ln_fqdn = ""
+        # self.sdp_master_ln_fqdn = ""
+        # self.tm_mid_subarrays = ""
+        # self.dln_prefix = ""
         self.csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         self.sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        property_value = this_server.read_property("DishLeafNodePrefix")
-        self.dln_prefix = self.dln_prefix.join(property_value)   
+        self.dln_prefix = this_server.read_property("DishLeafNodePrefix")  
         self.startup_sdp(self.sdp_master_ln_fqdn)
         self.startup_dish(device_data._dish_leaf_node_devices)
         self.startup_csp(self.csp_master_ln_fqdn)
