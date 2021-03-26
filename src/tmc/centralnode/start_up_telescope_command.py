@@ -72,39 +72,28 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         self.logger.info(type(self.target))
         device_data.health_aggreegator = HealthStateAggregator(self.logger)
         device_data.health_aggreegator.subscribe_event()
-        
         this_server = TangoServerHelper.get_instance()
         self.csp_master_ln_fqdn = ""
         self.sdp_master_ln_fqdn = ""
-        self.tm_mid_subarray = ""
+        self.tm_mid_subarrays = ""
         self.dln_prefix = ""
-
         property_value = this_server.read_property("CspMasterLeafNodeFQDN")
         self.csp_master_ln_fqdn = self.csp_master_ln_fqdn.join(property_value)
-
         property_value = this_server.read_property("SdpMasterLeafNodeFQDN")
         self.sdp_master_ln_fqdn = self.sdp_master_ln_fqdn.join(property_value)
-
-        self.tm_mid_subarray = this_server.read_property("TMMidSubarrayNodes")
-
+        self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         property_value = this_server.read_property("DishLeafNodePrefix")
         self.dln_prefix = self.dln_prefix.join(property_value)   
-
         self.startup_sdp(self.sdp_master_ln_fqdn)
         self.startup_dish(device_data._dish_leaf_node_devices)
         self.startup_csp(self.csp_master_ln_fqdn)
-        self.startup_subarray(self.tm_mid_subarray)
-
+        self.startup_subarray(self.tm_mid_subarrays)
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED)
-
-
         # start obs state aggregation
         device_data.obs_state_aggregator.start_aggregation()
-
         # TODO: start healthState aggregation
-
         return (ResultCode.OK, const.STR_ON_CMD_ISSUED)
 
     def startup_csp(self, csp_fqdn):

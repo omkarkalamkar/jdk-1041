@@ -37,7 +37,7 @@ class HealthStateAggregator:
         # FQDN are passed as string here. Once tangoserverhelper is updated in tmccommonpackage, then this will be updated.
         self.csp_master_ln_fqdn = ""
         self.sdp_master_ln_fqdn = ""
-        self.tm_mid_subarray = ""
+        self.tm_mid_subarrays = ""
         property_value = self.this_server.read_property("CspMasterLeafNodeFQDN")
         self.csp_master_ln_fqdn = self.csp_master_ln_fqdn.join(property_value)
 
@@ -112,8 +112,8 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if erroe occures while subscribing event.
         """
-        self.tm_mid_subarray = self.this_server.read_property("TMMidSubarrayNodes")
-        for subarray_fqdn in self.tm_mid_subarray:
+        self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
+        for subarray_fqdn in self.tm_mid_subarrays:
             subarray_client = TangoClient(subarray_fqdn)
             # updating the subarray_health_state_map with device name (as ska_mid/tm_subarray_node/1) and its value which is required in callback
             self.subarray_health_state_map[subarray_fqdn] = -1

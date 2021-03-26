@@ -112,3 +112,4 @@ class StowAntennas(BaseCommand):
                 "CentralNode.StowAntennasCommand",
                 tango.ErrSeverity.ERR,
             )
+

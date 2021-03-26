@@ -152,8 +152,8 @@ class ReleaseResources(BaseCommand):
 
         except ValueError as value_error:
             self.logger.error(const.ERR_INVALID_JSON)
-            this_server.write_attr("activityMessage", f"{const.ERR_INVALID_JSON}{value_error}")
             log_msg = f"{const.ERR_INVALID_JSON}{value_error}"
+            this_server.write_attr("activityMessage", log_msg)
             self.logger.exception(value_error)
             tango.Except.throw_exception(
                 const.STR_RELEASE_RES_EXEC,
@@ -164,8 +164,8 @@ class ReleaseResources(BaseCommand):
 
         except KeyError as key_error:
             self.logger.error(const.ERR_JSON_KEY_NOT_FOUND)
-            this_server.write_attr("activityMessage", f"{const.ERR_JSON_KEY_NOT_FOUND}{key_error}")
             log_msg = f"{const.ERR_JSON_KEY_NOT_FOUND}{key_error}"
+            this_server.write_attr("activityMessage", log_msg)
             self.logger.exception(key_error)
             tango.Except.throw_exception(
                 const.STR_RELEASE_RES_EXEC,

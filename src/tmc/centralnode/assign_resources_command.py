@@ -17,6 +17,7 @@ from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.exceptions import ResourceReassignmentError, ResourceNotPresentError
 from tmc.centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
 
+
 class AssignResources(BaseCommand):
     """
     A class for CentralNode's AssignResources() command.
