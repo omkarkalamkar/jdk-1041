@@ -208,7 +208,7 @@ class CentralNode(SKABaseDevice):
                 ] = device.TMMidSubarrayNodes[subarray]
                 
             this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS)
-            self.logger.info(device.attr_map["activityMessage"])
+            self.logger.info(const.STR_INIT_SUCCESS)
             return (ResultCode.OK, device.attr_map["activityMessage"])
 
     def always_executed_hook(self):
