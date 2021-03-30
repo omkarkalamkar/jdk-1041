@@ -10,9 +10,8 @@ import tango
 
 # Additional import
 from ska.base.control_model import ObsState
-
 from tmc.common.tango_client import TangoClient
-
+from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
 
@@ -75,6 +74,7 @@ class ObsStateAggregator:
 
         :raises: KeyError in Subarray obsState callback
         """
+        self.this_server = TangoServerHelper.get_instance()
         try:
             device_data = DeviceData.get_instance()
             log_msg = f"Observation state attribute change event is : {evt}"
@@ -96,10 +96,10 @@ class ObsStateAggregator:
                     )
             else:
                 # TODO: For future reference
-                self._read_activity_message = f"{const.ERR_SUBSR_SA_OBS_STATE}{evt}"
+                self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{evt}")
+
                 self.logger.critical(const.ERR_SUBSR_SA_OBS_STATE)
         except KeyError as key_error:
-            self._read_activity_message = f"{const.ERR_SUBARRAY_HEALTHSTATE}{key_error}"
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBARRAY_HEALTHSTATE}{key_error}")
             log_msg = const.ERR_SUBARRAY_HEALTHSTATE + f": {key_error}"
-            self.logger.critical(log_msg)
             self.logger.critical(log_msg)

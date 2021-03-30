@@ -12,9 +12,8 @@ from tango import DevState, DevFailed
 # Additional import
 from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
-
 from tmc.common.tango_client import TangoClient
-
+from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
 
@@ -70,13 +69,18 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         self.logger.info(type(self.target))
         device_data = DeviceData.get_instance()
         self.standby_dish(device_data._dish_leaf_node_devices)
-        self.standby_csp(device_data.csp_master_ln_fqdn)
-        self.standby_sdp(device_data.sdp_master_ln_fqdn)
-        self.standby_subarray(device_data.tm_mid_subarray)
+        this_server = TangoServerHelper.get_instance()
+        self.csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
+        self.sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+        self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")        
+        self.standby_csp(self.csp_master_ln_fqdn)                                                               
+        self.standby_sdp(self.sdp_master_ln_fqdn)
+        self.standby_subarray(self.tm_mid_subarrays)
         device_data.health_aggreegator.unsubscribe_event()
         log_msg = const.STR_STANDBY_CMD_ISSUED
         self.logger.info(log_msg)
-        device_data._read_activity_message = log_msg
+
+        this_server.write_attr("activityMessage", log_msg)
 
         # stop obs state aggregation
         device_data.obs_state_aggregator.stop_aggregation()
@@ -142,18 +146,19 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         :raises: Devfailed exception if error occures while executing command on leaf nodes.
 
         """
-        device_data = DeviceData.get_instance()
+        this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(cmd_name, param)
             log_msg = "Command {} invoked successfully on {}".format(
                 cmd_name, tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            device_data._read_activity_message = log_msg
+            this_server.write_attr("activityMessage", log_msg)
+
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_STANDBY_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            device_data._read_activity_message = const.ERR_EXE_STANDBY_CMD
+            this_server.write_attr("activityMessage", log_msg)
             tango.Except.throw_exception(
                 const.STR_STANDBY_EXEC,
                 log_msg,

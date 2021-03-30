@@ -5,6 +5,7 @@ ResourceManager class for CentralNode.
 import logging
 
 from tmc.centralnode.device_data import DeviceData
+from tmc.common.tango_server_helper import TangoServerHelper
 
 
 class ResourceManager:
@@ -25,17 +26,17 @@ class ResourceManager:
         else:
             self.logger = logger
         self._subarray_allocation = {}
-
-    def initialize_resource_matrix(self):
+        
+    def initialize_resource_matrix(self, dln_prefix, num_dishes):
         """
         Initializes Resource Matrix which maintains resource allocation to a perticular subarray.
         :return: None
         """
         device_data = DeviceData.get_instance()
-        for dish in range(1, (device_data.num_dishes + 1)):
+        for dish in range(1, (num_dishes + 1)):
             # Update device._dish_leaf_node_devices variable
             device_data._dish_leaf_node_devices.append(
-                device_data.dln_prefix + f"000{dish}"
+                dln_prefix + f"000{dish}"
             )
             # Initialize device._subarray_allocation variable (map of Dish Id and allocation status)
             # to indicate availability of the dishes

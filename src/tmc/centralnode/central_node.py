@@ -9,9 +9,11 @@ Central Node is a coordinator of the complete M&C system. Central Node implement
 of state and mode attributes defined by the SKA Control Model.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
+import threading
 # Tango imports
 from tango import DebugIt, AttrWriteType
 from tango.server import run, attribute, command, device_property
+from tmc.common.tango_server_helper import TangoServerHelper
 
 # Additional import
 from ska.base import SKABaseDevice
@@ -167,7 +169,17 @@ class CentralNode(SKABaseDevice):
 
             device = self.target
             self.logger.info("Device initialisating...")
-            # Initialise Attributes
+            # Get Instance of TangoServerHelper class 
+            this_server = TangoServerHelper.get_instance()
+            this_server.set_tango_class(device)
+            device.attr_map = {}
+            #Initilise the attributes
+            device.attr_map["activityMessage"] = ""
+            device.attr_map["subarray1HealthState"] = HealthState.UNKNOWN
+            device.attr_map["subarray2HealthState"] = HealthState.UNKNOWN
+            device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
+            device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
+
             device._health_state = HealthState.OK
             device._build_state = "{},{},{}".format(
                 release.name, release.version, release.description
@@ -175,20 +187,16 @@ class CentralNode(SKABaseDevice):
             device._version_id = release.version
             device_data = DeviceData.get_instance()
             device.device_data = device_data
-            device_data.csp_master_ln_fqdn = device.CspMasterLeafNodeFQDN
-            device_data.sdp_master_ln_fqdn = device.SdpMasterLeafNodeFQDN
-            device_data.tm_mid_subarray = device.TMMidSubarrayNodes
-            device_data.dln_prefix = device.DishLeafNodePrefix
-            device_data.num_dishes = device.NumDishes
+
             self.logger.debug(const.STR_INIT_SUCCESS)
             device_data.resource_manager = ResourceManager.get_instance()
 
             # Initialization of ObsState aggregator object
             device_data.obs_state_aggregator = ObsStateAggregator(
-                device_data.tm_mid_subarray, self.logger
+                device.TMMidSubarrayNodes, self.logger
             )
 
-            device_data.resource_manager.initialize_resource_matrix()
+            device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")
@@ -199,11 +207,9 @@ class CentralNode(SKABaseDevice):
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
                 
-            device_data._read_activity_message = (
-                "Central Node initialised successfully."
-            )
-            self.logger.info(device_data._read_activity_message)
-            return (ResultCode.OK, device_data._read_activity_message)
+            this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS)
+            self.logger.info(const.STR_INIT_SUCCESS)
+            return (ResultCode.OK, device.attr_map["activityMessage"])
 
     def always_executed_hook(self):
         # PROTECTED REGION ID(CentralNode.always_executed_hook) ENABLED START #
@@ -222,39 +228,51 @@ class CentralNode(SKABaseDevice):
     def read_telescopeHealthState(self):
         # PROTECTED REGION ID(CentralNode.telescope_healthstate_read) ENABLED START #
         """ Internal construct of TANGO. Returns the Telescope health state."""
-        return self.device_data._telescope_health_state
+        return self.attr_map["telescopeHealthState"]
         # PROTECTED REGION END #    //  CentralNode.telescope_healthstate_read
 
     def read_subarray1HealthState(self):
         # PROTECTED REGION ID(CentralNode.subarray1_healthstate_read) ENABLED START #
         """ Internal construct of TANGO. Returns Subarray1 health state. """
-        return self.device_data._subarray1_health_state
+        return self.attr_map["subarray1HealthState"]
         # PROTECTED REGION END #    //  CentralNode.subarray1_healthstate_read
 
     def read_subarray2HealthState(self):
         # PROTECTED REGION ID(CentralNode.subarray2_healthstate_read) ENABLED START #
         """ Internal construct of TANGO. Returns Subarray2 health state. """
-        return self.device_data._subarray2_health_state
+        return self.attr_map["subarray2HealthState"]
+
         # PROTECTED REGION END #    //  CentralNode.subarray2_healthstate_read
 
     def read_subarray3HealthState(self):
         # PROTECTED REGION ID(CentralNode.subarray3HealthState_read) ENABLED START #
         """ Internal construct of TANGO. Returns Subarray3 health state. """
-        return self.device_data._subarray3_health_state
+        return self.attr_map["subarray3HealthState"]
+
         # PROTECTED REGION END #    //  CentralNode.subarray3HealthState_read
 
     def read_activityMessage(self):
         # PROTECTED REGION ID(CentralNode.activity_message_read) ENABLED START #
         """Internal construct of TANGO. Returns activity message. """
-        return self.device_data._read_activity_message
+        return self.attr_map["activityMessage"]
         # PROTECTED REGION END #    //  CentralNode.activity_message_read
 
     def write_activityMessage(self, value):
         # PROTECTED REGION ID(CentralNode.activity_message_write) ENABLED START #
         """Internal construct of TANGO. Sets the activity message. """
-        self.device_data._read_activity_message = value
+        self.update_attr_map("activityMessage", value)
         # PROTECTED REGION END #    //  CentralNode.activity_message_write
-
+    
+    def update_attr_map(self, attr, val):
+        """
+        This method updates attribute value in attribute map. Once a thread has acquired a lock,
+        subsequent attempts to acquire it are blocked, until it is released.
+        """
+        lock = threading.Lock()
+        lock.acquire()
+        self.attr_map[attr] = val
+        lock.release()
+ 
     # --------
     # Commands
     # --------

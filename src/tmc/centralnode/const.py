@@ -5,13 +5,13 @@ CMD_SET_STANDBYFP_MODE = "SetStandbyFPMode"
 CMD_SET_OPERATE_MODE = "SetOperateMode"
 CMD_ASSIGN_RESOURCES = "AssignResources"
 CMD_RELEASE_RESOURCES = "ReleaseAllResources"
-
 CMD_STANDBY = "Standby"
+CMD_ON = "On"
+CMD_OFF = "Off"
+
 STR_CMD_STANDBY_CSP_DEV = "STANDBY command invoked on CspMasterLeafNode device "
 STR_CMD_STANDBY_SDP_DEV = "STANDBY command invoked on SdpMasterleafNode device "
 STR_CMD_STANDBY_SA_DEV = "STANDBY command invoked on SubarrayNode device"
-CMD_ON = "On"
-CMD_OFF = "Off"
 
 # Event messages
 EVT_UNKNOWN = "Event from the Unknown device!"
@@ -45,7 +45,6 @@ ERR_RECEPTOR_ID_REALLOCATION = "The following Receptor id(s) are allocated to ot
 ERR_DEVFAILED_MSG = "This is error message for devfailed"
 ERR_SUBARRAY_ID_DOES_NOT_EXIST = "The Subarray '99' does not exist."
 
-# strings
 # General strings
 STR_HEALTH_STATE = "healthState of "
 STR_OK = " :-> OK"
