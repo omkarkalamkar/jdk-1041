@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""centralnode"""
-version="0.1.0"
+version="0.1.2"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,9 +10,9 @@ license="""BSD-3-Clause"""
 url="""https://www.skatelescope.org"""
 copyright=""""""
 
-release=0.1.1
-tag=0.1.1
-tag_description= Improve readthedocs generated for CentralNodeMid
-release_notes=This release contains:<br/><ul><li>Improved readthedocs version of tmc centralnode mid</li></ul><br/>
-gitlab_username=kalyanithigale
-private_token=uqwK7WTp_wkTzw5o68nd
+release=0.1.2
+tag=0.1.2
+tag_description= Updated CentralNode-mid to utilise new ska-tmc-common package
+release_notes=This release contains:<br/><ul><li> Updated CentralNode-mid to utilise new ska-tmc-common package</li></ul><br/>
+gitlab_username=shraddhabajare
+private_token=pNx3WJcgQ74ojBT8r_yA
