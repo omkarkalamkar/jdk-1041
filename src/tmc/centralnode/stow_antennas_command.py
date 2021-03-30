@@ -65,7 +65,6 @@ class StowAntennas(BaseCommand):
 
         """
         self.logger.info(type(self.target))
-        # self.dln_prefix = ""
         this_server = TangoServerHelper.get_instance()
         dln_prefix = this_server.read_property("DishLeafNodePrefix")
         try:

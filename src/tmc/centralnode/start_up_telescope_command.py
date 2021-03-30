@@ -73,10 +73,6 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         device_data.health_aggreegator = HealthStateAggregator(self.logger)
         device_data.health_aggreegator.subscribe_event()
         this_server = TangoServerHelper.get_instance()
-        # self.csp_master_ln_fqdn = ""
-        # self.sdp_master_ln_fqdn = ""
-        # self.tm_mid_subarrays = ""
-        # self.dln_prefix = ""
         self.csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         self.sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")

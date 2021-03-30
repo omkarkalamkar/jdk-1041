@@ -164,7 +164,6 @@ class AssignResources(BaseCommand):
 
         this_server = TangoServerHelper.get_instance()
         self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        self.dln_prefix = ""
         self.dln_prefix = this_server.read_property("DishLeafNodePrefix")
         try:
             self.logger.info("Validating input string.")
