@@ -66,7 +66,7 @@ class StowAntennas(BaseCommand):
         """
         self.logger.info(type(self.target))
         this_server = TangoServerHelper.get_instance()
-        dln_prefix = this_server.read_property("DishLeafNodePrefix")
+        dln_prefix = this_server.read_property("DishLeafNodePrefix")[0]
         try:
             for leafId in range(0, len(argin)):
                 float(argin[leafId])
