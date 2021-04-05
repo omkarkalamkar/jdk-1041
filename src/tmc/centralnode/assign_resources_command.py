@@ -208,7 +208,7 @@ class AssignResources(BaseCommand):
             )
 
             # Allocation successful
-            this_server.write_attr("activityMessage", const.STR_ASSIGN_RESOURCES_SUCCESS)
+            # this_server.write_attr("activityMessage", const.STR_ASSIGN_RESOURCES_SUCCESS)
             self.logger.debug(const.STR_ASSIGN_RESOURCES_SUCCESS)
 
             # Prepare output argument

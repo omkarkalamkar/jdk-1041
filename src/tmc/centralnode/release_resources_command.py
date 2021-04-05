@@ -126,7 +126,7 @@ class ReleaseResources(BaseCommand):
                 res_not_released = ast.literal_eval(return_val[1][0])
                 log_msg = const.STR_REL_RESOURCES
                 self.logger.debug(log_msg)
-                this_server.write_attr("activityMessage", log_msg)
+                # this_server.write_attr("activityMessage", log_msg)
 
                 if not res_not_released:
                     release_success = True

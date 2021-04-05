@@ -68,7 +68,6 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         """
         self.logger.info(type(self.target))
         device_data = DeviceData.get_instance()
-        self.standby_dish(device_data._dish_leaf_node_devices)
         this_server = TangoServerHelper.get_instance()
         self.csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         self.sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
@@ -76,11 +75,12 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         self.standby_csp(self.csp_master_ln_fqdn)                                                               
         self.standby_sdp(self.sdp_master_ln_fqdn)
         self.standby_subarray(self.tm_mid_subarrays)
+        self.standby_dish(device_data._dish_leaf_node_devices)
         device_data.health_aggreegator.unsubscribe_event()
         log_msg = const.STR_STANDBY_CMD_ISSUED
         self.logger.info(log_msg)
 
-        this_server.write_attr("activityMessage", log_msg)
+        #this_server.write_attr("activityMessage", log_msg)
 
         # stop obs state aggregation
         device_data.obs_state_aggregator.stop_aggregation()
@@ -153,7 +153,7 @@ class StandByTelescope(SKABaseDevice.OffCommand):
                 cmd_name, tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg)
+            # this_server.write_attr("activityMessage", log_msg)
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_STANDBY_CMD}{dev_failed}"

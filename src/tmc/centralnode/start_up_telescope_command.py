@@ -70,23 +70,24 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         """
         device_data = DeviceData.get_instance()
         self.logger.info(type(self.target))
-        device_data.health_aggreegator = HealthStateAggregator(self.logger)
-        device_data.health_aggreegator.subscribe_event()
         this_server = TangoServerHelper.get_instance()
-        self.csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
-        self.sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
-        self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        self.dln_prefix = this_server.read_property("DishLeafNodePrefix")  
-        self.startup_sdp(self.sdp_master_ln_fqdn)
+        csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
+        sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+        tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
+        dln_prefix = this_server.read_property("DishLeafNodePrefix")  
+        self.startup_sdp(sdp_master_ln_fqdn)
         self.startup_dish(device_data._dish_leaf_node_devices)
-        self.startup_csp(self.csp_master_ln_fqdn)
-        self.startup_subarray(self.tm_mid_subarrays)
+        self.startup_csp(csp_master_ln_fqdn)
+        self.startup_subarray(tm_mid_subarrays)
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
-        this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED)
+        # this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED)
         # start obs state aggregation
         device_data.obs_state_aggregator.start_aggregation()
-        # TODO: start healthState aggregation
+        # start health state aggregation
+        if device_data.health_aggreegator is None:
+            device_data.health_aggreegator = HealthStateAggregator(self.logger)
+            device_data.health_aggreegator.subscribe_event()
         return (ResultCode.OK, const.STR_ON_CMD_ISSUED)
 
     def startup_csp(self, csp_fqdn):
@@ -141,14 +142,14 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
-        this_server = TangoServerHelper.get_instance()
+        # this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(const.CMD_ON)
             log_msg = "ON command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg)
+            # this_server.write_attr("activityMessage", log_msg)
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
@@ -178,21 +179,21 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg)
+            # this_server.write_attr("activityMessage", log_msg)
             tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
             log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg)
+            # this_server.write_attr("activityMessage", log_msg)
 
-            time.sleep(0.5)
+            time.sleep(0.2)
             tango_client.send_command(const.CMD_SET_OPERATE_MODE)
             log_msg = "SetOperateMode command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg)
+            # this_server.write_attr("activityMessage", log_msg)
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"

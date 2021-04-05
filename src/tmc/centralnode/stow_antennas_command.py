@@ -72,7 +72,7 @@ class StowAntennas(BaseCommand):
                 float(argin[leafId])
             log_msg = const.STR_STOW_CMD_ISSUED_CN
             self.logger.info(log_msg)
-            this_server.write_attr("activityMessage", log_msg)
+            # this_server.write_attr("activityMessage", log_msg)
             for i in range(0, len(argin)):
                 device_name = dln_prefix + argin[i]
                 try:
