@@ -208,7 +208,7 @@ class AssignResources(BaseCommand):
             )
 
             # Allocation successful
-            # this_server.write_attr("activityMessage", const.STR_ASSIGN_RESOURCES_SUCCESS)
+            this_server.write_attr("activityMessage", const.STR_ASSIGN_RESOURCES_SUCCESS, False)
             self.logger.debug(const.STR_ASSIGN_RESOURCES_SUCCESS)
 
             # Prepare output argument
@@ -220,7 +220,7 @@ class AssignResources(BaseCommand):
             SubarrayNotPresentError,
         ) as error:
             self.logger.exception("Exception in AssignResource(): %s", str(error))
-            this_server.write_attr("activityMessage", f"Exception in validating input:{error}")
+            this_server.write_attr("activityMessage", f"Exception in validating input:{error}", False)
 
             log_msg = f"{const.STR_ASSIGN_RES_EXEC}{error}"
             self.logger.exception(error)
@@ -236,7 +236,7 @@ class AssignResources(BaseCommand):
                 "List of the dishes that are already allocated: %s",
                 str(resource_error.resources_reallocation),
             )
-            this_server.write_attr("activityMessage", f"{const.STR_DISH_DUPLICATE}{resource_error.resources_reallocation}")
+            this_server.write_attr("activityMessage", f"{const.STR_DISH_DUPLICATE}{resource_error.resources_reallocation}", False)
 
             log_msg = f"{const.STR_DISH_DUPLICATE}{resource_error}"
             self.logger.exception(resource_error)
@@ -248,7 +248,7 @@ class AssignResources(BaseCommand):
             )
         except ValueError as ve:
             self.logger.exception("Exception in AssignResources command: %s", str(ve))
-            this_server.write_attr("activityMessage", f"Invalid value in input:{ve}")
+            this_server.write_attr("activityMessage", f"Invalid value in input:{ve}", False)
 
             log_msg = f"{const.STR_ASSIGN_RES_EXEC}{ve}"    
             self.logger.exception(ve)

@@ -67,7 +67,7 @@ class HealthStateAggregator:
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH}{dev_failed}"
             self.logger.exception(dev_failed)
-            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH)
+            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH, False)
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
@@ -91,7 +91,7 @@ class HealthStateAggregator:
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH}{dev_failed}"
             self.logger.exception(dev_failed)
-            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH)
+            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH, False)
 
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
@@ -119,7 +119,7 @@ class HealthStateAggregator:
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_SA_HEALTH_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
-                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SA_HEALTH_STATE)
+                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SA_HEALTH_STATE, False)
                 tango.Except.throw_exception(
                     const.STR_CMD_FAILED,
                     log_msg,
@@ -219,6 +219,6 @@ class HealthStateAggregator:
 
         else:
             # TODO: For future reference
-            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}", False)
             self.logger.info(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
             self.logger.critical(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
