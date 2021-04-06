@@ -74,7 +74,6 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        dln_prefix = this_server.read_property("DishLeafNodePrefix")  
         self.startup_sdp(sdp_master_ln_fqdn)
         self.startup_dish(device_data._dish_leaf_node_devices)
         self.startup_csp(csp_master_ln_fqdn)
