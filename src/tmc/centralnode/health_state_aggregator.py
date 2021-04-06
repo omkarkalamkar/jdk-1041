@@ -35,9 +35,11 @@ class HealthStateAggregator:
         self.subarray_health_state_map = {}
         self.this_server = TangoServerHelper.get_instance()
         # FQDN are passed as string here. Once tangoserverhelper is updated in tmccommonpackage, then this will be updated.
+        self.csp_master_ln_fqdn = ""
+        self.sdp_master_ln_fqdn = ""
+        self.tm_mid_subarrays = []
         self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
         self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
-        self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
         self.health_state_event_map = {}
                 
     def subscribe_event(self):
@@ -64,7 +66,7 @@ class HealthStateAggregator:
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH}{dev_failed}"
             self.logger.exception(dev_failed)
-            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH)
+            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH, False)
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
@@ -87,7 +89,7 @@ class HealthStateAggregator:
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH}{dev_failed}"
             self.logger.exception(dev_failed)
-            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH)
+            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH, False)
 
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
@@ -102,6 +104,7 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if erroe occures while subscribing event.
         """
+        self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
         for subarray_fqdn in self.tm_mid_subarrays:
             subarray_client = TangoClient(subarray_fqdn)
             # updating the subarray_health_state_map with device name (as ska_mid/tm_subarray_node/1) and its value which is required in callback
@@ -114,7 +117,7 @@ class HealthStateAggregator:
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_SA_HEALTH_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
-                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SA_HEALTH_STATE)
+                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SA_HEALTH_STATE, False)
                 tango.Except.throw_exception(
                     const.STR_CMD_FAILED,
                     log_msg,
@@ -148,8 +151,9 @@ class HealthStateAggregator:
         device_data = DeviceData.get_instance()
         log_msg = f'Health state attribute change event is : {event.attr_name}'
         self.logger.info(log_msg)
-        log_msg = f'Health state attribute change event is .....................: {event.attr_value.value}'
+        log_msg = f'Health state attribute change event is: {event.attr_value.value}'
         self.logger.info(log_msg)
+        
         def _update_health_state(self, fqdn_device_health_state_map: dict):
             health_state = event.attr_value.value
             attr_name = event.attr_name
@@ -160,8 +164,8 @@ class HealthStateAggregator:
                     if "subarray" in fqdn:
                         self.subarray_health_state_map[attr_name] = health_state
                     elif "csp" in fqdn:
-                        self.logger.info(f"Health state msg in CSP Master....: {attr_name}")
-                        self.logger.info(f"CSP Master health is....: {health_state}")
+                        self.logger.info(f"Health state msg in CSP Master: {attr_name}")
+                        self.logger.info(f"CSP Master health is: {health_state}")
                     break
             else:
                 self.logger.debug(const.EVT_UNKNOWN)
@@ -211,6 +215,6 @@ class HealthStateAggregator:
 
         else:
             # TODO: For future reference
-            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}", False)
             self.logger.info(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
             self.logger.critical(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")

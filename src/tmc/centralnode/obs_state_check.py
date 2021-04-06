@@ -96,10 +96,10 @@ class ObsStateAggregator:
                     )
             else:
                 # TODO: For future reference
-                self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{evt}")
+                self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{evt}", False)
 
                 self.logger.critical(const.ERR_SUBSR_SA_OBS_STATE)
         except KeyError as key_error:
-            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBARRAY_HEALTHSTATE}{key_error}")
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBARRAY_HEALTHSTATE}{key_error}", False)
             log_msg = const.ERR_SUBARRAY_HEALTHSTATE + f": {key_error}"
             self.logger.critical(log_msg)
