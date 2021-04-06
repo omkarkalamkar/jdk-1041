@@ -37,7 +37,7 @@ class HealthStateAggregator:
         # FQDN are passed as string here. Once tangoserverhelper is updated in tmccommonpackage, then this will be updated.
         self.csp_master_ln_fqdn = ""
         self.sdp_master_ln_fqdn = ""
-        self.tm_mid_subarrays = ""
+        self.tm_mid_subarrays = []
         self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
         self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         self.health_state_event_map = {}
@@ -57,7 +57,6 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if error occures while subscribing event.
         """
-        self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
         csp_mln_client = TangoClient(self.csp_master_ln_fqdn)
         try:
             self.csp_event_id = csp_mln_client.subscribe_attribute(
@@ -81,7 +80,6 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if error occures while subscribing event.
         """
-        self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         sdp_mln_client = TangoClient(self.sdp_master_ln_fqdn)
         try:
             self.sdp_event_id = sdp_mln_client.subscribe_attribute(
@@ -153,10 +151,8 @@ class HealthStateAggregator:
         device_data = DeviceData.get_instance()
         log_msg = f'Health state attribute change event is : {event.attr_name}'
         self.logger.info(log_msg)
-        log_msg = f'Health state attribute change event is .....................: {event.attr_value.value}'
+        log_msg = f'Health state attribute change event is: {event.attr_value.value}'
         self.logger.info(log_msg)
-        self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
-        self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         
         def _update_health_state(self, fqdn_device_health_state_map: dict):
             health_state = event.attr_value.value
@@ -168,8 +164,8 @@ class HealthStateAggregator:
                     if "subarray" in fqdn:
                         self.subarray_health_state_map[attr_name] = health_state
                     elif "csp" in fqdn:
-                        self.logger.info(f"Health state msg in CSP Master....: {attr_name}")
-                        self.logger.info(f"CSP Master health is....: {health_state}")
+                        self.logger.info(f"Health state msg in CSP Master: {attr_name}")
+                        self.logger.info(f"CSP Master health is: {health_state}")
                     break
             else:
                 self.logger.debug(const.EVT_UNKNOWN)

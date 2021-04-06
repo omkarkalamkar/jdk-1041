@@ -86,7 +86,7 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         # start health state aggregation
         if device_data.health_aggreegator is None:
             device_data.health_aggreegator = HealthStateAggregator(self.logger)
-            device_data.health_aggreegator.subscribe_event()
+        device_data.health_aggreegator.subscribe_event()
         return (ResultCode.OK, const.STR_ON_CMD_ISSUED)
 
     def startup_csp(self, csp_fqdn):
