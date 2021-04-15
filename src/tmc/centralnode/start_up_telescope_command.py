@@ -4,7 +4,7 @@ StartUpTelescope class for CentralNode.
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Standard Python imports
 import time
-
+from concurrent.futures import ThreadPoolExecutor
 #Tango imports
 import tango
 from tango import DevState, DevFailed
@@ -116,9 +116,16 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
         :return: None
         """
-        for name in range(0, len(dish_fqdn)):
-            dish_ln_client = TangoClient(dish_fqdn[name])
-            self.startup_dish_leaf_node(dish_ln_client)
+        total_dishes = len(dish_fqdn)
+        dish_ln_thread_status = {}
+        with ThreadPoolExecutor(total_dishes) as executor:
+            for dish in dish_fqdn:
+                dish_ln_client = TangoClient(dish)
+                dish_ln_thread_status[dish] = executor.submit(self.startup_dish_leaf_node, dish_ln_client)
+
+        # Wait for result
+        while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
+            pass
 
     def startup_subarray(self, subarray_fqdn_list):
         """
