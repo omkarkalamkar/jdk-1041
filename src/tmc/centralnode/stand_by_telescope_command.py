@@ -75,6 +75,7 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         self.standby_csp(csp_master_ln_fqdn)                                                               
         self.standby_sdp(sdp_master_ln_fqdn)
         self.standby_dish(device_data._dish_leaf_node_devices)
+        this_server.write_attr("activityMessage", const.STR_CMD_STANDBY_DISH, False)
         self.standby_subarray(tm_mid_subarrays)
         log_msg = const.STR_STANDBY_CMD_ISSUED
         self.logger.info(log_msg)
@@ -136,29 +137,29 @@ class StandByTelescope(SKABaseDevice.OffCommand):
 
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
-        this_server = TangoServerHelper.get_instance()
+        # this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
             log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
                                                 tango_client.get_device_fqdn)
             self.logger.debug(log_msg)
             time.sleep(0.2)
-            this_server.write_attr("activityMessage", log_msg, False)
+            # this_server.write_attr("activityMessage", log_msg, False)
             tango_client.send_command(const.CMD_SET_STANDBYLP_MODE)
             log_msg = "SetStandbyLPMode command invoked successfully on {}".format(
                                                       tango_client.get_device_fqdn)
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
+            # this_server.write_attr("activityMessage", log_msg, False)
             tango_client.send_command(const.CMD_OFF)
             log_msg = "OFF command invoked successfully on {}".format(tango_client.get_device_fqdn)
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
+            # this_server.write_attr("activityMessage", log_msg, False)
             return tango_client.get_device_fqdn
 
         except DevFailed as dev_failed:
             log_msg = f"{const.STR_STANDBY_EXEC}{dev_failed}"
             self.logger.exception(dev_failed)
-            this_server.write_attr("activityMessage", log_msg, False)
+            # this_server.write_attr("activityMessage", log_msg, False)
             tango.Except.throw_exception(const.STR_STANDBY_EXEC, log_msg,
                                          "CentralNode.StandByTelescopeCommand", tango.ErrSeverity.ERR)
 
