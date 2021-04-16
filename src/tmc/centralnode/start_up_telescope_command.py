@@ -136,9 +136,16 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
         :return: None
         """
-        for subarray_fqdn in subarray_fqdn_list:
-            subarray_client = TangoClient(subarray_fqdn)
-            self.startup_leaf_node(subarray_client)
+        total_subarrays = len(subarray_fqdn_list)
+        subarray_thread_status = {}
+        with ThreadPoolExecutor(total_subarrays) as executor:
+            for subarray_fqdn in subarray_fqdn_list:
+                subarray_client = TangoClient(subarray_fqdn)
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.startup_leaf_node,
+                                                              subarray_client)
+        # Wait for result
+        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
+            pass
 
     def startup_leaf_node(self, tango_client):
         """
@@ -150,19 +157,19 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
-        this_server = TangoServerHelper.get_instance()
+        #this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(const.CMD_ON)
             log_msg = "ON command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
+            #this_server.write_attr("activityMessage", log_msg, False)
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            this_server.write_attr("activityMessage", const.ERR_EXE_ON_CMD, False)
+            #this_server.write_attr("activityMessage", const.ERR_EXE_ON_CMD, False)
             tango.Except.throw_exception(
                 const.STR_ON_EXEC,
                 log_msg,

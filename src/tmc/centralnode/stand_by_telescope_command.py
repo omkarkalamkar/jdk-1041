@@ -171,9 +171,16 @@ class StandByTelescope(SKABaseDevice.OffCommand):
 
         :return: None
         """
-        for subarray_fqdn in subarray_fqdn_list:
-            subarray_client = TangoClient(subarray_fqdn)
-            self.standby_leaf_node(subarray_client, const.CMD_OFF)
+        total_subarrays = len(subarray_fqdn_list)
+        subarray_thread_status = {}
+        with ThreadPoolExecutor(total_subarrays) as executor:
+            for subarray_fqdn in subarray_fqdn_list:
+                subarray_client = TangoClient(subarray_fqdn)
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.standby_leaf_node,
+                                                                        subarray_client, const.CMD_OFF)
+        # Wait for result
+        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
+            pass
 
     def standby_leaf_node(self, tango_client, cmd_name, param=None):
         """
@@ -188,19 +195,19 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         :raises: Devfailed exception if error occures while executing command on leaf nodes.
 
         """
-        this_server = TangoServerHelper.get_instance()
+        #this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(cmd_name, param)
             log_msg = "Command {} invoked successfully on {}".format(
                 cmd_name, tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
+            #this_server.write_attr("activityMessage", log_msg, False)
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_STANDBY_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            this_server.write_attr("activityMessage", log_msg, False)
+            #this_server.write_attr("activityMessage", log_msg, False)
             tango.Except.throw_exception(
                 const.STR_STANDBY_EXEC,
                 log_msg,
