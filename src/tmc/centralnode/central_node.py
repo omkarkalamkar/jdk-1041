@@ -28,6 +28,7 @@ from tmc.centralnode.stow_antennas_command import StowAntennas
 from tmc.centralnode.resource_manager import ResourceManager
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
+from tmc.centralnode.health_state_aggregator import HealthStateAggregator
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -195,8 +196,17 @@ class CentralNode(SKABaseDevice):
             device_data.obs_state_aggregator = ObsStateAggregator(
                 device.TMMidSubarrayNodes, self.logger
             )
+             # start obs state aggregation
+            if device_data.obs_state_aggregator is None:
+                device_data.obs_state_aggregator.start_aggregation()
 
             device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
+
+             # start health state aggregation
+            if device_data.health_aggreegator is None:
+                device_data.health_aggreegator = HealthStateAggregator(self.logger)
+            device_data.health_aggreegator.subscribe_event()
+
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")
