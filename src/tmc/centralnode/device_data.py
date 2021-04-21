@@ -43,6 +43,7 @@ class DeviceData:
         self.resource_manager = None
         self.obs_state_aggregator = None
         self.check_resources = None
+        self.resource_manager = None
 
     @staticmethod
     def get_instance():

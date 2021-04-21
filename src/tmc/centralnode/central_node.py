@@ -189,14 +189,14 @@ class CentralNode(SKABaseDevice):
             device.device_data = device_data
 
             self.logger.debug(const.STR_INIT_SUCCESS)
-            device_data.resource_manager = ResourceManager.get_instance()
+            device.device_data.resource_manager = ResourceManager.get_instance()
 
             # Initialization of ObsState aggregator object
             device_data.obs_state_aggregator = ObsStateAggregator(
                 device.TMMidSubarrayNodes, self.logger
             )
 
-            device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
+            device.device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")
