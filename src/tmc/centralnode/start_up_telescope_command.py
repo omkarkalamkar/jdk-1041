@@ -71,10 +71,10 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         device_data = DeviceData.get_instance()
         self.logger.info(type(self.target))
         this_server = TangoServerHelper.get_instance()
-        # start health state aggregation
-        if device_data.health_aggreegator is None:
-            device_data.health_aggreegator = HealthStateAggregator(self.logger)
-        device_data.health_aggreegator.subscribe_event()
+        # # start health state aggregation
+        # if device_data.health_aggreegator is None:
+        #     device_data.health_aggreegator = HealthStateAggregator(self.logger)
+        # device_data.health_aggreegator.subscribe_event()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
@@ -86,9 +86,9 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED, False)
-        # start obs state aggregation
-        if device_data.obs_state_aggregator is None:
-            device_data.obs_state_aggregator.start_aggregation()
+        # # start obs state aggregation
+        # if device_data.obs_state_aggregator is None:
+        #     device_data.obs_state_aggregator.start_aggregation()
         return (ResultCode.OK, const.STR_ON_CMD_ISSUED)
 
     def startup_csp(self, csp_fqdn):

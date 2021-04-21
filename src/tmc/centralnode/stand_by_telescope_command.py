@@ -81,10 +81,10 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
 
-        # stop obs state aggregation
-        device_data.obs_state_aggregator.stop_aggregation()
-        # Unsubscribe change event for HealthState
-        device_data.health_aggreegator.unsubscribe_event()
+        # # stop obs state aggregation
+        # device_data.obs_state_aggregator.stop_aggregation()
+        # # Unsubscribe change event for HealthState
+        # device_data.health_aggreegator.unsubscribe_event()
         return (ResultCode.OK, const.STR_STANDBY_CMD_ISSUED)
 
     def standby_csp(self, csp_fqdn):
