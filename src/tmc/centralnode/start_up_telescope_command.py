@@ -4,7 +4,7 @@ StartUpTelescope class for CentralNode.
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Standard Python imports
 import time
-
+from concurrent.futures import ThreadPoolExecutor
 #Tango imports
 import tango
 from tango import DevState, DevFailed
@@ -71,22 +71,17 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         device_data = DeviceData.get_instance()
         self.logger.info(type(self.target))
         this_server = TangoServerHelper.get_instance()
-        # start health state aggregation
-        if device_data.health_aggreegator is None:
-            device_data.health_aggreegator = HealthStateAggregator(self.logger)
-        device_data.health_aggreegator.subscribe_event()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.startup_sdp(sdp_master_ln_fqdn)
         self.startup_dish(device_data._dish_leaf_node_devices)
+        this_server.write_attr("activityMessage", const.STR_CMD_STARTUP_DISH, False)
         self.startup_csp(csp_master_ln_fqdn)
         self.startup_subarray(tm_mid_subarrays)
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED, False)
-        # start obs state aggregation
-        device_data.obs_state_aggregator.start_aggregation()
         return (ResultCode.OK, const.STR_ON_CMD_ISSUED)
 
     def startup_csp(self, csp_fqdn):
@@ -116,9 +111,16 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
         :return: None
         """
-        for name in range(0, len(dish_fqdn)):
-            dish_ln_client = TangoClient(dish_fqdn[name])
-            self.startup_dish_leaf_node(dish_ln_client)
+        total_dishes = len(dish_fqdn)
+        dish_ln_thread_status = {}
+        with ThreadPoolExecutor(total_dishes) as executor:
+            for dish in dish_fqdn:
+                dish_ln_client = TangoClient(dish)
+                dish_ln_thread_status[dish] = executor.submit(self.startup_dish_leaf_node, dish_ln_client)
+
+        # Wait for result
+        while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
+            pass
 
     def startup_subarray(self, subarray_fqdn_list):
         """
@@ -127,9 +129,16 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
         :return: None
         """
-        for subarray_fqdn in subarray_fqdn_list:
-            subarray_client = TangoClient(subarray_fqdn)
-            self.startup_leaf_node(subarray_client)
+        total_subarrays = len(subarray_fqdn_list)
+        subarray_thread_status = {}
+        with ThreadPoolExecutor(total_subarrays) as executor:
+            for subarray_fqdn in subarray_fqdn_list:
+                subarray_client = TangoClient(subarray_fqdn)
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.startup_leaf_node,
+                                                              subarray_client)
+        # Wait for result
+        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
+            pass
 
     def startup_leaf_node(self, tango_client):
         """
@@ -141,19 +150,16 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
-        this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(const.CMD_ON)
             log_msg = "ON command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            this_server.write_attr("activityMessage", const.ERR_EXE_ON_CMD, False)
             tango.Except.throw_exception(
                 const.STR_ON_EXEC,
                 log_msg,
@@ -163,41 +169,35 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
 
     def startup_dish_leaf_node(self, tango_client):
         """
-        Invoke On command on leaf nodes.
+        Invoke On, SetStandbyFPMode and SetOperateMode commands on Dish leaf nodes.
 
         :param tango_client: Proxy of corresponding node.
 
         :return: None
 
-        :raises: Devfailed exception if error occures while  executing On command on leaf node.
+        :raises: Devfailed exception if error occures while  executing On command on Dish leaf node.
         """
-        this_server = TangoServerHelper.get_instance()
         try:
             tango_client.send_command(const.CMD_ON)
             log_msg = "ON command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
             tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
             log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
-
             time.sleep(0.2)
             tango_client.send_command(const.CMD_SET_OPERATE_MODE)
             log_msg = "SetOperateMode command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
 
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
-            this_server.write_attr("activityMessage", log_msg, False)
             tango.Except.throw_exception(
                 const.STR_ON_EXEC,
                 log_msg,

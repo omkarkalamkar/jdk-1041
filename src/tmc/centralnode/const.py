@@ -12,6 +12,8 @@ CMD_OFF = "Off"
 STR_CMD_STANDBY_CSP_DEV = "STANDBY command invoked on CspMasterLeafNode device "
 STR_CMD_STANDBY_SDP_DEV = "STANDBY command invoked on SdpMasterleafNode device "
 STR_CMD_STANDBY_SA_DEV = "STANDBY command invoked on SubarrayNode device"
+STR_CMD_STARTUP_DISH = "STARTUP command invoked on Dish devices"
+STR_CMD_STANDBY_DISH = "STANDBY command invoked on Dish devices"
 
 # Event messages
 EVT_UNKNOWN = "Event from the Unknown device!"

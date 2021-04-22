@@ -28,6 +28,7 @@ from tmc.centralnode.stow_antennas_command import StowAntennas
 from tmc.centralnode.resource_manager import ResourceManager
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
+from tmc.centralnode.health_state_aggregator import HealthStateAggregator
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -185,25 +186,30 @@ class CentralNode(SKABaseDevice):
                 release.name, release.version, release.description
             )
             device._version_id = release.version
-            device_data = DeviceData.get_instance()
-            device.device_data = device_data
+            device.device_data = DeviceData.get_instance()
 
             self.logger.debug(const.STR_INIT_SUCCESS)
-            device_data.resource_manager = ResourceManager.get_instance()
-
-            # Initialization of ObsState aggregator object
-            device_data.obs_state_aggregator = ObsStateAggregator(
+            # Initialization of ObsState aggregator object and start obs state aggregation
+            device.device_data.obs_state_aggregator = ObsStateAggregator(
                 device.TMMidSubarrayNodes, self.logger
             )
+            device.device_data.obs_state_aggregator.start_aggregation()
+            
+            # Initialize resource manager instance and initialize the resource matrix with availabler resources
+            device.device_data.resource_manager = ResourceManager.get_instance()
+            device.device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
 
-            device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
+            #create healthStateAggregator object and start health state aggregation
+            device.device_data.health_aggreegator = HealthStateAggregator(self.logger)
+            device.device_data.health_aggreegator.subscribe_event()
+
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")
                 subarrayID = int(tokens[2])
                 # The below code appends the FQDN corresponding to each subarray Id into the dictionary.
                 # This is required in AssignResource command where according to Subarray Id in input json, proxy has to be created.
-                device_data.subarray_FQDN_dict[
+                device.device_data.subarray_FQDN_dict[
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
                 
