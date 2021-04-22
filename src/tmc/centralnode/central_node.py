@@ -189,20 +189,17 @@ class CentralNode(SKABaseDevice):
             device.device_data = DeviceData.get_instance()
 
             self.logger.debug(const.STR_INIT_SUCCESS)
-            device.device_data.resource_manager = ResourceManager.get_instance()
-
-            # Initialization of ObsState aggregator object
+            # Initialization of ObsState aggregator object and start obs state aggregation
             device.device_data.obs_state_aggregator = ObsStateAggregator(
                 device.TMMidSubarrayNodes, self.logger
             )
-             # start obs state aggregation
-            # if device_data.obs_state_aggregator is None:
             device.device_data.obs_state_aggregator.start_aggregation()
-
+            
+            # Initialize resource manager instance and initialize the resource matrix with availabler resources
+            device.device_data.resource_manager = ResourceManager.get_instance()
             device.device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
 
-             # start health state aggregation
-            # if device_data.health_aggreegator is None:
+            #create healthStateAggregator object and start health state aggregation
             device.device_data.health_aggreegator = HealthStateAggregator(self.logger)
             device.device_data.health_aggreegator.subscribe_event()
 
