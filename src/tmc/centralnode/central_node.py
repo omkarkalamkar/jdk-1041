@@ -186,26 +186,25 @@ class CentralNode(SKABaseDevice):
                 release.name, release.version, release.description
             )
             device._version_id = release.version
-            device_data = DeviceData.get_instance()
-            device.device_data = device_data
+            device.device_data = DeviceData.get_instance()
 
             self.logger.debug(const.STR_INIT_SUCCESS)
             device.device_data.resource_manager = ResourceManager.get_instance()
 
             # Initialization of ObsState aggregator object
-            device_data.obs_state_aggregator = ObsStateAggregator(
+            device.device_data.obs_state_aggregator = ObsStateAggregator(
                 device.TMMidSubarrayNodes, self.logger
             )
              # start obs state aggregation
-            if device_data.obs_state_aggregator is None:
-                device_data.obs_state_aggregator.start_aggregation()
+            # if device_data.obs_state_aggregator is None:
+            device.device_data.obs_state_aggregator.start_aggregation()
 
             device.device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
 
              # start health state aggregation
-            if device_data.health_aggreegator is None:
-                device_data.health_aggreegator = HealthStateAggregator(self.logger)
-            device_data.health_aggreegator.subscribe_event()
+            # if device_data.health_aggreegator is None:
+            device.device_data.health_aggreegator = HealthStateAggregator(self.logger)
+            device.device_data.health_aggreegator.subscribe_event()
 
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
@@ -213,7 +212,7 @@ class CentralNode(SKABaseDevice):
                 subarrayID = int(tokens[2])
                 # The below code appends the FQDN corresponding to each subarray Id into the dictionary.
                 # This is required in AssignResource command where according to Subarray Id in input json, proxy has to be created.
-                device_data.subarray_FQDN_dict[
+                device.device_data.subarray_FQDN_dict[
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
                 
