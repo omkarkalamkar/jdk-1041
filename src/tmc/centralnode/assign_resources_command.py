@@ -180,7 +180,8 @@ class AssignResources(BaseCommand):
             subarrayFqdn = device_data.subarray_FQDN_dict[subarrayID] 
             ## check for duplicate allocation
             self.logger.info("Checking for resource reallocation.")
-            device_data.check_resources = ReceptorReassignmentChecker(self.logger)
+            if device_data.check_resources is None:
+                device_data.check_resources = ReceptorReassignmentChecker(self.logger)
             device_data.check_resources.do(json_argument["dish"]["receptorIDList"])
 
             # Allocate resources to subarray
