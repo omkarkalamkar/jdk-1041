@@ -10,9 +10,8 @@ RUN python3 -m pip install ska-logging==0.3.0 \
                            lmcbaseclasses==0.7.2 \
                            cdm-shared-library==2.0.0 \
                            ska-log-transactions \
-                           skatmccommon==0.1.6+3aaa7bbe
-
-RUN python3 -m pip install .
+                           skatmccommon==0.1.6+3aaa7bbe \
+                            .
 
 USER tango
 
