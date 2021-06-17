@@ -22,6 +22,7 @@ from ska.base.control_model import HealthState
 from tmc.centralnode import const, release
 from tmc.centralnode.start_up_telescope_command import StartUpTelescope
 from tmc.centralnode.stand_by_telescope_command import StandByTelescope
+from tmc.centralnode.off_command import Off
 from tmc.centralnode.assign_resources_command import AssignResources
 from tmc.centralnode.release_resources_command import ReleaseResources
 from tmc.centralnode.stow_antennas_command import StowAntennas
@@ -44,6 +45,7 @@ __all__ = [
     "StandByTelescope",
     "StartUpTelescope",
     "StowAntennas",
+    "Off"
 ]
 
 
@@ -439,6 +441,7 @@ class CentralNode(SKABaseDevice):
         args = (self.device_data, self.state_model, self.logger)
         self.startup_object = StartUpTelescope(*args)
         self.standby_object = StandByTelescope(*args)
+        self.off_object = Off(*args)
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)
@@ -446,6 +449,7 @@ class CentralNode(SKABaseDevice):
         self.register_command_object("StowAntennas", self.stow_object)
         self.register_command_object("StartUpTelescope", self.startup_object)
         self.register_command_object("StandByTelescope", self.standby_object)
+        self.register_command_object("Off", self.off_object)
         self.register_command_object("ReleaseResources", self.release_object)
 
 

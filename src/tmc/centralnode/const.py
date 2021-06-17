@@ -57,6 +57,7 @@ STR_HEALTH_STATE_UNKNOWN_VAL = "Subarray healthState event returned unknown valu
 STR_ERR_MSG = "Error message is: "
 STR_STOW_CMD_ISSUED_CN = "STOW command invoked from Central node on the requested dishes"
 STR_STANDBY_CMD_ISSUED = "STANDBYTELESCOPE command invoked from Central node"
+STR_OFF_CMD_ISSUED = "OFF command invoked from Central node"
 STR_ON_CMD_ISSUED = "STARTUPTELESCOPE (ON) command invoked from Central node"
 STR_INIT_SUCCESS = "CentralNode is initialized successfully."
 STR_FALSE = "False"
@@ -73,6 +74,7 @@ STR_RELEASE_RES_EXEC = "RELEASERESOURCES command execution"
 STR_ASSIGN_RES_EXEC = "ASSIGNRESOURCES command execution"
 STR_ON_EXEC = "STARTUPTELESCOPE (ON) command execution"
 STR_STANDBY_EXEC = "STANDBYTELESCOPE command execution"
+STR_OFF_EXEC = "OFF command execution"
 STR_RESOURCE_ALLOCATION_FAILED = "Resource allocation failed."
 
 # PROPERTIES DEFAULT VALUES
