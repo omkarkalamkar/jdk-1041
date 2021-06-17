@@ -84,7 +84,7 @@ class On(BaseCommand):
         :return: None
         """
         csp_mln_client = TangoClient(csp_fqdn)
-        self.startup_leaf_node(csp_mln_client)
+        self.on_leaf_node(csp_mln_client)
 
     def on_sdp(self, sdp_fqdn):
         """
@@ -94,7 +94,7 @@ class On(BaseCommand):
         :return: None
         """
         sdp_mln_client = TangoClient(sdp_fqdn)
-        self.startup_leaf_node(sdp_mln_client)
+        self.on_leaf_node(sdp_mln_client)
 
     def on_dish(self, dish_fqdn):
         """
@@ -108,7 +108,7 @@ class On(BaseCommand):
         with ThreadPoolExecutor(total_dishes) as executor:
             for dish in dish_fqdn:
                 dish_ln_client = TangoClient(dish)
-                dish_ln_thread_status[dish] = executor.submit(self.startup_dish_leaf_node, dish_ln_client)
+                dish_ln_thread_status[dish] = executor.submit(self.on_dish_leaf_node, dish_ln_client)
 
         # Wait for result
         while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
@@ -132,7 +132,7 @@ class On(BaseCommand):
     #     while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
     #         pass
 
-    def startup_leaf_node(self, tango_client):
+    def on_leaf_node(self, tango_client):
         """
         Invoke On command on leaf nodes.
 
@@ -159,7 +159,7 @@ class On(BaseCommand):
                 tango.ErrSeverity.ERR,
             )
 
-    def startup_dish_leaf_node(self, tango_client):
+    def on_dish_leaf_node(self, tango_client):
         """
         Invoke On, SetStandbyFPMode and SetOperateMode commands on Dish leaf nodes.
 
