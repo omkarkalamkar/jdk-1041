@@ -15,8 +15,6 @@ from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
-
-
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 
@@ -38,10 +36,10 @@ class HealthStateAggregator:
         self.csp_master_ln_fqdn = ""
         self.sdp_master_ln_fqdn = ""
         self.tm_mid_subarrays = []
-        self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
-        self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+        self.csp_master_fqdn = "mid_sdp/elt/master"
+        self.sdp_master_fqdn = "mid_csp/elt/master"
         self.health_state_event_map = {}
-                
+
     def subscribe_event(self):
         """
         Method for event subscription. Calls separate subscribe event methods for CSP Master, SDP Master and
@@ -57,16 +55,16 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if error occures while subscribing event.
         """
-        csp_mln_client = TangoClient(self.csp_master_ln_fqdn)
+        csp_master_client = TangoClient(self.csp_master_fqdn)
         try:
-            self.csp_event_id = csp_mln_client.subscribe_attribute(
-                const.EVT_SUBSR_CSP_MASTER_HEALTH, self.health_state_cb
+            self.csp_event_id = csp_master_client.subscribe_attribute(
+                const.EVT_SUBSR_HEALTH_STATE, self.health_state_cb
             )
-            self.health_state_event_map[csp_mln_client] = self.csp_event_id
+            self.health_state_event_map[csp_master_client] = self.csp_event_id
         except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH}{dev_failed}"
+            log_msg = f"{const.ERR_SUBSR_CSP_MASTER_HEALTH}{dev_failed}"
             self.logger.exception(dev_failed)
-            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_MASTER_LEAF_HEALTH, False)
+            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_MASTER_HEALTH, False)
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
@@ -80,16 +78,16 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if error occures while subscribing event.
         """
-        sdp_mln_client = TangoClient(self.sdp_master_ln_fqdn)
+        sdp_master_client = TangoClient(self.sdp_master_fqdn)
         try:
-            self.sdp_event_id = sdp_mln_client.subscribe_attribute(
-                const.EVT_SUBSR_SDP_MASTER_HEALTH, self.health_state_cb
+            self.sdp_event_id = sdp_master_client.subscribe_attribute(
+                const.EVT_SUBSR_HEALTH_STATE, self.health_state_cb
             )
-            self.health_state_event_map[sdp_mln_client] = self.sdp_event_id
+            self.health_state_event_map[sdp_master_client] = self.sdp_event_id
         except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH}{dev_failed}"
+            log_msg = f"{const.ERR_SUBSR_SDP_MASTER_HEALTH}{dev_failed}"
             self.logger.exception(dev_failed)
-            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_MASTER_LEAF_HEALTH, False)
+            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_MASTER_HEALTH, False)
 
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
@@ -201,14 +199,14 @@ class HealthStateAggregator:
                 const.PROP_DEF_VAL_TM_MID_SA1: "_subarray1_health_state",
                 const.PROP_DEF_VAL_TM_MID_SA2: "._subarray2_health_state",
                 const.PROP_DEF_VAL_TM_MID_SA3: "_subarray3_health_state",
-                self.csp_master_ln_fqdn: "_csp_master_leaf_health",             
-                self.sdp_master_ln_fqdn: "_sdp_master_leaf_health"
+                self.csp_master_fqdn: "_csp_master_health",
+                self.sdp_master_fqdn: "_sdp_master_health"
             }
             _update_health_state(self, fqdn_device_health_state_map)
 
             health_states = [
-                device_data._csp_master_leaf_health,
-                device_data._sdp_master_leaf_health
+                device_data._csp_master_health,
+                device_data._sdp_master_health
             ]
             health_states = health_states + list(self.subarray_health_state_map.values())
             _calculate_health_state(health_states)
