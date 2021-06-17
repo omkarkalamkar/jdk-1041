@@ -433,6 +433,34 @@ class CentralNode(SKABaseDevice):
         message = handler(argin)
         return message
 
+    def is_Off_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        handler = self.get_command_object("Off")
+        return handler.check_allowed()
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="[ResultCode, information-only string]",
+    )
+    def Off(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command on CspMasterLeafNode and
+        SdpMasterLeafNode and sets CentralNode into OFF state.
+
+        """
+        handler = self.get_command_object("Off")
+        (result_code, message) = handler()
+        return [[result_code], [message]]
+
     def init_command_objects(self):
         """
         Initialises the command handlers for commands supported by this device.
