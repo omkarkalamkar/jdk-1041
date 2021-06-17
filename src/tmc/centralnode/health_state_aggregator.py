@@ -20,7 +20,7 @@ from tmc.centralnode.device_data import DeviceData
 
 class HealthStateAggregator:
     """
-    Aggrergator class for health state event supscription and health state
+    Aggregator class for health state event subscription and health state
     callback.
     """
     
@@ -51,9 +51,9 @@ class HealthStateAggregator:
 
     def csp_health_subscribe_event(self):
         """
-        Method to subscribe to health state change event on CspMasterLeafNode.
+        Method to subscribe to health state change event on CspMaster.
 
-        :raises: Devfailed exception if error occures while subscribing event.
+        :raises: Devfailed exception if error occurs while subscribing event.
         """
         csp_master_client = TangoClient(self.csp_master_fqdn)
         try:
@@ -74,9 +74,9 @@ class HealthStateAggregator:
 
     def sdp_health_subscribe_event(self):
         """
-        Method to subscribe to health state change event on SdpMasterLeafNode.
+        Method to subscribe to health state change event on SdpMaster.
 
-        :raises: Devfailed exception if error occures while subscribing event.
+        :raises: Devfailed exception if error occurs while subscribing event.
         """
         sdp_master_client = TangoClient(self.sdp_master_fqdn)
         try:
@@ -100,7 +100,7 @@ class HealthStateAggregator:
         """
         Method to subscribe to health state change event on SubarrayNode.
 
-        :raises: Devfailed exception if erroe occures while subscribing event.
+        :raises: Devfailed exception if erroe occurs while subscribing event.
         """
         self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
         for subarray_fqdn in self.tm_mid_subarrays:
