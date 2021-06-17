@@ -139,6 +139,12 @@ def central_node_test_info(request):
     return test_info
 
 
+def test_on(mock_subarray):
+    device_proxy, _, _ = mock_subarray
+    device_proxy.On()
+    assert device_proxy.activityMessage == const.STR_TMC_ON_CMD_ISSUED
+
+
 def test_startup(mock_subarray):
     device_proxy, _, _ = mock_subarray
     assert device_proxy.StartUpTelescope() == [
@@ -178,6 +184,7 @@ def mock_tango_client():
     ) as mock_obj:
         tango_client_obj = TangoClient("ska_mid/tm_subarray_node/1")
         yield tango_client_obj
+        
 
 @pytest.fixture(scope="function")
 def mock_subarray(mock_tango_server_helper, mock_tango_client):
