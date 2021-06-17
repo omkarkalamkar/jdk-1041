@@ -142,9 +142,9 @@ class StandBy(BaseCommand):
             return tango_client.get_device_fqdn
 
         except DevFailed as dev_failed:
-            log_msg = f"{const.STR_STANDBY_EXEC}{dev_failed}"
+            log_msg = f"{const.STR_TMC_STANDBY_EXEC}{dev_failed}"
             self.logger.exception(dev_failed)
-            tango.Except.throw_exception(const.STR_STANDBY_EXEC, log_msg,
+            tango.Except.throw_exception(const.STR_TMC_STANDBY_EXEC, log_msg,
                                          "CentralNode.StandByTelescopeCommand", tango.ErrSeverity.ERR)
                                     
     def standby_leaf_node(self, tango_client, cmd_name, param=None):
@@ -171,7 +171,7 @@ class StandBy(BaseCommand):
             log_msg = f"{const.ERR_EXE_STANDBY_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
             tango.Except.throw_exception(
-                const.STR_STANDBY_EXEC,
+                const.STR_TMC_STANDBY_EXEC,
                 log_msg,
                 "CentralNode.StandByTelescopeCommand",
                 tango.ErrSeverity.ERR,

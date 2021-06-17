@@ -74,6 +74,7 @@ STR_ASSIGN_RES_EXEC = "ASSIGNRESOURCES command execution"
 STR_ON_EXEC = "STARTUPTELESCOPE (ON) command execution"
 STR_STANDBY_EXEC = "STANDBYTELESCOPE command execution"
 STR_RESOURCE_ALLOCATION_FAILED = "Resource allocation failed."
+STR_TMC_STANDBY_EXEC = "TMC STANDBY command execution"
 
 # PROPERTIES DEFAULT VALUES
 PROP_DEF_VAL_TM_MID_SA1 = "ska_mid/tm_subarray_node/1"
