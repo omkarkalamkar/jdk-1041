@@ -2,6 +2,7 @@
 Off class for CentralNode.
 """
 # Standard Python imports
+import time
 from concurrent.futures import ThreadPoolExecutor
 # Tango imports
 import tango
