@@ -6,6 +6,7 @@ import types
 import json
 import pytest
 import mock
+import logging
 from mock import MagicMock
 from mock import Mock
 from os.path import dirname, join
@@ -18,6 +19,8 @@ from tango.test_context import DeviceTestContext
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
+from tmc.centralnode.off_command import Off
+from ska.base import SKASubarrayStateModel
 from tmc.centralnode.input_validator import AssignResourceValidator
 from tmc.centralnode import CentralNode, const, release
 from tmc.centralnode.const import (
@@ -62,7 +65,7 @@ with open(path, "r") as f:
     release_invalid_key = f.read()
 
 @pytest.fixture
-def subarray_state_model(): //skasubarraymodel is generic, is the name ok?
+def subarray_state_model():
     """
     Yields a new SKASubarrayStateModel for testing
     """
@@ -200,15 +203,14 @@ def mock_subarray(mock_tango_server_helper, mock_tango_client):
         yield tango_context.device, tango_client_obj, tango_server_obj
 
 def test_off_command(
-    device_data, subarray_state_model, mock_subarray
+    subarray_state_model, mock_subarray
 ):
     device_proxy, _, _ = mock_subarray
     device_proxy.On()
+    device_data = DeviceData.get_instance()
     off_cmd = Off(device_data, subarray_state_model)
-    # subarray_state_model._straight_to_state(DevState.ON, None, ObsState.IDLE)
     off_cmd.do() 
     assert const.STR_OFF_CMD_ISSUED in device_proxy.activityMessage
-    )
 
 def test_assign_resources(mock_subarray):
     device_proxy, tango_client_obj, tango_server_obj = mock_subarray
