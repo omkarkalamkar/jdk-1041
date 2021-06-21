@@ -60,13 +60,13 @@ class AssignResources(BaseCommand):
 
         :param argin: The string in JSON format. The JSON contains following values:
 
-           subarrayID:
+           subarray_id:
                DevShort. Mandatory.
 
            dish:
                Mandatory JSON object consisting of
 
-               receptorIDList:
+               receptor_ids:
                    DevVarStringArray
                    The individual string should contain dish numbers in string format
                    with preceding zeroes upto 3 digits. E.g. 0001, 0002.
@@ -94,13 +94,13 @@ class AssignResources(BaseCommand):
 
                processing_blocks:
                    array of the blocks each consisting following parameters
-                    id:
+                    pb_id:
                         DevString
                         The Processing Block id.
                     workflow:
                         type:
                            DevString
-                        id:
+                        name:
                            DevString
                         version:
                            DevString
@@ -108,22 +108,24 @@ class AssignResources(BaseCommand):
                         {}
 
         Example:
-            {"subarrayID":1,"dish":{"receptorIDList":["0001","0002"]},"sdp":{"id":"sbi-mvp01-20200325-00001",
-            "max_length":100.0,"scan_types":[{"id":"science_A","coordinate_system":"ICRS","ra":"02:42:40.771"
-            ,"dec":"-00:00:47.84","channels":[{"count":744,"start":0,"stride":2,"freq_min":
-            0.35e9,"freq_max":0.368e9,"link_map":[[0,0],[200,1],[744,2],[944,3]]},{"count":744,"start":2000,
-            "stride":1,"freq_min":0.36e9,"freq_max":0.368e9,"link_map":[[2000,4],[2200,5]]}]},{"id":
-            "calibration_B","coordinate_system":"ICRS","ra":"12:29:06.699","dec":"02:03:08.598",
-            "channels":[{"count":744,"start":0,"stride":2,"freq_min":0.35e9,"freq_max":0.368e9,"link_map":
-            [[0,0],[200,1],[744,2],[944,3]]},{"count":744,"start":2000,"stride":1,"freq_min":0.36e9,
-            "freq_max":0.368e9,"link_map":[[2000,4],[2200,5]]}]}],"processing_blocks":[{"id":
-            "pb-mvp01-20200325-00001","workflow":{"type":"realtime","id":"vis_receive","version":
-            "0.1.0"},"parameters":{}},{"id":"pb-mvp01-20200325-00002","workflow":{"type":"realtime",
-            "id":"test_realtime","version":"0.1.0"},"parameters":{}},{"id":"pb-mvp01-20200325-00003",
-            "workflow":{"type":"batch","id":"ical","version":"0.1.0"},"parameters":{},"dependencies":
-            [{"pb_id":"pb-mvp01-20200325-00001","type":["visibilities"]}]},{"id":"pb-mvp01-20200325-00004"
-            ,"workflow":{"type":"batch","id":"dpreb","version":"0.1.0"},"parameters":{},"dependencies":
-            [{"pb_id":"pb-mvp01-20200325-00003","type":["calibration"]}]}]}}
+            {"interface":"https://schema.skatelescope.org/ska-tmc-assignresources/1.0","
+            subarray_id":1,"dish":{"receptor_ids":["0001","0002"]},"sdp":{"sbi_id":
+            "sbi-mvp01-20200325-00001","max_length":100.0,"scan_types":[{"scan_type_id":"science_A",
+            "reference_frame":"ICRS","ra":"02:42:40.771","dec":"-00:00:47.84","channels":[{"count":744,
+            "start":0,"stride":2,"freq_min":0.35e9,"freq_max":0.368e9,"link_map":[[0,0],[200,1],[744,2],
+            [944,3]]},{"count":744,"start":2000,"stride":1,"freq_min":0.36e9,"freq_max":0.368e9,"link_map":
+            [[2000,4],[2200,5]]}]},{"scan_type_id":"calibration_B","reference_frame":"ICRS","ra":
+            "12:29:06.699","dec":"02:03:08.598","channels":[{"count":744,"start":0,"stride":2,"freq_min":
+            0.35e9,"freq_max":0.368e9,"link_map":[[0,0],[200,1],[744,2],[944,3]]},{"count":744,"start":2000,"stride":1,
+            "freq_min":0.36e9,"freq_max":0.368e9,"link_map":[[2000,4],[2200,5]]}]}],"processing_blocks":
+            [{"pb_id":"pb-mvp01-20200325-00001","workflow":{"type":"realtime","name":"vis_receive","version":"0.1.0"},
+            "parameters":{}},{"pb_id":"pb-mvp01-20200325-00002","workflow":{"type":"realtime","name":"test_realtime",
+            "version":"0.1.0"},"parameters":{}},{"pb_id":"pb-mvp01-20200325-00003","workflow":{"type":"batch","name":
+            "ical","version":"0.1.0"},"parameters":{},"dependencies":[{"pb_id":"pb-mvp01-20200325-00001","type":
+            ["visibilities"]}]},{"pb_id":"pb-mvp01-20200325-00004","workflow":{"type":"batch","name":"dpreb","version":
+            "0.1.0"},"parameters":{},"dependencies":[{"pb_id":"pb-mvp01-20200325-00003","type":["calibration"]}]}]}}
+
+
 
         Note: From Jive, enter above input string without any space.
 
@@ -143,7 +145,7 @@ class AssignResources(BaseCommand):
             Example:
                 {
                 "dish": {
-                "receptorIDList_success": ["0001", "0002"]
+                "receptor_ids_success": ["0001", "0002"]
                 }
                 }
 
@@ -173,16 +175,17 @@ class AssignResources(BaseCommand):
                 self.dln_prefix,
                 self.logger,
             )
-            json_argument = input_validator.loads(argin)
+            # json_argument = input_validator.loads(argin)
+            json_argument= json.loads(argin)
 
             # Create subarray proxy
-            subarrayID = int(json_argument["subarrayID"])
-            subarrayFqdn = device_data.subarray_FQDN_dict[subarrayID] 
+            subarrayID = int(json_argument["subarray_id"])
+            subarrayFqdn = device_data.subarray_FQDN_dict[subarrayID]
             ## check for duplicate allocation
             self.logger.info("Checking for resource reallocation.")
             if device_data.check_resources is None:
                 device_data.check_resources = ReceptorReassignmentChecker(self.logger)
-            device_data.check_resources.do(json_argument["dish"]["receptorIDList"])
+            device_data.check_resources.do(json_argument["dish"]["receptor_ids"])
 
             # Allocate resources to subarray
             # Remove Subarray Id key from input json argument and send the json with
@@ -213,7 +216,7 @@ class AssignResources(BaseCommand):
             self.logger.debug(const.STR_ASSIGN_RESOURCES_SUCCESS)
 
             # Prepare output argument
-            argout = {"dish": {"receptorIDList_success": device_data.receptorIDList}}
+            argout = {"dish": {"receptor_ids_success": device_data.receptorIDList}}
             self.logger.debug(argout)
         except (
             InvalidJSONError,

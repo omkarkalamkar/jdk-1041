@@ -161,7 +161,7 @@ def test_standby(mock_subarray):
 # Mocking AssignResources command success response from SubarrayNode
 def mock_subarray_call_assign_resources_success(arg1, arg2):
     arg = json.loads(assign_input_str)
-    argout = [str(arg["dish"]["receptorIDList"])]
+    argout = [str(arg["dish"]["receptor_ids"])]
     return [ResultCode.STARTED, argout]
 
 
@@ -202,10 +202,10 @@ def test_assign_resources(mock_subarray):
               ])
     # mocking subarray device state as ON as per new state model
     tango_client_obj.DevState = DevState.ON
-    receptorIDList_success = []
-    receptorIDList_success.append("0001")
+    receptor_ids_success = []
+    receptor_ids_success.append("0001")
     dish = {}
-    dish["receptorIDList_success"] = receptorIDList_success
+    dish["receptor_ids_success"] = receptor_ids_success
     success_response = {}
     success_response["dish"] = dish
     tango_client_obj.deviceproxy.command_inout.side_effect = (
@@ -275,10 +275,10 @@ def test_assign_resources_raise_devfailed_when_reseource_reallocation(mock_tango
         CentralNode, initial_dut_properties=dut_properties
     ) as tango_context:
         device_proxy = tango_context.device
-        receptorIDList_success = []
-        receptorIDList_success.append("0001")
+        receptor_ids_success = []
+        receptor_ids_success.append("0001")
         dish = {}
-        dish["receptorIDList_success"] = receptorIDList_success
+        dish["receptor_ids_success"] = receptor_ids_success
         success_response = {}
         success_response["dish"] = dish
         with mock.patch.object(
@@ -291,7 +291,7 @@ def test_assign_resources_raise_devfailed_when_reseource_reallocation(mock_tango
             message = device_proxy.AssignResources(assign_input_str)
             assert json.loads(message) == success_response
             reallocation_request = json.loads(assign_input_str)
-            reallocation_request["subarrayID"] = 2
+            reallocation_request["subarray_id"] = 2
             with pytest.raises(tango.DevFailed) as df:
                 device_proxy.AssignResources(json.dumps(reallocation_request))
             assert const.ERR_RECEPTOR_ID_REALLOCATION in str(df.value)
