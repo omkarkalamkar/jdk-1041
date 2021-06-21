@@ -447,10 +447,7 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("Off")
         return handler.check_allowed()
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="[ResultCode, information-only string]",
-    )
+    @command()
     def Off(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command on CspMasterLeafNode and
@@ -458,8 +455,7 @@ class CentralNode(SKABaseDevice):
 
         """
         handler = self.get_command_object("Off")
-        (result_code, message) = handler()
-        return [[result_code], [message]]
+        handler()
 
     def init_command_objects(self):
         """

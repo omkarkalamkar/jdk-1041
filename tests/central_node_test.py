@@ -61,6 +61,13 @@ path = join(dirname(__file__), "data", release_invalid_key_file)
 with open(path, "r") as f:
     release_invalid_key = f.read()
 
+@pytest.fixture
+def subarray_state_model(): //skasubarraymodel is generic, is the name ok?
+    """
+    Yields a new SKASubarrayStateModel for testing
+    """
+    yield SKASubarrayStateModel(logging.getLogger())
+
 
 @pytest.fixture(scope="function")
 def mock_subarraynode_device(mock_tango_server_helper, mock_tango_client):
@@ -192,6 +199,16 @@ def mock_subarray(mock_tango_server_helper, mock_tango_client):
     ) as tango_context:
         yield tango_context.device, tango_client_obj, tango_server_obj
 
+def test_off_command(
+    device_data, subarray_state_model, mock_subarray
+):
+    device_proxy, _, _ = mock_subarray
+    device_proxy.On()
+    off_cmd = Off(device_data, subarray_state_model)
+    # subarray_state_model._straight_to_state(DevState.ON, None, ObsState.IDLE)
+    off_cmd.do() 
+    assert const.STR_OFF_CMD_ISSUED in device_proxy.activityMessage
+    )
 
 def test_assign_resources(mock_subarray):
     device_proxy, tango_client_obj, tango_server_obj = mock_subarray
