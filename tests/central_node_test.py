@@ -412,7 +412,7 @@ def test_stow_antennas_invalid_value(mock_tango_server_helper, mock_tango_client
 
 def test_release_resources(mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
-    release_all_success = {"ReleaseAll": True, "receptorIDList": []}
+    release_all_success = {"release_all": True, "receptor_ids": []}
     tango_client_obj.deviceproxy.command_inout.side_effect = (
         mock_subarray_call_release_resources_success
     )

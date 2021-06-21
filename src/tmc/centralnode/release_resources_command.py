@@ -95,9 +95,12 @@ class ReleaseResources(BaseCommand):
             Example:
                 argout =
                     {
-                        "ReleaseAll" : True,
-                        "receptorIDList" : []
+                      "interface": "https://schema.skatelescope.org/ska-tmc-releaseresources/1.0",
+                      "subarray_id": 1,
+                      "release_all": true,
+                      "receptor_ids": [
 
+                      ]
                     }
 
         return:
@@ -116,10 +119,10 @@ class ReleaseResources(BaseCommand):
         try:
             release_success = False
             jsonArgument = json.loads(argin)
-            subarrayID = jsonArgument["subarrayID"]
+            subarrayID = jsonArgument["subarray_id"]
             subarray_fqdn = device_data.subarray_FQDN_dict[subarrayID]
             subarray_name = f"SA {subarrayID}"
-            if jsonArgument["releaseALL"] == True:
+            if jsonArgument["release_all"] == True:
                 # Invoke "ReleaseAllResources" on SubarrayNode
                 subarray_client = TangoClient(subarray_fqdn)
                 return_val = subarray_client.send_command(const.CMD_RELEASE_RESOURCES)
@@ -134,8 +137,8 @@ class ReleaseResources(BaseCommand):
                         subarray_name
                     )
                     argout = {
-                        "ReleaseAll": release_success,
-                        "receptorIDList": res_not_released,
+                        "release_all": release_success,
+                        "receptor_ids": res_not_released,
                     }
                     message = json.dumps(argout)
                     self.logger.info(message)
