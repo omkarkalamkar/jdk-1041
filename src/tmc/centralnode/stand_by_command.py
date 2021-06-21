@@ -72,7 +72,7 @@ class StandBy(BaseCommand):
         self.standby_sdp(sdp_master_ln_fqdn)
         self.standby_dish(device_data._dish_leaf_node_devices)
         this_server.write_attr("activityMessage", const.STR_CMD_STANDBY_DISH, False)
-        log_msg = const.STR_STANDBY_CMD_ISSUED
+        log_msg = const.STR_TMC_STANDBY_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
     
@@ -168,7 +168,7 @@ class StandBy(BaseCommand):
             self.logger.debug(log_msg)
 
         except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_EXE_STANDBY_CMD}{dev_failed}"
+            log_msg = f"{const.ERR_EXE_TMC_STANDBY_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
             tango.Except.throw_exception(
                 const.STR_TMC_STANDBY_EXEC,
