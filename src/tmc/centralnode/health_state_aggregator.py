@@ -33,11 +33,11 @@ class HealthStateAggregator:
         self.subarray_health_state_map = {}
         self.this_server = TangoServerHelper.get_instance()
         # FQDN are passed as string here. Once tangoserverhelper is updated in tmccommonpackage, then this will be updated.
-        self.csp_master_ln_fqdn = ""
-        self.sdp_master_ln_fqdn = ""
+        self.csp_master_fqdn = ""
+        self.sdp_master_fqdn = ""
         self.tm_mid_subarrays = []
-        self.csp_master_fqdn = "mid_sdp/elt/master"
-        self.sdp_master_fqdn = "mid_csp/elt/master"
+        self.csp_master_fqdn = self.this_server.read_property("CspMasterFQDN")[0]
+        self.sdp_master_fqdn = self.this_server.read_property("SdpMasterFQDN")[0]
         self.health_state_event_map = {}
 
     def subscribe_event(self):
