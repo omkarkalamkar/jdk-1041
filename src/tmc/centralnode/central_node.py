@@ -475,6 +475,7 @@ class CentralNode(SKABaseDevice):
         self.register_command_object("StandByTelescope", self.standby_object)
         self.register_command_object("ReleaseResources", self.release_object)
         self.register_command_object("On", self.on_object)
+        self.on_object.do()
 
 
 # ----------

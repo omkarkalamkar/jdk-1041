@@ -66,12 +66,12 @@ class On(BaseCommand):
         this_server = TangoServerHelper.get_instance()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
-        # tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
+        tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.on_sdp(sdp_master_ln_fqdn)
         self.on_dish(device_data._dish_leaf_node_devices)
         this_server.write_attr("activityMessage", const.STR_CMD_ON_DISH, False)
         self.on_csp(csp_master_ln_fqdn)
-        #self.startup_subarray(tm_mid_subarrays)
+        self.on_subarray(tm_mid_subarrays)
         log_msg = const.STR_TMC_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_TMC_ON_CMD_ISSUED, False)
@@ -114,23 +114,23 @@ class On(BaseCommand):
         while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
             pass
 
-    # def startup_subarray(self, subarray_fqdn_list):
-    #     """
-    #     Create TangoClient for Subarray node and call
-    #     startup method.
+    def on_subarray(self, subarray_fqdn_list):
+        """
+        Create TangoClient for Subarray node and call
+        On method.
 
-    #     :return: None
-    #     """
-    #     total_subarrays = len(subarray_fqdn_list)
-    #     subarray_thread_status = {}
-    #     with ThreadPoolExecutor(total_subarrays) as executor:
-    #         for subarray_fqdn in subarray_fqdn_list:
-    #             subarray_client = TangoClient(subarray_fqdn)
-    #             subarray_thread_status[subarray_fqdn] = executor.submit(self.startup_leaf_node,
-    #                                                           subarray_client)
-    #     # Wait for result
-    #     while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
-    #         pass
+        :return: None
+        """
+        total_subarrays = len(subarray_fqdn_list)
+        subarray_thread_status = {}
+        with ThreadPoolExecutor(total_subarrays) as executor:
+            for subarray_fqdn in subarray_fqdn_list:
+                subarray_client = TangoClient(subarray_fqdn)
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.on_leaf_node,
+                                                              subarray_client)
+        # Wait for result
+        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
+            pass
 
     def on_leaf_node(self, tango_client):
         """
@@ -142,6 +142,7 @@ class On(BaseCommand):
 
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
+        print(":::::::::::::::::::::::::On command on leaf nodes::::::::::::::::::::::::")
         try:
             tango_client.send_command(const.CMD_ON)
             log_msg = "ON command invoked successfully on {}".format(
