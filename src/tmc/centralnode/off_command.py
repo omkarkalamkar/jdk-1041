@@ -2,7 +2,6 @@
 Off class for CentralNode.
 """
 # Standard Python imports
-import time
 from concurrent.futures import ThreadPoolExecutor
 # Tango imports
 import tango
@@ -157,7 +156,7 @@ class Off(BaseCommand):
 
     def off_dish_leaf_node(self, tango_client):
         """
-        Invoke SetStandbyFPMode, SetStandbyLPMode and Off commands on Dish leaf nodes.
+        Invoke Off command on Dish leaf nodes.
 
         :param tango_client: Proxy of corresponding node.
 
@@ -166,17 +165,6 @@ class Off(BaseCommand):
         :raises: Devfailed exception if error occures while  executing Off command on Dish leaf node.
         """
         try:
-            tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
-            log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
-                                                tango_client.get_device_fqdn)
-            self.logger.debug(log_msg)
-            time.sleep(0.2)
-
-            tango_client.send_command(const.CMD_SET_STANDBYLP_MODE)
-            log_msg = "SetStandbyLPMode command invoked successfully on {}".format(
-                                                      tango_client.get_device_fqdn)
-            self.logger.debug(log_msg)
-
             tango_client.send_command(const.CMD_OFF)
             log_msg = "OFF command invoked successfully on {}".format(tango_client.get_device_fqdn)
             self.logger.debug(log_msg)
