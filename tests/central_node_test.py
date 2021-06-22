@@ -145,7 +145,7 @@ def test_telescope_on(mock_subarray):
         [ResultCode.OK],
         ["TelescopeOn (ON) command invoked from Central node"],
     ]
-    # this statement need to be enable once 
+    # this statement need to be enable once telescope on command implemented on leafnodes.
     # assert device_proxy.state() == DevState.ON
 
 
