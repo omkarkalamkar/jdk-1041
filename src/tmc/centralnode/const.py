@@ -7,6 +7,7 @@ CMD_ASSIGN_RESOURCES = "AssignResources"
 CMD_RELEASE_RESOURCES = "ReleaseAllResources"
 CMD_STANDBY = "Standby"
 CMD_TELESCOPE_ON = "TelescopeOn"
+CMD_ON = "On"
 CMD_OFF = "Off"
 
 STR_CMD_STANDBY_CSP_DEV = "STANDBY command invoked on CspMasterLeafNode device "
