@@ -1,5 +1,5 @@
 """
-StartUpTelescope class for CentralNode.
+TelescopeOn class for CentralNode.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Standard Python imports
@@ -11,6 +11,7 @@ from tango import DevState, DevFailed
 
 # Additional import
 from ska.base import SKABaseDevice
+from ska.base.commands import BaseCommand
 from ska.base.commands import ResultCode
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
@@ -20,11 +21,11 @@ from tmc.centralnode.health_state_aggregator import HealthStateAggregator
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
-class StartUpTelescope(SKABaseDevice.OnCommand):
+class TelescopeOn(BaseCommand):
     """
-    A class for CentralNode's StartupCommand() command.
+    A class for CentralNode's TelescopeOn() command.
 
-    StartUpTelescope command on Central node enables the telescope to perform further operations
+    TelescopeOn command on Central node enables the telescope to perform further operations
     and observations. It Invokes On command on lower level devices.
 
     """
@@ -46,9 +47,9 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
             DevState.DISABLE,
         ]:
             tango.Except.throw_exception(
-                f"Command StartUpTelescope is not allowed in current state {self.state_model.op_state}.",
-                "Failed to invoke StartUpTelescope command on CentralNode.",
-                "CentralNode.StartUpTelescope()",
+                f"Command TelescopeOn is not allowed in current state {self.state_model.op_state}.",
+                "Failed to invoke TelescopeOn command on CentralNode.",
+                "CentralNode.TelescopeOn()",
                 tango.ErrSeverity.ERR,
             )
         return True
@@ -76,7 +77,7 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.startup_sdp(sdp_master_ln_fqdn)
         self.startup_dish(device_data._dish_leaf_node_devices)
-        this_server.write_attr("activityMessage", const.STR_CMD_STARTUP_DISH, False)
+        this_server.write_attr("activityMessage", const.STR_CMD_TELESCOPEON, False)
         self.startup_csp(csp_master_ln_fqdn)
         self.startup_subarray(tm_mid_subarrays)
         log_msg = const.STR_ON_CMD_ISSUED
@@ -151,7 +152,7 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
         try:
-            tango_client.send_command(const.CMD_ON)
+            tango_client.send_command(const.CMD_TELESCOPE_ON)
             log_msg = "ON command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
@@ -163,7 +164,7 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
             tango.Except.throw_exception(
                 const.STR_ON_EXEC,
                 log_msg,
-                "CentralNode.StartUpTelescopeCommand",
+                "CentralNode.TelescopeOnCommand",
                 tango.ErrSeverity.ERR,
             )
 
@@ -178,7 +179,7 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
         :raises: Devfailed exception if error occures while  executing On command on Dish leaf node.
         """
         try:
-            tango_client.send_command(const.CMD_ON)
+            tango_client.send_command(const.CMD_TELESCOPE_ON)
             log_msg = "ON command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
@@ -201,6 +202,6 @@ class StartUpTelescope(SKABaseDevice.OnCommand):
             tango.Except.throw_exception(
                 const.STR_ON_EXEC,
                 log_msg,
-                "CentralNode.StartUpTelescopeCommand",
+                "CentralNode.TelescopeOnCommand",
                 tango.ErrSeverity.ERR,
             )

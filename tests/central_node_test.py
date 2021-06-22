@@ -145,21 +145,19 @@ def test_on(mock_subarray):
     assert device_proxy.activityMessage == const.STR_TMC_ON_CMD_ISSUED
     #assert device_proxy.state() == DevState.ON
 
-#TODO: Use TelescopeOn command instead of StartUpTelescope
-       # can be modified as a part of story AT1-917 
-def test_startup(mock_subarray):
+def test_telescope_on(mock_subarray):
     device_proxy, _, _ = mock_subarray
-    assert device_proxy.StartUpTelescope() == [
+    assert device_proxy.TelescopeOn() == [
         [ResultCode.OK],
-        ["STARTUPTELESCOPE (ON) command invoked from Central node"],
+        ["TelescopeOn (ON) command invoked from Central node"],
     ]
-    assert device_proxy.state() == DevState.ON
+    # this statement need to be enable once telescope on command implemented on leafnodes.
+    # assert device_proxy.state() == DevState.ON
 
-#TODO: Use TelescopeOn and TelescopeOff command instead of StartUpTelescope, StandByTelescope
-    # can be modified as a part of story AT1-917
+
 def test_standby(mock_subarray):
     device_proxy, _, _ = mock_subarray
-    device_proxy.StartUpTelescope()
+    device_proxy.TelescopeOn()
     assert device_proxy.StandByTelescope() == [
         [ResultCode.OK],
         ["STANDBYTELESCOPE command invoked from Central node"],
@@ -468,13 +466,12 @@ def test_release_resources_invalid_key(mock_tango_server_helper, mock_tango_clie
         assert const.ERR_JSON_KEY_NOT_FOUND in str(df.value)
 
 
-@pytest.fixture(scope="function", params=[("StandByTelescope"), ("StartUpTelescope")])
+@pytest.fixture(scope="function", params=[("StandByTelescope"), ("TelescopeOn")])
 def command_without_arg_devfailed(request):
     cmd_name = request.param
     return cmd_name
 
-#TODO: Use TelescopeOn command instead of StartUpTelescope
-       # can be modified as a part of story AT1-917 
+
 def test_command_without_arg_should_raise_devfailed_exception(
     mock_subarray, command_without_arg_devfailed, mock_tango_server_helper
 
@@ -526,8 +523,7 @@ def test_telescope_health_state_matches_csp_master_leaf_node_health_state_after_
             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
         ):
             tango_client_obj = TangoClient("ska_mid/tm_leaf_node/csp_master")
-            #device_proxy.StartUpTelescope()       #since On command is called in Init,
-                                                    #No need to invoke device_proxy.StartUpTelescope() here
+            device_proxy.TelescopeOn()
     assert device_proxy.telescopeHealthState == health_state
 
 
@@ -569,8 +565,7 @@ def test_telescope_health_state_is_ok_when_sdp_master_leaf_node_is_ok_after_star
             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
         ):
             tango_client_obj = TangoClient("ska_mid/tm_leaf_node/sdp_master")
-            #device_proxy.StartUpTelescope()         #since On command is called in Init,
-                                                    #No need to invoke device_proxy.StartUpTelescope() here   
+            device_proxy.TelescopeOn()
     assert device_proxy.telescopeHealthState == health_state
 
 
@@ -600,8 +595,7 @@ def test_telescope_health_state_is_ok_when_subarray1_is_ok_after_start(
     device_proxy, tango_client_obj, subarray1_fqdn, event_subscription_map, tango_server_obj = mock_subarraynode_device
     tango_server_obj.read_property.side_effect = Mock(return_value=["fqdn"])
     tango_client_obj = TangoClient("ska_mid/tm_subarray_node/1")
-    #device_proxy.StartUpTelescope()                #since On command is called in Init,
-                                                    #No need to invoke device_proxy.StartUpTelescope() here   
+    device_proxy.TelescopeOn()
     assert device_proxy.telescopeHealthState == health_state
 
 
@@ -623,8 +617,7 @@ def test_telescope_health_state_is_ok_when_subarray2_is_ok_after_start(
             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
         ):
             tango_client_obj = TangoClient("ska_mid/tm_subarray_node/2")
-            #device_proxy.StartUpTelescope()        #since On command is called in Init,
-                                                    #No need to invoke device_proxy.StartUpTelescope() here   
+            device_proxy.TelescopeOn()
     assert device_proxy.telescopeHealthState == health_state
 
 
@@ -665,8 +658,7 @@ def test_telescope_health_state_is_ok_when_subarray3_is_ok_after_start(
             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
         ):
             tango_client_obj = TangoClient("ska_mid/tm_subarray_node/3")
-            #device_proxy.StartUpTelescope()        #since On command is called in Init,
-                                                    #No need to invoke device_proxy.StartUpTelescope() here   
+            device_proxy.TelescopeOn()
     assert device_proxy.telescopeHealthState == health_state
 
 

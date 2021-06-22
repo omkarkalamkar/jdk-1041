@@ -21,7 +21,7 @@ from ska.base.commands import ResultCode
 from ska.base.control_model import HealthState
 from tmc.centralnode import const, release
 from tmc.centralnode.on_command import On
-from tmc.centralnode.start_up_telescope_command import StartUpTelescope
+from tmc.centralnode.telescope_on_command import TelescopeOn
 from tmc.centralnode.stand_by_telescope_command import StandByTelescope
 from tmc.centralnode.assign_resources_command import AssignResources
 from tmc.centralnode.release_resources_command import ReleaseResources
@@ -43,7 +43,7 @@ __all__ = [
     "release",
     "ReleaseResources",
     "StandByTelescope",
-    "StartUpTelescope",
+    "TelescopeOn",
     "StowAntennas",
     "On"
 ]
@@ -342,7 +342,7 @@ class CentralNode(SKABaseDevice):
         (result_code, message) = handler()
         return [[result_code], [message]]
 
-    def is_StartUpTelescope_allowed(self):
+    def is_TelescopeOn_allowed(self):
         """
         Checks whether this command is allowed to be run in current device state.
 
@@ -353,7 +353,7 @@ class CentralNode(SKABaseDevice):
         :raises: DevFailed if this command is not allowed to be run in current device state.
 
         """
-        handler = self.get_command_object("StartUpTelescope")
+        handler = self.get_command_object("TelescopeOn")
         return handler.check_allowed()
 
     @command(
@@ -361,12 +361,12 @@ class CentralNode(SKABaseDevice):
         doc_out="[ResultCode, information-only string]",
     )
     @DebugIt()
-    def StartUpTelescope(self):
+    def TelescopeOn(self):
         """
         This command invokes SetOperateMode() command on DishLeadNode, On() command on CspMasterLeafNode,
         SdpMasterLeafNode and SubarrayNode and sets the Central Node into ON state.
         """
-        handler = self.get_command_object("StartUpTelescope")
+        handler = self.get_command_object("TelescopeOn")
         (result_code, message) = handler()
         return [[result_code], [message]]
 
@@ -464,14 +464,14 @@ class CentralNode(SKABaseDevice):
         super().init_command_objects()
         args = (self.device_data, self.state_model, self.logger)
         self.on_object = On(*args)
-        self.startup_object = StartUpTelescope(*args)
+        self.telescopeon_object = TelescopeOn(*args)
         self.standby_object = StandByTelescope(*args)
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)
         self.register_command_object("AssignResources", self.assign_object)
         self.register_command_object("StowAntennas", self.stow_object)
-        self.register_command_object("StartUpTelescope", self.startup_object)
+        self.register_command_object("TelescopeOn", self.telescopeon_object)
         self.register_command_object("StandByTelescope", self.standby_object)
         self.register_command_object("ReleaseResources", self.release_object)
         self.register_command_object("On", self.on_object)
