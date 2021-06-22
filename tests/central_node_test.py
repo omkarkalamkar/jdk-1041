@@ -163,7 +163,7 @@ def test_telescope_off(mock_subarray):
     device_proxy.StartUpTelescope()
     device_proxy.TelescopeOff()
     assert device_proxy.activityMessage == const.STR_TELESCOPE_OFF_CMD_ISSUED
-    #assert device_proxy.state() == DevState.OFF
+    #assert device_proxy.state() == DevState.OFF  ##This statement can be reverted once TelescopeOn command implementation is merged
 
 
 # Mocking AssignResources command success response from SubarrayNode

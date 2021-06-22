@@ -87,7 +87,7 @@ class TelescopeOff(BaseCommand):
         :return: None
         """
         csp_mln_client = TangoClient(csp_fqdn)
-        self.telescope_off_leaf_node(csp_mln_client, const.CMD_OFF)
+        self.telescope_off_leaf_node(csp_mln_client, const.CMD_TELESCOPE_OFF)
 
     def telescope_off_sdp(self, sdp_fqdn):
         """
@@ -97,7 +97,7 @@ class TelescopeOff(BaseCommand):
         :return: None
         """
         sdp_mln_client = TangoClient(sdp_fqdn)
-        self.telescope_off_leaf_node(sdp_mln_client, const.CMD_OFF)
+        self.telescope_off_leaf_node(sdp_mln_client, const.CMD_TELESCOPE_OFF)
 
     def telescope_off_dish(self, dish_fqdn):
         """
@@ -137,7 +137,7 @@ class TelescopeOff(BaseCommand):
             log_msg = "SetStandbyLPMode command invoked successfully on {}".format(
                                                       tango_client.get_device_fqdn)
             self.logger.debug(log_msg)
-            tango_client.send_command(const.CMD_OFF)
+            tango_client.send_command(const.CMD_TELESCOPE_OFF)
             log_msg = "OFF command invoked successfully on {}".format(tango_client.get_device_fqdn)
             self.logger.debug(log_msg)
             return tango_client.get_device_fqdn

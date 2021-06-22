@@ -42,7 +42,7 @@ __all__ = [
     "ObsStateAggregator",
     "release",
     "ReleaseResources",
-    "StandByTelescope",
+    "TelescopeOff",
     "StartUpTelescope",
     "StowAntennas",
     "Off"
