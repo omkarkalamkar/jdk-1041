@@ -27,7 +27,7 @@ from tmc.centralnode.const import (
     CMD_SET_STOW_MODE,
     STR_ON_CMD_ISSUED,
     STR_STOW_CMD_ISSUED_CN,
-    STR_STANDBY_CMD_ISSUED,
+    STR_TELESCOPE_OFF_CMD_ISSUED,
 )
 from ska.base.control_model import (
     HealthState,
@@ -158,14 +158,12 @@ def test_startup(mock_subarray):
     assert device_proxy.state() == DevState.ON
 
 
-def test_standby(mock_subarray):
+def test_telescope_off(mock_subarray):
     device_proxy, _, _ = mock_subarray
     device_proxy.StartUpTelescope()
-    assert device_proxy.StandByTelescope() == [
-        [ResultCode.OK],
-        ["STANDBYTELESCOPE command invoked from Central node"],
-    ]
-    assert device_proxy.state() == DevState.OFF
+    device_proxy.TelescopeOff()
+    assert device_proxy.activityMessage == const.STR_TELESCOPE_OFF_CMD_ISSUED
+    #assert device_proxy.state() == DevState.OFF
 
 
 # Mocking AssignResources command success response from SubarrayNode
@@ -477,7 +475,7 @@ def test_release_resources_invalid_key(mock_tango_server_helper, mock_tango_clie
         assert const.ERR_JSON_KEY_NOT_FOUND in str(df.value)
 
 
-@pytest.fixture(scope="function", params=[("StandByTelescope"), ("StartUpTelescope")])
+@pytest.fixture(scope="function", params=[("TelescopeOff"), ("StartUpTelescope")])
 def command_without_arg_devfailed(request):
     cmd_name = request.param
     return cmd_name

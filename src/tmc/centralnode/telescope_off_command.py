@@ -11,7 +11,7 @@ from tango import DevState, DevFailed
 
 # Additional import
 from ska.base import SKABaseDevice
-from ska.base.commands import ResultCode
+from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
@@ -20,12 +20,12 @@ from tmc.centralnode.device_data import DeviceData
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 
-class StandByTelescope(SKABaseDevice.OffCommand):
+class TelescopeOff(BaseCommand):
     """
-    A class for CentralNode's StandByTelescope() command.
+    A class for CentralNode's TelescopeOff() command.
 
     Sets the CentralNode into OFF state.Invokes command on DishLeaf node, SDPMasterLeaf node,
-    CSPMasterLeaf node and Subarray Node.
+    CSPMasterLeaf node.
     """
 
     def check_allowed(self):
@@ -45,16 +45,16 @@ class StandByTelescope(SKABaseDevice.OffCommand):
             DevState.DISABLE,
         ]:
             tango.Except.throw_exception(
-                f"Command StandByTelescope is not allowed in current state {self.state_model.op_state}.",
-                "Failed to invoke StandByTelescope command on CentralNode.",
-                "CentralNode.StandByTelescope()",
+                f"Command TelescopeOff is not allowed in current state {self.state_model.op_state}.",
+                "Failed to invoke TelescopeOff command on CentralNode.",
+                "CentralNode.TelescopeOff()",
                 tango.ErrSeverity.ERR,
             )
         return True
 
     def do(self):
         """
-        Method to invoke Off command on Lower level devices.
+        Method to invoke telescopeoff command on Lower level devices.
 
         param:
             None
@@ -71,43 +71,38 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         this_server = TangoServerHelper.get_instance()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
-        tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        self.standby_csp(csp_master_ln_fqdn)                                                               
-        self.standby_sdp(sdp_master_ln_fqdn)
-        self.standby_dish(device_data._dish_leaf_node_devices)
-        this_server.write_attr("activityMessage", const.STR_CMD_STANDBY_DISH, False)
-        self.standby_subarray(tm_mid_subarrays)
-        log_msg = const.STR_STANDBY_CMD_ISSUED
+        self.telescope_off_csp(csp_master_ln_fqdn)                                                               
+        self.telescope_off_sdp(sdp_master_ln_fqdn)
+        self.telescope_off_dish(device_data._dish_leaf_node_devices)
+        this_server.write_attr("activityMessage", const.STR_CMD_TELESCOPE_OFF_DISH, False)
+        log_msg = const.STR_TELESCOPE_OFF_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
-        return (ResultCode.OK, const.STR_STANDBY_CMD_ISSUED)
 
-    def standby_csp(self, csp_fqdn):
+    def telescope_off_csp(self, csp_fqdn):
         """
         Create TangoClient for CspMasterLeaf node and call
-        standby method.
+        telescopeoff method.
 
         :return: None
         """
         csp_mln_client = TangoClient(csp_fqdn)
-        self.standby_leaf_node(csp_mln_client, const.CMD_OFF)
-        self.standby_leaf_node(csp_mln_client, const.CMD_STANDBY, [])
+        self.telescope_off_leaf_node(csp_mln_client, const.CMD_OFF)
 
-    def standby_sdp(self, sdp_fqdn):
+    def telescope_off_sdp(self, sdp_fqdn):
         """
         Create TangoClient for SdpMasterLeaf node and call
-        standby method.
+        telescopeoff method.
 
         :return: None
         """
         sdp_mln_client = TangoClient(sdp_fqdn)
-        self.standby_leaf_node(sdp_mln_client, const.CMD_OFF)
-        self.standby_leaf_node(sdp_mln_client, const.CMD_STANDBY)
+        self.telescope_off_leaf_node(sdp_mln_client, const.CMD_OFF)
 
-    def standby_dish(self, dish_fqdn):
+    def telescope_off_dish(self, dish_fqdn):
         """
         Create TangoClient for DishLeaf node node and call
-        standby method.
+        telescopeoff method.
 
         :return: None
         """
@@ -116,13 +111,13 @@ class StandByTelescope(SKABaseDevice.OffCommand):
         with ThreadPoolExecutor(total_dishes) as executor:
             for dish in dish_fqdn:
                 dish_ln_client = TangoClient(dish)
-                dish_ln_thread_status[dish] = executor.submit(self.standby_dish_leaf_node, dish_ln_client)
+                dish_ln_thread_status[dish] = executor.submit(self.telescope_off_dish_leaf_node, dish_ln_client)
 
         # Wait for result
         while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
             pass
 
-    def standby_dish_leaf_node(self, tango_client):
+    def telescope_off_dish_leaf_node(self, tango_client):
         """
         Invoke SetStandbyFPMode, SetStandbyLPMode and Off commands on Dish leaf nodes.
 
@@ -148,31 +143,13 @@ class StandByTelescope(SKABaseDevice.OffCommand):
             return tango_client.get_device_fqdn
 
         except DevFailed as dev_failed:
-            log_msg = f"{const.STR_STANDBY_EXEC}{dev_failed}"
+            log_msg = f"{const.STR_TELESCOPE_OFF_EXEC}{dev_failed}"
             self.logger.exception(dev_failed)
-            tango.Except.throw_exception(const.STR_STANDBY_EXEC, log_msg,
-                                         "CentralNode.StandByTelescopeCommand", tango.ErrSeverity.ERR)
+            tango.Except.throw_exception(const.STR_TELESCOPE_OFF_EXEC, log_msg,
+                                         "CentralNode.TelescopeOff", tango.ErrSeverity.ERR)
 
 
-    def standby_subarray(self, subarray_fqdn_list):
-        """
-        Create TangoClient for Subarray node and call
-        standby method.
-
-        :return: None
-        """
-        total_subarrays = len(subarray_fqdn_list)
-        subarray_thread_status = {}
-        with ThreadPoolExecutor(total_subarrays) as executor:
-            for subarray_fqdn in subarray_fqdn_list:
-                subarray_client = TangoClient(subarray_fqdn)
-                subarray_thread_status[subarray_fqdn] = executor.submit(self.standby_leaf_node,
-                                                                        subarray_client, const.CMD_OFF)
-        # Wait for result
-        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
-            pass
-
-    def standby_leaf_node(self, tango_client, cmd_name, param=None):
+    def telescope_off_leaf_node(self, tango_client, cmd_name, param=None):
         """
         Invoke command on leaf nodes.
 
@@ -196,8 +173,8 @@ class StandByTelescope(SKABaseDevice.OffCommand):
             log_msg = f"{const.ERR_EXE_STANDBY_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
             tango.Except.throw_exception(
-                const.STR_STANDBY_EXEC,
+                const.STR_TELESCOPE_OFF_EXEC,
                 log_msg,
-                "CentralNode.StandByTelescopeCommand",
+                "CentralNode.TelescopeOff",
                 tango.ErrSeverity.ERR,
             )
