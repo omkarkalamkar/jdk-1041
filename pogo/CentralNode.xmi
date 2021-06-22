@@ -132,6 +132,15 @@
       </argout>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
     </commands>
+    <commands name="Off" description="This command is to bring the Telescope into OFF state (i.e. Low Power State)." execMethod="off" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
+      <argin description="">
+        <type xsi:type="pogoDsl:VoidType"/>
+      </argin>
+      <argout description="">
+        <type xsi:type="pogoDsl:VoidType"/>
+      </argout>
+      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
+    </commands>
     <commands name="AssignResources" description="This command assigns resources to given subarray. It accepts the subarray id and receptor id list as JSON string." execMethod="assign_resources" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
       <argin description="The string in JSON format. The JSON contains following values:&#xA;subarrayID: DevShort&#xA;dish: JSON object consisting&#xA;- receptorIDList: DevVarStringArray. The individual string should contain dish numbers in string format with preceding zeroes upto 3 digits. E.g. 0001, 0002">
         <type xsi:type="pogoDsl:StringType"/>

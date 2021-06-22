@@ -18,8 +18,8 @@ class Off(BaseCommand):
     """
     A class for CentralNode's Off() command.
 
-    Sets the CentralNode into OFF state.Invokes command on DishLeaf node, SDPMasterLeaf node and
-    CSPMasterLeaf node.
+    Sets the CentralNode into OFF state.Invokes command on DishLeaf node, SDPMasterLeaf node,
+    CSPMasterLeaf node and Subarray Node.
     """
     def check_allowed(self):
 
@@ -60,9 +60,11 @@ class Off(BaseCommand):
         this_server = TangoServerHelper.get_instance()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+        tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.off_csp(csp_master_ln_fqdn)                                                               
         self.off_sdp(sdp_master_ln_fqdn)
         self.off_dish(device_data._dish_leaf_node_devices)
+        self.off_subarray(tm_mid_subarrays)
         log_msg = const.STR_OFF_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
@@ -86,6 +88,24 @@ class Off(BaseCommand):
         """
         sdp_mln_client = TangoClient(sdp_fqdn)
         self.off_leaf_node(sdp_mln_client, const.CMD_OFF)
+
+    def off_subarray(self, subarray_fqdn_list):
+        """
+        Create TangoClient for Subarray node and call
+        off method.
+
+        :return: None
+        """
+        total_subarrays = len(subarray_fqdn_list)
+        subarray_thread_status = {}
+        with ThreadPoolExecutor(total_subarrays) as executor:
+            for subarray_fqdn in subarray_fqdn_list:
+                subarray_client = TangoClient(subarray_fqdn)
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.off_leaf_node,
+                                                                        subarray_client, const.CMD_OFF)
+        # Wait for result
+        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
+            pass
 
     def off_leaf_node(self, tango_client, cmd_name, param=None):
         """
