@@ -175,18 +175,7 @@ class On(BaseCommand):
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
-            tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
-            log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
-                tango_client.get_device_fqdn
-            )
-            self.logger.debug(log_msg)
-            time.sleep(0.2)
-            tango_client.send_command(const.CMD_SET_OPERATE_MODE)
-            log_msg = "SetOperateMode command invoked successfully on {}".format(
-                tango_client.get_device_fqdn
-            )
-            self.logger.debug(log_msg)
-
+            
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_TMC_ON_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
