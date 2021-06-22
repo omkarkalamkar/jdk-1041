@@ -142,7 +142,6 @@ class On(BaseCommand):
 
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
-        print(":::::::::::::::::::::::::On command on leaf nodes::::::::::::::::::::::::")
         try:
             tango_client.send_command(const.CMD_ON)
             log_msg = "ON command invoked successfully on {}".format(
