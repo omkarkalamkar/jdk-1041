@@ -116,7 +116,11 @@ class CentralNode(SKABaseDevice):
 
     CspMasterLeafNodeFQDN = device_property(dtype="str")
 
+    CspMasterFQDN = device_property(dtype="str")
+
     SdpMasterLeafNodeFQDN = device_property(dtype="str")
+
+    SdpMasterFQDN = device_property(dtype="str")
 
     # ----------
     # Attributes
