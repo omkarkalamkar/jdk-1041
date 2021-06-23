@@ -11,7 +11,7 @@ of state and mode attributes defined by the SKA Control Model.
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 import threading
 # Tango imports
-from tango import DebugIt, AttrWriteType
+from tango import DebugIt, AttrWriteType, DevState
 from tango.server import run, attribute, command, device_property
 from tmc.common.tango_server_helper import TangoServerHelper
 
@@ -148,6 +148,13 @@ class CentralNode(SKABaseDevice):
         doc="Activity Message",
     )
 
+    desiredTelescopeState = attribute(
+        dtype=DevState,
+        access=AttrWriteType.READ,
+        doc="desiredTelescopeState attribute of Central Node.",
+    )
+
+
     # ---------------
     # General methods
     # ---------------
@@ -184,7 +191,7 @@ class CentralNode(SKABaseDevice):
             device.attr_map["subarray2HealthState"] = HealthState.UNKNOWN
             device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
             device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
-
+            device.attr_map["desiredTelescopeState"] = ""
             device._health_state = HealthState.OK
             device._build_state = "{},{},{}".format(
                 release.name, release.version, release.description
@@ -272,7 +279,13 @@ class CentralNode(SKABaseDevice):
         """Internal construct of TANGO. Sets the activity message. """
         self.update_attr_map("activityMessage", value)
         # PROTECTED REGION END #    //  CentralNode.activity_message_write
-    
+
+    def read_desiredTelescopeState(self):
+        # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
+        """Internal construct of TANGO. Returns Desired Telescope State. """
+        return self.attr_map["desiredTelescopeState"]
+        # PROTECTED REGION END #    //  CentralNode.activity_message_read
+
     def update_attr_map(self, attr, val):
         """
         This method updates attribute value in attribute map. Once a thread has acquired a lock,
