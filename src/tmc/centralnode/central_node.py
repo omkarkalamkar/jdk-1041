@@ -451,8 +451,8 @@ class CentralNode(SKABaseDevice):
     @DebugIt()
     def StandBy(self):
         """
-        This command invokes SetStandbyLPMode() command on DishLeafNode, StandBy() command on CspMasterLeafNode and
-        SdpMasterLeafNode and sets CentralNode into OFF state.
+        This command invokes StandBy() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
 
         """
         handler = self.get_command_object("StandBy")

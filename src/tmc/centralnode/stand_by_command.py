@@ -25,7 +25,7 @@ class StandBy(BaseCommand):
     """
     A class for CentralNode's StandBy() command.
 
-    Sets the CentralNode into OFF state.Invokes command on DishLeaf node, SDPMasterLeaf node,
+    Sets the CentralNode into OFF state. Invokes StandBy command on DishLeaf node, SDPMasterLeaf node,
     CSPMasterLeaf node.
     """
 
