@@ -172,7 +172,7 @@ class TelescopeOff(BaseCommand):
             self.logger.debug(log_msg)
 
         except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_EXE_STANDBY_CMD}{dev_failed}"
+            log_msg = f"{const.ERR_EXE_TELESCOPE_OFF_CMD}{dev_failed}"
             self.logger.exception(dev_failed)
             tango.Except.throw_exception(
                 const.STR_TELESCOPE_OFF_EXEC,
@@ -200,34 +200,4 @@ class TelescopeOff(BaseCommand):
         while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
             pass
 
-
-    def telescope_off_leaf_node(self, tango_client, cmd_name, param=None):
-        """
-        Invoke command on leaf nodes.
-
-        :param tango_client: proxy of corresponding leaf node
-        :param cmd_name: command name
-        :param param: Empty list from cspsmn
-
-        :return: None
-
-        :raises: Devfailed exception if error occures while executing command on leaf nodes.
-
-        """
-        try:
-            tango_client.send_command(cmd_name, param)
-            log_msg = "Command {} invoked successfully on {}".format(
-                cmd_name, tango_client.get_device_fqdn
-            )
-            self.logger.debug(log_msg)
-
-        except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_EXE_TELESCOPE_OFF_CMD}{dev_failed}"
-            self.logger.exception(dev_failed)
-            tango.Except.throw_exception(
-                const.STR_TELESCOPE_OFF_EXEC,
-                log_msg,
-                "CentralNode.TelescopeOff",
-                tango.ErrSeverity.ERR,
-            )
 
