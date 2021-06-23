@@ -25,7 +25,7 @@ from tmc.centralnode.stand_by_telescope_command import StandByTelescope
 from tmc.centralnode.assign_resources_command import AssignResources
 from tmc.centralnode.release_resources_command import ReleaseResources
 from tmc.centralnode.stow_antennas_command import StowAntennas
-from tmc.centralnode.stand_by_command import StandBy
+from tmc.centralnode.standby_command import Standby
 from tmc.centralnode.resource_manager import ResourceManager
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
@@ -45,7 +45,7 @@ __all__ = [
     "StandByTelescope",
     "StartUpTelescope",
     "StowAntennas",
-    "StandBy"
+    "Standby"
 ]
 
 
@@ -433,7 +433,7 @@ class CentralNode(SKABaseDevice):
         message = handler(argin)
         return message
 
-    def is_StandBy_allowed(self):
+    def is_Standby_allowed(self):
         """
         Checks whether this command is allowed to be run in current device state.
 
@@ -444,18 +444,18 @@ class CentralNode(SKABaseDevice):
         :raises: DevFailed if this command is not allowed to be run in current device state.
 
         """
-        handler = self.get_command_object("StandBy")
+        handler = self.get_command_object("Standby")
         return handler.check_allowed()
 
     @command()
     @DebugIt()
-    def StandBy(self):
+    def Standby(self):
         """
-        This command invokes StandBy() command on CspMasterLeafNode,
+        This command invokes Standby() command on CspMasterLeafNode,
         SdpMasterLeafNode and DishLeafNode.
 
         """
-        handler = self.get_command_object("StandBy")
+        handler = self.get_command_object("Standby")
         handler()
 
     def init_command_objects(self):
@@ -469,13 +469,13 @@ class CentralNode(SKABaseDevice):
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)
-        self.standby_tmc_object = StandBy(*args)
+        self.standby_tmc_object = Standby(*args)
         self.register_command_object("AssignResources", self.assign_object)
         self.register_command_object("StowAntennas", self.stow_object)
         self.register_command_object("StartUpTelescope", self.startup_object)
         self.register_command_object("StandByTelescope", self.standby_object)
         self.register_command_object("ReleaseResources", self.release_object)
-        self.register_command_object("StandBy", self.standby_tmc_object)
+        self.register_command_object("Standby", self.standby_tmc_object)
 
 
 # ----------

@@ -15,7 +15,7 @@ from os.path import dirname, join
 import tango
 from tango import DevState
 from tango.test_context import DeviceTestContext
-from tmc.centralnode.stand_by_command import StandBy
+from tmc.centralnode.standby_command import Standby
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
@@ -150,10 +150,10 @@ def central_node_test_info(request):
     }
     return test_info
 
-def test_stand_by_command(device_data, subarray_state_model, mock_subarray):
+def test_standby_command(device_data, subarray_state_model, mock_subarray):
     device_proxy, _, _ = mock_subarray
-    stand_by_cmd = StandBy(device_data, subarray_state_model)
-    stand_by_cmd.do()
+    standby_cmd = Standby(device_data, subarray_state_model)
+    standby_cmd.do()
     assert device_proxy.activityMessage == const.STR_TMC_STANDBY_CMD_ISSUED
     
 

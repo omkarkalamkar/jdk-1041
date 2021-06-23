@@ -21,11 +21,11 @@ from tmc.centralnode.device_data import DeviceData
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 
-class StandBy(BaseCommand):
+class Standby(BaseCommand):
     """
-    A class for CentralNode's StandBy() command.
+    A class for CentralNode's Standby() command.
 
-    Sets the CentralNode into OFF state. Invokes StandBy command on DishLeaf node, SDPMasterLeaf node,
+    Sets the CentralNode into OFF state. Invokes Standby command on DishLeaf node, SDPMasterLeaf node,
     CSPMasterLeaf node.
     """
 
@@ -46,9 +46,9 @@ class StandBy(BaseCommand):
             DevState.DISABLE,
         ]:
             tango.Except.throw_exception(
-                f"Command StandByTelescope is not allowed in current state {self.state_model.op_state}.",
-                "Failed to invoke StandByTelescope command on CentralNode.",
-                "CentralNode.StandByTelescope()",
+                f"Command Standby is not allowed in current state {self.state_model.op_state}.",
+                "Failed to invoke Standby command on CentralNode.",
+                "CentralNode.Standby()",
                 tango.ErrSeverity.ERR,
             )
         return True
@@ -84,7 +84,6 @@ class StandBy(BaseCommand):
         :return: None
         """
         csp_mln_client = TangoClient(csp_fqdn)
-        self.standby_leaf_node(csp_mln_client, const.CMD_OFF)
         self.standby_leaf_node(csp_mln_client, const.CMD_STANDBY, [])
 
     def standby_sdp(self, sdp_fqdn):
@@ -95,7 +94,6 @@ class StandBy(BaseCommand):
         :return: None
         """
         sdp_mln_client = TangoClient(sdp_fqdn)
-        self.standby_leaf_node(sdp_mln_client, const.CMD_OFF)
         self.standby_leaf_node(sdp_mln_client, const.CMD_STANDBY)
     
     def standby_dish(self, dish_fqdn):
@@ -127,8 +125,8 @@ class StandBy(BaseCommand):
         :raises: Devfailed exception if error occures while  executing On command on Dish leaf node.
         """
         try:
-            tango_client.send_command(const.CMD_OFF)
-            log_msg = "OFF command invoked successfully on {}".format(tango_client.get_device_fqdn)
+            tango_client.send_command(const.CMD_STANDBY)
+            log_msg = "Standby command invoked successfully on {}".format(tango_client.get_device_fqdn)
             self.logger.debug(log_msg)
             return tango_client.get_device_fqdn
 
@@ -136,7 +134,7 @@ class StandBy(BaseCommand):
             log_msg = f"{const.STR_TMC_STANDBY_EXEC}{dev_failed}"
             self.logger.exception(dev_failed)
             tango.Except.throw_exception(const.STR_TMC_STANDBY_EXEC, log_msg,
-                                         "CentralNode.StandByTelescopeCommand", tango.ErrSeverity.ERR)
+                                         "CentralNode.Standby", tango.ErrSeverity.ERR)
                                     
     def standby_leaf_node(self, tango_client, cmd_name, param=None):
         """
@@ -164,6 +162,6 @@ class StandBy(BaseCommand):
             tango.Except.throw_exception(
                 const.STR_TMC_STANDBY_EXEC,
                 log_msg,
-                "CentralNode.StandByTelescopeCommand",
+                "CentralNode.Standby",
                 tango.ErrSeverity.ERR,
             )
