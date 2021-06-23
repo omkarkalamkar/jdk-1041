@@ -55,8 +55,8 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if error occurs while subscribing event.
         """
-        csp_master_client = TangoClient(self.csp_master_fqdn)
         try:
+            csp_master_client = TangoClient(self.csp_master_fqdn)
             self.csp_event_id = csp_master_client.subscribe_attribute(
                 const.EVT_SUBSR_HEALTH_STATE, self.health_state_cb
             )
@@ -78,8 +78,8 @@ class HealthStateAggregator:
 
         :raises: Devfailed exception if error occurs while subscribing event.
         """
-        sdp_master_client = TangoClient(self.sdp_master_fqdn)
         try:
+            sdp_master_client = TangoClient(self.sdp_master_fqdn)
             self.sdp_event_id = sdp_master_client.subscribe_attribute(
                 const.EVT_SUBSR_HEALTH_STATE, self.health_state_cb
             )
