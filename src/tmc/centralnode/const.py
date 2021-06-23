@@ -14,7 +14,6 @@ STR_CMD_STANDBY_CSP_DEV = "STANDBY command invoked on CspMasterLeafNode device "
 STR_CMD_STANDBY_SDP_DEV = "STANDBY command invoked on SdpMasterleafNode device "
 STR_CMD_STANDBY_SA_DEV = "STANDBY command invoked on SubarrayNode device"
 STR_CMD_STARTUP_DISH = "STARTUP command invoked on Dish devices"
-#STR_CMD_STANDBY_DISH = "STANDBY command invoked on Dish devices"
 STR_CMD_TELESCOPE_OFF_DISH = "TelescopeOff command invoked on Dish devices"
 
 
@@ -57,10 +56,9 @@ STR_UNKNOWN = " :-> UNKNOWN"
 STR_HEALTH_STATE_UNKNOWN_VAL = "Subarray healthState event returned unknown value \n"
 STR_ERR_MSG = "Error message is: "
 STR_STOW_CMD_ISSUED_CN = "STOW command invoked from Central node on the requested dishes"
-#STR_STANDBY_CMD_ISSUED = "STANDBYTELESCOPE command invoked from Central node"
 STR_TELESCOPE_OFF_CMD_ISSUED = "TelescopeOff command invoked from Central node"
 
-STR_OFF_CMD_ISSUED = "OFF command invoked from Central node"
+STR_TMC_OFF_CMD_ISSUED = "TMC OFF command invoked from Central node"
 STR_ON_CMD_ISSUED = "STARTUPTELESCOPE (ON) command invoked from Central node"
 STR_INIT_SUCCESS = "CentralNode is initialized successfully."
 STR_FALSE = "False"
@@ -77,7 +75,7 @@ STR_RELEASE_RES_EXEC = "RELEASERESOURCES command execution"
 STR_ASSIGN_RES_EXEC = "ASSIGNRESOURCES command execution"
 STR_ON_EXEC = "STARTUPTELESCOPE (ON) command execution"
 STR_TELESCOPE_OFF_EXEC = "TelescopeOff command execution"
-STR_OFF_EXEC = "OFF command execution"
+STR_TMC_OFF_EXEC = "TMC OFF command execution"
 STR_RESOURCE_ALLOCATION_FAILED = "Resource allocation failed."
 
 # PROPERTIES DEFAULT VALUES

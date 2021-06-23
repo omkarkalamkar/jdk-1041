@@ -208,7 +208,7 @@ def test_off_command(
     device_data = DeviceData.get_instance()
     off_cmd = Off(device_data, subarray_state_model)
     off_cmd.do() 
-    assert const.STR_OFF_CMD_ISSUED in device_proxy.activityMessage
+    assert const.STR_TMC_OFF_CMD_ISSUED in device_proxy.activityMessage
 
 def test_assign_resources(mock_subarray):
     device_proxy, tango_client_obj, tango_server_obj = mock_subarray
