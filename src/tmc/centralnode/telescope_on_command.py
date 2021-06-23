@@ -56,7 +56,7 @@ class TelescopeOn(BaseCommand):
 
     def do(self):
         """
-        Method to invoke On command on Lower level devices.
+        Method to invoke Telescope On command on Lower level devices.
 
         param argin:
             None.
@@ -135,7 +135,7 @@ class TelescopeOn(BaseCommand):
 
     def startup_leaf_node(self, tango_client):
         """
-        Invoke On command on leaf nodes.
+        Invoke Telescope On command on leaf nodes.
 
         :param tango_client: Proxy of corresponding node.
 
@@ -145,7 +145,7 @@ class TelescopeOn(BaseCommand):
         """
         try:
             tango_client.send_command(const.CMD_TELESCOPE_ON)
-            log_msg = "ON command invoked successfully on {}".format(
+            log_msg = "Telescope On command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)
@@ -162,17 +162,17 @@ class TelescopeOn(BaseCommand):
 
     def startup_dish_leaf_node(self, tango_client):
         """
-        Invoke On, SetStandbyFPMode and SetOperateMode commands on Dish leaf nodes.
+        Invoke Telescope On, SetStandbyFPMode and SetOperateMode commands on Dish leaf nodes.
 
         :param tango_client: Proxy of corresponding node.
 
         :return: None
 
-        :raises: Devfailed exception if error occures while  executing On command on Dish leaf node.
+        :raises: Devfailed exception if error occures while  executing Telescope On command on Dish leaf node.
         """
         try:
             tango_client.send_command(const.CMD_TELESCOPE_ON)
-            log_msg = "ON command invoked successfully on {}".format(
+            log_msg = "Telescope On command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_msg)

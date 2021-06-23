@@ -364,8 +364,8 @@ class CentralNode(SKABaseDevice):
     @DebugIt()
     def TelescopeOn(self):
         """
-        This command invokes SetOperateMode() command on DishLeadNode, On() command on CspMasterLeafNode,
-        SdpMasterLeafNode and SubarrayNode and sets the Central Node into ON state.
+        This command invokes TelescopeOn() command on DishLeadNode, CspMasterLeafNode,
+        SdpMasterLeafNode .
         """
         handler = self.get_command_object("TelescopeOn")
         handler()
