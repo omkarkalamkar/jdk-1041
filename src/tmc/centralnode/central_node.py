@@ -388,8 +388,9 @@ class CentralNode(SKABaseDevice):
     @DebugIt()
     def On(self):
         """
-        This command invokes SetOperateMode() command on DishLeadNode, On() command on CspMasterLeafNode,
+        This command invokes On command on DishLeadNode, On() command on CspMasterLeafNode,
         SdpMasterLeafNode and sets the Central Node into ON state.
+        This commmand turn On the TMC devices
         """
         handler = self.get_command_object("On")
         handler()
