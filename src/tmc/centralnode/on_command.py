@@ -161,7 +161,7 @@ class On(BaseCommand):
 
     def on_dish_leaf_node(self, tango_client):
         """
-        Invoke On, SetStandbyFPMode and SetOperateMode commands on Dish leaf nodes.
+        Invoke On command on Dish leaf nodes.
 
         :param tango_client: Proxy of corresponding node.
 
