@@ -115,26 +115,26 @@ def mock_tango_server_helper():
 )
 def central_node_test_info(request):
     device_under_test = CentralNode
-    csp_master_ln_fqdn = "ska_mid/tm_leaf_node/csp_master"
-    csp_master_ln_health_attribute = "cspHealthState"
+    csp_master_fqdn = "mid_csp/elt/master"
+    csp_master_health_attribute = "healthState"
 
-    initial_dut_properties = {"CspMasterLeafNodeFQDN": csp_master_ln_fqdn}
+    initial_dut_properties = {"CspMasterLeafNodeFQDN": csp_master_fqdn}
 
     event_subscription_map = {}
-    csp_master_ln_proxy_mock = Mock()
-    csp_master_ln_proxy_mock.subscribe_event.side_effect = lambda attr_name, event_type, callback, *args, **kwargs: event_subscription_map.update(
+    csp_master_proxy_mock = Mock()
+    csp_master_proxy_mock.subscribe_event.side_effect = lambda attr_name, event_type, callback, *args, **kwargs: event_subscription_map.update(
         {attr_name: callback}
     )
 
-    proxies_to_mock = {csp_master_ln_fqdn: csp_master_ln_proxy_mock}
+    proxies_to_mock = {csp_master_fqdn: csp_master_proxy_mock}
 
     test_info = {
-        "csp_master_ln_health_attribute": csp_master_ln_health_attribute,
+        "csp_master_health_attribute": csp_master_health_attribute,
         "initial_dut_properties": initial_dut_properties,
         "proxies_to_mock": proxies_to_mock,
-        "csp_master_ln_health_state": request.param,
+        "csp_master_health_state": request.param,
         "event_subscription_map": event_subscription_map,
-        "csp_master_ln_fqdn": csp_master_ln_fqdn,
+        "csp_master_fqdn": csp_master_fqdn,
     }
     return test_info
 
@@ -520,7 +520,7 @@ def test_telescope_health_state_matches_csp_master_leaf_node_health_state_after_
         with mock.patch.object(
             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
         ):
-            tango_client_obj = TangoClient("ska_mid/tm_leaf_node/csp_master")
+            tango_client_obj = TangoClient("mid_csp/elt/master")
             device_proxy.TelescopeOn()
     assert device_proxy.telescopeHealthState == health_state
 
@@ -545,7 +545,7 @@ def mock_sdp_master_proxy(mock_tango_server_helper, mock_tango_client):
             ], event_subscription_map
 
 
-def test_telescope_health_state_is_ok_when_sdp_master_leaf_node_is_ok_after_start(
+def test_telescope_health_state_is_ok_when_sdp_master_node_is_ok_after_start(
     mock_sdp_master_proxy, health_state, mock_tango_server_helper
 ):
     (
@@ -562,7 +562,7 @@ def test_telescope_health_state_is_ok_when_sdp_master_leaf_node_is_ok_after_star
         with mock.patch.object(
             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
         ):
-            tango_client_obj = TangoClient("ska_mid/tm_leaf_node/sdp_master")
+            tango_client_obj = TangoClient("mid_sdp/elt/master")
             device_proxy.TelescopeOn()
     assert device_proxy.telescopeHealthState == health_state
 
