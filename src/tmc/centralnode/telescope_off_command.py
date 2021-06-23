@@ -71,10 +71,12 @@ class TelescopeOff(BaseCommand):
         this_server = TangoServerHelper.get_instance()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+        tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.telescope_off_csp(csp_master_ln_fqdn)                                                               
         self.telescope_off_sdp(sdp_master_ln_fqdn)
         self.telescope_off_dish(device_data._dish_leaf_node_devices)
         this_server.write_attr("activityMessage", const.STR_CMD_TELESCOPE_OFF_DISH, False)
+        self.telescope_off_subarray(tm_mid_subarrays)
         log_msg = const.STR_TELESCOPE_OFF_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
@@ -178,3 +180,54 @@ class TelescopeOff(BaseCommand):
                 "CentralNode.TelescopeOff",
                 tango.ErrSeverity.ERR,
             )
+
+
+    def telescope_off_subarray(self, subarray_fqdn_list):
+        """
+        Create TangoClient for Subarray node and call
+        standby method.
+
+        :return: None
+        """
+        total_subarrays = len(subarray_fqdn_list)
+        subarray_thread_status = {}
+        with ThreadPoolExecutor(total_subarrays) as executor:
+            for subarray_fqdn in subarray_fqdn_list:
+                subarray_client = TangoClient(subarray_fqdn)
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.telescope_off_leaf_node,
+                                                                        subarray_client, const.CMD_TELESCOPE_OFF)
+        # Wait for result
+        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
+            pass
+
+
+    def telescope_off_leaf_node(self, tango_client, cmd_name, param=None):
+        """
+        Invoke command on leaf nodes.
+
+        :param tango_client: proxy of corresponding leaf node
+        :param cmd_name: command name
+        :param param: Empty list from cspsmn
+
+        :return: None
+
+        :raises: Devfailed exception if error occures while executing command on leaf nodes.
+
+        """
+        try:
+            tango_client.send_command(cmd_name, param)
+            log_msg = "Command {} invoked successfully on {}".format(
+                cmd_name, tango_client.get_device_fqdn
+            )
+            self.logger.debug(log_msg)
+
+        except DevFailed as dev_failed:
+            log_msg = f"{const.ERR_EXE_TELESCOPE_OFF_CMD}{dev_failed}"
+            self.logger.exception(dev_failed)
+            tango.Except.throw_exception(
+                const.STR_TELESCOPE_OFF_EXEC,
+                log_msg,
+                "CentralNode.TelescopeOff",
+                tango.ErrSeverity.ERR,
+            )
+

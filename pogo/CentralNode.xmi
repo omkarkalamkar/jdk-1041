@@ -114,7 +114,7 @@
       </argout>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
     </commands>
-    <commands name="StandByTelescope" description="This command is to bring the Telescope into a STANDBY state (i.e. Low Power State)." execMethod="stand_by_telescope" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
+    <commands name="TelescopeOff" description="This command is to bring the Telescope into a Off state (i.e. Low Power State)." execMethod="stand_by_telescope" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
       <argin description="">
         <type xsi:type="pogoDsl:VoidType"/>
       </argin>
