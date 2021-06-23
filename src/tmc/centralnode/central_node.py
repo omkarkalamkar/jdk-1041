@@ -356,10 +356,7 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("TelescopeOn")
         return handler.check_allowed()
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="[ResultCode, information-only string]",
-    )
+    @command()
     @DebugIt()
     def TelescopeOn(self):
         """
@@ -367,8 +364,7 @@ class CentralNode(SKABaseDevice):
         SdpMasterLeafNode and SubarrayNode and sets the Central Node into ON state.
         """
         handler = self.get_command_object("TelescopeOn")
-        (result_code, message) = handler()
-        return [[result_code], [message]]
+        handler()
 
     def is_On_allowed(self):
         """

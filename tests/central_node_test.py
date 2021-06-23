@@ -141,17 +141,15 @@ def central_node_test_info(request):
 
 def test_on(mock_subarray):
     device_proxy, _, _ = mock_subarray
-    #device_proxy.On()
+    device_proxy.On()
     assert device_proxy.activityMessage == const.STR_TMC_ON_CMD_ISSUED
     #assert device_proxy.state() == DevState.ON
 
 def test_telescope_on(mock_subarray):
     device_proxy, _, _ = mock_subarray
-    assert device_proxy.TelescopeOn() == [
-        [ResultCode.OK],
-        ["TelescopeOn (ON) command invoked from Central node"],
-    ]
-    # this statement need to be enable once telescope on command implemented on leafnodes.
+    device_proxy.On()
+    device_proxy.TelescopeOn()
+    assert device_proxy.activityMessage == const.STR_ON_CMD_ISSUED
     # assert device_proxy.state() == DevState.ON
 
 

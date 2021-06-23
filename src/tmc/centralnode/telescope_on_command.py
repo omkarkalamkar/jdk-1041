@@ -61,13 +61,6 @@ class TelescopeOn(BaseCommand):
         param argin:
             None.
 
-        return:
-            A tuple containing a return code and a string message indicating status.
-            The message is for information purpose only.
-
-        rtype:
-            (ResultCode, str)
-
         """
         device_data = DeviceData.get_instance()
         self.logger.info(type(self.target))
@@ -83,7 +76,6 @@ class TelescopeOn(BaseCommand):
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED, False)
-        return (ResultCode.OK, const.STR_ON_CMD_ISSUED)
 
     def startup_csp(self, csp_fqdn):
         """
