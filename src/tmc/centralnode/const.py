@@ -9,6 +9,7 @@ CMD_STANDBY = "Standby"
 CMD_TELESCOPE_ON = "TelescopeOn"
 CMD_ON = "On"
 CMD_OFF = "Off"
+CMD_TELESCOPE_STANDBY = "TelescopeStandBy"
 
 STR_CMD_STANDBY_CSP_DEV = "STANDBY command invoked on CspMasterLeafNode device "
 STR_CMD_STANDBY_SDP_DEV = "STANDBY command invoked on SdpMasterleafNode device "
@@ -35,6 +36,7 @@ ERR_IN_CREATE_PROXY = "Error in creating proxy of the LeafNode device: "
 ERR_EXE_STOW_CMD = "Error in executing STOW command "
 ERR_EXE_STANDBY_CMD = "Error in executing STANDBY Telescope command "
 ERR_EXE_TMC_STANDBY_CMD = "Error in executing TMC STANDBY command "
+ERR_EXE_TELESCOPE_STANDBY_CMD = "Error in executing TELESCOPE STANDBY command "
 ERR_EXE_OFF_CMD = "Error in executing OFF Telescope command "
 ERR_EXE_TMC_ON_CMD = "Error in executing TMC ON command "
 
@@ -83,6 +85,7 @@ STR_ON_EXEC = "TelescopeOn (ON) command execution"
 STR_STANDBY_EXEC = "STANDBYTELESCOPE command execution"
 STR_RESOURCE_ALLOCATION_FAILED = "Resource allocation failed."
 STR_TMC_STANDBY_EXEC = "TMC STANDBY command execution"
+STR_TELESCOPE_STANDBY_EXEC = "Telescope STANDBY command execution"
 
 # PROPERTIES DEFAULT VALUES
 PROP_DEF_VAL_TM_MID_SA1 = "ska_mid/tm_subarray_node/1"
