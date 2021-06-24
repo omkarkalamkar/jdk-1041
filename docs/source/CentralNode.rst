@@ -25,12 +25,20 @@ Central Node Mid
 .. autoclass:: src.tmc.centralnode.release_resources_command.ReleaseResources
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.stand_by_telescope_command
-.. autoclass:: src.tmc.centralnode.stand_by_telescope_command.StandByTelescope
+.. automodule:: src.tmc.centralnode.telescope_off_command
+.. autoclass:: src.tmc.centralnode.telescope_off_command.TelescopeOff
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.start_up_telescope_command
-.. autoclass:: src.tmc.centralnode.start_up_telescope_command.StartUpTelescope
+.. automodule:: src.tmc.centralnode.telescope_on_command
+.. autoclass:: src.tmc.centralnode.telescope_on_command.TelescopeOn
+   :members: do
+   :undoc-members:
+.. automodule:: src.tmc.centralnode.on_command
+.. autoclass:: src.tmc.centralnode.on_command.On
+   :members: do
+   :undoc-members:
+.. automodule:: src.tmc.centralnode.off_command
+.. autoclass:: src.tmc.centralnode.off_command.Off
    :members: do
    :undoc-members:
 .. automodule:: src.tmc.centralnode.stow_antennas_command

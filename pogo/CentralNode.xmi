@@ -123,7 +123,16 @@
       </argout>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
     </commands>
-    <commands name="StartUpTelescope" description="This command is to bring the Telescope into ON state from the STANDBY state." execMethod="start_up_telescope" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
+    <commands name="TelescopeOn" description="This command is to bring the Telescope into ON state from the STANDBY state." execMethod="telescope_on" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
+      <argin description="">
+        <type xsi:type="pogoDsl:VoidType"/>
+      </argin>
+      <argout description="">
+        <type xsi:type="pogoDsl:VoidType"/>
+      </argout>
+      <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
+    </commands>
+    <commands name="On" description="This command is to bring the TMC devices into ON state from the OFF state." execMethod="on" displayLevel="OPERATOR" polledPeriod="0" isDynamic="false">
       <argin description="">
         <type xsi:type="pogoDsl:VoidType"/>
       </argin>
