@@ -1,5 +1,5 @@
 """
-StandBy class for CentralNode.
+Standby class for CentralNode.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Standard Python imports
@@ -54,7 +54,7 @@ class Standby(BaseCommand):
         return True
     def do(self):
         """
-        Method to invoke Off command on Lower level devices.
+        Method to invoke Standby command on Lower level devices.
 
         param:
             None
@@ -116,7 +116,7 @@ class Standby(BaseCommand):
     
     def standby_dish_leaf_node(self, tango_client):
         """
-        Invoke Off command on Dish leaf nodes.
+        Invoke Standby command on Dish leaf nodes.
 
         :param tango_client: Proxy of corresponding node.
 

@@ -10,7 +10,6 @@ import tango
 from tango import DevState, DevFailed
 
 # Additional import
-from ska.base import SKABaseDevice
 from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
@@ -71,7 +70,7 @@ class TelescopeStandby(BaseCommand):
         self.telescope_standby_sdp(sdp_master_ln_fqdn)
         self.telescope_standby_dish(device_data._dish_leaf_node_devices)
         this_server.write_attr("activityMessage", const.STR_CMD_STANDBY_DISH, False)
-        log_msg = const.STR_TELESCOPE_STANDBY_EXEC
+        log_msg = const.STR_TELESCOPE_STANDBY_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
 

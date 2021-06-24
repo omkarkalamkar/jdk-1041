@@ -16,6 +16,7 @@ import tango
 from tango import DevState
 from tango.test_context import DeviceTestContext
 from tmc.centralnode.standby_command import Standby
+from tmc.centralnode.telescope_standby_command import TelescopeStandby
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
@@ -156,12 +157,25 @@ def test_standby_command(device_data, subarray_state_model, mock_subarray):
     standby_cmd.do()
     assert device_proxy.activityMessage == const.STR_TMC_STANDBY_CMD_ISSUED
     
-
 def test_on(mock_subarray):
     device_proxy, _, _ = mock_subarray
     device_proxy.On()
     assert device_proxy.activityMessage == const.STR_TMC_ON_CMD_ISSUED
     #assert device_proxy.state() == DevState.ON
+
+def test_telescope_standby_command(device_data, subarray_state_model, mock_subarray):
+    device_proxy, _, _ = mock_subarray
+    telescope_standby_cmd = TelescopeStandby(device_data, subarray_state_model)
+    telescope_standby_cmd.do()
+    assert device_proxy.activityMessage == const.STR_TELESCOPE_STANDBY_ISSUED
+
+# def test_telescope_standby(mock_subarray):
+#     device_proxy, _, _ = mock_subarray
+#     device_proxy.On()
+#     device_proxy.TelescopeOn()
+#     device_proxy.TelescopeStandby()
+#     assert device_proxy.activityMessage == const.STR_TELESCOPE_STANDBY_EXEC
+#     # assert device_proxy.state() == DevState.OFF
 
 def test_telescope_on(mock_subarray):
     device_proxy, _, _ = mock_subarray
