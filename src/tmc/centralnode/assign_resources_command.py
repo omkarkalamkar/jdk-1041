@@ -167,13 +167,14 @@ class AssignResources(BaseCommand):
         self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.dln_prefix = this_server.read_property("DishLeafNodePrefix")[0]
         try:
-            self.logger.info("Validating input string.")
-            input_validator = AssignResourceValidator(           
-                self.tm_mid_subarrays,
-                device_data._dish_leaf_node_devices,
-                self.dln_prefix,
-                self.logger,
-            )
+            # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
+            # self.logger.info("Validating input string.")
+            # input_validator = AssignResourceValidator(
+            #     self.tm_mid_subarrays,
+            #     device_data._dish_leaf_node_devices,
+            #     self.dln_prefix,
+            #     self.logger,
+            # )
             # json_argument = input_validator.loads(argin)
             json_argument= json.loads(argin)
 
