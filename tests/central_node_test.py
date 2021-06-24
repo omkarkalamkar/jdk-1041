@@ -174,6 +174,13 @@ def test_telescope_on_class_command_method(device_data, subarray_state_model, mo
     telescope_on_cmd.do()
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_TELESCOPE_ON, None)
 
+def test_telescope_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
+    telescope_standby_cmd = TelescopeStandby(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    telescope_standby_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_TELESCOPE_STANDBY, None)
+
 
 def test_standby(mock_subarray):
     device_proxy, _, _ = mock_subarray
