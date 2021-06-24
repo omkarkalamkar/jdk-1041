@@ -61,35 +61,37 @@ class ReleaseResources(BaseCommand):
 
         :param argin: The string in JSON format. The JSON contains following values:
 
-            subarrayID:
+            subarray_id:
                 DevShort. Mandatory.
 
-            releaseALL:
+            release_all:
                 Boolean(True or False). Mandatory. True when all the resources to be released from Subarray.
 
-            receptorIDList:
-                DevVarStringArray. Empty when releaseALL tag is True.
+            receptor_ids:
+                DevVarStringArray. Empty when release_all tag is True.
 
             Example:
                 {
-                    "subarrayID": 1,
-                    "releaseALL": true,
-                    "receptorIDList": []
-
+                  "interface": "https://schema.skao.int/ska-tmc-releaseresources/1.0",
+                  "subarray_id": 1,
+                  "release_all": true,
+                  "receptor_ids": [
+                ]
                 }
 
-        Note: From Jive, enter input as: {"subarrayID":1,"releaseALL":true,"receptorIDList":[]} without any space.
+        Note: From Jive, enter input as: {"interface":"https://schema.skao.int/ska-tmc-releaseresources/1.0",
+        "subarray_id":1,"release_all":true,"receptor_ids":[]}
 
         return:
             A tuple containing a return code and a string in josn format on successful release
             of all the resources. The JSON string contains following values:
 
-            releaseALL:
+            release_all:
                 Boolean(True or False). If True, all the resources are successfully released from the
                 Subarray.
 
-            receptorIDList:
-                DevVarStringArray. If releaseALL is True, receptorIDList is empty. Else list returns
+            receptor_ids:
+                DevVarStringArray. If release_all is True, receptor_ids is empty. Else list returns
                 resources (device names) that are noe released from the subarray.
 
             Example:
@@ -130,6 +132,7 @@ class ReleaseResources(BaseCommand):
                 log_msg = const.STR_REL_RESOURCES
                 self.logger.debug(log_msg)
                 this_server.write_attr("activityMessage", log_msg, False)
+
 
                 if not res_not_released:
                     release_success = True
