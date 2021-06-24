@@ -151,11 +151,12 @@ def central_node_test_info(request):
     }
     return test_info
 
-def test_standby_command(device_data, subarray_state_model, mock_subarray):
-    device_proxy, _, _ = mock_subarray
+def test_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
     standby_cmd = Standby(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
     standby_cmd.do()
-    assert device_proxy.activityMessage == const.STR_TMC_STANDBY_CMD_ISSUED
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_STANDBY, None)
     
 def test_on(mock_subarray):
     device_proxy, _, _ = mock_subarray
@@ -163,11 +164,13 @@ def test_on(mock_subarray):
     assert device_proxy.activityMessage == const.STR_TMC_ON_CMD_ISSUED
     #assert device_proxy.state() == DevState.ON
 
-def test_telescope_standby_command(device_data, subarray_state_model, mock_subarray):
-    device_proxy, _, _ = mock_subarray
+def test_telescope_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
     telescope_standby_cmd = TelescopeStandby(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
     telescope_standby_cmd.do()
-    assert device_proxy.activityMessage == const.STR_TELESCOPE_STANDBY_ISSUED
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_TELESCOPE_STANDBY, None)
+
 
 def test_telescope_on(mock_subarray):
     device_proxy, _, _ = mock_subarray
