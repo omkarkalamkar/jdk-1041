@@ -66,9 +66,11 @@ class TelescopeStandby(BaseCommand):
         this_server = TangoServerHelper.get_instance()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+        tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.telescope_standby_csp(csp_master_ln_fqdn)                                                               
         self.telescope_standby_sdp(sdp_master_ln_fqdn)
         self.telescope_standby_dish(device_data._dish_leaf_node_devices)
+        self.telescope_standby_subarray(tm_mid_subarrays)
         this_server.write_attr("activityMessage", const.STR_CMD_STANDBY_DISH, False)
         log_msg = const.STR_TELESCOPE_STANDBY_ISSUED
         self.logger.info(log_msg)
@@ -93,6 +95,54 @@ class TelescopeStandby(BaseCommand):
         """
         sdp_mln_client = TangoClient(sdp_fqdn)
         self.telescope_standby_leaf_node(sdp_mln_client, const.CMD_TELESCOPE_STANDBY)
+
+    def telescope_standby_subarray(self, subarray_fqdn_list):
+        """
+        Create TangoClient for Subarray node and call
+        standby method.
+
+        :return: None
+        """
+        total_subarrays = len(subarray_fqdn_list)
+        subarray_thread_status = {}
+        with ThreadPoolExecutor(total_subarrays) as executor:
+            for subarray_fqdn in subarray_fqdn_list:
+                subarray_client = TangoClient(subarray_fqdn)
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.telescope_standby_leaf_node,
+                                                                        subarray_client, const.CMD_TELESCOPE_STANDBY)
+        # Wait for result
+        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
+            pass
+    
+    def telescope_standby_leaf_node(self, tango_client, cmd_name, param=None):
+        """
+        Invoke TelescopeStandby command on leaf nodes.
+
+        :param tango_client: proxy of corresponding leaf node
+        :param cmd_name: command name
+        :param param: Empty list from cspsmn
+
+        :return: None
+
+        :raises: Devfailed exception if error occures while executing command on leaf nodes.
+
+        """
+        try:
+            tango_client.send_command(cmd_name, param)
+            log_msg = "Command {} invoked successfully on {}".format(
+                cmd_name, tango_client.get_device_fqdn
+            )
+            self.logger.debug(log_msg)
+
+        except DevFailed as dev_failed:
+            log_msg = f"{const.ERR_EXE_TELESCOPE_STANDBY_CMD}{dev_failed}"
+            self.logger.exception(dev_failed)
+            tango.Except.throw_exception(
+                const.STR_TELESCOPE_STANDBY_EXEC,
+                log_msg,
+                "CentralNode.TelescopeStandby",
+                tango.ErrSeverity.ERR,
+            )
     
     def telescope_standby_dish(self, dish_fqdn):
         """
@@ -111,6 +161,7 @@ class TelescopeStandby(BaseCommand):
         # Wait for result
         while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
             pass
+    
     
     def telescope_standby_dish_leaf_node(self, tango_client):
         """
@@ -143,32 +194,4 @@ class TelescopeStandby(BaseCommand):
             tango.Except.throw_exception(const.STR_TELESCOPE_STANDBY_EXEC, log_msg,
                                          "CentralNode.TelescopeStandby", tango.ErrSeverity.ERR)
                                     
-    def telescope_standby_leaf_node(self, tango_client, cmd_name, param=None):
-        """
-        Invoke TelescopeStandby command on leaf nodes.
-
-        :param tango_client: proxy of corresponding leaf node
-        :param cmd_name: command name
-        :param param: Empty list from cspsmn
-
-        :return: None
-
-        :raises: Devfailed exception if error occures while executing command on leaf nodes.
-
-        """
-        try:
-            tango_client.send_command(cmd_name, param)
-            log_msg = "Command {} invoked successfully on {}".format(
-                cmd_name, tango_client.get_device_fqdn
-            )
-            self.logger.debug(log_msg)
-
-        except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_EXE_TMC_STANDBY_CMD}{dev_failed}"
-            self.logger.exception(dev_failed)
-            tango.Except.throw_exception(
-                const.STR_TELESCOPE_STANDBY_EXEC,
-                log_msg,
-                "CentralNode.TelescopeStandby",
-                tango.ErrSeverity.ERR,
-            )
+    
