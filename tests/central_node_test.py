@@ -6,6 +6,7 @@ import types
 import json
 import pytest
 import mock
+import logging
 from mock import MagicMock
 from mock import Mock
 from os.path import dirname, join
@@ -14,7 +15,7 @@ from os.path import dirname, join
 import tango
 from tango import DevState
 from tango.test_context import DeviceTestContext
-
+from tmc.centralnode.standby_command import Standby
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
@@ -35,6 +36,7 @@ from ska.base.control_model import (
 )
 from ska.base.control_model import LoggingLevel
 from ska.base.commands import ResultCode
+from ska.base import SKASubarrayStateModel
 
 assign_input_file = "command_AssignResources.json"
 path = join(dirname(__file__), "data", assign_input_file)
@@ -61,6 +63,16 @@ path = join(dirname(__file__), "data", release_invalid_key_file)
 with open(path, "r") as f:
     release_invalid_key = f.read()
 
+@pytest.fixture
+def subarray_state_model():
+    """
+    Yields a new SKASubarrayStateModel for testing
+    """
+    yield SKASubarrayStateModel(logging.getLogger())
+
+@pytest.fixture
+def device_data():
+    yield DeviceData()
 
 @pytest.fixture(scope="function")
 def mock_subarraynode_device(mock_tango_server_helper, mock_tango_client):
@@ -138,6 +150,12 @@ def central_node_test_info(request):
     }
     return test_info
 
+def test_standby_command(device_data, subarray_state_model, mock_subarray):
+    device_proxy, _, _ = mock_subarray
+    standby_cmd = Standby(device_data, subarray_state_model)
+    standby_cmd.do()
+    assert device_proxy.activityMessage == const.STR_TMC_STANDBY_CMD_ISSUED
+    
 
 def test_on(mock_subarray):
     device_proxy, _, _ = mock_subarray

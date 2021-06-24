@@ -34,6 +34,7 @@ ERR_IN_READ_DISH_LN_DEVS = "Error in reading exported Dish Leaf Node device name
 ERR_IN_CREATE_PROXY = "Error in creating proxy of the LeafNode device: "
 ERR_EXE_STOW_CMD = "Error in executing STOW command "
 ERR_EXE_STANDBY_CMD = "Error in executing STANDBY Telescope command "
+ERR_EXE_TMC_STANDBY_CMD = "Error in executing TMC STANDBY command "
 ERR_EXE_OFF_CMD = "Error in executing OFF Telescope command "
 ERR_EXE_TMC_ON_CMD = "Error in executing TMC ON command "
 
@@ -62,6 +63,7 @@ STR_STOW_CMD_ISSUED_CN = "STOW command invoked from Central node on the requeste
 STR_STANDBY_CMD_ISSUED = "STANDBYTELESCOPE command invoked from Central node"
 STR_TMC_ON_CMD_ISSUED = "TMC ON command invoked from Central node"
 STR_ON_CMD_ISSUED = "TelescopeOn (ON) command invoked from Central node"
+STR_TMC_STANDBY_CMD_ISSUED = "TMC STANDBY command invoked from Central node"
 STR_INIT_SUCCESS = "CentralNode is initialized successfully."
 STR_FALSE = "False"
 STR_DISH_DUPLICATE = "List of the dishes that are already allocated: "
@@ -80,6 +82,7 @@ STR_TMC_ON_EXEC = "TMC ON command execution"
 STR_ON_EXEC = "TelescopeOn (ON) command execution"
 STR_STANDBY_EXEC = "STANDBYTELESCOPE command execution"
 STR_RESOURCE_ALLOCATION_FAILED = "Resource allocation failed."
+STR_TMC_STANDBY_EXEC = "TMC STANDBY command execution"
 
 # PROPERTIES DEFAULT VALUES
 PROP_DEF_VAL_TM_MID_SA1 = "ska_mid/tm_subarray_node/1"
