@@ -106,6 +106,26 @@ class Off(BaseCommand):
         while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
             pass
 
+
+    def off_dish(self, dish_fqdn):
+        """
+        Create TangoClient for DishLeaf node node and call
+        off method.
+
+        :return: None
+        """
+        total_dishes = len(dish_fqdn)
+        dish_ln_thread_status = {}
+        with ThreadPoolExecutor(total_dishes) as executor:
+            for dish in dish_fqdn:
+                dish_ln_client = TangoClient(dish)
+                dish_ln_thread_status[dish] = executor.submit(self.off_leaf_node, dish_ln_client, const.CMD_OFF)
+
+        # Wait for result
+        while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
+            pass
+
+
     def off_leaf_node(self, tango_client, cmd_name, param=None):
         """
         Invoke command on leaf nodes.
@@ -135,43 +155,3 @@ class Off(BaseCommand):
                 "CentralNode.Off()",
                 tango.ErrSeverity.ERR,
             )
-
-    def off_dish(self, dish_fqdn):
-        """
-        Create TangoClient for DishLeaf node node and call
-        off method.
-
-        :return: None
-        """
-        total_dishes = len(dish_fqdn)
-        dish_ln_thread_status = {}
-        with ThreadPoolExecutor(total_dishes) as executor:
-            for dish in dish_fqdn:
-                dish_ln_client = TangoClient(dish)
-                dish_ln_thread_status[dish] = executor.submit(self.off_dish_leaf_node, dish_ln_client)
-
-        # Wait for result
-        while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
-            pass
-
-    def off_dish_leaf_node(self, tango_client):
-        """
-        Invoke Off command on Dish leaf nodes.
-
-        :param tango_client: Proxy of corresponding node.
-
-        :return: None
-
-        :raises: Devfailed exception if error occures while  executing Off command on Dish leaf node.
-        """
-        try:
-            tango_client.send_command(const.CMD_OFF)
-            log_msg = "OFF command invoked successfully on {}".format(tango_client.get_device_fqdn)
-            self.logger.debug(log_msg)
-            return tango_client.get_device_fqdn
-
-        except DevFailed as dev_failed:
-            log_msg = f"{const.STR_TMC_OFF_EXEC}{dev_failed}"
-            self.logger.exception(dev_failed)
-            tango.Except.throw_exception(const.STR_TMC_OFF_EXEC, log_msg,
-                                         "CentralNode.Off()", tango.ErrSeverity.ERR)
