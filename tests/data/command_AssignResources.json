@@ -1,17 +1,19 @@
 {
-  "subarrayID": 1,
+  "interface": "https://schema.skao.int/ska-tmc-assignresources/1.0",
+  "subarray_id": 1,
   "dish": {
-    "receptorIDList": [
+    "receptor_ids": [
       "0001"
     ]
   },
   "sdp": {
-    "id": "sbi-mvp01-20200325-00001",
+    "interface": "https://schema.skao.int/ska-sdp-assignresources/1.0",
+    "eb_id": "eb-mvp01-20200325-00001",
     "max_length": 100.0,
     "scan_types": [
       {
-        "id": "science_A",
-        "coordinate_system": "ICRS",
+        "scan_type_id": "science_A",
+        "reference_frame": "ICRS",
         "ra": "02:42:40.771",
         "dec": "-00:00:47.84",
         "channels": [
@@ -60,8 +62,8 @@
         ]
       },
       {
-        "id": "calibration_B",
-        "coordinate_system": "ICRS",
+        "scan_type_id": "calibration_B",
+        "reference_frame": "ICRS",
         "ra": "12:29:06.699",
         "dec": "02:03:08.598",
         "channels": [
@@ -112,10 +114,10 @@
     ],
     "processing_blocks": [
       {
-        "id": "pb-mvp01-20200325-00001",
+        "pb_id": "pb-mvp01-20200325-00001",
         "workflow": {
-          "type": "realtime",
-          "id": "vis_receive",
+          "kind": "realtime",
+          "name": "vis_receive",
           "version": "0.1.0"
         },
         "parameters": {
@@ -123,10 +125,9 @@
         }
       },
       {
-        "id": "pb-mvp01-20200325-00002",
+        "pb_id": "pb-mvp01-20200325-00002",
         "workflow": {
-          "type": "realtime",
-          "id": "test_realtime",
+          "kind": "realtime",
           "version": "0.1.0"
         },
         "parameters": {
@@ -134,10 +135,10 @@
         }
       },
       {
-        "id": "pb-mvp01-20200325-00003",
+        "pb_id": "pb-mvp01-20200325-00003",
         "workflow": {
-          "type": "batch",
-          "id": "ical",
+          "kind": "batch",
+          "name": "ical",
           "version": "0.1.0"
         },
         "parameters": {
@@ -146,17 +147,17 @@
         "dependencies": [
           {
             "pb_id": "pb-mvp01-20200325-00001",
-            "type": [
+            "kind": [
               "visibilities"
             ]
           }
         ]
       },
       {
-        "id": "pb-mvp01-20200325-00004",
+        "pb_id": "pb-mvp01-20200325-00004",
         "workflow": {
-          "type": "batch",
-          "id": "dpreb",
+          "kind": "batch",
+          "name": "dpreb",
           "version": "0.1.0"
         },
         "parameters": {
@@ -165,7 +166,7 @@
         "dependencies": [
           {
             "pb_id": "pb-mvp01-20200325-00003",
-            "type": [
+            "kind": [
               "calibration"
             ]
           }

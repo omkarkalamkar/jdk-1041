@@ -54,7 +54,7 @@ class ResourceManager:
         for dish in range(0, len(resources_allocated)):
             dish_ID = "dish" + (resources_allocated[dish])
             self._subarray_allocation[dish_ID] = f"SA{subarrayID}"
-            device_data.receptorIDList.append(resources_allocated[dish])
+            device_data.receptor_ids.append(resources_allocated[dish])
 
     def update_resource_deallocation(self, subarray_name):
         for Dish_ID, Dish_Status in self._subarray_allocation.items():

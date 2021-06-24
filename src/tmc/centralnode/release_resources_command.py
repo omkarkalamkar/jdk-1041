@@ -61,43 +61,48 @@ class ReleaseResources(BaseCommand):
 
         :param argin: The string in JSON format. The JSON contains following values:
 
-            subarrayID:
+            subarray_id:
                 DevShort. Mandatory.
 
-            releaseALL:
+            release_all:
                 Boolean(True or False). Mandatory. True when all the resources to be released from Subarray.
 
-            receptorIDList:
-                DevVarStringArray. Empty when releaseALL tag is True.
+            receptor_ids:
+                DevVarStringArray. Empty when release_all tag is True.
 
             Example:
                 {
-                    "subarrayID": 1,
-                    "releaseALL": true,
-                    "receptorIDList": []
-
+                  "interface": "https://schema.skao.int/ska-tmc-releaseresources/1.0",
+                  "subarray_id": 1,
+                  "release_all": true,
+                  "receptor_ids": [
+                ]
                 }
 
-        Note: From Jive, enter input as: {"subarrayID":1,"releaseALL":true,"receptorIDList":[]} without any space.
+        Note: From Jive, enter input as: {"interface":"https://schema.skao.int/ska-tmc-releaseresources/1.0",
+        "subarray_id":1,"release_all":true,"receptor_ids":[]}
 
         return:
             A tuple containing a return code and a string in josn format on successful release
             of all the resources. The JSON string contains following values:
 
-            releaseALL:
+            release_all:
                 Boolean(True or False). If True, all the resources are successfully released from the
                 Subarray.
 
-            receptorIDList:
-                DevVarStringArray. If releaseALL is True, receptorIDList is empty. Else list returns
+            receptor_ids:
+                DevVarStringArray. If release_all is True, receptor_ids is empty. Else list returns
                 resources (device names) that are noe released from the subarray.
 
             Example:
                 argout =
                     {
-                        "ReleaseAll" : True,
-                        "receptorIDList" : []
+                      "interface": "https://schema.skatelescope.org/ska-tmc-releaseresources/1.0",
+                      "subarray_id": 1,
+                      "release_all": true,
+                      "receptor_ids": [
 
+                      ]
                     }
 
         return:
@@ -116,10 +121,10 @@ class ReleaseResources(BaseCommand):
         try:
             release_success = False
             jsonArgument = json.loads(argin)
-            subarrayID = jsonArgument["subarrayID"]
+            subarrayID = jsonArgument["subarray_id"]
             subarray_fqdn = device_data.subarray_FQDN_dict[subarrayID]
             subarray_name = f"SA {subarrayID}"
-            if jsonArgument["releaseALL"] == True:
+            if jsonArgument["release_all"] == True:
                 # Invoke "ReleaseAllResources" on SubarrayNode
                 subarray_client = TangoClient(subarray_fqdn)
                 return_val = subarray_client.send_command(const.CMD_RELEASE_RESOURCES)
@@ -128,14 +133,15 @@ class ReleaseResources(BaseCommand):
                 self.logger.debug(log_msg)
                 this_server.write_attr("activityMessage", log_msg, False)
 
+
                 if not res_not_released:
                     release_success = True
                     device_data.resource_manager.update_resource_deallocation(
                         subarray_name
                     )
                     argout = {
-                        "ReleaseAll": release_success,
-                        "receptorIDList": res_not_released,
+                        "release_all": release_success,
+                        "receptor_ids": res_not_released,
                     }
                     message = json.dumps(argout)
                     self.logger.info(message)

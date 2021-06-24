@@ -31,9 +31,9 @@ class DeviceData:
         else:
             DeviceData.__instance = self
 
-        self._sdp_master_health = HealthState.UNKNOWN
-        self._csp_master_health = HealthState.UNKNOWN
-        self.receptorIDList = []
+        self._sdp_master_leaf_health = HealthState.UNKNOWN
+        self._csp_master_leaf_health = HealthState.UNKNOWN
+        self.receptor_ids = []
         self.subarray_health_state_map = {}
         self._dish_leaf_node_devices = []
         self._leaf_device_proxy = []
