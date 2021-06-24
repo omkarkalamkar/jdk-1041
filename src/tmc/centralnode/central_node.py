@@ -501,6 +501,7 @@ class CentralNode(SKABaseDevice):
         self.register_command_object("TelescopeOn", self.telescopeon_object)
         self.register_command_object("ReleaseResources", self.release_object)
         self.register_command_object("On", self.on_object)
+        #TODO: This call for do() method will change in future
         self.on_object.do()
 
 

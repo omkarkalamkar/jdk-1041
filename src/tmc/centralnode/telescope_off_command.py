@@ -11,6 +11,7 @@ from tango import DevState, DevFailed
 
 # Additional import
 from ska.base import SKABaseDevice
+from ska.base.control_model import ObsState
 from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
@@ -72,14 +73,25 @@ class TelescopeOff(BaseCommand):
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        self.telescope_off_csp(csp_master_ln_fqdn)                                                               
-        self.telescope_off_sdp(sdp_master_ln_fqdn)
-        self.telescope_off_dish(device_data._dish_leaf_node_devices)
-        this_server.write_attr("activityMessage", const.STR_CMD_TELESCOPE_OFF_DISH, False)
-        self.telescope_off_subarray(tm_mid_subarrays)
-        log_msg = const.STR_TELESCOPE_OFF_CMD_ISSUED
-        self.logger.info(log_msg)
-        this_server.write_attr("activityMessage", log_msg, False)
+        try:
+            self.telescope_off_subarray(tm_mid_subarrays)
+            retry_count = 0
+            for value in self.subarray_obs_state.items():
+                while retry_count < 3:
+                    if value in [ObsState.EMPTY, ObsState.RESOURCING]:
+                        break
+                    time.sleep(0.1)
+                    retry_count+=1
+            self.telescope_off_csp(csp_master_ln_fqdn)                                                               
+            self.telescope_off_sdp(sdp_master_ln_fqdn)
+            self.telescope_off_dish(device_data._dish_leaf_node_devices)
+            this_server.write_attr("activityMessage", const.STR_CMD_TELESCOPE_OFF_DISH, False)
+            log_msg = const.STR_TELESCOPE_OFF_CMD_ISSUED
+            self.logger.info(log_msg)
+            this_server.write_attr("activityMessage", log_msg, False)
+        except Exception as e:
+            self.logger.exception(e)
+
 
     def telescope_off_csp(self, csp_fqdn):
         """
@@ -191,9 +203,11 @@ class TelescopeOff(BaseCommand):
         """
         total_subarrays = len(subarray_fqdn_list)
         subarray_thread_status = {}
+        self.subarray_obs_state = {}
         with ThreadPoolExecutor(total_subarrays) as executor:
             for subarray_fqdn in subarray_fqdn_list:
                 subarray_client = TangoClient(subarray_fqdn)
+                self.subarray_obs_state[subarray_fqdn] = subarray_client.get_attribute("obsState").value
                 subarray_thread_status[subarray_fqdn] = executor.submit(self.telescope_off_leaf_node,
                                                                         subarray_client, const.CMD_TELESCOPE_OFF)
         # Wait for result
