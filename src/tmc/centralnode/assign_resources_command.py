@@ -23,7 +23,7 @@ class AssignResources(BaseCommand):
     A class for CentralNode's AssignResources() command.
 
     Assigns resources to given subarray. It accepts the subarray id, receptor id list and SDP block in JSON
-    string format. Upon successful execution, the 'receptorIDList' attribute of the given subarray is populated
+    string format. Upon successful execution, the 'receptor_ids' attribute of the given subarray is populated
     with the given receptors.Also checking for duplicate allocation of resources is done. If already allocated
     it will throw error message regarding the prior existence of resource.
     """
@@ -74,7 +74,7 @@ class AssignResources(BaseCommand):
            sdp:
                Mandatory JSON object consisting of
 
-               id:
+               eb_id:
                    DevString
                    The SBI id.
                max_length:
@@ -82,7 +82,7 @@ class AssignResources(BaseCommand):
                    Maximum length of the SBI in seconds.
                scan_types:
                    array of the blocks each consisting following parameters
-                    id:
+                    scan_type_id:
                        DevString
                        The scan id.
                     coordinate_system:
@@ -94,11 +94,11 @@ class AssignResources(BaseCommand):
 
                processing_blocks:
                    array of the blocks each consisting following parameters
-                    pb_id:
+                    eb_id:
                         DevString
                         The Processing Block id.
                     workflow:
-                        type:
+                        kind:
                            DevString
                         name:
                            DevString
@@ -108,23 +108,22 @@ class AssignResources(BaseCommand):
                         {}
 
         Example:
-            {"interface":"https://schema.skatelescope.org/ska-tmc-assignresources/1.0","
-            subarray_id":1,"dish":{"receptor_ids":["0001","0002"]},"sdp":{"sbi_id":
-            "sbi-mvp01-20200325-00001","max_length":100.0,"scan_types":[{"scan_type_id":"science_A",
-            "reference_frame":"ICRS","ra":"02:42:40.771","dec":"-00:00:47.84","channels":[{"count":744,
-            "start":0,"stride":2,"freq_min":0.35e9,"freq_max":0.368e9,"link_map":[[0,0],[200,1],[744,2],
-            [944,3]]},{"count":744,"start":2000,"stride":1,"freq_min":0.36e9,"freq_max":0.368e9,"link_map":
-            [[2000,4],[2200,5]]}]},{"scan_type_id":"calibration_B","reference_frame":"ICRS","ra":
-            "12:29:06.699","dec":"02:03:08.598","channels":[{"count":744,"start":0,"stride":2,"freq_min":
-            0.35e9,"freq_max":0.368e9,"link_map":[[0,0],[200,1],[744,2],[944,3]]},{"count":744,"start":2000,"stride":1,
-            "freq_min":0.36e9,"freq_max":0.368e9,"link_map":[[2000,4],[2200,5]]}]}],"processing_blocks":
-            [{"pb_id":"pb-mvp01-20200325-00001","workflow":{"type":"realtime","name":"vis_receive","version":"0.1.0"},
-            "parameters":{}},{"pb_id":"pb-mvp01-20200325-00002","workflow":{"type":"realtime","name":"test_realtime",
-            "version":"0.1.0"},"parameters":{}},{"pb_id":"pb-mvp01-20200325-00003","workflow":{"type":"batch","name":
-            "ical","version":"0.1.0"},"parameters":{},"dependencies":[{"pb_id":"pb-mvp01-20200325-00001","type":
-            ["visibilities"]}]},{"pb_id":"pb-mvp01-20200325-00004","workflow":{"type":"batch","name":"dpreb","version":
-            "0.1.0"},"parameters":{},"dependencies":[{"pb_id":"pb-mvp01-20200325-00003","type":["calibration"]}]}]}}
-
+            {"interface":"https://schema.skao.int/ska-tmc-assignresources/1.0","subarray_id":1,
+            "dish":{"receptor_ids":["0001","0002"]},"sdp":{"interface":
+            "https://schema.skao.int/ska-sdp-assignresources/1.0","eb_id":"eb-mvp01-20200325-00001","max_length"
+            :100.0,"scan_types":[{"scan_type_id":"science_A","reference_frame":"ICRS","ra":"02:42:40.771","dec":
+            "-00:00:47.84","channels":[{"count":744,"start":0,"stride":2,"freq_min":0.35e9,"freq_max":0.368e9,
+            "link_map":[[0,0],[200,1],[744,2],[944,3]]},{"count":744,"start":2000,"stride":1,"freq_min":0.36e9,
+            "freq_max":0.368e9,"link_map":[[2000,4],[2200,5]]}]},{"scan_type_id":"calibration_B","reference_frame":
+            "ICRS","ra":"12:29:06.699","dec":"02:03:08.598","channels":[{"count":744,"start":0,"stride":2,"freq_min"
+            :0.35e9,"freq_max":0.368e9,"link_map":[[0,0],[200,1],[744,2],[944,3]]},{"count":744,"start":2000,"stride":1,
+            "freq_min":0.36e9,"freq_max":0.368e9,"link_map":[[2000,4],[2200,5]]}]}],"processing_blocks":[{"pb_id":
+            "pb-mvp01-20200325-00001","workflow":{"kind":"realtime","name":"vis_receive","version":"0.1.0"},
+            "parameters":{}},{"pb_id":"pb-mvp01-20200325-00002","workflow":{"kind":"realtime","version":"0.1.0"},
+            "parameters":{}},{"pb_id":"pb-mvp01-20200325-00003","workflow":{"kind":"batch","name":"ical","version":
+            "0.1.0"},"parameters":{},"dependencies":[{"pb_id":"pb-mvp01-20200325-00001","kind":["visibilities"]}]},
+            {"pb_id":"pb-mvp01-20200325-00004","workflow":{"kind":"batch","name":"dpreb","version":"0.1.0"},"parameters"
+            :{},"dependencies":[{"pb_id":"pb-mvp01-20200325-00003","kind":["calibration"]}]}]}}
 
 
         Note: From Jive, enter above input string without any space.
@@ -136,7 +135,7 @@ class AssignResources(BaseCommand):
             dish:
                 Mandatory JSON object consisting of
 
-                receptorIDList_success:
+                receptor_ids_success:
                     DevVarStringArray
                     Contains ids of the receptors which are successfully allocated. Empty on unsuccessful
                     allocation.
@@ -149,7 +148,7 @@ class AssignResources(BaseCommand):
                 }
                 }
 
-        Note: Enter input without spaces as:{"dish":{"receptorIDList_success":["0001","0002"]}}
+        Note: Enter input without spaces as:{"dish":{"receptor_ids_success":["0001","0002"]}}
 
         return:
             None
@@ -159,7 +158,7 @@ class AssignResources(BaseCommand):
 
         """
         device_data = DeviceData.get_instance()
-        device_data.receptorIDList = []
+        device_data.receptor_ids = []
         argout = []
 
         ## Validate the input JSON string.
@@ -216,7 +215,7 @@ class AssignResources(BaseCommand):
             self.logger.debug(const.STR_ASSIGN_RESOURCES_SUCCESS)
 
             # Prepare output argument
-            argout = {"dish": {"receptor_ids_success": device_data.receptorIDList}}
+            argout = {"dish": {"receptor_ids_success": device_data.receptor_ids}}
             self.logger.debug(argout)
         except (
             InvalidJSONError,

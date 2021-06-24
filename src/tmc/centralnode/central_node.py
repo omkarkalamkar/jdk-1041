@@ -385,7 +385,7 @@ class CentralNode(SKABaseDevice):
     @command(
         dtype_in="str",
         doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
-        "DevShort\ndish: JSON object consisting\n- receptorIDList: DevVarStringArray. "
+        "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
         "The individual string should contain dish numbers in string format with "
         "preceding zeroes upto 3 digits. E.g. 0001, 0002",
         dtype_out="str",
@@ -417,7 +417,7 @@ class CentralNode(SKABaseDevice):
     @command(
         dtype_in="str",
         doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
-        "releaseALL boolean as true and receptorIDList.",
+        "releaseALL boolean as true and receptor_ids.",
         dtype_out="str",
         doc_out="information-only string",
     )

@@ -1,5 +1,5 @@
 {
-  "interface": "https://schema.skatelescope.org/ska-tmc-assignresources/1.0",
+  "interface": "https://schema.skao.int/ska-tmc-assignresources/1.0",
   "subarray_id": 1,
   "dish": {
     "receptor_ids": [
@@ -7,7 +7,8 @@
     ]
   },
   "sdp": {
-    "sbi_id": "sbi-mvp01-20200325-00001",
+    "interface": "https://schema.skao.int/ska-sdp-assignresources/1.0",
+    "eb_id": "eb-mvp01-20200325-00001",
     "max_length": 100.0,
     "scan_types": [
       {
@@ -115,7 +116,7 @@
       {
         "pb_id": "pb-mvp01-20200325-00001",
         "workflow": {
-          "type": "realtime",
+          "kind": "realtime",
           "name": "vis_receive",
           "version": "0.1.0"
         },
@@ -126,8 +127,7 @@
       {
         "pb_id": "pb-mvp01-20200325-00002",
         "workflow": {
-          "type": "realtime",
-          "name": "test_realtime",
+          "kind": "realtime",
           "version": "0.1.0"
         },
         "parameters": {
@@ -137,7 +137,7 @@
       {
         "pb_id": "pb-mvp01-20200325-00003",
         "workflow": {
-          "type": "batch",
+          "kind": "batch",
           "name": "ical",
           "version": "0.1.0"
         },
@@ -147,7 +147,7 @@
         "dependencies": [
           {
             "pb_id": "pb-mvp01-20200325-00001",
-            "type": [
+            "kind": [
               "visibilities"
             ]
           }
@@ -156,7 +156,7 @@
       {
         "pb_id": "pb-mvp01-20200325-00004",
         "workflow": {
-          "type": "batch",
+          "kind": "batch",
           "name": "dpreb",
           "version": "0.1.0"
         },
@@ -166,7 +166,7 @@
         "dependencies": [
           {
             "pb_id": "pb-mvp01-20200325-00003",
-            "type": [
+            "kind": [
               "calibration"
             ]
           }
