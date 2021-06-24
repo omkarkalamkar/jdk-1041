@@ -169,14 +169,6 @@ def test_telescope_standby_command(device_data, subarray_state_model, mock_subar
     telescope_standby_cmd.do()
     assert device_proxy.activityMessage == const.STR_TELESCOPE_STANDBY_ISSUED
 
-# def test_telescope_standby(mock_subarray):
-#     device_proxy, _, _ = mock_subarray
-#     device_proxy.On()
-#     device_proxy.TelescopeOn()
-#     device_proxy.TelescopeStandby()
-#     assert device_proxy.activityMessage == const.STR_TELESCOPE_STANDBY_EXEC
-#     # assert device_proxy.state() == DevState.OFF
-
 def test_telescope_on(mock_subarray):
     device_proxy, _, _ = mock_subarray
     device_proxy.On()
