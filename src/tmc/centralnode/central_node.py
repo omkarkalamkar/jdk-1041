@@ -20,7 +20,8 @@ from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 from ska.base.control_model import HealthState
 from tmc.centralnode import const, release
-from tmc.centralnode.start_up_telescope_command import StartUpTelescope
+from tmc.centralnode.on_command import On
+from tmc.centralnode.telescope_on_command import TelescopeOn
 from tmc.centralnode.stand_by_telescope_command import StandByTelescope
 from tmc.centralnode.assign_resources_command import AssignResources
 from tmc.centralnode.release_resources_command import ReleaseResources
@@ -42,8 +43,9 @@ __all__ = [
     "release",
     "ReleaseResources",
     "StandByTelescope",
-    "StartUpTelescope",
+    "TelescopeOn",
     "StowAntennas",
+    "On"
 ]
 
 
@@ -357,7 +359,7 @@ class CentralNode(SKABaseDevice):
         (result_code, message) = handler()
         return [[result_code], [message]]
 
-    def is_StartUpTelescope_allowed(self):
+    def is_TelescopeOn_allowed(self):
         """
         Checks whether this command is allowed to be run in current device state.
 
@@ -368,22 +370,43 @@ class CentralNode(SKABaseDevice):
         :raises: DevFailed if this command is not allowed to be run in current device state.
 
         """
-        handler = self.get_command_object("StartUpTelescope")
+        handler = self.get_command_object("TelescopeOn")
         return handler.check_allowed()
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="[ResultCode, information-only string]",
-    )
+    @command()
     @DebugIt()
-    def StartUpTelescope(self):
+    def TelescopeOn(self):
         """
-        This command invokes SetOperateMode() command on DishLeadNode, On() command on CspMasterLeafNode,
-        SdpMasterLeafNode and SubarrayNode and sets the Central Node into ON state.
+        This command invokes TelescopeOn() command on DishLeadNode, CspMasterLeafNode,
+        SdpMasterLeafNode .
         """
-        handler = self.get_command_object("StartUpTelescope")
-        (result_code, message) = handler()
-        return [[result_code], [message]]
+        handler = self.get_command_object("TelescopeOn")
+        handler()
+
+    def is_On_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        handler = self.get_command_object("On")
+        return handler.check_allowed()
+
+    @command()   
+    @DebugIt()
+    def On(self):
+        """
+        This command invokes On command on DishLeadNode, On() command on CspMasterLeafNode,
+        SdpMasterLeafNode and sets the Central Node into ON state.
+        This commmand turn On the TMC devices
+        """
+        handler = self.get_command_object("On")
+        handler()
 
     def is_AssignResources_allowed(self):
         """
@@ -454,16 +477,19 @@ class CentralNode(SKABaseDevice):
         """
         super().init_command_objects()
         args = (self.device_data, self.state_model, self.logger)
-        self.startup_object = StartUpTelescope(*args)
+        self.on_object = On(*args)
+        self.telescopeon_object = TelescopeOn(*args)
         self.standby_object = StandByTelescope(*args)
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)
         self.register_command_object("AssignResources", self.assign_object)
         self.register_command_object("StowAntennas", self.stow_object)
-        self.register_command_object("StartUpTelescope", self.startup_object)
+        self.register_command_object("TelescopeOn", self.telescopeon_object)
         self.register_command_object("StandByTelescope", self.standby_object)
         self.register_command_object("ReleaseResources", self.release_object)
+        self.register_command_object("On", self.on_object)
+        self.on_object.do()
 
 
 # ----------
