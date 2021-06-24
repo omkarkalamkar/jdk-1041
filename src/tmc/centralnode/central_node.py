@@ -47,7 +47,7 @@ __all__ = [
     "StandByTelescope",
     "TelescopeOn",
     "StowAntennas",
-    "On"
+    "On",
     "Standby",
     "TelescopeStandby"
 ]
