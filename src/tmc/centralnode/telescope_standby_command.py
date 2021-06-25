@@ -23,7 +23,7 @@ class TelescopeStandby(BaseCommand):
     """
     A class for CentralNode's TelescopeStandby() command.
 
-    Sets the CentralNode into OFF state.Invokes command on DishLeaf node, SDPMasterLeaf node,
+    Invokes command on DishLeaf node, SDPMasterLeaf node,
     CSPMasterLeaf node.
     """
     def check_allowed(self):
@@ -71,7 +71,7 @@ class TelescopeStandby(BaseCommand):
         self.telescope_standby_sdp(sdp_master_ln_fqdn)
         self.telescope_standby_dish(device_data._dish_leaf_node_devices)
         self.telescope_standby_subarray(tm_mid_subarrays)
-        this_server.write_attr("activityMessage", const.STR_CMD_STANDBY_DISH, False)
+        this_server.write_attr("activityMessage", const.STR_CMD_TELESCOPESTANDBY, False)
         log_msg = const.STR_TELESCOPE_STANDBY_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
@@ -84,7 +84,7 @@ class TelescopeStandby(BaseCommand):
         :return: None
         """
         csp_mln_client = TangoClient(csp_fqdn)
-        self.telescope_standby_leaf_node(csp_mln_client, const.CMD_TELESCOPE_STANDBY, [])
+        self.telescope_standby_leaf_node(csp_mln_client, const.CMD_TELESCOPE_STANDBY)
 
     def telescope_standby_sdp(self, sdp_fqdn):
         """
