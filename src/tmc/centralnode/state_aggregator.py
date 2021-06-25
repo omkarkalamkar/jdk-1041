@@ -4,6 +4,7 @@ state_aggregator class for CentralNode.
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Standard Python imports
 import logging
+import threading
 
 # Tango imports
 import tango
