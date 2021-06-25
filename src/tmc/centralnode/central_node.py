@@ -24,9 +24,11 @@ from tmc.centralnode.telescope_off_command import TelescopeOff
 from tmc.centralnode.off_command import Off
 from tmc.centralnode.on_command import On
 from tmc.centralnode.telescope_on_command import TelescopeOn
+from tmc.centralnode.telescope_standby_command import TelescopeStandby
 from tmc.centralnode.assign_resources_command import AssignResources
 from tmc.centralnode.release_resources_command import ReleaseResources
 from tmc.centralnode.stow_antennas_command import StowAntennas
+from tmc.centralnode.standby_command import Standby
 from tmc.centralnode.resource_manager import ResourceManager
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
@@ -48,7 +50,9 @@ __all__ = [
     "Off",
     "TelescopeOn",
     "StowAntennas",
-    "On"
+    "On",
+    "Standby",
+    "TelescopeStandby"
 ]
 
 
@@ -457,6 +461,56 @@ class CentralNode(SKABaseDevice):
         message = handler(argin)
         return message
 
+    def is_Standby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        handler = self.get_command_object("Standby")
+        return handler.check_allowed()
+
+    @command()
+    @DebugIt()
+    def Standby(self):
+        """
+        This command invokes Standby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
+
+        """
+        handler = self.get_command_object("Standby")
+        handler()
+
+    def is_telescope_standby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        handler = self.get_command_object("TelescopeStandby")
+        return handler.check_allowed()
+
+    @command()
+    @DebugIt()
+    def TelescopeStandby(self):
+        """
+        This command invokes TelescopeStandby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
+
+        """
+        handler = self.get_command_object("TelescopeStandby")
+        handler()
+
     def is_Off_allowed(self):
         """
         Checks whether this command is allowed to be run in current device state.
@@ -468,6 +522,7 @@ class CentralNode(SKABaseDevice):
         :raises: DevFailed if this command is not allowed to be run in current device state.
 
         """
+        
         handler = self.get_command_object("Off")
         return handler.check_allowed()
 
@@ -494,6 +549,8 @@ class CentralNode(SKABaseDevice):
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)
+        self.standby_tmc_object = Standby(*args)
+        self.telescope_standby_object = TelescopeStandby(*args)
         self.register_command_object("AssignResources", self.assign_object)
         self.register_command_object("StowAntennas", self.stow_object)
         self.register_command_object("TelescopeOff", self.telescope_off_object)
@@ -501,9 +558,11 @@ class CentralNode(SKABaseDevice):
         self.register_command_object("TelescopeOn", self.telescopeon_object)
         self.register_command_object("ReleaseResources", self.release_object)
         self.register_command_object("On", self.on_object)
+        self.register_command_object("Standby", self.standby_tmc_object)
+        self.register_command_object("TelescopeStandby", self.telescope_standby_object)
         #TODO: This call for do() method will change in future
         self.on_object.do()
-
+        
 
 # ----------
 # Run server

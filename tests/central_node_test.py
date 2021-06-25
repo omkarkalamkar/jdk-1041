@@ -15,6 +15,10 @@ from os.path import dirname, join
 import tango
 from tango import DevState
 from tango.test_context import DeviceTestContext
+from tmc.centralnode.standby_command import Standby
+from tmc.centralnode.telescope_standby_command import TelescopeStandby
+from tmc.centralnode.on_command import On
+from tmc.centralnode.telescope_on_command import TelescopeOn
 from ska.base.control_model import ObsState
 from ska.base import SKASubarrayStateModel
 
@@ -39,6 +43,7 @@ from ska.base.control_model import (
 )
 from ska.base.control_model import LoggingLevel
 from ska.base.commands import ResultCode
+from ska.base import SKASubarrayStateModel
 
 assign_input_file = "command_AssignResources.json"
 path = join(dirname(__file__), "data", assign_input_file)
@@ -72,6 +77,9 @@ def subarray_state_model():
     """
     yield SKASubarrayStateModel(logging.getLogger())
 
+@pytest.fixture
+def device_data():
+    yield DeviceData()
 
 @pytest.fixture(scope="function")
 def mock_subarraynode_device(mock_tango_server_helper, mock_tango_client):
@@ -163,15 +171,33 @@ def central_node_test_info(request):
     }
     return test_info
 
+def test_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
+    standby_cmd = Standby(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    standby_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_STANDBY, None)
+    
+def test_on_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
+    on_cmd = On(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    on_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_ON, None)
 
-def test_on(mock_subarray):
-    device_proxy, _, _ = mock_subarray
-    assert device_proxy.activityMessage == const.STR_TMC_ON_CMD_ISSUED
+def test_telescope_on_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
+    telescope_on_cmd = TelescopeOn(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    telescope_on_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_TELESCOPE_ON, None)
 
-def test_telescope_on(mock_subarray):
-    device_proxy, _, _ = mock_subarray
-    device_proxy.TelescopeOn()
-    assert device_proxy.activityMessage == const.STR_ON_CMD_ISSUED
+def test_telescope_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
+    telescope_standby_cmd = TelescopeStandby(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    telescope_standby_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_TELESCOPE_STANDBY, None)
 
 
 def test_telescope_off(mock_obstate_check, mock_subarray):
