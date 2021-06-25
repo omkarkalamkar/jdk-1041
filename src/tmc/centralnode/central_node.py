@@ -117,9 +117,21 @@ class CentralNode(SKABaseDevice):
         dtype="str", default_value="", doc="Device name prefix for Dish Leaf Node"
     )
 
+    TMMidCspSubarrayLeafNodeFQDN = device_property(
+        dtype=("str",),
+        doc="List of TM Mid CspSubarrayLeafNode devices",
+        default_value=tuple(),
+    )
+
+    TMMidSdpSubarrayLeafNodeFQDN = device_property(
+        dtype=("str",),
+        doc="List of TM Mid SdpSubarrayLeafNode devices",
+        default_value=tuple(),
+    )
+
     CspMasterLeafNodeFQDN = device_property(dtype="str")
 
-    CspMasterFQDN = device_property(dtype="str")
+    CspMasterFQDN = device_property(dtype="str")    
 
     SdpMasterLeafNodeFQDN = device_property(dtype="str")
 
