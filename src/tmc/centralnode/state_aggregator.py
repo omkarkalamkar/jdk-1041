@@ -15,6 +15,7 @@ from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
+from tmc.centralnode.aggregator import Aggregator
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 
@@ -34,8 +35,10 @@ class StateAggregator(Aggregator):
         self.csp_subarray_state_map = {}
         self.sdp_subarray_state_map = {}
         self.dish_state_map = {}
-
+        self.state_event_map = {}
         self.this_server = TangoServerHelper.get_instance()
+        # create lock
+        self.state_callback_lock = threading.Lock()
         # FQDN are passed as string here. Once tangoserverhelper is updated in tmccommonpackage, then this will be updated.
         self.csp_master_ln_fqdn = ""
         self.sdp_master_ln_fqdn = ""
@@ -43,7 +46,7 @@ class StateAggregator(Aggregator):
         self.tm_mid_subarrays = []
         self.tm_mid_csp_subarrays_leaf_nodes = []
         self.tm_mid_sdp_subarrays_leaf_nodes = []
-
+        # Read the property of devices
         self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
         self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         self.dln_prefix = self.this_server.read_property("DishLeafNodePrefix")[0]
@@ -51,8 +54,6 @@ class StateAggregator(Aggregator):
         self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
         self.tm_mid_csp_subarrays_leaf_nodes = self.this_server.read_property("TMMidCspSubarrayLeafNodeFQDN")
         self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property("TMMidSdpSubarrayLeafNodeFQDN")
-
-        self.state_event_map = {}
 
 
     def subscribe_event(self):
@@ -234,20 +235,23 @@ class StateAggregator(Aggregator):
 
     def state_cb(self, event):
         """
-        Retrieves the subscribed Subarray health state, aggregates them to calculate the
-        telescope health state.
+        Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
+        and Subarray, aggregates them to calculate the CentralNode state.
 
-        :param event: A TANGO_CHANGE event on Subarray healthState.
+        :param event: A TANGO_CHANGE event on CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
+        and Subarray healthState.
 
         :return: None
         """
         device_data = DeviceData.get_instance()
-        log_msg = f'Health state attribute change event is : {event.attr_name}'
+        # Lock for thread 1
+        self.state_callback_lock.acquire()
+        log_msg = f'State attribute change event is : {event.attr_name}'
         self.logger.info(log_msg)
-        log_msg = f'Health state attribute change event is: {event.attr_value.value}'
+        log_msg = f'State attribute change event is: {event.attr_value.value}'
         self.logger.info(log_msg)
         
-        def _update_health_state(self, fqdn_device_health_state_map: dict):
+        def _update_state(self, fqdn_device_health_state_map: dict):
             health_state = event.attr_value.value
             attr_name = event.attr_name
             self.logger.info(f"Health state is: {health_state}")
@@ -263,6 +267,7 @@ class StateAggregator(Aggregator):
             else:
                 self.logger.debug(const.EVT_UNKNOWN)
                 # TODO: update read_activity message for unknown events
+        self.state_callback_lock.release()
 
         def _generate_health_state_log_msg(self, health_state):
             health_state_string_map = {
@@ -297,7 +302,7 @@ class StateAggregator(Aggregator):
                 self.csp_master_ln_fqdn: "_csp_master_health",
                 self.sdp_master_ln_fqdn: "_sdp_master_health"
             }
-            _update_health_state(self, fqdn_device_health_state_map)
+            _update_state(self, fqdn_device_health_state_map)
 
             health_states = [
                 device_data._csp_master_health,
