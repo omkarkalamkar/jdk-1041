@@ -151,9 +151,7 @@ class CentralNode(SKABaseDevice):
     )
 
     desiredTelescopeState = attribute(
-        dtype=DevState,
-        access=AttrWriteType.READ,
-        doc="desiredTelescopeState attribute of Central Node.",
+        dtype="DevState",
     )
 
 

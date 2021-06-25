@@ -150,6 +150,7 @@ def test_telescope_on(mock_subarray):
     device_proxy.On()
     device_proxy.TelescopeOn()
     assert device_proxy.activityMessage == const.STR_ON_CMD_ISSUED
+    assert device_proxy.desiredTelescopeState == DevState.ON
     # assert device_proxy.state() == DevState.ON
 
 

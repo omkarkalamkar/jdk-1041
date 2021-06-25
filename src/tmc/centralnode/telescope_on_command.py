@@ -76,6 +76,9 @@ class TelescopeOn(BaseCommand):
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED, False)
+        device_data.desired_telescope_state["TelescopeON"] = self.state_model.op_state
+        # device_data.desired_telescope_state["TelescopeON"] = DevState.ON
+        this_server.write_attr("desiredTelescopeState", device_data.desired_telescope_state["TelescopeON"], False)
 
     def startup_csp(self, csp_fqdn):
         """
