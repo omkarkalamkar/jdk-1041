@@ -76,9 +76,9 @@ class TelescopeOff(BaseCommand):
         try:
             self.telescope_off_subarray(tm_mid_subarrays)
             retry_count = 0
-            for value in self.subarray_obs_state.items():
+            for val in self.subarray_obs_state:
                 while retry_count < 3:
-                    if value in [ObsState.EMPTY, ObsState.RESOURCING]:
+                    if self.subarray_obs_state[val] in [ObsState.EMPTY, ObsState.RESOURCING]:
                         break
                     time.sleep(0.1)
                     retry_count+=1
