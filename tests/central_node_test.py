@@ -6,6 +6,7 @@ import types
 import json
 import pytest
 import mock
+import logging
 from mock import MagicMock
 from mock import Mock
 from os.path import dirname, join
@@ -14,17 +15,24 @@ from os.path import dirname, join
 import tango
 from tango import DevState
 from tango.test_context import DeviceTestContext
+from tmc.centralnode.standby_command import Standby
+from tmc.centralnode.telescope_standby_command import TelescopeStandby
+from tmc.centralnode.on_command import On
+from tmc.centralnode.telescope_on_command import TelescopeOn
+from ska.base.control_model import ObsState
+from ska.base import SKASubarrayStateModel
 
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
+from tmc.centralnode.off_command import Off
 from tmc.centralnode.input_validator import AssignResourceValidator
 from tmc.centralnode import CentralNode, const, release
 from tmc.centralnode.const import (
     CMD_SET_STOW_MODE,
     STR_ON_CMD_ISSUED,
     STR_STOW_CMD_ISSUED_CN,
-    STR_STANDBY_CMD_ISSUED,
+    STR_TELESCOPE_OFF_CMD_ISSUED,
 )
 from ska.base.control_model import (
     HealthState,
@@ -35,6 +43,7 @@ from ska.base.control_model import (
 )
 from ska.base.control_model import LoggingLevel
 from ska.base.commands import ResultCode
+from ska.base import SKASubarrayStateModel
 
 assign_input_file = "command_AssignResources.json"
 path = join(dirname(__file__), "data", assign_input_file)
@@ -61,6 +70,16 @@ path = join(dirname(__file__), "data", release_invalid_key_file)
 with open(path, "r") as f:
     release_invalid_key = f.read()
 
+@pytest.fixture
+def subarray_state_model():
+    """
+    Yields a new SKASubarrayStateModel for testing
+    """
+    yield SKASubarrayStateModel(logging.getLogger())
+
+@pytest.fixture
+def device_data():
+    yield DeviceData()
 
 @pytest.fixture(scope="function")
 def mock_subarraynode_device(mock_tango_server_helper, mock_tango_client):
@@ -84,6 +103,20 @@ def mock_subarraynode_device(mock_tango_server_helper, mock_tango_client):
 @pytest.fixture(scope="function", params=[HealthState.UNKNOWN])
 def health_state(request):
     return request.param
+
+
+
+@pytest.fixture(scope="function")
+def mock_obstate_check():
+    dut_properties = {"TMMidSubarrayNodes": "ska_mid/tm_subarray_node/1"}
+    with mock.patch.object(
+            TangoClient, "_get_deviceproxy", return_value=Mock()
+        ) as mock_obj:
+        tango_client_obj = TangoClient(dut_properties["TMMidSubarrayNodes"])
+        with mock.patch.object(
+            TangoClient, "get_attribute", Mock(return_value = ObsState.EMPTY)
+        ) as mock_obj_obstate:
+            yield tango_client_obj
 
 
 def dummy_subscriber(attribute, callback_method):
@@ -138,30 +171,47 @@ def central_node_test_info(request):
     }
     return test_info
 
+def test_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
+    standby_cmd = Standby(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    standby_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_STANDBY, None)
 
-def test_on(mock_subarray):
-    device_proxy, _, _ = mock_subarray
-    device_proxy.On()
-    assert device_proxy.activityMessage == const.STR_TMC_ON_CMD_ISSUED
-    #assert device_proxy.state() == DevState.ON
 
-def test_telescope_on(mock_subarray):
-    device_proxy, _, _ = mock_subarray
-    device_proxy.On()
-    device_proxy.TelescopeOn()
-    assert device_proxy.activityMessage == const.STR_ON_CMD_ISSUED
+def test_on_class_command_method(device_data, subarray_state_model, mock_subarray):
+    _, tango_client_obj, _ = mock_subarray
+    on_cmd = On(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    on_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_ON, None)
+
+
+def test_telescope_on_class_command_method(device_data, subarray_state_model, mock_subarray):
+    device_proxy, tango_client_obj, _ = mock_subarray
+    telescope_on_cmd = TelescopeOn(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    telescope_on_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_TELESCOPE_ON, None)
     assert device_proxy.desiredTelescopeState == DevState.ON
-    # assert device_proxy.state() == DevState.ON
 
 
-def test_standby(mock_subarray):
-    device_proxy, _, _ = mock_subarray
+def test_telescope_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+    device_proxy, tango_client_obj, _ = mock_subarray
+    telescope_standby_cmd = TelescopeStandby(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    telescope_standby_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_TELESCOPE_STANDBY, None)
+    assert device_proxy.desiredTelescopeState == DevState.STANDBY
+
+
+def test_telescope_off(mock_obstate_check, mock_subarray):
+    device_proxy, tango_client_obj, _ = mock_subarray
+    tango_client_obj.get_attribute.side_effect = Mock(return_value = ObsState.EMPTY)
     device_proxy.TelescopeOn()
-    assert device_proxy.StandByTelescope() == [
-        [ResultCode.OK],
-        ["STANDBYTELESCOPE command invoked from Central node"],
-    ]
-    assert device_proxy.state() == DevState.OFF
+    device_proxy.TelescopeOff()
+    assert device_proxy.activityMessage == const.STR_TELESCOPE_OFF_CMD_ISSUED
+    assert device_proxy.desiredTelescopeState == DevState.OFF
 
 
 # Mocking AssignResources command success response from SubarrayNode
@@ -198,6 +248,19 @@ def mock_subarray(mock_tango_server_helper, mock_tango_client):
         CentralNode, initial_dut_properties=dut_properties
     ) as tango_context:
         yield tango_context.device, tango_client_obj, tango_server_obj
+
+
+def test_off_class_command_method(
+    subarray_state_model, mock_subarray
+):
+    _, tango_client_obj, _ = mock_subarray
+    device_data = DeviceData.get_instance()
+    off_cmd = Off(device_data, subarray_state_model)
+    subarray_state_model._straight_to_state(DevState.ON, None)
+    off_cmd.do()
+    tango_client_obj.deviceproxy.command_inout.assert_called_with(
+        const.CMD_OFF, None
+    )
 
 
 def test_assign_resources(mock_subarray):
@@ -465,7 +528,7 @@ def test_release_resources_invalid_key(mock_tango_server_helper, mock_tango_clie
         assert const.ERR_JSON_KEY_NOT_FOUND in str(df.value)
 
 
-@pytest.fixture(scope="function", params=[("StandByTelescope"), ("TelescopeOn")])
+@pytest.fixture(scope="function", params=[("TelescopeOn")])
 def command_without_arg_devfailed(request):
     cmd_name = request.param
     return cmd_name
@@ -480,6 +543,18 @@ def test_command_without_arg_should_raise_devfailed_exception(
     tango_client.deviceproxy.command_inout.side_effect = raise_devfailed_exception
     with pytest.raises(tango.DevFailed):
         device_proxy.command_inout(cmd_name)
+    assert device_proxy.state() == DevState.FAULT
+
+
+def test_telescopeoff_should_raise_devfailed_exception(
+    mock_subarray, mock_tango_server_helper
+
+):
+    device_proxy, tango_client, _ = mock_subarray
+    tango_client.deviceproxy.command_inout.side_effect = raise_devfailed_exception
+    with pytest.raises(tango.DevFailed):
+        device_proxy.TelescopeOn()
+        device_proxy.TelescopeOff()
     assert device_proxy.state() == DevState.FAULT
 
 
@@ -526,7 +601,6 @@ def test_telescope_health_state_matches_csp_master_leaf_node_health_state_after_
     assert device_proxy.telescopeHealthState == health_state
 
 
-
 @pytest.fixture(scope="function")
 def mock_sdp_master_proxy(mock_tango_server_helper, mock_tango_client):
     dut_properties = {"SdpMasterFQDN": "mid_sdp/elt/master"}
@@ -566,7 +640,6 @@ def test_telescope_health_state_is_ok_when_sdp_master_node_is_ok_after_start(
             tango_client_obj = TangoClient("mid_sdp/elt/master")
             device_proxy.TelescopeOn()
     assert device_proxy.telescopeHealthState == health_state
-
 
 
 @pytest.fixture(scope="function")
