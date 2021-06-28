@@ -96,6 +96,12 @@ PROP_DEF_VAL_TM_MID_SA1 = "ska_mid/tm_subarray_node/1"
 PROP_DEF_VAL_TM_MID_SA2 = "ska_mid/tm_subarray_node/2"
 PROP_DEF_VAL_TM_MID_SA3 = "ska_mid/tm_subarray_node/3"
 PROP_DEF_VAL_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d"
+PROP_DEF_VAL_TM_MID_CSPSA_LN1: "ska_mid/tm_leaf_node/csp_subarray01"
+PROP_DEF_VAL_TM_MID_CSPSA_LN2: "ska_mid/tm_leaf_node/csp_subarray02"
+PROP_DEF_VAL_TM_MID_CSPSA_LN3: "ska_mid/tm_leaf_node/csp_subarray03"
+PROP_DEF_VAL_TM_MID_SDPSA_LN1: "ska_mid/tm_leaf_node/sdp_subarray01"
+PROP_DEF_VAL_TM_MID_SDPSA_LN2: "ska_mid/tm_leaf_node/sdp_subarray02"
+PROP_DEF_VAL_TM_MID_SDPSA_LN3: "ska_mid/tm_leaf_node/sdp_subarray03"
 GET_DEVICE_LIST_TANGO_DB = "ska_mid/tm_leaf_node/d000*"
 
 

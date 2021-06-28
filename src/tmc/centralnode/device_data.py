@@ -33,8 +33,19 @@ class DeviceData:
 
         self._sdp_master_health = HealthState.UNKNOWN
         self._csp_master_health = HealthState.UNKNOWN
+
+        ##Do we need to initialize tmc devices state?? currently I have not added any states
+        self._csp_master_state = ""
+        self._sdp_master_state = ""
+        ##
         self.receptorIDList = []
         self.subarray_health_state_map = {}
+        ###
+        self.subarray_state_map = {}
+        self.csp_subarray_state_map = {}
+        self.sdp_subarray_state_map = {}
+        self.dish_state_map = {}
+        ##
         self._dish_leaf_node_devices = []
         self._leaf_device_proxy = []
         self.subarray_FQDN_dict = {}
