@@ -8,7 +8,7 @@ import threading
 
 # Tango imports
 import tango
-from tango import DevFailed
+from tango import DevFailed, DevState
 
 # Additional import
 from ska.base.control_model import HealthState
@@ -323,7 +323,7 @@ class StateAggregator(Aggregator):
         # create thread
         self.logger.info("Starting thread to calculate state for Tmc devices.")
         self.state_calculator_thread = threading.Thread(
-            target=self._calculate_state,
+            target=self.calculate_state,
         )
         self.state_calculator_thread.start()
 
@@ -336,7 +336,7 @@ class StateAggregator(Aggregator):
         self.logger.info("State calculator thread stopped.")
 
 
-    def _generate_state_log_msg(self, device_state):
+    def generate_state_log_msg(self, device_state):
         state_string_map = {
             DevState.ON: const.STR_ON,
             DevState.OFF: const.STR_OFF,
@@ -347,23 +347,23 @@ class StateAggregator(Aggregator):
         self.logger.info(log_msg)
         
 
-    def _calculate_state(device_states):
+    def calculate_state(self, device_states):
         while not self._state_event.isSet():
-            if self._attr_callback_trigger.isset():
+            if self._attr_callback_trigger.isSet():
                 #calculation logic
                 unique_states = set(device_states)
                 if unique_states == set([DevState.ON]):
                     self.this_server.device.attr_map["State"] = DevState.ON
-                    _generate_state_log_msg(self, DevState.ON)
+                    generate_state_log_msg(self, DevState.ON)
                 elif unique_states == set([DevState.OFF]):
                     self.this_server.device.attr_map["State"] = DevState.OFF
-                    _generate_state_log_msg(self, DevState.ON)
+                    generate_state_log_msg(self, DevState.ON)
                 elif DevState.INIT in unique_states:
                     self.this_server.device.attr_map["State"] = DevState.INIT
-                    _generate_state_log_msg(self, DevState.INIT)
+                    generate_state_log_msg(self, DevState.INIT)
                 elif DevState.FAULT in unique_states:
                     self.this_server.device.attr_map["State"] = DevState.FAULT
-                    _generate_state_log_msg(self, DevState.FAULT)
+                    generate_state_log_msg(self, DevState.FAULT)
                 else:
                     self.logger.info("State can not be state")
             self._attr_callback_trigger.clear()
