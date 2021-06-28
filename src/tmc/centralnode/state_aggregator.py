@@ -51,7 +51,7 @@ class StateAggregator(Aggregator):
         self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
         self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         self.dln_prefix = self.this_server.read_property("DishLeafNodePrefix")[0]
-        self.num_dishes = self.this_server.read_property("NumDishes")
+        self.num_dishes = self.this_server.read_property("NumDishes")[0]
         self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
         self.tm_mid_csp_subarrays_leaf_nodes = self.this_server.read_property("TMMidCspSubarrayLeafNodeFQDN")
         self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property("TMMidSdpSubarrayLeafNodeFQDN")
@@ -149,7 +149,7 @@ class StateAggregator(Aggregator):
 
         :raises: Devfailed exception if error occurs while subscribing event.
         """
-        for dish in range(1, (self.num_dishes + 1)):
+        for dish in range(0, len(self.num_dishes)):
             dish_ln_fqdn = self.dln_prefix + f"000{dish}"
             dish_ln_client = TangoClient(dish_ln_fqdn)
             self.dish_state_map[dish_ln_fqdn] = -1
@@ -221,7 +221,7 @@ class StateAggregator(Aggregator):
 
     def unsubscribe_event(self):
         """
-        Method to unsubscribe to health state change event on CspMasterLeafNode, SdpMasterLeafNode and SubarrayNode
+        Method to unsubscribe to state change event on CspMasterLeafNode, SdpMasterLeafNode,  CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode and SubarrayNode
         """
         for tango_client in self.state_event_map:
             log_message = "Unsubscribing ObsState of: {}".format(
@@ -314,7 +314,7 @@ class StateAggregator(Aggregator):
             self.logger.critical(f"{const.ERR_SUBSR_SA_STATE}{event}")
 
 
-    def start_state_aggregation():
+    def start_state_aggregation(self):
         # Create event for state change
         self._state_event = threading.Event() # thread control
         # Create event for attribute callback trigger
