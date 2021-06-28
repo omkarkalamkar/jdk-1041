@@ -72,11 +72,12 @@ class ReleaseResources(BaseCommand):
 
             Example:
                 {
-                  "interface": "https://schema.skao.int/ska-tmc-releaseresources/1.0",
-                  "subarray_id": 1,
-                  "release_all": true,
-                  "receptor_ids": [
-                ]
+                    "interface": "https://schema.skao.int/ska-tmc-releaseresources/2.0",
+                    "transaction_id": "txn-....-00001",
+                    "subarray_id": 1,
+                    "release_all": true,
+                    "receptor_ids": [       
+                    ]
                 }
 
         Note: From Jive, enter input as: {"interface":"https://schema.skao.int/ska-tmc-releaseresources/1.0",
@@ -97,12 +98,11 @@ class ReleaseResources(BaseCommand):
             Example:
                 argout =
                     {
-                      "interface": "https://schema.skatelescope.org/ska-tmc-releaseresources/1.0",
-                      "subarray_id": 1,
-                      "release_all": true,
-                      "receptor_ids": [
-
-                      ]
+                    "interface": "https://schema.skao.int/ska-tmc-releaseresources/2.0",
+                    "subarray_id": 1,
+                    "release_all": true,
+                    "receptor_ids": [       
+                    ]
                     }
 
         return:
@@ -121,6 +121,7 @@ class ReleaseResources(BaseCommand):
         try:
             release_success = False
             jsonArgument = json.loads(argin)
+            del jsonArgument["transaction_id"]
             subarrayID = jsonArgument["subarray_id"]
             subarray_fqdn = device_data.subarray_FQDN_dict[subarrayID]
             subarray_name = f"SA {subarrayID}"
