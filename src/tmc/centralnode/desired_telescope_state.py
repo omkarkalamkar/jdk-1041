@@ -17,12 +17,11 @@ class DesiredTelescopeState:
         """
         try:
             if self.device_data.command_in_progress in self.device_data.desired_telescope_state:
-                self.this_server.write_attr("desiredTelescopeState", self.device_data.desired_telescope_state[self.command_in_progress], False)
+                self.this_server.write_attr("desiredTelescopeState", self.device_data.desired_telescope_state[self.device_data.command_in_progress], False)
             else:
                 raise Exception
         except Exception as exp:
             log_msg = f"{const.ERR_IN_DESIRED_STATE_ATTR}{exp}"
-            self.logger.exception(exp)
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
