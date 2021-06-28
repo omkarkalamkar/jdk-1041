@@ -33,6 +33,7 @@ from tmc.centralnode.const import (
     STR_ON_CMD_ISSUED,
     STR_STOW_CMD_ISSUED_CN,
     STR_TELESCOPE_OFF_CMD_ISSUED,
+    Imaging, PSS, PST, VLBI
 )
 from ska.base.control_model import (
     HealthState,
@@ -369,7 +370,27 @@ def test_telescope_state():
     with fake_tango_system(CentralNode) as tango_context:
         assert tango_context.device.telescopeState == DevState.STANDBY
 
-        
+
+def test_imaging():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.Imaging == Imaging.not_available
+
+
+def test_pss():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.PSS == PSS.not_available
+
+
+def test_pst():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.PST == PST.not_available
+
+
+def test_vlbi():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.VLBI == VLBI.not_available
+
+
 def test_activity_message():
     with fake_tango_system(CentralNode) as tango_context:
         tango_context.device.activityMessage = ""
