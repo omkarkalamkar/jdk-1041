@@ -119,13 +119,13 @@ class CentralNode(SKABaseDevice):
         dtype="str", default_value="", doc="Device name prefix for Dish Leaf Node"
     )
 
-    TMMidCspSubarrayLeafNodeFQDN = device_property(
+    TMMidCspSubarrayLeafNodes = device_property(
         dtype=("str",),
         doc="List of TM Mid CspSubarrayLeafNode devices",
         default_value=tuple(),
     )
 
-    TMMidSdpSubarrayLeafNodeFQDN = device_property(
+    TMMidSdpSubarrayLeafNodes = device_property(
         dtype=("str",),
         doc="List of TM Mid SdpSubarrayLeafNode devices",
         default_value=tuple(),
@@ -203,7 +203,6 @@ class CentralNode(SKABaseDevice):
             device.attr_map["subarray2HealthState"] = HealthState.UNKNOWN
             device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
             device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
-            device.attr_map["State"] = None
 
             device._health_state = HealthState.OK
             device._build_state = "{},{},{}".format(
@@ -229,7 +228,7 @@ class CentralNode(SKABaseDevice):
 
             #create StateAggregator object and start state aggregation
             device.device_data.state_aggreegator = StateAggregator(self.logger)
-            device.device_data.state_aggreegator.subscribe_event()  #####I think we can subscribe here as well
+            device.device_data.state_aggreegator.subscribe_event() 
             device.device_data.state_aggreegator.start_state_aggregation()
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):

@@ -40,21 +40,27 @@ class StateAggregator(Aggregator):
         self.this_server = TangoServerHelper.get_instance()
         # create lock
         self.state_callback_lock = threading.Lock()
-        # FQDN are passed as string here. Once tangoserverhelper is updated in tmccommonpackage, then this will be updated.
+        # # Create event for state change
+        # self._state_event = threading.Event() # thread control
+        # Create event for attribute callback trigger
+        self._attr_callback_trigger = threading.Event() 
+        self._csp_master_state = ""
+        self._sdp_master_state = ""
         self.csp_master_ln_fqdn = ""
         self.sdp_master_ln_fqdn = ""
         self.dln_prefix = ""
         self.tm_mid_subarrays = []
         self.tm_mid_csp_subarrays_leaf_nodes = []
         self.tm_mid_sdp_subarrays_leaf_nodes = []
+        self.tmc_device_states = []
         # Read the property of devices
         self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
         self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         self.dln_prefix = self.this_server.read_property("DishLeafNodePrefix")[0]
         self.num_dishes = self.this_server.read_property("NumDishes")[0]
         self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
-        self.tm_mid_csp_subarrays_leaf_nodes = self.this_server.read_property("TMMidCspSubarrayLeafNodeFQDN")
-        self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property("TMMidSdpSubarrayLeafNodeFQDN")
+        self.tm_mid_csp_subarrays_leaf_nodes = self.this_server.read_property("TMMidCspSubarrayLeafNodes")
+        self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property("TMMidSdpSubarrayLeafNodes")
 
 
     def subscribe_event(self):  ###when this method will call?????
@@ -252,8 +258,6 @@ class StateAggregator(Aggregator):
         log_msg = f'State attribute change event is: {event.attr_value.value}'
         self.logger.info(log_msg)
         
-        self._attr_callback_trigger.set()  # start state calculation
-
         def _update_state(self, fqdn_device_state_map: dict):
             device_state = event.attr_value.value
             attr_name = event.attr_name
@@ -261,25 +265,29 @@ class StateAggregator(Aggregator):
             for fqdn, dd_device_state in fqdn_device_state_map.items():
                 if fqdn in attr_name:
                     setattr(device_data, dd_device_state, device_state)
-                    if "subarray" in fqdn:
+                    if "tm_subarray" in fqdn:
                         self.subarray_state_map[attr_name] = device_state
+                        print("::::::::::subarray state map is::::::::::::::", self.subarray_state_map[attr_name])
                     elif "csp_subarray" in fqdn:
                         self.csp_subarray_state_map[attr_name] = device_state
+                        print("::::::::::csp subarray state map is::::::::::::::", self.csp_subarray_state_map[attr_name])
                     elif "sdp_subarray" in fqdn:
                         self.sdp_subarray_state_map[attr_name] = device_state
+                        print("::::::::::sdp subarray state map is::::::::::::::", self.sdp_subarray_state_map[attr_name])
                     elif "dish" in fqdn:
                         self.dish_state_map[attr_name] = device_state
                     elif "csp_master" in fqdn:
+                        self._csp_master_state = device_state
                         self.logger.info(f"State msg in CSP Master: {attr_name}")
                         self.logger.info(f"CSP Master state is: {device_state}")
                     elif "sdp_master" in fqdn:
+                        self._sdp_master_state = device_state
                         self.logger.info(f"State msg in SDP Master: {attr_name}")
                         self.logger.info(f"SDP Master state is: {device_state}")
                     break
             else:
                 self.logger.debug(const.EVT_UNKNOWN)
                 # TODO: update read_activity message for unknown events
-        self.state_callback_lock.release()
             
         if not event.err:
             fqdn_device_state_map = {
@@ -292,7 +300,7 @@ class StateAggregator(Aggregator):
                 const.PROP_DEF_VAL_TM_MID_SDPSA_LN1: "_sdp_subarray1_ln_state",
                 const.PROP_DEF_VAL_TM_MID_SDPSA_LN2: "_sdp_subarray2_ln_state",
                 const.PROP_DEF_VAL_TM_MID_SDPSA_LN3: "_sdp_subarray3_ln_state",
-                const.PROP_DEF_VAL_TM_MID_DLN1: "_dish_ln1_state",   #need to check for this value
+                const.PROP_DEF_VAL_TM_MID_DLN1: "_dish_ln1_state", 
                 const.PROP_DEF_VAL_TM_MID_DLN2: "_dish_ln2_state",
                 const.PROP_DEF_VAL_TM_MID_DLN3: "_dish_ln3_state",
                 const.PROP_DEF_VAL_TM_MID_DLN4: "_dish_ln4_state",
@@ -301,25 +309,25 @@ class StateAggregator(Aggregator):
             }
             _update_state(self, fqdn_device_state_map)
 
-            device_states = [
-                device_data._csp_master_state,
-                device_data._sdp_master_state
+            self.tmc_device_states = [
+                self._csp_master_state,
+                self._sdp_master_state
             ]
-            device_states = device_states + list(self.subarray_state_map.values()) + list(self.csp_subarray_state_map.values()) + list(self.sdp_subarray_state_map.values()) + list(self.dish_state_map.values())                              
+            self.tmc_device_states = self.tmc_device_states + list(self.subarray_state_map.values()) + list(self.csp_subarray_state_map.values()) + list(self.sdp_subarray_state_map.values()) + list(self.dish_state_map.values()) 
 
+            #self._attr_callback_trigger.set()  # start state calculation 
+            print("*******tmc_device_states******", self.tmc_device_states)
+            self.state_callback_lock.release()  # release the lock                             
         else:
             # TODO: For future reference
             self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_STATE}{event}", False)
             self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
             self.logger.critical(f"{const.ERR_SUBSR_SA_STATE}{event}")
-
+        
 
     def start_state_aggregation(self):
         # Create event for state change
         self._state_event = threading.Event() # thread control
-        # Create event for attribute callback trigger
-        self._attr_callback_trigger = threading.Event() 
-
         # create thread
         self.logger.info("Starting thread to calculate state for Tmc devices.")
         self.state_calculator_thread = threading.Thread(
@@ -343,27 +351,34 @@ class StateAggregator(Aggregator):
             DevState.INIT: const.STR_INIT,
             DevState.FAULT: const.STR_FAULT
         }
-        log_msg = f"{const.STR_STATE}{event.device}{state_string_map[device_state]}"                       
+        log_msg = f"{const.STR_STATE}{self.state_event_map[tango_client]}{state_string_map[device_state]}"                       
         self.logger.info(log_msg)
         
 
-    def calculate_state(self, device_states):
+    def calculate_state(self):
         while not self._state_event.isSet():
+            self._attr_callback_trigger.set()
             if self._attr_callback_trigger.isSet():
+                print("::::::::::::Inside if block since attr is triggered:::::::::::")
                 #calculation logic
-                unique_states = set(device_states)
+                unique_states = set(self.tmc_device_states)
+                print("::::::::::::::::::::::unique_states::::::::::::::::::", unique_states)
                 if unique_states == set([DevState.ON]):
-                    self.this_server.device.attr_map["State"] = DevState.ON
+                    self.this_server.device._op_state = DevState.ON 
                     generate_state_log_msg(self, DevState.ON)
+                    print("Device is ON")
                 elif unique_states == set([DevState.OFF]):
-                    self.this_server.device.attr_map["State"] = DevState.OFF
+                    self.this_server.device._op_state = DevState.OFF
                     generate_state_log_msg(self, DevState.ON)
+                    print("Device is OFF")
                 elif DevState.INIT in unique_states:
-                    self.this_server.device.attr_map["State"] = DevState.INIT
+                    self.this_server.device._op_state = DevState.INIT
                     generate_state_log_msg(self, DevState.INIT)
+                    print("Device is INIT")
                 elif DevState.FAULT in unique_states:
-                    self.this_server.device.attr_map["State"] = DevState.FAULT
+                    self.this_server.device._op_state = DevState.FAULT
                     generate_state_log_msg(self, DevState.FAULT)
+                    print("Device is FAULT")
                 else:
                     self.logger.info("State can not be state")
             self._attr_callback_trigger.clear()
