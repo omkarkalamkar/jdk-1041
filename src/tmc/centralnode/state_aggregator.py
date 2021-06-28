@@ -306,7 +306,6 @@ class StateAggregator(Aggregator):
                 device_data._sdp_master_state
             ]
             device_states = device_states + list(self.subarray_state_map.values()) + list(self.csp_subarray_state_map.values()) + list(self.sdp_subarray_state_map.values()) + list(self.dish_state_map.values())                              
-            _calculate_health_state(device_states)
 
         else:
             # TODO: For future reference
@@ -324,7 +323,7 @@ class StateAggregator(Aggregator):
         # create thread
         self.logger.info("Starting thread to calculate state for Tmc devices.")
         self.state_calculator_thread = threading.Thread(
-            target=self._calculate_health_state,
+            target=self._calculate_state,
         )
         self.state_calculator_thread.start()
 
