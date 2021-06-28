@@ -159,10 +159,12 @@ class CentralNode(SKABaseDevice):
 
     desiredTelescopeState = attribute(
         dtype="DevState",
+        access=AttrWriteType.READ,
+        doc="desiredTelescopeState attribute of Central Node.",
     )
 
     commandInProgress = attribute(
-        dtype=DevString,
+        dtype="DevString",
         access=AttrWriteType.READ,
         doc="commandInProgress attribute of Central Node.",
     )
@@ -300,7 +302,7 @@ class CentralNode(SKABaseDevice):
 
     def read_commandInProgress(self):
         # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
-        """Internal construct of TANGO. Returns Desired Telescope State. """
+        """Internal construct of TANGO. Returns commandInProgress Telescope State. """
         return self.attr_map["commandInProgress"]
         # PROTECTED REGION END #    //  CentralNode.activity_message_read
 

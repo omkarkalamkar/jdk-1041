@@ -73,9 +73,7 @@ class TelescopeOff(BaseCommand):
         device_data.command_in_progress = "TelescopeOff"
         this_server.write_attr("commandInProgress", device_data.command_in_progress, False)
         desired_telescope_state_obj = DesiredTelescopeState()
-        desired_telescope_state_obj.desired_telescope_state()
-        self.logger.info(type(self.target))
-        # this_server = TangoServerHelper.get_instance()
+        desired_telescope_state_obj.update_desired_telescope_state()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
@@ -95,8 +93,6 @@ class TelescopeOff(BaseCommand):
             log_msg = const.STR_TELESCOPE_OFF_CMD_ISSUED
             self.logger.info(log_msg)
             this_server.write_attr("activityMessage", log_msg, False)
-            # device_data.desired_telescope_state["TelescopeOff"] = self.state_model.op_state
-            # this_server.write_attr("desiredTelescopeState", device_data.desired_telescope_state["TelescopeOff"], False)
             this_server.write_attr("commandInProgress", "", False)
 
         except Exception as e:

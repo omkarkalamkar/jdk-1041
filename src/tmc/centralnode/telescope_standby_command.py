@@ -68,8 +68,7 @@ class TelescopeStandby(BaseCommand):
         device_data.command_in_progress = "TelescopeStandby"
         this_server.write_attr("commandInProgress", device_data.command_in_progress, False)
         desired_telescope_state_obj = DesiredTelescopeState()
-        desired_telescope_state_obj.desired_telescope_state()
-        # this_server = TangoServerHelper.get_instance()
+        desired_telescope_state_obj.update_desired_telescope_state()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
@@ -81,8 +80,6 @@ class TelescopeStandby(BaseCommand):
         log_msg = const.STR_TELESCOPE_STANDBY_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
-        # device_data.desired_telescope_state["TelescopeStandby"] = DevState.STANDBY
-        # this_server.write_attr("desiredTelescopeState", device_data.desired_telescope_state["TelescopeStandby"], False)
         this_server.write_attr("commandInProgress", "", False)
 
     def telescope_standby_csp(self, csp_fqdn):

@@ -68,7 +68,7 @@ class TelescopeOn(BaseCommand):
         device_data.command_in_progress = "TelescopeOn"
         this_server.write_attr("commandInProgress", device_data.command_in_progress, False)
         desired_telescope_state_obj = DesiredTelescopeState()
-        desired_telescope_state_obj.desired_telescope_state()
+        desired_telescope_state_obj.update_desired_telescope_state()
         self.logger.info(type(self.target))
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
@@ -81,8 +81,6 @@ class TelescopeOn(BaseCommand):
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED, False)
-        # device_data.desired_telescope_state["TelescopeON"] = self.state_model.op_state
-        # this_server.write_attr("desiredTelescopeState", device_data.desired_telescope_state["TelescopeON"], False)
         this_server.write_attr("commandInProgress", "", False)
 
     def startup_csp(self, csp_fqdn):

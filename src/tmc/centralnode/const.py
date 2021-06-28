@@ -42,6 +42,7 @@ ERR_EXE_TELESCOPE_STANDBY_CMD = "Error in executing TELESCOPE STANDBY command "
 ERR_EXE_TELESCOPE_OFF_CMD = "Error in executing TelescopeOff command "
 ERR_EXE_OFF_CMD = "Error in executing OFF Telescope command "
 ERR_EXE_TMC_ON_CMD = "Error in executing TMC ON command "
+ERR_IN_DESIRED_STATE_ATTR =" Error in Updating Desired Telescope State attribute. "
 
 ERR_EXE_ON_CMD = "Error in executing TelescopeOn(ON) Telescope command "
 ERR_INVALID_JSON = "Invalid JSON format"

@@ -204,7 +204,7 @@ def test_telescope_standby_class_command_method(device_data, subarray_state_mode
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_TELESCOPE_STANDBY, None)
     assert device_proxy.desiredTelescopeState == DevState.STANDBY
 
-
+    
 def test_telescope_off(mock_obstate_check, mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     tango_client_obj.get_attribute.side_effect = Mock(return_value = ObsState.EMPTY)
