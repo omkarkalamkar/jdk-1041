@@ -51,6 +51,7 @@ class DeviceData:
         self.subarray_FQDN_dict = {}
         self.sln_prefix = ""
         self.health_aggreegator = None
+        self.state_aggreegator = None
         self.resource_manager = None
         self.obs_state_aggregator = None
         self.check_resources = None

@@ -224,6 +224,10 @@ class CentralNode(SKABaseDevice):
             device.device_data.health_aggreegator = HealthStateAggregator(self.logger)
             device.device_data.health_aggreegator.subscribe_event()
 
+            #create StateAggregator object and start state aggregation
+            device.device_data.state_aggreegator = StateAggregator(self.logger)
+            device.device_data.state_aggreegator.subscribe_event()  #####I think we can subscribe here as well
+            device.device_data.state_aggreegator.start_state_aggregation()
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")

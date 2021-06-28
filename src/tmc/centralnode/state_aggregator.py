@@ -57,7 +57,7 @@ class StateAggregator(Aggregator):
         self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property("TMMidSdpSubarrayLeafNodeFQDN")
 
 
-    def subscribe_event(self):
+    def subscribe_event(self):  ###when this method will call?????
         """
         Method for event subscription. Calls separate subscribe event methods for CSPMasterLeafNode, SDPMasterLeafNode, 
         TM Subarray, DishLeafNode, CSPSubarrayLeafNode, SDPSubarrayLeafNode state attribute subscription.
@@ -252,6 +252,8 @@ class StateAggregator(Aggregator):
         log_msg = f'State attribute change event is: {event.attr_value.value}'
         self.logger.info(log_msg)
         
+        self._attr_callback_trigger.set()  # start state calculation
+
         def _update_state(self, fqdn_device_state_map: dict):
             device_state = event.attr_value.value
             attr_name = event.attr_name
@@ -312,6 +314,28 @@ class StateAggregator(Aggregator):
             self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_STATE}{event}", False)
             self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
             self.logger.critical(f"{const.ERR_SUBSR_SA_STATE}{event}")
+
+
+    def start_state_aggregation():
+        # Create event for state change
+        self._state_event = threading.Event() # thread control
+        # Create event for attribute callback trigger
+        self._attr_callback_trigger = threading.Event() 
+
+        # create thread
+        self.logger.info("Starting thread to calculate state for Tmc devices.")
+        self.state_calculator_thread = threading.Thread(
+            target=self._calculate_health_state,
+        )
+        self.state_calculator_thread.start()
+
+
+    def stop_state_aggregation(self):   ## when to call this method ????     
+        # Stop thread of state calculation
+        self.logger.info("Stopping state calculator thread.")
+        self._state_event.set()
+        self.state_calculator_thread.join()
+        self.logger.info("State calculator thread stopped.")
 
 
     def _generate_health_state_log_msg(self, device_state):
