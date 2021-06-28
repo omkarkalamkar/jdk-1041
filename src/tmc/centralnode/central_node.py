@@ -31,6 +31,8 @@ from tmc.centralnode.resource_manager import ResourceManager
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
 from tmc.centralnode.health_state_aggregator import HealthStateAggregator
+from tmc.centralnode.state_aggregator import StateAggregator
+
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -201,6 +203,7 @@ class CentralNode(SKABaseDevice):
             device.attr_map["subarray2HealthState"] = HealthState.UNKNOWN
             device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
             device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
+            device.attr_map["State"] = None
 
             device._health_state = HealthState.OK
             device._build_state = "{},{},{}".format(

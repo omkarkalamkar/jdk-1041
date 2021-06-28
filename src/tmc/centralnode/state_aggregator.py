@@ -305,8 +305,7 @@ class StateAggregator(Aggregator):
                 device_data._csp_master_state,
                 device_data._sdp_master_state
             ]
-            device_states = device_states + list(self.subarray_state_map.values()) + list(self.csp_subarray_state_map.values()) + list(self.sdp_subarray_state_map.values())
-                                          + list(self.dish_state_map.values())                              
+            device_states = device_states + list(self.subarray_state_map.values()) + list(self.csp_subarray_state_map.values()) + list(self.sdp_subarray_state_map.values()) + list(self.dish_state_map.values())                              
             _calculate_health_state(device_states)
 
         else:
@@ -338,28 +337,34 @@ class StateAggregator(Aggregator):
         self.logger.info("State calculator thread stopped.")
 
 
-    def _generate_health_state_log_msg(self, device_state):
-        health_state_string_map = {
-            HealthState.OK: const.STR_OK,
-            HealthState.DEGRADED: const.STR_DEGRADED,
-            HealthState.FAILED: const.STR_FAILED,
-            HealthState.UNKNOWN: const.STR_UNKNOWN
+    def _generate_state_log_msg(self, device_state):
+        state_string_map = {
+            DevState.ON: const.STR_ON,
+            DevState.OFF: const.STR_OFF,
+            DevState.INIT: const.STR_INIT,
+            DevState.FAULT: const.STR_FAULT
         }
-        log_msg = f"{const.STR_HEALTH_STATE}{event.device}{health_state_string_map[device_state]}"                       
+        log_msg = f"{const.STR_STATE}{event.device}{state_string_map[device_state]}"                       
         self.logger.info(log_msg)
         
 
-    def _calculate_health_state(device_states):
-        unique_states = set(device_states)
-        if unique_states == set([HealthState.OK]):
-            self.this_server.device.attr_map["telescopeHealthState"] = HealthState.OK
-            _generate_health_state_log_msg(self, HealthState.OK)
-        elif HealthState.FAILED in unique_states:
-            self.this_server.device.attr_map["telescopeHealthState"] = HealthState.FAILED
-            _generate_health_state_log_msg(self, HealthState.FAILED)
-        elif HealthState.DEGRADED in unique_states:
-            self.this_server.device.attr_map["telescopeHealthState"] = HealthState.DEGRADED
-            _generate_health_state_log_msg(self, HealthState.DEGRADED)
-        else:
-            self.this_server.device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
-            _generate_health_state_log_msg(self, HealthState.UNKNOWN)
+    def _calculate_state(device_states):
+        while not self._state_event.isSet():
+            if self._attr_callback_trigger.isset():
+                #calculation logic
+                unique_states = set(device_states)
+                if unique_states == set([DevState.ON]):
+                    self.this_server.device.attr_map["State"] = DevState.ON
+                    _generate_state_log_msg(self, DevState.ON)
+                elif unique_states == set([DevState.OFF]):
+                    self.this_server.device.attr_map["State"] = DevState.OFF
+                    _generate_state_log_msg(self, DevState.ON)
+                elif DevState.INIT in unique_states:
+                    self.this_server.device.attr_map["State"] = DevState.INIT
+                    _generate_state_log_msg(self, DevState.INIT)
+                elif DevState.FAULT in unique_states:
+                    self.this_server.device.attr_map["State"] = DevState.FAULT
+                    _generate_state_log_msg(self, DevState.FAULT)
+                else:
+                    self.logger.info("State can not be state")
+            self._attr_callback_trigger.clear()
