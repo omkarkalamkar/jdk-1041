@@ -15,6 +15,7 @@ from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
+from tmc.centralnode.desired_telescope_state import DesiredTelescopeState
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -64,6 +65,11 @@ class TelescopeStandby(BaseCommand):
         self.logger.info(type(self.target))
         device_data = DeviceData.get_instance()
         this_server = TangoServerHelper.get_instance()
+        device_data.command_in_progress = "TelescopeStandby"
+        this_server.write_attr("commandInProgress", device_data.command_in_progress, False)
+        desired_telescope_state_obj = DesiredTelescopeState()
+        desired_telescope_state_obj.desired_telescope_state()
+        # this_server = TangoServerHelper.get_instance()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
@@ -75,8 +81,9 @@ class TelescopeStandby(BaseCommand):
         log_msg = const.STR_TELESCOPE_STANDBY_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", log_msg, False)
-        device_data.desired_telescope_state["TelescopeStandby"] = DevState.STANDBY
-        this_server.write_attr("desiredTelescopeState", device_data.desired_telescope_state["TelescopeStandby"], False)
+        # device_data.desired_telescope_state["TelescopeStandby"] = DevState.STANDBY
+        # this_server.write_attr("desiredTelescopeState", device_data.desired_telescope_state["TelescopeStandby"], False)
+        this_server.write_attr("commandInProgress", "", False)
 
     def telescope_standby_csp(self, csp_fqdn):
         """

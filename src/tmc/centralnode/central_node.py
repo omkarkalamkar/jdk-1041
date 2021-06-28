@@ -203,7 +203,7 @@ class CentralNode(SKABaseDevice):
             device.attr_map["subarray2HealthState"] = HealthState.UNKNOWN
             device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
             device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
-            device.attr_map["desiredTelescopeState"] = ""
+            device.attr_map["desiredTelescopeState"] = None
             device.attr_map["commandInProgress"] = ""
             device._health_state = HealthState.OK
             device._build_state = "{},{},{}".format(
@@ -211,7 +211,7 @@ class CentralNode(SKABaseDevice):
             )
             device._version_id = release.version
             device.device_data = DeviceData.get_instance()
-
+            device.device_data.desired_telescope_state = {"TelescopeOn" : DevState.ON, "TelescopeStandby" : DevState.STANDBY, "TelescopeOff" : DevState.OFF}
             self.logger.debug(const.STR_INIT_SUCCESS)
             # Initialization of ObsState aggregator object and start obs state aggregation
             device.device_data.obs_state_aggregator = ObsStateAggregator(
