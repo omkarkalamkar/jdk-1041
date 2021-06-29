@@ -111,6 +111,8 @@ PROP_DEF_VAL_TM_MID_DLN1 = "ska_mid/tm_leaf_node/d0001"
 PROP_DEF_VAL_TM_MID_DLN2 = "ska_mid/tm_leaf_node/d0002"
 PROP_DEF_VAL_TM_MID_DLN3 = "ska_mid/tm_leaf_node/d0003"
 PROP_DEF_VAL_TM_MID_DLN4 = "ska_mid/tm_leaf_node/d0004"
+PROP_DEF_VAL_TM_MID_CSPM_LN = "ska_mid/tm_leaf_node/csp_master"
+PROP_DEF_VAL_TM_MID_SDPM_LN = "ska_mid/tm_leaf_node/sdp_master"
 GET_DEVICE_LIST_TANGO_DB = "ska_mid/tm_leaf_node/d000*"
 
 
