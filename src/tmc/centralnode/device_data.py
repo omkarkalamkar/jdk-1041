@@ -43,6 +43,8 @@ class DeviceData:
         self.resource_manager = None
         self.obs_state_aggregator = None
         self.check_resources = None
+        self.desired_telescope_state = {}
+        self.command_in_progress = ""
 
     @staticmethod
     def get_instance():
