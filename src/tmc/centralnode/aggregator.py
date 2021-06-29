@@ -31,14 +31,14 @@ class Aggregator:
 
     def subscribe_event(self):
         """
-        Method for event subscription. Calls separate subscribe event methods for CSP Master, SDP Master and
-        Subarray health state attribute subscription.
+        Method for event subscription. Calls separate subscribe event methods for CSPMasterLeafNode, SDPMasterLeafNode, 
+        TM Subarray, DishLeafNode, CSPSubarrayLeafNode, SDPSubarrayLeafNode state attribute subscription.
         """
         
 
     def unsubscribe_event(self):
         """
-        Method to unsubscribe to health state change event on CspMasterLeafNode, SdpMasterLeafNode and SubarrayNode
+        Method to unsubscribe to state change event on CspMasterLeafNode, SdpMasterLeafNode,  CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode and SubarrayNode
         """
 
     

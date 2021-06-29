@@ -258,7 +258,7 @@ class StateAggregator(Aggregator):
             try:
                 for fqdn, dd_device_state in fqdn_device_state_map.items():
                     if fqdn in attr_name:
-                        setattr(device_data, dd_device_state, device_state)
+                        #setattr(device_data, dd_device_state, device_state)
                         if "tm_subarray" in fqdn:
                             self.subarray_state_map[attr_name] = device_state
                             print("::::::::::subarray state map is::::::::::::::", self.subarray_state_map[attr_name])
