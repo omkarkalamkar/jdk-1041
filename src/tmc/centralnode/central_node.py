@@ -33,7 +33,7 @@ from tmc.centralnode.resource_manager import ResourceManager
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
 from tmc.centralnode.health_state_aggregator import HealthStateAggregator
-
+from tmc.centralnode.const import ModesAvailability
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 __all__ = [
@@ -157,6 +157,36 @@ class CentralNode(SKABaseDevice):
         doc="Activity Message",
     )
 
+    telescopeState = attribute(
+        dtype="DevState",
+        access=AttrWriteType.READ,
+        doc="DevState of telescope"
+    )
+
+    imaging = attribute(
+        dtype=ModesAvailability,
+        access=AttrWriteType.READ,
+        doc="Imaging Attribute"
+    )
+
+    pss = attribute(
+        dtype=ModesAvailability,
+        access=AttrWriteType.READ,
+        doc="PSS Attribute"
+    )
+
+    pst = attribute(
+        dtype=ModesAvailability,
+        access=AttrWriteType.READ,
+        doc="PST Attribute"
+    )
+
+    vlbi = attribute(
+        dtype=ModesAvailability,
+        access=AttrWriteType.READ,
+        doc="VLBI Attribute"
+    )
+
     desiredTelescopeState = attribute(
         dtype="DevState",
         access=AttrWriteType.READ,
@@ -205,8 +235,13 @@ class CentralNode(SKABaseDevice):
             device.attr_map["subarray2HealthState"] = HealthState.UNKNOWN
             device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
             device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
+            device.attr_map["telescopeState"] = DevState.STANDBY
             device.attr_map["desiredTelescopeState"] = None
             device.attr_map["commandInProgress"] = ""
+            device.attr_map["imaging"] = ModesAvailability.not_available
+            device.attr_map["pss"] = ModesAvailability.not_available
+            device.attr_map["pst"] = ModesAvailability.not_available
+            device.attr_map["vlbi"] = ModesAvailability.not_available
             device._health_state = HealthState.OK
             device._build_state = "{},{},{}".format(
                 release.name, release.version, release.description
@@ -294,6 +329,36 @@ class CentralNode(SKABaseDevice):
         """Internal construct of TANGO. Sets the activity message. """
         self.update_attr_map("activityMessage", value)
         # PROTECTED REGION END #    //  CentralNode.activity_message_write
+
+    def read_telescopeState(self):
+        # PROTECTED REGION ID(CentralNode.telescope_state_read) ENABLED START #
+        """Internal construct of TANGO. Returns Telescope State. """
+        return self.attr_map["telescopeState"]
+        # PROTECTED REGION END #    //  CentralNode.telescope_state_read
+
+    def read_imaging(self):
+        # PROTECTED REGION ID(CentralNode.imaging_read) ENABLED START #
+        """Internal construct of TANGO. Returns imaging. """
+        return self.attr_map["imaging"]
+        # PROTECTED REGION END #    //  CentralNode.imaging_read
+
+    def read_pss(self):
+        # PROTECTED REGION ID(CentralNode.PSS_read) ENABLED START #
+        """Internal construct of TANGO. Returns PSS. """
+        return self.attr_map["pss"]
+        # PROTECTED REGION END #    //  CentralNode.PSS_read
+
+    def read_pst(self):
+        # PROTECTED REGION ID(CentralNode.PST_read) ENABLED START #
+        """Internal construct of TANGO. Returns PST """
+        return self.attr_map["pst"]
+        # PROTECTED REGION END #    //  CentralNode.PST_read
+
+    def read_vlbi(self):
+        # PROTECTED REGION ID(CentralNode.VLBI_read) ENABLED START #
+        """Internal construct of TANGO. Returns VLBI State. """
+        return self.attr_map["vlbi"]
+        # PROTECTED REGION END #    //  CentralNode.VLBI_read
 
     def read_desiredTelescopeState(self):
         # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #

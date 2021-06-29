@@ -1,3 +1,15 @@
+"""
+This file is part of the CentralNode project and defines variables used
+"""
+
+# ENUMS
+from enum import IntEnum, unique
+
+@unique
+class ModesAvailability(IntEnum):
+    not_available = 0
+    available = 1
+
 # In/Out command constants
 CMD_SET_STOW_MODE = "SetStowMode"
 CMD_SET_STANDBYLP_MODE = "SetStandbyLPMode"

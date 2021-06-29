@@ -33,6 +33,7 @@ from tmc.centralnode.const import (
     STR_ON_CMD_ISSUED,
     STR_STOW_CMD_ISSUED_CN,
     STR_TELESCOPE_OFF_CMD_ISSUED,
+    ModesAvailability
 )
 from ska.base.control_model import (
     HealthState,
@@ -371,6 +372,31 @@ def test_assign_resources_raise_devfailed_when_reseource_reallocation(mock_tango
 def test_telescope_health_state():
     with fake_tango_system(CentralNode) as tango_context:
         assert tango_context.device.telescopeHealthState == HealthState.UNKNOWN
+
+
+def test_telescope_state():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.telescopeState == DevState.STANDBY
+
+
+def test_imaging():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.imaging == ModesAvailability.not_available
+
+
+def test_pss():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.pss == ModesAvailability.not_available
+
+
+def test_pst():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.pst == ModesAvailability.not_available
+
+
+def test_vlbi():
+    with fake_tango_system(CentralNode) as tango_context:
+        assert tango_context.device.vlbi == ModesAvailability.not_available
 
 
 def test_activity_message():
