@@ -350,34 +350,24 @@ class OpStateAggregator(Aggregator):
 
     def calculate_state(self):
         device_data = DeviceData.get_instance()
-        print("::::::::self._attr_callback_trigger.isSet():::::::", device_data._attr_callback_trigger.isSet())
-        print("::::::::self._state_event.isSet():::::::", self._state_event.isSet())
         while not self._state_event.isSet():
             if device_data._attr_callback_trigger.isSet():
                 print("::::::::::::Inside if block since attr is triggered:::::::::::")
                 #calculation logic
-                print("*******tmc_device_states in if block before set()******", device_data.tmc_device_states)
                 unique_states = set(device_data.tmc_device_states)
-                print("::::::::::::::::::::::unique_states::::::::::::::::::", unique_states)
                 if unique_states == set([DevState.ON]):
                     print("Inside if for DevState.ON")
-                    self.this_server.device._op_state = DevState.ON 
-                    print("self.this_server.device._op_state is", self.this_server.device._op_state)
-                    #print("state of CN is",str(self.this_server.device.get_state()))
+                    self.this_server.set_state(DevState.ON)
                     self.generate_state_log_msg(DevState.ON)
-                    print("Device is ON")
                 elif unique_states == set([DevState.OFF]):
                     self.this_server.device._op_state = DevState.OFF
                     self.generate_state_log_msg(DevState.ON)
-                    print("Device is OFF")
                 elif DevState.INIT in unique_states:
                     self.this_server.device._op_state = DevState.INIT
                     self.generate_state_log_msg(DevState.INIT)
-                    print("Device is INIT")
                 elif DevState.FAULT in unique_states:
                     self.this_server.device._op_state = DevState.FAULT
                     self.generate_state_log_msg(DevState.FAULT)
-                    print("Device is FAULT")
                 else:
                     self.logger.info("State can not be state")
                 device_data._attr_callback_trigger.clear()

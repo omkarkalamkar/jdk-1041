@@ -10,6 +10,7 @@ import logging
 from mock import MagicMock
 from mock import Mock
 from os.path import dirname, join
+import threading
 
 # Tango imports
 import tango
@@ -23,7 +24,7 @@ from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.off_command import Off
 from tmc.centralnode.input_validator import AssignResourceValidator
-from tmc.centralnode.state_aggregator import StateAggregator
+from tmc.centralnode.op_state_aggregator import OpStateAggregator
 
 from tmc.centralnode import CentralNode, const, release
 from tmc.centralnode.const import (
@@ -144,9 +145,13 @@ def dummy_subscriber_State(attribute ,fqdn, state):
 def test_state_aggregator_callback(mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     device_proxy.On()
-    state_aggr = StateAggregator()
+    state_aggr = OpStateAggregator()
+    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_subarray_node/1", DevState.ON))
     state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/csp_subarray01", DevState.ON))
     state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/sdp_subarray01", DevState.ON))
+    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/d0001", DevState.ON))
+    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/sdp_master", DevState.ON))
+    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/csp_master", DevState.ON))
     assert device_proxy.state() == DevState.ON
 
 
