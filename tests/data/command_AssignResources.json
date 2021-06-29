@@ -8,13 +8,13 @@
     ]
   },
   "sdp": {
-    "interface": "https://schema.skao.int/ska-sdp-assignresources/2.0",
+    "interface": "https://schema.skao.int/ska-sdp-assignres/0.3",
     "eb_id": "eb-mvp01-20200325-00001",
-  "max_length": 100.0,
+    "max_length": 100.0,
     "scan_types": [
       {
         "scan_type_id": "science_A",
-       "reference_frame": "ICRS",
+        "reference_frame": "ICRS",
         "ra": "02:42:40.771",
         "dec": "-00:00:47.84",
         "channels": [
@@ -119,7 +119,7 @@
         "workflow": {
           "kind": "realtime",
           "name": "vis_receive",
-         "version": "0.1.0"
+          "version": "0.1.0"
         },
         "parameters": {
           
@@ -127,10 +127,10 @@
       },
       {
         "pb_id": "pb-mvp01-20200325-00002",
-"workflow": {
+        "workflow": {
           "kind": "realtime",
           "name": "test_realtime",
-         "version": "0.1.0"
+          "version": "0.1.0"
         },
         "parameters": {
           
