@@ -40,9 +40,6 @@ class OpStateAggregator(Aggregator):
             self.dish_state_map = {}
             self.state_event_map = {}
             self.this_server = TangoServerHelper.get_instance()
-            # self.csp_master_ln_fqdn = ""
-            # self.sdp_master_ln_fqdn = ""
-            # self.dln_prefix = ""
             self.tm_mid_subarrays = []
             self.tm_mid_csp_subarrays_leaf_nodes = []
             # create lock
@@ -151,8 +148,9 @@ class OpStateAggregator(Aggregator):
 
         :raises: Devfailed exception if error occurs while subscribing event.
         """
-        for dish in range(0, len(self.num_dishes)):
-            dish_ln_fqdn = self.dln_prefix + f"000{dish}"
+        dish_device_ids = [str(i).zfill(4) for i in range(1, 5)]
+        for dish in range(0, len(dish_device_ids)):
+            dish_ln_fqdn = self.dln_prefix + dish_device_ids[dish]
             dish_ln_client = TangoClient(dish_ln_fqdn)
             self.dish_state_map[dish_ln_fqdn] = -1
             try:
