@@ -151,12 +151,12 @@ def test_state_aggregator_callback(mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     device_proxy.On()
     state_aggr = OpStateAggregator()
-    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_subarray_node/1", DevState.ON))
-    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/csp_subarray01", DevState.ON))
-    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/sdp_subarray01", DevState.ON))
-    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/d0001", DevState.ON))
-    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/sdp_master", DevState.ON))
-    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/csp_master", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_subarray_node/1", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/csp_subarray01", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/sdp_subarray01", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/d0001", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/sdp_master", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/csp_master", DevState.ON))
     assert device_proxy.state() == DevState.ON
 
 
