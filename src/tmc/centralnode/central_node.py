@@ -11,7 +11,7 @@ of state and mode attributes defined by the SKA Control Model.
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 import threading
 # Tango imports
-from tango import DebugIt, AttrWriteType
+from tango import DebugIt, AttrWriteType, DevState, DevString
 from tango.server import run, attribute, command, device_property
 from tmc.common.tango_server_helper import TangoServerHelper
 
@@ -20,17 +20,20 @@ from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 from ska.base.control_model import HealthState
 from tmc.centralnode import const, release
+from tmc.centralnode.telescope_off_command import TelescopeOff
+from tmc.centralnode.off_command import Off
 from tmc.centralnode.on_command import On
 from tmc.centralnode.telescope_on_command import TelescopeOn
-from tmc.centralnode.stand_by_telescope_command import StandByTelescope
+from tmc.centralnode.telescope_standby_command import TelescopeStandby
 from tmc.centralnode.assign_resources_command import AssignResources
 from tmc.centralnode.release_resources_command import ReleaseResources
 from tmc.centralnode.stow_antennas_command import StowAntennas
+from tmc.centralnode.standby_command import Standby
 from tmc.centralnode.resource_manager import ResourceManager
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
 from tmc.centralnode.health_state_aggregator import HealthStateAggregator
-
+from tmc.centralnode.const import ModesAvailability
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 __all__ = [
@@ -42,10 +45,14 @@ __all__ = [
     "ObsStateAggregator",
     "release",
     "ReleaseResources",
-    "StandByTelescope",
+    "TelescopeOff",
+    "StowAntennas",
+    "Off",
     "TelescopeOn",
     "StowAntennas",
-    "On"
+    "On",
+    "Standby",
+    "TelescopeStandby"
 ]
 
 
@@ -150,6 +157,48 @@ class CentralNode(SKABaseDevice):
         doc="Activity Message",
     )
 
+    telescopeState = attribute(
+        dtype="DevState",
+        access=AttrWriteType.READ,
+        doc="DevState of telescope"
+    )
+
+    imaging = attribute(
+        dtype=ModesAvailability,
+        access=AttrWriteType.READ,
+        doc="Imaging Attribute"
+    )
+
+    pss = attribute(
+        dtype=ModesAvailability,
+        access=AttrWriteType.READ,
+        doc="PSS Attribute"
+    )
+
+    pst = attribute(
+        dtype=ModesAvailability,
+        access=AttrWriteType.READ,
+        doc="PST Attribute"
+    )
+
+    vlbi = attribute(
+        dtype=ModesAvailability,
+        access=AttrWriteType.READ,
+        doc="VLBI Attribute"
+    )
+
+    desiredTelescopeState = attribute(
+        dtype="DevState",
+        access=AttrWriteType.READ,
+        doc="desiredTelescopeState attribute of Central Node.",
+    )
+
+    commandInProgress = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ,
+        doc="commandInProgress attribute of Central Node.",
+    )
+
     # ---------------
     # General methods
     # ---------------
@@ -186,14 +235,20 @@ class CentralNode(SKABaseDevice):
             device.attr_map["subarray2HealthState"] = HealthState.UNKNOWN
             device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
             device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
-
+            device.attr_map["telescopeState"] = DevState.STANDBY
+            device.attr_map["desiredTelescopeState"] = None
+            device.attr_map["commandInProgress"] = ""
+            device.attr_map["imaging"] = ModesAvailability.not_available
+            device.attr_map["pss"] = ModesAvailability.not_available
+            device.attr_map["pst"] = ModesAvailability.not_available
+            device.attr_map["vlbi"] = ModesAvailability.not_available
             device._health_state = HealthState.OK
             device._build_state = "{},{},{}".format(
                 release.name, release.version, release.description
             )
             device._version_id = release.version
             device.device_data = DeviceData.get_instance()
-
+            device.device_data.desired_telescope_state = {"TelescopeOn" : DevState.ON, "TelescopeStandby" : DevState.STANDBY, "TelescopeOff" : DevState.OFF}
             self.logger.debug(const.STR_INIT_SUCCESS)
             # Initialization of ObsState aggregator object and start obs state aggregation
             device.device_data.obs_state_aggregator = ObsStateAggregator(
@@ -274,7 +329,48 @@ class CentralNode(SKABaseDevice):
         """Internal construct of TANGO. Sets the activity message. """
         self.update_attr_map("activityMessage", value)
         # PROTECTED REGION END #    //  CentralNode.activity_message_write
-    
+
+    def read_telescopeState(self):
+        # PROTECTED REGION ID(CentralNode.telescope_state_read) ENABLED START #
+        """Internal construct of TANGO. Returns Telescope State. """
+        return self.attr_map["telescopeState"]
+        # PROTECTED REGION END #    //  CentralNode.telescope_state_read
+
+    def read_imaging(self):
+        # PROTECTED REGION ID(CentralNode.imaging_read) ENABLED START #
+        """Internal construct of TANGO. Returns imaging. """
+        return self.attr_map["imaging"]
+        # PROTECTED REGION END #    //  CentralNode.imaging_read
+
+    def read_pss(self):
+        # PROTECTED REGION ID(CentralNode.PSS_read) ENABLED START #
+        """Internal construct of TANGO. Returns PSS. """
+        return self.attr_map["pss"]
+        # PROTECTED REGION END #    //  CentralNode.PSS_read
+
+    def read_pst(self):
+        # PROTECTED REGION ID(CentralNode.PST_read) ENABLED START #
+        """Internal construct of TANGO. Returns PST """
+        return self.attr_map["pst"]
+        # PROTECTED REGION END #    //  CentralNode.PST_read
+
+    def read_vlbi(self):
+        # PROTECTED REGION ID(CentralNode.VLBI_read) ENABLED START #
+        """Internal construct of TANGO. Returns VLBI State. """
+        return self.attr_map["vlbi"]
+        # PROTECTED REGION END #    //  CentralNode.VLBI_read
+
+    def read_desiredTelescopeState(self):
+        # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
+        """Internal construct of TANGO. Returns Desired Telescope State. """
+        return self.attr_map["desiredTelescopeState"]
+
+    def read_commandInProgress(self):
+        # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
+        """Internal construct of TANGO. Returns commandInProgress Telescope State. """
+        return self.attr_map["commandInProgress"]
+        # PROTECTED REGION END #    //  CentralNode.activity_message_read
+
     def update_attr_map(self, attr, val):
         """
         This method updates attribute value in attribute map. Once a thread has acquired a lock,
@@ -318,7 +414,7 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("StowAntennas")
         handler(argin)
 
-    def is_StandByTelescope_allowed(self):
+    def is_TelescopeOff_allowed(self):
         """
         Checks whether this command is allowed to be run in current device state.
 
@@ -329,22 +425,18 @@ class CentralNode(SKABaseDevice):
         :raises: DevFailed if this command is not allowed to be run in current device state.
 
         """
-        handler = self.get_command_object("StandByTelescope")
+        handler = self.get_command_object("TelescopeOff")
         return handler.check_allowed()
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="[ResultCode, information-only string]",
-    )
-    def StandByTelescope(self):
+    @command()
+    def TelescopeOff(self):
         """
-        This command invokes SetStandbyLPMode() command on DishLeafNode, StandBy() command on CspMasterLeafNode and
-        SdpMasterLeafNode and Off() command on SubarrayNode and sets CentralNode into OFF state.
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command on CspMasterLeafNode and
+        SdpMasterLeafNode sets CentralNode into OFF state.
 
         """
-        handler = self.get_command_object("StandByTelescope")
-        (result_code, message) = handler()
-        return [[result_code], [message]]
+        handler = self.get_command_object("TelescopeOff")
+        handler()
 
     def is_TelescopeOn_allowed(self):
         """
@@ -458,26 +550,108 @@ class CentralNode(SKABaseDevice):
         message = handler(argin)
         return message
 
+    def is_Standby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        handler = self.get_command_object("Standby")
+        return handler.check_allowed()
+
+    @command()
+    @DebugIt()
+    def Standby(self):
+        """
+        This command invokes Standby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
+
+        """
+        handler = self.get_command_object("Standby")
+        handler()
+
+    def is_telescope_standby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        handler = self.get_command_object("TelescopeStandby")
+        return handler.check_allowed()
+
+    @command()
+    @DebugIt()
+    def TelescopeStandby(self):
+        """
+        This command invokes TelescopeStandby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
+
+        """
+        handler = self.get_command_object("TelescopeStandby")
+        handler()
+
+    def is_Off_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        
+        handler = self.get_command_object("Off")
+        return handler.check_allowed()
+
+    @command()
+    def Off(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command on CspMasterLeafNode and
+        SdpMasterLeafNode and sets CentralNode into OFF state.
+
+        """
+        handler = self.get_command_object("Off")
+        handler()
+
     def init_command_objects(self):
         """
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
         args = (self.device_data, self.state_model, self.logger)
+        self.telescope_off_object = TelescopeOff(*args)
+        self.off_object = Off(*args)
         self.on_object = On(*args)
         self.telescopeon_object = TelescopeOn(*args)
-        self.standby_object = StandByTelescope(*args)
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)
+        self.standby_tmc_object = Standby(*args)
+        self.telescope_standby_object = TelescopeStandby(*args)
         self.register_command_object("AssignResources", self.assign_object)
         self.register_command_object("StowAntennas", self.stow_object)
+        self.register_command_object("TelescopeOff", self.telescope_off_object)
+        self.register_command_object("Off", self.off_object)
         self.register_command_object("TelescopeOn", self.telescopeon_object)
-        self.register_command_object("StandByTelescope", self.standby_object)
         self.register_command_object("ReleaseResources", self.release_object)
         self.register_command_object("On", self.on_object)
+        self.register_command_object("Standby", self.standby_tmc_object)
+        self.register_command_object("TelescopeStandby", self.telescope_standby_object)
+        #TODO: This call for do() method will change in future
         self.on_object.do()
-
+        
 
 # ----------
 # Run server
