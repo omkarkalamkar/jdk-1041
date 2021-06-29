@@ -236,8 +236,7 @@ class OpStateAggregator(Aggregator):
     def state_callback(self, event):
         """
         Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode
-        and Subarray, aggregates them to calculate the CentralNode State.
-
+        and Subarray
         :param event: A TANGO_CHANGE event on CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode
         and Subarray State.
 
@@ -281,7 +280,7 @@ class OpStateAggregator(Aggregator):
         try:
             for fqdn, dd_device_state in fqdn_device_state_map.items():
                 if fqdn in attr_name:
-                    # setattr(device_data, dd_device_state, device_state)
+                    setattr(device_data, dd_device_state, device_state)
                     if "tm_subarray" in fqdn:
                         self.subarray_state_map[attr_name] = device_state
                         self.logger.info(
@@ -355,15 +354,15 @@ class OpStateAggregator(Aggregator):
                     self.this_server.set_state(DevState.ON)
                     self.generate_state_log_msg(DevState.ON)
                 elif unique_states == set([DevState.OFF]):
-                    self.this_server.device._op_state = DevState.OFF
-                    self.generate_state_log_msg(DevState.ON)
+                    self.this_server.set_state(DevState.OFF)
+                    self.generate_state_log_msg(DevState.OFF)
                 elif DevState.INIT in unique_states:
-                    self.this_server.device._op_state = DevState.INIT
+                    self.this_server.set_state(DevState.INIT)
                     self.generate_state_log_msg(DevState.INIT)
                 elif DevState.FAULT in unique_states:
-                    self.this_server.device._op_state = DevState.FAULT
+                    self.this_server.set_state(DevState.FAULT)
                     self.generate_state_log_msg(DevState.FAULT)
                 else:
-                    self.this_server.device._op_state = DevState.UNKNOWN
+                    self.this_server.set_state(DevState.UNKNOWN)
                     self.logger.info("State can not be state")
                 device_data._attr_callback_trigger.clear()
