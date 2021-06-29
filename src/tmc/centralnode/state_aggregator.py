@@ -31,29 +31,32 @@ class StateAggregator(Aggregator):
             self.logger = logging.getLogger(__name__)
         else:
             self.logger = logger
-        self.device_data = DeviceData.get_instance()
-        self.subarray_state_map = {}
-        self.csp_subarray_state_map = {}
-        self.sdp_subarray_state_map = {}
-        self.dish_state_map = {}
-        self.state_event_map = {}
-        self.this_server = TangoServerHelper.get_instance()
-        self.csp_master_ln_fqdn = ""
-        self.sdp_master_ln_fqdn = ""
-        self.dln_prefix = ""
-        self.tm_mid_subarrays = []
-        self.tm_mid_csp_subarrays_leaf_nodes = []
-        # create lock
-        self.state_callback_lock = threading.Lock()
-        self.tm_mid_sdp_subarrays_leaf_nodes = []
-        # Read the property of devices
-        self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
-        self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
-        self.dln_prefix = self.this_server.read_property("DishLeafNodePrefix")[0]
-        self.num_dishes = self.this_server.read_property("NumDishes")[0]
-        self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
-        self.tm_mid_csp_subarrays_leaf_nodes = self.this_server.read_property("TMMidCspSubarrayLeafNodes")
-        self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property("TMMidSdpSubarrayLeafNodes")
+        try:
+            self.device_data = DeviceData.get_instance()
+            self.subarray_state_map = {}
+            self.csp_subarray_state_map = {}
+            self.sdp_subarray_state_map = {}
+            self.dish_state_map = {}
+            self.state_event_map = {}
+            self.this_server = TangoServerHelper.get_instance()
+            self.csp_master_ln_fqdn = ""
+            self.sdp_master_ln_fqdn = ""
+            self.dln_prefix = ""
+            self.tm_mid_subarrays = []
+            self.tm_mid_csp_subarrays_leaf_nodes = []
+            # create lock
+            self.state_callback_lock = threading.Lock()
+            self.tm_mid_sdp_subarrays_leaf_nodes = []
+            # Read the property of devices
+            self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
+            self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+            self.dln_prefix = self.this_server.read_property("DishLeafNodePrefix")[0]
+            self.num_dishes = self.this_server.read_property("NumDishes")[0]
+            self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
+            self.tm_mid_csp_subarrays_leaf_nodes = self.this_server.read_property("TMMidCspSubarrayLeafNodes")
+            self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property("TMMidSdpSubarrayLeafNodes")
+        except Exception as exe:
+            self.logger.exception(exe)
 
 
     def subscribe_event(self):  ###when this method will call?????
@@ -121,7 +124,6 @@ class StateAggregator(Aggregator):
 
         :raises: Devfailed exception if erroe occurs while subscribing event.
         """
-        self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
         for subarray_fqdn in self.tm_mid_subarrays:
             subarray_client = TangoClient(subarray_fqdn)
             # updating the subarray_state_map with device name (as ska_mid/tm_subarray_node/1) and its value which is required in callback
@@ -236,10 +238,10 @@ class StateAggregator(Aggregator):
     def state_cb(self, event):
         """
         Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
-        and Subarray, aggregates them to calculate the CentralNode state.
+        and Subarray, aggregates them to calculate the CentralNode State.
 
         :param event: A TANGO_CHANGE event on CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
-        and Subarray healthState.
+        and Subarray State.
 
         :return: None
         """
