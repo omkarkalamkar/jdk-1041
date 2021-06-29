@@ -83,10 +83,6 @@ def subarray_state_model():
     """
     yield SKASubarrayStateModel(logging.getLogger())
 
-@pytest.fixture
-def device_data():
-    yield DeviceData()
-
 @pytest.fixture(scope="function")
 def mock_subarraynode_device(mock_tango_server_helper, mock_tango_client):
     subarray1_fqdn = "ska_mid/tm_subarray_node/1"
@@ -198,7 +194,7 @@ def central_node_test_info(request):
     }
     return test_info
 
-def test_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+def test_standby_class_command_method(subarray_state_model, mock_subarray):
     _, tango_client_obj, _ = mock_subarray
     standby_cmd = Standby(device_data, subarray_state_model)
     subarray_state_model._straight_to_state(DevState.ON, None)
@@ -206,7 +202,7 @@ def test_standby_class_command_method(device_data, subarray_state_model, mock_su
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_STANDBY, None)
 
 
-def test_on_class_command_method(device_data, subarray_state_model, mock_subarray):
+def test_on_class_command_method(subarray_state_model, mock_subarray):
     _, tango_client_obj, _ = mock_subarray
     on_cmd = On(device_data, subarray_state_model)
     subarray_state_model._straight_to_state(DevState.ON, None)
@@ -214,7 +210,7 @@ def test_on_class_command_method(device_data, subarray_state_model, mock_subarra
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_ON, None)
 
 
-def test_telescope_on_class_command_method(device_data, subarray_state_model, mock_subarray):
+def test_telescope_on_class_command_method(subarray_state_model, mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     telescope_on_cmd = TelescopeOn(device_data, subarray_state_model)
     subarray_state_model._straight_to_state(DevState.ON, None)
@@ -223,7 +219,7 @@ def test_telescope_on_class_command_method(device_data, subarray_state_model, mo
     assert device_proxy.desiredTelescopeState == DevState.ON
 
 
-def test_telescope_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+def test_telescope_standby_class_command_method(subarray_state_model, mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     telescope_standby_cmd = TelescopeStandby(device_data, subarray_state_model)
     subarray_state_model._straight_to_state(DevState.ON, None)
