@@ -27,6 +27,8 @@ from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.off_command import Off
 from tmc.centralnode.input_validator import AssignResourceValidator
+from tmc.centralnode.state_aggregator import StateAggregator
+
 from tmc.centralnode import CentralNode, const, release
 from tmc.centralnode.const import (
     CMD_SET_STOW_MODE,
@@ -70,6 +72,8 @@ release_invalid_key_file = "invalid_key_ReleaseResources.json"
 path = join(dirname(__file__), "data", release_invalid_key_file)
 with open(path, "r") as f:
     release_invalid_key = f.read()
+
+device_data = DeviceData.get_instance()
 
 @pytest.fixture
 def subarray_state_model():
@@ -137,6 +141,23 @@ def mock_tango_server_helper():
         tango_server_obj = TangoServerHelper.get_instance()
         yield tango_server_obj
         
+
+def dummy_subscriber_State(attribute ,fqdn, state):
+    fake_event = Mock()
+    fake_event.err = False
+    fake_event.attr_name = f"{fqdn}/{attribute}"
+    fake_event.attr_value.value = state
+    return fake_event
+
+
+def test_state_aggregator_callback(mock_subarray):
+    device_proxy, tango_client_obj, _ = mock_subarray
+    device_proxy.On()
+    state_aggr = StateAggregator()
+    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/csp_subarray01", DevState.ON))
+    state_aggr.state_cb(dummy_subscriber_State("attr", "ska_mid/tm_leaf_node/sdp_subarray01", DevState.ON))
+    assert device_proxy.state() == DevState.ON
+
 
 @pytest.fixture(
     scope="function",

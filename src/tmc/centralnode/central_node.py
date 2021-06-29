@@ -34,6 +34,9 @@ from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
 from tmc.centralnode.health_state_aggregator import HealthStateAggregator
 from tmc.centralnode.const import ModesAvailability
+from tmc.centralnode.state_aggregator import StateAggregator
+
+
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 __all__ = [
@@ -121,9 +124,21 @@ class CentralNode(SKABaseDevice):
         dtype="str", default_value="", doc="Device name prefix for Dish Leaf Node"
     )
 
+    TMMidCspSubarrayLeafNodes = device_property(
+        dtype=("str",),
+        doc="List of TM Mid CspSubarrayLeafNode devices",
+        default_value=tuple(),
+    )
+
+    TMMidSdpSubarrayLeafNodes = device_property(
+        dtype=("str",),
+        doc="List of TM Mid SdpSubarrayLeafNode devices",
+        default_value=tuple(),
+    )
+
     CspMasterLeafNodeFQDN = device_property(dtype="str")
 
-    CspMasterFQDN = device_property(dtype="str")
+    CspMasterFQDN = device_property(dtype="str")    
 
     SdpMasterLeafNodeFQDN = device_property(dtype="str")
 
@@ -264,6 +279,10 @@ class CentralNode(SKABaseDevice):
             device.device_data.health_aggreegator = HealthStateAggregator(self.logger)
             device.device_data.health_aggreegator.subscribe_event()
 
+            #create StateAggregator object and start state aggregation
+            device.device_data.state_aggregator = StateAggregator(self.logger)
+            device.device_data.state_aggregator.subscribe_event() 
+            device.device_data.state_aggregator.start_state_aggregation()
 
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")

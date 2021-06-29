@@ -11,6 +11,7 @@ This module defines the DeviceData class, which represents of the functional Cen
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 from ska.base.control_model import HealthState
+import threading
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -31,8 +32,19 @@ class DeviceData:
         else:
             DeviceData.__instance = self
 
+        # Create event for attribute callback trigger
+        self._attr_callback_trigger = threading.Event() 
+
         self._sdp_master_health = HealthState.UNKNOWN
         self._csp_master_health = HealthState.UNKNOWN
+
+        self._csp_master_state = ""
+        self._sdp_master_state = ""
+        # self.subarray_state_map = {}
+        # self.csp_subarray_state_map = {}
+        # self.sdp_subarray_state_map = {}
+        # self.dish_state_map = {}
+
         self.receptorIDList = []
         self.subarray_health_state_map = {}
         self._dish_leaf_node_devices = []
@@ -40,11 +52,14 @@ class DeviceData:
         self.subarray_FQDN_dict = {}
         self.sln_prefix = ""
         self.health_aggreegator = None
+        self.state_aggregator = None
         self.resource_manager = None
         self.obs_state_aggregator = None
         self.check_resources = None
         self.desired_telescope_state = {}
         self.command_in_progress = ""
+
+        self.tmc_device_states = []
 
     @staticmethod
     def get_instance():
