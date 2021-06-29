@@ -6,22 +6,7 @@ This file is part of the CentralNode project and defines variables used
 from enum import IntEnum, unique
 
 @unique
-class Imaging(IntEnum):
-    not_available = 0
-    available = 1
-
-@unique
-class PSS(IntEnum):
-    not_available = 0
-    available = 1
-
-@unique
-class PST(IntEnum):
-    not_available = 0
-    available = 1
-
-@unique
-class VLBI(IntEnum):
+class ModesAvailability(IntEnum):
     not_available = 0
     available = 1
 

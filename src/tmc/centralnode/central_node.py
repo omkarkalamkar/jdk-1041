@@ -11,11 +11,7 @@ of state and mode attributes defined by the SKA Control Model.
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 import threading
 # Tango imports
-<<<<<<< HEAD
-from tango import DebugIt, AttrWriteType, DevState
-=======
 from tango import DebugIt, AttrWriteType, DevState, DevString
->>>>>>> origin/master
 from tango.server import run, attribute, command, device_property
 from tmc.common.tango_server_helper import TangoServerHelper
 
@@ -37,7 +33,7 @@ from tmc.centralnode.resource_manager import ResourceManager
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
 from tmc.centralnode.health_state_aggregator import HealthStateAggregator
-from tmc.centralnode.const import Imaging, PSS, PST, VLBI
+from tmc.centralnode.const import ModesAvailability
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 __all__ = [
@@ -167,26 +163,26 @@ class CentralNode(SKABaseDevice):
         doc="DevState of telescope"
     )
 
-    Imaging = attribute(
-        dtype=Imaging,
+    imaging = attribute(
+        dtype=ModesAvailability,
         access=AttrWriteType.READ,
         doc="Imaging Attribute"
     )
 
-    PSS = attribute(
-        dtype=PSS,
+    pss = attribute(
+        dtype=ModesAvailability,
         access=AttrWriteType.READ,
         doc="PSS Attribute"
     )
 
-    PST = attribute(
-        dtype=PST,
+    pst = attribute(
+        dtype=ModesAvailability,
         access=AttrWriteType.READ,
         doc="PST Attribute"
     )
 
-    VLBI = attribute(
-        dtype=VLBI,
+    vlbi = attribute(
+        dtype=ModesAvailability,
         access=AttrWriteType.READ,
         doc="VLBI Attribute"
     )
@@ -240,12 +236,12 @@ class CentralNode(SKABaseDevice):
             device.attr_map["subarray3HealthState"] = HealthState.UNKNOWN
             device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
             device.attr_map["telescopeState"] = DevState.STANDBY
-            device.attr_map["Imaging"] = Imaging.not_available
-            device.attr_map["PSS"] = PSS.not_available
-            device.attr_map["PST"] = PST.not_available
-            device.attr_map["VLBI"] = VLBI.not_available
             device.attr_map["desiredTelescopeState"] = None
             device.attr_map["commandInProgress"] = ""
+            device.attr_map["imaging"] = ModesAvailability.not_available
+            device.attr_map["pss"] = ModesAvailability.not_available
+            device.attr_map["pst"] = ModesAvailability.not_available
+            device.attr_map["vlbi"] = ModesAvailability.not_available
             device._health_state = HealthState.OK
             device._build_state = "{},{},{}".format(
                 release.name, release.version, release.description
@@ -340,28 +336,28 @@ class CentralNode(SKABaseDevice):
         return self.attr_map["telescopeState"]
         # PROTECTED REGION END #    //  CentralNode.telescope_state_read
 
-    def read_Imaging(self):
+    def read_imaging(self):
         # PROTECTED REGION ID(CentralNode.imaging_read) ENABLED START #
         """Internal construct of TANGO. Returns imaging. """
-        return self.attr_map["Imaging"]
+        return self.attr_map["imaging"]
         # PROTECTED REGION END #    //  CentralNode.imaging_read
 
-    def read_PSS(self):
+    def read_pss(self):
         # PROTECTED REGION ID(CentralNode.PSS_read) ENABLED START #
         """Internal construct of TANGO. Returns PSS. """
-        return self.attr_map["PSS"]
+        return self.attr_map["pss"]
         # PROTECTED REGION END #    //  CentralNode.PSS_read
 
-    def read_PST(self):
+    def read_pst(self):
         # PROTECTED REGION ID(CentralNode.PST_read) ENABLED START #
         """Internal construct of TANGO. Returns PST """
-        return self.attr_map["PST"]
+        return self.attr_map["pst"]
         # PROTECTED REGION END #    //  CentralNode.PST_read
 
-    def read_VLBI(self):
+    def read_vlbi(self):
         # PROTECTED REGION ID(CentralNode.VLBI_read) ENABLED START #
         """Internal construct of TANGO. Returns VLBI State. """
-        return self.attr_map["VLBI"]
+        return self.attr_map["vlbi"]
         # PROTECTED REGION END #    //  CentralNode.VLBI_read
 
     def read_desiredTelescopeState(self):
