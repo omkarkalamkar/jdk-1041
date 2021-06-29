@@ -67,7 +67,7 @@ class OpStateAggregator(Aggregator):
         except Exception as exe:
             self.logger.exception(exe)
 
-    def subscribe_event(self):  ###when this method will call?????
+    def subscribe_event(self):
         """
         Method for event subscription. Calls separate subscribe event methods for CSPMasterLeafNode, SDPMasterLeafNode,
         TM Subarray, DishLeafNode, CSPSubarrayLeafNode, SDPSubarrayLeafNode state attribute subscription.
@@ -87,10 +87,9 @@ class OpStateAggregator(Aggregator):
         """
         try:
             csp_master_ln_client = TangoClient(self.csp_master_ln_fqdn)
-            self.csp_mln_event_id = csp_master_ln_client.subscribe_attribute(
+            self.state_event_map[csp_master_ln_client] = csp_master_ln_client.subscribe_attribute(
                 const.EVT_SUBSR_STATE, self.state_callback
             )
-            self.state_event_map[csp_master_ln_client] = self.csp_mln_event_id
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_CSP_MASTER_LN_STATE}{dev_failed}"
             self.logger.exception(dev_failed)
@@ -109,10 +108,9 @@ class OpStateAggregator(Aggregator):
         """
         try:
             sdp_master_ln_client = TangoClient(self.sdp_master_ln_fqdn)
-            self.sdp_mln_event_id = sdp_master_ln_client.subscribe_attribute(
+            self.state_event_map[sdp_master_ln_client] = sdp_master_ln_client.subscribe_attribute(
                 const.EVT_SUBSR_STATE, self.state_callback
             )
-            self.state_event_map[sdp_master_ln_client] = self.sdp_mln_event_id
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_SDP_MASTER_LN_STATE}{dev_failed}"
             self.logger.exception(dev_failed)
@@ -134,10 +132,9 @@ class OpStateAggregator(Aggregator):
             # updating the subarray_state_map with device name (as ska_mid/tm_subarray_node/1) and its value which is required in callback
             self.subarray_state_map[subarray_fqdn] = -1
             try:
-                sa_event_id = subarray_client.subscribe_attribute(
+                self.state_event_map[subarray_client] = subarray_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
                 )
-                self.state_event_map[subarray_client] = sa_event_id
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_SA_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
@@ -159,10 +156,9 @@ class OpStateAggregator(Aggregator):
             dish_ln_client = TangoClient(dish_ln_fqdn)
             self.dish_state_map[dish_ln_fqdn] = -1
             try:
-                self.dish_ln_event_id = dish_ln_client.subscribe_attribute(
+                self.state_event_map[dish_ln_client] = dish_ln_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
                 )
-                self.state_event_map[dish_ln_client] = self.dish_ln_event_id
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_DISH_LN_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
@@ -183,10 +179,9 @@ class OpStateAggregator(Aggregator):
             csp_sa_ln_client = TangoClient(csp_sa_ln_fqdn)
             self.csp_subarray_state_map[csp_sa_ln_fqdn] = -1
             try:
-                csp_sa_event_id = csp_sa_ln_client.subscribe_attribute(
+                self.state_event_map[csp_sa_ln_client] = csp_sa_ln_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
                 )
-                self.state_event_map[csp_sa_ln_client] = csp_sa_event_id
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_CSP_SA_LN_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
@@ -207,10 +202,9 @@ class OpStateAggregator(Aggregator):
             sdp_sa_ln_client = TangoClient(sdp_sa_ln_fqdn)
             self.sdp_subarray_state_map[sdp_sa_ln_fqdn] = -1
             try:
-                sdp_sa_event_id = sdp_sa_ln_client.subscribe_attribute(
+                self.state_event_map[sdp_sa_ln_client] = sdp_sa_ln_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
                 )
-                self.state_event_map[sdp_sa_ln_client] = sdp_sa_event_id
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_SDP_SA_LN_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
@@ -237,6 +231,7 @@ class OpStateAggregator(Aggregator):
         """
         Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode
         and Subarray
+
         :param event: A TANGO_CHANGE event on CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode
         and Subarray State.
 
@@ -246,9 +241,9 @@ class OpStateAggregator(Aggregator):
         # Lock for thread 1
         self.state_callback_lock.acquire()
         log_msg = f"State attribute change event is : {event.attr_name}"
-        self.logger.info(log_msg)
+        self.logger.debug(log_msg)
         log_msg = f"State attribute change event is: {event.attr_value.value}"
-        self.logger.info(log_msg)
+        self.logger.debug(log_msg)
 
         if not event.err:
             self.update_state(event, device_data.fqdn_device_state_map)
@@ -270,7 +265,6 @@ class OpStateAggregator(Aggregator):
         else:
             # TODO: For future reference
             self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
-            self.logger.critical(f"{const.ERR_SUBSR_SA_STATE}{event}")
 
     def update_state(self, event, fqdn_device_state_map: dict):
         device_data = DeviceData.get_instance()
