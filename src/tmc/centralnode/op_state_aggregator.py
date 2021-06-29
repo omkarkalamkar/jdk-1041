@@ -39,9 +39,9 @@ class OpStateAggregator(Aggregator):
             self.dish_state_map = {}
             self.state_event_map = {}
             self.this_server = TangoServerHelper.get_instance()
-            self.csp_master_ln_fqdn = ""
-            self.sdp_master_ln_fqdn = ""
-            self.dln_prefix = ""
+            # self.csp_master_ln_fqdn = ""
+            # self.sdp_master_ln_fqdn = ""
+            # self.dln_prefix = ""
             self.tm_mid_subarrays = []
             self.tm_mid_csp_subarrays_leaf_nodes = []
             # create lock
@@ -79,7 +79,7 @@ class OpStateAggregator(Aggregator):
         try:
             csp_master_ln_client = TangoClient(self.csp_master_ln_fqdn)
             self.csp_mln_event_id = csp_master_ln_client.subscribe_attribute(
-                const.EVT_SUBSR_STATE, self.state_cb
+                const.EVT_SUBSR_STATE, self.state_callback
             )
             self.state_event_map[csp_master_ln_client] = self.csp_mln_event_id
         except DevFailed as dev_failed:
@@ -102,7 +102,7 @@ class OpStateAggregator(Aggregator):
         try:
             sdp_master_ln_client = TangoClient(self.sdp_master_ln_fqdn)
             self.sdp_mln_event_id = sdp_master_ln_client.subscribe_attribute(
-                const.EVT_SUBSR_STATE, self.state_cb
+                const.EVT_SUBSR_STATE, self.state_callback
             )
             self.state_event_map[sdp_master_ln_client] = self.sdp_mln_event_id
         except DevFailed as dev_failed:
@@ -128,7 +128,7 @@ class OpStateAggregator(Aggregator):
             self.subarray_state_map[subarray_fqdn] = -1
             try:
                 sa_event_id = subarray_client.subscribe_attribute(
-                    const.EVT_SUBSR_STATE, self.state_cb
+                    const.EVT_SUBSR_STATE, self.state_callback
                 )
                 self.state_event_map[subarray_client] = sa_event_id
             except DevFailed as dev_failed:
@@ -154,7 +154,7 @@ class OpStateAggregator(Aggregator):
             self.dish_state_map[dish_ln_fqdn] = -1
             try:
                 self.dish_ln_event_id = dish_ln_client.subscribe_attribute(
-                    const.EVT_SUBSR_STATE, self.state_cb
+                    const.EVT_SUBSR_STATE, self.state_callback
                 )
                 self.state_event_map[dish_ln_client] = self.dish_ln_event_id
             except DevFailed as dev_failed:
@@ -179,7 +179,7 @@ class OpStateAggregator(Aggregator):
             self.csp_subarray_state_map[csp_sa_ln_fqdn] = -1
             try:
                 csp_sa_event_id = csp_sa_ln_client.subscribe_attribute(
-                    const.EVT_SUBSR_STATE, self.state_cb
+                    const.EVT_SUBSR_STATE, self.state_callback
                 )
                 self.state_event_map[csp_sa_ln_client] = csp_sa_event_id
             except DevFailed as dev_failed:
@@ -204,7 +204,7 @@ class OpStateAggregator(Aggregator):
             self.sdp_subarray_state_map[sdp_sa_ln_fqdn] = -1
             try:
                 sdp_sa_event_id = sdp_sa_ln_client.subscribe_attribute(
-                    const.EVT_SUBSR_STATE, self.state_cb
+                    const.EVT_SUBSR_STATE, self.state_callback
                 )
                 self.state_event_map[sdp_sa_ln_client] = sdp_sa_event_id
             except DevFailed as dev_failed:
@@ -232,7 +232,7 @@ class OpStateAggregator(Aggregator):
             )
         self.state_event_map.clear()
 
-    def state_cb(self, event):
+    def state_callback(self, event):
         """
         Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
         and Subarray, aggregates them to calculate the CentralNode State.
@@ -250,43 +250,7 @@ class OpStateAggregator(Aggregator):
         log_msg = f'State attribute change event is: {event.attr_value.value}'
         self.logger.info(log_msg)
         
-        def _update_state(self, fqdn_device_state_map: dict):
-            device_state = event.attr_value.value
-            attr_name = event.attr_name
-            self.logger.info(f"State is: {device_state}")
-            try:
-                for fqdn, dd_device_state in fqdn_device_state_map.items():
-                    if fqdn in attr_name:
-                        #setattr(device_data, dd_device_state, device_state)
-                        if "tm_subarray" in fqdn:
-                            self.subarray_state_map[attr_name] = device_state
-                            print("::::::::::subarray state map is::::::::::::::", self.subarray_state_map[attr_name])
-                        elif "csp_subarray" in fqdn:
-                            self.csp_subarray_state_map[attr_name] = device_state
-                            print("::::::::::csp subarray state map is::::::::::::::", self.csp_subarray_state_map[attr_name])
-                        elif "sdp_subarray" in fqdn:
-                            self.sdp_subarray_state_map[attr_name] = device_state
-                            print("::::::::::sdp subarray state map is::::::::::::::", self.sdp_subarray_state_map[attr_name])
-                        elif "ska_mid/tm_leaf_node/d" in fqdn:
-                            self.dish_state_map[attr_name] = device_state
-                            print("::::::::::dish state map is::::::::::::::", self.dish_state_map[attr_name])
-                        elif "csp_master" in fqdn:
-                            device_data._csp_master_state = device_state
-                            self.logger.info(f"State msg in CSP Master: {attr_name}")
-                            self.logger.info(f"CSP Master state is: {device_state}")
-                        elif "sdp_master" in fqdn:
-                            device_data._sdp_master_state = device_state
-                            self.logger.info(f"State msg in SDP Master: {attr_name}")
-                            self.logger.info(f"SDP Master state is: {device_state}")
-                        else:
-                            print("Condition is not statisfied")
-                        break
-                else:
-                    self.logger.debug(const.EVT_UNKNOWN)
-                    # TODO: update read_activity message for unknown events
-            except Exception as e:
-                print("::::::Exception is:::::", str(e))
-
+    
         if not event.err:
             fqdn_device_state_map = {
                 const.PROP_DEF_VAL_TM_MID_SA1: "_subarray1_state",
@@ -305,7 +269,7 @@ class OpStateAggregator(Aggregator):
                 const.PROP_DEF_VAL_TM_MID_CSPM_LN: "_csp_master_state",
                 const.PROP_DEF_VAL_TM_MID_SDPM_LN: "_sdp_master_state"
             }
-            _update_state(self, fqdn_device_state_map)
+            self.update_state(event, fqdn_device_state_map)
 
             device_data.tmc_device_states = [
                 device_data._csp_master_state,
@@ -320,6 +284,45 @@ class OpStateAggregator(Aggregator):
             self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_STATE}{event}", False)
             self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
             self.logger.critical(f"{const.ERR_SUBSR_SA_STATE}{event}")
+
+    def update_state(self, event, fqdn_device_state_map: dict):
+        device_data = DeviceData.get_instance()
+        device_state = event.attr_value.value
+        attr_name = event.attr_name
+        self.logger.info(f"State is: {device_state}")
+        try:
+            for fqdn, dd_device_state in fqdn_device_state_map.items():
+                if fqdn in attr_name:
+                    #setattr(device_data, dd_device_state, device_state)
+                    if "tm_subarray" in fqdn:
+                        self.subarray_state_map[attr_name] = device_state
+                        print("::::::::::subarray state map is::::::::::::::", self.subarray_state_map[attr_name])
+                    elif "csp_subarray" in fqdn:
+                        self.csp_subarray_state_map[attr_name] = device_state
+                        print("::::::::::csp subarray state map is::::::::::::::", self.csp_subarray_state_map[attr_name])
+                    elif "sdp_subarray" in fqdn:
+                        self.sdp_subarray_state_map[attr_name] = device_state
+                        print("::::::::::sdp subarray state map is::::::::::::::", self.sdp_subarray_state_map[attr_name])
+                    elif "ska_mid/tm_leaf_node/d" in fqdn:
+                        self.dish_state_map[attr_name] = device_state
+                        print("::::::::::dish state map is::::::::::::::", self.dish_state_map[attr_name])
+                    elif "csp_master" in fqdn:
+                        device_data._csp_master_state = device_state
+                        self.logger.info(f"State msg in CSP Master: {attr_name}")
+                        self.logger.info(f"CSP Master state is: {device_state}")
+                    elif "sdp_master" in fqdn:
+                        device_data._sdp_master_state = device_state
+                        self.logger.info(f"State msg in SDP Master: {attr_name}")
+                        self.logger.info(f"SDP Master state is: {device_state}")
+                    else:
+                        print("Condition is not statisfied")
+                    break
+            else:
+                self.logger.debug(const.EVT_UNKNOWN)
+                # TODO: update read_activity message for unknown events
+        except Exception as e:
+            print("::::::Exception is:::::", str(e))
+
         
     def start_state_aggregation(self):
         # Create event for state change
