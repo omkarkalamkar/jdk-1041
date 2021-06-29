@@ -20,7 +20,7 @@ from tmc.centralnode.aggregator import Aggregator
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 
-class StateAggregator(Aggregator):
+class OpStateAggregator(Aggregator):
     """
     Aggregator class for state event subscription and state
     callback.
@@ -58,7 +58,6 @@ class StateAggregator(Aggregator):
         except Exception as exe:
             self.logger.exception(exe)
 
-
     def subscribe_event(self):  ###when this method will call?????
         """
         Method for event subscription. Calls separate subscribe event methods for CSPMasterLeafNode, SDPMasterLeafNode, 
@@ -70,7 +69,6 @@ class StateAggregator(Aggregator):
         self.dish_ln_state_subscribe_event()
         self.csp_sa_ln_state_subscribe_event()
         self.sdp_sa_ln_state_subscribe_event()
-
 
     def csp_master_ln_state_subscribe_event(self):
         """
@@ -234,7 +232,6 @@ class StateAggregator(Aggregator):
             )
         self.state_event_map.clear()
 
-
     def state_cb(self, event):
         """
         Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
@@ -324,7 +321,6 @@ class StateAggregator(Aggregator):
             self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
             self.logger.critical(f"{const.ERR_SUBSR_SA_STATE}{event}")
         
-
     def start_state_aggregation(self):
         # Create event for state change
         self._state_event = threading.Event() # thread control
@@ -335,14 +331,12 @@ class StateAggregator(Aggregator):
         )
         self.state_calculator_thread.start()
 
-
     def stop_state_aggregation(self):   ## when to call this method ????     
         # Stop thread of state calculation
         self.logger.info("Stopping state calculator thread.")
         self._state_event.set()
         self.state_calculator_thread.join()
         self.logger.info("State calculator thread stopped.")
-
 
     def generate_state_log_msg(self, device_state):
         state_string_map = {
@@ -353,38 +347,27 @@ class StateAggregator(Aggregator):
         }
         log_msg = f"{const.STR_STATE}{state_string_map[device_state]}"                       
         self.logger.info(log_msg)
-        
 
     def calculate_state(self):
         device_data = DeviceData.get_instance()
-        print("::::::::self._attr_callback_trigger.isSet():::::::", device_data._attr_callback_trigger.isSet())
-        print("::::::::self._state_event.isSet():::::::", self._state_event.isSet())
         while not self._state_event.isSet():
             if device_data._attr_callback_trigger.isSet():
                 print("::::::::::::Inside if block since attr is triggered:::::::::::")
                 #calculation logic
-                print("*******tmc_device_states in if block before set()******", device_data.tmc_device_states)
                 unique_states = set(device_data.tmc_device_states)
-                print("::::::::::::::::::::::unique_states::::::::::::::::::", unique_states)
                 if unique_states == set([DevState.ON]):
                     print("Inside if for DevState.ON")
-                    self.this_server.device._op_state = DevState.ON 
-                    print("self.this_server.device._op_state is", self.this_server.device._op_state)
-                    #print("state of CN is",str(self.this_server.device.get_state()))
+                    self.this_server.set_state(DevState.ON)
                     self.generate_state_log_msg(DevState.ON)
-                    print("Device is ON")
                 elif unique_states == set([DevState.OFF]):
                     self.this_server.device._op_state = DevState.OFF
                     self.generate_state_log_msg(DevState.ON)
-                    print("Device is OFF")
                 elif DevState.INIT in unique_states:
                     self.this_server.device._op_state = DevState.INIT
                     self.generate_state_log_msg(DevState.INIT)
-                    print("Device is INIT")
                 elif DevState.FAULT in unique_states:
                     self.this_server.device._op_state = DevState.FAULT
                     self.generate_state_log_msg(DevState.FAULT)
-                    print("Device is FAULT")
                 else:
                     self.logger.info("State can not be state")
                 device_data._attr_callback_trigger.clear()

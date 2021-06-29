@@ -34,7 +34,7 @@ from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.obs_state_check import ObsStateAggregator
 from tmc.centralnode.health_state_aggregator import HealthStateAggregator
 from tmc.centralnode.const import ModesAvailability
-from tmc.centralnode.state_aggregator import StateAggregator
+from tmc.centralnode.op_state_aggregator import OpStateAggregator
 
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
@@ -279,8 +279,8 @@ class CentralNode(SKABaseDevice):
             device.device_data.health_aggreegator = HealthStateAggregator(self.logger)
             device.device_data.health_aggreegator.subscribe_event()
 
-            #create StateAggregator object and start state aggregation
-            device.device_data.state_aggregator = StateAggregator(self.logger)
+            #create OpStateAggregator object and start state aggregation
+            device.device_data.state_aggregator = OpStateAggregator(self.logger)
             device.device_data.state_aggregator.subscribe_event() 
             device.device_data.state_aggregator.start_state_aggregation()
 
