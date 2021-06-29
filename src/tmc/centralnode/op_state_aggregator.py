@@ -17,6 +17,7 @@ from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode import const
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.aggregator import Aggregator
+
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 
@@ -25,7 +26,7 @@ class OpStateAggregator(Aggregator):
     Aggregator class for state event subscription and state
     callback.
     """
-    
+
     def __init__(self, logger=None):
         if logger is None:
             self.logger = logging.getLogger(__name__)
@@ -48,19 +49,27 @@ class OpStateAggregator(Aggregator):
             self.state_callback_lock = threading.Lock()
             self.tm_mid_sdp_subarrays_leaf_nodes = []
             # Read the property of devices
-            self.csp_master_ln_fqdn = self.this_server.read_property("CspMasterLeafNodeFQDN")[0]
-            self.sdp_master_ln_fqdn = self.this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+            self.csp_master_ln_fqdn = self.this_server.read_property(
+                "CspMasterLeafNodeFQDN"
+            )[0]
+            self.sdp_master_ln_fqdn = self.this_server.read_property(
+                "SdpMasterLeafNodeFQDN"
+            )[0]
             self.dln_prefix = self.this_server.read_property("DishLeafNodePrefix")[0]
             self.num_dishes = self.this_server.read_property("NumDishes")[0]
             self.tm_mid_subarrays = self.this_server.read_property("TMMidSubarrayNodes")
-            self.tm_mid_csp_subarrays_leaf_nodes = self.this_server.read_property("TMMidCspSubarrayLeafNodes")
-            self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property("TMMidSdpSubarrayLeafNodes")
+            self.tm_mid_csp_subarrays_leaf_nodes = self.this_server.read_property(
+                "TMMidCspSubarrayLeafNodes"
+            )
+            self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property(
+                "TMMidSdpSubarrayLeafNodes"
+            )
         except Exception as exe:
             self.logger.exception(exe)
 
     def subscribe_event(self):  ###when this method will call?????
         """
-        Method for event subscription. Calls separate subscribe event methods for CSPMasterLeafNode, SDPMasterLeafNode, 
+        Method for event subscription. Calls separate subscribe event methods for CSPMasterLeafNode, SDPMasterLeafNode,
         TM Subarray, DishLeafNode, CSPSubarrayLeafNode, SDPSubarrayLeafNode state attribute subscription.
         """
         self.csp_master_ln_state_subscribe_event()
@@ -85,7 +94,6 @@ class OpStateAggregator(Aggregator):
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_CSP_MASTER_LN_STATE}{dev_failed}"
             self.logger.exception(dev_failed)
-            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_MASTER_LN_STATE, False)
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
@@ -108,7 +116,6 @@ class OpStateAggregator(Aggregator):
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_SUBSR_SDP_MASTER_LN_STATE}{dev_failed}"
             self.logger.exception(dev_failed)
-            self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_MASTER_LN_STATE, False)
             tango.Except.throw_exception(
                 const.STR_CMD_FAILED,
                 log_msg,
@@ -134,7 +141,6 @@ class OpStateAggregator(Aggregator):
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_SA_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
-                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SA_STATE, False)
                 tango.Except.throw_exception(
                     const.STR_CMD_FAILED,
                     log_msg,
@@ -160,7 +166,6 @@ class OpStateAggregator(Aggregator):
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_DISH_LN_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
-                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_DISH_LN_STATE, False)
                 tango.Except.throw_exception(
                     const.STR_CMD_FAILED,
                     log_msg,
@@ -185,7 +190,6 @@ class OpStateAggregator(Aggregator):
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_CSP_SA_LN_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
-                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_CSP_SA_LN_STATE, False)
                 tango.Except.throw_exception(
                     const.STR_CMD_FAILED,
                     log_msg,
@@ -210,7 +214,6 @@ class OpStateAggregator(Aggregator):
             except DevFailed as dev_failed:
                 log_msg = f"{const.ERR_SUBSR_SDP_SA_LN_STATE}{dev_failed}"
                 self.logger.exception(dev_failed)
-                self.this_server.write_attr("activityMessage", const.ERR_SUBSR_SDP_SA_LN_STATE, False)
                 tango.Except.throw_exception(
                     const.STR_CMD_FAILED,
                     log_msg,
@@ -227,17 +230,15 @@ class OpStateAggregator(Aggregator):
                 tango_client.get_device_fqdn
             )
             self.logger.debug(log_message)
-            tango_client.unsubscribe_attribute(
-                self.state_event_map[tango_client]
-            )
+            tango_client.unsubscribe_attribute(self.state_event_map[tango_client])
         self.state_event_map.clear()
 
     def state_callback(self, event):
         """
-        Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
+        Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode
         and Subarray, aggregates them to calculate the CentralNode State.
 
-        :param event: A TANGO_CHANGE event on CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
+        :param event: A TANGO_CHANGE event on CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode
         and Subarray State.
 
         :return: None
@@ -245,12 +246,11 @@ class OpStateAggregator(Aggregator):
         device_data = DeviceData.get_instance()
         # Lock for thread 1
         self.state_callback_lock.acquire()
-        log_msg = f'State attribute change event is : {event.attr_name}'
+        log_msg = f"State attribute change event is : {event.attr_name}"
         self.logger.info(log_msg)
-        log_msg = f'State attribute change event is: {event.attr_value.value}'
+        log_msg = f"State attribute change event is: {event.attr_value.value}"
         self.logger.info(log_msg)
-        
-    
+
         if not event.err:
             fqdn_device_state_map = {
                 const.PROP_DEF_VAL_TM_MID_SA1: "_subarray1_state",
@@ -262,26 +262,31 @@ class OpStateAggregator(Aggregator):
                 const.PROP_DEF_VAL_TM_MID_SDPSA_LN1: "_sdp_subarray1_ln_state",
                 const.PROP_DEF_VAL_TM_MID_SDPSA_LN2: "_sdp_subarray2_ln_state",
                 const.PROP_DEF_VAL_TM_MID_SDPSA_LN3: "_sdp_subarray3_ln_state",
-                const.PROP_DEF_VAL_TM_MID_DLN1: "_dish_ln1_state", 
+                const.PROP_DEF_VAL_TM_MID_DLN1: "_dish_ln1_state",
                 const.PROP_DEF_VAL_TM_MID_DLN2: "_dish_ln2_state",
                 const.PROP_DEF_VAL_TM_MID_DLN3: "_dish_ln3_state",
                 const.PROP_DEF_VAL_TM_MID_DLN4: "_dish_ln4_state",
                 const.PROP_DEF_VAL_TM_MID_CSPM_LN: "_csp_master_state",
-                const.PROP_DEF_VAL_TM_MID_SDPM_LN: "_sdp_master_state"
+                const.PROP_DEF_VAL_TM_MID_SDPM_LN: "_sdp_master_state",
             }
             self.update_state(event, fqdn_device_state_map)
 
             device_data.tmc_device_states = [
                 device_data._csp_master_state,
-                device_data._sdp_master_state
+                device_data._sdp_master_state,
             ]
-            device_data.tmc_device_states = device_data.tmc_device_states + list(self.subarray_state_map.values()) + list(self.csp_subarray_state_map.values()) + list(self.sdp_subarray_state_map.values()) + list(self.dish_state_map.values()) 
+            device_data.tmc_device_states = (
+                device_data.tmc_device_states
+                + list(self.subarray_state_map.values())
+                + list(self.csp_subarray_state_map.values())
+                + list(self.sdp_subarray_state_map.values())
+                + list(self.dish_state_map.values())
+            )
 
-            device_data._attr_callback_trigger.set()  # start state calculation 
-            self.state_callback_lock.release()  # release the lock                             
+            device_data._attr_callback_trigger.set()  # start state calculation
+            self.state_callback_lock.release()  # release the lock
         else:
             # TODO: For future reference
-            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_STATE}{event}", False)
             self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
             self.logger.critical(f"{const.ERR_SUBSR_SA_STATE}{event}")
 
@@ -293,19 +298,27 @@ class OpStateAggregator(Aggregator):
         try:
             for fqdn, dd_device_state in fqdn_device_state_map.items():
                 if fqdn in attr_name:
-                    #setattr(device_data, dd_device_state, device_state)
+                    # setattr(device_data, dd_device_state, device_state)
                     if "tm_subarray" in fqdn:
                         self.subarray_state_map[attr_name] = device_state
-                        print("::::::::::subarray state map is::::::::::::::", self.subarray_state_map[attr_name])
+                        self.logger.info(
+                            f"Subarray state map is:{self.subarray_state_map[attr_name]}"
+                        )
                     elif "csp_subarray" in fqdn:
                         self.csp_subarray_state_map[attr_name] = device_state
-                        print("::::::::::csp subarray state map is::::::::::::::", self.csp_subarray_state_map[attr_name])
+                        self.logger.info(
+                            f"Csp subarray state map is:{self.csp_subarray_state_map[attr_name]}"
+                        )
                     elif "sdp_subarray" in fqdn:
                         self.sdp_subarray_state_map[attr_name] = device_state
-                        print("::::::::::sdp subarray state map is::::::::::::::", self.sdp_subarray_state_map[attr_name])
+                        self.logger.info(
+                            f"sdp subarray state map is:{self.sdp_subarray_state_map[attr_name]}"
+                        )
                     elif "ska_mid/tm_leaf_node/d" in fqdn:
                         self.dish_state_map[attr_name] = device_state
-                        print("::::::::::dish state map is::::::::::::::", self.dish_state_map[attr_name])
+                        self.logger.info(
+                            f"dish state map is is:{self.dish_state_map[attr_name]}"
+                        )
                     elif "csp_master" in fqdn:
                         device_data._csp_master_state = device_state
                         self.logger.info(f"State msg in CSP Master: {attr_name}")
@@ -315,18 +328,16 @@ class OpStateAggregator(Aggregator):
                         self.logger.info(f"State msg in SDP Master: {attr_name}")
                         self.logger.info(f"SDP Master state is: {device_state}")
                     else:
-                        print("Condition is not statisfied")
+                        self.logger.info(f"Condition is not statisfied")
                     break
             else:
                 self.logger.debug(const.EVT_UNKNOWN)
-                # TODO: update read_activity message for unknown events
         except Exception as e:
-            print("::::::Exception is:::::", str(e))
+            self.logger.exception(e)
 
-        
     def start_state_aggregation(self):
         # Create event for state change
-        self._state_event = threading.Event() # thread control
+        self._state_event = threading.Event()  # thread control
         # create thread
         self.logger.info("Starting thread to calculate state for Tmc devices.")
         self.state_calculator_thread = threading.Thread(
@@ -334,7 +345,7 @@ class OpStateAggregator(Aggregator):
         )
         self.state_calculator_thread.start()
 
-    def stop_state_aggregation(self):   ## when to call this method ????     
+    def stop_state_aggregation(self):  ## when to call this method ????
         # Stop thread of state calculation
         self.logger.info("Stopping state calculator thread.")
         self._state_event.set()
@@ -346,20 +357,18 @@ class OpStateAggregator(Aggregator):
             DevState.ON: const.STR_ON,
             DevState.OFF: const.STR_OFF,
             DevState.INIT: const.STR_INIT,
-            DevState.FAULT: const.STR_FAULT
+            DevState.FAULT: const.STR_FAULT,
         }
-        log_msg = f"{const.STR_STATE}{state_string_map[device_state]}"                       
+        log_msg = f"{const.STR_STATE}{state_string_map[device_state]}"
         self.logger.info(log_msg)
 
     def calculate_state(self):
         device_data = DeviceData.get_instance()
         while not self._state_event.isSet():
             if device_data._attr_callback_trigger.isSet():
-                print("::::::::::::Inside if block since attr is triggered:::::::::::")
-                #calculation logic
+                # calculation logic
                 unique_states = set(device_data.tmc_device_states)
                 if unique_states == set([DevState.ON]):
-                    print("Inside if for DevState.ON")
                     self.this_server.set_state(DevState.ON)
                     self.generate_state_log_msg(DevState.ON)
                 elif unique_states == set([DevState.OFF]):
@@ -372,5 +381,6 @@ class OpStateAggregator(Aggregator):
                     self.this_server.device._op_state = DevState.FAULT
                     self.generate_state_log_msg(DevState.FAULT)
                 else:
+                    self.this_server.device._op_state = DevState.UNKNOWN
                     self.logger.info("State can not be state")
                 device_data._attr_callback_trigger.clear()
