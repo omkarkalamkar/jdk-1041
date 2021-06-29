@@ -20,7 +20,7 @@ from tmc.centralnode.aggregator import Aggregator
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
 
-class StateAggregator(Aggregator):
+class OpStateAggregator(Aggregator):
     """
     Aggregator class for state event subscription and state
     callback.
@@ -58,7 +58,6 @@ class StateAggregator(Aggregator):
         except Exception as exe:
             self.logger.exception(exe)
 
-
     def subscribe_event(self):  ###when this method will call?????
         """
         Method for event subscription. Calls separate subscribe event methods for CSPMasterLeafNode, SDPMasterLeafNode, 
@@ -70,7 +69,6 @@ class StateAggregator(Aggregator):
         self.dish_ln_state_subscribe_event()
         self.csp_sa_ln_state_subscribe_event()
         self.sdp_sa_ln_state_subscribe_event()
-
 
     def csp_master_ln_state_subscribe_event(self):
         """
@@ -234,7 +232,6 @@ class StateAggregator(Aggregator):
             )
         self.state_event_map.clear()
 
-
     def state_cb(self, event):
         """
         Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode 
@@ -324,7 +321,6 @@ class StateAggregator(Aggregator):
             self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
             self.logger.critical(f"{const.ERR_SUBSR_SA_STATE}{event}")
         
-
     def start_state_aggregation(self):
         # Create event for state change
         self._state_event = threading.Event() # thread control
@@ -335,14 +331,12 @@ class StateAggregator(Aggregator):
         )
         self.state_calculator_thread.start()
 
-
     def stop_state_aggregation(self):   ## when to call this method ????     
         # Stop thread of state calculation
         self.logger.info("Stopping state calculator thread.")
         self._state_event.set()
         self.state_calculator_thread.join()
         self.logger.info("State calculator thread stopped.")
-
 
     def generate_state_log_msg(self, device_state):
         state_string_map = {
@@ -353,7 +347,6 @@ class StateAggregator(Aggregator):
         }
         log_msg = f"{const.STR_STATE}{state_string_map[device_state]}"                       
         self.logger.info(log_msg)
-        
 
     def calculate_state(self):
         device_data = DeviceData.get_instance()
