@@ -152,7 +152,7 @@ class OpStateAggregator(Aggregator):
         for dish in range(0, len(dish_device_ids)):
             dish_ln_fqdn = self.dln_prefix + dish_device_ids[dish]
             dish_ln_client = TangoClient(dish_ln_fqdn)
-            self.dish_state_map[dish_ln_fqdn] = -1
+            self.dish_state_map[dish_ln_fqdn] = DevState.UNKNOWN
             try:
                 self.state_event_map[dish_ln_client] = dish_ln_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
