@@ -650,7 +650,7 @@ class CentralNode(SKABaseDevice):
         self.register_command_object("Standby", self.standby_tmc_object)
         self.register_command_object("TelescopeStandby", self.telescope_standby_object)
         #TODO: This call for do() method will change in future
-        self.on_object.do()
+        # self.on_object.do()
         
 
 # ----------
