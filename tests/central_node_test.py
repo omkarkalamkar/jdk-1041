@@ -133,7 +133,7 @@ def dummy_subscriber(attribute, callback_method):
 @pytest.fixture(scope="function")
 def mock_tango_server_helper():
     with mock.patch.object(
-                    TangoServerHelper, "read_property", return_value=("fqdn",)
+                    TangoServerHelper, "read_property", return_value=("ska_mid/tm_subarray_node/1", "ska_mid/tm_leaf_node/csp_subarray01","ska_mid/tm_leaf_node/sdp_subarray01", "ska_mid/tm_leaf_node/d0001", "ska_mid/tm_leaf_node/sdp_master", "ska_mid/tm_leaf_node/csp_master")
                     ) as mock_obj:
         tango_server_obj = TangoServerHelper.get_instance()
         yield tango_server_obj

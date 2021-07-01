@@ -244,8 +244,11 @@ class OpStateAggregator(Aggregator):
         self.logger.debug(log_msg)
 
         if not event.err:
-            self.update_state(event, device_data.fqdn_device_state_map)
+            fqdn_device_state_list = [self.sdp_master_ln_fqdn, self.csp_master_ln_fqdn, self.dln_prefix]
+            fqdn_device_state_list = fqdn_device_state_list + list(self.tm_mid_subarrays) + list(self.tm_mid_csp_subarrays_leaf_nodes) + list(self.tm_mid_sdp_subarrays_leaf_nodes)
+            self.logger.info(f"fqdn_device_state_list is: {fqdn_device_state_list}")
 
+            self.update_state(event, fqdn_device_state_list)
             device_data.tmc_device_states = [
                 device_data._csp_master_state,
                 device_data._sdp_master_state,
@@ -264,13 +267,13 @@ class OpStateAggregator(Aggregator):
             # TODO: For future reference
             self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
 
-    def update_state(self, event, fqdn_device_state_map: dict):
+    def update_state(self, event, fqdn_device_state_list: dict):
         device_data = DeviceData.get_instance()
         device_state = event.attr_value.value
         attr_name = event.attr_name
         self.logger.info(f"State is: {device_state}")
         try:
-            for fqdn in fqdn_device_state_map.keys():
+            for fqdn in fqdn_device_state_list:
                 if fqdn in attr_name:
                     if "tm_subarray" in fqdn:
                         self.subarray_state_map[attr_name] = device_state
