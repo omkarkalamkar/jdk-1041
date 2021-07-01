@@ -61,6 +61,10 @@ class OpStateAggregator(Aggregator):
             self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property(
                 "TMMidSdpSubarrayLeafNodes"
             )
+            self.fqdn_device_state_list = [self.sdp_master_ln_fqdn, self.csp_master_ln_fqdn, self.dln_prefix]
+            self.fqdn_device_state_list = self.fqdn_device_state_list + list(self.tm_mid_subarrays) + list(self.tm_mid_csp_subarrays_leaf_nodes) + list(self.tm_mid_sdp_subarrays_leaf_nodes)
+            self.logger.info(f"fqdn_device_state_list is: {self.fqdn_device_state_list}")
+
         except Exception as exe:
             self.logger.exception(exe)
 
@@ -244,11 +248,7 @@ class OpStateAggregator(Aggregator):
         self.logger.debug(log_msg)
 
         if not event.err:
-            fqdn_device_state_list = [self.sdp_master_ln_fqdn, self.csp_master_ln_fqdn, self.dln_prefix]
-            fqdn_device_state_list = fqdn_device_state_list + list(self.tm_mid_subarrays) + list(self.tm_mid_csp_subarrays_leaf_nodes) + list(self.tm_mid_sdp_subarrays_leaf_nodes)
-            self.logger.info(f"fqdn_device_state_list is: {fqdn_device_state_list}")
-
-            self.update_state(event, fqdn_device_state_list)
+            self.update_state(event, self.fqdn_device_state_list)
             device_data.tmc_device_states = [
                 device_data._csp_master_state,
                 device_data._sdp_master_state,
