@@ -10,6 +10,7 @@ import logging
 from mock import MagicMock
 from mock import Mock
 from os.path import dirname, join
+import threading
 
 # Tango imports
 import tango
@@ -27,6 +28,8 @@ from tmc.common.tango_server_helper import TangoServerHelper
 from tmc.centralnode.device_data import DeviceData
 from tmc.centralnode.off_command import Off
 from tmc.centralnode.input_validator import AssignResourceValidator
+from tmc.centralnode.op_state_aggregator import OpStateAggregator
+
 from tmc.centralnode import CentralNode, const, release
 from tmc.centralnode.const import (
     CMD_SET_STOW_MODE,
@@ -71,16 +74,14 @@ path = join(dirname(__file__), "data", release_invalid_key_file)
 with open(path, "r") as f:
     release_invalid_key = f.read()
 
+device_data = DeviceData.get_instance()
+
 @pytest.fixture
 def subarray_state_model():
     """
     Yields a new SKASubarrayStateModel for testing
     """
     yield SKASubarrayStateModel(logging.getLogger())
-
-@pytest.fixture
-def device_data():
-    yield DeviceData()
 
 @pytest.fixture(scope="function")
 def mock_subarraynode_device(mock_tango_server_helper, mock_tango_client):
@@ -132,11 +133,32 @@ def dummy_subscriber(attribute, callback_method):
 @pytest.fixture(scope="function")
 def mock_tango_server_helper():
     with mock.patch.object(
-                    TangoServerHelper, "read_property", return_value=("fqdn",)
+                    TangoServerHelper, "read_property", return_value=("ska_mid/tm_subarray_node/1", "ska_mid/tm_leaf_node/csp_subarray01","ska_mid/tm_leaf_node/sdp_subarray01", "ska_mid/tm_leaf_node/d0001", "ska_mid/tm_leaf_node/sdp_master", "ska_mid/tm_leaf_node/csp_master")
                     ) as mock_obj:
         tango_server_obj = TangoServerHelper.get_instance()
         yield tango_server_obj
         
+
+def dummy_subscriber_State(attribute ,fqdn, state):
+    fake_event = Mock()
+    fake_event.err = False
+    fake_event.attr_name = f"{fqdn}/{attribute}"
+    fake_event.attr_value.value = state
+    return fake_event
+
+
+def test_state_aggregator_callback(mock_subarray):
+    device_proxy, tango_client_obj, _ = mock_subarray
+    device_proxy.On()
+    state_aggr = OpStateAggregator()
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_subarray_node/1", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/csp_subarray01", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/sdp_subarray01", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/d0001", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/sdp_master", DevState.ON))
+    state_aggr.state_callback(dummy_subscriber_State("State", "ska_mid/tm_leaf_node/csp_master", DevState.ON))
+    assert device_proxy.state() == DevState.ON
+
 
 @pytest.fixture(
     scope="function",
@@ -172,7 +194,7 @@ def central_node_test_info(request):
     }
     return test_info
 
-def test_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+def test_standby_class_command_method(subarray_state_model, mock_subarray):
     _, tango_client_obj, _ = mock_subarray
     standby_cmd = Standby(device_data, subarray_state_model)
     subarray_state_model._straight_to_state(DevState.ON, None)
@@ -180,7 +202,7 @@ def test_standby_class_command_method(device_data, subarray_state_model, mock_su
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_STANDBY, None)
 
 
-def test_on_class_command_method(device_data, subarray_state_model, mock_subarray):
+def test_on_class_command_method(subarray_state_model, mock_subarray):
     _, tango_client_obj, _ = mock_subarray
     on_cmd = On(device_data, subarray_state_model)
     subarray_state_model._straight_to_state(DevState.ON, None)
@@ -188,7 +210,7 @@ def test_on_class_command_method(device_data, subarray_state_model, mock_subarra
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_ON, None)
 
 
-def test_telescope_on_class_command_method(device_data, subarray_state_model, mock_subarray):
+def test_telescope_on_class_command_method(subarray_state_model, mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     telescope_on_cmd = TelescopeOn(device_data, subarray_state_model)
     subarray_state_model._straight_to_state(DevState.ON, None)
@@ -197,7 +219,7 @@ def test_telescope_on_class_command_method(device_data, subarray_state_model, mo
     assert device_proxy.desiredTelescopeState == DevState.ON
 
 
-def test_telescope_standby_class_command_method(device_data, subarray_state_model, mock_subarray):
+def test_telescope_standby_class_command_method(subarray_state_model, mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     telescope_standby_cmd = TelescopeStandby(device_data, subarray_state_model)
     subarray_state_model._straight_to_state(DevState.ON, None)
