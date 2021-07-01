@@ -228,7 +228,7 @@ class OpStateAggregator(Aggregator):
     def state_callback(self, event):
         """
         Retrieves the subscribed state for CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode
-        and Subarray
+        and SubarrayNode
 
         :param event: A TANGO_CHANGE event on CspMasterLeafNode, SdpMasterLeafNode, CspSubarrayLeafNode, SdpSubarrayLeafNode, DishLeafNode
         and Subarray State.
@@ -270,9 +270,8 @@ class OpStateAggregator(Aggregator):
         attr_name = event.attr_name
         self.logger.info(f"State is: {device_state}")
         try:
-            for fqdn, dd_device_state in fqdn_device_state_map.items():
+            for fqdn in fqdn_device_state_map.keys():
                 if fqdn in attr_name:
-                    setattr(device_data, dd_device_state, device_state)
                     if "tm_subarray" in fqdn:
                         self.subarray_state_map[attr_name] = device_state
                         self.logger.info(

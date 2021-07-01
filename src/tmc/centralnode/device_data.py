@@ -38,14 +38,8 @@ class DeviceData:
 
         self._sdp_master_health = HealthState.UNKNOWN
         self._csp_master_health = HealthState.UNKNOWN
-
         self._csp_master_state = ""
         self._sdp_master_state = ""
-        # self.subarray_state_map = {}
-        # self.csp_subarray_state_map = {}
-        # self.sdp_subarray_state_map = {}
-        # self.dish_state_map = {}
-
         self.receptorIDList = []
         self.subarray_health_state_map = {}
         self._dish_leaf_node_devices = []
@@ -59,8 +53,8 @@ class DeviceData:
         self.check_resources = None
         self.desired_telescope_state = {}
         self.command_in_progress = ""
-
         self.tmc_device_states = []
+        
         self.fqdn_device_state_map = {
             const.PROP_DEF_VAL_TM_MID_SA1: "_subarray1_state",
             const.PROP_DEF_VAL_TM_MID_SA2: "_subarray2_state",
