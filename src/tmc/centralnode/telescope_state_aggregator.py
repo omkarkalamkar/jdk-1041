@@ -36,6 +36,7 @@ class TelescopeStateAggregator(Aggregator):
             self.device_data = DeviceData.get_instance()
             self.csp_master_state_map = {}
             self.sdp_master_state_map = {}
+            self.dishmaster_state_map = {}
             self.telescope_state_event_map = {}
             self.this_server = TangoServerHelper.get_instance()
             self.telescope_state_callback_lock = threading.Lock()
@@ -46,8 +47,10 @@ class TelescopeStateAggregator(Aggregator):
             self.sdp_master_fqdn = self.this_server.read_property(
                 "SdpMasterFQDN"
             )[0]
-
+            self.dish_master_fqdn = self.this_server.read_property("DishMaster")[0]
+            self.tmmid_subarraynode_fqdn = self.this_server.read_property("TMMidSubarrayNodes")[0]
             self.fqdn_device_telescope_state_list = [self.csp_master_fqdn, self.sdp_master_fqdn]
+            self.fqdn_device_telescope_state_list = self.fqdn_device_telescope_state_list + list(self.dish_master_fqdn)
             self.logger.info(f"fqdn_device_telescope_state_list is: {self.fqdn_device_telescope_state_list}")
 
         except Exception as exe:
@@ -59,7 +62,7 @@ class TelescopeStateAggregator(Aggregator):
         Dish Master state attribute subscription.
         """
         self.csp_master_state_subscribe_event()
-
+        self.dishmaster_state_subscribe_event()
 
     def csp_master_state_subscribe_event(self):
         """
@@ -104,6 +107,30 @@ class TelescopeStateAggregator(Aggregator):
                 "CentralNode.StateSubscribeEvent",
                 tango.ErrSeverity.ERR,
             )
+
+    def dishmaster_state_subscribe_event(self):
+        """
+        Method to subscribe to state change event on DishMaster.
+
+        :raises: Devfailed exception if erroe occurs while subscribing event.
+        """
+        for dishmaster_fqdn in self.dish_master_fqdn:
+            dishmaster_client = TangoClient(subarray_fqdn)
+            # updating the dishmaster_state_map with device name and its value which is required in callback
+            self.dishmaster_state_map[dishmaster_fqdn] = -1
+            try:
+                self.telescope_state_event_map[dishmaster_fqdn] = dishmaster_client.subscribe_attribute(
+                    const.EVT_SUBSR_STATE, self.telescope_state_callback
+                )
+            except DevFailed as dev_failed:
+                log_msg = f"{const.ERR_SUBSR_DISH_MASTER_STATE}{dev_failed}"
+                self.logger.exception(dev_failed)
+                tango.Except.throw_exception(
+                    const.STR_CMD_FAILED,
+                    log_msg,
+                    "CentralNode.TelescopeStateAggregator.dishmaster_state_subscribe_event",
+                    tango.ErrSeverity.ERR,
+                )
 
     def unsubscribe_event(self):
         """
@@ -165,13 +192,38 @@ class TelescopeStateAggregator(Aggregator):
                         self.logger.info(
                             f"CSP Master state is: {self.csp_master_state_map[attr_name]}"
                         )
+
                     elif "mid_sdp/elt/master" in fqdn:
                         self.sdp_master_state_map[attr_name] = device_state
                         self.logger.info(
                             f"SDP Master state is: {self.sdp_master_state_map[attr_name]}"
                         )
-            else:
-                self.logger.debug(const.EVT_UNKNOWN)
+
+                    elif "mid_d0001/elt/master" in fqdn:
+                        self.dishmaster_state_map[attr_name] = device_state
+                        self.logger.info(
+                            f"Dish Master 01 state is: {self.dishmaster_state_map[attr_name]}"
+                        )
+
+                    elif "mid_d0002/elt/master" in fqdn:
+                        self.dishmaster_state_map[attr_name] = device_state
+                        self.logger.info(
+                            f"Dish Master 02 state is: {self.dishmaster_state_map[attr_name]}"
+                        )
+
+                    elif "mid_d0003/elt/master" in fqdn:
+                        self.dishmaster_state_map[attr_name] = device_state
+                        self.logger.info(
+                            f"Dish Master 03 state is: {self.dishmaster_state_map[attr_name]}"
+                        )
+
+                    elif "mid_d0004/elt/master" in fqdn:
+                        self.dishmaster_state_map[attr_name] = device_state
+                        self.logger.info(
+                            f"Dish Master 04 state is: {self.dishmaster_state_map[attr_name]}"
+                        )
+                else:
+                    self.logger.debug(const.EVT_UNKNOWN)
         except Exception as e:
             self.logger.exception(e)
 
