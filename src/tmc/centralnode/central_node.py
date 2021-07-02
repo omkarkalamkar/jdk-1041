@@ -296,14 +296,15 @@ class CentralNode(SKABaseDevice):
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
                 
-            this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS, False)
-            self.logger.info(const.STR_INIT_SUCCESS)
-            return (ResultCode.OK, device.attr_map["activityMessage"])
-
             #create TelescopeStateAggregator object and start telescope state aggregation
             device.device_data.telescope_state_aggregator = TelescopeStateAggregator(self.logger)
             device.device_data.telescope_state_aggregator.subscribe_event() 
             device.device_data.telescope_state_aggregator.start_telescope_state_aggregation()
+            
+            this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS, False)
+            self.logger.info(const.STR_INIT_SUCCESS)
+            return (ResultCode.OK, device.attr_map["activityMessage"])
+
 
     def always_executed_hook(self):
         # PROTECTED REGION ID(CentralNode.always_executed_hook) ENABLED START #

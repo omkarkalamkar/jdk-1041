@@ -35,6 +35,7 @@ class TelescopeStateAggregator(Aggregator):
         try:
             self.device_data = DeviceData.get_instance()
             self.csp_master_state_map = {}
+            self.sdp_master_state_map = {}
             self.telescope_state_event_map = {}
             self.this_server = TangoServerHelper.get_instance()
             self.telescope_state_callback_lock = threading.Lock()
@@ -42,8 +43,11 @@ class TelescopeStateAggregator(Aggregator):
             self.csp_master_fqdn = self.this_server.read_property(
                 "CspMasterFQDN"
             )[0]
+            self.sdp_master_fqdn = self.this_server.read_property(
+                "SdpMasterFQDN"
+            )[0]
 
-            self.fqdn_device_telescope_state_list = [self.csp_master_fqdn]
+            self.fqdn_device_telescope_state_list = [self.csp_master_fqdn, self.sdp_master_fqdn]
             self.logger.info(f"fqdn_device_telescope_state_list is: {self.fqdn_device_telescope_state_list}")
 
         except Exception as exe:
@@ -79,12 +83,32 @@ class TelescopeStateAggregator(Aggregator):
                 tango.ErrSeverity.ERR,
             )
 
+    def sdp_master_state_subscribe_event(self):
+        """
+        Method to subscribe to state change event on SDP Master Node.
+
+        :raises: Devfailed exception if error occurs while subscribing event.
+        """
+        try:
+            sdp_master_client = TangoClient(self.sdp_master_fqdn)
+            self.sdp_master_state_map[self.sdp_master_fqdn] = -1
+            self.telescope_state_event_map[sdp_master_client] = sdp_master_client.subscribe_attribute(
+                const.EVT_SUBSR_STATE, self.telescope_state_callback
+            )
+        except DevFailed as dev_failed:
+            log_msg = f"{const.ERR_SUBSR_SDP_MASTER_STATE}{dev_failed}"
+            self.logger.exception(dev_failed)
+            tango.Except.throw_exception(
+                const.STR_CMD_FAILED,
+                log_msg,
+                "CentralNode.StateSubscribeEvent",
+                tango.ErrSeverity.ERR,
+            )
 
     def unsubscribe_event(self):
         """
         Method to unsubscribe to state change event on Csp Master Node, Sdp Master Node, Dish Master.
         """
-        
 
         for tango_client in self.telescope_state_event_map:
             log_message = "Unsubscribing ObsState of: {}".format(
@@ -119,6 +143,7 @@ class TelescopeStateAggregator(Aggregator):
             device_data.telescope_device_states = (
                 device_data.telescope_device_states
                 + list(self.csp_master_state_map.values())
+                + list(self.sdp_master_state_map.values())
             )
 
             device_data._attr_callback_trigger.set()  # start state calculation
@@ -129,7 +154,6 @@ class TelescopeStateAggregator(Aggregator):
 
 
     def update_telescope_state(self, event, fqdn_device_telescope_state_list: dict):
-        device_data = DeviceData.get_instance()
         device_state = event.attr_value.value
         attr_name = event.attr_name
         self.logger.info(f"State is: {device_state}")
@@ -139,7 +163,12 @@ class TelescopeStateAggregator(Aggregator):
                     if "mid_csp/elt/master" in fqdn:
                         self.csp_master_state_map[attr_name] = device_state
                         self.logger.info(
-                            f"Subarray state map is:{self.csp_master_state_map[attr_name]}"
+                            f"CSP Master state is: {self.csp_master_state_map[attr_name]}"
+                        )
+                    elif "mid_sdp/elt/master" in fqdn:
+                        self.sdp_master_state_map[attr_name] = device_state
+                        self.logger.info(
+                            f"SDP Master state is: {self.sdp_master_state_map[attr_name]}"
                         )
             else:
                 self.logger.debug(const.EVT_UNKNOWN)
