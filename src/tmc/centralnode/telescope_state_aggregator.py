@@ -186,13 +186,13 @@ class TelescopeStateAggregator(Aggregator):
         try:
             for fqdn in fqdn_device_telescope_state_list:
                 if fqdn in attr_name:
-                    if "mid_csp/elt/master" in fqdn:
+                    if "mid_csp" in fqdn:
                         self.csp_master_state_map[attr_name] = device_state
                         self.logger.info(
                             f"CSP Master state is: {self.csp_master_state_map[attr_name]}"
                         )
 
-                    elif "mid_sdp/elt/master" in fqdn:
+                    elif "mid_sdp" in fqdn:
                         self.sdp_master_state_map[attr_name] = device_state
                         self.logger.info(
                             f"SDP Master state is: {self.sdp_master_state_map[attr_name]}"
