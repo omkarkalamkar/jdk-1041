@@ -72,7 +72,6 @@ class TelescopeStateAggregator(Aggregator):
         """
         try:
             csp_master_client = TangoClient(self.csp_master_fqdn)
-            self.csp_master_state_map[self.csp_master_fqdn] = -1
             self.telescope_state_event_map[csp_master_client] = csp_master_client.subscribe_attribute(
                 const.EVT_SUBSR_STATE, self.telescope_state_callback
             )
@@ -94,7 +93,6 @@ class TelescopeStateAggregator(Aggregator):
         """
         try:
             sdp_master_client = TangoClient(self.sdp_master_fqdn)
-            self.sdp_master_state_map[self.sdp_master_fqdn] = -1
             self.telescope_state_event_map[sdp_master_client] = sdp_master_client.subscribe_attribute(
                 const.EVT_SUBSR_STATE, self.telescope_state_callback
             )
@@ -117,7 +115,6 @@ class TelescopeStateAggregator(Aggregator):
         for dishmaster_fqdn in self.dish_master_fqdn:
             dishmaster_client = TangoClient(dishmaster_fqdn)
             # updating the dish_master_state_map with device name and its value which is required in callback
-            self.dish_master_state_map[dishmaster_fqdn] = -1
             try:
                 self.telescope_state_event_map[dishmaster_fqdn] = dishmaster_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.telescope_state_callback
