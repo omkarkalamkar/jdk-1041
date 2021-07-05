@@ -198,29 +198,12 @@ class TelescopeStateAggregator(Aggregator):
                             f"SDP Master state is: {self.sdp_master_state_map[attr_name]}"
                         )
 
-                    elif "mid_d0001/elt/master" in fqdn:
+                    elif "mid_d" in fqdn:
                         self.dish_master_state_map[attr_name] = device_state
                         self.logger.info(
-                            f"Dish Master 01 state is: {self.dish_master_state_map[attr_name]}"
+                            f"Dish Master's state is: {self.dish_master_state_map[attr_name]}"
                         )
 
-                    elif "mid_d0002/elt/master" in fqdn:
-                        self.dish_master_state_map[attr_name] = device_state
-                        self.logger.info(
-                            f"Dish Master 02 state is: {self.dish_master_state_map[attr_name]}"
-                        )
-
-                    elif "mid_d0003/elt/master" in fqdn:
-                        self.dish_master_state_map[attr_name] = device_state
-                        self.logger.info(
-                            f"Dish Master 03 state is: {self.dish_master_state_map[attr_name]}"
-                        )
-
-                    elif "mid_d0004/elt/master" in fqdn:
-                        self.dish_master_state_map[attr_name] = device_state
-                        self.logger.info(
-                            f"Dish Master 04 state is: {self.dish_master_state_map[attr_name]}"
-                        )
                 else:
                     self.logger.debug(const.EVT_UNKNOWN)
         except Exception as e:
