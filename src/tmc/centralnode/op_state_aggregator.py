@@ -240,28 +240,29 @@ class OpStateAggregator(Aggregator):
             self.state_callback_lock.acquire()
             log_msg = f"State attribute change event is : {event.attr_name}"
             self.logger.debug(log_msg)
-            log_msg = f"State attribute change event is: {event.attr_value.value}"
-            self.logger.debug(log_msg)
+            if event.attr_value:
+                log_msg = f"State attribute change event is: {event.attr_value.value}"
+                self.logger.debug(log_msg)
 
-            if not event.err:
-                self.update_state(event, self.fqdn_device_state_list)
-                device_data.tmc_device_states = [
-                    device_data._csp_master_state,
-                    device_data._sdp_master_state,
-                ]
-                device_data.tmc_device_states = (
-                    device_data.tmc_device_states
-                    + list(self.subarray_state_map.values())
-                    + list(self.csp_subarray_state_map.values())
-                    + list(self.sdp_subarray_state_map.values())
-                    + list(self.dish_state_map.values())
-                )
+                if not event.err:
+                    self.update_state(event, self.fqdn_device_state_list)
+                    device_data.tmc_device_states = [
+                        device_data._csp_master_state,
+                        device_data._sdp_master_state,
+                    ]
+                    device_data.tmc_device_states = (
+                        device_data.tmc_device_states
+                        + list(self.subarray_state_map.values())
+                        + list(self.csp_subarray_state_map.values())
+                        + list(self.sdp_subarray_state_map.values())
+                        + list(self.dish_state_map.values())
+                    )
 
-                device_data._attr_callback_trigger.set()  # start state calculation
-                self.state_callback_lock.release()  # release the lock
-            else:
-                # TODO: For future reference
-                self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
+                    device_data._attr_callback_trigger.set()  # start state calculation
+                    self.state_callback_lock.release() # release the lock
+                else:
+                    # TODO: For future reference
+                    self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
         except Exception as e:
             self.logger.exception(f"In state_callback exception is:{e}")
 
@@ -270,7 +271,9 @@ class OpStateAggregator(Aggregator):
         device_data = DeviceData.get_instance()
         device_state = event.attr_value.value
         attr_name = event.attr_name
-        self.logger.info(f"State is: {device_state}")
+        self.logger.info(
+            f"Change event received for atttribute:{attr_name} with value : {device_state}"
+                        )
         try:
             for fqdn in fqdn_device_state_list:
                 if fqdn in attr_name:
@@ -374,5 +377,6 @@ class OpStateAggregator(Aggregator):
                         self.this_server.set_state(DevState.UNKNOWN)
                         self.logger.info("State can not be state")
                     device_data._attr_callback_trigger.clear()
+                    #self.state_callback_lock.release() # release the lock
         except Exception as e:
             self.logger.exception(f"In calculate_state exception is:{e}")
