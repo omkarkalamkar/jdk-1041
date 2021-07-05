@@ -133,7 +133,7 @@ def dummy_subscriber(attribute, callback_method):
 @pytest.fixture(scope="function")
 def mock_tango_server_helper():
     with mock.patch.object(
-                    TangoServerHelper, "read_property", return_value=("mid_d0001/elt/master", "mid_csp/elt/master", "mid_sdp/elt/master", "ska_mid/tm_subarray_node/1", "ska_mid/tm_leaf_node/csp_subarray01","ska_mid/tm_leaf_node/sdp_subarray01", "ska_mid/tm_leaf_node/d0001", "ska_mid/tm_leaf_node/sdp_master", "ska_mid/tm_leaf_node/csp_master")
+                    TangoServerHelper, "read_property", return_value=("mid_csp/elt/master", "mid_sdp/elt/master", "mid_d0001/elt/master", "ska_mid/tm_subarray_node/1", "ska_mid/tm_leaf_node/csp_subarray01","ska_mid/tm_leaf_node/sdp_subarray01", "ska_mid/tm_leaf_node/d0001", "ska_mid/tm_leaf_node/sdp_master", "ska_mid/tm_leaf_node/csp_master")
                     ) as mock_obj:
         tango_server_obj = TangoServerHelper.get_instance()
         yield tango_server_obj
@@ -172,9 +172,9 @@ def test_telescopeState_aggregator_callback(mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     device_proxy.On()
     telescope_state_aggr = TelescopeStateAggregator()
-    telescope_state_aggr.telescope_state_callback(dummy_subscriber_telescopeState("telescopeState", "mid_d0001/elt/master", DevState.ON))
-    telescope_state_aggr.telescope_state_callback(dummy_subscriber_telescopeState("telescopeState", "mid_csp/elt/master", DevState.ON))
-    telescope_state_aggr.telescope_state_callback(dummy_subscriber_telescopeState("telescopeState", "mid_sdp/elt/master", DevState.ON))
+    telescope_state_aggr.telescope_state_callback(dummy_subscriber_telescopeState("State", "mid_csp/elt/master", DevState.ON))
+    telescope_state_aggr.telescope_state_callback(dummy_subscriber_telescopeState("State", "mid_sdp/elt/master", DevState.ON))
+    telescope_state_aggr.telescope_state_callback(dummy_subscriber_telescopeState("State", "mid_d0001/elt/master", DevState.ON))
     assert device_proxy.telescopeState == DevState.ON
 
 

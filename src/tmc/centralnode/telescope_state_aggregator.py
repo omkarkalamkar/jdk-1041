@@ -59,6 +59,7 @@ class TelescopeStateAggregator(Aggregator):
         Dish Master state attribute subscription.
         """
         self.csp_master_state_subscribe_event()
+        self.sdp_master_state_subscribe_event()
         self.dishmaster_state_subscribe_event()
 
     def csp_master_state_subscribe_event(self):
