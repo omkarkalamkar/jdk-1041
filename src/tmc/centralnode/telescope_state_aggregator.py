@@ -43,7 +43,10 @@ class TelescopeStateAggregator(Aggregator):
     
             self.csp_master_fqdn = self.this_server.read_property("CspMasterFQDN")[0]
             self.sdp_master_fqdn = self.this_server.read_property("SdpMasterFQDN")[0]
-            self.dish_master_fqdn = self.this_server.read_property("DishMaster")[0]
+            self.num_dishes = list(self.this_server.read_property("NumDishes")[0])
+            self.dish_master_fqdn = []
+            for dish in self.num_dishes:
+                self.dish_master_fqdn = self.dish_master_fqdn.append(f"{'mid_d000'}{dish}{'/elt/master'}")
 
             self.fqdn_device_telescope_state_list = [self.csp_master_fqdn, self.sdp_master_fqdn]
             self.logger.info(f"The 1st fqdn_device_telescope_state_list is: {self.fqdn_device_telescope_state_list}")

@@ -147,12 +147,6 @@ class CentralNode(SKABaseDevice):
 
     SdpMasterFQDN = device_property(dtype="str")
 
-    DishMaster = device_property(
-        dtype=("str",),
-        doc="List of DishMaster devices",
-        default_value=tuple(),
-    )
-
     # ----------
     # Attributes
     # ----------
