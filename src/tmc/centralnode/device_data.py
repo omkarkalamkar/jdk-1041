@@ -35,6 +35,7 @@ class DeviceData:
 
         # Create event for attribute callback trigger
         self._attr_callback_trigger = threading.Event()
+        self._tmc_off_trigger = threading.Event()
 
         self._sdp_master_health = HealthState.UNKNOWN
         self._csp_master_health = HealthState.UNKNOWN

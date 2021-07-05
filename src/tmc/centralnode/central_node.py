@@ -293,6 +293,7 @@ class CentralNode(SKABaseDevice):
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
                 
+            device.check_cn_state()
             this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS, False)
             self.logger.info(const.STR_INIT_SUCCESS)
             return (ResultCode.OK, device.attr_map["activityMessage"])
@@ -399,7 +400,43 @@ class CentralNode(SKABaseDevice):
         lock.acquire()
         self.attr_map[attr] = val
         lock.release()
- 
+    
+    def check_cn_state(self):
+        try:
+            # Create event for state change
+            self._cn_state_event = threading.Event()  # thread control
+            # create thread
+            self.logger.info("Starting thread to check the state of CentralNode.")
+            cn_state_thread = threading.Thread(
+                target=self.monitor_cn_state,
+            )
+            cn_state_thread.start() 
+        except Exception as e:
+            self.logger.exception(f"In check_cn_state exception is:{e}")
+    
+    def monitor_cn_state(self):
+        self.logger.info("Starting monitoring CN state")
+        this_server = TangoServerHelper.get_instance()
+        device_data = DeviceData.get_instance()
+        try:
+            while not self._cn_state_event.isSet():
+                cn_state = this_server.get_state()
+                if cn_state == DevState.OFF and device_data._tmc_off_trigger.isSet():
+                    self.logger.info(
+                                f"CN_device_states is:{cn_state}"
+                            )
+                    this_server.device.On()
+                    self.logger.info(
+                                f"On command is called"
+                            )
+                    self.logger.info(
+                                f"CN_device_states is:{cn_state}"
+                            )
+                    device_data._tmc_off_trigger.clear()
+
+        except Exception as e:
+            self.logger.exception(f"In monitor_cn_state exception is:{e}")
+
     # --------
     # Commands
     # --------

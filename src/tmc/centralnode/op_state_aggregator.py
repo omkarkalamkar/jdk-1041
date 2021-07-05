@@ -130,8 +130,6 @@ class OpStateAggregator(Aggregator):
         """
         for subarray_fqdn in self.tm_mid_subarrays:
             subarray_client = TangoClient(subarray_fqdn)
-            # updating the subarray_state_map with device name (as ska_mid/tm_subarray_node/1) and its value which is required in callback
-            self.subarray_state_map[subarray_fqdn] = -1
             try:
                 self.state_event_map[subarray_client] = subarray_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
@@ -156,7 +154,6 @@ class OpStateAggregator(Aggregator):
         for dish in range(0, len(dish_device_ids)):
             dish_ln_fqdn = self.dln_prefix + dish_device_ids[dish]
             dish_ln_client = TangoClient(dish_ln_fqdn)
-            self.dish_state_map[dish_ln_fqdn] = DevState.UNKNOWN
             try:
                 self.state_event_map[dish_ln_client] = dish_ln_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
@@ -179,7 +176,6 @@ class OpStateAggregator(Aggregator):
         """
         for csp_sa_ln_fqdn in self.tm_mid_csp_subarrays_leaf_nodes:
             csp_sa_ln_client = TangoClient(csp_sa_ln_fqdn)
-            self.csp_subarray_state_map[csp_sa_ln_fqdn] = -1
             try:
                 self.state_event_map[csp_sa_ln_client] = csp_sa_ln_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
@@ -202,7 +198,6 @@ class OpStateAggregator(Aggregator):
         """
         for sdp_sa_ln_fqdn in self.tm_mid_sdp_subarrays_leaf_nodes:
             sdp_sa_ln_client = TangoClient(sdp_sa_ln_fqdn)
-            self.sdp_subarray_state_map[sdp_sa_ln_fqdn] = -1
             try:
                 self.state_event_map[sdp_sa_ln_client] = sdp_sa_ln_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
@@ -239,33 +234,37 @@ class OpStateAggregator(Aggregator):
 
         :return: None
         """
-        device_data = DeviceData.get_instance()
-        # Lock for thread 1
-        self.state_callback_lock.acquire()
-        log_msg = f"State attribute change event is : {event.attr_name}"
-        self.logger.debug(log_msg)
-        log_msg = f"State attribute change event is: {event.attr_value.value}"
-        self.logger.debug(log_msg)
+        try:
+            device_data = DeviceData.get_instance()
+            # Lock for thread 1
+            self.state_callback_lock.acquire()
+            log_msg = f"State attribute change event is : {event.attr_name}"
+            self.logger.debug(log_msg)
+            log_msg = f"State attribute change event is: {event.attr_value.value}"
+            self.logger.debug(log_msg)
 
-        if not event.err:
-            self.update_state(event, self.fqdn_device_state_list)
-            device_data.tmc_device_states = [
-                device_data._csp_master_state,
-                device_data._sdp_master_state,
-            ]
-            device_data.tmc_device_states = (
-                device_data.tmc_device_states
-                + list(self.subarray_state_map.values())
-                + list(self.csp_subarray_state_map.values())
-                + list(self.sdp_subarray_state_map.values())
-                + list(self.dish_state_map.values())
-            )
+            if not event.err:
+                self.update_state(event, self.fqdn_device_state_list)
+                device_data.tmc_device_states = [
+                    device_data._csp_master_state,
+                    device_data._sdp_master_state,
+                ]
+                device_data.tmc_device_states = (
+                    device_data.tmc_device_states
+                    + list(self.subarray_state_map.values())
+                    + list(self.csp_subarray_state_map.values())
+                    + list(self.sdp_subarray_state_map.values())
+                    + list(self.dish_state_map.values())
+                )
 
-            device_data._attr_callback_trigger.set()  # start state calculation
-            self.state_callback_lock.release()  # release the lock
-        else:
-            # TODO: For future reference
-            self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
+                device_data._attr_callback_trigger.set()  # start state calculation
+                self.state_callback_lock.release()  # release the lock
+            else:
+                # TODO: For future reference
+                self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
+        except Exception as e:
+            self.logger.exception(f"In state_callback exception is:{e}")
+
 
     def update_state(self, event, fqdn_device_state_list: dict):
         device_data = DeviceData.get_instance()
@@ -309,17 +308,20 @@ class OpStateAggregator(Aggregator):
             else:
                 self.logger.debug(const.EVT_UNKNOWN)
         except Exception as e:
-            self.logger.exception(e)
+            self.logger.exception(f"In update_state exception is:{e}")
 
     def start_state_aggregation(self):
-        # Create event for state change
-        self._state_event = threading.Event()  # thread control
-        # create thread
-        self.logger.info("Starting thread to calculate state for Tmc devices.")
-        self.state_calculator_thread = threading.Thread(
-            target=self.calculate_state,
-        )
-        self.state_calculator_thread.start()
+        try:
+            # Create event for state change
+            self._state_event = threading.Event()  # thread control
+            # create thread
+            self.logger.info("Starting thread to calculate state for Tmc devices.")
+            self.state_calculator_thread = threading.Thread(
+                target=self.calculate_state,
+            )
+            self.state_calculator_thread.start()
+        except Exception as e:
+            self.logger.exception(f"In start_state_aggregation exception is:{e}")
 
     def stop_state_aggregation(self):  ## when to call this method ????
         # Stop thread of state calculation
@@ -329,34 +331,48 @@ class OpStateAggregator(Aggregator):
         self.logger.info("State calculator thread stopped.")
 
     def generate_state_log_msg(self, device_state):
-        state_string_map = {
-            DevState.ON: const.STR_ON,
-            DevState.OFF: const.STR_OFF,
-            DevState.INIT: const.STR_INIT,
-            DevState.FAULT: const.STR_FAULT,
-        }
-        log_msg = f"{const.STR_STATE}{state_string_map[device_state]}"
-        self.logger.info(log_msg)
+        try:
+            state_string_map = {
+                DevState.ON: const.STR_ON,
+                DevState.OFF: const.STR_OFF,
+                DevState.INIT: const.STR_INIT,
+                DevState.FAULT: const.STR_FAULT,
+            }
+            # Need to work on getting device name here
+            log_msg = f"{const.STR_STATE}{state_string_map[device_state]}"
+            self.logger.info(log_msg)
+        except Exception as e:
+            self.logger.exception(f"In generate_state_log_msg exception is:{e}")
 
     def calculate_state(self):
-        device_data = DeviceData.get_instance()
-        while not self._state_event.isSet():
-            if device_data._attr_callback_trigger.isSet():
-                # calculation logic
-                unique_states = set(device_data.tmc_device_states)
-                if unique_states == set([DevState.ON]):
-                    self.this_server.set_state(DevState.ON)
-                    self.generate_state_log_msg(DevState.ON)
-                elif unique_states == set([DevState.OFF]):
-                    self.this_server.set_state(DevState.OFF)
-                    self.generate_state_log_msg(DevState.OFF)
-                elif DevState.INIT in unique_states:
-                    self.this_server.set_state(DevState.INIT)
-                    self.generate_state_log_msg(DevState.INIT)
-                elif DevState.FAULT in unique_states:
-                    self.this_server.set_state(DevState.FAULT)
-                    self.generate_state_log_msg(DevState.FAULT)
-                else:
-                    self.this_server.set_state(DevState.UNKNOWN)
-                    self.logger.info("State can not be state")
-                device_data._attr_callback_trigger.clear()
+        try:
+            device_data = DeviceData.get_instance()
+            while not self._state_event.isSet():
+                if device_data._attr_callback_trigger.isSet():
+                    # calculation logic
+                    unique_states = set(device_data.tmc_device_states)
+                    self.logger.info(
+                                f"tmc_device_states is:{device_data.tmc_device_states}"
+                            )
+                    self.logger.info(
+                        f"unique_states is:{unique_states}"
+                    )
+                    if unique_states == set([DevState.ON]):
+                        self.this_server.set_state(DevState.ON)
+                        self.generate_state_log_msg(self.this_server.get_state())
+                    elif unique_states == set([DevState.OFF]):
+                        #Set trigger to call CentralNode On command
+                        device_data._tmc_off_trigger.set()
+                        self.generate_state_log_msg(self.this_server.get_state())
+                    elif DevState.INIT in unique_states:
+                        self.this_server.set_state(DevState.INIT)
+                        self.generate_state_log_msg(self.this_server.get_state())
+                    elif DevState.FAULT in unique_states:
+                        self.this_server.set_state(DevState.FAULT)
+                        self.generate_state_log_msg(self.this_server.get_state())
+                    else:
+                        self.this_server.set_state(DevState.UNKNOWN)
+                        self.logger.info("State can not be state")
+                    device_data._attr_callback_trigger.clear()
+        except Exception as e:
+            self.logger.exception(f"In calculate_state exception is:{e}")
