@@ -167,7 +167,7 @@ def dummy_subscriber_telescopeState(attribute ,fqdn, telescope_state):
     fake_event.attr_value.value = telescope_state
     return fake_event
 
-@pytest.mark.skip(reason = Behaviour of the test case is random)
+@pytest.mark.skip(reason="Behaviour of the test case is random")
 def test_telescopeState_aggregator_callback(mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     device_proxy.On()
