@@ -90,7 +90,7 @@ class TelescopeStandby(BaseCommand):
         :return: None
         """
         csp_mln_client = TangoClient(csp_fqdn)
-        self.telescope_standby_leaf_node(csp_mln_client, const.CMD_TELESCOPE_STANDBY)
+        self.telescope_standby_leaf_node(csp_mln_client, const.CMD_TELESCOPE_STANDBY, [])
 
     def telescope_standby_sdp(self, sdp_fqdn):
         """
@@ -189,9 +189,9 @@ class TelescopeStandby(BaseCommand):
             log_msg = "SetStandbyLPMode command invoked successfully on {}".format(
                                                       tango_client.get_device_fqdn)
             self.logger.debug(log_msg)
-            tango_client.send_command(const.CMD_TELESCOPE_STANDBY)
-            log_msg = "TelescopeStandby command invoked successfully on {}".format(tango_client.get_device_fqdn)
-            self.logger.debug(log_msg)
+            # tango_client.send_command(const.CMD_TELESCOPE_STANDBY)
+            # log_msg = "TelescopeStandby command invoked successfully on {}".format(tango_client.get_device_fqdn)
+            # self.logger.debug(log_msg)
             return tango_client.get_device_fqdn
 
         except DevFailed as dev_failed:
