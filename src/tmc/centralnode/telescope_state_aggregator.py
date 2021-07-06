@@ -34,8 +34,8 @@ class TelescopeStateAggregator(Aggregator):
             self.logger = logger
         try:
             self.device_data = DeviceData.get_instance()
-            self.csp_master_state_map = {}
-            self.sdp_master_state_map = {}
+            self.csp_master_state = ""
+            self.sdp_master_state = ""
             self.dish_master_state_map = {}
             self.telescope_state_event_map = {}
             self.this_server = TangoServerHelper.get_instance()
@@ -162,12 +162,8 @@ class TelescopeStateAggregator(Aggregator):
         if not event.err:
             self.update_telescope_state(event, self.fqdn_device_telescope_state_list)
             
-            device_data.telescope_device_states = (
-                device_data.telescope_device_states
-                + list(self.csp_master_state_map.values())
-                + list(self.sdp_master_state_map.values())
-                + list(self.dish_master_state_map.values())
-            )
+            device_data.telescope_device_states = [self.csp_master_state,  self.sdp_master_state]
+            device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map)
 
             device_data._attr_callback_trigger.set()  # start state calculation
             self.telescope_state_callback_lock.release()  # release the lock
@@ -184,15 +180,15 @@ class TelescopeStateAggregator(Aggregator):
             for fqdn in fqdn_device_telescope_state_list:
                 if fqdn in attr_name:
                     if "mid_csp" in fqdn:
-                        self.csp_master_state_map[attr_name] = device_state
+                        self.csp_master_state = device_state
                         self.logger.info(
-                            f"CSP Master state is: {self.csp_master_state_map[attr_name]}"
+                            f"CSP Master state is: {self.csp_master_state}"
                         )
 
                     elif "mid_sdp" in fqdn:
-                        self.sdp_master_state_map[attr_name] = device_state
+                        self.sdp_master_state = device_state
                         self.logger.info(
-                            f"SDP Master state is: {self.sdp_master_state_map[attr_name]}"
+                            f"SDP Master state is: {self.sdp_master_state}"
                         )
 
                     elif "mid_d" in fqdn:
