@@ -415,7 +415,7 @@ class CentralNode(SKABaseDevice):
             self.logger.exception(f"In check_cn_state exception is:{e}")
     
     def monitor_cn_state(self):
-        self.logger.info("Starting monitoring CN state")
+        self.logger.info("Started monitoring CN state")
         this_server = TangoServerHelper.get_instance()
         device_data = DeviceData.get_instance()
         try:
@@ -433,6 +433,7 @@ class CentralNode(SKABaseDevice):
                                 f"CN_device_states is:{cn_state}"
                             )
                     device_data._tmc_off_trigger.clear()
+                    # self._cn_state_event.set()
 
         except Exception as e:
             self.logger.exception(f"In monitor_cn_state exception is:{e}")

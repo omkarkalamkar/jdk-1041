@@ -94,6 +94,12 @@ class ObsStateAggregator:
                     device_data.resource_manager.update_resource_deallocation(
                         subarray_id
                     )
+                self.logger.info(f"Subarray device : {subarray_device} and its obsstate : {obs_state}")
+                device_data.subarray_obsstate_map[subarray_device] = obs_state
+                self.logger.info(f"Subarray obsState map is: {device_data.subarray_obsstate_map}")
+                device_data.list_subarray_obsstate = list(device_data.subarray_obsstate_map.values())
+                self.logger.info(f"list_subarray_obsstate is: {device_data.list_subarray_obsstate}")
+                
             else:
                 # TODO: For future reference
                 self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{evt}", False)

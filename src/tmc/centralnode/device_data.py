@@ -55,6 +55,8 @@ class DeviceData:
         self.desired_telescope_state = {}
         self.command_in_progress = ""
         self.tmc_device_states = []
+        self.subarray_obsstate_map = {}
+        self.list_subarray_obsstate = []
 
     @staticmethod
     def get_instance():

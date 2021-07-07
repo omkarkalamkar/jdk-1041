@@ -79,11 +79,8 @@ class TelescopeOff(BaseCommand):
         try:
             self.telescope_off_subarray(tm_mid_subarrays)
             try:
-                # Create event for state change
-                self._sa_obsstate_event = threading.Event()  # thread control
                 # create thread
                 self.logger.info("Starting thread to check the obsstate of SubarrayNode.")
-                self._sa_obsstate_event.set()
                 sa_obsstate_thread = threading.Thread(
                     target=self.monitor_sa_obsstate,
                 )
@@ -101,19 +98,24 @@ class TelescopeOff(BaseCommand):
             self.logger.exception(e)
 
     def monitor_sa_obsstate(self):
-        self.logger.info("Starting monitoring SA obsstate")
+        self.logger.info("Started monitoring SA obsstate")
         this_server = TangoServerHelper.get_instance()
         device_data = DeviceData.get_instance()
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         try:
-            for val in self.subarray_obs_state:
-                while True:
-                    if self.subarray_obs_state[val] in [ObsState.EMPTY, ObsState.RESOURCING]:
-                        break
-                    time.sleep(0.1)
-            self.telescope_off_csp(csp_master_ln_fqdn)                                                               
+            while True:
+                if set(device_data.list_subarray_obsstate) == set([ObsState.EMPTY]):
+                    break
+                else:
+                    self.logger.info("ObsState is not empty")
+                time.sleep(0.1)
+
+            self.logger.info("Invoking telescope off command on csp_master_ln_fqdn ")
+            self.telescope_off_csp(csp_master_ln_fqdn)   
+            self.logger.info("Invoking telescope off command on sdp_master_ln_fqdn ")                                                            
             self.telescope_off_sdp(sdp_master_ln_fqdn)
+            self.logger.info("Invoking telescope off command on _dish_leaf_node_devices ")
             self.telescope_off_dish(device_data._dish_leaf_node_devices)
         except Exception as e:
             self.logger.exception(e)
