@@ -31,7 +31,8 @@ STR_CMD_TELESCOPE_OFF_DISH = "TelescopeOff command invoked on Dish devices"
 STR_CMD_TELESCOPEON = "TelescopeOn command invoked on Dish devices"
 STR_CMD_TELESCOPESTANDBY = "TelescopeStandby command invoked on Dish devices"
 STR_CMD_ON_DISH = "ON command invoked on Dish devices"
-
+STR_INVOKE_SUCCESS = " invoked successfully."
+STR_COMMAND = "Command :-> "
 
 # Event messages
 EVT_UNKNOWN = "Event from the Unknown device!"
@@ -77,6 +78,7 @@ ERR_RECEPTOR_ID_REALLOCATION = "The following Receptor id(s) are allocated to ot
 ERR_DEVFAILED_MSG = "This is error message for devfailed"
 ERR_SUBARRAY_ID_DOES_NOT_EXIST = "The Subarray '99' does not exist."
 
+ERR_INVOKING_CMD = "Error in invoking command: "
 # General strings
 STR_HEALTH_STATE = "healthState of "
 STR_STATE = "state of "

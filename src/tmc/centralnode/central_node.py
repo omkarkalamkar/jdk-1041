@@ -687,26 +687,24 @@ class CentralNode(SKABaseDevice):
         """
         super().init_command_objects()
         args = (self.device_data, self.state_model, self.logger)
+        self.on_object = On(*args)
+        self.register_command_object("On", self.on_object)
+        self.telescopeon_object = TelescopeOn(*args)
+        self.register_command_object("TelescopeOn", self.telescopeon_object)
         self.telescope_off_object = TelescopeOff(*args)
         self.off_object = Off(*args)
-        self.on_object = On(*args)
-        self.telescopeon_object = TelescopeOn(*args)
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)
         self.standby_tmc_object = Standby(*args)
         self.telescope_standby_object = TelescopeStandby(*args)
+        self.register_command_object("Off", self.off_object)
         self.register_command_object("AssignResources", self.assign_object)
         self.register_command_object("StowAntennas", self.stow_object)
         self.register_command_object("TelescopeOff", self.telescope_off_object)
-        self.register_command_object("Off", self.off_object)
-        self.register_command_object("TelescopeOn", self.telescopeon_object)
         self.register_command_object("ReleaseResources", self.release_object)
-        self.register_command_object("On", self.on_object)
         self.register_command_object("Standby", self.standby_tmc_object)
         self.register_command_object("TelescopeStandby", self.telescope_standby_object)
-        #TODO: This call for do() method will change in future
-        # self.on_object.do()
         
 
 # ----------
