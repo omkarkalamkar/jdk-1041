@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""centralnode"""
-version="0.1.6"
+version="0.1.10"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,9 +10,9 @@ license="""BSD-3-Clause"""
 url="""https://www.skatelescope.org"""
 copyright=""""""
 
-release=0.1.6
-tag=0.1.6
-tag_description= Update CentralNode-mid to subscribe CSPs and SDPs healthState directly from Central node mid as a part of resolution of SKB-10.
-release_notes=This release contains:<br/><ul><li> Updated CentralNode-mid to subscribe CSPs and SDPs healthState directly from Central node mid as a part of resolution of SKB-10</li></ul><br/>
+release=0.1.10
+tag=0.1.10
+tag_description= Implementated telescopeState aggregation as a part of SP-1623.
+release_notes=This release contains:<br/><ul><li> Implementated telescopeState aggregation as a part of SP-1623</li></ul><br/>
 gitlab_username=JayantKumbhar
 private_token=qbx9w8iZw5st2dxAZ2MF

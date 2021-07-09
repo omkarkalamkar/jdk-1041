@@ -268,25 +268,37 @@ class CentralNode(SKABaseDevice):
             device.device_data = DeviceData.get_instance()
             device.device_data.desired_telescope_state = {"TelescopeOn" : DevState.ON, "TelescopeStandby" : DevState.STANDBY, "TelescopeOff" : DevState.OFF}
             self.logger.debug(const.STR_INIT_SUCCESS)
+            # Initialize resource manager instance and initialize the resource matrix with availabler resources
+            device.device_data.resource_manager = ResourceManager.get_instance()
+            device.device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
+
             # Initialization of ObsState aggregator object and start obs state aggregation
             device.device_data.obs_state_aggregator = ObsStateAggregator(
                 device.TMMidSubarrayNodes, self.logger
             )
             device.device_data.obs_state_aggregator.start_aggregation()
             
-            # Initialize resource manager instance and initialize the resource matrix with availabler resources
-            device.device_data.resource_manager = ResourceManager.get_instance()
-            device.device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
-
+            
             #create healthStateAggregator object and start health state aggregation
             device.device_data.health_aggreegator = HealthStateAggregator(self.logger)
             device.device_data.health_aggreegator.subscribe_event()
-
-            #create OpStateAggregator object and start state aggregation
-            device.device_data.state_aggregator = OpStateAggregator(self.logger)
-            device.device_data.state_aggregator.subscribe_event() 
-            device.device_data.state_aggregator.start_state_aggregation()
-
+            try:
+                #create TelescopeStateAggregator object and start telescope state aggregation
+                device.device_data.telescope_state_aggregator = TelescopeStateAggregator(self.logger)
+                device.device_data.telescope_state_aggregator.subscribe_event() 
+                device.device_data.telescope_state_aggregator.start_telescope_state_aggregation()
+            except Exception as e:
+                self.logger.error(f"Exception in TelescopeStateAggregation {e}")
+            
+            try:
+                #create OpStateAggregator object and start state aggregation
+                device.device_data.state_aggregator = OpStateAggregator(self.logger)
+                device.device_data.state_aggregator.subscribe_event() 
+                device.device_data.state_aggregator.start_state_aggregation()
+            except Exception as e:
+                self.logger.error(f"Exception in OpState Aggregation {e}")
+            
+            
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")
                 subarrayID = int(tokens[2])
@@ -295,11 +307,8 @@ class CentralNode(SKABaseDevice):
                 device.device_data.subarray_FQDN_dict[
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
-                
-            #create TelescopeStateAggregator object and start telescope state aggregation
-            device.device_data.telescope_state_aggregator = TelescopeStateAggregator(self.logger)
-            device.device_data.telescope_state_aggregator.subscribe_event() 
-            device.device_data.telescope_state_aggregator.start_telescope_state_aggregation()
+            
+            device.check_cn_state()
             
             this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS, False)
             self.logger.info(const.STR_INIT_SUCCESS)
@@ -408,7 +417,45 @@ class CentralNode(SKABaseDevice):
         lock.acquire()
         self.attr_map[attr] = val
         lock.release()
- 
+    
+    def check_cn_state(self):
+        try:
+            # Create event for state change
+            self._cn_state_event = threading.Event()  # thread control
+            # create thread
+            self.logger.info("Starting thread to check the state of CentralNode.")
+            cn_state_thread = threading.Thread(
+                target=self.monitor_cn_state,
+            )
+            cn_state_thread.start() 
+        except Exception as e:
+            self.logger.exception(f"In check_cn_state exception is:{e}")
+    
+    def monitor_cn_state(self):
+        self.logger.info("Started monitoring CN state")
+        this_server = TangoServerHelper.get_instance()
+        device_data = DeviceData.get_instance()
+        try:
+            while not self._cn_state_event.isSet():
+                cn_state = this_server.get_state()
+                if cn_state == DevState.OFF and device_data._tmc_off_trigger.isSet():
+                    self.logger.info(
+                                f"CN_device_states is:{cn_state}"
+                            )
+                    this_server.device.On()
+                    self.logger.info(
+                                f"On command is called"
+                            )
+                    self.logger.info(
+                                f"CN_device_states is:{cn_state}"
+                            )
+                    device_data._tmc_off_trigger.clear()
+                    break
+                    # self._cn_state_event.set()
+
+        except Exception as e:
+            self.logger.exception(f"In monitor_cn_state exception is:{e}")
+
     # --------
     # Commands
     # --------
@@ -659,26 +706,24 @@ class CentralNode(SKABaseDevice):
         """
         super().init_command_objects()
         args = (self.device_data, self.state_model, self.logger)
+        self.on_object = On(*args)
+        self.register_command_object("On", self.on_object)
+        self.telescopeon_object = TelescopeOn(*args)
+        self.register_command_object("TelescopeOn", self.telescopeon_object)
         self.telescope_off_object = TelescopeOff(*args)
         self.off_object = Off(*args)
-        self.on_object = On(*args)
-        self.telescopeon_object = TelescopeOn(*args)
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)
         self.standby_tmc_object = Standby(*args)
         self.telescope_standby_object = TelescopeStandby(*args)
+        self.register_command_object("Off", self.off_object)
         self.register_command_object("AssignResources", self.assign_object)
         self.register_command_object("StowAntennas", self.stow_object)
         self.register_command_object("TelescopeOff", self.telescope_off_object)
-        self.register_command_object("Off", self.off_object)
-        self.register_command_object("TelescopeOn", self.telescopeon_object)
         self.register_command_object("ReleaseResources", self.release_object)
-        self.register_command_object("On", self.on_object)
         self.register_command_object("Standby", self.standby_tmc_object)
         self.register_command_object("TelescopeStandby", self.telescope_standby_object)
-        #TODO: This call for do() method will change in future
-        self.on_object.do()
         
 
 # ----------

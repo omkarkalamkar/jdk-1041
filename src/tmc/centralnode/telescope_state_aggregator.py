@@ -48,7 +48,6 @@ class TelescopeStateAggregator(Aggregator):
             for dish in range(0, len(dish_device_ids)):
                 self.dish_master_fqdn.append(f"{'mid_d'}{dish_device_ids[dish]}{'/elt/master'}")
             self.fqdn_device_telescope_state_list = [self.csp_master_fqdn, self.sdp_master_fqdn]
-            self.logger.info(f"The 1st fqdn_device_telescope_state_list is: {self.fqdn_device_telescope_state_list}")
             self.fqdn_device_telescope_state_list = self.fqdn_device_telescope_state_list + list(self.dish_master_fqdn)
             self.logger.info(f"fqdn_device_telescope_state_list is: {self.fqdn_device_telescope_state_list}")
 
@@ -60,9 +59,13 @@ class TelescopeStateAggregator(Aggregator):
         Method for event subscription. Calls separate subscribe event methods for CSP Master Node, SDP Master Node,
         Dish Master state attribute subscription.
         """
+        self.dishmaster_state_subscribe_event()
         self.csp_master_state_subscribe_event()
         self.sdp_master_state_subscribe_event()
-        self.dishmaster_state_subscribe_event()
+        # dish_state_thread = threading.Thread(
+        #             target=self.monitor_dish_state,
+        #         )
+        # dish_state_thread.start() 
 
     def csp_master_state_subscribe_event(self):
         """
@@ -116,7 +119,7 @@ class TelescopeStateAggregator(Aggregator):
             dishmaster_client = TangoClient(dishmaster_fqdn)
             # updating the dish_master_state_map with device name and its value which is required in callback
             try:
-                self.telescope_state_event_map[dishmaster_fqdn] = dishmaster_client.subscribe_attribute(
+                self.telescope_state_event_map[dishmaster_client] = dishmaster_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.telescope_state_callback
                 )
             except DevFailed as dev_failed:
@@ -150,32 +153,37 @@ class TelescopeStateAggregator(Aggregator):
 
         :return: None
         """
-        
-        device_data = DeviceData.get_instance()
-        # Lock for thread 1
-        self.telescope_state_callback_lock.acquire()
-        log_msg = f"State attribute change event is : {event.attr_name}"
-        self.logger.debug(log_msg)
-        log_msg = f"State attribute change event is: {event.attr_value.value}"
-        self.logger.debug(log_msg)
+        try:
+            device_data = DeviceData.get_instance()
+            # Lock for thread 1
+            # self.telescope_state_callback_lock.acquire()
+            self.logger.info(f"Telescope state callback : {event}")
+            if event.attr_value:
+                log_msg = f"TelescopeState attribute change event is : {event.attr_name}"
+                self.logger.debug(log_msg)
+                log_msg = f"TelescopeState attribute change event is: {event.attr_value.value}"
+                self.logger.debug(log_msg)
+                if not event.err:
+                    self.update_telescope_state(event, self.fqdn_device_telescope_state_list)
+                    
+                    device_data.telescope_device_states = [self.csp_master_state,  self.sdp_master_state]
+                    device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map.values())
+                    self.logger.info(f"telescope_device_states: {device_data.telescope_device_states}")
+                    device_data._telstate_callback_trigger.set()  # start state calculation
+                    # self.telescope_state_callback_lock.release()  # release the lock
+                else:
+                    # TODO: For future reference
+                    self.logger.info(f"{const.ERR_SUBSR_TELESCOPE_STATE}{event}")
 
-        if not event.err:
-            self.update_telescope_state(event, self.fqdn_device_telescope_state_list)
-            
-            device_data.telescope_device_states = [self.csp_master_state,  self.sdp_master_state]
-            device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map)
-
-            device_data._attr_callback_trigger.set()  # start state calculation
-            self.telescope_state_callback_lock.release()  # release the lock
-        else:
-            # TODO: For future reference
-            self.logger.info(f"{const.ERR_SUBSR_TELESCOPE_STATE}{event}")
+        except Exception as e:
+            self.logger.exception(f"In telescope_state_callback exception is:{e}")
 
 
     def update_telescope_state(self, event, fqdn_device_telescope_state_list: dict):
         device_state = event.attr_value.value
         attr_name = event.attr_name
-        self.logger.info(f"State is: {device_state}")
+        self.logger.info(f"State for {attr_name} is: {device_state}")
+        self.logger.info(f"fqdn_device_telescope_state_list is:  {fqdn_device_telescope_state_list}")
         try:
             for fqdn in fqdn_device_telescope_state_list:
                 if fqdn in attr_name:
@@ -184,21 +192,19 @@ class TelescopeStateAggregator(Aggregator):
                         self.logger.info(
                             f"CSP Master state is: {self.csp_master_state}"
                         )
-
                     elif "mid_sdp" in fqdn:
                         self.sdp_master_state = device_state
                         self.logger.info(
                             f"SDP Master state is: {self.sdp_master_state}"
                         )
-
                     elif "mid_d" in fqdn:
                         self.dish_master_state_map[attr_name] = device_state
                         self.logger.info(
                             f"Dish Master's state is: {self.dish_master_state_map[attr_name]}"
                         )
-
-                else:
-                    self.logger.debug(const.EVT_UNKNOWN)
+                    else:
+                        self.logger.info(f"Condition is not statisfied")
+                    break
         except Exception as e:
             self.logger.exception(e)
 
@@ -221,7 +227,7 @@ class TelescopeStateAggregator(Aggregator):
         self.telescope_state_calculator_thread.join()
         self.logger.info("Telescope State calculator thread stopped.")
 
-    def generate_state_log_msg(self, device_state):
+    def generate_telescope_state_log_msg(self, device_state):
         state_string_map = {
             DevState.ON: const.STR_ON,
             DevState.OFF: const.STR_OFF,
@@ -233,28 +239,61 @@ class TelescopeStateAggregator(Aggregator):
         self.logger.info(log_msg)
 
     def calculate_telescope_state(self):
-        device_data = DeviceData.get_instance()
-        while not self._telescope_state_event.isSet():
-            if device_data._attr_callback_trigger.isSet():
-                # calculation logic
-                unique_telescope_states = set(device_data.telescope_device_states)
-                if unique_telescope_states == set([DevState.ON]):
-                    self.this_server.write_attr("telescopeState", DevState.ON, False)
-                    self.generate_state_log_msg(DevState.ON)
-                elif unique_telescope_states == set([DevState.OFF]):
-                    self.this_server.write_attr("telescopeState", DevState.OFF, False)
-                    self.generate_state_log_msg(DevState.OFF)
-                elif DevState.INIT in unique_telescope_states:
-                    self.this_server.write_attr("telescopeState", DevState.INIT, False)
-                    self.generate_state_log_msg(DevState.INIT)
-                elif DevState.FAULT in unique_telescope_states:
-                    self.this_server.write_attr("telescopeState", DevState.FAULT, False)
-                    self.generate_state_log_msg(DevState.FAULT)
-                elif DevState.STANDBY in unique_telescope_states:
-                    self.this_server.write_attr("telescopeState", DevState.STANDBY, False)
-                    self.generate_state_log_msg(DevState.STANDBY)
+        try:
+            device_data = DeviceData.get_instance()
+            self.logger.info(f"telescope_device_states: {device_data.telescope_device_states}")
+            while not self._telescope_state_event.isSet():
+                if device_data._telstate_callback_trigger.isSet():
+                    # calculation logic
+                    # self.logger.info("Calling get_dish_master_state method")
+                    # self.get_dish_master_state()
+                    unique_telescope_states = set(device_data.telescope_device_states)
+                    self.logger.info(
+                                    f"telescope_device_states is:{device_data.telescope_device_states}"
+                                )
+                    self.logger.info(
+                        f"unique_telescope_states is:{unique_telescope_states}"
+                    )
+                    if unique_telescope_states == set([DevState.ON]):
+                        self.logger.info("In ON telescope state")
+                        self.this_server.write_attr("telescopeState", DevState.ON, False)
+                        self.generate_telescope_state_log_msg(DevState.ON)
+                    elif unique_telescope_states == set([DevState.OFF]):
+                        self.logger.info("In OFF telescope state")
+                        self.this_server.write_attr("telescopeState", DevState.OFF, False)
+                        self.generate_telescope_state_log_msg(DevState.OFF)
+                    elif DevState.INIT in unique_telescope_states:
+                        self.logger.info("In INIT telescope state")
+                        self.this_server.write_attr("telescopeState", DevState.INIT, False)
+                        self.generate_telescope_state_log_msg(DevState.INIT)
+                    elif DevState.FAULT in unique_telescope_states:
+                        self.logger.info("In FAULT telescope state")
+                        self.this_server.write_attr("telescopeState", DevState.FAULT, False)
+                        self.generate_telescope_state_log_msg(DevState.FAULT)
+                    elif DevState.STANDBY in unique_telescope_states:
+                        self.logger.info("In STANDBY telescope state")
+                        self.this_server.write_attr("telescopeState", DevState.STANDBY, False)
+                        self.generate_telescope_state_log_msg(DevState.STANDBY)
+                    else:
+                        self.this_server.write_attr("telescopeState", DevState.UNKNOWN, False)
+                        self.logger.info("TelescopeState can not be set")
+                    device_data._telstate_callback_trigger.clear()
+        except Exception as e:
+            self.logger.exception(f"In calculate_telescope_state exception is:{e}")
 
+    def monitor_dish_state(self):
+        self.logger.info("In monitor_dish_state method")
+        device_data = DeviceData.get_instance()
+        while True:
+            for dishmaster_fqdn in self.dish_master_fqdn:
+                dishmaster_client = TangoClient(dishmaster_fqdn)
+                dish_master_device_state = dishmaster_client.get_attribute("State").value
+                self.dish_master_state_map[dishmaster_fqdn] = dish_master_device_state
+                device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map.values())
+                dish_master_state_list = list(self.dish_master_state_map.values())
+                if set(dish_master_state_list) == set([DevState.ON]):
+                    self.logger.info(f"telescope_device_states in get_dish_master_state method: {device_data.telescope_device_states}")
+                    self.calculate_telescope_state()
+                    break
                 else:
-                    self.this_server.write_attr("telescopeState", DevState.UNKNOWN, False)
-                    self.logger.info("State can not be state")
-                device_data._attr_callback_trigger.clear()
+                    self.logger.info(f"telescope_device_states in get_dish_master_state method: {device_data.telescope_device_states}")

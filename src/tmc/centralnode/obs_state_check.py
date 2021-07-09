@@ -82,24 +82,35 @@ class ObsStateAggregator:
             if not evt.err:
                 obs_state = evt.attr_value.value
                 subarray_device = evt.device
+                self.logger.info(f"Subarray device 1: {subarray_device} and its obsstate : {obs_state}")
                 subarray_device_list = list(str(subarray_device))
                 # Identify the Subarray ID
                 for index in range(0, len(subarray_device_list)):
                     if subarray_device_list[index].isdigit():
                         id = subarray_device_list[index]
-
+                self.logger.info(f"Subarray device 2: {subarray_device} and its obsstate : {obs_state}")
                 subarray_id = f"SA{id}"
-                self.logger.info(log_msg)
+
+                self.logger.info(f"Subarray device 3: {subarray_device} and its obsstate : {obs_state}")
+                device_data.subarray_obsstate_map[subarray_device] = obs_state
+                self.logger.info(f"Subarray obsState map is: {device_data.subarray_obsstate_map}")
+                device_data.list_subarray_obsstate = list(device_data.subarray_obsstate_map.values())
+                self.logger.info(f"list_subarray_obsstate is: {device_data.list_subarray_obsstate}")
+                
                 if obs_state == ObsState.EMPTY or obs_state == ObsState.RESTARTING:
                     device_data.resource_manager.update_resource_deallocation(
                         subarray_id
                     )
+                
             else:
                 # TODO: For future reference
                 self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{evt}", False)
-
                 self.logger.critical(const.ERR_SUBSR_SA_OBS_STATE)
         except KeyError as key_error:
-            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBARRAY_HEALTHSTATE}{key_error}", False)
-            log_msg = const.ERR_SUBARRAY_HEALTHSTATE + f": {key_error}"
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{key_error}", False)
+            log_msg = const.ERR_SUBSR_SA_OBS_STATE + f": {key_error}"
+            self.logger.critical(log_msg)
+        except Exception as e:
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{e}", False)
+            log_msg = const.ERR_SUBSR_SA_OBS_STATE + f": {e}"
             self.logger.critical(log_msg)

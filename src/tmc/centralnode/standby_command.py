@@ -84,7 +84,7 @@ class Standby(BaseCommand):
         :return: None
         """
         csp_mln_client = TangoClient(csp_fqdn)
-        self.standby_leaf_node(csp_mln_client, const.CMD_STANDBY, [])
+        self.standby_leaf_node(csp_mln_client, const.CMD_STANDBY)
 
     def standby_sdp(self, sdp_fqdn):
         """
