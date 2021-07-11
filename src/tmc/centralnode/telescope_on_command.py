@@ -177,11 +177,6 @@ class TelescopeOn(BaseCommand):
         :raises: Devfailed exception if error occures while  executing Telescope On command on Dish leaf node.
         """
         try:
-            # tango_client.send_command(const.CMD_TELESCOPE_ON)
-            # log_msg = "Telescope On command invoked successfully on {}".format(
-            #     tango_client.get_device_fqdn
-            # )
-            # self.logger.debug(log_msg)
             tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
             log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
                 tango_client.get_device_fqdn

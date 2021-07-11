@@ -180,9 +180,6 @@ class TelescopeOff(BaseCommand):
             log_msg = "SetStandbyLPMode command invoked successfully on {}".format(
                                                       tango_client.get_device_fqdn())
             self.logger.debug(log_msg)
-            # tango_client.send_command(const.CMD_TELESCOPE_OFF)
-            # log_msg = "OFF command invoked successfully on {}".format(tango_client.get_device_fqdn)
-            # self.logger.debug(log_msg)
             return tango_client.get_device_fqdn()
 
         except DevFailed as dev_failed:

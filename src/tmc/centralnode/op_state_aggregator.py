@@ -263,10 +263,6 @@ class OpStateAggregator(Aggregator):
                             )
                     device_data._state_callback_trigger.set()  # start state calculation
                     self.state_callback_lock.release() # release the lock
-                    # while True:
-                    #     if not device_data._state_callback_trigger.isSet():
-                    #         self.state_callback_lock.release() # release the lock
-                    #     time.sleep(0.1)
                 else:
                     # TODO: For future reference
                     self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
