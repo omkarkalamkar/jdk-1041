@@ -59,13 +59,9 @@ class TelescopeStateAggregator(Aggregator):
         Method for event subscription. Calls separate subscribe event methods for CSP Master Node, SDP Master Node,
         Dish Master state attribute subscription.
         """
-        self.dishmaster_state_subscribe_event()
         self.csp_master_state_subscribe_event()
         self.sdp_master_state_subscribe_event()
-        # dish_state_thread = threading.Thread(
-        #             target=self.monitor_dish_state,
-        #         )
-        # dish_state_thread.start() 
+        self.dishmaster_state_subscribe_event()
 
     def csp_master_state_subscribe_event(self):
         """
@@ -245,8 +241,6 @@ class TelescopeStateAggregator(Aggregator):
             while not self._telescope_state_event.isSet():
                 if device_data._telstate_callback_trigger.isSet():
                     # calculation logic
-                    # self.logger.info("Calling get_dish_master_state method")
-                    # self.get_dish_master_state()
                     unique_telescope_states = set(device_data.telescope_device_states)
                     self.logger.info(
                                     f"telescope_device_states is:{device_data.telescope_device_states}"
@@ -280,20 +274,3 @@ class TelescopeStateAggregator(Aggregator):
                     device_data._telstate_callback_trigger.clear()
         except Exception as e:
             self.logger.exception(f"In calculate_telescope_state exception is:{e}")
-
-    def monitor_dish_state(self):
-        self.logger.info("In monitor_dish_state method")
-        device_data = DeviceData.get_instance()
-        while True:
-            for dishmaster_fqdn in self.dish_master_fqdn:
-                dishmaster_client = TangoClient(dishmaster_fqdn)
-                dish_master_device_state = dishmaster_client.get_attribute("State").value
-                self.dish_master_state_map[dishmaster_fqdn] = dish_master_device_state
-                device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map.values())
-                dish_master_state_list = list(self.dish_master_state_map.values())
-                if set(dish_master_state_list) == set([DevState.ON]):
-                    self.logger.info(f"telescope_device_states in get_dish_master_state method: {device_data.telescope_device_states}")
-                    self.calculate_telescope_state()
-                    break
-                else:
-                    self.logger.info(f"telescope_device_states in get_dish_master_state method: {device_data.telescope_device_states}")
