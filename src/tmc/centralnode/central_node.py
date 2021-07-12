@@ -270,6 +270,7 @@ class CentralNode(SKABaseDevice):
             device.device_data.desired_telescope_state = {"TelescopeOn" : DevState.ON, "TelescopeStandby" : DevState.STANDBY, "TelescopeOff" : DevState.OFF}
             self.logger.debug(const.STR_INIT_SUCCESS)
             # Initialize resource manager instance and initialize the resource matrix with availabler resources
+            # Note: ResourceManager's instance has to be initialised before ObsStateAggregator
             device.device_data.resource_manager = ResourceManager.get_instance()
             device.device_data.resource_manager.initialize_resource_matrix(device.DishLeafNodePrefix, device.NumDishes)
 
@@ -283,22 +284,21 @@ class CentralNode(SKABaseDevice):
             #create healthStateAggregator object and start health state aggregation
             device.device_data.health_aggreegator = HealthStateAggregator(self.logger)
             device.device_data.health_aggreegator.subscribe_event()
+
+            #create TelescopeStateAggregator object and start telescope state aggregation
             try:
-                #create TelescopeStateAggregator object and start telescope state aggregation
                 device.device_data.telescope_state_aggregator = TelescopeStateAggregator(self.logger)
                 device.device_data.telescope_state_aggregator.subscribe_event() 
                 device.device_data.telescope_state_aggregator.start_telescope_state_aggregation()
             except Exception as e:
                 self.logger.error(f"Exception in TelescopeStateAggregation {e}")
-            
+            #create OpStateAggregator object and start state aggregation
             try:
-                #create OpStateAggregator object and start state aggregation
                 device.device_data.state_aggregator = OpStateAggregator(self.logger)
                 device.device_data.state_aggregator.subscribe_event() 
                 device.device_data.state_aggregator.start_state_aggregation()
             except Exception as e:
                 self.logger.error(f"Exception in OpState Aggregation {e}")
-            
             
             for subarray in range(0, len(device.TMMidSubarrayNodes)):
                 tokens = device.TMMidSubarrayNodes[subarray].split("/")
@@ -309,7 +309,7 @@ class CentralNode(SKABaseDevice):
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
             
-            # method to check CentralNode device State
+            # Method to check CentralNode device State
             device.check_cn_state()
             
             this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS, False)
@@ -438,8 +438,8 @@ class CentralNode(SKABaseDevice):
     
     def monitor_cn_state(self):
         """
-        This methods monitors the State of CentralNode, once state of CentralNode and all TMC devices = OFF,
-        TMC On command is getting invoked which makes CentralNode device State = ON
+        This methods monitors the State of CentralNode, once state of CentralNode is OFF and state of all TMC devices is OFF,
+        TMC On command is getting invoked which makes CentralNode device State to ON
         """
         self.logger.info("Started monitoring CN state")
         this_server = TangoServerHelper.get_instance()
@@ -462,7 +462,6 @@ class CentralNode(SKABaseDevice):
                             )
                     device_data._tmc_off_trigger.clear()
                     break
-                    # self._cn_state_event.set()
 
         except Exception as e:
             self.logger.exception(f"In monitor_cn_state exception is:{e}")

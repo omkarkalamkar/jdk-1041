@@ -77,7 +77,13 @@ class TelescopeOff(BaseCommand):
         desired_telescope_state_obj.update_desired_telescope_state()
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         try:
+            # Call telescopeOff command on SubarrayNode asynchronously.
+            # As telescopeOff on SubarrayNode invokes Abort() and Restart() command when any 
+            # observation is in progres and hence command takes more than 3sec to get completed.
+            # As a result , it generates Tango Timeout exception on CentralNode. 
             self.telescope_off_subarray(tm_mid_subarrays)
+            # Once the telescopeOff command is sent on SubarrayNode, a thread is started to monitor
+            # the observation state of SubarrayNode.
             try:
                 # create thread to monitor ObsState for subarray while telescope observation
                 self.logger.info("Starting thread to check the obsstate of SubarrayNode.")
@@ -100,8 +106,10 @@ class TelescopeOff(BaseCommand):
    
     def monitor_sa_obsstate(self):
         """
-        This methods monitors the ObState of all the running Subarrays 
-        also checkes SA ObsState = EMPTY before sending TelescopeOff on CspMasterLeafNode and SdpMasterLeafNode
+        This methods monitors the ObState of all the running SubarrayNodes.
+        This method waits and ensures that SubarrayNode ObsState is EMPTY before 
+        sending TelescopeOff on CspMasterLeafNode and SdpMasterLeafNode and 
+        SetStandbyFPMode command on DishLeafNode
         """
         self.logger.info("Started monitoring SA obsstate")
         this_server = TangoServerHelper.get_instance()
@@ -110,6 +118,7 @@ class TelescopeOff(BaseCommand):
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         self.logger.info(f"device_data.list_subarray_obsstate :{device_data.list_subarray_obsstate}")
         try:
+            # Wait till all the subarrays are in EMPTY observation state
             while True:
                 if set(device_data.list_subarray_obsstate) == set([ObsState.EMPTY]):
                     break
@@ -259,7 +268,7 @@ class TelescopeOff(BaseCommand):
 
     def telescope_off_subarray_async(self, tango_client, cmd_name, param=None):
         """
-        Invoke command on leaf nodes.
+        Invoke command on SubarrayNode node asynchronously.
 
         :param tango_client: proxy of corresponding leaf node
         :param cmd_name: command name
@@ -267,7 +276,7 @@ class TelescopeOff(BaseCommand):
 
         :return: None
 
-        :raises: Devfailed exception if error occures while executing command on leaf nodes.
+        :raises: Devfailed exception if error occures while executing command on Subarray Nodes.
 
         """
         try:

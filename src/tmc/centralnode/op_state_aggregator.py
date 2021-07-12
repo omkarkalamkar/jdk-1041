@@ -317,6 +317,7 @@ class OpStateAggregator(Aggregator):
             self.logger.exception(f"In update_state exception is:{e}")
 
     def start_state_aggregation(self):
+        """Start a thread to derive the op_state of Central Node"""
         try:
             # Create event for state change
             self._state_event = threading.Event()  # thread control
@@ -351,6 +352,11 @@ class OpStateAggregator(Aggregator):
             self.logger.exception(f"In generate_state_log_msg exception is:{e}")
 
     def calculate_state(self):
+        """
+        A thread for calculating op_state of CentralNode.
+        This thread will be continuosly running and checking the updates received on state attribute for
+        TMC devices and then derives the State of CentralNode
+        """
         try:
             device_data = DeviceData.get_instance()
             while not self._state_event.isSet():
@@ -368,6 +374,7 @@ class OpStateAggregator(Aggregator):
                         self.generate_state_log_msg(self.this_server.get_state())
                     elif unique_states == set([DevState.OFF]):
                         #Set trigger to call CentralNode On command
+                        # This trigger is being monitored in CentralNode.py module's monitor_cn_state method
                         device_data._tmc_off_trigger.set()
                         self.generate_state_log_msg(self.this_server.get_state())
                     elif DevState.INIT in unique_states:
@@ -387,6 +394,5 @@ class OpStateAggregator(Aggregator):
                         )
                         self.logger.info("State can not be set")
                     device_data._state_callback_trigger.clear()
-                    #self.state_callback_lock.release() # release the lock
         except Exception as e:
             self.logger.exception(f"In calculate_state exception is:{e}")
