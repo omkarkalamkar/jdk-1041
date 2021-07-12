@@ -82,16 +82,14 @@ class ObsStateAggregator:
             if not evt.err:
                 obs_state = evt.attr_value.value
                 subarray_device = evt.device
-                self.logger.info(f"Subarray device 1: {subarray_device} and its obsstate : {obs_state}")
                 subarray_device_list = list(str(subarray_device))
                 # Identify the Subarray ID
                 for index in range(0, len(subarray_device_list)):
                     if subarray_device_list[index].isdigit():
                         id = subarray_device_list[index]
-                self.logger.info(f"Subarray device 2: {subarray_device} and its obsstate : {obs_state}")
                 subarray_id = f"SA{id}"
-
-                self.logger.info(f"Subarray device 3: {subarray_device} and its obsstate : {obs_state}")
+                # subarray_obsstate_map is maintained in device_data and updated here to make use of it 
+                # inside telescopeoff command class to check all the subarray's ObState
                 device_data.subarray_obsstate_map[subarray_device] = obs_state
                 self.logger.info(f"Subarray obsState map is: {device_data.subarray_obsstate_map}")
                 device_data.list_subarray_obsstate = list(device_data.subarray_obsstate_map.values())

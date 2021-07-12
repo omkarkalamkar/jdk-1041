@@ -71,13 +71,11 @@ class TelescopeStandby(BaseCommand):
         this_server.write_attr("commandInProgress", device_data.command_in_progress, False)
         desired_telescope_state_obj = DesiredTelescopeState()
         desired_telescope_state_obj.update_desired_telescope_state()
-        csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
-        sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         try:
             self.telescope_standby_subarray(tm_mid_subarrays)
             try:
-                # create thread
+                # create thread to monitor ObsState for subarray while telescope observation
                 self.logger.info("Starting thread to check the obsstate of SubarrayNode.")
                 sa_obsstate_thread = threading.Thread(
                     target=self.monitor_sa_obsstate,
@@ -96,6 +94,10 @@ class TelescopeStandby(BaseCommand):
             self.logger.exception(e)
 
     def monitor_sa_obsstate(self):
+        """
+        This methods monitors the ObState of all the running Subarrays 
+        also checkes SA ObsState = EMPTY before sending TelescopeStandBy on CspMasterLeafNode and SdpMasterLeafNode
+        """
         self.logger.info("Started monitoring SA obsstate")
         this_server = TangoServerHelper.get_instance()
         device_data = DeviceData.get_instance()

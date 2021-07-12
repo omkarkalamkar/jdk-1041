@@ -79,7 +79,7 @@ class TelescopeOff(BaseCommand):
         try:
             self.telescope_off_subarray(tm_mid_subarrays)
             try:
-                # create thread
+                # create thread to monitor ObsState for subarray while telescope observation
                 self.logger.info("Starting thread to check the obsstate of SubarrayNode.")
                 sa_obsstate_thread = threading.Thread(
                     target=self.monitor_sa_obsstate,
@@ -97,7 +97,12 @@ class TelescopeOff(BaseCommand):
         except Exception as e:
             self.logger.exception(e)
 
+   
     def monitor_sa_obsstate(self):
+        """
+        This methods monitors the ObState of all the running Subarrays 
+        also checkes SA ObsState = EMPTY before sending TelescopeOff on CspMasterLeafNode and SdpMasterLeafNode
+        """
         self.logger.info("Started monitoring SA obsstate")
         this_server = TangoServerHelper.get_instance()
         device_data = DeviceData.get_instance()

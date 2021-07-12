@@ -309,6 +309,7 @@ class CentralNode(SKABaseDevice):
                     subarrayID
                 ] = device.TMMidSubarrayNodes[subarray]
             
+            # method to check CentralNode device State
             device.check_cn_state()
             
             this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS, False)
@@ -420,6 +421,9 @@ class CentralNode(SKABaseDevice):
         lock.release()
     
     def check_cn_state(self):
+        """
+        This method creates and start thread to check CentralNode device State
+        """
         try:
             # Create event for state change
             self._cn_state_event = threading.Event()  # thread control
@@ -433,6 +437,10 @@ class CentralNode(SKABaseDevice):
             self.logger.exception(f"In check_cn_state exception is:{e}")
     
     def monitor_cn_state(self):
+        """
+        This methods monitors the State of CentralNode, once state of CentralNode and all TMC devices = OFF,
+        TMC On command is getting invoked which makes CentralNode device State = ON
+        """
         self.logger.info("Started monitoring CN state")
         this_server = TangoServerHelper.get_instance()
         device_data = DeviceData.get_instance()
@@ -711,8 +719,8 @@ class CentralNode(SKABaseDevice):
         args = (self.device_data, self.state_model, self.logger)
         self.on_object = On(*args)
         self.register_command_object("On", self.on_object)
-        self.telescopeon_object = TelescopeOn(*args)
-        self.register_command_object("TelescopeOn", self.telescopeon_object)
+        self.telescope_on_object = TelescopeOn(*args)
+        self.register_command_object("TelescopeOn", self.telescope_on_object)
         self.telescope_off_object = TelescopeOff(*args)
         self.off_object = Off(*args)
         self.assign_object = AssignResources(*args)
