@@ -10,6 +10,7 @@ of state and mode attributes defined by the SKA Control Model.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 import threading
+from time import sleep
 # Tango imports
 from tango import DebugIt, AttrWriteType, DevState, DevString
 from tango.server import run, attribute, command, device_property
@@ -442,6 +443,8 @@ class CentralNode(SKABaseDevice):
                     self.logger.info(
                                 f"CN_device_states is:{cn_state}"
                             )
+                    # Time sleep added to wait for On() command to be registered using init_register_command() method
+                    sleep(1)
                     this_server.device.On()
                     self.logger.info(
                                 f"On command is called"

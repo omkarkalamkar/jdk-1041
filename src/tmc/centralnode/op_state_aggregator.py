@@ -238,7 +238,7 @@ class OpStateAggregator(Aggregator):
         try:
             device_data = DeviceData.get_instance()
             # Lock for thread 1
-            self.state_callback_lock.acquire()
+            #self.state_callback_lock.acquire()
             log_msg = f"State attribute change event is : {event.attr_name}"
             self.logger.debug(log_msg)
             if event.attr_value:
@@ -262,7 +262,7 @@ class OpStateAggregator(Aggregator):
                                 f"tmc_device_states in state_callback is:{device_data.tmc_device_states}"
                             )
                     device_data._state_callback_trigger.set()  # start state calculation
-                    self.state_callback_lock.release() # release the lock
+                    #self.state_callback_lock.release() # release the lock
                 else:
                     # TODO: For future reference
                     self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")
@@ -356,10 +356,10 @@ class OpStateAggregator(Aggregator):
             while not self._state_event.isSet():
                 if device_data._state_callback_trigger.isSet():
                     # calculation logic
-                    unique_states = set(device_data.tmc_device_states)
                     self.logger.info(
                                 f"tmc_device_states is:{device_data.tmc_device_states}"
                             )
+                    unique_states = set(device_data.tmc_device_states)
                     self.logger.info(
                         f"unique_states is:{unique_states}"
                     )
@@ -379,10 +379,11 @@ class OpStateAggregator(Aggregator):
                     else:
                         self.this_server.set_state(DevState.UNKNOWN)
                         self.logger.info(
-                                f"tmc_device_states is:{device_data.tmc_device_states}"
+                                f"When in UNKNOWN state tmc_device_states is:{device_data.tmc_device_states}"
                             )
+                        unique_states = set(device_data.tmc_device_states)
                         self.logger.info(
-                            f"unique_states is:{unique_states}"
+                            f"When in UNKNOWN state unique_states is:{unique_states}"
                         )
                         self.logger.info("State can not be set")
                     device_data._state_callback_trigger.clear()
