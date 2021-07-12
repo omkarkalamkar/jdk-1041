@@ -205,8 +205,9 @@ class TelescopeStateAggregator(Aggregator):
             self.logger.exception(e)
 
     def start_telescope_state_aggregation(self):
-        # Create event for telescope state change
-
+        """
+        Start a thread to derive the op_state of Central Node
+        """
         self._telescope_state_event = threading.Event()  # thread control
         # create thread
         self.logger.info("Starting thread to calculate telescope state for Tmc devices.")
@@ -235,6 +236,11 @@ class TelescopeStateAggregator(Aggregator):
         self.logger.info(log_msg)
 
     def calculate_telescope_state(self):
+        """
+        A thread for calculating telescopeState of CentralNode.
+        This thread will be continuosly running and checking the updates received on State attribute for
+        DishMaster, CspMaster and SdpMaster and then derives the telescopeState of CentralNode
+        """
         try:
             device_data = DeviceData.get_instance()
             self.logger.info(f"telescope_device_states: {device_data.telescope_device_states}")
