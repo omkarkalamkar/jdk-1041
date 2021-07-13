@@ -240,6 +240,7 @@ class TelescopeStateAggregator(Aggregator):
             DevState.INIT: const.STR_INIT,
             DevState.FAULT: const.STR_FAULT,
             DevState.STANDBY: const.STR_STANDBY,
+            DevState.UNKNOWN: const.STR_UNKNOWN,
         }
         log_msg = f"{const.STR_STATE}{state_string_map[device_state]}"
         self.logger.info(log_msg)
