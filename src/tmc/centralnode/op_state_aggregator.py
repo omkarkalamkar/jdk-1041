@@ -239,7 +239,7 @@ class OpStateAggregator(Aggregator):
             device_data = DeviceData.get_instance()
             # Lock for thread 1
             #self.state_callback_lock.acquire()
-            retry_count = 3
+            # retry_count = 3
             log_msg = f"State attribute change event is : {event.attr_name}"
             self.logger.debug(log_msg)
             if event.attr_value:
