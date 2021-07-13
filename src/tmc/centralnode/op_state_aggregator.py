@@ -262,6 +262,7 @@ class OpStateAggregator(Aggregator):
                     self.logger.info(
                                 f"tmc_device_states in state_callback is:{device_data.tmc_device_states}"
                             )
+                    device_data._state_callback_trigger.set()
                     # Note: Need to test this block of code 
                     # while retry_count < 3: 
                     #     if device_data._state_callback_trigger.isSet(): 

@@ -166,6 +166,7 @@ class TelescopeStateAggregator(Aggregator):
                     device_data.telescope_device_states = [self.csp_master_state,  self.sdp_master_state]
                     device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map.values())
                     self.logger.info(f"telescope_device_states: {device_data.telescope_device_states}")
+                    device_data._telstate_callback_trigger.set()
                     # Note: Need to test this block of code
                     # while retry_count < 3: 
                     #     if device_data._telstate_callback_trigger.isSet(): 
