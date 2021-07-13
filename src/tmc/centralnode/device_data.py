@@ -40,9 +40,9 @@ class DeviceData:
 
         self._sdp_master_health = HealthState.UNKNOWN
         self._csp_master_health = HealthState.UNKNOWN
+        self.receptor_ids = []
         self._csp_master_state = ""
         self._sdp_master_state = ""
-        self.receptorIDList = []
         self.subarray_health_state_map = {}
         self._dish_leaf_node_devices = []
         self._leaf_device_proxy = []
