@@ -57,9 +57,12 @@ class ResourceManager:
             device_data.receptor_ids.append(resources_allocated[dish])
 
     def update_resource_deallocation(self, subarray_name):
-        for Dish_ID, Dish_Status in self._subarray_allocation.items():
-            if Dish_Status == subarray_name:
-                self._subarray_allocation[Dish_ID] = "NOT_ALLOCATED"
+        try:
+            for Dish_ID, Dish_Status in self._subarray_allocation.items():
+                if Dish_Status == subarray_name:
+                    self._subarray_allocation[Dish_ID] = "NOT_ALLOCATED"
+        except Exception as e:
+            self.logger.exception(f"Exception in update_resource_deallocation :{e}")
 
     def is_already_assigned(self, dish_ID):
         return self._subarray_allocation[dish_ID] != "NOT_ALLOCATED"

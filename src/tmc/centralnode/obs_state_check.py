@@ -87,19 +87,28 @@ class ObsStateAggregator:
                 for index in range(0, len(subarray_device_list)):
                     if subarray_device_list[index].isdigit():
                         id = subarray_device_list[index]
-
                 subarray_id = f"SA{id}"
-                self.logger.info(log_msg)
+                # subarray_obsstate_map is maintained in device_data and updated here to make use of it 
+                # inside telescopeoff command class to check all the subarray's ObState
+                device_data.subarray_obsstate_map[subarray_device] = obs_state
+                self.logger.info(f"Subarray obsState map is: {device_data.subarray_obsstate_map}")
+                device_data.list_subarray_obsstate = list(device_data.subarray_obsstate_map.values())
+                self.logger.info(f"list_subarray_obsstate is: {device_data.list_subarray_obsstate}")
+                
                 if obs_state == ObsState.EMPTY or obs_state == ObsState.RESTARTING:
                     device_data.resource_manager.update_resource_deallocation(
                         subarray_id
                     )
+                
             else:
                 # TODO: For future reference
                 self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{evt}", False)
-
                 self.logger.critical(const.ERR_SUBSR_SA_OBS_STATE)
         except KeyError as key_error:
-            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBARRAY_HEALTHSTATE}{key_error}", False)
-            log_msg = const.ERR_SUBARRAY_HEALTHSTATE + f": {key_error}"
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{key_error}", False)
+            log_msg = const.ERR_SUBSR_SA_OBS_STATE + f": {key_error}"
+            self.logger.critical(log_msg)
+        except Exception as e:
+            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_OBS_STATE}{e}", False)
+            log_msg = const.ERR_SUBSR_SA_OBS_STATE + f": {e}"
             self.logger.critical(log_msg)

@@ -34,7 +34,9 @@ class DeviceData:
             DeviceData.__instance = self
 
         # Create event for attribute callback trigger
-        self._attr_callback_trigger = threading.Event()
+        self._state_callback_trigger = threading.Event()
+        self._telstate_callback_trigger = threading.Event()
+        self._tmc_off_trigger = threading.Event()
 
         self._sdp_master_health = HealthState.UNKNOWN
         self._csp_master_health = HealthState.UNKNOWN
@@ -57,6 +59,8 @@ class DeviceData:
         self.tmc_device_states = []
         self.telescope_device_states = []
 
+        self.subarray_obsstate_map = {}
+        self.list_subarray_obsstate = []
 
     @staticmethod
     def get_instance():
