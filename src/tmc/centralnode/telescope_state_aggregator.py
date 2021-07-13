@@ -153,6 +153,7 @@ class TelescopeStateAggregator(Aggregator):
             device_data = DeviceData.get_instance()
             # Lock for thread 1
             # self.telescope_state_callback_lock.acquire()
+            # retry_count = 3
             self.logger.info(f"Telescope state callback : {event}")
             if event.attr_value:
                 log_msg = f"TelescopeState attribute change event is : {event.attr_name}"
