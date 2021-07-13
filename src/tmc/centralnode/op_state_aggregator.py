@@ -354,6 +354,7 @@ class OpStateAggregator(Aggregator):
                 DevState.OFF: const.STR_OFF,
                 DevState.INIT: const.STR_INIT,
                 DevState.FAULT: const.STR_FAULT,
+                DevState.UNKNOWN: const.STR_UNKNOWN,
             }
             # Need to work on getting device name here
             log_msg = f"{const.STR_STATE}{state_string_map[device_state]}"
