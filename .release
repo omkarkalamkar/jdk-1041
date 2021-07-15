@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""centralnode"""
-version="0.2.2"
+version="0.2.3"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,9 +10,9 @@ license="""BSD-3-Clause"""
 url="""https://www.skatelescope.org"""
 copyright=""""""
 
-release=0.2.2
-tag=0.2.2
-tag_description= Merged changes from SP-1623 work in SP-1643.
-release_notes=This release contains:<br/><ul><li> JSON changes as per ADR-35 for SP-1643</li></ul><br/>
+release=0.2.3
+tag=0.2.3
+tag_description= Updated CDM import with new repository ska-tmc-cdm
+release_notes=This release contains:<br/><ul><li> New CDM library import changes</li></ul><br/>
 gitlab_username=SnehalNakave
 private_token=aLhd5Gs_Bjxsge_bswn3

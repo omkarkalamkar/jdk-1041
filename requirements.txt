@@ -4,6 +4,6 @@ jsonschema >= 3.2.0
 ska-logging == 0.3.0
 lmcbaseclasses == 0.7.2
 marshmallow
-cdm-shared-library
+ska-tmc-cdm
 fire
 skatmccommon == 0.1.6+3aaa7bbe

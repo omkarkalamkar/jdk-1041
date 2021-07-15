@@ -11,7 +11,7 @@ Central Node is a coordinator of the complete M&C system.
 * [PyTango (9.3.2)](https://docs.google.com/document/d/1DtuIs1PeYGHlDXx8RyOzZyRQ-_Eiup-ncqeDDCtcNxk/edit?usp=sharing)
 * skabase (LMC Base classes for SKA): Refer Section 2.1 for installation guide
 * [ska-logging](https://gitlab.com/ska-telescope/ska-logging)
-* [cdm-shared-library](https://gitlab.com/ska-telescope/cdm-shared-library)
+* [ska-tmc-cdm](https://gitlab.com/ska-telescope/ska-tmc-cdm)
 * [pytest](https://pypi.org/project/pytest/)
 * [pytest-cov](https://pypi.org/project/pytest-cov/)
 * [pytest-json-report](https://pypi.org/project/pytest-json-report/)

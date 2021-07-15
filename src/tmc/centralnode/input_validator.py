@@ -14,8 +14,8 @@ import logging
 
 from marshmallow import ValidationError
 # SKA specific imports
-from ska.cdm.schemas import CODEC
-from ska.cdm.messages.central_node.assign_resources import AssignResourcesRequest
+from ska_tmc_cdm.schemas import CODEC
+from ska_tmc_cdm.central_node.assign_resources import AssignResourcesRequest
 from tmc.centralnode.exceptions import ResourceNotPresentError
 from tmc.centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
 
@@ -89,7 +89,7 @@ class AssignResourceValidator:
     def loads(self, input_string):
         """
         Validates the input string received as an argument of AssignResources command.
-        If the request is correct, returns the deserialized JSON object. The cdm-shared-library
+        If the request is correct, returns the deserialized JSON object. The ska-tmc-cdm
         is used to validate the JSON.
 
         :param: input_string: A JSON string
