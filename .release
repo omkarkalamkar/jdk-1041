@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""centralnode"""
-version="0.2.0"
+version="0.2.1"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,9 +10,9 @@ license="""BSD-3-Clause"""
 url="""https://www.skatelescope.org"""
 copyright=""""""
 
-release=0.2.0
-tag=0.2.0
-tag_description= Implementated telescopeOn , telescopeOff and telescopeStandby command as a part of SP-1623.
-release_notes=This release contains:<br/><ul><li> Implementated telescopeOn , telescopeOff and telescopeStandby command along with op_state and telescopeState aggregation as a part of SP-1623</li></ul><br/>
+release=0.2.1
+tag=0.2.1
+tag_description= Implementated fix for state aggregation after tmc On command as a part of SP-1623.
+release_notes=This release contains:<br/><ul><li> Implementated fix for state aggregation after tmc On command as a part of SP-1623</li></ul><br/>
 gitlab_username=kalyanithigale
 private_token=uqwK7WTp_wkTzw5o68nd
