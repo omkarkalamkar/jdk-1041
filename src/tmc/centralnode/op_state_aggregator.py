@@ -245,17 +245,9 @@ class OpStateAggregator(Aggregator):
             if event.attr_value:
                 log_msg = f"State attribute change event is: {event.attr_value.value}"
                 self.logger.debug(log_msg)
-                device_state = event.attr_value.value
-                self.logger.info("::::device_state is:::::::", device_state)
+
                 if not event.err:
-                    while True:
-                        self.logger.info("::::Inside while loop value is:::::::")
-                        if device_state == DevState.OFF:
-                            break
-                        else:
-                            self.logger.info("ObsState is not empty")
-                        time.sleep(0.1)
-                        
+                    retry_count = 0
                     self.update_state(event, self.fqdn_device_state_list)
                     device_data.tmc_device_states = [
                         device_data._csp_master_state,
@@ -271,15 +263,15 @@ class OpStateAggregator(Aggregator):
                     self.logger.info(
                                 f"tmc_device_states in state_callback is:{device_data.tmc_device_states}"
                             )
-                    device_data._state_callback_trigger.set()
+                    # device_data._state_callback_trigger.set()
                     # Note: Need to test this block of code 
-                    # while retry_count < 3: 
-                    #     if device_data._state_callback_trigger.isSet(): 
-                    #         time.sleep(0.05)
-                    #         retry_count +=1 
-                    #     else:
-                    #         device_data._state_callback_trigger.set()  # start state calculation
-                    #         break
+                    while retry_count < 3: 
+                        if device_data._state_callback_trigger.isSet(): 
+                            time.sleep(0.05)
+                            retry_count +=1 
+                        else:
+                            device_data._state_callback_trigger.set()  # start state calculation
+                            break
                     
                     #self.state_callback_lock.release() # release the lock
                 else:
