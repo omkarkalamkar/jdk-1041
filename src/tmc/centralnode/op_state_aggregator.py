@@ -43,6 +43,7 @@ class OpStateAggregator(Aggregator):
             self.this_server = TangoServerHelper.get_instance()
             self.tm_mid_subarrays = []
             self.tm_mid_csp_subarrays_leaf_nodes = []
+
             # create lock
             self.state_callback_lock = threading.Lock()
             self.tm_mid_sdp_subarrays_leaf_nodes = []
@@ -62,8 +63,13 @@ class OpStateAggregator(Aggregator):
             self.tm_mid_sdp_subarrays_leaf_nodes = self.this_server.read_property(
                 "TMMidSdpSubarrayLeafNodes"
             )
-            self.fqdn_device_state_list = [self.sdp_master_ln_fqdn, self.csp_master_ln_fqdn, self.dln_prefix]
-            self.fqdn_device_state_list = self.fqdn_device_state_list + list(self.tm_mid_subarrays) + list(self.tm_mid_csp_subarrays_leaf_nodes) + list(self.tm_mid_sdp_subarrays_leaf_nodes)
+            dish_ln_fqdn_list = []
+            dish_device_ids = [str(i).zfill(4) for i in range(1, 5)]
+            for dish in range(0, len(dish_device_ids)):
+                dish_ln_fqdn = self.dln_prefix + dish_device_ids[dish]
+                dish_ln_fqdn_list.append(dish_ln_fqdn)
+            self.fqdn_device_state_list = [self.sdp_master_ln_fqdn, self.csp_master_ln_fqdn]
+            self.fqdn_device_state_list = self.fqdn_device_state_list + dish_ln_fqdn_list + list(self.tm_mid_subarrays) + list(self.tm_mid_csp_subarrays_leaf_nodes) + list(self.tm_mid_sdp_subarrays_leaf_nodes)
             self.logger.info(f"fqdn_device_state_list is: {self.fqdn_device_state_list}")
 
         except Exception as exe:
@@ -130,6 +136,7 @@ class OpStateAggregator(Aggregator):
         :raises: Devfailed exception if erroe occurs while subscribing event.
         """
         for subarray_fqdn in self.tm_mid_subarrays:
+            self.subarray_state_map[subarray_fqdn] = ''
             subarray_client = TangoClient(subarray_fqdn)
             try:
                 self.state_event_map[subarray_client] = subarray_client.subscribe_attribute(
@@ -155,6 +162,7 @@ class OpStateAggregator(Aggregator):
         for dish in range(0, len(dish_device_ids)):
             dish_ln_fqdn = self.dln_prefix + dish_device_ids[dish]
             dish_ln_client = TangoClient(dish_ln_fqdn)
+            self.dish_state_map[dish_ln_fqdn]=''
             try:
                 self.state_event_map[dish_ln_client] = dish_ln_client.subscribe_attribute(
                     const.EVT_SUBSR_STATE, self.state_callback
@@ -176,6 +184,7 @@ class OpStateAggregator(Aggregator):
         :raises: Devfailed exception if error occurs while subscribing event.
         """
         for csp_sa_ln_fqdn in self.tm_mid_csp_subarrays_leaf_nodes:
+            self.csp_subarray_state_map[csp_sa_ln_fqdn]=''
             csp_sa_ln_client = TangoClient(csp_sa_ln_fqdn)
             try:
                 self.state_event_map[csp_sa_ln_client] = csp_sa_ln_client.subscribe_attribute(
@@ -198,6 +207,7 @@ class OpStateAggregator(Aggregator):
         :raises: Devfailed exception if error occurs while subscribing event.
         """
         for sdp_sa_ln_fqdn in self.tm_mid_sdp_subarrays_leaf_nodes:
+            self.sdp_subarray_state_map[sdp_sa_ln_fqdn]=''
             sdp_sa_ln_client = TangoClient(sdp_sa_ln_fqdn)
             try:
                 self.state_event_map[sdp_sa_ln_client] = sdp_sa_ln_client.subscribe_attribute(
@@ -247,6 +257,7 @@ class OpStateAggregator(Aggregator):
                 self.logger.debug(log_msg)
 
                 if not event.err:
+                    retry_count = 0
                     self.update_state(event, self.fqdn_device_state_list)
                     device_data.tmc_device_states = [
                         device_data._csp_master_state,
@@ -262,15 +273,19 @@ class OpStateAggregator(Aggregator):
                     self.logger.info(
                                 f"tmc_device_states in state_callback is:{device_data.tmc_device_states}"
                             )
-                    device_data._state_callback_trigger.set()
+                    # device_data._state_callback_trigger.set()
                     # Note: Need to test this block of code 
-                    # while retry_count < 3: 
-                    #     if device_data._state_callback_trigger.isSet(): 
-                    #         time.sleep(0.05)
-                    #         retry_count +=1 
-                    #     else:
-                    #         device_data._state_callback_trigger.set()  # start state calculation
-                    #         break
+                    
+                    while retry_count < 3: 
+                        if device_data._state_callback_trigger.isSet(): 
+                            time.sleep(0.05)
+                            retry_count +=1 
+                        else:
+                            self.logger.info(
+                                f"device_data._state_callback_trigger.isSet():{device_data._state_callback_trigger.isSet()}"
+                            )
+                            device_data._state_callback_trigger.set()  # start state calculation
+                            break
                     
                     #self.state_callback_lock.release() # release the lock
                 else:
@@ -291,24 +306,24 @@ class OpStateAggregator(Aggregator):
             for fqdn in fqdn_device_state_list:
                 if fqdn in attr_name:
                     if "tm_subarray" in fqdn:
-                        self.subarray_state_map[attr_name] = device_state
+                        self.subarray_state_map[fqdn] = device_state
                         self.logger.info(
-                            f"Subarray state map is:{self.subarray_state_map[attr_name]}"
+                            f"Subarray state map is:{self.subarray_state_map}"
                         )
                     elif "csp_subarray" in fqdn:
-                        self.csp_subarray_state_map[attr_name] = device_state
+                        self.csp_subarray_state_map[fqdn] = device_state
                         self.logger.info(
-                            f"Csp subarray state map is:{self.csp_subarray_state_map[attr_name]}"
+                            f"Csp subarray state map is:{self.csp_subarray_state_map}"
                         )
                     elif "sdp_subarray" in fqdn:
-                        self.sdp_subarray_state_map[attr_name] = device_state
+                        self.sdp_subarray_state_map[fqdn] = device_state
                         self.logger.info(
-                            f"sdp subarray state map is:{self.sdp_subarray_state_map[attr_name]}"
+                            f"sdp subarray state map is:{self.sdp_subarray_state_map}"
                         )
                     elif "ska_mid/tm_leaf_node/d" in fqdn:
-                        self.dish_state_map[attr_name] = device_state
+                        self.dish_state_map[fqdn] = device_state
                         self.logger.info(
-                            f"dish state map is is:{self.dish_state_map[attr_name]}"
+                            f"dish state map is is:{self.dish_state_map}"
                         )
                     elif "csp_master" in fqdn:
                         device_data._csp_master_state = device_state
@@ -384,7 +399,7 @@ class OpStateAggregator(Aggregator):
                         self.this_server.set_state(DevState.ON)
                         self.generate_state_log_msg(self.this_server.get_state())
                     elif unique_states == set([DevState.OFF]):
-                        #Set trigger to call CentralNode On command
+                        # Set trigger to call CentralNode On command
                         # This trigger is being monitored in CentralNode.py module's monitor_cn_state method
                         device_data._tmc_off_trigger.set()
                         self.generate_state_log_msg(self.this_server.get_state())
