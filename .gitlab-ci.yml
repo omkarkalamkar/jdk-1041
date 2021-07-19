@@ -98,9 +98,9 @@ release docker image:
   script:
     - make release-centralnode USERNAME=$GITLAB_USER_NAME EMAILID=$GITLAB_USER_EMAIL # Publish tag on the gitlab and tagged image on Nexus
   when: manual
-  only:
-    refs:
-      - master
+  # only:
+  #   refs:
+  #     - master
 
 pages:
   stage: pages
@@ -125,3 +125,7 @@ include:
 # https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
 - project: 'ska-telescope/templates-repository'
   file: 'gitlab-ci/includes/post_step.yml'
+# Publish Python packages
+# https://developer.skao.int/en/latest/tools/software-package-release-procedure.html#building-and-publishing-python-packages
+- project: 'ska-telescope/templates-repository'
+  file: 'gitlab-ci/includes/build_wheel.yml'
