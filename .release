@@ -1,6 +1,6 @@
 """Release information for Python Package"""
 
-name="""centralnode"""
+name="""ska-tmc-centralnode-mid"""
 version="0.2.3"
 version_info=version.split(".")
 description="""Central Node Mid"""
