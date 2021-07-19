@@ -63,16 +63,16 @@ clean shell runner:
 #     paths:
 #       - ./build
 
-linting:
-  stage: linting
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.10
-  tags:
-    - docker-executor
-  script:
-    - make lint
-  artifacts:
-    paths:
-      - ./build
+# linting:
+#   stage: linting
+#   image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.10
+#   tags:
+#     - docker-executor
+#   script:
+#     - make lint
+#   artifacts:
+#     paths:
+#       - ./build
 
 # publish to nexus:
 #   stage: publish
