@@ -94,23 +94,20 @@ publish to nexus:
 
 release docker image:
   stage: release
-  image: nexus.engageska-portugal.pt/ska-docker/tango-builder:0.2.3
+  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
   before_script:
-  - docker login -u $DOCKER_REGISTRY_USERNAME -p $DOCKER_REGISTRY_PASSWORD $DOCKER_REGISTRY_HOST
+  - docker login -u $CAR_OCI_REGISTRY_USERNAME -p $CAR_OCI_REGISTRY_PASSWORD $CAR_OCI_REGISTRY_HOST
   tags:
     - docker-executor
   script:
     - make release-centralnode USERNAME=$GITLAB_USER_NAME EMAILID=$GITLAB_USER_EMAIL # Publish tag on the gitlab and tagged image on Nexus
   when: manual
-  only:
-    refs:
-      - master
+  # only:
+  #   refs:
+  #     - master
 
 pages:
   stage: pages
-  image: nexus.engageska-portugal.pt/ska-docker/tango-builder:0.2.3
-  before_script:
-  - docker login -u $DOCKER_REGISTRY_USERNAME -p $DOCKER_REGISTRY_PASSWORD $DOCKER_REGISTRY_HOST
   tags:
     - docker-executor
   only:
