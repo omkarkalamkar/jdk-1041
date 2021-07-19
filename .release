@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
-name="""ska-tmc-mid-centralnode"""
-version="0.2.5"
+name="""centralnode"""
+version="0.2.3"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,8 +10,8 @@ license="""BSD-3-Clause"""
 url="""https://www.skatelescope.org"""
 copyright=""""""
 
-release=0.2.5
-tag=0.2.5
+release=0.2.3
+tag=0.2.3
 tag_description= Implementated fix for state aggregation after tmc On command as a part of SP-1623.
 release_notes=This release contains:<br/><ul><li> Implementated fix for state aggregation after tmc On command as a part of SP-1623</li></ul><br/>
 gitlab_username=kalyanithigale

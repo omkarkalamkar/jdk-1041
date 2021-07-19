@@ -21,11 +21,15 @@ endif
 
 RELEASE_SUPPORT := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))/.make-release-support
 
-ifeq ($(strip $(CAR_OCI_REGISTRY_HOST)),)
-  CAR_OCI_REGISTRY_HOST = artefact.skao.int
+ifeq ($(strip $(DOCKER_REGISTRY_HOST)),)
+  DOCKER_REGISTRY_HOST = nexus.engageska-portugal.pt
 endif
 
-IMAGE=$(CAR_OCI_REGISTRY_HOST)/$(CAR_OCI_REGISTRY_USER)/$(NAME)
+ifeq ($(strip $(DOCKER_REGISTRY_USER)),)
+  DOCKER_REGISTRY_USER = ska-telescope
+endif
+
+IMAGE=$(DOCKER_REGISTRY_HOST)/$(DOCKER_REGISTRY_USER)/$(NAME)
 
 VERSION=$(shell . $(RELEASE_SUPPORT) ; getVersion)
 TAG=$(shell . $(RELEASE_SUPPORT); getTag)
@@ -49,7 +53,7 @@ pre-push:
 post-push:
 
 docker-build: .release
-	docker build $(DOCKER_BUILD_ARGS) -t $(IMAGE):$(VERSION) $(DOCKER_BUILD_CONTEXT) -f $(DOCKER_FILE_PATH) --build-arg CAR_OCI_REGISTRY_HOST=$(CAR_OCI_REGISTRY_HOST) --build-arg CAR_OCI_REGISTRY_USER=$(CAR_OCI_REGISTRY_USER)
+	docker build $(DOCKER_BUILD_ARGS) -t $(IMAGE):$(VERSION) $(DOCKER_BUILD_CONTEXT) -f $(DOCKER_FILE_PATH) --build-arg DOCKER_REGISTRY_HOST=$(DOCKER_REGISTRY_HOST) --build-arg DOCKER_REGISTRY_USER=$(DOCKER_REGISTRY_USER)
 	@DOCKER_MAJOR=$(shell docker -v | sed -e 's/.*version //' -e 's/,.*//' | cut -d\. -f1) ; \
 	DOCKER_MINOR=$(shell docker -v | sed -e 's/.*version //' -e 's/,.*//' | cut -d\. -f2) ; \
 	if [ $$DOCKER_MAJOR -eq 1 ] && [ $$DOCKER_MINOR -lt 10 ] ; then \
@@ -125,7 +129,7 @@ config-git:
 	git config --global user.email $(EMAILID)
 	git config --global user.name $(USERNAME)
 
-release-centralnode: config-git docker-build push-versioned-image #create-publish-tag release-cn-if-no-error
+release-centralnode: config-git docker-build push-versioned-image create-publish-tag release-cn-if-no-error
 
 release-cn: .release
 	@. $(RELEASE_SUPPORT) ; releaseCN
