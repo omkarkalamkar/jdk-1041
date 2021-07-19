@@ -447,7 +447,8 @@ class CentralNode(SKABaseDevice):
         try:
             while not self._cn_state_event.isSet():
                 cn_state = this_server.get_state()
-                if cn_state == DevState.OFF and device_data._tmc_off_trigger.isSet():
+                # CentralNode can be OFF after init and will be updated to UNKNOWN until receives states from all TMC devices
+                if cn_state in [DevState.OFF, DevState.UNKNOWN] and device_data._tmc_off_trigger.isSet():
                     self.logger.info(
                                 f"CN_device_states is:{cn_state}"
                             )
