@@ -16,7 +16,7 @@ from marshmallow import ValidationError
 
 # SKA specific imports
 from ska_tmc_cdm.schemas import CODEC
-from ska_tmc_cdm.central_node.assign_resources import AssignResourcesRequest
+from ska_tmc_cdm.messages.central_node.assign_resources import AssignResourcesRequest
 from tmc.centralnode.exceptions import ResourceNotPresentError
 from tmc.centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
 
