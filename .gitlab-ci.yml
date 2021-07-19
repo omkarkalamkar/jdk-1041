@@ -52,27 +52,27 @@ clean shell runner:
 #     paths:
 #       - ./dist/
           
-# unit tests:
-#   stage: test
-#   image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.10
-#   tags:
-#     - docker-executor
-#   script:
-#     - tox -e py37
-#   artifacts:
-#     paths:
-#       - ./build
+unit tests:
+  stage: test
+  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.10
+  tags:
+    - docker-executor
+  script:
+    - tox -e py37
+  artifacts:
+    paths:
+      - ./build
 
-# linting:
-#   stage: linting
-#   image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.10
-#   tags:
-#     - docker-executor
-#   script:
-#     - make lint
-#   artifacts:
-#     paths:
-#       - ./build
+linting:
+  stage: linting
+  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.10
+  tags:
+    - docker-executor
+  script:
+    - make lint
+  artifacts:
+    paths:
+      - ./build
 
 # publish to nexus:
 #   stage: publish
