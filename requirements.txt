@@ -2,6 +2,7 @@ numpy == 1.17.2
 pytango >= 9.3.3
 jsonschema >= 3.2.0
 ska-ser-logging == 0.4.0
+ska-tango-base == 0.11.3
 marshmallow
 ska-tmc-cdm
 fire
