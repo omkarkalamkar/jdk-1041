@@ -125,7 +125,7 @@ config-git:
 	git config --global user.email $(EMAILID)
 	git config --global user.name $(USERNAME)
 
-release-centralnode: config-git docker-build push-versioned-image create-publish-tag release-cn-if-no-error
+release-centralnode: config-git docker-build push-versioned-image #create-publish-tag release-cn-if-no-error
 
 release-cn: .release
 	@. $(RELEASE_SUPPORT) ; releaseCN

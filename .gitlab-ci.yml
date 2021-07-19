@@ -96,6 +96,8 @@ release docker image:
   stage: release
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
   before_script:
+  - echo $CAR_OCI_REGISTRY_USERNAME
+  - echo $CAR_OCI_REGISTRY_PASSWORD
   - docker login -u $CAR_OCI_REGISTRY_USERNAME -p $CAR_OCI_REGISTRY_PASSWORD $CAR_OCI_REGISTRY_HOST
   tags:
     - docker-executor
