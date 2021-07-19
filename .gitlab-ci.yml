@@ -56,16 +56,16 @@ build wheel for development: # Executed on non-tagged commit
     paths:
       - ./dist/
           
-unit tests:
-  stage: test
-  image: nexus.engageska-portugal.pt/ska-docker/ska-python-buildenv:9.3.3.1
-  tags:
-    - docker-executor
-  script:
-    - tox -e py37
-  artifacts:
-    paths:
-      - ./build
+# unit tests:
+#   stage: test
+#   image: nexus.engageska-portugal.pt/ska-docker/ska-python-buildenv:9.3.3.1
+#   tags:
+#     - docker-executor
+#   script:
+#     - tox -e py37
+#   artifacts:
+#     paths:
+#       - ./build
 
 linting:
   stage: linting
