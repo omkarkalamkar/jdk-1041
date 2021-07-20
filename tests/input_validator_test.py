@@ -353,5 +353,5 @@ class TestAssignResourceValidator:
 
         with pytest.raises(ResourceNotPresentError) as excinfo:
             input_validator.loads(json.dumps(input_json))
-
+        
         assert const.ERR_RECEPTOR_ID_DOES_NOT_EXIST in str(excinfo.value)
