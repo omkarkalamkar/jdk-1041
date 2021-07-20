@@ -29,28 +29,6 @@ clean shell runner:
   script:
     # Gitlab CI badges creation
     - rm -rf build/*
-
-# build wheel for publication: # Executed on a tag
-#   stage: build
-#   tags:
-#     - docker-executor
-#   script:
-#     - python3 setup.py egg_info -b+$CI_COMMIT_SHORT_SHA sdist bdist_wheel
-#   rules:
-#     - if: '$CI_COMMIT_TAG'
-#   artifacts:
-#     paths:
-#       - ./dist/
-
-# build wheel for development: # Executed on non-tagged commit
-#   stage: build
-#   tags:
-#     - docker-executor
-#   script:
-#     - python3 setup.py egg_info -b+dev.$CI_COMMIT_SHORT_SHA sdist bdist_wheel
-#   artifacts:
-#     paths:
-#       - ./dist/
           
 unit tests:
   stage: test
@@ -74,20 +52,6 @@ linting:
     paths:
       - ./build
 
-# publish to nexus:
-#   stage: publish
-#   tags:
-#     - docker-executor
-#   variables:
-#     TWINE_USERNAME: $TWINE_USERNAME
-#     TWINE_PASSWORD: $TWINE_PASSWORD
-#   script:
-#     - python3 -m pip install twine
-#     - twine upload --repository-url $PYPI_REPOSITORY_URL dist/*
-#   rules:
-#     # PyPI package release only on tags, and confirm semantic versioning of tag
-#     - if: '$CI_COMMIT_TAG && $CI_COMMIT_TAG =~ /^((([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$/'
-
 release docker image:
   stage: release
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
@@ -97,6 +61,7 @@ release docker image:
     - docker-executor
   script:
     - make release-centralnode USERNAME=$GITLAB_USER_NAME EMAILID=$GITLAB_USER_EMAIL # Publish tag on the gitlab and tagged image on Nexus
+  when: manual
   only:
     refs:
       - master

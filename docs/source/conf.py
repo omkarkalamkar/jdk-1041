@@ -56,7 +56,7 @@ def setup(app):
 
 # -- Project information -----------------------------------------------------
 
-project = "CentralNode Mid"
+project = "ska-tmc-centralnode-mid"
 copyright = "2021, NCRA India"
 author = "NCRA India"
 
