@@ -5,9 +5,9 @@ ReceptorReassignmentChecker class for CentralNode.
 # Standard Python imports
 import logging
 
-from tmc.centralnode import const
-from tmc.centralnode.exceptions import ResourceReassignmentError
-from tmc.centralnode.device_data import DeviceData
+from ska_tmc_centralnode_mid import const
+from ska_tmc_centralnode_mid.exceptions import ResourceReassignmentError
+from ska_tmc_centralnode_mid.device_data import DeviceData
 
 # PROTECTED REGION END #
 

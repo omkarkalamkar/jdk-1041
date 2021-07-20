@@ -24,19 +24,21 @@ readme_filename = os.path.join(setup_dir, "README.rst")
 with open(readme_filename) as file:
     long_description = file.read()
 
-release_filename = os.path.join(setup_dir, "src", "tmc", "centralnode", "release.py")
+release_filename = os.path.join(
+    setup_dir, "src", "ska_tmc_centralnode_mid", "release.py"
+)
 exec(open(release_filename).read())
 
 setup(
     name=name,
     version=version,
     description="Central Node is a coordinator of the complete M&C system.",
-    packages=setuptools.find_namespace_packages(where="src", include=["tmc.*"]),
+    packages=setuptools.find_namespace_packages(where="src"),
     package_dir={"": "src"},
     include_package_data=True,
     test_suite="test",
     entry_points={
-        "console_scripts": ["CentralNodeDS=tmc.centralnode.central_node:main"]
+        "console_scripts": ["CentralNodeDS=ska_tmc_centralnode_mid.central_node:main"]
     },
     author="Team NCRA",
     author_email="telmgt-internal@googlegroups.com",

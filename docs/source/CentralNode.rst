@@ -9,67 +9,67 @@ Central Node Mid
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: src.tmc.centralnode.central_node
-.. autoclass:: src.tmc.centralnode.central_node.CentralNode
+.. automodule:: src.ska_tmc_centralnode_mid.central_node
+.. autoclass:: src.ska_tmc_centralnode_mid.central_node.CentralNode
    :members:
    :undoc-members:
-.. automodule:: src.tmc.centralnode.device_data
-.. autoclass:: src.tmc.centralnode.device_data.DeviceData
+.. automodule:: src.ska_tmc_centralnode_mid.device_data
+.. autoclass:: src.ska_tmc_centralnode_mid.device_data.DeviceData
    :members:
    :undoc-members:
-.. automodule:: src.tmc.centralnode.assign_resources_command
-.. autoclass:: src.tmc.centralnode.assign_resources_command.AssignResources
+.. automodule:: src.ska_tmc_centralnode_mid.assign_resources_command
+.. autoclass:: src.ska_tmc_centralnode_mid.assign_resources_command.AssignResources
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.release_resources_command
-.. autoclass:: src.tmc.centralnode.release_resources_command.ReleaseResources
+.. automodule:: src.ska_tmc_centralnode_mid.release_resources_command
+.. autoclass:: src.ska_tmc_centralnode_mid.release_resources_command.ReleaseResources
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.telescope_off_command
-.. autoclass:: src.tmc.centralnode.telescope_off_command.TelescopeOff
+.. automodule:: src.ska_tmc_centralnode_mid.telescope_off_command
+.. autoclass:: src.ska_tmc_centralnode_mid.telescope_off_command.TelescopeOff
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.telescope_on_command
-.. autoclass:: src.tmc.centralnode.telescope_on_command.TelescopeOn
+.. automodule:: src.ska_tmc_centralnode_mid.telescope_on_command
+.. autoclass:: src.ska_tmc_centralnode_mid.telescope_on_command.TelescopeOn
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.on_command
-.. autoclass:: src.tmc.centralnode.on_command.On
+.. automodule:: src.ska_tmc_centralnode_mid.on_command
+.. autoclass:: src.ska_tmc_centralnode_mid.on_command.On
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.off_command
-.. autoclass:: src.tmc.centralnode.off_command.Off
+.. automodule:: src.ska_tmc_centralnode_mid.off_command
+.. autoclass:: src.ska_tmc_centralnode_mid.off_command.Off
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.stow_antennas_command
-.. autoclass:: src.tmc.centralnode.stow_antennas_command.StowAntennas
+.. automodule:: src.ska_tmc_centralnode_mid.stow_antennas_command
+.. autoclass:: src.ska_tmc_centralnode_mid.stow_antennas_command.StowAntennas
    :members: do
    :undoc-members:
-.. automodule:: src.tmc.centralnode.health_state_aggregator
-.. autoclass:: src.tmc.centralnode.health_state_aggregator.HealthStateAggregator
+.. automodule:: src.ska_tmc_centralnode_mid.health_state_aggregator
+.. autoclass:: src.ska_tmc_centralnode_mid.health_state_aggregator.HealthStateAggregator
    :members:
    :undoc-members:
-.. automodule:: src.tmc.centralnode.receptor_reassignment_checker
-.. autoclass:: src.tmc.centralnode.receptor_reassignment_checker.ReceptorReassignmentChecker
+.. automodule:: src.ska_tmc_centralnode_mid.receptor_reassignment_checker
+.. autoclass:: src.ska_tmc_centralnode_mid.receptor_reassignment_checker.ReceptorReassignmentChecker
    :members:
    :undoc-members:
-.. automodule:: src.tmc.centralnode.resource_manager
-.. autoclass:: src.tmc.centralnode.resource_manager.ResourceManager
+.. automodule:: src.ska_tmc_centralnode_mid.resource_manager
+.. autoclass:: src.ska_tmc_centralnode_mid.resource_manager.ResourceManager
    :members:
    :undoc-members:
-.. automodule:: src.tmc.centralnode.obs_state_check
-.. autoclass:: src.tmc.centralnode.obs_state_check.ObsStateAggregator
+.. automodule:: src.ska_tmc_centralnode_mid.obs_state_check
+.. autoclass:: src.ska_tmc_centralnode_mid.obs_state_check.ObsStateAggregator
    :members:
    :undoc-members:
-.. automodule:: src.tmc.centralnode.input_validator
-.. autoclass:: src.tmc.centralnode.input_validator.AssignResourceValidator
+.. automodule:: src.ska_tmc_centralnode_mid.input_validator
+.. autoclass:: src.ska_tmc_centralnode_mid.input_validator.AssignResourceValidator
    :members:
    :undoc-members:
-.. automodule:: src.tmc.centralnode.exceptions
-.. autoclass:: src.tmc.centralnode.exceptions.InvalidObsStateError
-.. autoclass:: src.tmc.centralnode.exceptions.ResourceReassignmentError
-.. autoclass:: src.tmc.centralnode.exceptions.InvalidJSONError
-.. autoclass:: src.tmc.centralnode.exceptions.ResourceNotPresentError
-.. autoclass:: src.tmc.centralnode.exceptions.SubarrayNotPresentError
+.. automodule:: src.ska_tmc_centralnode_mid.exceptions
+.. autoclass:: src.ska_tmc_centralnode_mid.exceptions.InvalidObsStateError
+.. autoclass:: src.ska_tmc_centralnode_mid.exceptions.ResourceReassignmentError
+.. autoclass:: src.ska_tmc_centralnode_mid.exceptions.InvalidJSONError
+.. autoclass:: src.ska_tmc_centralnode_mid.exceptions.ResourceNotPresentError
+.. autoclass:: src.ska_tmc_centralnode_mid.exceptions.SubarrayNotPresentError
    :members:
    :undoc-members:

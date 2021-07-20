@@ -20,23 +20,23 @@ from tmc.common.tango_server_helper import TangoServerHelper
 from ska.base import SKABaseDevice
 from ska.base.commands import ResultCode
 from ska.base.control_model import HealthState
-from tmc.centralnode import const, release
-from tmc.centralnode.telescope_off_command import TelescopeOff
-from tmc.centralnode.off_command import Off
-from tmc.centralnode.on_command import On
-from tmc.centralnode.telescope_on_command import TelescopeOn
-from tmc.centralnode.telescope_standby_command import TelescopeStandby
-from tmc.centralnode.assign_resources_command import AssignResources
-from tmc.centralnode.release_resources_command import ReleaseResources
-from tmc.centralnode.stow_antennas_command import StowAntennas
-from tmc.centralnode.standby_command import Standby
-from tmc.centralnode.resource_manager import ResourceManager
-from tmc.centralnode.device_data import DeviceData
-from tmc.centralnode.obs_state_check import ObsStateAggregator
-from tmc.centralnode.health_state_aggregator import HealthStateAggregator
-from tmc.centralnode.const import ModesAvailability
-from tmc.centralnode.op_state_aggregator import OpStateAggregator
-from tmc.centralnode.telescope_state_aggregator import TelescopeStateAggregator
+from ska_tmc_centralnode_mid import const, release
+from ska_tmc_centralnode_mid.telescope_off_command import TelescopeOff
+from ska_tmc_centralnode_mid.off_command import Off
+from ska_tmc_centralnode_mid.on_command import On
+from ska_tmc_centralnode_mid.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode_mid.telescope_standby_command import TelescopeStandby
+from ska_tmc_centralnode_mid.assign_resources_command import AssignResources
+from ska_tmc_centralnode_mid.release_resources_command import ReleaseResources
+from ska_tmc_centralnode_mid.stow_antennas_command import StowAntennas
+from ska_tmc_centralnode_mid.standby_command import Standby
+from ska_tmc_centralnode_mid.resource_manager import ResourceManager
+from ska_tmc_centralnode_mid.device_data import DeviceData
+from ska_tmc_centralnode_mid.obs_state_check import ObsStateAggregator
+from ska_tmc_centralnode_mid.health_state_aggregator import HealthStateAggregator
+from ska_tmc_centralnode_mid.const import ModesAvailability
+from ska_tmc_centralnode_mid.op_state_aggregator import OpStateAggregator
+from ska_tmc_centralnode_mid.telescope_state_aggregator import TelescopeStateAggregator
 
 
 
