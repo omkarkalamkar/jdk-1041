@@ -9,12 +9,12 @@
 
 """Release information for Python Package"""
 
-name = """centralnode"""
-version = "0.2.3"
+name = """ska-tmc-centralnode-mid"""
+version = "0.2.5"
 version_info = version.split(".")
 description = """Central Node is a coordinator of the complete M&C system."""
 author = "Team NCRA"
 author_email = "telmgt-internal@googlegroups.com"
 license = """BSD-3-Clause"""
-url = """https://www.skatelescope.org"""
+url = """https://www.skaobservatory.org/"""
 copyright = """"""
