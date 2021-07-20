@@ -62,9 +62,6 @@ release docker image:
   script:
     - make release-centralnode USERNAME=$GITLAB_USER_NAME EMAILID=$GITLAB_USER_EMAIL # Publish tag on the gitlab and tagged image on Nexus
   when: manual
-  only:
-    refs:
-      - master
 
 pages:
   stage: pages
