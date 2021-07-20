@@ -14,10 +14,10 @@ from tmc.centralnode.exceptions import SubarrayNotPresentError, InvalidJSONError
 from tmc.centralnode import const
 
 # Sample 'good' JSON
-sample_assign_resources_request = "command_AssignResources.json"
+assign_input_file = "command_AssignResources.json"
 path = join(dirname(__file__), "data", assign_input_file)
 with open(path, "r") as f:
-    assign_input_str = f.read()
+    sample_assign_resources_request = f.read()
 
 # sample_assign_resources_request = {
 #   "interface": "https://schema.skao.int/ska-tmc-assignresources/2.0",
