@@ -128,7 +128,7 @@ function getSha(){
 # Delete docker image from nexus repo using sha
 function deleteImageFromNexus(){
   sha=$(getSha)
-  result=$(curl -X "DELETE" -u $RAW_USER:$RAW_PASS https://artefact.skao.int/v2/ska-telescope/ska-tmc-centralnode-mid/manifests/"$sha" --verbose)
+  result=$(curl -X "DELETE" -u $CAR_RAW_USERNAME:$CAR_RAW_PASSWORD https://artefact.skao.int/v2/ska-telescope/ska-tmc-centralnode-mid/manifests/"$sha" --verbose)
 }
 
 # Publish tag. (If there is error while publishing tag, docker image with same tag will be deleted.)
