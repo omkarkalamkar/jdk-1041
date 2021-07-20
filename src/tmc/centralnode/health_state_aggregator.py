@@ -149,70 +149,72 @@ class HealthStateAggregator:
         device_data = DeviceData.get_instance()
         log_msg = f'Health state attribute change event is : {event.attr_name}'
         self.logger.info(log_msg)
-        log_msg = f'Health state attribute change event is: {event.attr_value.value}'
-        self.logger.info(log_msg)
-        
-        def _update_health_state(self, fqdn_device_health_state_map: dict):
-            health_state = event.attr_value.value
-            attr_name = event.attr_name
-            self.logger.info(f"Health state is: {health_state}")
-            for fqdn, dd_health_state in fqdn_device_health_state_map.items():
-                if fqdn in attr_name:
-                    setattr(device_data, dd_health_state, health_state)
-                    if "subarray" in fqdn:
-                        self.subarray_health_state_map[attr_name] = health_state
-                    elif "csp" in fqdn:
-                        self.logger.info(f"Health state msg in CSP Master: {attr_name}")
-                        self.logger.info(f"CSP Master health is: {health_state}")
-                    break
-            else:
-                self.logger.debug(const.EVT_UNKNOWN)
-                # TODO: update read_activity message for unknown events
 
-        def _generate_health_state_log_msg(self, health_state):
-            health_state_string_map = {
-                HealthState.OK: const.STR_OK,
-                HealthState.DEGRADED: const.STR_DEGRADED,
-                HealthState.FAILED: const.STR_FAILED,
-                HealthState.UNKNOWN: const.STR_UNKNOWN
-            }
-            log_msg = f"{const.STR_HEALTH_STATE}{event.device}{health_state_string_map[health_state]}"                       
+        if event.attr_value:
+            log_msg = f'Health state attribute change event is: {event.attr_value.value}'
             self.logger.info(log_msg)
-          
-        def _calculate_health_state(health_states):
-            unique_states = set(health_states)
-            if unique_states == set([HealthState.OK]):
-                self.this_server.device.attr_map["telescopeHealthState"] = HealthState.OK
-                _generate_health_state_log_msg(self, HealthState.OK)
-            elif HealthState.FAILED in unique_states:
-                self.this_server.device.attr_map["telescopeHealthState"] = HealthState.FAILED
-                _generate_health_state_log_msg(self, HealthState.FAILED)
-            elif HealthState.DEGRADED in unique_states:
-                self.this_server.device.attr_map["telescopeHealthState"] = HealthState.DEGRADED
-                _generate_health_state_log_msg(self, HealthState.DEGRADED)
-            else:
-                self.this_server.device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
-                _generate_health_state_log_msg(self, HealthState.UNKNOWN)
+
+            def _update_health_state(self, fqdn_device_health_state_map: dict):
+                health_state = event.attr_value.value
+                attr_name = event.attr_name
+                self.logger.info(f"Health state is: {health_state}")
+                for fqdn, dd_health_state in fqdn_device_health_state_map.items():
+                    if fqdn in attr_name:
+                        setattr(device_data, dd_health_state, health_state)
+                        if "subarray" in fqdn:
+                            self.subarray_health_state_map[attr_name] = health_state
+                        elif "csp" in fqdn:
+                            self.logger.info(f"Health state msg in CSP Master: {attr_name}")
+                            self.logger.info(f"CSP Master health is: {health_state}")
+                        break
+                else:
+                    self.logger.debug(const.EVT_UNKNOWN)
+                    # TODO: update read_activity message for unknown events
+
+            def _generate_health_state_log_msg(self, health_state):
+                health_state_string_map = {
+                    HealthState.OK: const.STR_OK,
+                    HealthState.DEGRADED: const.STR_DEGRADED,
+                    HealthState.FAILED: const.STR_FAILED,
+                    HealthState.UNKNOWN: const.STR_UNKNOWN
+                }
+                log_msg = f"{const.STR_HEALTH_STATE}{event.device}{health_state_string_map[health_state]}"                       
+                self.logger.info(log_msg)
             
-        if not event.err:
-            fqdn_device_health_state_map = {
-                const.PROP_DEF_VAL_TM_MID_SA1: "_subarray1_health_state",
-                const.PROP_DEF_VAL_TM_MID_SA2: "._subarray2_health_state",
-                const.PROP_DEF_VAL_TM_MID_SA3: "_subarray3_health_state",
-                self.csp_master_fqdn: "_csp_master_health",
-                self.sdp_master_fqdn: "_sdp_master_health"
-            }
-            _update_health_state(self, fqdn_device_health_state_map)
+            def _calculate_health_state(health_states):
+                unique_states = set(health_states)
+                if unique_states == set([HealthState.OK]):
+                    self.this_server.device.attr_map["telescopeHealthState"] = HealthState.OK
+                    _generate_health_state_log_msg(self, HealthState.OK)
+                elif HealthState.FAILED in unique_states:
+                    self.this_server.device.attr_map["telescopeHealthState"] = HealthState.FAILED
+                    _generate_health_state_log_msg(self, HealthState.FAILED)
+                elif HealthState.DEGRADED in unique_states:
+                    self.this_server.device.attr_map["telescopeHealthState"] = HealthState.DEGRADED
+                    _generate_health_state_log_msg(self, HealthState.DEGRADED)
+                else:
+                    self.this_server.device.attr_map["telescopeHealthState"] = HealthState.UNKNOWN
+                    _generate_health_state_log_msg(self, HealthState.UNKNOWN)
+                
+            if not event.err:
+                fqdn_device_health_state_map = {
+                    const.PROP_DEF_VAL_TM_MID_SA1: "_subarray1_health_state",
+                    const.PROP_DEF_VAL_TM_MID_SA2: "._subarray2_health_state",
+                    const.PROP_DEF_VAL_TM_MID_SA3: "_subarray3_health_state",
+                    self.csp_master_fqdn: "_csp_master_health",
+                    self.sdp_master_fqdn: "_sdp_master_health"
+                }
+                _update_health_state(self, fqdn_device_health_state_map)
 
-            health_states = [
-                device_data._csp_master_health,
-                device_data._sdp_master_health
-            ]
-            health_states = health_states + list(self.subarray_health_state_map.values())
-            _calculate_health_state(health_states)
+                health_states = [
+                    device_data._csp_master_health,
+                    device_data._sdp_master_health
+                ]
+                health_states = health_states + list(self.subarray_health_state_map.values())
+                _calculate_health_state(health_states)
 
-        else:
-            # TODO: For future reference
-            self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}", False)
-            self.logger.info(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
-            self.logger.critical(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
+            else:
+                # TODO: For future reference
+                self.this_server.write_attr("activityMessage", f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}", False)
+                self.logger.info(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")
+                self.logger.critical(f"{const.ERR_SUBSR_SA_HEALTH_STATE}{event}")

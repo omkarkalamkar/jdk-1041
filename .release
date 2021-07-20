@@ -1,18 +1,18 @@
 """Release information for Python Package"""
 
-name="""centralnode"""
-version="0.2.3"
+name="""ska-tmc-centralnode-mid"""
+version="0.2.6"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
 author_email="telmgt-internal@googlegroups.com"
 license="""BSD-3-Clause"""
-url="""https://www.skatelescope.org"""
+url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.2.3
-tag=0.2.3
-tag_description= Updated CDM import with new repository ska-tmc-cdm
-release_notes=This release contains:<br/><ul><li> New CDM library import changes</li></ul><br/>
-gitlab_username=SnehalNakave
-private_token=aLhd5Gs_Bjxsge_bswn3
+release=0.2.6
+tag=0.2.6
+tag_description= Import CDM library from Central Artifacts Repository
+release_notes=This release contains:<br/><ul><li> Changes related to CDM migrated to new Nexus (CAR).</li></ul><br/>
+gitlab_username=kalyanithigale
+private_token=uqwK7WTp_wkTzw5o68nd
