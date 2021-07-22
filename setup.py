@@ -52,11 +52,6 @@ setup(
         "ska-ser-logging==0.4.0",
         "ska-tmc-common==0.1.7+d39e6423",
         ],
-    # dependency_links=["https://artefact.skao.int/repository/pypi-internal/simple"], 
-    #install_requires=["https://nexus.engageska-portugal.pt/repository/pypi/simple/lmcbaseclasses:0.7.2", "mock"],
-    # dependency_links=["https://nexus.engageska-portugal.pt/repository/pypi/simple"], 
-    # install_requires=['pytango==9.3.2', 'mock', 'ska_logging==0.3.0', 'lmcbaseclasses==0.7.2',
-    #                     'skatmccommon==0.1.6+3aaa7bbe'],
     setup_requires=[
         # dependency for `python setup.py test`
         "pytest-runner",

@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode-mid"""
-version="0.2.5"
+version="0.2.6"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,9 +10,9 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.2.5
-tag=0.2.5
-tag_description= Migration from EngageSKA to Central Artifacts Repository.
-release_notes=This release contains:<br/><ul><li> Changes realted to migration from EngageSKA to Central Artifacts Repository.</li></ul><br/>
+release=0.2.6
+tag=0.2.6
+tag_description= Fix issues with migration from EngageSKA to Central Artifacts Repository.
+release_notes=This release contains:<br/><ul><li> Updates realted to issue observed while migration from EngageSKA to Central Artifacts Repository.</li></ul><br/>
 gitlab_username=kalyanithigale
 private_token=uqwK7WTp_wkTzw5o68nd
