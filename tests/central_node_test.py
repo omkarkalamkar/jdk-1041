@@ -16,22 +16,22 @@ import threading
 import tango
 from tango import DevState
 from tango.test_context import DeviceTestContext
-from tmc.centralnode.standby_command import Standby
-from tmc.centralnode.telescope_standby_command import TelescopeStandby
-from tmc.centralnode.on_command import On
-from tmc.centralnode.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode_mid.standby_command import Standby
+from ska_tmc_centralnode_mid.telescope_standby_command import TelescopeStandby
+from ska_tmc_centralnode_mid.on_command import On
+from ska_tmc_centralnode_mid.telescope_on_command import TelescopeOn
 from ska.base.control_model import ObsState
 from ska.base import SKASubarrayStateModel
 
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
-from tmc.centralnode.device_data import DeviceData
-from tmc.centralnode.off_command import Off
-from tmc.centralnode.input_validator import AssignResourceValidator
-from tmc.centralnode.op_state_aggregator import OpStateAggregator
-from tmc.centralnode.telescope_state_aggregator import TelescopeStateAggregator
-from tmc.centralnode import CentralNode, const, release
-from tmc.centralnode.const import (
+from ska_tmc_centralnode_mid.device_data import DeviceData
+from ska_tmc_centralnode_mid.off_command import Off
+from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
+from ska_tmc_centralnode_mid.op_state_aggregator import OpStateAggregator
+from ska_tmc_centralnode_mid.telescope_state_aggregator import TelescopeStateAggregator
+from ska_tmc_centralnode_mid import CentralNode, const, release
+from ska_tmc_centralnode_mid.const import (
     CMD_SET_STOW_MODE,
     STR_ON_CMD_ISSUED,
     STR_STOW_CMD_ISSUED_CN,

@@ -12,11 +12,11 @@
 Central Node is a coordinator of the complete M&C system.
 """
 
-from tmc.centralnode import release
-from tmc.centralnode import const
-from tmc.centralnode.central_node import CentralNode
-from tmc.centralnode import input_validator
-from tmc.centralnode import exceptions
+from ska_tmc_centralnode_mid import release
+from ska_tmc_centralnode_mid import const
+from ska_tmc_centralnode_mid.central_node import CentralNode
+from ska_tmc_centralnode_mid import input_validator
+from ska_tmc_centralnode_mid import exceptions
 __all__ = ["release", "const", "CentralNode", "input_validator", "exceptions"]
 
 __version__ = release.version

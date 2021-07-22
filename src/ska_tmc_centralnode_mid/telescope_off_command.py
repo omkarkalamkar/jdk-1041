@@ -16,9 +16,9 @@ from ska.base.control_model import ObsState
 from ska.base.commands import BaseCommand
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
-from tmc.centralnode import const
-from tmc.centralnode.device_data import DeviceData
-from tmc.centralnode.desired_telescope_state import DesiredTelescopeState
+from ska_tmc_centralnode_mid import const
+from ska_tmc_centralnode_mid.device_data import DeviceData
+from ska_tmc_centralnode_mid.desired_telescope_state import DesiredTelescopeState
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 

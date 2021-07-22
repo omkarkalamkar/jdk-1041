@@ -11,7 +11,7 @@ This module defines the DeviceData class, which represents of the functional Cen
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 from ska.base.control_model import HealthState
-from tmc.centralnode import const
+from ska_tmc_centralnode_mid import const
 import threading
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
