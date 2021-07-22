@@ -91,7 +91,6 @@ class AssignResourceValidator:
         """
         Validates the input string received as an argument of AssignResources command.
         If the request is correct, returns the deserialized JSON object. The ska-tmc-cdm
-
         is used to validate the JSON.
 
         :param: input_string: A JSON string
@@ -123,10 +122,10 @@ class AssignResourceValidator:
         # TODO: Use the object returned by cdm library instead of parsing
         # JSON string.
         assign_request = json.loads(input_string)
-        if not self._subarray_exists(assign_request["subarrayID"]):
+        if not self._subarray_exists(assign_request["subarray_id"]):
             exception_message = (
                 "The Subarray '"
-                + str(assign_request["subarrayID"])
+                + str(assign_request["subarray_id"])
                 + "' does not exist."
             )
             raise SubarrayNotPresentError(exception_message)
@@ -134,14 +133,14 @@ class AssignResourceValidator:
 
         ## Validate receptorIDList
         try:
-            receptor_list = assign_request["dish"]["receptorIDList"]
+            receptor_list = assign_request["dish"]["receptor_ids"]
             assert len(receptor_list) > 0
         except AssertionError as ae:
             raise ValueError("Empty receptorIDList") from ae
 
-        # if(not self._receptor_exists(assign_request["dish"]["receptorIDList"])):
+        # if(not self._receptor_exists(assign_request["dish"]["receptor_ids"])):
         non_existing_receptors = self._search_invalid_receptors(
-            assign_request["dish"]["receptorIDList"]
+            assign_request["dish"]["receptor_ids"]
         )
         if non_existing_receptors:
             exception_message = "The following Receptor id(s) do not exist: " + str(
