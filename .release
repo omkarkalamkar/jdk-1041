@@ -12,8 +12,7 @@ copyright=""""""
 
 release=0.2.8
 tag=0.2.8
-tag_description= Fix issues with migration from EngageSKA to Central Artifacts Repository.
-release_notes=This release contains:<br/><ul><li> Updates realted to issue observed while migration from EngageSKA to Central Artifacts Repository.</li>
-<li>Import CDM library from Central Artifacts Repository</li></ul><br/>
+tag_description= Fix issues with telescopeOn command while executing integration test cases.
+release_notes=This release contains:<br/><ul><li> Fix issues with telescopeOn command while executing integration test cases</li></ul><br/>
 gitlab_username=kalyanithigale
 private_token=uqwK7WTp_wkTzw5o68nd
