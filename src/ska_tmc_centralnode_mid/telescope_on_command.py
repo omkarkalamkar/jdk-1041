@@ -69,15 +69,16 @@ class TelescopeOn(BaseCommand):
         this_server.write_attr("commandInProgress", device_data.command_in_progress, False)
         desired_telescope_state_obj = DesiredTelescopeState()
         desired_telescope_state_obj.update_desired_telescope_state()
-        self.logger.info(type(self.target))
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        self.startup_sdp(sdp_master_ln_fqdn)
-        self.startup_dish(device_data._dish_leaf_node_devices)
-        this_server.write_attr("activityMessage", const.STR_CMD_TELESCOPEON, False)
-        self.startup_csp(csp_master_ln_fqdn)
+        # Calling TelescopeOn command asynchronously on SubarrayNode
         self.startup_subarray(tm_mid_subarrays)
+        # Calling TelescopeOn command synchronously on csp, sdp and dish devices
+        self.startup_sdp(sdp_master_ln_fqdn)
+        self.startup_csp(csp_master_ln_fqdn)
+        self.startup_dish(device_data._dish_leaf_node_devices)
+        
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED, False)
@@ -133,11 +134,70 @@ class TelescopeOn(BaseCommand):
         with ThreadPoolExecutor(total_subarrays) as executor:
             for subarray_fqdn in subarray_fqdn_list:
                 subarray_client = TangoClient(subarray_fqdn)
-                subarray_thread_status[subarray_fqdn] = executor.submit(self.startup_leaf_node,
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.telescope_on_subarray_async,
                                                               subarray_client)
         # Wait for result
         while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
             pass
+
+    def telescope_on_subarray_async(self, tango_client, param=None):
+        """
+        Invoke Telescope On command on leaf nodes.
+
+        :param tango_client: Proxy of corresponding node.
+
+        :return: None
+
+        :raises: Devfailed exception if error occures while  executing On command on leaf node.
+        """
+        try:
+            tango_client.send_command_async(const.CMD_TELESCOPE_ON, param, self.telescopeon_cmd_ended_cb)
+            log_msg = "Telescope On command invoked successfully on {}".format(
+                tango_client.get_device_fqdn
+            )
+            self.logger.debug(log_msg)
+
+        except DevFailed as dev_failed:
+            log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
+            self.logger.exception(dev_failed)
+            tango.Except.throw_exception(
+                const.STR_ON_EXEC,
+                log_msg,
+                "CentralNode.TelescopeOnCommand",
+                tango.ErrSeverity.ERR,
+            )
+
+    def telescopeon_cmd_ended_cb(self, event):
+        """
+        Callback function immediately executed when the asynchronous invoked
+        command returns.
+
+        :param event: a CmdDoneEvent object. This class is used to pass data
+            to the callback method in asynchronous callback model for command
+            execution.
+
+        :type: CmdDoneEvent object
+            It has the following members:
+                - device     : (DeviceProxy) The DeviceProxy object on which the call was executed.
+                - cmd_name   : (str) The command name
+                - argout_raw : (DeviceData) The command argout
+                - argout     : The command argout
+                - err        : (bool) A boolean flag set to true if the command failed. False otherwise
+                - errors     : (sequence<DevError>) The error stack
+                - ext
+
+        :return: none
+        """
+        # Update logs and activity message attribute with received event
+        this_server = TangoServerHelper.get_instance()
+        if event.err:
+            log_msg = f"{const.ERR_INVOKING_CMD}{event.cmd_name}\n{event.errors}"
+            self.logger.error(log_msg)
+            this_server.write_attr("activityMessage", log_msg, False)
+        else:
+            log_msg = f"{const.STR_COMMAND}{event.cmd_name}{const.STR_INVOKE_SUCCESS}"
+            self.logger.info(log_msg)
+            this_server.write_attr("activityMessage", log_msg, False)
 
     def startup_leaf_node(self, tango_client):
         """
