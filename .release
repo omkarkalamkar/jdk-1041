@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode-mid"""
-version="0.2.7"
+version="0.2.8"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,8 +10,8 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.2.7
-tag=0.2.7
+release=0.2.8
+tag=0.2.8
 tag_description= Fix issues with migration from EngageSKA to Central Artifacts Repository.
 release_notes=This release contains:<br/><ul><li> Updates realted to issue observed while migration from EngageSKA to Central Artifacts Repository.</li>
 <li>Import CDM library from Central Artifacts Repository</li></ul><br/>

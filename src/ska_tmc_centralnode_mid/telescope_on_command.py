@@ -72,12 +72,12 @@ class TelescopeOn(BaseCommand):
         csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
         sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
         tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        # Calling TelescopeOn command asynchronously on SubarrayNode
+        # Calling TelescopeOn command asynchronously
         self.startup_subarray(tm_mid_subarrays)
-        # Calling TelescopeOn command synchronously on csp, sdp and dish devices
+        self.startup_dish(device_data._dish_leaf_node_devices)
         self.startup_sdp(sdp_master_ln_fqdn)
         self.startup_csp(csp_master_ln_fqdn)
-        self.startup_dish(device_data._dish_leaf_node_devices)
+        
         
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
@@ -199,7 +199,7 @@ class TelescopeOn(BaseCommand):
             self.logger.info(log_msg)
             this_server.write_attr("activityMessage", log_msg, False)
 
-    def startup_leaf_node(self, tango_client):
+    def startup_leaf_node(self, tango_client, param=None):
         """
         Invoke Telescope On command on leaf nodes.
 
@@ -210,7 +210,7 @@ class TelescopeOn(BaseCommand):
         :raises: Devfailed exception if error occures while  executing On command on leaf node.
         """
         try:
-            tango_client.send_command(const.CMD_TELESCOPE_ON)
+            tango_client.send_command_async(const.CMD_TELESCOPE_ON, param, self.telescopeon_cmd_ended_cb)
             log_msg = "Telescope On command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
@@ -226,7 +226,7 @@ class TelescopeOn(BaseCommand):
                 tango.ErrSeverity.ERR,
             )
 
-    def startup_dish_leaf_node(self, tango_client):
+    def startup_dish_leaf_node(self, tango_client, param=None):
         """
         Invoke Telescope On, SetStandbyFPMode and SetOperateMode commands on Dish leaf nodes.
 
@@ -243,7 +243,7 @@ class TelescopeOn(BaseCommand):
             )
             self.logger.debug(log_msg)
             time.sleep(0.2)
-            tango_client.send_command(const.CMD_SET_OPERATE_MODE)
+            tango_client.send_command_async(const.CMD_SET_OPERATE_MODE, param, self.telescopeon_cmd_ended_cb)
             log_msg = "SetOperateMode command invoked successfully on {}".format(
                 tango_client.get_device_fqdn
             )
