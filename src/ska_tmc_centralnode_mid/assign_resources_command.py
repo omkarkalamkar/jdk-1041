@@ -185,7 +185,8 @@ class AssignResources(BaseCommand):
             json_argument= json.loads(argin)
 
             # Create subarray proxy
-            del json_argument["transaction_id"]
+            if 'transaction_id' in json_argument:
+                del json_argument["transaction_id"]
             subarrayID = int(json_argument["subarray_id"])
             subarrayFqdn = device_data.subarray_FQDN_dict[subarrayID]
             ## check for duplicate allocation
