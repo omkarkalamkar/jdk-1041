@@ -357,10 +357,10 @@ def test_assign_resources(mock_subarray):
     )
     # mocking subarray device state as ON as per new state model
     tango_client_obj.DevState = DevState.ON
-    receptor_ids_success = []
-    receptor_ids_success.append("0001")
+    receptor_ids_allocated = []
+    receptor_ids_allocated.append("0001")
     dish = {}
-    dish["receptor_ids_success"] = receptor_ids_success
+    dish["receptor_ids_allocated"] = receptor_ids_allocated
     success_response = {}
     success_response["dish"] = dish
     tango_client_obj.deviceproxy.command_inout.side_effect = (
@@ -443,10 +443,10 @@ def test_assign_resources_raise_devfailed_when_reseource_reallocation(
         CentralNode, initial_dut_properties=dut_properties
     ) as tango_context:
         device_proxy = tango_context.device
-        receptor_ids_success = []
-        receptor_ids_success.append("0001")
+        receptor_ids_allocated = []
+        receptor_ids_allocated.append("0001")
         dish = {}
-        dish["receptor_ids_success"] = receptor_ids_success
+        dish["receptor_ids_allocated"] = receptor_ids_allocated
         success_response = {}
         success_response["dish"] = dish
         with mock.patch.object(

@@ -141,7 +141,7 @@ class AssignResources(BaseCommand):
             dish:
                 Mandatory JSON object consisting of
 
-                receptor_ids_success:
+                receptor_ids_allocated:
                     DevVarStringArray
                     Contains ids of the receptors which are successfully allocated. Empty on unsuccessful
                     allocation.
@@ -150,11 +150,11 @@ class AssignResources(BaseCommand):
             Example:
                 {
                 "dish": {
-                "receptor_ids_success": ["0001"]
+                "receptor_ids_allocated": ["0001"]
                 }
                 }
 
-        Note: Enter input without spaces as:{"dish":{"receptor_ids_success":["0001"]}}
+        Note: Enter input without spaces as:{"dish":{"receptor_ids_allocated":["0001"]}}
 
         return:
             None
@@ -224,7 +224,7 @@ class AssignResources(BaseCommand):
             self.logger.debug(const.STR_ASSIGN_RESOURCES_SUCCESS)
 
             # Prepare output argument
-            argout = {"dish": {"receptor_ids_success": device_data.receptor_ids}}
+            argout = {"dish": {"receptor_ids_allocated": device_data.receptor_ids}}
             self.logger.debug(argout)
         except (
             InvalidJSONError,
