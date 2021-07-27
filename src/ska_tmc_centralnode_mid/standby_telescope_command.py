@@ -14,6 +14,7 @@ from tango import DevState, DevFailed
 from ska.base import SKABaseDevice
 from ska.base.control_model import ObsState
 from ska.base.commands import BaseCommand
+from ska.base.commands import ResultCode
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from ska_tmc_centralnode_mid import const
@@ -79,7 +80,7 @@ class StandByTelescope(BaseCommand):
             self.logger.info(message)
             this_server.write_attr("activityMessage", message, False)
             return (ResultCode.OK, const.STR_STANDBY_CMD_ISSUED)
-            
+
         except DevFailed as dev_failed:
             log_msg = f"{const.ERR_EXE_STANDBYTELESCOPE_CMD}{dev_failed}"
             self.logger.error(log_msg)
