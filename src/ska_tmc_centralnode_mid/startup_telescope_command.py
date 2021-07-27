@@ -67,7 +67,7 @@ class StartUpTelescope(BaseCommand):
         self.logger.info(message)
         # Call TelescopeOn command to maintain the backword compatibility with OET
         try:
-            this_server.device.telescopeOn()
+            this_server.device.telescope_on_object()
             message = "telescopeOn command Invoked as part of StartupTelescope on CentralNode"
             self.logger.info(message)
             this_server.write_attr("activityMessage", message, False)

@@ -134,38 +134,11 @@ class TelescopeOn(BaseCommand):
         with ThreadPoolExecutor(total_subarrays) as executor:
             for subarray_fqdn in subarray_fqdn_list:
                 subarray_client = TangoClient(subarray_fqdn)
-                subarray_thread_status[subarray_fqdn] = executor.submit(self.telescope_on_subarray_async,
+                subarray_thread_status[subarray_fqdn] = executor.submit(self.startup_leaf_node,
                                                               subarray_client)
         # Wait for result
         while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
             pass
-
-    def telescope_on_subarray_async(self, tango_client, param=None):
-        """
-        Invoke Telescope On command on leaf nodes.
-
-        :param tango_client: Proxy of corresponding node.
-
-        :return: None
-
-        :raises: Devfailed exception if error occures while  executing On command on leaf node.
-        """
-        try:
-            tango_client.send_command_async(const.CMD_TELESCOPE_ON, param, self.telescopeon_cmd_ended_cb)
-            log_msg = "Telescope On command invoked successfully on {}".format(
-                tango_client.get_device_fqdn
-            )
-            self.logger.debug(log_msg)
-
-        except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
-            self.logger.exception(dev_failed)
-            tango.Except.throw_exception(
-                const.STR_ON_EXEC,
-                log_msg,
-                "CentralNode.TelescopeOnCommand",
-                tango.ErrSeverity.ERR,
-            )
 
     def telescopeon_cmd_ended_cb(self, event):
         """

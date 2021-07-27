@@ -75,7 +75,7 @@ class StandByTelescope(BaseCommand):
         self.logger.info(message)
         # Call telescopeOff command to maintain the backword compatibility with OET
         try:
-            this_server.device.telescopeOff()
+            this_server.device.telescope_off_object()
             message = "TelescopeOff command Invoked as part of StandbyTelescope command on CentralNode"
             self.logger.info(message)
             this_server.write_attr("activityMessage", message, False)
