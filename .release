@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode-mid"""
-version="0.2.9"
+version="0.2.10"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,9 +10,9 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.2.9
-tag=0.2.9
-tag_description= Enable StartUpTelescope and StandByTelescope commands.
-release_notes=This release contains:<br/><ul><li> Enable StartUpTelescope and StandByTelescope commands</li></ul><br/>
+release=0.2.10
+tag=0.2.10
+tag_description= Apply fix for telescopestate attribute after TelescopeOn command
+release_notes=This release contains:<br/><ul><li>  Apply fix for telescopestate attribute after TelescopeOn command</li></ul><br/>
 gitlab_username=kalyanithigale
 private_token=uqwK7WTp_wkTzw5o68nd

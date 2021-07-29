@@ -3,6 +3,7 @@ telescope_state_aggregator class for CentralNode.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Standard Python imports
+import time
 import logging
 import threading
 
@@ -161,20 +162,24 @@ class TelescopeStateAggregator(Aggregator):
                 log_msg = f"TelescopeState attribute change event is: {event.attr_value.value}"
                 self.logger.debug(log_msg)
                 if not event.err:
+                    retry_count = 0
                     self.update_telescope_state(event, self.fqdn_device_telescope_state_list)
                     
                     device_data.telescope_device_states = [self.csp_master_state,  self.sdp_master_state]
                     device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map.values())
                     self.logger.info(f"telescope_device_states: {device_data.telescope_device_states}")
-                    device_data._telstate_callback_trigger.set()
+                    # device_data._telstate_callback_trigger.set()
                     # Note: Need to test this block of code
-                    # while retry_count < 3: 
-                    #     if device_data._telstate_callback_trigger.isSet(): 
-                    #         time.sleep(0.05)
-                    #         retry_count +=1 
-                    #     else:
-                    #         device_data._telstate_callback_trigger.set()  # start state calculation
-                    #         break
+                    while retry_count < 3: 
+                        if device_data._telstate_callback_trigger.isSet(): 
+                            time.sleep(0.05)
+                            retry_count +=1 
+                        else:
+                            self.logger.info(
+                                f"device_data._telstate_callback_trigger.isSet():{device_data._telstate_callback_trigger.isSet()}"
+                            )
+                            device_data._telstate_callback_trigger.set()  # start state calculation
+                            break
                     # self.telescope_state_callback_lock.release()  # release the lock
                 else:
                     # TODO: For future reference
