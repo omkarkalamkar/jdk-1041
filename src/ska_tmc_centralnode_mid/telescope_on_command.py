@@ -82,7 +82,7 @@ class TelescopeOn(BaseCommand):
         log_msg = const.STR_ON_CMD_ISSUED
         self.logger.info(log_msg)
         this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED, False)
-        this_server.write_attr("commandInProgress", "", False)
+        #this_server.write_attr("commandInProgress", "", False)
 
     def startup_csp(self, csp_fqdn):
         """

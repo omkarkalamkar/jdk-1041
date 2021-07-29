@@ -88,7 +88,7 @@ class TelescopeStandby(BaseCommand):
             log_msg = const.STR_TELESCOPE_STANDBY_ISSUED
             self.logger.info(log_msg)
             this_server.write_attr("activityMessage", log_msg, False)
-            this_server.write_attr("commandInProgress", "", False)
+            #this_server.write_attr("commandInProgress", "", False)
 
         except Exception as e:
             self.logger.exception(e)
