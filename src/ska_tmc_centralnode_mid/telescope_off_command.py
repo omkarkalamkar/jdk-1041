@@ -19,6 +19,7 @@ from tmc.common.tango_server_helper import TangoServerHelper
 from ska_tmc_centralnode_mid import const
 from ska_tmc_centralnode_mid.device_data import DeviceData
 from ska_tmc_centralnode_mid.desired_telescope_state import DesiredTelescopeState
+from ska_tmc_centralnode_mid.const import ModesAvailability
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -98,6 +99,7 @@ class TelescopeOff(BaseCommand):
             log_msg = const.STR_TELESCOPE_OFF_CMD_ISSUED
             self.logger.info(log_msg)
             this_server.write_attr("activityMessage", log_msg, False)
+            this_server.write_attr("imaging", ModesAvailability.not_available, False)
             #this_server.write_attr("commandInProgress", "", False)
 
         except Exception as e:

@@ -18,6 +18,7 @@ from tmc.common.tango_server_helper import TangoServerHelper
 from ska_tmc_centralnode_mid import const
 from ska_tmc_centralnode_mid.device_data import DeviceData
 from ska_tmc_centralnode_mid.aggregator import Aggregator
+from ska_tmc_centralnode_mid.const import ModesAvailability
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -272,6 +273,7 @@ class TelescopeStateAggregator(Aggregator):
                     if unique_telescope_states == set([DevState.ON]):
                         self.logger.info("In ON telescope state")
                         self.this_server.write_attr("telescopeState", DevState.ON, False)
+                        self.this_server.write_attr("imaging", ModesAvailability.available, False)
                         self.generate_telescope_state_log_msg(DevState.ON)
                     elif unique_telescope_states == set([DevState.OFF]):
                         self.logger.info("In OFF telescope state")
