@@ -99,8 +99,6 @@ class TelescopeOff(BaseCommand):
             log_msg = const.STR_TELESCOPE_OFF_CMD_ISSUED
             self.logger.info(log_msg)
             this_server.write_attr("activityMessage", log_msg, False)
-            this_server.write_attr("imaging", ModesAvailability.not_available, False)
-            #this_server.write_attr("commandInProgress", "", False)
 
         except Exception as e:
             self.logger.exception(e)
@@ -134,6 +132,7 @@ class TelescopeOff(BaseCommand):
             self.telescope_off_sdp(sdp_master_ln_fqdn)
             self.logger.info("Invoking telescope off command on _dish_leaf_node_devices ")
             self.telescope_off_dish(device_data._dish_leaf_node_devices)
+            this_server.write_attr("commandInProgress", "", False)
         except Exception as e:
             self.logger.exception(e)
 

@@ -5,6 +5,7 @@ TelescopeOn class for CentralNode.
 # Standard Python imports
 import time
 from concurrent.futures import ThreadPoolExecutor
+import threading
 #Tango imports
 import tango
 from tango import DevState, DevFailed
@@ -69,21 +70,34 @@ class TelescopeOn(BaseCommand):
         this_server.write_attr("commandInProgress", device_data.command_in_progress, False)
         desired_telescope_state_obj = DesiredTelescopeState()
         desired_telescope_state_obj.update_desired_telescope_state()
-        csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
-        sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
-        tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
+        self.csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
+        self.sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
+        self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
+        try:
+            # create thread
+            self.logger.info("Starting thread to execute telescope on command.")
+            telescope_on_thread = threading.Thread(
+                target=self.execute_telescope_on,
+            )
+            telescope_on_thread.start() 
+        except Exception as e:
+            self.logger.exception(f"Exception in creating telescope_on thread:{e}")
+        self.logger.info("Started thread to execute telescope on command.")
+    
+    def execute_telescope_on(self):
         # Calling TelescopeOn command asynchronously
-        self.startup_subarray(tm_mid_subarrays)
-        self.startup_dish(device_data._dish_leaf_node_devices)
-        self.startup_sdp(sdp_master_ln_fqdn)
-        self.startup_csp(csp_master_ln_fqdn)
+        try:
+            device_data = DeviceData.get_instance()
+            this_server = TangoServerHelper.get_instance()
+            self.startup_subarray(self.tm_mid_subarrays)
+            self.startup_dish(device_data._dish_leaf_node_devices)
+            self.startup_sdp(self.sdp_master_ln_fqdn)
+            self.startup_csp(self.csp_master_ln_fqdn)
+            self.logger.info("Completed thread to execute telescope on command.")
+            this_server.write_attr("commandInProgress", "", False)
+        except Exception as e:
+            self.logger.error(f"Exception in creating telescope_on thread:{e}")
         
-        
-        log_msg = const.STR_ON_CMD_ISSUED
-        self.logger.info(log_msg)
-        this_server.write_attr("activityMessage", const.STR_ON_CMD_ISSUED, False)
-        #this_server.write_attr("commandInProgress", "", False)
-
     def startup_csp(self, csp_fqdn):
         """
         Create TangoClient for CspMasterLeaf node and call
@@ -91,6 +105,7 @@ class TelescopeOn(BaseCommand):
 
         :return: None
         """
+        self.logger.info("Invoking telescopeOn command on CspMasterLeafNode")
         csp_mln_client = TangoClient(csp_fqdn)
         self.startup_leaf_node(csp_mln_client)
 
@@ -101,6 +116,7 @@ class TelescopeOn(BaseCommand):
 
         :return: None
         """
+        self.logger.info("Invoking telescopeOn command on SdpMasterLeafNode")
         sdp_mln_client = TangoClient(sdp_fqdn)
         self.startup_leaf_node(sdp_mln_client)
 
@@ -113,14 +129,15 @@ class TelescopeOn(BaseCommand):
         """
         total_dishes = len(dish_fqdn)
         dish_ln_thread_status = {}
+        self.logger.info("Invoking telescopeOn command on DishLeafNode")
         with ThreadPoolExecutor(total_dishes) as executor:
             for dish in dish_fqdn:
                 dish_ln_client = TangoClient(dish)
                 dish_ln_thread_status[dish] = executor.submit(self.startup_dish_leaf_node, dish_ln_client)
 
         # Wait for result
-        while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
-            pass
+        # while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
+        #     pass
 
     def startup_subarray(self, subarray_fqdn_list):
         """
@@ -131,14 +148,15 @@ class TelescopeOn(BaseCommand):
         """
         total_subarrays = len(subarray_fqdn_list)
         subarray_thread_status = {}
+        self.logger.info("Invoking telescopeOn command on SubarrayNode")
         with ThreadPoolExecutor(total_subarrays) as executor:
             for subarray_fqdn in subarray_fqdn_list:
                 subarray_client = TangoClient(subarray_fqdn)
                 subarray_thread_status[subarray_fqdn] = executor.submit(self.startup_leaf_node,
                                                               subarray_client)
         # Wait for result
-        while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
-            pass
+        # while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
+        #     pass
 
     def telescopeon_cmd_ended_cb(self, event):
         """
@@ -185,7 +203,7 @@ class TelescopeOn(BaseCommand):
         try:
             tango_client.send_command_async(const.CMD_TELESCOPE_ON, param, self.telescopeon_cmd_ended_cb)
             log_msg = "Telescope On command invoked successfully on {}".format(
-                tango_client.get_device_fqdn
+                tango_client.get_device_fqdn()
             )
             self.logger.debug(log_msg)
 
@@ -212,13 +230,13 @@ class TelescopeOn(BaseCommand):
         try:
             tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
             log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
-                tango_client.get_device_fqdn
+                tango_client.get_device_fqdn()
             )
             self.logger.debug(log_msg)
             time.sleep(0.2)
             tango_client.send_command_async(const.CMD_SET_OPERATE_MODE, param, self.telescopeon_cmd_ended_cb)
             log_msg = "SetOperateMode command invoked successfully on {}".format(
-                tango_client.get_device_fqdn
+                tango_client.get_device_fqdn()
             )
             self.logger.debug(log_msg)
 
