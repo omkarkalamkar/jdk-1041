@@ -117,6 +117,7 @@ class TelescopeStandby(BaseCommand):
             self.telescope_standby_sdp(sdp_master_ln_fqdn)
             self.logger.info("Invoking telescope standby command on _dish_leaf_node_devices ")
             self.telescope_standby_dish(device_data._dish_leaf_node_devices)
+            this_server.write_attr("commandInProgress", "", False)
         except Exception as e:
             self.logger.exception(e)
 

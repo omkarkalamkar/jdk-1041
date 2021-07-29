@@ -290,6 +290,7 @@ class TelescopeStateAggregator(Aggregator):
                     elif DevState.STANDBY in unique_telescope_states:
                         self.logger.info("In STANDBY telescope state")
                         self.this_server.write_attr("telescopeState", DevState.STANDBY, False)
+                        self.this_server.write_attr("imaging", ModesAvailability.not_available, False)
                         self.generate_telescope_state_log_msg(DevState.STANDBY)
                     else:
                         self.this_server.write_attr("telescopeState", DevState.UNKNOWN, False)
