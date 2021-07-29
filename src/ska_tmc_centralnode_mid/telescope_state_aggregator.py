@@ -272,8 +272,10 @@ class TelescopeStateAggregator(Aggregator):
                     )
                     if unique_telescope_states == set([DevState.ON]):
                         self.logger.info("In ON telescope state")
+                        self.this_server.device.attr_map["imaging"] = ModesAvailability.available
+                        self.logger.info("imaging attr is:", self.this_server.device.attr_map["imaging"])
+                        #self.this_server.write_attr("imaging", ModesAvailability.available, False)
                         self.this_server.write_attr("telescopeState", DevState.ON, False)
-                        self.this_server.write_attr("imaging", ModesAvailability.available, False)
                         self.generate_telescope_state_log_msg(DevState.ON)
                     elif unique_telescope_states == set([DevState.OFF]):
                         self.logger.info("In OFF telescope state")
