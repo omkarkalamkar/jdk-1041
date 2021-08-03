@@ -1,11 +1,15 @@
---extra-index-url https://nexus.engageska-portugal.pt/repository/pypi/simple
+--extra-index-url https://artefact.skao.int/repository/pypi/simple
 numpy == 1.17.2
 pytango >= 9.3.3
 jsonschema >= 3.2.0
-ska-ser-logging == 0.4.0
-lmcbaseclasses == 0.7.2
+
+# Commented out temporarily. Both thesedependencies will be upgraded to
+# latest versions in PI 12.
+# ska-logging == 0.3.0
+# ska-tango-base
+
 marshmallow
-ska-tmc-cdm == 6.0.0
+ska-tmc-cdm == 6.0.0+ddc1a227
 fire
 ska-tmc-common == 0.1.7+d39e6423
 ska-ser-log-transactions
