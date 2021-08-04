@@ -2,12 +2,8 @@
 numpy == 1.17.2
 pytango >= 9.3.3
 jsonschema >= 3.2.0
-
-# Commented out temporarily. Both thesedependencies will be upgraded to
-# latest versions in PI 12.
-# ska-logging == 0.3.0
-# ska-tango-base
-
+ska-ser-logging == 0.4.0
+ska-tango-base == 0.7.2
 marshmallow
 ska-tmc-cdm == 6.0.0+ddc1a227
 fire
