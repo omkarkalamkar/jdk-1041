@@ -135,9 +135,6 @@ class TelescopeOn(BaseCommand):
                 dish_ln_client = TangoClient(dish)
                 dish_ln_thread_status[dish] = executor.submit(self.startup_dish_leaf_node, dish_ln_client)
 
-        # Wait for result
-        # while not all(thread_status.done() for thread_status in dish_ln_thread_status.values()):
-        #     pass
 
     def startup_subarray(self, subarray_fqdn_list):
         """
@@ -154,9 +151,6 @@ class TelescopeOn(BaseCommand):
                 subarray_client = TangoClient(subarray_fqdn)
                 subarray_thread_status[subarray_fqdn] = executor.submit(self.startup_leaf_node,
                                                               subarray_client)
-        # Wait for result
-        # while not all(thread_status.done() for thread_status in subarray_thread_status.values()):
-        #     pass
 
     def telescopeon_cmd_ended_cb(self, event):
         """
