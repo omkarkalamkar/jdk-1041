@@ -153,9 +153,6 @@ class TelescopeStateAggregator(Aggregator):
         """
         try:
             device_data = DeviceData.get_instance()
-            # Lock for thread 1
-            # self.telescope_state_callback_lock.acquire()
-            # retry_count = 3
             self.logger.info(f"Telescope state callback : {event}")
             if event.attr_value:
                 log_msg = f"TelescopeState attribute change event is : {event.attr_name}"
@@ -169,8 +166,6 @@ class TelescopeStateAggregator(Aggregator):
                     device_data.telescope_device_states = [self.csp_master_state,  self.sdp_master_state]
                     device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map.values())
                     self.logger.info(f"telescope_device_states: {device_data.telescope_device_states}")
-                    # device_data._telstate_callback_trigger.set()
-                    # Note: Need to test this block of code
                     while retry_count < 3: 
                         if device_data._telstate_callback_trigger.isSet(): 
                             time.sleep(0.05)
@@ -181,7 +176,6 @@ class TelescopeStateAggregator(Aggregator):
                             )
                             device_data._telstate_callback_trigger.set()  # start state calculation
                             break
-                    # self.telescope_state_callback_lock.release()  # release the lock
                 else:
                     # TODO: For future reference
                     self.logger.info(f"{const.ERR_SUBSR_TELESCOPE_STATE}{event}")

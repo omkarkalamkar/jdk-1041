@@ -247,9 +247,6 @@ class OpStateAggregator(Aggregator):
         """
         try:
             device_data = DeviceData.get_instance()
-            # Lock for thread 1
-            #self.state_callback_lock.acquire()
-            # retry_count = 3
             log_msg = f"State attribute change event is : {event.attr_name}"
             self.logger.debug(log_msg)
             if event.attr_value:
@@ -273,9 +270,6 @@ class OpStateAggregator(Aggregator):
                     self.logger.info(
                                 f"tmc_device_states in state_callback is:{device_data.tmc_device_states}"
                             )
-                    # device_data._state_callback_trigger.set()
-                    # Note: Need to test this block of code 
-                    
                     while retry_count < 3: 
                         if device_data._state_callback_trigger.isSet(): 
                             time.sleep(0.05)
@@ -286,8 +280,6 @@ class OpStateAggregator(Aggregator):
                             )
                             device_data._state_callback_trigger.set()  # start state calculation
                             break
-                    
-                    #self.state_callback_lock.release() # release the lock
                 else:
                     # TODO: For future reference
                     self.logger.info(f"{const.ERR_SUBSR_SA_STATE}{event}")

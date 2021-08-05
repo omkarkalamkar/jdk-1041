@@ -9,7 +9,7 @@ Central Node is a coordinator of the complete M&C system.
 * [python3-pip](https://packages.ubuntu.com/xenial/python3-pip)
 * [Tango (9.3.4-rc2)](https://docs.google.com/document/d/1TMp5n380YMvaeqeKZvRHHXa7yVxT8oBn5xsEymyNFC4/edit?usp=sharing)
 * [PyTango (9.3.2)](https://docs.google.com/document/d/1DtuIs1PeYGHlDXx8RyOzZyRQ-_Eiup-ncqeDDCtcNxk/edit?usp=sharing)
-* skabase (LMC Base classes for SKA): Refer Section 2.1 for installation guide
+* [ska-tango-base] (https://gitlab.com/ska-telescope/ska-tango-base) (LMC Base classes for SKA): Refer Section 2.1 for installation guide
 * [ska-ser-logging](https://gitlab.com/ska-telescope/ska-ser-logging)
 * [ska-tmc-cdm](https://gitlab.com/ska-telescope/ska-tmc-cdm)
 * [pytest](https://pypi.org/project/pytest/)
@@ -25,7 +25,7 @@ Central Node is a coordinator of the complete M&C system.
 ## 2.1 Install SKA Base classes
 
 Since the Central Node is developed using LMC Base classes, we need to install them prior to running centralnode.
-Follow the steps specified at [this link](https://gitlab.com/ska-telescope/lmc-base-classes#installation-steps) to install LMC Base classes.
+Follow the steps specified at [this link](https://gitlab.com/ska-telescope/ska-tango-base#installation-steps) to install LMC Base classes.
 
 # 4 Testing
 
