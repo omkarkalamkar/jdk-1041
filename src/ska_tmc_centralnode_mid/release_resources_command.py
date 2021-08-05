@@ -121,7 +121,8 @@ class ReleaseResources(BaseCommand):
         try:
             release_success = False
             jsonArgument = json.loads(argin)
-            del jsonArgument["transaction_id"]
+            if 'transaction_id' in jsonArgument:
+                del jsonArgument["transaction_id"]
             subarrayID = jsonArgument["subarray_id"]
             subarray_fqdn = device_data.subarray_FQDN_dict[subarrayID]
             subarray_name = f"SA {subarrayID}"

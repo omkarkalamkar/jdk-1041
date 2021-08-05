@@ -82,6 +82,8 @@ ERR_RECEPTOR_ID_REALLOCATION = "The following Receptor id(s) are allocated to ot
 ERR_DEVFAILED_MSG = "This is error message for devfailed"
 ERR_SUBARRAY_ID_DOES_NOT_EXIST = "The Subarray '99' does not exist."
 ERR_RECEPTOR_ID_DOES_NOT_EXIST = "The following Receptor id(s) do not exist: ['9999']"
+ERR_EXE_STARTUPTELESCOPE_CMD = "Error in executing StartUpTelescope command "
+ERR_EXE_STANDBYTELESCOPE_CMD = "Error in executing StandByTelescope command "
 
 ERR_INVOKING_CMD = "Error in invoking command: "
 # General strings
@@ -103,6 +105,8 @@ STR_TELESCOPE_OFF_CMD_ISSUED = "TelescopeOff command invoked from Central node"
 STR_TMC_OFF_CMD_ISSUED = "TMC OFF command invoked from Central node"
 STR_TMC_ON_CMD_ISSUED = "TMC ON command invoked from Central node"
 STR_ON_CMD_ISSUED = "TelescopeOn (ON) command invoked from Central node"
+STR_STANDBY_CMD_ISSUED = "StandByTelescope command invoked from Central node"
+STR_STARTUP_CMD_ISSUED = "StartUpTelescope command invoked from Central node"
 STR_TMC_STANDBY_CMD_ISSUED = "TMC STANDBY command invoked from Central node"
 STR_TELESCOPE_STANDBY_ISSUED = "TELESCOPE STANDBY command invoked from Central node"
 STR_ON_CMD_ISSUED = "TelescopeOn command invoked from Central node"

@@ -37,6 +37,8 @@ from ska_tmc_centralnode_mid.health_state_aggregator import HealthStateAggregato
 from ska_tmc_centralnode_mid.const import ModesAvailability
 from ska_tmc_centralnode_mid.op_state_aggregator import OpStateAggregator
 from ska_tmc_centralnode_mid.telescope_state_aggregator import TelescopeStateAggregator
+from ska_tmc_centralnode_mid.startup_telescope_command import StartUpTelescope
+from ska_tmc_centralnode_mid.standby_telescope_command import StandByTelescope
 
 
 
@@ -59,7 +61,9 @@ __all__ = [
     "StowAntennas",
     "On",
     "Standby",
-    "TelescopeStandby"
+    "TelescopeStandby",
+    "StandByTelescope",
+    "StartUpTelescope"
 ]
 
 
@@ -475,6 +479,62 @@ class CentralNode(SKABaseDevice):
 
     # pylint: enable=unused-variable
 
+    def is_StartUpTelescope_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        handler = self.get_command_object("StartUpTelescope")
+        return handler.check_allowed()
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="[ResultCode, information-only string]",
+    )
+    @DebugIt()
+    def StartUpTelescope(self):
+        """
+        This command invokes SetOperateMode() command on DishLeadNode, On() command on CspMasterLeafNode,
+        SdpMasterLeafNode and SubarrayNode and sets the Central Node into ON state.
+        """
+        handler = self.get_command_object("StartUpTelescope")
+        (result_code, message) = handler()
+        return [[result_code], [message]]
+
+    def is_StandByTelescope_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state.
+
+        """
+        handler = self.get_command_object("StandByTelescope")
+        return handler.check_allowed()
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="[ResultCode, information-only string]",
+    )
+    def StandByTelescope(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode, StandBy() command on CspMasterLeafNode and
+        SdpMasterLeafNode and Off() command on SubarrayNode and sets CentralNode into OFF state.
+
+        """
+        handler = self.get_command_object("StandByTelescope")
+        (result_code, message) = handler()
+        return [[result_code], [message]]
+
     def is_StowAntennas_allowed(self):
         """
         Checks whether this command is allowed to be run in current device state.
@@ -723,6 +783,10 @@ class CentralNode(SKABaseDevice):
         self.register_command_object("TelescopeOn", self.telescope_on_object)
         self.telescope_off_object = TelescopeOff(*args)
         self.off_object = Off(*args)
+        self.startup_object = StartUpTelescope(*args)
+        self.register_command_object("StartUpTelescope", self.startup_object)
+        self.standby_object = StandByTelescope(*args)
+        self.register_command_object("StandByTelescope", self.standby_object)
         self.assign_object = AssignResources(*args)
         self.release_object = ReleaseResources(*args)
         self.stow_object = StowAntennas(*args)

@@ -3,6 +3,7 @@ telescope_state_aggregator class for CentralNode.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Standard Python imports
+import time
 import logging
 import threading
 
@@ -17,6 +18,7 @@ from tmc.common.tango_server_helper import TangoServerHelper
 from ska_tmc_centralnode_mid import const
 from ska_tmc_centralnode_mid.device_data import DeviceData
 from ska_tmc_centralnode_mid.aggregator import Aggregator
+from ska_tmc_centralnode_mid.const import ModesAvailability
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
@@ -161,20 +163,24 @@ class TelescopeStateAggregator(Aggregator):
                 log_msg = f"TelescopeState attribute change event is: {event.attr_value.value}"
                 self.logger.debug(log_msg)
                 if not event.err:
+                    retry_count = 0
                     self.update_telescope_state(event, self.fqdn_device_telescope_state_list)
                     
                     device_data.telescope_device_states = [self.csp_master_state,  self.sdp_master_state]
                     device_data.telescope_device_states = device_data.telescope_device_states + list(self.dish_master_state_map.values())
                     self.logger.info(f"telescope_device_states: {device_data.telescope_device_states}")
-                    device_data._telstate_callback_trigger.set()
+                    # device_data._telstate_callback_trigger.set()
                     # Note: Need to test this block of code
-                    # while retry_count < 3: 
-                    #     if device_data._telstate_callback_trigger.isSet(): 
-                    #         time.sleep(0.05)
-                    #         retry_count +=1 
-                    #     else:
-                    #         device_data._telstate_callback_trigger.set()  # start state calculation
-                    #         break
+                    while retry_count < 3: 
+                        if device_data._telstate_callback_trigger.isSet(): 
+                            time.sleep(0.05)
+                            retry_count +=1 
+                        else:
+                            self.logger.info(
+                                f"device_data._telstate_callback_trigger.isSet():{device_data._telstate_callback_trigger.isSet()}"
+                            )
+                            device_data._telstate_callback_trigger.set()  # start state calculation
+                            break
                     # self.telescope_state_callback_lock.release()  # release the lock
                 else:
                     # TODO: For future reference
@@ -267,6 +273,7 @@ class TelescopeStateAggregator(Aggregator):
                     if unique_telescope_states == set([DevState.ON]):
                         self.logger.info("In ON telescope state")
                         self.this_server.write_attr("telescopeState", DevState.ON, False)
+                        self.this_server.write_attr("imaging", ModesAvailability.available, False)
                         self.generate_telescope_state_log_msg(DevState.ON)
                     elif unique_telescope_states == set([DevState.OFF]):
                         self.logger.info("In OFF telescope state")
@@ -283,6 +290,7 @@ class TelescopeStateAggregator(Aggregator):
                     elif DevState.STANDBY in unique_telescope_states:
                         self.logger.info("In STANDBY telescope state")
                         self.this_server.write_attr("telescopeState", DevState.STANDBY, False)
+                        self.this_server.write_attr("imaging", ModesAvailability.not_available, False)
                         self.generate_telescope_state_log_msg(DevState.STANDBY)
                     else:
                         self.this_server.write_attr("telescopeState", DevState.UNKNOWN, False)
