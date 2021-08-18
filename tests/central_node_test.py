@@ -368,6 +368,7 @@ def test_assign_resources(mock_subarray):
     )
     message = device_proxy.AssignResources(assign_input_str)
     assert json.loads(message) == success_response
+    assert 0
 
 
 def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_throws_devfailed_exception(

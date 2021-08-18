@@ -16,7 +16,7 @@ from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
 from ska_tmc_centralnode_mid.device_data import DeviceData
 from ska_tmc_centralnode_mid.exceptions import ResourceReassignmentError, ResourceNotPresentError
 from ska_tmc_centralnode_mid.exceptions import SubarrayNotPresentError, InvalidJSONError
-
+from ska_ser_skuid.client import SkuidClient
 
 class AssignResources(BaseCommand):
     """
@@ -173,6 +173,10 @@ class AssignResources(BaseCommand):
         self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.dln_prefix = this_server.read_property("DishLeafNodePrefix")[0]
         try:
+            client = SkuidClient(os.environ['SKUID_URL'])
+            # New type of id "eb_id" is used to distinguish between real SB and id used during testing
+            eb_id = client.fetch_skuid("eb")
+            print("client {} and eb id {} is::::::::::::::".format(client,eb_id))
             # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
             # self.logger.info("Validating input string.")
             # input_validator = AssignResourceValidator(
