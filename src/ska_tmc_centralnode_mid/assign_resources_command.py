@@ -3,7 +3,7 @@ AssignResources class for CentralNode.
 """
 import json
 import ast
-
+import os
 # Tango imports
 import tango
 from tango import DevState, DevFailed
@@ -173,10 +173,6 @@ class AssignResources(BaseCommand):
         self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
         self.dln_prefix = this_server.read_property("DishLeafNodePrefix")[0]
         try:
-            client = SkuidClient(os.environ['SKUID_URL'])
-            # New type of id "eb_id" is used to distinguish between real SB and id used during testing
-            eb_id = client.fetch_skuid("eb")
-            print("client {} and eb id {} is::::::::::::::".format(client,eb_id))
             # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
             # self.logger.info("Validating input string.")
             # input_validator = AssignResourceValidator(
@@ -187,7 +183,23 @@ class AssignResources(BaseCommand):
             # )
             # json_argument = input_validator.loads(argin)
             json_argument= json.loads(argin)
-
+            if json_argument["sdp"]["sb_id"]:
+                client = SkuidClient(os.environ['SKUID_URL'])
+                # New type of id "eb_id" is used to distinguish between real SB and id used during testing
+                sb_id = client.fetch_skuid("sb")
+                json_argument["sdp"]["sb_id"] = sb_id
+                if "processing_blocks" in json_argument["sdp"]:
+                    for i in range(len(json_argument["sdp"]["processing_blocks"])):
+                        pb_id = client.fetch_skuid("pb")
+                        json_argument["sdp"]["processing_blocks"][i]["pb_id"] = pb_id
+                        if "dependencies" in json_argument["sdp"]["processing_blocks"][i]:
+                            if i == 0:
+                                json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
+                                    json_argument["sdp"]["processing_blocks"][i]["pb_id"]
+                            else:
+                                json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
+                                    json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
+                LOGGER.info(json_argument)
             # Create subarray proxy
             if 'transaction_id' in json_argument:
                 del json_argument["transaction_id"]
