@@ -184,22 +184,7 @@ class AssignResources(BaseCommand):
             # json_argument = input_validator.loads(argin)
             json_argument= json.loads(argin)
             if json_argument["sdp"]["sb_id"]:
-                client = SkuidClient(os.environ['SKUID_URL'])
-                # New type of id "eb_id" is used to distinguish between real SB and id used during testing
-                sb_id = client.fetch_skuid("sb")
-                json_argument["sdp"]["sb_id"] = sb_id
-                if "processing_blocks" in json_argument["sdp"]:
-                    for i in range(len(json_argument["sdp"]["processing_blocks"])):
-                        pb_id = client.fetch_skuid("pb")
-                        json_argument["sdp"]["processing_blocks"][i]["pb_id"] = pb_id
-                        if "dependencies" in json_argument["sdp"]["processing_blocks"][i]:
-                            if i == 0:
-                                json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
-                                    json_argument["sdp"]["processing_blocks"][i]["pb_id"]
-                            else:
-                                json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
-                                    json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
-                LOGGER.info(json_argument)
+                self.update_resource_config_file(json_argument)
             # Create subarray proxy
             if 'transaction_id' in json_argument:
                 del json_argument["transaction_id"]
@@ -298,5 +283,24 @@ class AssignResources(BaseCommand):
         message = json.dumps(argout)
         self.logger.info(message)
         return message
-        
+
+    def update_resource_config_file(self, json_argument):
+        '''This method utilise SKUID service to generate I'd.'''
+        client = SkuidClient(os.environ['SKUID_URL'])
+        # New type of id "eb_id" is used to distinguish between real SB and id used during testing
+        sb_id = client.fetch_skuid("sb")
+        json_argument["sdp"]["sb_id"] = sb_id
+        if "processing_blocks" in json_argument["sdp"]:
+            for i in range(len(json_argument["sdp"]["processing_blocks"])):
+                pb_id = client.fetch_skuid("pb")
+                json_argument["sdp"]["processing_blocks"][i]["pb_id"] = pb_id
+                if "dependencies" in json_argument["sdp"]["processing_blocks"][i]:
+                    if i == 0:
+                        json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
+                            json_argument["sdp"]["processing_blocks"][i]["pb_id"]
+                    else:
+                        json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
+                            json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
+        LOGGER.info(json_argument)
+
         # PROTECTED REGION END #    //  CentralNode.AssignResources
