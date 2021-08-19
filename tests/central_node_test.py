@@ -8,9 +8,6 @@ import pytest
 import mock
 import logging
 from mock import Mock, MagicMock
-# from mock import Mock
-# import unittest
-# from unittest.mock import patch
 from os.path import dirname, join
 import threading
 
@@ -33,7 +30,6 @@ from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
 from ska_tmc_centralnode_mid.op_state_aggregator import OpStateAggregator
 from ska_tmc_centralnode_mid.telescope_state_aggregator import TelescopeStateAggregator
 from ska_tmc_centralnode_mid import CentralNode, const, release
-from ska_tmc_centralnode_mid.assign_resources_command import AssignResources
 from ska_tmc_centralnode_mid.const import (
     CMD_SET_STOW_MODE,
     STR_ON_CMD_ISSUED,

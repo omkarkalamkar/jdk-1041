@@ -301,6 +301,5 @@ class AssignResources(BaseCommand):
                     else:
                         json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
                             json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
-        LOGGER.info(json_argument)
 
         # PROTECTED REGION END #    //  CentralNode.AssignResources
