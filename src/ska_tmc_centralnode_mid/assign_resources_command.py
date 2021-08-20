@@ -183,7 +183,7 @@ class AssignResources(BaseCommand):
             # )
             # json_argument = input_validator.loads(argin)
             json_argument= json.loads(argin)
-            if json_argument["sdp"]["sb_id"]:
+            if json_argument["sdp"]["eb_id"]=="":
                 self.update_resource_config_file(json_argument)
             # Create subarray proxy
             if 'transaction_id' in json_argument:
@@ -288,8 +288,8 @@ class AssignResources(BaseCommand):
         '''This method utilise SKUID service to generate I'd.'''
         client = SkuidClient(os.environ['SKUID_URL'])
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
-        sb_id = client.fetch_skuid("sb")
-        json_argument["sdp"]["sb_id"] = sb_id
+        eb_id = client.fetch_skuid("eb")
+        json_argument["sdp"]["eb_id"] = eb_id
         if "processing_blocks" in json_argument["sdp"]:
             for i in range(len(json_argument["sdp"]["processing_blocks"])):
                 pb_id = client.fetch_skuid("pb")
