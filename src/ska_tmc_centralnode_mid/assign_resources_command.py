@@ -286,7 +286,7 @@ class AssignResources(BaseCommand):
 
     def update_resource_config_file(self, json_argument):
         '''This method utilise SKUID service to generate I'd.'''
-        client = SkuidClient(os.environ['SKUID_URL'])
+        client = SkuidClient('ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870')
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
         eb_id = client.fetch_skuid("eb")
         json_argument["sdp"]["eb_id"] = eb_id
