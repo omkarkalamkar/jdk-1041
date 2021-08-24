@@ -183,8 +183,12 @@ class AssignResources(BaseCommand):
             # )
             # json_argument = input_validator.loads(argin)
             json_argument= json.loads(argin)
-            if json_argument["sdp"]["eb_id"]=="":
-                self.update_resource_config_file(json_argument)
+            if json_argument["sdp"]["eb_id"]:
+                if json_argument["sdp"]["eb_id"] == "":
+                    self.update_resource_config_file(json_argument)
+            elif json_argument["sdp"]["sb_id"]:
+                if json_argument["sdp"]["sb_id"] == "":
+                    self.update_resource_config_file(json_argument)
             # Create subarray proxy
             if 'transaction_id' in json_argument:
                 del json_argument["transaction_id"]
@@ -285,7 +289,8 @@ class AssignResources(BaseCommand):
         return message
 
     def update_resource_config_file(self, json_argument):
-        '''This method utilise SKUID service to generate I'd.'''
+        '''This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id'''
+        # Here, 'ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870' is fixed URL to access SKUID service running on port 9870
         client = SkuidClient('ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870')
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
         eb_id = client.fetch_skuid("eb")
