@@ -182,27 +182,13 @@ class AssignResources(BaseCommand):
             #     self.logger,
             # )
             # json_argument = input_validator.loads(argin)
-            json_argument= json.loads(argin)
 
+            json_argument= json.loads(argin)
             sdp_keys = list(json_argument["sdp"].keys())
-            print("sdp keys are:::::::::::::::::::::::::::::::", sdp_keys)
             sdp_values = list(json_argument["sdp"].values())
-            print("sdp keys are:::::::::::::::::::::::::::::::", sdp_values)
             if "" in sdp_values:
                 id = sdp_keys[sdp_values.index("")]
-                print("id is::::::::::::::::::::::::::::::::::::::::::", id)
                 self.update_resource_config_file(json_argument, id)
-
-            # if not json_argument["sdp"][sdp_keys[1]]:
-            #     self.update_resource_config_file(json_argument, sd)
-            # if json_argument["sdp"]["eb_id"]:
-            #     if json_argument["sdp"]["eb_id"] == "":
-            #         self.update_resource_config_file(json_argument)
-            # elif json_argument["sdp"]["sb_id"]:
-            #     if json_argument["sdp"]["sb_id"] == "":
-            #         self.update_resource_config_file(json_argument)
-            # else:
-            #     self.logger.info("No eb id or sb id are present in SDP block of AssignResources input json string.")
 
             # Create subarray proxy
             if 'transaction_id' in json_argument:
@@ -321,6 +307,5 @@ class AssignResources(BaseCommand):
                     else:
                         json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
                             json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
-        print("json arg is:::::::::::::::::::::::::::::::::::::::::::", json_argument)
 
         # PROTECTED REGION END #    //  CentralNode.AssignResources
