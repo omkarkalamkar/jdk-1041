@@ -183,14 +183,26 @@ class AssignResources(BaseCommand):
             # )
             # json_argument = input_validator.loads(argin)
             json_argument= json.loads(argin)
-            if json_argument["sdp"]["eb_id"]:
-                if json_argument["sdp"]["eb_id"] == "":
-                    self.update_resource_config_file(json_argument)
-            elif json_argument["sdp"]["sb_id"]:
-                if json_argument["sdp"]["sb_id"] == "":
-                    self.update_resource_config_file(json_argument)
-            else:
-                self.logger.info("No eb id or sb id are present in SDP block of AssignResources input json string.")
+
+            sdp_keys = list(json_argument["sdp"].keys())
+            print("sdp keys are:::::::::::::::::::::::::::::::", sdp_keys)
+            sdp_values = list(json_argument["sdp"].values())
+            print("sdp keys are:::::::::::::::::::::::::::::::", sdp_values)
+            if "" in sdp_values:
+                id = sdp_keys[sdp_values.index("")]
+                print("id is::::::::::::::::::::::::::::::::::::::::::", id)
+                self.update_resource_config_file(json_argument, id)
+
+            # if not json_argument["sdp"][sdp_keys[1]]:
+            #     self.update_resource_config_file(json_argument, sd)
+            # if json_argument["sdp"]["eb_id"]:
+            #     if json_argument["sdp"]["eb_id"] == "":
+            #         self.update_resource_config_file(json_argument)
+            # elif json_argument["sdp"]["sb_id"]:
+            #     if json_argument["sdp"]["sb_id"] == "":
+            #         self.update_resource_config_file(json_argument)
+            # else:
+            #     self.logger.info("No eb id or sb id are present in SDP block of AssignResources input json string.")
 
             # Create subarray proxy
             if 'transaction_id' in json_argument:
@@ -291,13 +303,13 @@ class AssignResources(BaseCommand):
         self.logger.info(message)
         return message
 
-    def update_resource_config_file(self, json_argument):
+    def update_resource_config_file(self, json_argument, id):
         '''This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id'''
         # Here, 'ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870' is fixed URL to access SKUID service running on port 9870
         client = SkuidClient('ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870')
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
-        eb_id = client.fetch_skuid("eb")
-        json_argument["sdp"]["eb_id"] = eb_id
+        unique_id = client.fetch_skuid("eb")
+        json_argument["sdp"][id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
             for i in range(len(json_argument["sdp"]["processing_blocks"])):
                 pb_id = client.fetch_skuid("pb")
@@ -309,5 +321,6 @@ class AssignResources(BaseCommand):
                     else:
                         json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
                             json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
+        print("json arg is:::::::::::::::::::::::::::::::::::::::::::", json_argument)
 
         # PROTECTED REGION END #    //  CentralNode.AssignResources
