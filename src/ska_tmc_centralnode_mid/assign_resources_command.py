@@ -189,6 +189,9 @@ class AssignResources(BaseCommand):
             elif json_argument["sdp"]["sb_id"]:
                 if json_argument["sdp"]["sb_id"] == "":
                     self.update_resource_config_file(json_argument)
+            else:
+                self.logger.info("No eb id or sb id are present in SDP block of AssignResources input json string.")
+
             # Create subarray proxy
             if 'transaction_id' in json_argument:
                 del json_argument["transaction_id"]
