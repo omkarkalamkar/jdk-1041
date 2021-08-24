@@ -7,8 +7,7 @@ import json
 import pytest
 import mock
 import logging
-from mock import MagicMock
-from mock import Mock
+from mock import Mock, MagicMock
 from os.path import dirname, join
 import threading
 
@@ -346,7 +345,13 @@ def test_off_class_command_method(subarray_state_model, mock_subarray):
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_OFF, None)
 
 
-def test_assign_resources(mock_subarray):
+@pytest.fixture(scope="function")
+def mock_update_resource_config_file():
+    pass
+
+
+@mock.patch('ska_tmc_centralnode_mid.assign_resources_command.AssignResources.update_resource_config_file')
+def test_assign_resources(mock_update_resource_config_file, mock_subarray):
     device_proxy, tango_client_obj, tango_server_obj = mock_subarray
     tango_server_obj.read_property.side_effect = Mock(
         return_value=[
@@ -369,9 +374,9 @@ def test_assign_resources(mock_subarray):
     message = device_proxy.AssignResources(assign_input_str)
     assert json.loads(message) == success_response
 
-
+@mock.patch('ska_tmc_centralnode_mid.assign_resources_command.AssignResources.update_resource_config_file')
 def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_throws_devfailed_exception(
-    mock_subarray,
+    mock_update_resource_config_file, mock_subarray
 ):
     device_proxy, tango_client_obj, tango_server_obj = mock_subarray
     tango_server_obj.read_property.side_effect = Mock(
@@ -420,9 +425,9 @@ def test_assign_resources_invalid_key(mock_tango_server_helper, mock_tango_clien
             result = tango_context.device.AssignResources(assign_invalid_key)
         assert "test" in result
 
-
+@mock.patch('ska_tmc_centralnode_mid.assign_resources_command.AssignResources.update_resource_config_file')
 def test_assign_resources_raise_devfailed_when_reseource_reallocation(
-    mock_tango_server_helper, mock_tango_client
+    mock_update_resource_config_file, mock_tango_server_helper, mock_tango_client
 ):
     tango_server_obj = mock_tango_server_helper
     tango_server_obj.read_property.side_effect = Mock(

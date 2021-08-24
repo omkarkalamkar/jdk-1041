@@ -3,7 +3,7 @@ AssignResources class for CentralNode.
 """
 import json
 import ast
-
+import os
 # Tango imports
 import tango
 from tango import DevState, DevFailed
@@ -16,7 +16,7 @@ from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
 from ska_tmc_centralnode_mid.device_data import DeviceData
 from ska_tmc_centralnode_mid.exceptions import ResourceReassignmentError, ResourceNotPresentError
 from ska_tmc_centralnode_mid.exceptions import SubarrayNotPresentError, InvalidJSONError
-
+from ska_ser_skuid.client import SkuidClient
 
 class AssignResources(BaseCommand):
     """
@@ -183,6 +183,14 @@ class AssignResources(BaseCommand):
             # )
             # json_argument = input_validator.loads(argin)
             json_argument= json.loads(argin)
+            if json_argument["sdp"]["eb_id"]:
+                if json_argument["sdp"]["eb_id"] == "":
+                    self.update_resource_config_file(json_argument)
+            elif json_argument["sdp"]["sb_id"]:
+                if json_argument["sdp"]["sb_id"] == "":
+                    self.update_resource_config_file(json_argument)
+            else:
+                self.logger.info("No eb id or sb id are present in SDP block of AssignResources input json string.")
 
             # Create subarray proxy
             if 'transaction_id' in json_argument:
@@ -282,5 +290,24 @@ class AssignResources(BaseCommand):
         message = json.dumps(argout)
         self.logger.info(message)
         return message
-        
+
+    def update_resource_config_file(self, json_argument):
+        '''This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id'''
+        # Here, 'ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870' is fixed URL to access SKUID service running on port 9870
+        client = SkuidClient('ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870')
+        # New type of id "eb_id" is used to distinguish between real SB and id used during testing
+        eb_id = client.fetch_skuid("eb")
+        json_argument["sdp"]["eb_id"] = eb_id
+        if "processing_blocks" in json_argument["sdp"]:
+            for i in range(len(json_argument["sdp"]["processing_blocks"])):
+                pb_id = client.fetch_skuid("pb")
+                json_argument["sdp"]["processing_blocks"][i]["pb_id"] = pb_id
+                if "dependencies" in json_argument["sdp"]["processing_blocks"][i]:
+                    if i == 0:
+                        json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
+                            json_argument["sdp"]["processing_blocks"][i]["pb_id"]
+                    else:
+                        json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
+                            json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
+
         # PROTECTED REGION END #    //  CentralNode.AssignResources

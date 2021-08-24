@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode-mid"""
-version="0.2.12"
+version="0.2.13"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,9 +10,9 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.2.12
-tag=0.2.12
-tag_description= Apply fix for corba exception and telescopestate, commandInprogress and imaging attributes after TelescopeOn command.
-release_notes=This release contains:<br/><ul><li>  Apply fix for corba exception and telescopestate, commandInprogress and imaging attributes after TelescopeOn command.</li></ul><br/>
-gitlab_username=kalyanithigale
-private_token=uqwK7WTp_wkTzw5o68nd
+release=0.2.13
+tag=0.2.13
+tag_description= Utilise SKUID service in AssignResources command to generate eb/pb ids.
+release_notes=This release contains:<br/><ul><li>  Utilise SKUID service in AssignResources command to generate eb/pb ids.</li></ul><br/>
+gitlab_username=DigvijayMali92
+private_token=nqZDj3RexPAcyxPYrJ33
