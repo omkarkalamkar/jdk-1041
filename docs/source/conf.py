@@ -33,7 +33,7 @@ autodoc_mock_imports = [
     "marshmallow",
     "ska-tmc-cdm.messages",
     "ska-tmc-cdm.schemas",
-    "ska_tmc_centralnode_mid.assign_resources_command",
+    "ska_tmc_centralnode_mid.commads.assign_resources_command",
     "ska-tmc-cdm.messages.central_node.assign_resources",
     "AssignResourcesRequest",
     "CODEC",

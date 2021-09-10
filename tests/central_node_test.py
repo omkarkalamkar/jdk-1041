@@ -15,17 +15,17 @@ import threading
 import tango
 from tango import DevState
 from tango.test_context import DeviceTestContext
-from ska_tmc_centralnode_mid.standby_command import Standby
-from ska_tmc_centralnode_mid.telescope_standby_command import TelescopeStandby
-from ska_tmc_centralnode_mid.on_command import On
-from ska_tmc_centralnode_mid.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode_mid.commands.standby_command import Standby
+from ska_tmc_centralnode_mid.commands.telescope_standby_command import TelescopeStandby
+from ska_tmc_centralnode_mid.commands.on_command import On
+from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.base import OpStateModel
 
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from ska_tmc_centralnode_mid.device_data import DeviceData
-from ska_tmc_centralnode_mid.off_command import Off
+from ska_tmc_centralnode_mid.commands.off_command import Off
 from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
 from ska_tmc_centralnode_mid.op_state_aggregator import OpStateAggregator
 from ska_tmc_centralnode_mid.telescope_state_aggregator import TelescopeStateAggregator
@@ -350,7 +350,7 @@ def mock_update_resource_config_file():
     pass
 
 
-@mock.patch('ska_tmc_centralnode_mid.assign_resources_command.AssignResources.update_resource_config_file')
+@mock.patch('ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file')
 def test_assign_resources(mock_update_resource_config_file, mock_subarray):
     device_proxy, tango_client_obj, tango_server_obj = mock_subarray
     tango_server_obj.read_property.side_effect = Mock(
@@ -374,7 +374,7 @@ def test_assign_resources(mock_update_resource_config_file, mock_subarray):
     message = device_proxy.AssignResources(assign_input_str)
     assert json.loads(message) == success_response
 
-@mock.patch('ska_tmc_centralnode_mid.assign_resources_command.AssignResources.update_resource_config_file')
+@mock.patch('ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file')
 def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_throws_devfailed_exception(
     mock_update_resource_config_file, mock_subarray
 ):
@@ -425,7 +425,7 @@ def test_assign_resources_invalid_key(mock_tango_server_helper, mock_tango_clien
             result = tango_context.device.AssignResources(assign_invalid_key)
         assert "test" in result
 
-@mock.patch('ska_tmc_centralnode_mid.assign_resources_command.AssignResources.update_resource_config_file')
+@mock.patch('ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file')
 def test_assign_resources_raise_devfailed_when_reseource_reallocation(
     mock_update_resource_config_file, mock_tango_server_helper, mock_tango_client
 ):
