@@ -19,8 +19,8 @@ from ska_tmc_centralnode_mid.standby_command import Standby
 from ska_tmc_centralnode_mid.telescope_standby_command import TelescopeStandby
 from ska_tmc_centralnode_mid.on_command import On
 from ska_tmc_centralnode_mid.telescope_on_command import TelescopeOn
-from ska.base.control_model import ObsState
-from ska.base import SKASubarrayStateModel
+from ska_tango_base.control_model import ObsState
+from ska_tango_base.base import OpStateModel
 
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
@@ -37,16 +37,16 @@ from ska_tmc_centralnode_mid.const import (
     STR_TELESCOPE_OFF_CMD_ISSUED,
     ModesAvailability,
 )
-from ska.base.control_model import (
+from ska_tango_base.control_model import (
     HealthState,
     AdminMode,
     SimulationMode,
     ControlMode,
     TestMode,
 )
-from ska.base.control_model import LoggingLevel
-from ska.base.commands import ResultCode
-from ska.base import SKASubarrayStateModel
+from ska_tango_base.control_model import LoggingLevel
+from ska_tango_base.commands import ResultCode
+from ska_tango_base.base import OpStateModel
 
 assign_input_file = "command_AssignResources.json"
 path = join(dirname(__file__), "data", assign_input_file)
@@ -81,7 +81,7 @@ def subarray_state_model():
     """
     Yields a new SKASubarrayStateModel for testing
     """
-    yield SKASubarrayStateModel(logging.getLogger())
+    yield OpStateModel(logging.getLogger())
 
 
 @pytest.fixture(scope="function")
@@ -252,7 +252,7 @@ def central_node_test_info(request):
 def test_standby_class_command_method(subarray_state_model, mock_subarray):
     _, tango_client_obj, _ = mock_subarray
     standby_cmd = Standby(device_data, subarray_state_model)
-    subarray_state_model._straight_to_state(DevState.ON, None)
+    subarray_state_model._straight_to_state(DevState.ON)
     standby_cmd.do()
     tango_client_obj.deviceproxy.command_inout.assert_called_with(
         const.CMD_STANDBY, None
@@ -262,7 +262,7 @@ def test_standby_class_command_method(subarray_state_model, mock_subarray):
 def test_on_class_command_method(subarray_state_model, mock_subarray):
     _, tango_client_obj, _ = mock_subarray
     on_cmd = On(device_data, subarray_state_model)
-    subarray_state_model._straight_to_state(DevState.ON, None)
+    subarray_state_model._straight_to_state(DevState.ON)
     on_cmd.do()
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_ON, None)
 
@@ -270,7 +270,7 @@ def test_on_class_command_method(subarray_state_model, mock_subarray):
 def test_telescope_on_class_command_method(subarray_state_model, mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     telescope_on_cmd = TelescopeOn(device_data, subarray_state_model)
-    subarray_state_model._straight_to_state(DevState.ON, None)
+    subarray_state_model._straight_to_state(DevState.ON)
     telescope_on_cmd.do()
     # tango_client_obj.deviceproxy.command_inout.assert_called_with(
     #     const.CMD_TELESCOPE_ON, None
@@ -281,7 +281,7 @@ def test_telescope_on_class_command_method(subarray_state_model, mock_subarray):
 def test_telescope_standby_class_command_method(subarray_state_model, mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     telescope_standby_cmd = TelescopeStandby(device_data, subarray_state_model)
-    subarray_state_model._straight_to_state(DevState.ON, None, ObsState.EMPTY)
+    subarray_state_model._straight_to_state(DevState.ON)
     telescope_standby_cmd.do()
     tango_client_obj.deviceproxy.command_inout_asynch.assert_called_with(
         const.CMD_TELESCOPE_STANDBY,
@@ -340,7 +340,7 @@ def test_off_class_command_method(subarray_state_model, mock_subarray):
     _, tango_client_obj, _ = mock_subarray
     device_data = DeviceData.get_instance()
     off_cmd = Off(device_data, subarray_state_model)
-    subarray_state_model._straight_to_state(DevState.ON, None)
+    subarray_state_model._straight_to_state(DevState.ON)
     off_cmd.do()
     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_OFF, None)
 

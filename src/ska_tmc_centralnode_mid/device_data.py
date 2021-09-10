@@ -10,7 +10,7 @@
 This module defines the DeviceData class, which represents of the functional CentralNode device.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
-from ska.base.control_model import HealthState
+from ska_tango_base.control_model import HealthState
 from ska_tmc_centralnode_mid import const
 import threading
 

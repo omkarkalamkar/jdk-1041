@@ -21,14 +21,6 @@ stages:
   - publish
   - pages
   - release
-
-clean shell runner:
-  stage: .pre
-  tags:
-    - docker-executor
-  script:
-    # Gitlab CI badges creation
-    - rm -rf build/*
           
 unit tests:
   stage: test
@@ -52,7 +44,7 @@ linting:
     paths:
       - ./build
 
-release docker image:
+.release docker image:
   stage: release
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
   before_script:
