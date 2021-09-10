@@ -6,7 +6,6 @@ package.
 """
 import threading
 from ska_tango_base.base import BaseComponentManager
-from ska_tango_base.faults import ComponentFault
 
 from ska_tmc_centralnode_mid.model.component import Component
 
@@ -34,7 +33,16 @@ class CNComponentManager(BaseComponentManager):
     a component manager specific to the component managed by the device.
     """
 
-    def __init__(self, op_state_model, *args, logger=None, _component=None, **kwargs):
+    def __init__(self, 
+        op_state_model, 
+        logger=None, 
+        _component=None,
+        _update_device_callback = None,
+        _update_telescope_state_callback = None,
+        _update_telescope_health_state_callback = None,
+        _update_tmc_health_state_callback = None,
+        _update_subarray_health_state_callback = None,
+        *args, **kwargs):
         """
         Initialise a new ComponentManager instance.
 
@@ -49,6 +57,12 @@ class CNComponentManager(BaseComponentManager):
         self._component = _component or Component()
 
         self._lock = threading.Lock()
+
+        self._update_device_callback = _update_device_callback
+        self._update_telescope_state_callback = _update_telescope_state_callback
+        self._update_telescope_health_state_callback = _update_telescope_health_state_callback
+        self._update_tmc_health_state_callback = _update_tmc_health_state_callback
+        self._update_subarray_health_state_callback = _update_subarray_health_state_callback
 
         super().__init__(op_state_model, *args, **kwargs)
 
@@ -79,18 +93,47 @@ class CNComponentManager(BaseComponentManager):
         """
         self.op_state_model.perform_action("component_fault")
 
-    def device_failed(self, device_info, exception=None):
-        pass
+    def device_failed(self, device_info, exception):
+        with self._lock:
+            self._component.update_device_exception(device_info, exception)
+
+        self._update_device_callback()
 
     def update_device_info(self, device_info):
-        pass
+        with self._lock:
+            self._component.update_device(device_info)
+            self._update_device_callback()
 
     def update_device_health_state(self, dev_name, health_state):
-        pass
+        devInfo = self._component.get_device(dev_name)
+        with self._lock:
+            devInfo.healthState = health_state
+            self._aggregate_health_state()
+            self._update_device_callback()
+            self._update_telescope_health_state_callback()
 
     def update_device_state(self, dev_name, state):
-        pass
+        devInfo = self._component.get_device(dev_name)
+        with self._lock:
+            devInfo.state = state
+            self._aggregate_state()
+            self._update_device_callback()
+            self._update_telescope_state_callback()
 
     def update_device_obs_state(self, dev_name, obs_state):
+        devInfo = self._component.get_device(dev_name)
+        with self._lock:
+            devInfo.obsState = obs_state
+            self._update_device_callback()
+        
+        self._update_resources(dev_name)
+
+    def _aggregate_health_state(self):
+        pass
+
+    def _aggregate_state(self):
+        pass
+
+    def _update_resources(self, subarray_dev_name):
         pass
 

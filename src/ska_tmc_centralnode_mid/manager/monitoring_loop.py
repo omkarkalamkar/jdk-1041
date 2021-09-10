@@ -4,6 +4,7 @@ from ska_tmc_centralnode_mid import dev_factory
 from ska_tmc_centralnode_mid.dev_factory import dev_factory
 from ska_tmc_centralnode_mid.model.component import DeviceInfo
 from concurrent import futures
+import tango
 
 class MonitoringLoop:
     """
@@ -34,26 +35,28 @@ class MonitoringLoop:
         self._thread.join()
 
     def run(self):
-        while not self._stop:
-            with futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-                for devInfo in self._component_manager.devices:
-                    executor.submit(self.device_task, devInfo)
-            sleep(self._sleep_timeout)
+        with tango.EnsureOmniThread():
+            while not self._stop:
+                with futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
+                    for devInfo in self._component_manager.devices:
+                        executor.submit(self.device_task, devInfo)
+                sleep(self._sleep_timeout)
 
     def device_task(self, devInfo):
-        try:
-            proxy = self._dev_factory.get_device(devInfo.dev_name)
-            proxy.set_timeout_millis(self._proxy_timeout)
-            newDevInfo = DeviceInfo()
-            newDevInfo.ping = proxy.ping()
-            newDevInfo.state = proxy.State()
-            newDevInfo.obsState = proxy.obsState
-            newDevInfo.healthState = proxy.healthState
-            newDevInfo.dev_info = proxy.info()
-            self._component_manager.update_device(newDevInfo)
-        except Exception as e:
-            # device not working
-            self._component_manager.device_failed(devInfo, e)
+        with tango.EnsureOmniThread():
+            try:
+                proxy = self._dev_factory.get_device(devInfo.dev_name)
+                proxy.set_timeout_millis(self._proxy_timeout)
+                newDevInfo = DeviceInfo()
+                newDevInfo.ping = proxy.ping()
+                newDevInfo.state = proxy.State()
+                newDevInfo.obsState = proxy.obsState
+                newDevInfo.healthState = proxy.healthState
+                newDevInfo.dev_info = proxy.info()
+                self._component_manager.update_device(newDevInfo)
+            except Exception as e:
+                # device not working
+                self._component_manager.device_failed(devInfo, e)
 
     def handle_health_state_event(self, evt):
         if evt.err:
