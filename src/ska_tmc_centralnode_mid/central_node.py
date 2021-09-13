@@ -12,6 +12,7 @@ of state and mode attributes defined by the SKA Control Model.
 from logging import debug
 import threading
 from time import sleep
+from ska_tango_base.base import component_manager
 # Tango imports
 from tango import DebugIt, AttrWriteType, DevState, DevString
 from tango.server import run, attribute, command, device_property
@@ -229,9 +230,14 @@ class CentralNode(SKABaseDevice):
         self.op_state_model = TMCOpStateModel(
             logger=self.logger,
             callback=super()._update_state)
-        return CNComponentManager(
+        cm =  CNComponentManager(
             self.op_state_model, logger=self.logger
         )
+        cm.add_dishes(self.DishLeafNodePrefix, self.NumDishes)
+        cm.add_multiple_devices(self.TMMidSubarrayNodes)
+        cm.add_device(self.CspMasterFQDN)
+        cm.add_device(self.SdpMasterFQDN)
+        return cm
 
     # ---------------
     # General methods
@@ -325,7 +331,7 @@ class CentralNode(SKABaseDevice):
                 ] = device.TMMidSubarrayNodes[subarray]
             
             # Method to check CentralNode device State
-            device.check_cn_state()
+            # device.check_cn_state()
 
             device.op_state_model.perform_action("component_on")
             
@@ -437,52 +443,52 @@ class CentralNode(SKABaseDevice):
         self.attr_map[attr] = val
         lock.release()
     
-    def check_cn_state(self):
-        """
-        This method creates and start thread to check CentralNode device State
-        """
-        try:
-            # Create event for state change
-            self._cn_state_event = threading.Event()  # thread control
-            # create thread
-            self.logger.info("Starting thread to check the state of CentralNode.")
-            cn_state_thread = threading.Thread(
-                target=self.monitor_cn_state,
-            )
-            cn_state_thread.start() 
-        except Exception as e:
-            self.logger.exception(f"In check_cn_state exception is:{e}")
+    # def check_cn_state(self):
+    #     """
+    #     This method creates and start thread to check CentralNode device State
+    #     """
+    #     try:
+    #         # Create event for state change
+    #         self._cn_state_event = threading.Event()  # thread control
+    #         # create thread
+    #         self.logger.info("Starting thread to check the state of CentralNode.")
+    #         cn_state_thread = threading.Thread(
+    #             target=self.monitor_cn_state,
+    #         )
+    #         cn_state_thread.start() 
+    #     except Exception as e:
+    #         self.logger.exception(f"In check_cn_state exception is:{e}")
     
-    def monitor_cn_state(self):
-        """
-        This methods monitors the State of CentralNode, once state of CentralNode is OFF and state of all TMC devices is OFF,
-        TMC On command is getting invoked which makes CentralNode device State to ON
-        """
-        self.logger.info("Started monitoring CN state")
-        this_server = TangoServerHelper.get_instance()
-        device_data = DeviceData.get_instance()
-        try:
-            while not self._cn_state_event.isSet():
-                cn_state = this_server.get_state()
-                # CentralNode can be OFF after init and will be updated to UNKNOWN until receives states from all TMC devices
-                if cn_state in [DevState.OFF, DevState.UNKNOWN] and device_data._tmc_off_trigger.isSet():
-                    self.logger.info(
-                                f"CN_device_states is:{cn_state}"
-                            )
-                    # Time sleep added to wait for On() command to be registered using init_register_command() method
-                    sleep(1)
-                    this_server.device.On()
-                    self.logger.info(
-                                f"On command is called"
-                            )
-                    self.logger.info(
-                                f"CN_device_states is:{cn_state}"
-                            )
-                    device_data._tmc_off_trigger.clear()
-                    break
+    # def monitor_cn_state(self):
+    #     """
+    #     This methods monitors the State of CentralNode, once state of CentralNode is OFF and state of all TMC devices is OFF,
+    #     TMC On command is getting invoked which makes CentralNode device State to ON
+    #     """
+    #     self.logger.info("Started monitoring CN state")
+    #     this_server = TangoServerHelper.get_instance()
+    #     device_data = DeviceData.get_instance()
+    #     try:
+    #         while not self._cn_state_event.isSet():
+    #             cn_state = this_server.get_state()
+    #             # CentralNode can be OFF after init and will be updated to UNKNOWN until receives states from all TMC devices
+    #             if cn_state in [DevState.OFF, DevState.UNKNOWN] and device_data._tmc_off_trigger.isSet():
+    #                 self.logger.info(
+    #                             f"CN_device_states is:{cn_state}"
+    #                         )
+    #                 # Time sleep added to wait for On() command to be registered using init_register_command() method
+    #                 sleep(1)
+    #                 this_server.device.On()
+    #                 self.logger.info(
+    #                             f"On command is called"
+    #                         )
+    #                 self.logger.info(
+    #                             f"CN_device_states is:{cn_state}"
+    #                         )
+    #                 device_data._tmc_off_trigger.clear()
+    #                 break
 
-        except Exception as e:
-            self.logger.exception(f"In monitor_cn_state exception is:{e}")
+    #     except Exception as e:
+    #         self.logger.exception(f"In monitor_cn_state exception is:{e}")
 
     # --------
     # Commands

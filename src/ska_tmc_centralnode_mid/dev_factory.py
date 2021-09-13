@@ -3,7 +3,7 @@ import logging
 import tango
 
 
-class dev_factory:
+class DevFactory:
     """
     This class is an easy attempt to develop the concept developed by MCCS team
     in the following confluence page:
@@ -39,12 +39,12 @@ class dev_factory:
         if green_mode is None:
             green_mode = self.default_green_mode
 
-        if dev_factory._test_context is None:
+        if DevFactory._test_context is None:
             if dev_name not in self.dev_proxys:
-                self.logger.info("Creating Proxy for %s", dev_name)
+                self.logger.debug("Creating Proxy for %s", dev_name)
                 self.dev_proxys[dev_name] = tango.DeviceProxy(
                     dev_name, green_mode=green_mode
                 )
             return self.dev_proxys[dev_name]
         else:
-            return dev_factory._test_context.get_device(dev_name)
+            return DevFactory._test_context.get_device(dev_name)

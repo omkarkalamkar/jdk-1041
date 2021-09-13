@@ -14,8 +14,7 @@ class Component:
     * Monitoring its component
     """
 
-    def __init__(self, _faulty=False):
-        self._faulty = _faulty
+    def __init__(self):
         self._devices = []
         self._telescope_state = DevState.UNKNOWN
         self._tmc_op_state = DevState.UNKNOWN
@@ -26,23 +25,26 @@ class Component:
         self._pss = ModesAvailability.not_available
         self._pst = ModesAvailability.not_available
 
-    def update_faulty(self, faulty):
-        """
-        Set component faulty
-
-        :param faulty: boolean
-        """
-        self._faulty = faulty
-
     @property
     def faulty(self):
         """
-        Return whether this component is currently experiencing a fault.
+        Return whether this device is currently experiencing a fault.
 
-        :return: whether this component is faulting
+        :return: whether this device is faulting
         :rtype: bool
         """
-        return self._faulty
+        return False
+
+    @property
+    def is_communicating(self):
+        """
+        Whether there is currently a connection to the component.
+
+        :return: whether there is currently a connection to the
+            component
+        :rtype: bool
+        """
+        return True
 
     @property
     def devices(self):
@@ -89,7 +91,8 @@ class Component:
             self._devices.append(devInfo)
         else:
             index = self._devices.index(devInfo)
-            self._devices[index].exception = exception
+            intDevInfo = self._devices[index]
+            intDevInfo.update_faulty(True, exception)
 
     @property
     def telescope_state(self):
@@ -284,14 +287,39 @@ class Component:
         return result
 
 class DeviceInfo:
-    def __init__(self):
-        self.dev_name = ""
+    def __init__(self, dev_name = "", _faulty=False):
+        self.dev_name = dev_name
         self.state = DevState.UNKNOWN
         self.obsState = ObsState.EMPTY
         self.healthState = HealthState.UNKNOWN
         self.ping = -1
         self.last_event_arrived = None
         self.exception = None
+        self._faulty = _faulty
+
+    def update_faulty(self, faulty, exception):
+        """
+        Set device faulty
+
+        :param faulty: boolean
+        """
+        self._faulty = faulty
+        self.exception = exception
+        if self._faulty:
+            self.state = DevState.UNKNOWN
+            self.obsState = ObsState.EMPTY
+            self.healthState = HealthState.UNKNOWN
+            self.ping = -1
+
+    @property
+    def faulty(self):
+        """
+        Return whether this device is currently experiencing a fault.
+
+        :return: whether this device is faulting
+        :rtype: bool
+        """
+        return self._faulty
 
     def __eq__(self, other):
         if (isinstance(other, DeviceInfo)):
