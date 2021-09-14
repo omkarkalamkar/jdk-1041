@@ -17,7 +17,7 @@ class MonitoringLoop:
 
     """
 
-    def __init__(self, component_manager, logger=None, max_workers = 1, proxy_timeout=500, sleep_timeout=1):
+    def __init__(self, component_manager, logger=None, max_workers = 5, proxy_timeout=500, sleep_timeout=1):
         self._thread = threading.Thread(target=self.run)
         self._stop = False
         self._logger = logger
@@ -72,11 +72,12 @@ class MonitoringLoop:
                 self._component_manager.device_failed(devInfo, e)
 
     def handle_health_state_event(self, evt):
+        # import debugpy; debugpy.debug_this_thread()
         if evt.err:
             error = evt.errors[0]
             self._logger.error("%s %s", error.reason, error.desc)
             return
-
+        
         new_value = evt.attr_value.value
         self._component_manager.update_device_health_state(evt.device.dev_name(), new_value)
 
