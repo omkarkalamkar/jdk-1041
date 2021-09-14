@@ -45,21 +45,21 @@ class MonitoringLoop:
             sleep(self._sleep_timeout)
 
     def device_task(self, devInfo):
-        try:
-            import debugpy; debugpy.debug_this_thread()
-            self._logger.debug("Checking device %s", devInfo.dev_name)
-            proxy = self._dev_factory.get_device(devInfo.dev_name)
-            proxy.set_timeout_millis(self._proxy_timeout)
-            newDevInfo = DeviceInfo()
-            newDevInfo.ping = proxy.ping()
-            newDevInfo.state = proxy.State()
-            newDevInfo.obsState = proxy.obsState
-            newDevInfo.healthState = proxy.healthState
-            newDevInfo.dev_info = proxy.info()
-            self._component_manager.update_device(newDevInfo)
-        except Exception as e:
-            self._logger.debug("device not working %s", devInfo.dev_name)
-            self._component_manager.device_failed(devInfo, e)
+        with tango.EnsureOmniThread():
+            try:
+                self._logger.debug("Checking device %s", devInfo.dev_name)
+                proxy = self._dev_factory.get_device(devInfo.dev_name)
+                proxy.set_timeout_millis(self._proxy_timeout)
+                newDevInfo = DeviceInfo(devInfo.dev_name)
+                newDevInfo.ping = proxy.ping()
+                newDevInfo.state = proxy.State()
+                newDevInfo.obsState = proxy.obsState
+                newDevInfo.healthState = proxy.healthState
+                newDevInfo.dev_info = proxy.info()
+                self._component_manager.update_device_info(newDevInfo)
+            except Exception as e:
+                self._logger.debug("device not working %s", devInfo.dev_name)
+                self._component_manager.device_failed(devInfo, e)
 
     def handle_health_state_event(self, evt):
         if evt.err:

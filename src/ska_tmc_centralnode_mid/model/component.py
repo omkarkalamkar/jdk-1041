@@ -26,27 +26,6 @@ class Component:
         self._pst = ModesAvailability.not_available
 
     @property
-    def faulty(self):
-        """
-        Return whether this device is currently experiencing a fault.
-
-        :return: whether this device is faulting
-        :rtype: bool
-        """
-        return False
-
-    @property
-    def is_communicating(self):
-        """
-        Whether there is currently a connection to the component.
-
-        :return: whether there is currently a connection to the
-            component
-        :rtype: bool
-        """
-        return True
-
-    @property
     def devices(self):
         """
         Return the monitored devices.
@@ -287,7 +266,9 @@ class Component:
         return result
 
 class DeviceInfo:
-    def __init__(self, dev_name = "", _faulty=False):
+    def __init__(self, 
+                dev_name, 
+                _faulty=False):
         self.dev_name = dev_name
         self.state = DevState.UNKNOWN
         self.obsState = ObsState.EMPTY

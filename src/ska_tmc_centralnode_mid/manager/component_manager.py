@@ -80,6 +80,24 @@ class CNComponentManager(BaseComponentManager):
         """
         return self._component.devices
 
+    @property
+    def checked_devices(self):
+        """
+        Return the list of the checked monitored devices 
+
+        :return: list of the checked monitored devices
+        """
+        result = []
+        for dev in self._component.devices:
+            if dev.faulty:
+                result.append(dev)
+            if dev.ping > 0:
+                result.append(dev)
+        return result
+
+    def get_device(self, dev_name):
+        return self._component.get_device(dev_name)
+
     def add_dishes(self, dln_prefix, num_dishes):
         for dish in range(1, (num_dishes + 1)):
             self.add_device(dln_prefix + f"000{dish}")
