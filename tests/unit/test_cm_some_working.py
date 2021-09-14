@@ -1,6 +1,8 @@
 import pytest
 import logging
 import time
+
+from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
@@ -13,7 +15,7 @@ WORKING_DEVICES = 9
 def devices_to_load():
     return (
         {
-            "class": CentralNode,
+            "class": SKABaseDevice,
             "devices": [
                 {
                     "name": "ska_mid/tm_central/central_node"

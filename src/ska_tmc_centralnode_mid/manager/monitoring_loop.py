@@ -2,7 +2,7 @@ import threading
 from time import sleep
 from ska_tmc_centralnode_mid import dev_factory
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from ska_tmc_centralnode_mid.model.component import DeviceInfo
+from ska_tmc_centralnode_mid.model.component import DeviceInfo, SubArrayDeviceInfo
 from concurrent import futures
 import tango
 
@@ -17,7 +17,7 @@ class MonitoringLoop:
 
     """
 
-    def __init__(self, component_manager, logger=None, max_workers = 5, proxy_timeout=500, sleep_timeout=1):
+    def __init__(self, component_manager, logger=None, max_workers = 1, proxy_timeout=500, sleep_timeout=1):
         self._thread = threading.Thread(target=self.run)
         self._stop = False
         self._logger = logger
@@ -47,10 +47,20 @@ class MonitoringLoop:
     def device_task(self, devInfo):
         with tango.EnsureOmniThread():
             try:
+                # import debugpy; debugpy.debug_this_thread()
                 self._logger.debug("Checking device %s", devInfo.dev_name)
                 proxy = self._dev_factory.get_device(devInfo.dev_name)
+                if devInfo.last_event_arrived is None:
+                    proxy.subscribe_event("healthState",tango.EventType.CHANGE_EVENT,self.handle_health_state_event,stateless=True)
+                    proxy.subscribe_event("State",tango.EventType.CHANGE_EVENT,self.handle_state_event,stateless=True)
+                    proxy.subscribe_event("ObsState",tango.EventType.CHANGE_EVENT,self.handle_obs_state_event,stateless=True)
                 proxy.set_timeout_millis(self._proxy_timeout)
-                newDevInfo = DeviceInfo(devInfo.dev_name)
+                newDevInfo = None
+                if "subarray" in devInfo.dev_name.lower():
+                    newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
+                else:
+                    newDevInfo = DeviceInfo(devInfo.dev_name)
+                newDevInfo.from_dev_info(devInfo)
                 newDevInfo.ping = proxy.ping()
                 newDevInfo.state = proxy.State()
                 newDevInfo.obsState = proxy.obsState

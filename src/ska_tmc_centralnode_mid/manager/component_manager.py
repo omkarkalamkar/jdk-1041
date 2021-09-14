@@ -5,6 +5,7 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 import threading
+import time
 from ska_tango_base.base import BaseComponentManager
 
 from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo
@@ -96,21 +97,58 @@ class CNComponentManager(BaseComponentManager):
         return result
 
     def get_device(self, dev_name):
+        """
+        Return the device info our of the monitoring loop with name dev_name
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :return: a device info
+        :rtype: DeviceInfo
+        """
         return self._component.get_device(dev_name)
 
     def add_dishes(self, dln_prefix, num_dishes):
+        """
+        Add dishes to the monitoring loop
+
+        :param dln_prefix: prefix of the dish
+        :type dln_prefix: str
+        :param num_dishes: number of dishes
+        :type num_dishes: int
+        """
         for dish in range(1, (num_dishes + 1)):
             self.add_device(dln_prefix + f"000{dish}")
 
     def add_multiple_devices(self, list):
+        """
+        Add multiple devices to the monitoring loop
+
+        :param list: list of device names
+        :type list: list[str]
+        """
         for dev_name in list:
             self.add_device(dev_name)
 
     def add_device(self, dev_name):
+        """
+        Add device to the monitoring loop
+
+        :param dev_name: device name
+        :type dev_name: str
+        """
         devInfo = DeviceInfo(dev_name, False)
         self._component.update_device(devInfo)
 
+    
     def device_failed(self, device_info, exception):
+        """
+        Set a device to failed and call the relative callback if available
+
+        :param device_info: a device info
+        :type device_info: DeviceInfo
+        :param exception: an exception
+        :type Exception
+        """
         with self._lock:
             self._component.update_device_exception(device_info, exception)
 
@@ -118,15 +156,33 @@ class CNComponentManager(BaseComponentManager):
                 self._update_device_callback()
 
     def update_device_info(self, device_info):
+        """
+        Update a device with correct monitoring information
+        and call the relative callback if available
+
+        :param device_info: a device info
+        :type device_info: DeviceInfo
+        """
         with self._lock:
             self._component.update_device(device_info)
             if not self._update_device_callback is None:
                 self._update_device_callback()
 
     def update_device_health_state(self, dev_name, health_state):
+        """
+        Update a monitored device health state
+        aggregate the health states available
+        and call the relative callback if available
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param health_state: health state of the device
+        :type health_state: HealthState
+        """
         devInfo = self._component.get_device(dev_name)
         with self._lock:
             devInfo.healthState = health_state
+            devInfo.last_event_arrived = time.time()
             self._aggregate_health_state()
             if not self._update_device_callback is None:
                 self._update_device_callback()
@@ -134,9 +190,20 @@ class CNComponentManager(BaseComponentManager):
                 self._update_telescope_health_state_callback()
 
     def update_device_state(self, dev_name, state):
+        """
+        Update a monitored device state,
+        aggregate the states available
+        and call the relative callbacks if available
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param state: state of the device
+        :type state: DevState
+        """
         devInfo = self._component.get_device(dev_name)
         with self._lock:
             devInfo.state = state
+            devInfo.last_event_arrived = time.time()
             self._aggregate_state()
             if not self._update_device_callback is None:
                 self._update_device_callback()
@@ -144,20 +211,45 @@ class CNComponentManager(BaseComponentManager):
                 self._update_telescope_state_callback()
 
     def update_device_obs_state(self, dev_name, obs_state):
+        """
+        Update a monitored device obs state,
+        and call the relative callbacks if available
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param obs_state: obs state of the device
+        :type obs_state: ObsState
+        """
         devInfo = self._component.get_device(dev_name)
         with self._lock:
             devInfo.obsState = obs_state
+            devInfo.last_event_arrived = time.time()
             if not self._update_device_callback is None:
                 self._update_device_callback()
         
         self._update_resources(dev_name)
 
     def _aggregate_health_state(self):
+        """
+        Aggregates all health states and call 
+        the relative callback if available
+        """
         pass
 
     def _aggregate_state(self):
+        """
+        Aggregates all states and call 
+        the relative callback if available
+        """
         pass
 
     def _update_resources(self, subarray_dev_name):
+        """
+        Updates resources for a subarray 
+        the relative callback if available
+
+        :param subarray_dev_name: name of the subarray device
+        :type subarray_dev_name: str
+        """
         pass
 

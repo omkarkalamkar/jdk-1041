@@ -266,9 +266,7 @@ class Component:
         return result
 
 class DeviceInfo:
-    def __init__(self, 
-                dev_name, 
-                _faulty=False):
+    def __init__(self, dev_name: str, _faulty=False):
         self.dev_name = dev_name
         self.state = DevState.UNKNOWN
         self.obsState = ObsState.EMPTY
@@ -277,6 +275,16 @@ class DeviceInfo:
         self.last_event_arrived = None
         self.exception = None
         self._faulty = _faulty
+
+    def from_dev_info(self, devInfo):
+        self.dev_name = devInfo.dev_name
+        self.state = devInfo.state
+        self.obsState = devInfo.obsState
+        self.healthState = devInfo.healthState
+        self.ping = devInfo.ping
+        self.last_event_arrived = devInfo.last_event_arrived
+        self.exception = devInfo.exception
+        self._faulty = devInfo.faulty
 
     def update_faulty(self, faulty, exception):
         """
@@ -322,12 +330,19 @@ class DeviceInfo:
         return result
 
 class SubArrayDeviceInfo(DeviceInfo):
-    def __init__(self):
+    def __init__(self, dev_name, _faulty=False):
+        super(SubArrayDeviceInfo, self).__init__(dev_name, _faulty)
         self.id = -1
         self.resources = []
 
+    def from_dev_info(self, subarrayDevInfo):
+        super().from_dev_info(subarrayDevInfo)
+        if (isinstance(subarrayDevInfo, SubArrayDeviceInfo)):
+            self.id = subarrayDevInfo.id
+            self.resources = subarrayDevInfo.resources
+
     def __eq__(self, other):
-        if (isinstance(other, SubArrayDeviceInfo)):
+        if (isinstance(other, SubArrayDeviceInfo) or isinstance(other, DeviceInfo)):
             return self.dev_name == other.dev_name
 
     def to_json(self):

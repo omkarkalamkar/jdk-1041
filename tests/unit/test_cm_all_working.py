@@ -3,6 +3,7 @@ import logging
 import time
 
 from ska_tango_base.obs.obs_device import SKAObsDevice
+from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
@@ -12,14 +13,6 @@ from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, DishLeafNod
 @pytest.fixture()
 def devices_to_load():
     return (
-        {
-            "class": CentralNode,
-            "devices": [
-                {
-                    "name": "ska_mid/tm_central/central_node"
-                }
-            ],
-        },
         {
             "class": SKASubarray,
             "devices": [
@@ -78,9 +71,9 @@ def count_faulty_devices(cm):
             result += 1
     return result
 
-def test_all_working_other_faulty(tango_context):
+def test_all_working(tango_context):
     logger.info("%s", tango_context)
-    
+    # import debugpy; debugpy.debug_this_thread()
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(op_state_model, logger=logger)
     for dev in DEVICE_LIST:
@@ -99,3 +92,5 @@ def test_all_working_other_faulty(tango_context):
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
     for devInfo in cm.devices:
         assert not devInfo.faulty
+        if "subarray" in devInfo.dev_name.lower():
+            assert isinstance(devInfo, SubArrayDeviceInfo)
