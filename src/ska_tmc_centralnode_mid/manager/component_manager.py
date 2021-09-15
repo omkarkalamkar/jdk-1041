@@ -63,11 +63,12 @@ class CNComponentManager(BaseComponentManager):
 
         self._lock = threading.Lock()
 
-        self._update_device_callback = _update_device_callback
-        self._update_telescope_state_callback = _update_telescope_state_callback
-        self._update_telescope_health_state_callback = _update_telescope_health_state_callback
-        self._update_tmc_op_state_callback = _update_tmc_op_state_callback
-        self._update_subarray_health_state_callback = _update_subarray_health_state_callback
+        self._component.set_op_callbacks(_update_device_callback, 
+                                         _update_telescope_state_callback, 
+                                         _update_telescope_health_state_callback, 
+                                         _update_tmc_op_state_callback,
+                                         _update_subarray_health_state_callback
+                                         )
 
         super().__init__(op_state_model, *args, **kwargs)
 
@@ -163,9 +164,6 @@ class CNComponentManager(BaseComponentManager):
         with self._lock:
             self._component.update_device_exception(device_info, exception)
 
-            if not self._update_device_callback is None:
-                self._update_device_callback()
-
     def update_device_info(self, device_info):
         """
         Update a device with correct monitoring information
@@ -178,8 +176,6 @@ class CNComponentManager(BaseComponentManager):
             self._component.update_device(device_info)
             self._aggregate_health_state()
             self._aggregate_state()
-            if not self._update_device_callback is None:
-                self._update_device_callback()
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -196,8 +192,6 @@ class CNComponentManager(BaseComponentManager):
             devInfo.healthState = health_state
             devInfo.last_event_arrived = time.time()
             self._aggregate_health_state()
-            if not self._update_device_callback is None:
-                self._update_device_callback()
 
     def update_device_state(self, dev_name, state):
         """
@@ -215,8 +209,6 @@ class CNComponentManager(BaseComponentManager):
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
             self._aggregate_state()
-            if not self._update_device_callback is None:
-                self._update_device_callback()
 
     def update_device_obs_state(self, dev_name, obs_state):
         """
@@ -233,8 +225,6 @@ class CNComponentManager(BaseComponentManager):
             devInfo.obsState = obs_state
             devInfo.last_event_arrived = time.time()
             self._update_resources(dev_name)
-            if not self._update_device_callback is None:
-                self._update_device_callback()
 
     def _aggregate_health_state(self):
         """
@@ -264,9 +254,6 @@ class CNComponentManager(BaseComponentManager):
             self._component.set_telescope_health_state(HealthState.DEGRADED)
         else:
             self._component.set_telescope_health_state(HealthState.UNKNOWN)
-
-        if self._update_telescope_health_state_callback is not None: 
-            self._update_telescope_health_state_callback()
 
     def _aggregate_state(self):
         """
@@ -307,9 +294,6 @@ class CNComponentManager(BaseComponentManager):
         else:
             self._component.set_telescope_state(DevState.UNKNOWN)
 
-        if not self._update_telescope_state_callback is None:
-                self._update_telescope_state_callback()
-
     def _aggregate_tm_op_state(self):
         """
         Aggregates tm devices states
@@ -334,9 +318,6 @@ class CNComponentManager(BaseComponentManager):
             self._component.set_tmc_op_state(DevState.STANDBY)
         else:
             self._component.set_tmc_op_state(DevState.UNKNOWN)
-
-        if self._update_tmc_op_state_callback is not None:
-            self._update_tmc_op_state_callback()
 
     def _update_resources(self, subarray_dev_name):
         """
