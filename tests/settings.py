@@ -23,3 +23,10 @@ DEVICE_LIST = [
     "ska_mid/tm_leaf_node/sdp_subarray02",
     "ska_mid/tm_leaf_node/sdp_subarray03"
 ]
+
+def count_faulty_devices(cm):
+    result = 0
+    for devInfo in cm.devices:
+        if devInfo.faulty:
+            result += 1
+    return result

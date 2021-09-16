@@ -4,14 +4,7 @@ import time
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
-from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, DishLeafNodePrefix, NumDishes
-
-def count_faulty_devices(cm):
-    result = 0
-    for devInfo in cm.devices:
-        if devInfo.faulty:
-            result += 1
-    return result
+from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, DishLeafNodePrefix, NumDishes, count_faulty_devices
 
 def test_all_devices_faulty():
     op_state_model = TMCOpStateModel(logger)

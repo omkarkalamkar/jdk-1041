@@ -7,7 +7,7 @@ from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 from ska_tango_base.subarray import SKASubarray
-from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, DishLeafNodePrefix, NumDishes
+from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, DishLeafNodePrefix, NumDishes, count_faulty_devices
 
 WORKING_DEVICES = 9
 
@@ -56,12 +56,6 @@ def devices_to_load():
         }
     )
 
-def count_faulty_devices(cm):
-    result = 0
-    for devInfo in cm.devices:
-        if devInfo.faulty:
-            result += 1
-    return result
 
 def test_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)

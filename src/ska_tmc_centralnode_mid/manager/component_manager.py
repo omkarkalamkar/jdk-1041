@@ -234,6 +234,8 @@ class CNComponentManager(BaseComponentManager):
         # import debugpy; debugpy.debug_this_thread()
         healthStateList = []
         # get states of CspMaster, SdpMaster and DishMaster devices
+        # what if one of them is not working (i.e. faulty flag)? i.e. Csp, Sdp or dishes
+        # number of dishes is also variable
         for dev in self.checked_devices:
             name = dev.dev_name.lower()
             if "leaf" in name: 
@@ -269,6 +271,8 @@ class CNComponentManager(BaseComponentManager):
         # import debugpy; debugpy.debug_this_thread()
         telescopeStateList = []
         # get states of CspMaster, SdpMaster and DishMaster devices
+        # what if one of them is not working (i.e. faulty flag)? i.e. Csp, Sdp or dishes
+        # number of dishes is also variable: at least one?
         for dev in self.checked_devices:
             name = dev.dev_name.lower()
             if "leaf" in name:
@@ -299,7 +303,9 @@ class CNComponentManager(BaseComponentManager):
         Aggregates tm devices states
         """
         tmStateList = []
-        # get states of CspMaster, SdpMaster and DishMaster devices
+        # get states of all TM devices
+        # what if one of them is not working? i.e. tm subarray
+        # number of devices is also variable, how to handle that number
         for dev in self.checked_devices:
             name = dev.dev_name.lower()
             if "tm" in name:

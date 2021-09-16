@@ -19,6 +19,7 @@ class Component:
         self._telescope_state = DevState.UNKNOWN
         self._tmc_op_state = DevState.UNKNOWN
         self._telescope_health_state = HealthState.UNKNOWN
+        # _health_state is never changing. Setter not implemented
         self._health_state = HealthState.OK
         self._vlbi = ModesAvailability.not_available
         self._imaging = ModesAvailability.not_available
@@ -111,6 +112,7 @@ class Component:
         else:
             index = self._devices.index(devInfo)
             intDevInfo = self._devices[index]
+            intDevInfo.state = DevState.UNKNOWN
             intDevInfo.update_faulty(True, exception)
             self._invoke_device_callback(intDevInfo)
 
@@ -131,10 +133,9 @@ class Component:
         :param value: the new telescope state
         :type value: DevState
         """
-        if isinstance(value, DevState):
-            if self._telescope_state != value:
-                self._telescope_state = value
-                self._invoke_telescope_state_callback()
+        if self._telescope_state != value:
+            self._telescope_state = value
+            self._invoke_telescope_state_callback()
 
     @property
     def telescope_health_state(self):
@@ -168,15 +169,15 @@ class Component:
         """
         return self._health_state
 
-    def set_cn_health_state(self, value):
-        """
-        Set central node health state
+    # def set_cn_health_state(self, value):
+    #     """
+    #     Set central node health state
 
-        :param value: the new central node health state
-        :type value: HealthState
-        """
-        if isinstance(value, HealthState):
-            self._health_state = value
+    #     :param value: the new central node health state
+    #     :type value: HealthState
+    #     """
+    #     if isinstance(value, HealthState):
+    #         self._health_state = value
 
     @property
     def tmc_op_state(self):
