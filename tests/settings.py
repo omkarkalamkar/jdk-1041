@@ -21,7 +21,8 @@ DEVICE_LIST = [
     "ska_mid/tm_leaf_node/csp_subarray03",
     "ska_mid/tm_leaf_node/sdp_subarray01",
     "ska_mid/tm_leaf_node/sdp_subarray02",
-    "ska_mid/tm_leaf_node/sdp_subarray03"
+    "ska_mid/tm_leaf_node/sdp_subarray03",
+    "mid_d0001/elt/master"
 ]
 
 def count_faulty_devices(cm):

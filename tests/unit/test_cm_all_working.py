@@ -62,6 +62,9 @@ def devices_to_load():
                 },
                 {
                     "name": "mid_sdp/elt/master"
+                },
+                {
+                    "name": "mid_d0001/elt/master"
                 }
             ]
         }
