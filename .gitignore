@@ -34,7 +34,6 @@ coverage.xml
 *~
 .ropeproject
 .idea
-.vscode
 
 # Ansible
 *.retry

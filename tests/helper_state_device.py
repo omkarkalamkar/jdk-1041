@@ -18,8 +18,10 @@ class HelperStateDevice(SKASubarray):
     class InitCommand(SKASubarray.InitCommand):
         def do(self):
             super().do()
-            # device = self.target
-            # device.op_state_model.perform_action("init_completed")
+            device = self.target
+            device.set_change_event("State", True, False)   
+            device.set_change_event("healthState", True, False)    
+            device.set_change_event("obsState", True, False)   
 
     def create_component_manager(self):
         self.op_state_model = OpStateModel(
@@ -37,18 +39,6 @@ class HelperStateDevice(SKASubarray):
         pass
 
     @command(
-        dtype_in="str",
-        doc_in="action to be performed",
-    )
-    def TriggerStateChange(self, argin):
-        """
-        Trigger a state change
-        """
-        # import debugpy; debugpy.debug_this_thread()
-        self.op_state_model.perform_action(argin)
-        logging.info("%s", self.op_state_model.op_state)
-
-    @command(
         dtype_in="DevState",
         doc_in="state to assign",
     )
@@ -57,8 +47,9 @@ class HelperStateDevice(SKASubarray):
         Trigger a DevState change
         """
         # import debugpy; debugpy.debug_this_thread()
-        self.set_state(argin)
-        logging.info("%s", self.op_state_model.op_state)
+        if self.dev_state() != argin:
+            self.set_state(argin)
+            self.push_change_event("State", self.dev_state())
 
     @command(
         dtype_in=int,
@@ -69,7 +60,10 @@ class HelperStateDevice(SKASubarray):
         Trigger a HealthState change
         """
         # import debugpy; debugpy.debug_this_thread()
-        self._health_state = HealthState(argin)
+        value = HealthState(argin)
+        if(self._health_state != value):
+            self._health_state = HealthState(argin)
+            self.push_change_event("healthState", self._health_state)
 
     @command(
         dtype_in=int,
@@ -80,4 +74,7 @@ class HelperStateDevice(SKASubarray):
         Trigger a HealthState change
         """
         # import debugpy; debugpy.debug_this_thread()
-        self._obs_state = ObsState(argin)
+        value = ObsState(argin)
+        if(self._obs_state != value):
+            self._obs_state = ObsState(argin)
+            self.push_change_event("obsState", self._obs_state)

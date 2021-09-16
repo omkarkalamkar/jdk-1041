@@ -11,15 +11,14 @@ class MonitoringLoop:
     The MonitoringLoop class has the responsibility to monitor
     the sub devices managed by the central node.
 
-    The ComponentManager uses the handle events methods
-    for the attribute of interest. 
-    For each of them a callback is defined. 
+    It is an infinite loop which ping, get the state, the obsState,
+    the healthState and device information of the monitored SKA devices
 
     TBD: what about scalability? what if we have 1000 devices? 
 
     """
 
-    def __init__(self, component_manager, logger=None, max_workers = 1, proxy_timeout=500, sleep_timeout=1):
+    def __init__(self, component_manager, logger=None, max_workers = 5, proxy_timeout=500, sleep_timeout=1):
         self._thread = threading.Thread(target=self.run)
         self._stop = False
         self._logger = logger
@@ -51,8 +50,6 @@ class MonitoringLoop:
                 # import debugpy; debugpy.debug_this_thread()
                 self._logger.debug("Checking device %s", devInfo.dev_name)
                 proxy = self._dev_factory.get_device(devInfo.dev_name)
-                if devInfo.last_event_arrived is None:
-                    self.subscribe_events(proxy)
                 proxy.set_timeout_millis(self._proxy_timeout)
                 newDevInfo = None
                 if "subarray" in devInfo.dev_name.lower():
@@ -69,39 +66,3 @@ class MonitoringLoop:
             except Exception as e:
                 self._logger.debug("device not working %s", devInfo.dev_name)
                 self._component_manager.device_failed(devInfo, e)
-
-    def subscribe_events(self, proxy):
-        try:
-            proxy.subscribe_event("healthState",tango.EventType.CHANGE_EVENT,self.handle_health_state_event,stateless=True)
-            proxy.subscribe_event("State",tango.EventType.CHANGE_EVENT,self.handle_state_event,stateless=True)
-            proxy.subscribe_event("ObsState",tango.EventType.CHANGE_EVENT,self.handle_obs_state_event,stateless=True)
-        except: 
-            self._logger.debug("event not working for device %s", proxy.dev_name)
-
-    def handle_health_state_event(self, evt):
-        # import debugpy; debugpy.debug_this_thread()
-        if evt.err:
-            error = evt.errors[0]
-            self._logger.error("%s %s", error.reason, error.desc)
-            return
-        
-        new_value = evt.attr_value.value
-        self._component_manager.update_device_health_state(evt.device.dev_name(), new_value)
-
-    def handle_state_event(self, evt):
-        if evt.err:
-            error = evt.errors[0]
-            self._logger.error("%s %s", error.reason, error.desc)
-            return
-
-        new_value = evt.attr_value.value
-        self._component_manager.update_device_state(evt.device.dev_name(), new_value)
-
-    def handle_obs_state_event(self, evt):
-        if evt.err:
-            error = evt.errors[0]
-            self._logger.error("%s %s", error.reason, error.desc)
-            return
-
-        new_value = evt.attr_value.value
-        self._component_manager.update_device_obs_state(evt.device.dev_name(), new_value)

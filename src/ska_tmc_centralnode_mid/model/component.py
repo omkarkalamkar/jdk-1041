@@ -1,3 +1,4 @@
+import threading
 from ska_tango_base.control_model import HealthState, ObsState
 from tango import DevState
 import json
@@ -30,6 +31,7 @@ class Component:
         self._update_telescope_health_state_callback = None
         self._update_tmc_op_state_callback = None
         self._update_subarray_health_state_callback = None
+        self.lock = threading.Lock()
 
     def set_op_callbacks(self, 
         _update_device_callback = None,
@@ -323,6 +325,7 @@ class DeviceInfo:
         self.last_event_arrived = None
         self.exception = None
         self._faulty = _faulty
+        self.lock = threading.Lock()
 
     def from_dev_info(self, devInfo):
         self.dev_name = devInfo.dev_name
@@ -333,6 +336,7 @@ class DeviceInfo:
         self.last_event_arrived = devInfo.last_event_arrived
         self.exception = devInfo.exception
         self._faulty = devInfo.faulty
+        self.lock = devInfo.lock
 
     def update_faulty(self, faulty, exception):
         """

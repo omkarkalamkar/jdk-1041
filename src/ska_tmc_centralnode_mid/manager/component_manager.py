@@ -11,6 +11,7 @@ from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import HealthState
 from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo
 from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
+from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
 
 class CNComponentManager(BaseComponentManager):
     """
@@ -45,6 +46,8 @@ class CNComponentManager(BaseComponentManager):
         _update_telescope_health_state_callback = None,
         _update_tmc_op_state_callback = None,
         _update_subarray_health_state_callback = None,
+        _monitoring_loop = True,
+        _event_receiver = True,
         *args, **kwargs):
         """
         Initialise a new ComponentManager instance.
@@ -59,9 +62,11 @@ class CNComponentManager(BaseComponentManager):
 
         self._component = _component or Component()
         
-        self._monitoring_loop = MonitoringLoop(self, logger)
+        if _monitoring_loop:
+            self._monitoring_loop = MonitoringLoop(self, logger)
 
-        self._lock = threading.Lock()
+        if _event_receiver:
+            self._event_receiver = EventReceiver(self, logger)
 
         self._component.set_op_callbacks(_update_device_callback, 
                                          _update_telescope_state_callback, 
@@ -72,7 +77,11 @@ class CNComponentManager(BaseComponentManager):
 
         super().__init__(op_state_model, *args, **kwargs)
 
-        self._monitoring_loop.start()
+        if _monitoring_loop:
+            self._monitoring_loop.start()
+
+        if _event_receiver:
+            self._event_receiver.start()
 
     @property
     def component(self):
@@ -101,11 +110,16 @@ class CNComponentManager(BaseComponentManager):
         :return: list of the checked monitored devices
         """
         result = []
-        for dev in self._component.devices:
+        for dev in self.component.devices:
             if dev.faulty:
                 result.append(dev)
+                continue
             if dev.ping > 0:
                 result.append(dev)
+                continue
+            if dev.last_event_arrived is not None:
+                result.append(dev)
+                continue
         return result
 
     def get_device(self, dev_name):
@@ -117,7 +131,7 @@ class CNComponentManager(BaseComponentManager):
         :return: a device info
         :rtype: DeviceInfo
         """
-        return self._component.get_device(dev_name)
+        return self.component.get_device(dev_name)
 
     def add_dishes(self, dln_prefix, num_dishes):
         """
@@ -149,7 +163,7 @@ class CNComponentManager(BaseComponentManager):
         :type dev_name: str
         """
         devInfo = DeviceInfo(dev_name, False)
-        self._component.update_device(devInfo)
+        self.component.update_device(devInfo)
 
     
     def device_failed(self, device_info, exception):
@@ -161,8 +175,8 @@ class CNComponentManager(BaseComponentManager):
         :param exception: an exception
         :type Exception
         """
-        with self._lock:
-            self._component.update_device_exception(device_info, exception)
+        with device_info.lock:
+            self.component.update_device_exception(device_info, exception)
 
     def update_device_info(self, device_info):
         """
@@ -172,10 +186,11 @@ class CNComponentManager(BaseComponentManager):
         :param device_info: a device info
         :type device_info: DeviceInfo
         """
-        with self._lock:
-            self._component.update_device(device_info)
-            self._aggregate_health_state()
-            self._aggregate_state()
+        with device_info.lock:
+            self.component.update_device(device_info)
+
+        self._aggregate_health_state()
+        self._aggregate_state()
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -187,11 +202,12 @@ class CNComponentManager(BaseComponentManager):
         :param health_state: health state of the device
         :type health_state: HealthState
         """
-        devInfo = self._component.get_device(dev_name)
-        with self._lock:
+        devInfo = self.component.get_device(dev_name)
+        with devInfo.lock:
             devInfo.healthState = health_state
             devInfo.last_event_arrived = time.time()
-            self._aggregate_health_state()
+        
+        self._aggregate_health_state()
 
     def update_device_state(self, dev_name, state):
         """
@@ -204,11 +220,12 @@ class CNComponentManager(BaseComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        devInfo = self._component.get_device(dev_name)
-        with self._lock:
+        devInfo = self.component.get_device(dev_name)
+        with devInfo.lock:
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
-            self._aggregate_state()
+        
+        self._aggregate_state()
 
     def update_device_obs_state(self, dev_name, obs_state):
         """
@@ -220,8 +237,8 @@ class CNComponentManager(BaseComponentManager):
         :param obs_state: obs state of the device
         :type obs_state: ObsState
         """
-        devInfo = self._component.get_device(dev_name)
-        with self._lock:
+        devInfo = self.component.get_device(dev_name)
+        with devInfo.lock:
             devInfo.obsState = obs_state
             devInfo.last_event_arrived = time.time()
             self._update_resources(dev_name)
@@ -249,13 +266,17 @@ class CNComponentManager(BaseComponentManager):
         
         healthStateSetList = set(healthStateList)
         if healthStateSetList == set([HealthState.OK]):
-            self._component.set_telescope_health_state(HealthState.OK)
+            with self.component.lock:
+                self.component.set_telescope_health_state(HealthState.OK)
         elif HealthState.FAILED in healthStateSetList:
-            self._component.set_telescope_health_state(HealthState.FAILED)
+            with self.component.lock:
+                self.component.set_telescope_health_state(HealthState.FAILED)
         elif HealthState.DEGRADED in healthStateSetList:
-            self._component.set_telescope_health_state(HealthState.DEGRADED)
+            with self.component.lock:
+                self.component.set_telescope_health_state(HealthState.DEGRADED)
         else:
-            self._component.set_telescope_health_state(HealthState.UNKNOWN)
+            with self.component.lock:
+                self.component.set_telescope_health_state(HealthState.UNKNOWN)
 
     def _aggregate_state(self):
         """
@@ -275,6 +296,8 @@ class CNComponentManager(BaseComponentManager):
         # number of dishes is also variable: at least one?
         for dev in self.checked_devices:
             name = dev.dev_name.lower()
+            # if dev.faulty:
+                # what I do?
             if "leaf" in name:
                 continue
             if "csp" in name and "master" in name:
@@ -286,17 +309,23 @@ class CNComponentManager(BaseComponentManager):
 
         telescopeSetStateList = set(telescopeStateList)
         if telescopeSetStateList == set([DevState.ON]):
-            self._component.set_telescope_state(DevState.ON)
+            with self.component.lock:
+                self.component.set_telescope_state(DevState.ON)
         elif telescopeSetStateList == set([DevState.OFF]):
-            self._component.set_telescope_state(DevState.OFF)
+            with self.component.lock:
+                self.component.set_telescope_state(DevState.OFF)
         elif DevState.INIT in telescopeSetStateList:
-            self._component.set_telescope_state(DevState.INIT)
+            with self.component.lock:
+                self.component.set_telescope_state(DevState.INIT)
         elif DevState.FAULT in telescopeSetStateList:
-            self._component.set_telescope_state(DevState.FAULT)
+            with self.component.lock:
+                self.component.set_telescope_state(DevState.FAULT)
         elif DevState.STANDBY in telescopeSetStateList:
-            self._component.set_telescope_state(DevState.STANDBY)
+            with self.component.lock:
+                self.component.set_telescope_state(DevState.STANDBY)
         else:
-            self._component.set_telescope_state(DevState.UNKNOWN)
+            with self.component.lock:
+                self.component.set_telescope_state(DevState.UNKNOWN)
 
     def _aggregate_tm_op_state(self):
         """
@@ -313,17 +342,22 @@ class CNComponentManager(BaseComponentManager):
 
         tmSetStateList = set(tmStateList)
         if tmSetStateList == set([DevState.ON]):
-            self._component.set_tmc_op_state(DevState.ON)
+            with self.component.lock:
+                self.component.set_tmc_op_state(DevState.ON)
         elif tmSetStateList == set([DevState.OFF]):
             raise Exception("OFF State not allowed")
         elif DevState.INIT in tmSetStateList:
-            self._component.set_tmc_op_state(DevState.INIT)
+            with self.component.lock:
+                self.component.set_tmc_op_state(DevState.INIT)
         elif DevState.FAULT in tmSetStateList:
-            self._component.set_tmc_op_state(DevState.FAULT)
+            with self.component.lock:
+                self.component.set_tmc_op_state(DevState.FAULT)
         elif DevState.STANDBY in tmSetStateList:
-            self._component.set_tmc_op_state(DevState.STANDBY)
+            with self.component.lock:
+                self.component.set_tmc_op_state(DevState.STANDBY)
         else:
-            self._component.set_tmc_op_state(DevState.UNKNOWN)
+            with self.component.lock:
+                self.component.set_tmc_op_state(DevState.UNKNOWN)
 
     def _update_resources(self, subarray_dev_name):
         """
