@@ -9,7 +9,7 @@ import time
 from tango import DevState
 from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import HealthState
-from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo
+from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
 from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
 
@@ -162,7 +162,14 @@ class CNComponentManager(BaseComponentManager):
         :param dev_name: device name
         :type dev_name: str
         """
-        devInfo = DeviceInfo(dev_name, False)
+        if dev_name is None:
+            return
+            
+        if "subarray" in dev_name.lower():
+            devInfo = SubArrayDeviceInfo(dev_name, False)
+        else:
+            devInfo = DeviceInfo(dev_name, False)
+
         self.component.update_device(devInfo)
 
     
