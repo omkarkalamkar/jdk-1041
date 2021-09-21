@@ -30,8 +30,23 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperStateDevice,
+            "class": HelperSubarrayStateDevice,
             "devices": [
+                {
+                    "name": "ska_mid/tm_leaf_node/csp_master"
+                },
+                {
+                    "name": "ska_mid/tm_leaf_node/sdp_master"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/1"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/2"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/3"
+                },
                 {
                     "name": "ska_mid/tm_leaf_node/csp_subarray01"
                 },
@@ -49,28 +64,7 @@ def devices_to_load():
                 },
                 {
                     "name": "ska_mid/tm_leaf_node/sdp_subarray03"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_master"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_master"
-                },
-            ]
-        },
-        {
-            "class": HelperSubarrayStateDevice,
-            "devices": [
-                {
-                    "name": "ska_mid/tm_subarray_node/1"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/2"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/3"
-                },
-
+                }
             ]
 
         }      
