@@ -71,6 +71,7 @@ def devices_to_load():
     )
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
+    import debugpy; debugpy.debug_this_thread()
     proxy = devFactory.get_device("ska_mid/tm_subarray_node/1")
     proxy.SetDirectState(tango.DevState.INIT)
     assert proxy.State() == tango.DevState.INIT
@@ -108,6 +109,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     start_time = time.time()
     elapsed_time = 0
     while cm.component.tmc_op_state != tango.DevState.INIT:
+        print(cm.component.tmc_op_state)
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
@@ -115,9 +117,10 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     assert elapsed_time < expected_elapsed_time
 
 def test_tmc_state_init(tango_context):
+    # import debugpy; debugpy.debug_this_thread()
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_device_init(devFactory, cm, 1.5)
+    set_device_init(devFactory, cm, 5)
     assert cm.component.tmc_op_state == tango.DevState.INIT
 
 def test_tmc_state_init_only_monitoring_loop(tango_context):
