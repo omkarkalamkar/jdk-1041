@@ -8,6 +8,7 @@ from ska_tango_base.control_model import HealthState
 from tests.settings import count_faulty_devices, logger, TIMEOUT
 from test_cm_all_working import create_cm
 from tests.helper_state_device import HelperStateDevice
+from tests.helper_state_device_subarray import HelperSubarrayStateDevice
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from test_telescope_state_startup import create_cm_no_faulty_devices
 
@@ -31,15 +32,6 @@ def devices_to_load():
         {
             "class": HelperStateDevice,
             "devices": [
-                {
-                    "name": "ska_mid/tm_subarray_node/1"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/2"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/3"
-                },
                 {
                     "name": "ska_mid/tm_leaf_node/csp_subarray01"
                 },
@@ -65,7 +57,23 @@ def devices_to_load():
                     "name": "ska_mid/tm_leaf_node/sdp_master"
                 },
             ]
-        }        
+        },
+        {
+            "class": HelperSubarrayStateDevice,
+            "devices": [
+                {
+                    "name": "ska_mid/tm_subarray_node/1"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/2"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/3"
+                },
+
+            ]
+
+        }      
     )
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
