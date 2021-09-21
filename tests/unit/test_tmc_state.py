@@ -229,7 +229,7 @@ def set_device_standby(devFactory, cm, expected_elapsed_time):
     # wait for the propagations by event or polling
     start_time = time.time()
     elapsed_time = 0
-    while cm.component.telescope_state != tango.DevState.STANDBY:
+    while cm.component.tmc_op_state != tango.DevState.STANDBY:
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
