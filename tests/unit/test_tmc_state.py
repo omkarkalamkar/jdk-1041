@@ -73,7 +73,7 @@ def devices_to_load():
     )
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
-    import debugpy; debugpy.debug_this_thread()
+    # import debugpy; debugpy.debug_this_thread()
     proxy = devFactory.get_device("ska_mid/tm_subarray_node/1")
     proxy.SetDirectState(tango.DevState.INIT)
     assert proxy.State() == tango.DevState.INIT
