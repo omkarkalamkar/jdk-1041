@@ -109,7 +109,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     start_time = time.time()
     elapsed_time = 0
     while cm.component.tmc_op_state != tango.DevState.INIT:
-        print(cm.component.tmc_op_state)
+        logging.de(cm.component.tmc_op_state)
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
