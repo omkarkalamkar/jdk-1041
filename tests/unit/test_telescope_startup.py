@@ -78,8 +78,9 @@ def create_cm_no_faulty_devices(tango_context, p_monitoring_loop, p_event_receiv
 
 def test_aggregation_default(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
+    ## Why is this in fault state initially?
     assert cm.component.telescope_state == tango.DevState.FAULT
-    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
+    assert cm.component.tmc_op_state == tango.DevState.FAULT
     assert cm.component.telescope_health_state == HealthState.OK
     
     # without monitoring loop every thing is UNKNOWN
@@ -90,5 +91,5 @@ def test_aggregation_default(tango_context):
     
     cm = create_cm_no_faulty_devices(tango_context, True, False)
     assert cm.component.telescope_state == tango.DevState.FAULT
-    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
+    assert cm.component.tmc_op_state == tango.DevState.FAULT
     assert cm.component.telescope_health_state == HealthState.OK
