@@ -27,7 +27,7 @@ DEVICE_LIST = [
 
 def count_faulty_devices(cm):
     result = 0
-    for devInfo in cm.devices:
+    for devInfo in cm.checked_devices:
         if devInfo.faulty:
             result += 1
     return result

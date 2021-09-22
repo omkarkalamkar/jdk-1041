@@ -64,7 +64,7 @@ def devices_to_load():
                     "name": "mid_d0001/elt/master"
                 }
             ]
-        }        
+        }
     )
 
 def create_cm_no_faulty_devices(tango_context, p_monitoring_loop, p_event_receiver):

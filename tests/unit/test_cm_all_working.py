@@ -84,7 +84,7 @@ def create_cm(p_monitoring_loop = True, p_event_receiver = True):
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
-    
+
     return cm, start_time
 
 def test_all_working(tango_context):
@@ -100,6 +100,3 @@ def test_all_working(tango_context):
         assert not devInfo.faulty
         if "subarray" in devInfo.dev_name.lower():
             assert isinstance(devInfo, SubArrayDeviceInfo)
-
-    
-

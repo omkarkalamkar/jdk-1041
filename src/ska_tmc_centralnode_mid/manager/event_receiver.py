@@ -52,7 +52,7 @@ class EventReceiver:
             proxy.subscribe_event("healthState",tango.EventType.CHANGE_EVENT,self.handle_health_state_event,stateless=True)
             proxy.subscribe_event("State",tango.EventType.CHANGE_EVENT,self.handle_state_event,stateless=True)
             proxy.subscribe_event("ObsState",tango.EventType.CHANGE_EVENT,self.handle_obs_state_event,stateless=True)
-        except: 
+        except:
             self._logger.debug("event not working for device %s", proxy.dev_name)
 
     def handle_health_state_event(self, evt):
@@ -61,7 +61,7 @@ class EventReceiver:
             error = evt.errors[0]
             self._logger.error("%s %s", error.reason, error.desc)
             return
-        
+
         new_value = evt.attr_value.value
         self._component_manager.update_device_health_state(evt.device.dev_name(), new_value)
 

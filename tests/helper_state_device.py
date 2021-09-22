@@ -19,8 +19,8 @@ class HelperStateDevice(SKASubarray):
         def do(self):
             super().do()
             device = self.target
-            device.set_change_event("State", True, False)   
-            device.set_change_event("healthState", True, False)    
+            device.set_change_event("State", True, False)
+            device.set_change_event("healthState", True, False)
             device.set_change_event("obsState", True, False)   
 
     def create_component_manager(self):

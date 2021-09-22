@@ -20,9 +20,9 @@ class HelperSubarrayStateDevice(SKASubarray):
         def do(self):
             super().do()
             device = self.target
-            device.set_change_event("State", True, False)   
-            device.set_change_event("healthState", True, False)    
-            device.set_change_event("obsState", True, False)   
+            device.set_change_event("State", True, False)
+            device.set_change_event("healthState", True, False)
+            device.set_change_event("obsState", True, False)
             message = "SKASubarray Init command completed OK"
             return (ResultCode.OK, message)
 

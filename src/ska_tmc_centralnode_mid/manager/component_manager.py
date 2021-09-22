@@ -60,7 +60,7 @@ class CNComponentManager(BaseComponentManager):
         """
         self.logger = logger
 
-        self._component = _component or Component()
+        self._component = _component or Component(logger)
         
         if _monitoring_loop:
             self._monitoring_loop = MonitoringLoop(self, logger)
@@ -213,7 +213,7 @@ class CNComponentManager(BaseComponentManager):
         with devInfo.lock:
             devInfo.healthState = health_state
             devInfo.last_event_arrived = time.time()
-        
+
         self._aggregate_health_state()
 
     def update_device_state(self, dev_name, state):
@@ -231,7 +231,7 @@ class CNComponentManager(BaseComponentManager):
         with devInfo.lock:
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
-        
+
         self._aggregate_state()
 
     def update_device_obs_state(self, dev_name, obs_state):
@@ -262,7 +262,7 @@ class CNComponentManager(BaseComponentManager):
         # number of dishes is also variable
         for dev in self.checked_devices:
             name = dev.dev_name.lower()
-            if "leaf" in name: 
+            if "leaf" in name:
                 continue
             if "csp" in name and "master" in name:
                 healthStateList.append(dev.healthState)
@@ -270,7 +270,7 @@ class CNComponentManager(BaseComponentManager):
                 healthStateList.append(dev.healthState)
             if "tm" in name and "subarray" in name:
                 healthStateList.append(dev.healthState)
-        
+
         healthStateSetList = set(healthStateList)
         if healthStateSetList == set([HealthState.OK]):
             with self.component.lock:
