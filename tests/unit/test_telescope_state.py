@@ -9,7 +9,7 @@ from tests.settings import count_faulty_devices, logger, TIMEOUT
 from test_cm_all_working import create_cm
 from tests.helper_state_device import HelperStateDevice
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from test_telescope_state_startup import create_cm_no_faulty_devices
+from test_telescope_startup import create_cm_no_faulty_devices
 
 @pytest.fixture()
 def devices_to_load():
