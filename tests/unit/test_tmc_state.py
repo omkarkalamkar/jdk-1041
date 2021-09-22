@@ -32,7 +32,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperSubarrayStateDevice,
+            "class": HelperStateDevice,
             "devices": [
                 {
                     "name": "ska_mid/tm_leaf_node/csp_master"
