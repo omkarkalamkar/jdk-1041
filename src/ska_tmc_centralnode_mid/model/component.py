@@ -15,8 +15,9 @@ class Component:
     * Monitoring its component
     """
 
-    def __init__(self):
+    def __init__(self, logger):
         self._devices = []
+        self.logger = logger
         self._telescope_state = DevState.UNKNOWN
         self._tmc_op_state = DevState.UNKNOWN
         self._telescope_health_state = HealthState.UNKNOWN
@@ -198,10 +199,9 @@ class Component:
         :param value: the TMC operational State
         :type value: DevState
         """
-        if isinstance(value, DevState):
-            if self._tmc_op_state != value:
-                self._tmc_op_state = value
-                self._invoke_tmc_op_state_callback()
+        if self._tmc_op_state != value:
+            self._tmc_op_state = value
+            self._invoke_tmc_op_state_callback()
 
     @property
     def vlbi(self):
