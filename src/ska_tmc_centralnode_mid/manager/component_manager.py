@@ -307,11 +307,11 @@ class CNComponentManager(BaseComponentManager):
                 # what I do?
             if "leaf" in name:
                 continue
-            if "csp" in name and "master" in name:
+            elif "csp" in name and "master" in name:
                 telescopeStateList.append(dev.state)
-            if "sdp" in name and "master" in name:
+            elif "sdp" in name and "master" in name:
                 telescopeStateList.append(dev.state)
-            if "mid_d" in name and "master" in name:
+            elif "mid_d" in name and "master" in name:
                 telescopeStateList.append(dev.state)
 
         telescopeSetStateList = set(telescopeStateList)
