@@ -812,29 +812,6 @@ class CentralNode(SKABaseDevice):
             command_obj = command_class(self.component_manager, self.op_state_model, *args, self.logger)
             self.register_command_object(command_name, command_obj)
 
-        # self.on_object = On(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.register_command_object("On", self.on_object)
-        # self.telescope_on_object = TelescopeOn(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.register_command_object("TelescopeOn", self.telescope_on_object)
-        # self.telescope_off_object = TelescopeOff(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.off_object = Off(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.startup_object = StartUpTelescope(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.register_command_object("StartUpTelescope", self.startup_object)
-        # self.standby_object = StandByTelescope(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.register_command_object("StandByTelescope", self.standby_object)
-        # self.assign_object = AssignResources(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.release_object = ReleaseResources(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.stow_object = StowAntennas(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.standby_tmc_object = Standby(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.telescope_standby_object = TelescopeStandby(self.component_manager, self.op_state_model, *args, logger=self.logger)
-        # self.register_command_object("Off", self.off_object)
-        # self.register_command_object("AssignResources", self.assign_object)
-        # self.register_command_object("StowAntennas", self.stow_object)
-        # self.register_command_object("TelescopeOff", self.telescope_off_object)
-        # self.register_command_object("ReleaseResources", self.release_object)
-        # self.register_command_object("Standby", self.standby_tmc_object)
-        # self.register_command_object("TelescopeStandby", self.telescope_standby_object)
-
 # ----------
 # Run server
 # ----------
