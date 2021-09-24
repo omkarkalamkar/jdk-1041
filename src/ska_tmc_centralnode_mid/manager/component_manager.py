@@ -19,22 +19,14 @@ class CNComponentManager(BaseComponentManager):
 
     It supports:
 
-    * Maintaining a connection to its component
-
-    * Controlling its component via commands like Off(), Standby(),
-      On(), etc.
-
     * Monitoring its component, e.g. detect that it has been turned off
       or on
-
-    The current implementation is intended to
-
-    * illustrate the model
-
-    * enable testing of these base classes
-
-    It should not generally be used in concrete devices; instead, write
-    a component manager specific to the component managed by the device.
+    
+    * Fetching the latest SCM indicator values of the components periodically 
+      and trigger the TMC and telescope state aggregation
+    
+    * Receiving the change events from the component and trigger 
+      the TMC and telescope state aggregation
     """
 
     def __init__(self, 
@@ -145,14 +137,14 @@ class CNComponentManager(BaseComponentManager):
         for dish in range(1, (num_dishes + 1)):
             self.add_device(dln_prefix + f"000{dish}")
 
-    def add_multiple_devices(self, list):
+    def add_multiple_devices(self, device_list):
         """
         Add multiple devices to the monitoring loop
 
-        :param list: list of device names
+        :param device_list: list of device names
         :type list: list[str]
         """
-        for dev_name in list:
+        for dev_name in device_list:
             self.add_device(dev_name)
 
     def add_device(self, dev_name):

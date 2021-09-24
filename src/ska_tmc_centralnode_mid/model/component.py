@@ -6,7 +6,7 @@ from ska_tmc_centralnode_mid.const import ModesAvailability
 
 class Component:
     """
-    A component manager for Central Node
+    A component class for Central Node
 
     It supports:
 
@@ -49,7 +49,7 @@ class Component:
     def _invoke_device_callback(self, devInfo):
         if self._update_device_callback is not None:
             self._update_device_callback(devInfo)
-    
+
     def _invoke_telescope_state_callback(self):
         if self._update_telescope_state_callback is not None:
             self._update_telescope_state_callback(self.telescope_state)

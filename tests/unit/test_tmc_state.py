@@ -120,7 +120,7 @@ def test_tmc_state_init(tango_context):
     # import debugpy; debugpy.debug_this_thread()
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_device_init(devFactory, cm, 5)
+    set_device_init(devFactory, cm, 1.5)
     assert cm.component.tmc_op_state == tango.DevState.INIT
 
 def test_tmc_state_init_only_monitoring_loop(tango_context):
