@@ -18,7 +18,7 @@ class MonitoringLoop:
 
     """
 
-    def __init__(self, component_manager, logger=None, max_workers = 1, proxy_timeout=500, sleep_timeout=1):
+    def __init__(self, component_manager, logger=None, max_workers = 5, proxy_timeout=500, sleep_timeout=1):
         self._thread = threading.Thread(target=self.run)
         self._stop = False
         self._logger = logger

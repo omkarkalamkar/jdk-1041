@@ -41,8 +41,6 @@ from ska_tmc_centralnode_mid.health_state_aggregator import HealthStateAggregato
 from ska_tmc_centralnode_mid.const import ModesAvailability
 from ska_tmc_centralnode_mid.op_state_aggregator import OpStateAggregator
 from ska_tmc_centralnode_mid.telescope_state_aggregator import TelescopeStateAggregator
-from ska_tmc_centralnode_mid.commands.startup_telescope_command import StartUpTelescope
-from ska_tmc_centralnode_mid.commands.standby_telescope_command import StandByTelescope
 
 
 
@@ -65,9 +63,7 @@ __all__ = [
     "StowAntennas",
     "On",
     "Standby",
-    "TelescopeStandby",
-    "StandByTelescope",
-    "StartUpTelescope"
+    "TelescopeStandby"
 ]
 
 
@@ -801,8 +797,8 @@ class CentralNode(SKABaseDevice):
             ("TelescopeOn", TelescopeOn),
             ("Off", Off),
             ("TelescopeOff", TelescopeOff),
-            ("StartUpTelescope", StartUpTelescope),
-            ("StandByTelescope", StandByTelescope),
+            ("StartUpTelescope", TelescopeOn),
+            ("StandByTelescope", TelescopeOff),
             ("AssignResources", AssignResources),
             ("ReleaseResources", ReleaseResources),
             ("StowAntennas", StowAntennas),
