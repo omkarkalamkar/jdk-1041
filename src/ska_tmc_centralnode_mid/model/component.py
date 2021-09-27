@@ -130,7 +130,7 @@ class Component:
         return self._telescope_state
 
     @telescope_state.setter
-    def set_telescope_state(self, value):
+    def telescope_state(self, value):
         """
         Set telescope state
 
@@ -152,7 +152,7 @@ class Component:
         return self._telescope_health_state
 
     @telescope_health_state.setter
-    def set_telescope_health_state(self, value):
+    def telescope_health_state(self, value):
         """
         Set telescope health state
 
@@ -195,7 +195,7 @@ class Component:
         return self._tmc_op_state
 
     @tmc_op_state.setter
-    def set_tmc_op_state(self, value):
+    def tmc_op_state(self, value):
         """
         Set the TMC operational State
 
@@ -217,7 +217,7 @@ class Component:
         return self._vlbi
 
     @vlbi.setter
-    def set_vlbi(self, value):
+    def vlbi(self, value):
         """
         Set vlbi ModesAvailability
 
@@ -238,7 +238,7 @@ class Component:
         return self._imaging
 
     @imaging.setter
-    def set_imaging(self, value):
+    def imaging(self, value):
         """
         Set vlbi ModesAvailability
 
@@ -259,7 +259,7 @@ class Component:
         return self._pss
 
     @pss.setter
-    def set_pss(self, value):
+    def pss(self, value):
         """
         Set pss ModesAvailability
 
@@ -280,7 +280,7 @@ class Component:
         return self._pst
 
     @pst.setter
-    def set_pst(self, value):
+    def pst(self, value):
         """
         Set pss ModesAvailability
 

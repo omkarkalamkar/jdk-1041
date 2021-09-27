@@ -266,16 +266,16 @@ class CNComponentManager(BaseComponentManager):
         healthStateSetList = set(healthStateList)
         if healthStateSetList == set([HealthState.OK]):
             with self.component.lock:
-                self.component.set_telescope_health_state(HealthState.OK)
+                self.component.telescope_health_state = HealthState.OK
         elif HealthState.FAILED in healthStateSetList:
             with self.component.lock:
-                self.component.set_telescope_health_state(HealthState.FAILED)
+                self.component.telescope_health_state = HealthState.FAILED
         elif HealthState.DEGRADED in healthStateSetList:
             with self.component.lock:
-                self.component.set_telescope_health_state(HealthState.DEGRADED)
+                self.component.telescope_health_state = HealthState.DEGRADED
         else:
             with self.component.lock:
-                self.component.set_telescope_health_state(HealthState.UNKNOWN)
+                self.component.telescope_health_state = HealthState.UNKNOWN
 
     def _aggregate_state(self):
         """
@@ -309,22 +309,22 @@ class CNComponentManager(BaseComponentManager):
         telescopeSetStateList = set(telescopeStateList)
         if telescopeSetStateList == set([DevState.ON]):
             with self.component.lock:
-                self.component.set_telescope_state(DevState.ON)
+                self.component.telescope_state = DevState.ON
         elif telescopeSetStateList == set([DevState.OFF]):
             with self.component.lock:
-                self.component.set_telescope_state(DevState.OFF)
+                self.component.telescope_state = DevState.OFF
         elif DevState.INIT in telescopeSetStateList:
             with self.component.lock:
-                self.component.set_telescope_state(DevState.INIT)
+                self.component.telescope_state = DevState.INIT
         elif DevState.FAULT in telescopeSetStateList:
             with self.component.lock:
-                self.component.set_telescope_state(DevState.FAULT)
+                self.component.telescope_state = DevState.FAULT
         elif DevState.STANDBY in telescopeSetStateList:
             with self.component.lock:
-                self.component.set_telescope_state(DevState.STANDBY)
+                self.component.telescope_state = DevState.STANDBY
         else:
             with self.component.lock:
-                self.component.set_telescope_state(DevState.UNKNOWN)
+                self.component.telescope_state = DevState.UNKNOWN
 
     def _aggregate_tm_op_state(self):
         """
@@ -342,21 +342,21 @@ class CNComponentManager(BaseComponentManager):
         tmSetStateList = set(tmStateList)
         if tmSetStateList == set([DevState.ON]):
             with self.component.lock:
-                self.component.set_tmc_op_state(DevState.ON)
+                self.component.tmc_op_state = DevState.ON
         elif tmSetStateList == set([DevState.OFF]):
             raise Exception("OFF State not allowed")
         elif DevState.INIT in tmSetStateList:
             with self.component.lock:
-                self.component.set_tmc_op_state(DevState.INIT)
+                self.component.tmc_op_state = DevState.INIT
         elif DevState.FAULT in tmSetStateList:
             with self.component.lock:
-                self.component.set_tmc_op_state(DevState.FAULT)
+                self.component.tmc_op_state = DevState.FAULT
         elif DevState.STANDBY in tmSetStateList:
             with self.component.lock:
-                self.component.set_tmc_op_state(DevState.STANDBY)
+                self.component.tmc_op_state = DevState.STANDBY
         else:
             with self.component.lock:
-                self.component.set_tmc_op_state(DevState.UNKNOWN)
+                self.component.tmc_op_state = DevState.UNKNOWN
 
     def _update_resources(self, subarray_dev_name):
         """
