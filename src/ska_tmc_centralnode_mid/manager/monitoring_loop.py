@@ -18,7 +18,7 @@ class MonitoringLoop:
 
     """
 
-    def __init__(self, component_manager, logger=None, max_workers = 5, proxy_timeout=500, sleep_timeout=1):
+    def __init__(self, component_manager, logger=None, max_workers = 1, proxy_timeout=500, sleep_timeout=1):
         self._thread = threading.Thread(target=self.run)
         self._stop = False
         self._logger = logger
@@ -54,6 +54,7 @@ class MonitoringLoop:
                 newDevInfo = None
                 if "subarray" in devInfo.dev_name.lower():
                     newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
+                    # newDevInfo.resources = proxy.assignedResources
                 else:
                     newDevInfo = DeviceInfo(devInfo.dev_name)
                 newDevInfo.from_dev_info(devInfo)

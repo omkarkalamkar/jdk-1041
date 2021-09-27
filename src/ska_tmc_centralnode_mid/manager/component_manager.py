@@ -75,6 +75,29 @@ class CNComponentManager(BaseComponentManager):
         if _event_receiver:
             self._event_receiver.start()
 
+        self._adapters = []
+
+    @property
+    def adapters(self):
+        """
+        Return the list of the adapters used
+
+        :return: list of adapters
+        :rtype BaseAdapter
+        """
+        return self._adapters
+
+    def add_adapter(self, adapter):
+        """
+        Add an adapter at the list of adpters
+        if not present
+
+        :param adapter: adapter object
+        :type adapter: BaseAdapter
+        """
+        if adapter not in self.adapters:
+            self._adapters.append(adapter)
+
     @property
     def component(self):
         """
