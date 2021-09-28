@@ -1,18 +1,93 @@
-from ska_tango_base.commands import ResultCode
-from tests.settings import  logger
-from ska_tmc_centralnode_mid.commands.on_command import On
-from mock.mock import Mock
-from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter
-from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
-from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
-def test_on_command():
-    op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(op_state_model, logger=logger, _monitoring_loop=True, _event_receiver=True)
-    proxy = Mock()
-    adapter = BaseAdapter("ska_mid/tm_leaf_node/csp_master", proxy)
-    cm.add_adapter(adapter)
-    on_command = On(cm)
+import time
+import pytest
+from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter, CspMaster, Dish
+from tests.helper_adapter_factory import HelperAdapterFactory
+from ska_tango_base.commands import ResultCode
+from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
+from tests.settings import  logger
+from ska_tango_base.subarray import SKASubarray
+from ska_tango_base.obs.obs_device import SKAObsDevice
+from test_cm_all_working import create_cm
+from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_faulty_devices
+
+@pytest.fixture()
+def devices_to_load():
+    return (
+        {
+            "class": SKASubarray,
+            "devices": [
+                {
+                    "name": "ska_mid/tm_subarray_node/1"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/2"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/3"
+                },
+                {
+                    "name": "ska_mid/tm_leaf_node/csp_subarray01"
+                },
+                {
+                    "name": "ska_mid/tm_leaf_node/csp_subarray02"
+                },
+                {
+                    "name": "ska_mid/tm_leaf_node/csp_subarray03"
+                },
+                {
+                    "name": "ska_mid/tm_leaf_node/sdp_subarray01"
+                },
+                {
+                    "name": "ska_mid/tm_leaf_node/sdp_subarray02"
+                },
+                {
+                    "name": "ska_mid/tm_leaf_node/sdp_subarray03"
+                }
+            ],
+        },
+        {
+            "class": SKAObsDevice,
+            "devices": [
+                {
+                    "name": "ska_mid/tm_leaf_node/csp_master"
+                },
+                {
+                    "name": "mid_csp/elt/master"
+                },
+                {
+                    "name": "ska_mid/tm_leaf_node/sdp_master"
+                },
+                {
+                    "name": "mid_sdp/elt/master"
+                },
+                {
+                    "name": "mid_d0001/elt/master"
+                }
+            ]
+        }
+    )
+
+def test_telescope_on_command(tango_context):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    cm, start_time = create_cm()
+    num_faulty = count_faulty_devices(cm)
+    assert num_faulty == 0
+    elapsed_time = time.time() - start_time
+    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
+
+    my_adapter_factory = HelperAdapterFactory()
+    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
     (result_code, _) = on_command.do()
     assert result_code == ResultCode.OK
-    proxy.On.assert_called()
+    for adapter in my_adapter_factory.adapters:
+        if isinstance(adapter, Dish):
+            adapter.proxy.SetStandbyFPMode.assert_called() 
+            adapter.proxy.SetOperateMode.assert_called()
+            continue
+        if isinstance(adapter, CspMaster):
+            adapter.proxy.TelescopeOn.assert_called() 
+            continue
+        
+        adapter.proxy.TelescopeOn.assert_called() 

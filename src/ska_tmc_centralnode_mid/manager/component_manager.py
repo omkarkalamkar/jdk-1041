@@ -12,6 +12,10 @@ from ska_tango_base.control_model import HealthState
 from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
 from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
+from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter, AdapterType, CspMaster, Dish
+from ska_tmc_centralnode_mid.dev_factory import DevFactory
+
+from ska_tmc_centralnode_mid.model.input import InputParameter
 
 class CNComponentManager(BaseComponentManager):
     """
@@ -75,28 +79,84 @@ class CNComponentManager(BaseComponentManager):
         if _event_receiver:
             self._event_receiver.start()
 
-        self._adapters = []
+        # self._adapters = []
+        
+        self._input_parameter = InputParameter(None)
+
+        self._command_executed = []
+
+        # self._dev_factory = DevFactory()
+
+    # def input_parameter_callback(self):
+    #     # change the corresponding adapeter!
+    #     for dev_name in self._input_parameter.tm_subarray_dev_names:
+            
+    #     self._input_parameter.csp_subarray_dev_names = ("3", "4")
+    #     self._input_parameter.tm_dish_dev_names = ("5")
+    #     self._input_parameter.sdp_subarray_dev_names = ("6")
+    #     self._input_parameter.csp_master_dev_name = "7"
+    #     self._input_parameter.sdp_master_dev_name = "8"
+    #     self._input_parameter.tm_leaf_sdp_master_dev_name = "9"
+    #     self._input_parameter.tm_leaf_csp_master_dev_name = "10"
+
+    # @property
+    # def adapters(self):
+    #     """
+    #     Return the list of the adapters used
+
+    #     :return: list of adapters
+    #     :rtype BaseAdapter
+    #     """
+    #     return self._adapters
+
+    # def add_adapter(self, adapter):
+    #     """
+    #     Add an adapter at the list of adpters
+    #     if not present
+
+    #     :param adapter: adapter object
+    #     :type adapter: BaseAdapter
+    #     """
+    #     if adapter not in self.adapters:
+    #         self._adapters.append(adapter)
+
+    # def get_or_create_adapter(self, dev_name, adapter_type = AdapterType.BASE):
+    #     """
+    #     Get or create a generic adapter 
+
+    #     :param dev_name: device name
+    #     :type str
+    #     """
+    #     for adapter in self.adapters:
+    #         if adapter.dev_name == dev_name:
+    #             return adapter
+
+    #     if adapter_type ==  AdapterType.DISH:
+    #         return Dish(dev_name, self._dev_factory.get_device(dev_name))
+    #     elif adapter_type == AdapterType.CSP:
+    #         return CspMaster(dev_name, self._dev_factory.get_device(dev_name))
+    #     else:
+    #         return BaseAdapter(dev_name, self._dev_factory.get_device(dev_name))
 
     @property
-    def adapters(self):
+    def input_parameter(self):
         """
-        Return the list of the adapters used
+        Return the input parameter
 
-        :return: list of adapters
-        :rtype BaseAdapter
+        :return: input parameter
+        :rtype InputParameter
         """
-        return self._adapters
+        return self._input_parameter
 
-    def add_adapter(self, adapter):
-        """
-        Add an adapter at the list of adpters
-        if not present
+    # @input_parameter.setter
+    # def input_parameter(self, value):
+    #     """
+    #     Set the input parameter
 
-        :param adapter: adapter object
-        :type adapter: BaseAdapter
-        """
-        if adapter not in self.adapters:
-            self._adapters.append(adapter)
+    #     :param adapter: input parameter
+    #     :type adapter: InputParameter
+    #     """
+    #     self._input_parameter = value
 
     @property
     def component(self):
@@ -187,6 +247,14 @@ class CNComponentManager(BaseComponentManager):
 
         self.component.update_device(devInfo)
 
+    def add_command_execution(self, result_code, message):
+        """
+        Add a command execution to the list of the command executed
+        """
+        self._command_executed.append({
+            "ResultCode": result_code,
+            "Message" : message
+        })
     
     def device_failed(self, device_info, exception):
         """

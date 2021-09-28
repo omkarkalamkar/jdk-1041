@@ -26,14 +26,11 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
 from ska_tmc_centralnode_mid import const, release
 from ska_tmc_centralnode_mid.commands.telescope_off_command import TelescopeOff
-from ska_tmc_centralnode_mid.commands.off_command import Off
-from ska_tmc_centralnode_mid.commands.on_command import On
 from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode_mid.commands.telescope_standby_command import TelescopeStandby
 from ska_tmc_centralnode_mid.commands.assign_resources_command import AssignResources
 from ska_tmc_centralnode_mid.commands.release_resources_command import ReleaseResources
 from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
-from ska_tmc_centralnode_mid.commands.standby_command import Standby
 from ska_tmc_centralnode_mid.resource_manager import ResourceManager
 from ska_tmc_centralnode_mid.device_data import DeviceData
 from ska_tmc_centralnode_mid.obs_state_check import ObsStateAggregator
@@ -58,11 +55,8 @@ __all__ = [
     "ReleaseResources",
     "TelescopeOff",
     "StowAntennas",
-    "Off",
     "TelescopeOn",
     "StowAntennas",
-    "On",
-    "Standby",
     "TelescopeStandby"
 ]
 
@@ -793,16 +787,16 @@ class CentralNode(SKABaseDevice):
         super().init_command_objects()
         args = (self.device_data, self.op_state_model)
         for (command_name, command_class) in [
-            ("On", On),
+            ("On", TelescopeOn),
             ("TelescopeOn", TelescopeOn),
-            ("Off", Off),
+            ("Off", TelescopeOff),
             ("TelescopeOff", TelescopeOff),
             ("StartUpTelescope", TelescopeOn),
             ("StandByTelescope", TelescopeOff),
             ("AssignResources", AssignResources),
             ("ReleaseResources", ReleaseResources),
             ("StowAntennas", StowAntennas),
-            ("Standby", Standby),
+            ("Standby", TelescopeStandby),
             ("TelescopeStandby", TelescopeStandby)
         ]:
             command_obj = command_class(self.component_manager, self.op_state_model, *args, self.logger)

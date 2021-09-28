@@ -33,18 +33,21 @@ class Component:
         self._update_tmc_op_state_callback = None
         self._update_subarray_health_state_callback = None
         self.lock = threading.Lock()
+        self._desired_telescope_state = DevState.ON
 
     def set_op_callbacks(self, 
         _update_device_callback = None,
         _update_telescope_state_callback = None,
         _update_telescope_health_state_callback = None,
         _update_tmc_op_state_callback = None,
-        _update_subarray_health_state_callback = None,):
+        _update_subarray_health_state_callback = None,
+        _update_desired_telescope_state_callback = None):
         self._update_device_callback = _update_device_callback
         self._update_telescope_state_callback = _update_telescope_state_callback
         self._update_telescope_health_state_callback = _update_telescope_health_state_callback
         self._update_tmc_op_state_callback = _update_tmc_op_state_callback
         self._update_subarray_health_state_callback = _update_subarray_health_state_callback
+        self._update_desired_telescope_state_callback = _update_desired_telescope_state_callback
 
     def _invoke_device_callback(self, devInfo):
         if self._update_device_callback is not None:
@@ -65,6 +68,32 @@ class Component:
     def _invoke_subarray_health_state_callback(self, devInfo):
         if self._update_subarray_health_state_callback is not None:
             self._update_subarray_health_state_callback(devInfo)
+
+    def _invoke_update_desired_telescope_state_callback(self, desired_telescope_state):
+        if self._update_desired_telescope_state_callback is not None:
+            self._update_desired_telescope_state_callback(desired_telescope_state)
+
+    @property
+    def desired_telescope_state(self):
+        """
+        Return desired telescope state
+
+        :return: desired telescope state
+        :rtype: DevState
+        """
+        return self._pst
+
+    @desired_telescope_state.setter
+    def desired_telescope_state(self, value):
+        """
+        Set desired telescope state
+
+        :param value: desired telescope state
+        :type value: DevState
+        """
+        if not value == self._desired_telescope_state:
+            self._desired_telescope_state = value
+            self._invoke_update_desired_telescope_state_callback(self._desired_telescope_state)
     
     @property
     def devices(self):
@@ -173,16 +202,6 @@ class Component:
         :rtype: HealthState
         """
         return self._health_state
-
-    # def set_cn_health_state(self, value):
-    #     """
-    #     Set central node health state
-
-    #     :param value: the new central node health state
-    #     :type value: HealthState
-    #     """
-    #     if isinstance(value, HealthState):
-    #         self._health_state = value
 
     @property
     def tmc_op_state(self):
