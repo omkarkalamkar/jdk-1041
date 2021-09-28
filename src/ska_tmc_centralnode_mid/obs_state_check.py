@@ -9,7 +9,7 @@ import logging
 import tango
 
 # Additional import
-from ska.base.control_model import ObsState
+from ska_tango_base.control_model import ObsState
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from ska_tmc_centralnode_mid import const

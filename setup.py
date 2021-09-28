@@ -49,9 +49,9 @@ setup(
     install_requires=[
         "pytango==9.3.3",
         "mock",
-        "ska-ser-logging==0.4.0",
-        "ska-tmc-common==0.1.7+d39e6423",
-        "ska-ser-skuid==3.2.1+8ab41afc",
+        "ska-ser-logging>=0.4.0",
+        "ska-tmc-common>=0.1.7+d39e6423",
+        "ska-ser-skuid>=3.2.1+8ab41afc",
         ],
     setup_requires=[
         # dependency for `python setup.py test`

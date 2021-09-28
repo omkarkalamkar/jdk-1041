@@ -9,27 +9,31 @@ Central Node is a coordinator of the complete M&C system. Central Node implement
 of state and mode attributes defined by the SKA Control Model.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
+from logging import debug
 import threading
 from time import sleep
+from ska_tango_base.base import component_manager
 # Tango imports
 from tango import DebugIt, AttrWriteType, DevState, DevString
 from tango.server import run, attribute, command, device_property
+from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateMachine, TMCOpStateModel
 from tmc.common.tango_server_helper import TangoServerHelper
 
 # Additional import
-from ska.base import SKABaseDevice
-from ska.base.commands import ResultCode
-from ska.base.control_model import HealthState
+from ska_tango_base import SKABaseDevice
+from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import HealthState
 from ska_tmc_centralnode_mid import const, release
-from ska_tmc_centralnode_mid.telescope_off_command import TelescopeOff
-from ska_tmc_centralnode_mid.off_command import Off
-from ska_tmc_centralnode_mid.on_command import On
-from ska_tmc_centralnode_mid.telescope_on_command import TelescopeOn
-from ska_tmc_centralnode_mid.telescope_standby_command import TelescopeStandby
-from ska_tmc_centralnode_mid.assign_resources_command import AssignResources
-from ska_tmc_centralnode_mid.release_resources_command import ReleaseResources
-from ska_tmc_centralnode_mid.stow_antennas_command import StowAntennas
-from ska_tmc_centralnode_mid.standby_command import Standby
+from ska_tmc_centralnode_mid.commands.telescope_off_command import TelescopeOff
+from ska_tmc_centralnode_mid.commands.off_command import Off
+from ska_tmc_centralnode_mid.commands.on_command import On
+from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode_mid.commands.telescope_standby_command import TelescopeStandby
+from ska_tmc_centralnode_mid.commands.assign_resources_command import AssignResources
+from ska_tmc_centralnode_mid.commands.release_resources_command import ReleaseResources
+from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
+from ska_tmc_centralnode_mid.commands.standby_command import Standby
 from ska_tmc_centralnode_mid.resource_manager import ResourceManager
 from ska_tmc_centralnode_mid.device_data import DeviceData
 from ska_tmc_centralnode_mid.obs_state_check import ObsStateAggregator
@@ -37,8 +41,6 @@ from ska_tmc_centralnode_mid.health_state_aggregator import HealthStateAggregato
 from ska_tmc_centralnode_mid.const import ModesAvailability
 from ska_tmc_centralnode_mid.op_state_aggregator import OpStateAggregator
 from ska_tmc_centralnode_mid.telescope_state_aggregator import TelescopeStateAggregator
-from ska_tmc_centralnode_mid.startup_telescope_command import StartUpTelescope
-from ska_tmc_centralnode_mid.standby_telescope_command import StandByTelescope
 
 
 
@@ -61,9 +63,7 @@ __all__ = [
     "StowAntennas",
     "On",
     "Standby",
-    "TelescopeStandby",
-    "StandByTelescope",
-    "StartUpTelescope"
+    "TelescopeStandby"
 ]
 
 
@@ -222,6 +222,19 @@ class CentralNode(SKABaseDevice):
         doc="commandInProgress attribute of Central Node.",
     )
 
+    def create_component_manager(self):
+        self.op_state_model = TMCOpStateModel(
+            logger=self.logger,
+            callback=super()._update_state)
+        cm =  CNComponentManager(
+            self.op_state_model, logger=self.logger
+        )
+        cm.add_dishes(self.DishLeafNodePrefix, self.NumDishes)
+        cm.add_multiple_devices(self.TMMidSubarrayNodes)
+        cm.add_device(self.CspMasterFQDN)
+        cm.add_device(self.SdpMasterFQDN)
+        return cm
+
     # ---------------
     # General methods
     # ---------------
@@ -314,7 +327,9 @@ class CentralNode(SKABaseDevice):
                 ] = device.TMMidSubarrayNodes[subarray]
             
             # Method to check CentralNode device State
-            device.check_cn_state()
+            # device.check_cn_state()
+
+            device.op_state_model.perform_action("component_on")
             
             this_server.write_attr("activityMessage", const.STR_INIT_SUCCESS, False)
             self.logger.info(const.STR_INIT_SUCCESS)
@@ -424,52 +439,52 @@ class CentralNode(SKABaseDevice):
         self.attr_map[attr] = val
         lock.release()
     
-    def check_cn_state(self):
-        """
-        This method creates and start thread to check CentralNode device State
-        """
-        try:
-            # Create event for state change
-            self._cn_state_event = threading.Event()  # thread control
-            # create thread
-            self.logger.info("Starting thread to check the state of CentralNode.")
-            cn_state_thread = threading.Thread(
-                target=self.monitor_cn_state,
-            )
-            cn_state_thread.start() 
-        except Exception as e:
-            self.logger.exception(f"In check_cn_state exception is:{e}")
+    # def check_cn_state(self):
+    #     """
+    #     This method creates and start thread to check CentralNode device State
+    #     """
+    #     try:
+    #         # Create event for state change
+    #         self._cn_state_event = threading.Event()  # thread control
+    #         # create thread
+    #         self.logger.info("Starting thread to check the state of CentralNode.")
+    #         cn_state_thread = threading.Thread(
+    #             target=self.monitor_cn_state,
+    #         )
+    #         cn_state_thread.start() 
+    #     except Exception as e:
+    #         self.logger.exception(f"In check_cn_state exception is:{e}")
     
-    def monitor_cn_state(self):
-        """
-        This methods monitors the State of CentralNode, once state of CentralNode is OFF and state of all TMC devices is OFF,
-        TMC On command is getting invoked which makes CentralNode device State to ON
-        """
-        self.logger.info("Started monitoring CN state")
-        this_server = TangoServerHelper.get_instance()
-        device_data = DeviceData.get_instance()
-        try:
-            while not self._cn_state_event.isSet():
-                cn_state = this_server.get_state()
-                # CentralNode can be OFF after init and will be updated to UNKNOWN until receives states from all TMC devices
-                if cn_state in [DevState.OFF, DevState.UNKNOWN] and device_data._tmc_off_trigger.isSet():
-                    self.logger.info(
-                                f"CN_device_states is:{cn_state}"
-                            )
-                    # Time sleep added to wait for On() command to be registered using init_register_command() method
-                    sleep(1)
-                    this_server.device.On()
-                    self.logger.info(
-                                f"On command is called"
-                            )
-                    self.logger.info(
-                                f"CN_device_states is:{cn_state}"
-                            )
-                    device_data._tmc_off_trigger.clear()
-                    break
+    # def monitor_cn_state(self):
+    #     """
+    #     This methods monitors the State of CentralNode, once state of CentralNode is OFF and state of all TMC devices is OFF,
+    #     TMC On command is getting invoked which makes CentralNode device State to ON
+    #     """
+    #     self.logger.info("Started monitoring CN state")
+    #     this_server = TangoServerHelper.get_instance()
+    #     device_data = DeviceData.get_instance()
+    #     try:
+    #         while not self._cn_state_event.isSet():
+    #             cn_state = this_server.get_state()
+    #             # CentralNode can be OFF after init and will be updated to UNKNOWN until receives states from all TMC devices
+    #             if cn_state in [DevState.OFF, DevState.UNKNOWN] and device_data._tmc_off_trigger.isSet():
+    #                 self.logger.info(
+    #                             f"CN_device_states is:{cn_state}"
+    #                         )
+    #                 # Time sleep added to wait for On() command to be registered using init_register_command() method
+    #                 sleep(1)
+    #                 this_server.device.On()
+    #                 self.logger.info(
+    #                             f"On command is called"
+    #                         )
+    #                 self.logger.info(
+    #                             f"CN_device_states is:{cn_state}"
+    #                         )
+    #                 device_data._tmc_off_trigger.clear()
+    #                 break
 
-        except Exception as e:
-            self.logger.exception(f"In monitor_cn_state exception is:{e}")
+    #     except Exception as e:
+    #         self.logger.exception(f"In monitor_cn_state exception is:{e}")
 
     # --------
     # Commands
@@ -776,30 +791,22 @@ class CentralNode(SKABaseDevice):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        args = (self.device_data, self.state_model, self.logger)
-        self.on_object = On(*args)
-        self.register_command_object("On", self.on_object)
-        self.telescope_on_object = TelescopeOn(*args)
-        self.register_command_object("TelescopeOn", self.telescope_on_object)
-        self.telescope_off_object = TelescopeOff(*args)
-        self.off_object = Off(*args)
-        self.startup_object = StartUpTelescope(*args)
-        self.register_command_object("StartUpTelescope", self.startup_object)
-        self.standby_object = StandByTelescope(*args)
-        self.register_command_object("StandByTelescope", self.standby_object)
-        self.assign_object = AssignResources(*args)
-        self.release_object = ReleaseResources(*args)
-        self.stow_object = StowAntennas(*args)
-        self.standby_tmc_object = Standby(*args)
-        self.telescope_standby_object = TelescopeStandby(*args)
-        self.register_command_object("Off", self.off_object)
-        self.register_command_object("AssignResources", self.assign_object)
-        self.register_command_object("StowAntennas", self.stow_object)
-        self.register_command_object("TelescopeOff", self.telescope_off_object)
-        self.register_command_object("ReleaseResources", self.release_object)
-        self.register_command_object("Standby", self.standby_tmc_object)
-        self.register_command_object("TelescopeStandby", self.telescope_standby_object)
-        
+        args = (self.device_data, self.op_state_model)
+        for (command_name, command_class) in [
+            ("On", On),
+            ("TelescopeOn", TelescopeOn),
+            ("Off", Off),
+            ("TelescopeOff", TelescopeOff),
+            ("StartUpTelescope", TelescopeOn),
+            ("StandByTelescope", TelescopeOff),
+            ("AssignResources", AssignResources),
+            ("ReleaseResources", ReleaseResources),
+            ("StowAntennas", StowAntennas),
+            ("Standby", Standby),
+            ("TelescopeStandby", TelescopeStandby)
+        ]:
+            command_obj = command_class(self.component_manager, self.op_state_model, *args, self.logger)
+            self.register_command_object(command_name, command_obj)
 
 # ----------
 # Run server

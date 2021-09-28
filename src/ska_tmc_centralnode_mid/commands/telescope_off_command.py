@@ -11,9 +11,9 @@ import tango
 from tango import DevState, DevFailed
 
 # Additional import
-from ska.base import SKABaseDevice
-from ska.base.control_model import ObsState
-from ska.base.commands import BaseCommand
+from ska_tango_base import SKABaseDevice
+from ska_tango_base.commands import ResultCode, BaseCommand
+from ska_tango_base.control_model import HealthState, ObsState
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from ska_tmc_centralnode_mid import const
@@ -32,6 +32,11 @@ class TelescopeOff(BaseCommand):
     CSPMasterLeaf node.
     """
 
+    def __init__(self, target, pop_state_model, *args, logger=None, **kwargs):
+        super().__init__(target, args, logger, kwargs)
+        self.op_state_model = pop_state_model
+
+
     def check_allowed(self):
 
         """
@@ -43,13 +48,13 @@ class TelescopeOff(BaseCommand):
 
         :raises: DevFailed if this command is not allowed to be run in current device state
         """
-        if self.state_model.op_state in [
+        if self.op_state_model.op_state in [
             DevState.FAULT,
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
             tango.Except.throw_exception(
-                f"Command TelescopeOff is not allowed in current state {self.state_model.op_state}.",
+                f"Command TelescopeOff is not allowed in current state {self.op_state_model.op_state}.",
                 "Failed to invoke TelescopeOff command on CentralNode.",
                 "CentralNode.TelescopeOff()",
                 tango.ErrSeverity.ERR,

@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode-mid"""
-version="0.2.14"
+version="0.3.0"
 version_info=version.split(".")
 description="""Central Node Mid"""
 author="Team NCRA"
@@ -10,8 +10,8 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.2.14
-tag=0.2.14
+release=0.3.0
+tag=0.3.0
 tag_description= Fix implementation on CentralNode to fetch eb/sb ids from input json string.
 release_notes=This release contains:<br/><ul><li>  Fix implementation on CentralNode to fetch eb/sb ids from input json string.</li></ul><br/>
 gitlab_username=DigvijayMali92

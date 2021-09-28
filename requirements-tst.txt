@@ -1,3 +1,4 @@
+--extra-index-url https://artefact.skao.int/repository/pypi-internal/simple
 pytest
 pytest-cov
 pytest-json-report

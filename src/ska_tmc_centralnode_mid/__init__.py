@@ -17,7 +17,8 @@ from ska_tmc_centralnode_mid import const
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid import input_validator
 from ska_tmc_centralnode_mid import exceptions
-__all__ = ["release", "const", "CentralNode", "input_validator", "exceptions"]
+from ska_tmc_centralnode_mid.dev_factory import DevFactory
+__all__ = ["release", "const", "CentralNode", "input_validator", "exceptions", "DevFactory"]
 
 __version__ = release.version
 __version_info__ = release.version_info
