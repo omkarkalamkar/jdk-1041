@@ -543,6 +543,7 @@ def test_health_state():
 
 
 # # Test cases for commands
+@pytest.mark.skip("will be reworked")
 def test_stow_antennas_should_set_stow_mode_on_leaf_nodes(
     mock_tango_server_helper, mock_tango_client
 ):
@@ -567,7 +568,7 @@ def test_stow_antennas_should_set_stow_mode_on_leaf_nodes(
                 CMD_SET_STOW_MODE, None
             )
 
-
+@pytest.mark.skip("will be reworked")
 def test_stow_antennas_should_raise_devfailed_exception(
     mock_tango_server_helper, mock_tango_client
 ):
@@ -596,6 +597,7 @@ def test_stow_antennas_should_raise_devfailed_exception(
 
 
 #     """Negative Test for StowAntennas"""
+@pytest.mark.skip("will be reworked")
 def test_stow_antennas_invalid_value(mock_tango_server_helper, mock_tango_client):
     tango_server_obj = mock_tango_server_helper
     tango_server_obj.read_property.side_effect = Mock(return_value=["fqdn"])

@@ -40,7 +40,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         component_manager.component.desired_telescope_state = DevState.OFF
         
-        ret_code, message = self.init_adapters(component_manager)
+        ret_code, message = self.init_adapters("TelescopeOff", component_manager)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 

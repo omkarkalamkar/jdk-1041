@@ -54,6 +54,9 @@ class BaseAdapter:
 
     def Off(self):
         self.proxy.TelescopeOff()
+
+    def StandBy(self):
+        self.proxy.TelescopeStandBy()
     
     def __eq__(self, other):
         if (isinstance(other, BaseAdapter)):
@@ -83,3 +86,6 @@ class Dish(BaseAdapter):
 
     def SetStandbyLPMode(self):
         self._proxy.SetStandbyLPMode()
+
+    def SetStowMode(self):
+        self._proxy.SetStowMode()
