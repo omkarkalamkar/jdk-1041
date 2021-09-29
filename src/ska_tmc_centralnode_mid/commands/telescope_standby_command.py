@@ -1,7 +1,7 @@
 import time
 from tango import DevState
 from ska_tango_base.control_model import ObsState
-from ska_tmc_centralnode_mid.commands.telescope_on_command import AbstractTelescopeOnOff
+from ska_tmc_centralnode_mid.commands.abstract_command import AbstractTelescopeOnOff
 from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
 from ska_tango_base.commands import ResultCode
 
@@ -42,10 +42,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             try:
                 adapter.StandBy()
             except Exception as e:
-                message = f"Error in calling Telescope StandBy in TM Subarray {adapter.dev_name}: {e}"
-                self.logger.error(message)
-                component_manager.add_command_execution("TelescopeStandBy", ResultCode.FAILED, message)
-                return ResultCode.FAILED, message
+                return self.generate_command_result("TelescopeStandBy", ResultCode.FAILED, f"Error in calling Telescope StandBy in TM Subarray {adapter.dev_name}: {e}")
 
         self.logger.info("waiting for ALL Subarray devices obsState to be Empty")
         all_empty = False
@@ -58,40 +55,29 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                     all_empty = False
             elapsed_time = time.time() - start_time
             if elapsed_time > self._timeout_subarrays:
-                return ResultCode.FAILED, "Timeout in waiting for subarrays devices to be empty"
+                return self.generate_command_result("TelescopeStandBy", ResultCode.FAILED, "Timeout in waiting for subarrays devices to be empty")
             time.sleep(self._step_sleep)
 
         try:
             self.tm_leaf_csp_master_adapter.StandBy()
         except Exception as e:
-            message = f"Error in calling Telescope StandBy in TM CSP Master Leaf {self.tm_leaf_csp_master_adapter.dev_name}: {e}"
-            self.logger.error(message)
-            component_manager.add_command_execution("TelescopeStandBy", ResultCode.FAILED, message)
-            return ResultCode.FAILED, message
+            return self.generate_command_result("TelescopeStandBy", ResultCode.FAILED, f"Error in calling Telescope StandBy in TM CSP Master Leaf {self.tm_leaf_csp_master_adapter.dev_name}: {e}")
 
         try:
             self.tm_leaf_sdp_master_adapter.StandBy()
         except Exception as e:
-            message = f"Error in calling Telescope StandBy in TM SDP Master Leaf {self.tm_leaf_sdp_master_adapter.dev_name}: {e}"
-            self.logger.error(message)
-            component_manager.add_command_execution("TelescopeStandBy", ResultCode.FAILED, message)
-            return ResultCode.FAILED, message
+            return self.generate_command_result("TelescopeStandBy", ResultCode.FAILED, f"Error in calling Telescope StandBy in TM SDP Master Leaf {self.tm_leaf_sdp_master_adapter.dev_name}: {e}")
 
         for adapter in self.tm_dish_adapters:
             try:
                 adapter.SetStandbyFPMode()
             except Exception as e:
-                message = f"Error in calling SetStandbyFPMode in TM Dish Leaf {adapter.dev_name}: {e}"
-                self.logger.error(message)
-                component_manager.add_command_execution("TelescopeStandBy", ResultCode.FAILED, message)
-                return ResultCode.FAILED, message
+                return self.generate_command_result("TelescopeStandBy", ResultCode.FAILED, f"Error in calling SetStandbyFPMode in TM Dish Leaf {adapter.dev_name}: {e}")
+            
             try:
                 adapter.SetStandbyLPMode()
             except Exception as e:
-                message = f"Error in calling SetStandbyLPMode in TM Dish Leaf {adapter.dev_name}: {e}"
-                self.logger.error(message)
-                component_manager.add_command_execution("TelescopeStandBy", ResultCode.FAILED, message)
-                return ResultCode.FAILED, message
+                return self.generate_command_result("TelescopeStandBy", ResultCode.FAILED, f"Error in calling SetStandbyLPMode in TM Dish Leaf {adapter.dev_name}: {e}")
 
         component_manager.add_command_execution("TelescopeStandBy", ResultCode.OK, "")
         return (ResultCode.OK, "")

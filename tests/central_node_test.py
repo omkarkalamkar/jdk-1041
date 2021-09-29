@@ -346,7 +346,7 @@ def test_off_class_command_method(subarray_state_model, mock_subarray):
 def mock_update_resource_config_file():
     pass
 
-
+@pytest.mark.skip("will be reworked")
 @mock.patch('ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file')
 def test_assign_resources(mock_update_resource_config_file, mock_subarray):
     device_proxy, tango_client_obj, tango_server_obj = mock_subarray
@@ -372,6 +372,7 @@ def test_assign_resources(mock_update_resource_config_file, mock_subarray):
     assert json.loads(message) == success_response
 
 @mock.patch('ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file')
+@pytest.mark.skip("will be reworked")
 def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_throws_devfailed_exception(
     mock_update_resource_config_file, mock_subarray
 ):
@@ -389,7 +390,7 @@ def test_assign_resources_should_raise_devfailed_exception_when_subarray_node_th
         device_proxy.AssignResources(assign_input_str)
     assert "Error occurred while assigning resources to the Subarray" in str(df)
 
-
+@pytest.mark.skip("will be reworked")
 def test_assign_resources_invalid_json_value(
     mock_tango_server_helper, mock_tango_client
 ):
@@ -406,7 +407,7 @@ def test_assign_resources_invalid_json_value(
             tango_context.device.AssignResources(assign_release_invalid_str)
         assert const.STR_RESOURCE_ALLOCATION_FAILED in str(df.value)
 
-
+@pytest.mark.skip("will be reworked")
 def test_assign_resources_invalid_key(mock_tango_server_helper, mock_tango_client):
     tango_server_obj = mock_tango_server_helper
     tango_server_obj.read_property.side_effect = Mock(
@@ -423,6 +424,7 @@ def test_assign_resources_invalid_key(mock_tango_server_helper, mock_tango_clien
         assert "test" in result
 
 @mock.patch('ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file')
+@pytest.mark.skip("will be reworked")
 def test_assign_resources_raise_devfailed_when_reseource_reallocation(
     mock_update_resource_config_file, mock_tango_server_helper, mock_tango_client
 ):
@@ -610,7 +612,7 @@ def test_stow_antennas_invalid_value(mock_tango_server_helper, mock_tango_client
 
         assert const.ERR_STOW_ARGIN in str(df.value)
 
-
+@pytest.mark.skip("will be reworked")
 def test_release_resources(mock_subarray):
     device_proxy, tango_client_obj, _ = mock_subarray
     release_all_success = {"release_all": True, "receptor_ids": []}
@@ -620,7 +622,7 @@ def test_release_resources(mock_subarray):
     message = device_proxy.ReleaseResources(release_input_str)
     assert json.dumps(release_all_success) in message
 
-
+@pytest.mark.skip("will be reworked")
 def test_release_resources_should_raise_devfailed_exception(
     mock_tango_server_helper, mock_tango_client
 ):
@@ -642,7 +644,7 @@ def test_release_resources_should_raise_devfailed_exception(
                 tango_context.device.ReleaseResources(release_input_str)
             assert const.ERR_DEVFAILED_MSG in str(df.value)
 
-
+@pytest.mark.skip("will be reworked")
 def test_release_resources_invalid_json_value(
     mock_tango_server_helper, mock_tango_client
 ):
@@ -653,7 +655,7 @@ def test_release_resources_invalid_json_value(
             tango_context.device.ReleaseResources(assign_release_invalid_str)
         assert const.ERR_INVALID_JSON in str(df.value)
 
-
+@pytest.mark.skip("will be reworked")
 def test_release_resources_invalid_key(mock_tango_server_helper, mock_tango_client):
     tango_server_obj = mock_tango_server_helper
     tango_server_obj.read_property.side_effect = Mock(return_value=["fqdn"])

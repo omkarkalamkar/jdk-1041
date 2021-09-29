@@ -4,7 +4,6 @@ This module provided a reference implementation of a BaseComponentManager.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
-import threading
 import time
 from tango import DevState
 from ska_tango_base.base import BaseComponentManager
@@ -12,8 +11,6 @@ from ska_tango_base.control_model import HealthState
 from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
 from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
-from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter, AdapterType, CspMaster, Dish
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
 
 from ska_tmc_centralnode_mid.model.input import InputParameter
 
@@ -459,4 +456,20 @@ class CNComponentManager(BaseComponentManager):
         :type subarray_dev_name: str
         """
         pass
+
+    def is_already_assigned(self, dishId):
+        """
+        Check if a Dish is already assigned to a subarray
+
+        :param dishId: id of the dish
+        :type dishId: str
+
+        :return True is already assigned, False otherwise
+        """
+        for devInfo in self.devices:
+            if isinstance(devInfo, SubArrayDeviceInfo):
+                if dishId in devInfo.resources:
+                    return True
+
+        return False
 

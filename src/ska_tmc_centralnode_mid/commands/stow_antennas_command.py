@@ -1,9 +1,9 @@
 from tango import DevState
-from ska_tango_base.commands import BaseCommand
+from ska_tmc_centralnode_mid.commands.abstract_command import TMCCommand
 from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory, AdapterType
 from ska_tango_base.commands import ResultCode
 
-class StowAntennas(BaseCommand):
+class StowAntennas(TMCCommand):
     """
     A class for CentralNode's StowAntennas() command.
 
@@ -68,10 +68,7 @@ class StowAntennas(BaseCommand):
                     error_dev_names.append(dev_name)
         
         if num_working == 0:
-            message = f"Error in creating dish adapters {'.'.join(error_dev_names)}"
-            self.logger.error(message)
-            component_manager.add_command_execution("StowAntennas", ResultCode.FAILED, message)
-            return ResultCode.FAILED, message
+            return self.generate_command_result("StowAntennas", ResultCode.FAILED, f"Error in creating dish adapters {'.'.join(error_dev_names)}")
         
         return ResultCode.OK, ""
 
@@ -97,10 +94,7 @@ class StowAntennas(BaseCommand):
                 try:
                     adapter.SetStowMode()
                 except Exception as e:
-                    message = f"Error in calling SetStowMode in TM Dish Leaf {adapter.dev_name}: {e}"
-                    self.logger.error(message)
-                    component_manager.add_command_execution("StowAntennas", ResultCode.FAILED, message)
-                    return ResultCode.FAILED, message
+                    return self.generate_command_result("StowAntennas", ResultCode.FAILED, f"Error in calling SetStowMode in TM Dish Leaf {adapter.dev_name}: {e}")
 
         component_manager.add_command_execution("StowAntennas", ResultCode.OK, "")
         return (ResultCode.OK, "")

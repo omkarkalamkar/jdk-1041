@@ -1,5 +1,5 @@
 import mock
-from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory, AdapterType, Dish, CspMaster, BaseAdapter
+from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory, AdapterType, BaseAdapter, DishAdapter, SubArrayAdapter
 
 class HelperAdapterFactory(AdapterFactory):
     def __init__(self) -> None:
@@ -12,9 +12,9 @@ class HelperAdapterFactory(AdapterFactory):
 
         new_adapter = None
         if adapter_type ==  AdapterType.DISH:
-            new_adapter = Dish(dev_name, mock.Mock())
-        elif adapter_type == AdapterType.CSP:
-            new_adapter = CspMaster(dev_name, mock.Mock())
+            new_adapter = DishAdapter(dev_name, mock.Mock())
+        elif adapter_type == AdapterType.SUBARRAY:
+            new_adapter = SubArrayAdapter(dev_name, mock.Mock())
         else:
             new_adapter = BaseAdapter(dev_name, mock.Mock())
 

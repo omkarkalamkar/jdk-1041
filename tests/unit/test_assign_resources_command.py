@@ -1,15 +1,17 @@
 
 import time
 import pytest
-from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter, SubArrayAdapter, DishAdapter
+import mock
+from os.path import dirname, join
+from ska_tmc_centralnode_mid.manager.adapters import DishAdapter, SubArrayAdapter
 from tests.helper_adapter_factory import HelperAdapterFactory
 from ska_tango_base.commands import ResultCode
-from ska_tmc_centralnode_mid.commands.telescope_standby_command import TelescopeStandby
+from ska_tmc_centralnode_mid.commands.assign_resources_command import AssignResources
 from tests.settings import  logger
 from tests.helper_subarray_device import HelperSubArrayDevice
 from ska_tango_base.obs.obs_device import SKAObsDevice
 from test_cm_all_working import create_cm
-from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_faulty_devices
+from tests.settings import logger, count_faulty_devices
 
 @pytest.fixture()
 def devices_to_load():
@@ -68,7 +70,7 @@ def devices_to_load():
         }
     )
 
-def test_telescope_standby_command(tango_context):
+def test_telescope_assign_resources_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
@@ -78,16 +80,16 @@ def test_telescope_standby_command(tango_context):
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
 
     my_adapter_factory = HelperAdapterFactory()
-    on_command = TelescopeStandby(cm, cm.op_state_model, my_adapter_factory)
-    (result_code, _) = on_command.do()
+
+    attrs = {'fetch_skuid.return_value': 123}
+    skuid = mock.Mock(**attrs)
+    on_command = AssignResources(cm, cm.op_state_model, my_adapter_factory, skuid)
+    assign_input_file = "command_AssignResources.json"
+    path = join(dirname(__file__), "..", "data", assign_input_file)
+    with open(path, "r") as f:
+        assign_input_str = f.read()
+    (result_code, _) = on_command.do(assign_input_str)
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
-        if isinstance(adapter, DishAdapter):
-            adapter.proxy.SetStandbyFPMode.assert_called() 
-            adapter.proxy.SetStandbyLPMode.assert_called()
-            continue
         if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.TelescopeStandBy.assert_called() 
-            continue
-        
-        adapter.proxy.TelescopeStandBy.assert_called() 
+            adapter.proxy.AssignResources.assert_called()

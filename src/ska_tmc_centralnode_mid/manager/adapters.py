@@ -4,7 +4,7 @@ from ska_tmc_centralnode_mid.dev_factory import DevFactory
 
 class AdapterType(enum.IntEnum):
     BASE = 0
-    CSP = 1
+    SUBARRAY = 1
     DISH = 2
 
 class AdapterFactory():
@@ -26,9 +26,9 @@ class AdapterFactory():
 
         new_adapter = None
         if adapter_type ==  AdapterType.DISH:
-            new_adapter = Dish(dev_name, self._dev_factory.get_device(dev_name))
-        elif adapter_type == AdapterType.CSP:
-            new_adapter = CspMaster(dev_name, self._dev_factory.get_device(dev_name))
+            new_adapter = DishAdapter(dev_name, self._dev_factory.get_device(dev_name))
+        elif adapter_type == AdapterType.SUBARRAY:
+            new_adapter = SubArrayAdapter(dev_name, self._dev_factory.get_device(dev_name))
         else:
             new_adapter = BaseAdapter(dev_name, self._dev_factory.get_device(dev_name))
 
@@ -64,16 +64,16 @@ class BaseAdapter:
         else:
             return False
 
-class CspMaster(BaseAdapter):
+class SubArrayAdapter(BaseAdapter):
 
     def __init__(self, dev_name, proxy) -> None:
         super().__init__(dev_name, proxy)
 
-    def AssignResources(self, value):
-        self._proxy.AssignResources(value)
+    def AssignResources(self, argin):
+        return self._proxy.AssignResources(argin)
 
 
-class Dish(BaseAdapter):
+class DishAdapter(BaseAdapter):
 
     def __init__(self, dev_name, proxy) -> None:
         super().__init__(dev_name, proxy)

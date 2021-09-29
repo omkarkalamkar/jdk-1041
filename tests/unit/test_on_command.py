@@ -1,7 +1,7 @@
 
 import time
 import pytest
-from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter, CspMaster, Dish
+from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter, SubArrayAdapter, DishAdapter
 from tests.helper_adapter_factory import HelperAdapterFactory
 from ska_tango_base.commands import ResultCode
 from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
@@ -82,11 +82,11 @@ def test_telescope_on_command(tango_context):
     (result_code, _) = on_command.do()
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
-        if isinstance(adapter, Dish):
+        if isinstance(adapter, DishAdapter):
             adapter.proxy.SetStandbyFPMode.assert_called() 
             adapter.proxy.SetOperateMode.assert_called()
             continue
-        if isinstance(adapter, CspMaster):
+        if isinstance(adapter, SubArrayAdapter):
             adapter.proxy.TelescopeOn.assert_called() 
             continue
         
