@@ -8,13 +8,14 @@ from tests.settings import count_faulty_devices, logger, TIMEOUT
 from test_cm_all_working import create_cm
 from test_telescope_startup import create_cm_no_faulty_devices
 from tests.helper_state_device import HelperStateDevice
+from tests.helper_subarray_device import HelperSubArrayDevice
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 
 @pytest.fixture()
 def devices_to_load():
     return (
         {
-            "class": SKASubarray,
+            "class": HelperSubArrayDevice,
             "devices": [
                 {
                     "name": "ska_mid/tm_leaf_node/csp_subarray01"
@@ -33,7 +34,16 @@ def devices_to_load():
                 },
                 {
                     "name": "ska_mid/tm_leaf_node/sdp_subarray03"
-                }
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/1"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/2"
+                },
+                {
+                    "name": "ska_mid/tm_subarray_node/3"
+                },
             ],
         },
         {
@@ -53,16 +63,7 @@ def devices_to_load():
                 },
                 {
                     "name": "mid_d0001/elt/master"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/1"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/2"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/3"
-                },
+                }
             ]
         }        
     )

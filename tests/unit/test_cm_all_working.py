@@ -9,7 +9,7 @@ from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
-from ska_tango_base.subarray import SKASubarray
+from tests.helper_subarray_device import HelperSubArrayDevice
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_faulty_devices
 
@@ -17,7 +17,7 @@ from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_fault
 def devices_to_load():
     return (
         {
-            "class": SKASubarray,
+            "class": HelperSubArrayDevice,
             "devices": [
                 {
                     "name": "ska_mid/tm_subarray_node/1"

@@ -1,16 +1,21 @@
 import logging
-from ska_tango_base.base import OpStateModel, BaseComponentManager
+import time
+from ska_tango_base.base import OpStateModel
+from ska_tango_base.base.component_manager import BaseComponentManager
+from ska_tango_base.subarray import SubarrayComponentManager
 from ska_tango_base.control_model import HealthState, ObsState
-from ska_tango_base.subarray import SKASubarray
-from tango.server import command
+from ska_tango_base.subarray import SKASubarray, SubarrayObsStateModel
+from tango.server import command, attribute
+from ska_tango_base.commands import ResultCode
 
 class EmptyComponentManager(BaseComponentManager):
     def __init__(self, 
-                op_state_model, 
+                op_state_model,
                 logger=None,
                 *args, **kwargs):
         self.logger = logger
         super().__init__(op_state_model, *args, **kwargs)
+
 
 class HelperStateDevice(SKASubarray):
     """A generic device for triggering state changes with a command"""
@@ -21,14 +26,16 @@ class HelperStateDevice(SKASubarray):
             device = self.target
             device.set_change_event("State", True, False)
             device.set_change_event("healthState", True, False)
-            device.set_change_event("obsState", True, False)   
+            device.set_change_event("obsState", True, False)
+            return (ResultCode.OK, "")
 
     def create_component_manager(self):
         self.op_state_model = OpStateModel(
             logger=self.logger,
             callback=super()._update_state)
         cm =  EmptyComponentManager(
-            self.op_state_model, logger=self.logger
+            self.op_state_model, 
+            logger=self.logger
         )
         return cm
 

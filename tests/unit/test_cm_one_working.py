@@ -6,7 +6,7 @@ from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
-from ska_tango_base.subarray import SKASubarray
+from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, DishLeafNodePrefix, NumDishes, count_faulty_devices
 
 @pytest.fixture()
@@ -21,7 +21,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": SKASubarray,
+            "class": HelperSubArrayDevice,
             "devices": [
                 {
                     "name": "ska_mid/tm_subarray_node/1"

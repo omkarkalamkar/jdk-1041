@@ -6,7 +6,7 @@ from tests.helper_adapter_factory import HelperAdapterFactory
 from ska_tango_base.commands import ResultCode
 from ska_tmc_centralnode_mid.commands.telescope_standby_command import TelescopeStandby
 from tests.settings import  logger
-from ska_tango_base.subarray import SKASubarray
+from tests.helper_subarray_device import HelperSubArrayDevice
 from ska_tango_base.obs.obs_device import SKAObsDevice
 from test_cm_all_working import create_cm
 from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_faulty_devices
@@ -15,7 +15,7 @@ from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_fault
 def devices_to_load():
     return (
         {
-            "class": SKASubarray,
+            "class": HelperSubArrayDevice,
             "devices": [
                 {
                     "name": "ska_mid/tm_subarray_node/1"

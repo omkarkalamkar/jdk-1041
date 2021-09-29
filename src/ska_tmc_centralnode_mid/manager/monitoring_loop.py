@@ -48,13 +48,12 @@ class MonitoringLoop:
         with tango.EnsureOmniThread():
             try:
                 # import debugpy; debugpy.debug_this_thread()
-                self._logger.debug("Checking device %s", devInfo.dev_name)
                 proxy = self._dev_factory.get_device(devInfo.dev_name)
                 proxy.set_timeout_millis(self._proxy_timeout)
                 newDevInfo = None
                 if "subarray" in devInfo.dev_name.lower():
                     newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
-                    # newDevInfo.resources = proxy.assignedResources
+                    newDevInfo.resources = proxy.assignedResources
                 else:
                     newDevInfo = DeviceInfo(devInfo.dev_name)
                 newDevInfo.from_dev_info(devInfo)
@@ -65,5 +64,5 @@ class MonitoringLoop:
                 newDevInfo.dev_info = proxy.info()
                 self._component_manager.update_device_info(newDevInfo)
             except Exception as e:
-                self._logger.debug("device not working %s", devInfo.dev_name)
+                self._logger.error("Device not working %s %s", devInfo.dev_name, e)
                 self._component_manager.device_failed(devInfo, e)

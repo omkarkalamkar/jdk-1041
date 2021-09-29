@@ -8,13 +8,14 @@ from ska_tango_base.control_model import HealthState
 from tests.settings import count_faulty_devices, logger, TIMEOUT
 from test_cm_all_working import create_cm
 from tests.helper_state_device import HelperStateDevice
+from tests.helper_subarray_device import HelperSubArrayDevice
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 
 @pytest.fixture()
 def devices_to_load():
     return (
         {
-            "class": SKASubarray,
+            "class": HelperSubArrayDevice,
             "devices": [
                 {
                     "name": "ska_mid/tm_subarray_node/1"
@@ -79,8 +80,8 @@ def create_cm_no_faulty_devices(tango_context, p_monitoring_loop, p_event_receiv
 def test_aggregation_default(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     ## Why is this in fault state initially?
-    assert cm.component.telescope_state == tango.DevState.FAULT
-    assert cm.component.tmc_op_state == tango.DevState.FAULT
+    assert cm.component.telescope_state == tango.DevState.UNKNOWN
+    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
     assert cm.component.telescope_health_state == HealthState.OK
 
     # without monitoring loop every thing is UNKNOWN
@@ -90,6 +91,6 @@ def test_aggregation_default(tango_context):
     assert cm.component.telescope_health_state == HealthState.UNKNOWN
 
     cm = create_cm_no_faulty_devices(tango_context, True, False)
-    assert cm.component.telescope_state == tango.DevState.FAULT
-    assert cm.component.tmc_op_state == tango.DevState.FAULT
+    assert cm.component.telescope_state == tango.DevState.UNKNOWN
+    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
     assert cm.component.telescope_health_state == HealthState.OK
