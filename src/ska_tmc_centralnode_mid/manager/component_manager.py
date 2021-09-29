@@ -247,11 +247,12 @@ class CNComponentManager(BaseComponentManager):
 
         self.component.update_device(devInfo)
 
-    def add_command_execution(self, result_code, message):
+    def add_command_execution(self, command_name, result_code, message):
         """
         Add a command execution to the list of the command executed
         """
         self._command_executed.append({
+            "Command": command_name,
             "ResultCode": result_code,
             "Message" : message
         })
