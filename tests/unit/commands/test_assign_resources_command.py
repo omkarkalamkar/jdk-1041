@@ -21,30 +21,6 @@ def devices_to_load():
             "devices": [
                 {
                     "name": "ska_mid/tm_subarray_node/1"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/2"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/3"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray03"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray03"
                 }
             ],
         },
@@ -55,13 +31,7 @@ def devices_to_load():
                     "name": "ska_mid/tm_leaf_node/csp_master"
                 },
                 {
-                    "name": "mid_csp/elt/master"
-                },
-                {
                     "name": "ska_mid/tm_leaf_node/sdp_master"
-                },
-                {
-                    "name": "mid_sdp/elt/master"
                 },
                 {
                     "name": "mid_d0001/elt/master"
@@ -74,10 +44,8 @@ def test_telescope_assign_resources_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
-    num_faulty = count_faulty_devices(cm)
-    assert num_faulty == 0
     elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
+    logger.info("checked %s devices in %s", len(cm.checked_devices), elapsed_time)
 
     my_adapter_factory = HelperAdapterFactory()
 
@@ -85,7 +53,7 @@ def test_telescope_assign_resources_command(tango_context):
     skuid = mock.Mock(**attrs)
     on_command = AssignResources(cm, cm.op_state_model, my_adapter_factory, skuid)
     assign_input_file = "command_AssignResources.json"
-    path = join(dirname(__file__), "..", "data", assign_input_file)
+    path = join(dirname(__file__), "..", "..", "data", assign_input_file)
     with open(path, "r") as f:
         assign_input_str = f.read()
     (result_code, _) = on_command.do(assign_input_str)
