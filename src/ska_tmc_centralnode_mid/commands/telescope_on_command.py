@@ -38,30 +38,29 @@ class TelescopeOn(AbstractTelescopeOnOff):
         try:
             self.tm_leaf_csp_master_adapter.On()
         except Exception as e:
-            return self.generate_command_result("TelescopeOn", ResultCode.FAILED, f"Error in calling Telescope On in TM CSP Master Leaf {self.tm_leaf_csp_master_adapter.dev_name}: {e}")
+            return self.generate_command_result(ResultCode.FAILED, f"Error in calling Telescope On in TM CSP Master Leaf {self.tm_leaf_csp_master_adapter.dev_name}: {e}")
 
         try:
             self.tm_leaf_sdp_master_adapter.On()
         except Exception as e:
-            return self.generate_command_result("TelescopeOn", ResultCode.FAILED, f"Error in calling Telescope On in TM SDP Master Leaf {self.tm_leaf_sdp_master_adapter.dev_name}: {e}")
+            return self.generate_command_result(ResultCode.FAILED, f"Error in calling Telescope On in TM SDP Master Leaf {self.tm_leaf_sdp_master_adapter.dev_name}: {e}")
 
         for adapter in self.tm_subarray_adapters:
             try:
                 adapter.On()
             except Exception as e:
-                return self.generate_command_result("TelescopeOn", ResultCode.FAILED, f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}")
+                return self.generate_command_result(ResultCode.FAILED, f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}")
         
         for adapter in self.tm_dish_adapters:
             try:
                 adapter.SetStandbyFPMode()
             except Exception as e:
-                return self.generate_command_result("TelescopeOn", ResultCode.FAILED, f"Error in calling SetStandbyFPMode in TM Dish Leaf {adapter.dev_name}: {e}")
+                return self.generate_command_result(ResultCode.FAILED, f"Error in calling SetStandbyFPMode in TM Dish Leaf {adapter.dev_name}: {e}")
             try:
                 adapter.SetOperateMode()
             except Exception as e:
-                return self.generate_command_result("TelescopeOn", ResultCode.FAILED, f"Error in calling SetOperateMode in TM Dish Leaf {adapter.dev_name}: {e}")
+                return self.generate_command_result(ResultCode.FAILED, f"Error in calling SetOperateMode in TM Dish Leaf {adapter.dev_name}: {e}")
         
-        component_manager.add_command_execution("TelescopeOn", ResultCode.OK, "")
         return (ResultCode.OK, "")
 
 

@@ -10,20 +10,16 @@ class TMCCommand(BaseCommand):
     def __init__(self, target, *args, logger=None, **kwargs):
         super().__init__(target, args, logger, kwargs)
 
-    def generate_command_result(self, cmd_name, result_code, message):
+    def generate_command_result(self, result_code, message):
         if result_code == ResultCode.FAILED:
             self.logger.error(message)
         self.logger.info(message)
-        self.target.add_command_execution(cmd_name, result_code, message)
         return (result_code, message)
     
     def adapter_error_message_result(self, dev_name, e):
-        component_manager = self.target
-        result_code = ResultCode.FAILED
         message = f"Error in creating adapter for {dev_name}: {e}"
         self.logger.error(message)
-        component_manager.add_command_execution("AbstractTelescopeOnOff", result_code, message)
-        return result_code,message
+        return ResultCode.FAILED, message
 
 
 class AbstractTelescopeOnOff(TMCCommand):
@@ -124,9 +120,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         
         if num_working == 0:
             message = f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}"
-            self.logger.error(message)
-            component_manager.add_command_execution(cmd_name, ResultCode.FAILED, message)
-            return ResultCode.FAILED, message
+            return self.generate_command_result(ResultCode.FAILED, message)
 
         error_dev_names = []
         num_working = 0
@@ -142,9 +136,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         
         if num_working == 0:
             message = f"Error in creating dish adapters {'.'.join(error_dev_names)}"
-            self.logger.error(message)
-            component_manager.add_command_execution(cmd_name, ResultCode.FAILED, message)
-            return ResultCode.FAILED, message
+            return self.generate_command_result(ResultCode.FAILED, message)
         
         return ResultCode.OK, ""
 

@@ -68,7 +68,7 @@ class StowAntennas(TMCCommand):
                     error_dev_names.append(dev_name)
         
         if num_working == 0:
-            return self.generate_command_result("StowAntennas", ResultCode.FAILED, f"Error in creating dish adapters {'.'.join(error_dev_names)}")
+            return self.generate_command_result(ResultCode.FAILED, f"Error in creating dish adapters {'.'.join(error_dev_names)}")
         
         return ResultCode.OK, ""
 
@@ -94,7 +94,6 @@ class StowAntennas(TMCCommand):
                 try:
                     adapter.SetStowMode()
                 except Exception as e:
-                    return self.generate_command_result("StowAntennas", ResultCode.FAILED, f"Error in calling SetStowMode in TM Dish Leaf {adapter.dev_name}: {e}")
+                    return self.generate_command_result(ResultCode.FAILED, f"Error in calling SetStowMode in TM Dish Leaf {adapter.dev_name}: {e}")
 
-        component_manager.add_command_execution("StowAntennas", ResultCode.OK, "")
         return (ResultCode.OK, "")
