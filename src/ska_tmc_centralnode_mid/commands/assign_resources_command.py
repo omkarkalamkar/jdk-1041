@@ -20,10 +20,10 @@ from ska_tmc_centralnode_mid.exceptions import SubarrayNotPresentError, InvalidJ
 from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory, AdapterType
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
-from ska_tmc_centralnode_mid.commands.abstract_command import TMCCommand
+from ska_tmc_centralnode_mid.commands.abstract_command import AbstractAssignReleaseResources
 
 
-class AssignResources(TMCCommand):
+class AssignResources(AbstractAssignReleaseResources):
     """
     A class for CentralNode's AssignResources() command.
 
@@ -42,87 +42,6 @@ class AssignResources(TMCCommand):
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         self._skuid = skuid
-
-    def check_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state
-
-        :return: True if this command is allowed to be run in current device state
-
-        :rtype: boolean
-        """
-        component_manager = self.target
-
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            self.logger.error("AssignResources() is not allowed in current state %s", self.op_state_model.op_state)
-            return False
-        
-        subarray_count = 0
-        for dev_name in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
-                subarray_count += 1
-        if subarray_count == 0: 
-            self.logger.info("No TM Subarray available")
-            return False
-
-        dish_count = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
-                dish_count += 1
-        if dish_count == 0: 
-            self.logger.info("No Dish available")
-            return False
-
-        return True
-
-    def init_adapters(self, component_manager):
-        
-        self.tm_dish_adapters = []
-        self.tm_subarray_adapters = []
-
-        error_dev_names = []
-        num_working = 0
-
-        for dev_name in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
-                try:
-                    self.tm_subarray_adapters.append(self._adapter_factory.get_or_create_adapter(dev_name, AdapterType.SUBARRAY))
-                    num_working += 1
-                except Exception as e:
-                    self.logger.warning("Error in creating adapter for %s: %s", dev_name, e)
-                    error_dev_names.append(dev_name)
-        
-        if num_working == 0:
-            return self.generate_command_result(
-                ResultCode.FAILED,  
-                f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}")
-        
-
-        error_dev_names = []
-        num_working = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
-                try:
-                    self.tm_dish_adapters.append(self._adapter_factory.get_or_create_adapter(dev_name, AdapterType.DISH))
-                    num_working += 1
-                except Exception as e:
-                    self.logger.warning("Error in creating adapter for %s: %s", dev_name, e)
-                    error_dev_names.append(dev_name)
-        
-        if num_working == 0:
-            return self.generate_command_result(
-                ResultCode.FAILED,  
-                f"Error in creating dish adapters {'.'.join(error_dev_names)}")
-        
-        return (ResultCode.OK, "")
 
     def do(self, argin):
         """
@@ -233,7 +152,7 @@ class AssignResources(TMCCommand):
 
         component_manager = self.target
         
-        ret_code, message = self.init_adapters(component_manager)
+        ret_code, message = self.init_adapters("AssignResources", component_manager)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
