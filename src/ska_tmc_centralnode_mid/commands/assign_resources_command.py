@@ -3,6 +3,7 @@ AssignResources class for CentralNode.
 """
 import json
 import ast
+from logging import debug
 import os
 # Tango imports
 import tango
