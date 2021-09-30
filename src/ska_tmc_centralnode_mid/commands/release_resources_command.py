@@ -93,13 +93,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
         return:
             None
 
-        raises:
-            ValueError if input argument json string contains invalid value
-
-            KeyError if input argument json string contains invalid key
-
-            DevFailed if the command execution or command invocation on SubarrayNode is not successful
-
         """
         component_manager = self.target
         ret_code, message = self.init_adapters("ReleaseResources", component_manager)
@@ -132,10 +125,10 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 self.logger.info(const.STR_FALSE_TAG)
         
         except ValueError as value_error:
-            return self.generate_command_result(ResultCode.FAILED, ("Value Error occured in the execution of ReleaseResources on CentralNode %s: %s", my_subarray_adapter.dev_name, value_error))
+            return self.generate_command_result(ResultCode.FAILED, ("Value Error occured in the execution of ReleaseResources on CentralNode: %s", value_error))
 
         except KeyError as key_error:
-            return self.generate_command_result(ResultCode.FAILED, ("Key Error occured in the execution of ReleaseResources on CentralNode %s: %s", my_subarray_adapter.dev_name, key_error))
+            return self.generate_command_result(ResultCode.FAILED, ("Key Error occured in the execution of ReleaseResources on CentralNode: %s", key_error))
 
         except Exception as e:
             return self.generate_command_result(ResultCode.FAILED, ("Error in calling ReleaseAllResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
