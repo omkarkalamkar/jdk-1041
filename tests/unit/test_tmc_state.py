@@ -24,29 +24,11 @@ def devices_to_load():
                     "name": "ska_mid/tm_subarray_node/1"
                 },
                 {
-                    "name": "ska_mid/tm_subarray_node/2"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/3"
-                },
-                {
                     "name": "ska_mid/tm_leaf_node/csp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray03"
                 },
                 {
                     "name": "ska_mid/tm_leaf_node/sdp_subarray01"
                 },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray03"
-                }
             ],
         },
         {
@@ -76,28 +58,10 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     proxy = devFactory.get_device("ska_mid/tm_subarray_node/1")
     proxy.SetDirectState(tango.DevState.INIT)
     assert proxy.State() == tango.DevState.INIT
-    proxy = devFactory.get_device("ska_mid/tm_subarray_node/2")
-    proxy.SetDirectState(tango.DevState.DISABLE)
-    assert proxy.State() == tango.DevState.DISABLE
-    proxy = devFactory.get_device("ska_mid/tm_subarray_node/3")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray01")
     proxy.SetDirectState(tango.DevState.INIT)
     assert proxy.State() == tango.DevState.INIT
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray02")
-    proxy.SetDirectState(tango.DevState.INIT)
-    assert proxy.State() == tango.DevState.INIT
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray03")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray01")
-    proxy.SetDirectState(tango.DevState.INIT)
-    assert proxy.State() == tango.DevState.INIT
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray02")
-    proxy.SetDirectState(tango.DevState.DISABLE)
-    assert proxy.State() == tango.DevState.DISABLE
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray03")
     proxy.SetDirectState(tango.DevState.INIT)
     assert proxy.State() == tango.DevState.INIT
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_master")
@@ -139,28 +103,10 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     proxy = devFactory.get_device("ska_mid/tm_subarray_node/1")
     proxy.SetDirectState(tango.DevState.FAULT)
     assert proxy.State() == tango.DevState.FAULT
-    proxy = devFactory.get_device("ska_mid/tm_subarray_node/2")
-    proxy.SetDirectState(tango.DevState.STANDBY)
-    assert proxy.State() == tango.DevState.STANDBY
-    proxy = devFactory.get_device("ska_mid/tm_subarray_node/3")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray01")
     proxy.SetDirectState(tango.DevState.OFF)
     assert proxy.State() == tango.DevState.OFF
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray02")
-    proxy.SetDirectState(tango.DevState.STANDBY)
-    assert proxy.State() == tango.DevState.STANDBY
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray03")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray01")
-    proxy.SetDirectState(tango.DevState.STANDBY)
-    assert proxy.State() == tango.DevState.STANDBY
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray02")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray03")
     proxy.SetDirectState(tango.DevState.STANDBY)
     assert proxy.State() == tango.DevState.STANDBY
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_master")
@@ -201,28 +147,10 @@ def set_device_standby(devFactory, cm, expected_elapsed_time):
     proxy = devFactory.get_device("ska_mid/tm_subarray_node/1")
     proxy.SetDirectState(tango.DevState.STANDBY)
     assert proxy.State() == tango.DevState.STANDBY
-    proxy = devFactory.get_device("ska_mid/tm_subarray_node/2")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("ska_mid/tm_subarray_node/3")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray01")
     proxy.SetDirectState(tango.DevState.OFF)
     assert proxy.State() == tango.DevState.OFF
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray02")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray03")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray01")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray02")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray03")
     proxy.SetDirectState(tango.DevState.ON)
     assert proxy.State() == tango.DevState.ON
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_master")

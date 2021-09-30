@@ -1,5 +1,6 @@
 import threading
 import tango
+import time
 from queue import Empty, Queue
 from ska_tango_base.commands import ResultCode
 
@@ -46,7 +47,7 @@ class CommandExecutor:
             self._stop = True
             self._worker_thread.start()
 
-    def enqueue_command(self, command_object, argin):
+    def enqueue_command(self, command_object, argin = None):
         """Adds the Command to the queue.
 
         :param command_object: Instance of Command
@@ -54,13 +55,26 @@ class CommandExecutor:
         :param argin: The argument to the Tango command
         :type argin: Any
         """
-        self._work_queue.put([command_object, argin])
+        unique_id = self.get_unique_id(type(command_object).__name__)
+        self._work_queue.put([command_object, argin, unique_id])
+        return unique_id
 
-    def add_command_execution(self, command_name, result_code, message):
+    def get_unique_id(self, command_name):
+        """Generate a unique ID for the command
+
+        :param command_name: The name of the command
+        :type command_name: string
+        :return: The unique ID of the command
+        :rtype: string
+        """
+        return f"{time.time()}_{command_name}"
+
+    def add_command_execution(self, id, command_name, result_code, message):
         """
         Add a command execution to the list of the command executed
         """
         self._command_executed.append({
+            "Id": id,
             "Command": command_name,
             "ResultCode": result_code,
             "Message" : message
@@ -70,7 +84,7 @@ class CommandExecutor:
         with tango.EnsureOmniThread():
             while not self._stop:
                 try:
-                    (command_object, argin) = self._work_queue.get(block=True, timeout=self._queue_fetch_timeout)
+                    (command_object, argin, id) = self._work_queue.get(block=True, timeout=self._queue_fetch_timeout)
                     command_name = type(command_object).__name__
                     try:
                         self._command_in_progress = command_name
@@ -81,9 +95,9 @@ class CommandExecutor:
                         else:
                             (result_code, message) = command_object.do(argin)
                         self._logger.info("Command %s with argin %s executed with result: (%s, %s)", command_name, argin, result_code, message)
-                        self.add_command_execution(command_name, result_code, message)
+                        self.add_command_execution(id, command_name, result_code, message)
                     except Exception as err:
                         self._logger.error("Unmanaged exception during call to command %s with argin %s: %s", command_name, argin, err)
-                        self.add_command_execution(command_name, ResultCode.FAILED, str(err))
+                        self.add_command_execution(id, command_name, ResultCode.FAILED, str(err))
                 except Empty:
                     continue

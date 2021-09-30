@@ -9,7 +9,7 @@ from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, DishLeafNodePrefix, NumDishes, count_faulty_devices
 
-WORKING_DEVICES = 9
+WORKING_DEVICES = 3
 
 @pytest.fixture()
 def devices_to_load():
@@ -29,28 +29,10 @@ def devices_to_load():
                     "name": "ska_mid/tm_subarray_node/1"
                 },
                 {
-                    "name": "ska_mid/tm_subarray_node/2"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/3"
-                },
-                {
                     "name": "ska_mid/tm_leaf_node/csp_subarray01"
                 },
                 {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray03"
-                },
-                {
                     "name": "ska_mid/tm_leaf_node/sdp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray03"
                 }
             ],
         }

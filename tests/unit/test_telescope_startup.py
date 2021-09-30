@@ -21,29 +21,11 @@ def devices_to_load():
                     "name": "ska_mid/tm_subarray_node/1"
                 },
                 {
-                    "name": "ska_mid/tm_subarray_node/2"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/3"
-                },
-                {
                     "name": "ska_mid/tm_leaf_node/csp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray03"
                 },
                 {
                     "name": "ska_mid/tm_leaf_node/sdp_subarray01"
                 },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray03"
-                }
             ],
         },
         {

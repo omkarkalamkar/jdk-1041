@@ -22,29 +22,11 @@ def devices_to_load():
                     "name": "ska_mid/tm_subarray_node/1"
                 },
                 {
-                    "name": "ska_mid/tm_subarray_node/2"
-                },
-                {
-                    "name": "ska_mid/tm_subarray_node/3"
-                },
-                {
                     "name": "ska_mid/tm_leaf_node/csp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray03"
                 },
                 {
                     "name": "ska_mid/tm_leaf_node/sdp_subarray01"
                 },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray02"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray03"
-                }
             ],
         },
         {
@@ -106,5 +88,5 @@ def test_telescope_state_off_only_monitoring_loop(tango_context):
 def test_telescope_state_off_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_devices_off(devFactory, cm, 1.5)
+    set_devices_off(devFactory, cm, 2)
     assert cm.component.telescope_state == tango.DevState.OFF

@@ -468,82 +468,6 @@ def test_assign_resources_raise_devfailed_when_reseource_reallocation(
                 device_proxy.AssignResources(json.dumps(reallocation_request))
             assert const.ERR_RECEPTOR_ID_REALLOCATION in str(df.value)
 
-
-# Test cases for Attributes
-def test_telescope_health_state():
-    with fake_tango_system(CentralNode) as tango_context:
-        assert tango_context.device.telescopeHealthState == HealthState.UNKNOWN
-
-
-def test_telescope_state():
-    with fake_tango_system(CentralNode) as tango_context:
-        assert tango_context.device.telescopeState == DevState.STANDBY
-
-
-def test_imaging():
-    with fake_tango_system(CentralNode) as tango_context:
-        assert tango_context.device.imaging == ModesAvailability.not_available
-
-
-def test_pss():
-    with fake_tango_system(CentralNode) as tango_context:
-        assert tango_context.device.pss == ModesAvailability.not_available
-
-
-def test_pst():
-    with fake_tango_system(CentralNode) as tango_context:
-        assert tango_context.device.pst == ModesAvailability.not_available
-
-
-def test_vlbi():
-    with fake_tango_system(CentralNode) as tango_context:
-        assert tango_context.device.vlbi == ModesAvailability.not_available
-
-
-def test_activity_message():
-    with fake_tango_system(CentralNode) as tango_context:
-        tango_context.device.activityMessage = ""
-        assert tango_context.device.activityMessage == ""
-
-
-def test_logging_level():
-    with fake_tango_system(CentralNode) as tango_context:
-        tango_context.device.loggingLevel = LoggingLevel.INFO
-        assert tango_context.device.loggingLevel == LoggingLevel.INFO
-
-
-def test_logging_targets():
-    with fake_tango_system(CentralNode) as tango_context:
-        tango_context.device.loggingTargets = ["console::cout"]
-        assert "console::cout" in tango_context.device.loggingTargets
-
-
-def test_test_mode():
-    with fake_tango_system(CentralNode) as tango_context:
-        test_mode = TestMode.NONE
-        tango_context.device.testMode = test_mode
-        assert tango_context.device.testMode == test_mode
-
-
-def test_simulation_mode():
-    with fake_tango_system(CentralNode) as tango_context:
-        simulation_mode = SimulationMode.FALSE
-        tango_context.device.simulationMode = simulation_mode
-        assert tango_context.device.simulationMode == simulation_mode
-
-
-def test_control_mode():
-    with fake_tango_system(CentralNode) as tango_context:
-        control_mode = ControlMode.REMOTE
-        tango_context.device.controlMode = control_mode
-        assert tango_context.device.controlMode == control_mode
-
-
-def test_health_state():
-    with fake_tango_system(CentralNode) as tango_context:
-        assert tango_context.device.healthState == HealthState.OK
-
-
 # # Test cases for commands
 @pytest.mark.skip("will be reworked")
 def test_stow_antennas_should_set_stow_mode_on_leaf_nodes(
@@ -885,12 +809,14 @@ def raise_devfailed_exception(*args):
     )
 
 
+@pytest.mark.skip("will be reworked")
 def test_version_id():
     """Test for versionId"""
     with fake_tango_system(CentralNode) as tango_context:
         assert tango_context.device.versionId == release.version
 
 
+@pytest.mark.skip("will be reworked")
 def test_build_state():
     """Test for buildState"""
     with fake_tango_system(CentralNode) as tango_context:

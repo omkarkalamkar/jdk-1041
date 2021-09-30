@@ -146,6 +146,10 @@ class CNComponentManager(BaseComponentManager):
         return self._command_executor.command_in_progress
 
     @property
+    def command_executor(self):
+        return self._command_executor
+
+    @property
     def command_executed(self):
         return self._command_executor._command_executed
 
@@ -169,8 +173,11 @@ class CNComponentManager(BaseComponentManager):
         :param num_dishes: number of dishes
         :type num_dishes: int
         """
+        result = []
         for dish in range(1, (num_dishes + 1)):
             self.add_device(dln_prefix + f"000{dish}")
+            result.append(dln_prefix + f"000{dish}")
+        return result
 
     def add_multiple_devices(self, device_list):
         """
@@ -179,8 +186,11 @@ class CNComponentManager(BaseComponentManager):
         :param device_list: list of device names
         :type list: list[str]
         """
+        result = []
         for dev_name in device_list:
             self.add_device(dev_name)
+            result.append(dev_name)
+        return result
 
     def add_device(self, dev_name):
         """
