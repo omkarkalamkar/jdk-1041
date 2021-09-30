@@ -102,7 +102,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         """
         component_manager = self.target
-        ret_code, message = self.init_adapters(component_manager)
+        ret_code, message = self.init_adapters("ReleaseResources", component_manager)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
         try:
@@ -117,7 +117,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                     my_subarray_adapter = adapter
 
             if my_subarray_adapter is None:
-                return self.generate_command_result("ReleaseResources", ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
+                return self.generate_command_result(ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
 
             if jsonArgument["release_all"] == True:
                 # Invoke "ReleaseAllResources" on SubarrayNode
@@ -125,17 +125,17 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 self.logger.info("Command result from Subarray: %s", return_val)
                 self.logger.info(const.STR_REL_RESOURCES)
                 # Leave the monitoring loop to do the updates on the resources!
-                component_manager.add_command_execution("ReleaseResources", ResultCode.OK, "")
+                # component_manager.add_command_execution("ReleaseResources", ResultCode.OK, "")
                 return (ResultCode.OK, "")
                
             else:
                 self.logger.info(const.STR_FALSE_TAG)
         
         except ValueError as value_error:
-            return self.generate_command_result("ReleaseResources", ResultCode.FAILED, ("Value Error occured in the execution of ReleaseResources on CentralNode %s: %s", my_subarray_adapter.dev_name, value_error))
+            return self.generate_command_result(ResultCode.FAILED, ("Value Error occured in the execution of ReleaseResources on CentralNode %s: %s", my_subarray_adapter.dev_name, value_error))
 
         except KeyError as key_error:
-            return self.generate_command_result("ReleaseResources", ResultCode.FAILED, ("Key Error occured in the execution of ReleaseResources on CentralNode %s: %s", my_subarray_adapter.dev_name, key_error))
+            return self.generate_command_result(ResultCode.FAILED, ("Key Error occured in the execution of ReleaseResources on CentralNode %s: %s", my_subarray_adapter.dev_name, key_error))
 
         except Exception as e:
-            return self.generate_command_result("ReleaseResources", ResultCode.FAILED, ("Error in calling ReleaseAllResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
+            return self.generate_command_result(ResultCode.FAILED, ("Error in calling ReleaseAllResources on subarray %s: %s", my_subarray_adapter.dev_name, e))

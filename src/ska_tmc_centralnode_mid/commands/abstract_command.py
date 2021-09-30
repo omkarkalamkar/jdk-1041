@@ -193,7 +193,7 @@ class AbstractAssignReleaseResources(TMCCommand):
 
         return True
 
-    def init_adapters(self, component_manager):
+    def init_adapters(self, cmd_name, component_manager):
         
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
@@ -213,7 +213,6 @@ class AbstractAssignReleaseResources(TMCCommand):
         
         if num_working == 0:
             return self.generate_command_result(
-                "AssignReleaseResources", 
                 ResultCode.FAILED,  
                 f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}")
         
@@ -231,8 +230,7 @@ class AbstractAssignReleaseResources(TMCCommand):
                     error_dev_names.append(dev_name)
         
         if num_working == 0:
-            return self.generate_command_result(
-                "AssignReleaseResources", 
+            return self.generate_command_result( 
                 ResultCode.FAILED,  
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}")
         
