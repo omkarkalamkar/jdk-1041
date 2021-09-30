@@ -101,7 +101,6 @@ class AssignResources(TMCCommand):
         
         if num_working == 0:
             return self.generate_command_result(
-                "AssignResources", 
                 ResultCode.FAILED,  
                 f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}")
         
@@ -120,7 +119,6 @@ class AssignResources(TMCCommand):
         
         if num_working == 0:
             return self.generate_command_result(
-                "AssignResources", 
                 ResultCode.FAILED,  
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}")
         
@@ -267,24 +265,23 @@ class AssignResources(TMCCommand):
                 my_subarray_adapter = adapter
 
         if my_subarray_adapter is None:
-            return self.generate_command_result("AssignResources", ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
+            return self.generate_command_result(ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
 
         # check allocated dishes
         receptor_ids = json_argument["dish"]["receptor_ids"]
         for receptor_id in receptor_ids:
             dish_ID = "dish" + receptor_id
             if component_manager.is_already_assigned(dish_ID):
-                return self.generate_command_result("AssignResources", ResultCode.FAILED, ("Dish %s is already allocated", dish_ID))
+                return self.generate_command_result(ResultCode.FAILED, ("Dish %s is already allocated", dish_ID))
 
         try:
             # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
             resources_allocated_return = my_subarray_adapter.AssignResources(json.dumps(json_argument.copy()))
             self.logger.info("Command result from Subarray: %s", resources_allocated_return)
             # Leave the monitoring loop to do the updates on the allocated resources!
-            component_manager.add_command_execution("AssignResources", ResultCode.OK, "")
             return (ResultCode.OK, "")
         except Exception as e:
-            return self.generate_command_result("AssignResources", ResultCode.FAILED, ("Error in calling AssignResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
+            return self.generate_command_result(ResultCode.FAILED, ("Error in calling AssignResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
 
     def update_resource_config_file(self, json_argument, id):
         '''This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id'''

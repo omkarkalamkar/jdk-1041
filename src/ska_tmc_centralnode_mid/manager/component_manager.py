@@ -12,6 +12,7 @@ from ska_tmc_centralnode_mid.manager.aggregators import TelescopeStateAggragator
 from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
 from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
+from ska_tmc_centralnode_mid.manager.command_executor import CommandExecutor
 
 from ska_tmc_centralnode_mid.model.input import InputParameter
 
@@ -78,13 +79,13 @@ class CNComponentManager(BaseComponentManager):
             self._event_receiver.start()
         
         self._input_parameter = InputParameter(None)
-
-        self._command_executed = []
-
+        
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
-        
+
+        self._command_executor = CommandExecutor(logger)
+        self._command_executor.start()
 
     def set_aggregators(self, _telescope_state_aggregator, _health_state_aggregator, _tm_op_state_aggregator):
         self._telescope_state_aggregator = _telescope_state_aggregator
@@ -140,6 +141,14 @@ class CNComponentManager(BaseComponentManager):
                 continue
         return result
 
+    @property
+    def command_in_progress(self):
+        return self._command_executor.command_in_progress
+
+    @property
+    def command_executed(self):
+        return self._command_executor._command_executed
+
     def get_device(self, dev_name):
         """
         Return the device info our of the monitoring loop with name dev_name
@@ -189,16 +198,6 @@ class CNComponentManager(BaseComponentManager):
             devInfo = DeviceInfo(dev_name, False)
 
         self.component.update_device(devInfo)
-
-    def add_command_execution(self, command_name, result_code, message):
-        """
-        Add a command execution to the list of the command executed
-        """
-        self._command_executed.append({
-            "Command": command_name,
-            "ResultCode": result_code,
-            "Message" : message
-        })
     
     def device_failed(self, device_info, exception):
         """

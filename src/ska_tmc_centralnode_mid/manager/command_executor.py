@@ -1,0 +1,89 @@
+import threading
+import tango
+from queue import Empty, Queue
+from ska_tango_base.commands import ResultCode
+
+class CommandExecutor:
+    def __init__(self, logger, max_queue_size = 1, queue_fetch_timeout=1) -> None:
+        self._logger = logger
+        self._max_queue_size = max_queue_size
+        self._work_queue = Queue(self._max_queue_size)
+        self._queue_fetch_timeout = queue_fetch_timeout
+        
+        self._command_executed = []
+        self._command_in_progress = ""
+
+        self._worker_thread = threading.Thread(
+            target=self._run,
+            daemon=True,
+        )
+        self._stop = False
+        self._worker_thread.start()
+
+    @property
+    def command_executed(self):
+        return self._command_executed
+
+    @property
+    def command_in_progress(self):
+        return self._command_in_progress
+
+    @command_in_progress.setter
+    def command_in_progress(self, value):
+        self._command_in_progress = value
+
+    @property
+    def queue_full(self):
+        return self._work_queue.full()
+
+    def stop(self):
+        if self._worker_thread.is_alive():
+            self._stop = True
+            self._worker_thread.join()
+
+    def start(self):
+        if not self._worker_thread.is_alive():
+            self._stop = True
+            self._worker_thread.start()
+
+    def enqueue_command(self, command_object, argin):
+        """Adds the Command to the queue.
+
+        :param command_object: Instance of Command
+        :type command_object: Command
+        :param argin: The argument to the Tango command
+        :type argin: Any
+        """
+        self._work_queue.put([command_object, argin])
+
+    def add_command_execution(self, command_name, result_code, message):
+        """
+        Add a command execution to the list of the command executed
+        """
+        self._command_executed.append({
+            "Command": command_name,
+            "ResultCode": result_code,
+            "Message" : message
+        })
+
+    def _run(self):
+        with tango.EnsureOmniThread():
+            while not self._stop:
+                try:
+                    (command_object, argin) = self._work_queue.get(block=True, timeout=self._queue_fetch_timeout)
+                    command_name = type(command_object).__name__
+                    try:
+                        self._command_in_progress = command_name
+                        result_code = None
+                        message = None
+                        if argin is None:
+                            (result_code, message) = command_object.do()
+                        else:
+                            (result_code, message) = command_object.do(argin)
+                        self._logger.info("Command %s with argin %s executed with result: (%s, %s)", command_name, argin, result_code, message)
+                        self.add_command_execution(command_name, result_code, message)
+                    except Exception as err:
+                        self._logger.error("Unmanaged exception during call to command %s with argin %s: %s", command_name, argin, err)
+                        self.add_command_execution(command_name, ResultCode.FAILED, str(err))
+                except Empty:
+                    continue
