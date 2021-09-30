@@ -30,6 +30,7 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
 
     def release_all(self):
         """Release all resources."""
+        self._assigned_resources = []
         time.sleep(1)
         return (ResultCode.OK, "")
 

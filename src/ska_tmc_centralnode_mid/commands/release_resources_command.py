@@ -15,9 +15,11 @@ from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
 from ska_tmc_centralnode_mid import const
 from ska_tmc_centralnode_mid.device_data import DeviceData
+from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory, AdapterType
+from ska_tango_base.commands import ResultCode
+from ska_tmc_centralnode_mid.commands.abstract_command import AbstractAssignReleaseResources
 
-
-class ReleaseResources(BaseCommand):
+class ReleaseResources(AbstractAssignReleaseResources):
     """
     A class for CentralNode's ReleaseResources() command.
 
@@ -30,34 +32,13 @@ class ReleaseResources(BaseCommand):
     releaseALL Flag is False is not yet supported.
     """
 
-    def __init__(self, target, pop_state_model, *args, logger=None, **kwargs):
+    def __init__(self, target, pop_state_model, adapter_factory = AdapterFactory(),
+                *args, logger=None, **kwargs):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
-
-    def check_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state
-
-        :return: True if this command is allowed to be run in current device state
-
-        :rtype: boolean
-
-        :raises: DevFailed if this command is not allowed to be run in current device state
-        
-        """
-
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            tango.Except.throw_exception(
-                f"Command ReleaseResources is not allowed in current state {self.op_state_model.op_state}.",
-                "Failed to invoke ReleaseResources command on CentralNode.",
-                "CentralNode.ReleaseResources()",
-                tango.ErrSeverity.ERR,
-            )
-        return True
+        self._adapter_factory = adapter_factory
+        self.tm_dish_adapters = []
+        self.tm_subarray_adapters = []
 
     def do(self, argin):
         """
@@ -120,79 +101,41 @@ class ReleaseResources(BaseCommand):
             DevFailed if the command execution or command invocation on SubarrayNode is not successful
 
         """
-        device_data = DeviceData.get_instance()
-        this_server = TangoServerHelper.get_instance()
+        component_manager = self.target
+        ret_code, message = self.init_adapters(component_manager)
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
         try:
-            release_success = False
             jsonArgument = json.loads(argin)
             if 'transaction_id' in jsonArgument:
                 del jsonArgument["transaction_id"]
             subarrayID = jsonArgument["subarray_id"]
-            subarray_fqdn = device_data.subarray_FQDN_dict[subarrayID]
-            subarray_name = f"SA {subarrayID}"
+
+            my_subarray_adapter = None
+            for adapter in self.tm_subarray_adapters:
+                if str(subarrayID) in adapter.dev_name:
+                    my_subarray_adapter = adapter
+
+            if my_subarray_adapter is None:
+                return self.generate_command_result("ReleaseResources", ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
+
             if jsonArgument["release_all"] == True:
                 # Invoke "ReleaseAllResources" on SubarrayNode
-                subarray_client = TangoClient(subarray_fqdn)
-                return_val = subarray_client.send_command(const.CMD_RELEASE_RESOURCES)
-                res_not_released = ast.literal_eval(return_val[1][0])
-                log_msg = const.STR_REL_RESOURCES
-                self.logger.debug(log_msg)
-                this_server.write_attr("activityMessage", log_msg, False)
-
-
-                if not res_not_released:
-                    release_success = True
-                    device_data.resource_manager.update_resource_deallocation(
-                        subarray_name
-                    )
-                    argout = {
-                        "release_all": release_success,
-                        "receptor_ids": res_not_released,
-                    }
-                    message = json.dumps(argout)
-                    self.logger.info(message)
-                    return message
-                else:
-                    log_msg = f"{const.STR_LIST_RES_NOT_REL}{res_not_released}"
-                    this_server.write_attr("activityMessage", log_msg, False)
-
-                    self.logger.debug(log_msg)
-                    # release_success = False
+                return_val = my_subarray_adapter.ReleaseAllResources()
+                self.logger.info("Command result from Subarray: %s", return_val)
+                self.logger.info(const.STR_REL_RESOURCES)
+                # Leave the monitoring loop to do the updates on the resources!
+                component_manager.add_command_execution("ReleaseResources", ResultCode.OK, "")
+                return (ResultCode.OK, "")
+               
             else:
-                this_server.write_attr("activityMessage", const.STR_FALSE_TAG, False)
-                self.logger.debug(const.STR_FALSE_TAG)
-
+                self.logger.info(const.STR_FALSE_TAG)
+        
         except ValueError as value_error:
-            self.logger.error(const.ERR_INVALID_JSON)
-            log_msg = f"{const.ERR_INVALID_JSON}{value_error}"
-            this_server.write_attr("activityMessage", log_msg, False)
-            self.logger.exception(value_error)
-            tango.Except.throw_exception(
-                const.STR_RELEASE_RES_EXEC,
-                log_msg,
-                "CentralNode.ReleaseResources",
-                tango.ErrSeverity.ERR,
-            )
+            return self.generate_command_result("ReleaseResources", ResultCode.FAILED, ("Value Error occured in the execution of ReleaseResources on CentralNode %s: %s", my_subarray_adapter.dev_name, value_error))
 
         except KeyError as key_error:
-            self.logger.error(const.ERR_JSON_KEY_NOT_FOUND)
-            log_msg = f"{const.ERR_JSON_KEY_NOT_FOUND}{key_error}"
-            this_server.write_attr("activityMessage", log_msg, False)
-            self.logger.exception(key_error)
-            tango.Except.throw_exception(
-                const.STR_RELEASE_RES_EXEC,
-                log_msg,
-                "CentralNode.ReleaseResources",
-                tango.ErrSeverity.ERR,
-            )
+            return self.generate_command_result("ReleaseResources", ResultCode.FAILED, ("Key Error occured in the execution of ReleaseResources on CentralNode %s: %s", my_subarray_adapter.dev_name, key_error))
 
-        except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_RELEASE_RESOURCES}{dev_failed}"
-            this_server.write_attr("activityMessage", const.ERR_RELEASE_RESOURCES, False)
-            self.logger.exception(dev_failed)
-            tango.Except.throw_exception(
-                const.STR_RELEASE_RES_EXEC,
-                log_msg,
-                "CentralNode.ReleaseResources",
-                tango.ErrSeverity.ERR,
-            )
+        except Exception as e:
+            return self.generate_command_result("ReleaseResources", ResultCode.FAILED, ("Error in calling ReleaseAllResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
