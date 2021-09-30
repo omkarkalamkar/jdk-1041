@@ -1,6 +1,7 @@
 
 import time
 import pytest
+import mock
 from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter, SubArrayAdapter, DishAdapter
 from tests.helper_adapter_factory import HelperAdapterFactory
 from ska_tango_base.commands import ResultCode
@@ -48,8 +49,8 @@ def test_telescope_off_command(tango_context):
     logger.info("checked %s devices in %s", len(cm.checked_devices), elapsed_time)
 
     my_adapter_factory = HelperAdapterFactory()
-    on_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
-    (result_code, _) = on_command.do()
+    off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+    (result_code, _) = off_command.do()
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
         if isinstance(adapter, DishAdapter):
@@ -61,3 +62,41 @@ def test_telescope_off_command(tango_context):
             continue
         
         adapter.proxy.TelescopeOff.assert_called() 
+
+def test_telescope_off_command_fail_subarray(tango_context):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info("checked %s devices in %s", len(cm.checked_devices), elapsed_time)
+    my_adapter_factory = HelperAdapterFactory()
+
+    # include exception in TelescopeOff command
+    failing_dev = "ska_mid/tm_subarray_node/1"
+
+    attrs = {'TelescopeOff.side_effect': Exception}
+    subarrayMock = mock.Mock(**attrs)
+    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+
+    off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+    (result_code, message) = off_command.do()
+    assert result_code == ResultCode.FAILED
+    assert failing_dev in message
+
+def test_telescope_off_command_fail_csp(tango_context):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info("checked %s devices in %s", len(cm.checked_devices), elapsed_time)
+    my_adapter_factory = HelperAdapterFactory()
+
+    # include exception in TelescopeOff command
+    failing_dev = "ska_mid/tm_leaf_node/csp_master"
+
+    attrs = {'TelescopeOff.side_effect': Exception}
+    cspMasterLeafMock = mock.Mock(**attrs)
+    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=cspMasterLeafMock)
+
+    off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+    (result_code, message) = off_command.do()
+    assert result_code == ResultCode.FAILED
+    assert failing_dev in message
