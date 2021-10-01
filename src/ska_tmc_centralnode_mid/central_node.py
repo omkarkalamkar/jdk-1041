@@ -224,23 +224,16 @@ class CentralNode(SKABaseDevice):
             _update_subarray_health_state_callback = self.update_subarray_health_state_callback
         )
         cm.input_parameter.tm_dish_dev_names = []
-        if not self.DishLeafNodePrefix == "":
-            cm.input_parameter.tm_dish_dev_names = cm.add_dishes(self.DishLeafNodePrefix, self.NumDishes)
-
-        cm.add_multiple_devices(self.TMMidSubarrayNodes)
+        for dish in range(1, (self.NumDishes + 1)):
+            cm.input_parameter.tm_dish_dev_names.append(self.DishLeafNodePrefix + f"000{dish}")
         cm.input_parameter.tm_subarray_dev_names = self.TMMidSubarrayNodes
-        cm.add_device(self.CspMasterFQDN)
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
-        cm.add_device(self.CspMasterLeafNodeFQDN)
         cm.input_parameter.tm_leaf_csp_master_dev_name = self.CspMasterLeafNodeFQDN or ""
-        cm.add_device(self.SdpMasterFQDN)
         cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
-        cm.add_device(self.SdpMasterLeafNodeFQDN)
         cm.input_parameter.tm_leaf_sdp_master_dev_name = self.SdpMasterLeafNodeFQDN or ""
-        cm.add_multiple_devices(self.TMMidCspSubarrayLeafNodes)
         cm.input_parameter.csp_subarray_dev_names = self.TMMidCspSubarrayLeafNodes
-        cm.add_multiple_devices(self.TMMidSdpSubarrayLeafNodes)
         cm.input_parameter.sdp_subarray_dev_names = self.TMMidSdpSubarrayLeafNodes
+        cm.update_input_parameter()
         return cm
 
     def update_device_callback(self, devInfo):
@@ -401,6 +394,7 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(Counter.CspMasterDevName_write) ENABLED START #
         """Set the CspMasterDevName attribute."""
         self.component_manager.input_parameter.csp_master_dev_name = value
+        self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.CspMasterDevName_write
 
     def read_SdpMasterDevName(self):
@@ -413,6 +407,7 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(Counter.SdpMasterDevName_write) ENABLED START #
         """Set the SdpMasterDevName attribute."""
         self.component_manager.input_parameter.sdp_master_dev_name = value
+        self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.SdpMasterDevName_write
 
     def read_LeafCspMasterDevName(self):
@@ -425,6 +420,7 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(Counter.LeafCspMasterDevName_write) ENABLED START #
         """Set the LeafCspMasterDevName attribute."""
         self.component_manager.input_parameter.tm_leaf_csp_master_dev_name = value
+        self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.LeafCspMasterDevName_write
 
     def read_LeafSdpMasterDevName(self):
@@ -437,6 +433,7 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(Counter.LeafSdpMasterDevName_write) ENABLED START #
         """Set the LeafSdpMasterDevName attribute."""
         self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name = value
+        self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.LeafSdpMasterDevName_write
 
     def read_TMOpState(self):
@@ -455,6 +452,7 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(Counter.SubarrayDevNames_write) ENABLED START #
         """Set the SubarrayDevNames attribute."""
         self.component_manager.input_parameter.tm_subarray_dev_names = value
+        self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.SubarrayDevNames_write
 
     def read_CspSubarrayDevNames(self):
@@ -467,6 +465,7 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(Counter.CspSubarrayDevNames_write) ENABLED START #
         """Set the CspSubarrayDevNames attribute."""
         self.component_manager.input_parameter.csp_subarray_dev_names = value
+        self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.CspSubarrayDevNames_write
 
     def read_SdpSubarrayDevNames(self):
@@ -479,6 +478,7 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(Counter.SdpSubarrayDevNames_write) ENABLED START #
         """Set the SdpSubarrayDevNames attribute."""
         self.component_manager.input_parameter.sdp_subarray_dev_names = value
+        self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.SdpSubarrayDevNames_write
 
     def read_DishDevNames(self):
@@ -491,6 +491,7 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(Counter.DishDevNames_write) ENABLED START #
         """Set the DishDevNames attribute."""
         self.component_manager.input_parameter.tm_dish_dev_names = value
+        self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.DishDevNames_write
     
 

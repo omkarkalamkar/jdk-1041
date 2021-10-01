@@ -51,7 +51,8 @@ class EventReceiver:
             proxy = self._dev_factory.get_device(devInfo.dev_name)
             proxy.subscribe_event("healthState",tango.EventType.CHANGE_EVENT,self.handle_health_state_event,stateless=True)
             proxy.subscribe_event("State",tango.EventType.CHANGE_EVENT,self.handle_state_event,stateless=True)
-            proxy.subscribe_event("ObsState",tango.EventType.CHANGE_EVENT,self.handle_obs_state_event,stateless=True)
+            if "subarray" in devInfo.dev_name:
+                proxy.subscribe_event("ObsState",tango.EventType.CHANGE_EVENT,self.handle_obs_state_event,stateless=True)
         except:
             self._logger.debug("event not working for device %s", proxy.dev_name)
 

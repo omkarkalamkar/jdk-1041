@@ -208,6 +208,52 @@ class CNComponentManager(BaseComponentManager):
             devInfo = DeviceInfo(dev_name, False)
 
         self.component.update_device(devInfo)
+
+    def update_input_parameter(self):
+        list_dev_names = []
+        for dev_name in self.input_parameter.tm_dish_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.input_parameter.tm_subarray_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.input_parameter.csp_subarray_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.input_parameter.sdp_subarray_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+        
+        dev_name = self.input_parameter.csp_master_dev_name
+        if dev_name != "" and self.get_device(dev_name) is None:
+            self.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.input_parameter.tm_leaf_csp_master_dev_name
+        if dev_name != "" and self.get_device(dev_name) is None:
+            self.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.input_parameter.sdp_master_dev_name
+        if dev_name != "" and self.get_device(dev_name) is None:
+            self.add_device(dev_name)
+            list_dev_names.append(dev_name)
+        
+        dev_name = self.input_parameter.tm_leaf_sdp_master_dev_name
+        if dev_name != "" and self.get_device(dev_name) is None:
+            self.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        for devInfo in self.devices:
+            if devInfo.dev_name not in list_dev_names:
+                self.component.remove_device(devInfo.dev_name) 
     
     def device_failed(self, device_info, exception):
         """
@@ -286,6 +332,23 @@ class CNComponentManager(BaseComponentManager):
             devInfo.last_event_arrived = time.time()
             self._update_resources(dev_name)
 
+    
+    def is_already_assigned(self, dishId):
+        """
+        Check if a Dish is already assigned to a subarray
+
+        :param dishId: id of the dish
+        :type dishId: str
+
+        :return True is already assigned, False otherwise
+        """
+        for devInfo in self.devices:
+            if isinstance(devInfo, SubArrayDeviceInfo):
+                if dishId in devInfo.resources:
+                    return True
+
+        return False
+
     def _aggregate_health_state(self):
         """
         Aggregates all health states 
@@ -337,18 +400,3 @@ class CNComponentManager(BaseComponentManager):
         """
         self._monitoring_loop.add_priority_devices(subarray_dev_name)
 
-    def is_already_assigned(self, dishId):
-        """
-        Check if a Dish is already assigned to a subarray
-
-        :param dishId: id of the dish
-        :type dishId: str
-
-        :return True is already assigned, False otherwise
-        """
-        for devInfo in self.devices:
-            if isinstance(devInfo, SubArrayDeviceInfo):
-                if dishId in devInfo.resources:
-                    return True
-
-        return False
