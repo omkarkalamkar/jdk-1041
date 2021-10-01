@@ -40,6 +40,12 @@ def devices_to_load():
         }
     )
 
+def get_assign_input_str(assign_input_file = "command_AssignResources.json"):
+    path = join(dirname(__file__), "..", "..", "data", assign_input_file)
+    with open(path, "r") as f:
+        assign_input_str = f.read()
+    return assign_input_str
+
 def test_telescope_assign_resources_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -51,13 +57,34 @@ def test_telescope_assign_resources_command(tango_context):
 
     attrs = {'fetch_skuid.return_value': 123}
     skuid = mock.Mock(**attrs)
-    on_command = AssignResources(cm, cm.op_state_model, my_adapter_factory, skuid)
-    assign_input_file = "command_AssignResources.json"
-    path = join(dirname(__file__), "..", "..", "data", assign_input_file)
-    with open(path, "r") as f:
-        assign_input_str = f.read()
-    (result_code, _) = on_command.do(assign_input_str)
+
+    assign_res_command = AssignResources(cm, cm.op_state_model, my_adapter_factory, skuid)
+    assign_input_str = get_assign_input_str()
+    (result_code, _) = assign_res_command.do(assign_input_str)
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
         if isinstance(adapter, SubArrayAdapter):
             adapter.proxy.AssignResources.assert_called()
+
+def test_telescope_assign_resources_command_fail_subarray(tango_context):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info("checked %s devices in %s", len(cm.checked_devices), elapsed_time)
+    
+    my_adapter_factory = HelperAdapterFactory()
+
+    attrs = {'fetch_skuid.return_value': 123}
+    skuid = mock.Mock(**attrs)
+
+    # include exception in AssignResources command
+    failing_dev = "ska_mid/tm_subarray_node/1"
+    attrs = {'AssignResources.side_effect': Exception}
+    subarrayMock = mock.Mock(**attrs)
+    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+
+    assign_res_command = AssignResources(cm, cm.op_state_model, my_adapter_factory, skuid)
+    assign_input_str = get_assign_input_str()
+    (result_code, message) = assign_res_command.do(assign_input_str)
+    assert result_code == ResultCode.FAILED
+    assert failing_dev in message
