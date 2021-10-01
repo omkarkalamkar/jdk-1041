@@ -152,7 +152,14 @@ class AssignResources(AbstractAssignReleaseResources):
         # )
         # json_argument = input_validator.loads(argin)
 
-        json_argument= json.loads(argin)
+        try:
+            json_argument= json.loads(argin)
+        except Exception as e:
+            return self.generate_command_result(ResultCode.FAILED, ("Problem in loading the JSON string: %s", e))
+        
+        if not 'sdp' in json_argument:
+            return self.generate_command_result(ResultCode.FAILED, "sdp block in not present in the input json argument!")
+        
         sdp_keys = list(json_argument["sdp"].keys())
         sdp_values = list(json_argument["sdp"].values())
         if "" in sdp_values:

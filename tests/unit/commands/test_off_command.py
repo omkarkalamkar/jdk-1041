@@ -100,3 +100,14 @@ def test_telescope_off_command_fail_csp(tango_context):
     (result_code, message) = off_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
+
+def test_telescope_off_fail_check_allowed(tango_context):
+
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info("checked %s devices in %s", len(cm.checked_devices), elapsed_time)
+    my_adapter_factory = HelperAdapterFactory()
+    cm.input_parameter.tm_dish_dev_names = []
+    off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+    assert off_command.check_allowed() == False
