@@ -22,18 +22,8 @@ from ska_tango_base.base import OpStateModel
 
 from tmc.common.tango_client import TangoClient
 from tmc.common.tango_server_helper import TangoServerHelper
-from ska_tmc_centralnode_mid.device_data import DeviceData
 from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
-from ska_tmc_centralnode_mid.op_state_aggregator import OpStateAggregator
-from ska_tmc_centralnode_mid.telescope_state_aggregator import TelescopeStateAggregator
-from ska_tmc_centralnode_mid import CentralNode, const, release
-from ska_tmc_centralnode_mid.const import (
-    CMD_SET_STOW_MODE,
-    STR_ON_CMD_ISSUED,
-    STR_STOW_CMD_ISSUED_CN,
-    STR_TELESCOPE_OFF_CMD_ISSUED,
-    ModesAvailability,
-)
+from ska_tmc_centralnode_mid import CentralNode, release
 from ska_tango_base.control_model import (
     HealthState,
     AdminMode,
@@ -70,7 +60,7 @@ path = join(dirname(__file__), "data", release_invalid_key_file)
 with open(path, "r") as f:
     release_invalid_key = f.read()
 
-device_data = DeviceData.get_instance()
+device_data = None
 
 
 @pytest.fixture

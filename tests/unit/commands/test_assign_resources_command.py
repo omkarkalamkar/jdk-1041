@@ -48,7 +48,6 @@ def get_assign_input_str(assign_input_file = "command_AssignResources.json"):
 
 def test_telescope_assign_resources_command(tango_context):
     logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info("checked %s devices in %s", len(cm.checked_devices), elapsed_time)

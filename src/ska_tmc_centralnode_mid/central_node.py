@@ -22,7 +22,7 @@ from ska_tmc_centralnode_mid.commands.telescope_standby_command import Telescope
 from ska_tmc_centralnode_mid.commands.assign_resources_command import AssignResources
 from ska_tmc_centralnode_mid.commands.release_resources_command import ReleaseResources
 from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
-from ska_tmc_centralnode_mid.const import ModesAvailability
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 
 
 # PROTECTED REGION END #    //  CentralNode.additional_import

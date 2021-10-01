@@ -2,7 +2,7 @@ import threading
 from ska_tango_base.control_model import HealthState, ObsState
 from tango import DevState
 import json
-from ska_tmc_centralnode_mid.const import ModesAvailability
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 
 class Component:
     """

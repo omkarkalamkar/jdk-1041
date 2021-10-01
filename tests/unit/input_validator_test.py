@@ -11,7 +11,6 @@ from ska_tmc_centralnode_mid.exceptions import (
     ResourceNotPresentError,
 )
 from ska_tmc_centralnode_mid.exceptions import SubarrayNotPresentError, InvalidJSONError
-from ska_tmc_centralnode_mid import const
 
 # Sample 'good' JSON
 
@@ -240,7 +239,6 @@ class TestAssignResourceValidator:
 
         with pytest.raises(SubarrayNotPresentError) as excinfo:
             input_validator.loads(json.dumps(input_json))
-        assert const.ERR_SUBARRAY_ID_DOES_NOT_EXIST in str(excinfo.value)
 
     # @pytest.mark.skip(reason="Behavior of this test case has changed in tox env.")
     def test_validate_incorrect_receptor_id(self):
@@ -262,4 +260,3 @@ class TestAssignResourceValidator:
         with pytest.raises(ResourceNotPresentError) as excinfo:
             input_validator.loads(json.dumps(input_json))
         
-        assert const.ERR_RECEPTOR_ID_DOES_NOT_EXIST in str(excinfo.value)

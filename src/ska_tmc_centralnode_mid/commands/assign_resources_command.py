@@ -2,22 +2,8 @@
 AssignResources class for CentralNode.
 """
 import json
-import ast
-from logging import debug
-import os
-# Tango imports
-import tango
 from tango import DevState, DevFailed
-from ska_tango_base.commands import BaseCommand
-from tmc.common.tango_client import TangoClient
-from tmc.common.tango_server_helper import TangoServerHelper
-from ska_tmc_centralnode_mid import const
-from ska_tmc_centralnode_mid.receptor_reassignment_checker import ReceptorReassignmentChecker
-from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
-from ska_tmc_centralnode_mid.device_data import DeviceData
-from ska_tmc_centralnode_mid.exceptions import ResourceReassignmentError, ResourceNotPresentError
-from ska_tmc_centralnode_mid.exceptions import SubarrayNotPresentError, InvalidJSONError
-from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory, AdapterType
+from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tmc_centralnode_mid.commands.abstract_command import AbstractAssignReleaseResources
@@ -200,7 +186,7 @@ class AssignResources(AbstractAssignReleaseResources):
         if "dish" not in json_argument:
             return self.generate_command_result(ResultCode.FAILED, "dish key in not present in the input json argument!")
         else:
-            if "receptor_ids" not in json_argument:
+            if "receptor_ids" not in json_argument["dish"]:
                 return self.generate_command_result(ResultCode.FAILED, "dish.receptor_ids key in not present in the input json argument!")
 
         receptor_ids = json_argument["dish"]["receptor_ids"]

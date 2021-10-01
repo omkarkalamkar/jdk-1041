@@ -3,7 +3,7 @@ import tango
 import json
 from tango.test_utils import DeviceTestContext
 from ska_tmc_centralnode_mid.central_node import CentralNode
-from ska_tmc_centralnode_mid.const import ModesAvailability
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from ska_tango_base.control_model import HealthState, TestMode, SimulationMode, ControlMode
 from tango import DevState
 

@@ -335,7 +335,7 @@ class CNComponentManager(BaseComponentManager):
         :param subarray_dev_name: name of the subarray device
         :type subarray_dev_name: str
         """
-        pass
+        self._monitoring_loop.add_priority_devices(subarray_dev_name)
 
     def is_already_assigned(self, dishId):
         """

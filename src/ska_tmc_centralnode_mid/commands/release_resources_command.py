@@ -10,12 +10,7 @@ import tango
 from tango import DevState, DevFailed
 
 # Additional import
-from ska_tango_base.commands import BaseCommand
-from tmc.common.tango_client import TangoClient
-from tmc.common.tango_server_helper import TangoServerHelper
-from ska_tmc_centralnode_mid import const
-from ska_tmc_centralnode_mid.device_data import DeviceData
-from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory, AdapterType
+from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
 from ska_tango_base.commands import ResultCode
 from ska_tmc_centralnode_mid.commands.abstract_command import AbstractAssignReleaseResources
 

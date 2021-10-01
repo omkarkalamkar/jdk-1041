@@ -5,6 +5,7 @@ from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from ska_tmc_centralnode_mid.model.component import DeviceInfo, SubArrayDeviceInfo
 from concurrent import futures
 import tango
+from queue import Empty, Queue
 
 class MonitoringLoop:
     """
@@ -28,6 +29,7 @@ class MonitoringLoop:
         self._sleep_timeout = sleep_timeout
         self._max_workers = max_workers
         self._dev_factory = DevFactory()
+        self._priority_devices = Queue(0)
 
     def start(self):
         if not self._thread.is_alive():
@@ -37,11 +39,23 @@ class MonitoringLoop:
         self._stop = True
         self._thread.join()
 
+    def add_priority_devices(self, dev_name):
+        self._priority_devices.put(dev_name)
+
     def run(self):
         while not self._stop:
             with futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-                for devInfo in self._component_manager.devices:
+                not_read_devices_twice = []
+                while not self._priority_devices.empty():
+                    dev_name = self._priority_devices.get(block=False)
+                    devInfo = self._component_manager.get_device(dev_name)
                     executor.submit(self.device_task, devInfo)
+                    not_read_devices_twice.append(devInfo)
+
+                for devInfo in self._component_manager.devices:
+                    if devInfo not in not_read_devices_twice:
+                        executor.submit(self.device_task, devInfo)
+
             sleep(self._sleep_timeout)
 
     def device_task(self, devInfo):
