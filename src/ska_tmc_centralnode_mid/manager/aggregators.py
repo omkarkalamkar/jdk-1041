@@ -100,7 +100,7 @@ class HealthStateAggragator(Aggregator):
             return HealthState.UNKNOWN
 
 
-class TMOpStateAggragator(Aggregator):
+class TMCOpStateAggragator(Aggregator):
 
     def __init__(self, cm) -> None:
         super().__init__(cm)

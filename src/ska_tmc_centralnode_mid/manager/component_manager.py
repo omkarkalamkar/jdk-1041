@@ -8,7 +8,7 @@ import time
 from tango import DevState
 from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import HealthState
-from ska_tmc_centralnode_mid.manager.aggregators import TelescopeStateAggragator, HealthStateAggragator, TMOpStateAggragator
+from ska_tmc_centralnode_mid.manager.aggregators import TelescopeStateAggragator, HealthStateAggragator, TMCOpStateAggragator
 from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
 from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
@@ -321,7 +321,7 @@ class CNComponentManager(BaseComponentManager):
         Aggregates tm devices states
         """
         if self._tm_op_state_aggregator is None:
-            self._tm_op_state_aggregator = TMOpStateAggragator(self)
+            self._tm_op_state_aggregator = TMCOpStateAggragator(self)
 
         new_state = self._tm_op_state_aggregator.aggregate()
         with self.component.lock:
