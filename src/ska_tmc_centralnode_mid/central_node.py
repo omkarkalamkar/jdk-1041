@@ -374,7 +374,7 @@ class CentralNode(SKABaseDevice):
 
     def read_InternalModel(self):
         # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
-        return json.dumps(self.component_manager.component.to_dict())
+        return self.component_manager.component.to_json()
         # PROTECTED REGION END #    //  CentralNode.activity_message_read
     
     def read_CommandExecuted(self):
@@ -520,6 +520,8 @@ class CentralNode(SKABaseDevice):
         TelescopeOn() command on CspMasterLeafNode, SdpMasterLeafNode and SubarrayNode
         """
         handler = self.get_command_object("StartUpTelescope")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -545,6 +547,8 @@ class CentralNode(SKABaseDevice):
         on SubarrayNode.
         """
         handler = self.get_command_object("StandByTelescope")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -568,6 +572,8 @@ class CentralNode(SKABaseDevice):
         This command stows the specified receptors.
         """
         handler = self.get_command_object("StowAntennas")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler, argin)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -590,6 +596,8 @@ class CentralNode(SKABaseDevice):
 
         """
         handler = self.get_command_object("TelescopeOff")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -612,6 +620,8 @@ class CentralNode(SKABaseDevice):
         SdpMasterLeafNode.
         """
         handler = self.get_command_object("TelescopeOn")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -635,6 +645,8 @@ class CentralNode(SKABaseDevice):
         SdpMasterLeafNode.
         """
         handler = self.get_command_object("On")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -664,6 +676,8 @@ class CentralNode(SKABaseDevice):
         AssignResources command invokes the AssignResources command on lower level devices.
         """
         handler = self.get_command_object("AssignResources")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler, argin)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -691,6 +705,8 @@ class CentralNode(SKABaseDevice):
         Release all the resources assigned to the given Subarray.
         """
         handler = self.get_command_object("ReleaseResources")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler, argin)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -714,6 +730,8 @@ class CentralNode(SKABaseDevice):
 
         """
         handler = self.get_command_object("Standby")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -737,6 +755,8 @@ class CentralNode(SKABaseDevice):
 
         """
         handler = self.get_command_object("TelescopeStandby")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -761,6 +781,8 @@ class CentralNode(SKABaseDevice):
 
         """
         handler = self.get_command_object("Off")
+        if self.component_manager.command_executor.queue_full:
+            return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
         return [[ResultCode.QUEUED], [str(unique_id)]]
 

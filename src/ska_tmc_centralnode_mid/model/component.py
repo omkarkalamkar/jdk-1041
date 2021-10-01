@@ -121,6 +121,9 @@ class Component:
             self._devices.append(devInfo)
         else:
             index = self._devices.index(devInfo)
+            if isinstance(devInfo, SubArrayDeviceInfo):
+                if devInfo.healthState != self._devices[index].healthState:
+                    self._invoke_subarray_health_state_callback(devInfo)
             self._devices[index] = devInfo
 
         self._invoke_device_callback(devInfo)
@@ -185,16 +188,6 @@ class Component:
         if self._telescope_health_state != value:
             self._telescope_health_state = value
             self._invoke_telescope_health_state_callback()
-
-    @property
-    def cn_health_state(self):
-        """
-        Return the central node health state
-
-        :return: the central node health state
-        :rtype: HealthState
-        """
-        return self._health_state
 
     @property
     def tmc_op_state(self):
@@ -302,23 +295,7 @@ class Component:
         if isinstance(value, ModesAvailability):
             self._pst = value
 
-    @property
-    def sub_array_obs_state(self, id):
-
-        """
-        Return the subarray obsState
-
-        :param id: id of the subarray
-        :return: the subarray obsState
-        :rtype: ObsState
-        """
-        for devInfo in self._devices:
-            if isinstance(devInfo, SubArrayDeviceInfo):
-                if devInfo.id == id:
-                    return devInfo.obsState
-        return None
-
-    def default(self):
+    def to_json(self):
         return json.dumps(self.to_dict())
 
     def to_dict(self):
