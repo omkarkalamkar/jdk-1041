@@ -44,15 +44,31 @@ def test_attributes(central_node_device):
     assert central_node_device.desiredTelescopeState == DevState.ON
     assert central_node_device.commandInProgress == ""
     assert central_node_device.CspMasterDevName == ""
+    central_node_device.CspMasterDevName = "csp"
+    assert central_node_device.CspMasterDevName == "csp"
     assert central_node_device.SdpMasterDevName == ""
+    central_node_device.SdpMasterDevName = "sdp"
+    assert central_node_device.SdpMasterDevName == "sdp"
     assert central_node_device.LeafCspMasterDevName == ""
+    central_node_device.LeafCspMasterDevName = "leafcsp"
+    assert central_node_device.LeafCspMasterDevName == "leafcsp"
     assert central_node_device.LeafSdpMasterDevName == ""
+    central_node_device.LeafSdpMasterDevName = "leafsdp"
+    assert central_node_device.LeafSdpMasterDevName == "leafsdp"
     assert central_node_device.TMOpState == DevState.UNKNOWN
     assert len(central_node_device.CommandExecuted) == 1 # init
     assert len(central_node_device.SubarrayDevNames) == 0
+    central_node_device.SubarrayDevNames = ["subarray1"]
+    assert len(central_node_device.SubarrayDevNames) == 1
     assert len(central_node_device.CspSubarrayDevNames) == 0
+    central_node_device.CspSubarrayDevNames = ["cspsubarray1"]
+    assert len(central_node_device.CspSubarrayDevNames) == 1
     assert len(central_node_device.SdpSubarrayDevNames) == 0
+    central_node_device.SdpSubarrayDevNames = ["sdpsubarray1"]
+    assert len(central_node_device.SdpSubarrayDevNames) == 1
     assert len(central_node_device.DishDevNames) == 0
+    central_node_device.DishDevNames = ["dish1"]
+    assert len(central_node_device.DishDevNames) == 1
     json_model = json.loads(central_node_device.InternalModel)
     assert "telescope_state" in json_model
     assert "tmc_op_state" in json_model

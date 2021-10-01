@@ -7,7 +7,7 @@ package.
 import time
 from tango import DevState
 from ska_tango_base.base import BaseComponentManager
-from ska_tango_base.control_model import HealthState
+from ska_tango_base.control_model import HealthState, ObsState
 from ska_tmc_centralnode_mid.manager.aggregators import TelescopeStateAggragator, HealthStateAggragator, TMCOpStateAggragator
 from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
@@ -330,7 +330,7 @@ class CNComponentManager(BaseComponentManager):
         with devInfo.lock:
             devInfo.obsState = obs_state
             devInfo.last_event_arrived = time.time()
-            self._update_resources(dev_name)
+            self._update_resources(devInfo)
 
     
     def is_already_assigned(self, dishId):
@@ -390,7 +390,7 @@ class CNComponentManager(BaseComponentManager):
         with self.component.lock:
             self.component.tmc_op_state = new_state
 
-    def _update_resources(self, subarray_dev_name):
+    def _update_resources(self, subarray_dev_info):
         """
         Updates resources for a subarray 
         the relative callback if available
@@ -398,5 +398,11 @@ class CNComponentManager(BaseComponentManager):
         :param subarray_dev_name: name of the subarray device
         :type subarray_dev_name: str
         """
-        self._monitoring_loop.add_priority_devices(subarray_dev_name)
-
+        if self._monitoring_loop is not None:
+            self._monitoring_loop.add_priority_devices(subarray_dev_info.dev_name)
+        else:
+            # If the monitoring loop is not active
+            # I must assume that the subarray is reporting the correct value
+            # and I need to update the assigned resources in the device info
+            if subarray_dev_info.obsState == ObsState.EMPTY:
+                subarray_dev_info.resources = []

@@ -85,4 +85,5 @@ def test_telescope_stow_antennas_fail_check_allowed(tango_context):
     my_adapter_factory = HelperAdapterFactory()
     cm.input_parameter.tm_dish_dev_names = []
     stow_command = StowAntennas(cm, cm.op_state_model, my_adapter_factory)
-    assert stow_command.check_allowed() == False
+    with pytest.raises(Exception):
+        stow_command.check_allowed()

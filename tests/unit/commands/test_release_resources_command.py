@@ -131,4 +131,5 @@ def test_telescope_release_resources_fail_check_allowed(tango_context):
     my_adapter_factory = HelperAdapterFactory()
     cm.input_parameter.tm_dish_dev_names = []
     release_command = ReleaseResources(cm, cm.op_state_model, my_adapter_factory)
-    assert release_command.check_allowed() == False
+    with pytest.raises(Exception):
+        release_command.check_allowed()

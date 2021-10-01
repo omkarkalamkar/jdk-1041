@@ -110,4 +110,5 @@ def test_telescope_standby_fail_check_allowed(tango_context):
     my_adapter_factory = HelperAdapterFactory()
     cm.input_parameter.tm_dish_dev_names = []
     standby_command = TelescopeStandby(cm, cm.op_state_model, my_adapter_factory)
-    assert standby_command.check_allowed() == False
+    with pytest.raises(Exception):
+        standby_command.check_allowed()

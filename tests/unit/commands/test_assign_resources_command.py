@@ -171,4 +171,5 @@ def test_telescope_assign_resources_fail_check_allowed(tango_context):
     my_adapter_factory = HelperAdapterFactory()
     cm.input_parameter.tm_dish_dev_names = []
     assign_res_command = AssignResources(cm, cm.op_state_model, my_adapter_factory)
-    assert assign_res_command.check_allowed() == False
+    with pytest.raises(Exception):
+        assign_res_command.check_allowed()

@@ -46,25 +46,22 @@ class AbstractTelescopeOnOff(TMCCommand):
 
         """
         component_manager = self.target
-
+        
         if self.op_state_model.op_state in [
             DevState.FAULT,
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
-            self.logger.error("TelescopeOnOff() is not allowed in current state %s", self.op_state_model.op_state)
-            return False
+            raise Exception("TelescopeOnOff() is not allowed in current state %s", self.op_state_model.op_state)
 
         # for this command I need a number of sub-devices
         devInfo = component_manager.get_device(component_manager.input_parameter.tm_leaf_csp_master_dev_name)
         if devInfo is None or devInfo.faulty:
-            self.logger.info("TM Csp Master Leaf node not available")
-            return False
+            raise Exception("TM Csp Master Leaf node not available")
         
         devInfo = component_manager.get_device(component_manager.input_parameter.tm_leaf_sdp_master_dev_name)
         if devInfo is None or devInfo.faulty:
-            self.logger.info("TM SDP Master Leaf node not available")
-            return False
+            raise Exception("TM SDP Master Leaf node not available")
         
         subarray_count = 0
         for dev_name in component_manager.input_parameter.tm_subarray_dev_names:
@@ -72,8 +69,7 @@ class AbstractTelescopeOnOff(TMCCommand):
             if devInfo is not None and not devInfo.faulty:
                 subarray_count += 1
         if subarray_count == 0: 
-            self.logger.info("No TM Subarray available")
-            return False
+            raise Exception("No TM Subarray available")
 
         dish_count = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
@@ -81,8 +77,7 @@ class AbstractTelescopeOnOff(TMCCommand):
             if devInfo is not None and not devInfo.faulty:
                 dish_count += 1
         if dish_count == 0: 
-            self.logger.info("No Dish available")
-            return False
+            raise Exception("No Dish available")
 
         return True
 
@@ -170,8 +165,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
-            self.logger.error("AssignReleaseResources() is not allowed in current state %s", self.op_state_model.op_state)
-            return False
+            raise Exception("AssignReleaseResources() is not allowed in current state %s", self.op_state_model.op_state)
         
         subarray_count = 0
         for dev_name in component_manager.input_parameter.tm_subarray_dev_names:
@@ -179,8 +173,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             if devInfo is not None and not devInfo.faulty:
                 subarray_count += 1
         if subarray_count == 0: 
-            self.logger.info("No TM Subarray available")
-            return False
+            raise Exception("No TM Subarray available")
 
         dish_count = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
@@ -188,8 +181,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             if devInfo is not None and not devInfo.faulty:
                 dish_count += 1
         if dish_count == 0: 
-            self.logger.info("No Dish available")
-            return False
+            raise Exception("No Dish available")
 
         return True
 

@@ -72,7 +72,7 @@ class MonitoringLoop:
                     newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
                     newDevInfo.resources = proxy.assignedResources
                     newDevInfo.obsState = proxy.obsState
-                    for s in devInfo.dev_name.split():
+                    for s in devInfo.dev_name:
                         if s.isdigit():
                             newDevInfo.id = int(s)
                 else:
@@ -84,5 +84,5 @@ class MonitoringLoop:
                 newDevInfo.dev_info = proxy.info()
                 self._component_manager.update_device_info(newDevInfo)
             except Exception as e:
-                self._logger.error("Device not working %s %s", devInfo.dev_name, e)
+                self._logger.debug("Device not working %s %s", devInfo.dev_name, e)
                 self._component_manager.device_failed(devInfo, e)

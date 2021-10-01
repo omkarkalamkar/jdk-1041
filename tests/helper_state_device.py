@@ -1,6 +1,7 @@
 import logging
 import time
 from ska_tango_base.base import OpStateModel
+from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.base.component_manager import BaseComponentManager
 from ska_tango_base.subarray import SubarrayComponentManager
 from ska_tango_base.control_model import HealthState, ObsState
@@ -26,8 +27,14 @@ class HelperStateDevice(SKASubarray):
             device = self.target
             device.set_change_event("State", True, False)
             device.set_change_event("healthState", True, False)
-            device.set_change_event("obsState", True, False)
             return (ResultCode.OK, "")
+
+    # def init_command_objects(self):
+    #     super().init_command_objects()
+    #     component_args = (self.component_manager, self.op_state_model, self.logger)
+    #     self.register_command_object("TelescopeStandby", self.StandbyCommand(*component_args))
+    #     self.register_command_object("TelescopeOff", self.OffCommand(*component_args))
+    #     self.register_command_object("TelescopeOn", self.OnCommand(*component_args))
 
     def create_component_manager(self):
         self.op_state_model = OpStateModel(
@@ -72,16 +79,36 @@ class HelperStateDevice(SKASubarray):
             self._health_state = HealthState(argin)
             self.push_change_event("healthState", self._health_state)
 
+    def is_TelescopeOn_allowed(self):
+        return True
+
     @command(
-        dtype_in=int,
-        doc_in="state to assign",
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
     )
-    def SetDirectObsState(self, argin):
-        """
-        Trigger a HealthState change
-        """
+    def TelescopeOn(self):
+        time.sleep(0.1)
+        return [[ResultCode.OK], [""]]
+
+    def is_SetStandbyFPMode_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def SetStandbyFPMode(self):
         # import debugpy; debugpy.debug_this_thread()
-        value = ObsState(argin)
-        if(self._obs_state != value):
-            self._obs_state = ObsState(argin)
-            self.push_change_event("obsState", self._obs_state)
+        time.sleep(0.1)
+        return [[ResultCode.OK], [""]]
+
+    def is_SetOperateMode_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def SetOperateMode(self):
+        time.sleep(0.1)
+        return [[ResultCode.OK], [""]]

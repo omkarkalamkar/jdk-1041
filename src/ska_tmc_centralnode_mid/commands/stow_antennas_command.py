@@ -33,8 +33,7 @@ class StowAntennas(TMCCommand):
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
-            self.logger.error("StowAntennas() is not allowed in current state %s", self.op_state_model.op_state)
-            return False
+            raise Exception("StowAntennas() is not allowed in current state %s", self.op_state_model.op_state)
 
         # for this command I need a number of sub-devices
         component_manager = self.target
@@ -45,8 +44,7 @@ class StowAntennas(TMCCommand):
             if devInfo is not None and not devInfo.faulty:
                 dish_count += 1
         if dish_count == 0: 
-            self.logger.info("No Dish available")
-            return False
+            raise Exception("No Dish available")
 
         return True
 

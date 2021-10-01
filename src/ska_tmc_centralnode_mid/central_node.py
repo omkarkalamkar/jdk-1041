@@ -237,7 +237,7 @@ class CentralNode(SKABaseDevice):
         return cm
 
     def update_device_callback(self, devInfo):
-        self.push_change_event("InternalModel", devInfo)
+        self.push_change_event("InternalModel", devInfo.to_json())
     
     def update_telescope_state_callback(self, telescope_state):
         self.push_change_event("telescopeState", telescope_state)
@@ -645,11 +645,12 @@ class CentralNode(SKABaseDevice):
         This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
         SdpMasterLeafNode.
         """
+        # import debugpy; debugpy.debug_this_thread()
         handler = self.get_command_object("On")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
-        return [[ResultCode.QUEUED], [str(unique_id)]]
+        return ([ResultCode.QUEUED], [str(unique_id)])
 
     def is_AssignResources_allowed(self):
         """
@@ -806,7 +807,7 @@ class CentralNode(SKABaseDevice):
             ("Standby", TelescopeStandby),
             ("TelescopeStandby", TelescopeStandby)
         ]:
-            command_obj = command_class(self.component_manager, self.op_state_model, *args, self.logger)
+            command_obj = command_class(self.component_manager, self.op_state_model, *args, logger=self.logger)
             self.register_command_object(command_name, command_obj)
 
 # ----------
