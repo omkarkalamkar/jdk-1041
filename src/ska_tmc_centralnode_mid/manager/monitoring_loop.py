@@ -46,11 +46,14 @@ class MonitoringLoop:
         while not self._stop:
             with futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
                 not_read_devices_twice = []
-                while not self._priority_devices.empty():
-                    dev_name = self._priority_devices.get(block=False)
-                    devInfo = self._component_manager.get_device(dev_name)
-                    executor.submit(self.device_task, devInfo)
-                    not_read_devices_twice.append(devInfo)
+                try:
+                    while not self._priority_devices.empty():
+                        dev_name = self._priority_devices.get(block=False)
+                        devInfo = self._component_manager.get_device(dev_name)
+                        executor.submit(self.device_task, devInfo)
+                        not_read_devices_twice.append(devInfo)
+                except Empty:
+                    pass
 
                 for devInfo in self._component_manager.devices:
                     if devInfo not in not_read_devices_twice:
@@ -68,12 +71,15 @@ class MonitoringLoop:
                 if "subarray" in devInfo.dev_name.lower():
                     newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
                     newDevInfo.resources = proxy.assignedResources
+                    newDevInfo.obsState = proxy.obsState
+                    for s in devInfo.dev_name.split():
+                        if s.isdigit():
+                            newDevInfo.id = int(s)
                 else:
                     newDevInfo = DeviceInfo(devInfo.dev_name)
                 newDevInfo.from_dev_info(devInfo)
                 newDevInfo.ping = proxy.ping()
                 newDevInfo.state = proxy.State()
-                newDevInfo.obsState = proxy.obsState
                 newDevInfo.healthState = proxy.HealthState
                 newDevInfo.dev_info = proxy.info()
                 self._component_manager.update_device_info(newDevInfo)

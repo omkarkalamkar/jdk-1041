@@ -111,6 +111,16 @@ class Component:
                 return devInfo
         return None
 
+    def remove_device(self, dev_name):
+        """
+        Remove a device from the list
+
+        :param dev_name: name of the device
+        """
+        for devInfo in self.devices:
+            if devInfo.dev_name == dev_name:
+                self.devices.remove(devInfo)
+
     def update_device(self, devInfo):
         """
         Update (or add if missing) Device Information into the list of the component.
@@ -326,7 +336,6 @@ class DeviceInfo:
     def from_dev_info(self, devInfo):
         self.dev_name = devInfo.dev_name
         self.state = devInfo.state
-        self.obsState = devInfo.obsState
         self.healthState = devInfo.healthState
         self.ping = devInfo.ping
         self.last_event_arrived = devInfo.last_event_arrived
@@ -384,12 +393,14 @@ class SubArrayDeviceInfo(DeviceInfo):
         super(SubArrayDeviceInfo, self).__init__(dev_name, _faulty)
         self.id = -1
         self.resources = []
+        self.obsState = ObsState.EMPTY
 
     def from_dev_info(self, subarrayDevInfo):
         super().from_dev_info(subarrayDevInfo)
         if (isinstance(subarrayDevInfo, SubArrayDeviceInfo)):
             self.id = subarrayDevInfo.id
             self.resources = subarrayDevInfo.resources
+            self.obsState = subarrayDevInfo.obsState
 
     def __eq__(self, other):
         if (isinstance(other, SubArrayDeviceInfo) or isinstance(other, DeviceInfo)):
