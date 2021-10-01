@@ -171,11 +171,21 @@ class AssignResources(AbstractAssignReleaseResources):
         sdp_values = list(json_argument["sdp"].values())
         if "" in sdp_values:
             id = sdp_keys[sdp_values.index("")]
-            self.update_resource_config_file(json_argument, id)
+            try:
+                self.update_resource_config_file(json_argument, id)
+            except Exception as e:
+                return self.generate_command_result(ResultCode.FAILED, ("Errors in json input argument: %s!", e))
 
         # get subarray ID
+        if not 'transaction_id' in json_argument:
+            return self.generate_command_result(ResultCode.FAILED, "transaction_id in not present in the input json argument!")
+
         if 'transaction_id' in json_argument:
             del json_argument["transaction_id"]
+        
+        if not 'subarray_id' in json_argument:
+            return self.generate_command_result(ResultCode.FAILED, "subarray_id in not present in the input json argument!")
+
         subarrayID = int(json_argument["subarray_id"])
 
         my_subarray_adapter = None
@@ -187,6 +197,12 @@ class AssignResources(AbstractAssignReleaseResources):
             return self.generate_command_result(ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
 
         # check allocated dishes
+        if "dish" not in json_argument:
+            return self.generate_command_result(ResultCode.FAILED, "dish key in not present in the input json argument!")
+        else:
+            if "receptor_ids" not in json_argument:
+                return self.generate_command_result(ResultCode.FAILED, "dish.receptor_ids key in not present in the input json argument!")
+
         receptor_ids = json_argument["dish"]["receptor_ids"]
         for receptor_id in receptor_ids:
             dish_ID = "dish" + receptor_id
@@ -205,6 +221,8 @@ class AssignResources(AbstractAssignReleaseResources):
     def update_resource_config_file(self, json_argument, id):
         '''This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id'''
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
+        if "sdp" not in json_argument:
+            raise Exception("sdp key not present in the input json argument")
         unique_id = self._skuid.fetch_skuid("eb")
         json_argument["sdp"][id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
@@ -218,3 +236,5 @@ class AssignResources(AbstractAssignReleaseResources):
                     else:
                         json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
                             json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
+        else:
+            raise Exception("processing_blocks key not present in the input json argument")

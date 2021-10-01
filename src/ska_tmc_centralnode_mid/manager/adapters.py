@@ -58,12 +58,6 @@ class BaseAdapter:
     def StandBy(self):
         self.proxy.TelescopeStandBy()
     
-    def __eq__(self, other):
-        if (isinstance(other, BaseAdapter)):
-            return self.dev_name == other.dev_name
-        else:
-            return False
-
 class SubArrayAdapter(BaseAdapter):
 
     def __init__(self, dev_name, proxy) -> None:

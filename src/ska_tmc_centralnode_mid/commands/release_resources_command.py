@@ -98,37 +98,38 @@ class ReleaseResources(AbstractAssignReleaseResources):
         ret_code, message = self.init_adapters("ReleaseResources", component_manager)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-        try:
-            jsonArgument = json.loads(argin)
-            if 'transaction_id' in jsonArgument:
-                del jsonArgument["transaction_id"]
-            subarrayID = jsonArgument["subarray_id"]
 
-            my_subarray_adapter = None
-            for adapter in self.tm_subarray_adapters:
-                if str(subarrayID) in adapter.dev_name:
-                    my_subarray_adapter = adapter
+        jsonArgument = json.loads(argin)
+        if not 'transaction_id' in jsonArgument:
+            return self.generate_command_result(ResultCode.FAILED, "transaction_id in not present in the input json argument!")
 
-            if my_subarray_adapter is None:
-                return self.generate_command_result(ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
+        if 'transaction_id' in jsonArgument:
+            del jsonArgument["transaction_id"]
 
-            if jsonArgument["release_all"] == True:
-                # Invoke "ReleaseAllResources" on SubarrayNode
+        if not 'subarray_id' in jsonArgument:
+            return self.generate_command_result(ResultCode.FAILED, "subarray_id in not present in the input json argument!")
+
+        subarrayID = jsonArgument["subarray_id"]
+
+        my_subarray_adapter = None
+        for adapter in self.tm_subarray_adapters:
+            if str(subarrayID) in adapter.dev_name:
+                my_subarray_adapter = adapter
+
+        if my_subarray_adapter is None:
+            return self.generate_command_result(ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
+
+        if jsonArgument["release_all"] == True:
+            # Invoke "ReleaseAllResources" on SubarrayNode
+            try:
                 return_val = my_subarray_adapter.ReleaseAllResources()
                 self.logger.info("Command result from Subarray: %s", return_val)
-                self.logger.info(const.STR_REL_RESOURCES)
                 # Leave the monitoring loop to do the updates on the resources!
                 # component_manager.add_command_execution("ReleaseResources", ResultCode.OK, "")
                 return (ResultCode.OK, "")
-               
-            else:
-                self.logger.info(const.STR_FALSE_TAG)
+            except Exception as e:
+                return self.generate_command_result(ResultCode.FAILED, ("Error in calling ReleaseAllResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
+        else:
+            return (ResultCode.FAILED, "Partial release resources not supported!")
+
         
-        except ValueError as value_error:
-            return self.generate_command_result(ResultCode.FAILED, ("Value Error occured in the execution of ReleaseResources on CentralNode: %s", value_error))
-
-        except KeyError as key_error:
-            return self.generate_command_result(ResultCode.FAILED, ("Key Error occured in the execution of ReleaseResources on CentralNode: %s", key_error))
-
-        except Exception as e:
-            return self.generate_command_result(ResultCode.FAILED, ("Error in calling ReleaseAllResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
