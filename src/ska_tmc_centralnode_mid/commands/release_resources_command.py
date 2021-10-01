@@ -99,13 +99,13 @@ class ReleaseResources(AbstractAssignReleaseResources):
             return self.generate_command_result(ResultCode.FAILED, ("Problem in loading the JSON string: %s", e))
         
         if not 'transaction_id' in jsonArgument:
-            return self.generate_command_result(ResultCode.FAILED, "transaction_id in not present in the input json argument!")
+            return self.generate_command_result(ResultCode.FAILED, "transaction_id key is not present in the input json argument.")
 
         if 'transaction_id' in jsonArgument:
             del jsonArgument["transaction_id"]
 
         if not 'subarray_id' in jsonArgument:
-            return self.generate_command_result(ResultCode.FAILED, "subarray_id in not present in the input json argument!")
+            return self.generate_command_result(ResultCode.FAILED, "subarray_id key is not present in the input json argument.")
 
         subarrayID = jsonArgument["subarray_id"]
 
