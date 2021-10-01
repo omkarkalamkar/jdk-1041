@@ -93,8 +93,11 @@ class ReleaseResources(AbstractAssignReleaseResources):
         ret_code, message = self.init_adapters("ReleaseResources", component_manager)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-
-        jsonArgument = json.loads(argin)
+        try:
+            jsonArgument = json.loads(argin)
+        except Exception as e:
+            return self.generate_command_result(ResultCode.FAILED, ("Problem in loading the JSON string: %s", e))
+        
         if not 'transaction_id' in jsonArgument:
             return self.generate_command_result(ResultCode.FAILED, "transaction_id in not present in the input json argument!")
 
