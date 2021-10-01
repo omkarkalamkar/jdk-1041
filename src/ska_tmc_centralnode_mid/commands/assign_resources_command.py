@@ -158,7 +158,7 @@ class AssignResources(AbstractAssignReleaseResources):
             return self.generate_command_result(ResultCode.FAILED, ("Problem in loading the JSON string: %s", e))
         
         if not 'sdp' in json_argument:
-            return self.generate_command_result(ResultCode.FAILED, "sdp block in not present in the input json argument!")
+            return self.generate_command_result(ResultCode.FAILED, "sdp key is not present in the input json argument.")
         
         sdp_keys = list(json_argument["sdp"].keys())
         sdp_values = list(json_argument["sdp"].values())
@@ -167,17 +167,17 @@ class AssignResources(AbstractAssignReleaseResources):
             try:
                 self.update_resource_config_file(json_argument, id)
             except Exception as e:
-                return self.generate_command_result(ResultCode.FAILED, ("Errors in json input argument: %s!", e))
+                return self.generate_command_result(ResultCode.FAILED, ("Errors in input json argument: %s", e))
 
         # get subarray ID
         if not 'transaction_id' in json_argument:
-            return self.generate_command_result(ResultCode.FAILED, "transaction_id in not present in the input json argument!")
+            return self.generate_command_result(ResultCode.FAILED, "transaction_id key is not present in the input json argument.")
 
         if 'transaction_id' in json_argument:
             del json_argument["transaction_id"]
         
         if not 'subarray_id' in json_argument:
-            return self.generate_command_result(ResultCode.FAILED, "subarray_id in not present in the input json argument!")
+            return self.generate_command_result(ResultCode.FAILED, "subarray_id key is not present in the input json argument.")
 
         subarrayID = int(json_argument["subarray_id"])
 
@@ -191,10 +191,10 @@ class AssignResources(AbstractAssignReleaseResources):
 
         # check allocated dishes
         if "dish" not in json_argument:
-            return self.generate_command_result(ResultCode.FAILED, "dish key in not present in the input json argument!")
+            return self.generate_command_result(ResultCode.FAILED, "dish key is not present in the input json argument.")
         else:
             if "receptor_ids" not in json_argument["dish"]:
-                return self.generate_command_result(ResultCode.FAILED, "dish.receptor_ids key in not present in the input json argument!")
+                return self.generate_command_result(ResultCode.FAILED, "dish.receptor_ids key is not present in the input json argument.")
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         for receptor_id in receptor_ids:
@@ -214,8 +214,6 @@ class AssignResources(AbstractAssignReleaseResources):
     def update_resource_config_file(self, json_argument, id):
         '''This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id'''
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
-        if "sdp" not in json_argument:
-            raise Exception("sdp key not present in the input json argument")
         unique_id = self._skuid.fetch_skuid("eb")
         json_argument["sdp"][id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
