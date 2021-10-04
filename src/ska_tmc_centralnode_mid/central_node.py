@@ -237,7 +237,11 @@ class CentralNode(SKABaseDevice):
         return cm
 
     def update_device_callback(self, devInfo):
-        self.push_change_event("InternalModel", devInfo.to_json())
+        pass
+        # try:
+        #     self.push_change_event("InternalModel", devInfo.to_json())
+        # except Exception as e:
+        #     self.logger.info("%s", e)
     
     def update_telescope_state_callback(self, telescope_state):
         self.push_change_event("telescopeState", telescope_state)
@@ -567,6 +571,7 @@ class CentralNode(SKABaseDevice):
     @command(
         dtype_in=("str",),
         doc_in="List of Receptors to be stowed",
+        dtype_out="DevVarLongStringArray",
     )
     def StowAntennas(self, argin):
         """
@@ -589,7 +594,7 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("TelescopeOff")
         return handler.check_allowed()
 
-    @command()
+    @command(dtype_out="DevVarLongStringArray")
     def TelescopeOff(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command 
@@ -613,7 +618,7 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("TelescopeOn")
         return handler.check_allowed()
 
-    @command()
+    @command(dtype_out="DevVarLongStringArray")
     @DebugIt()
     def TelescopeOn(self):
         """
@@ -638,19 +643,18 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("On")
         return handler.check_allowed()
 
-    @command()   
+    @command(dtype_out="DevVarLongStringArray",)   
     @DebugIt()
     def On(self):
         """
         This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
         SdpMasterLeafNode.
         """
-        # import debugpy; debugpy.debug_this_thread()
         handler = self.get_command_object("On")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(handler)
-        return ([ResultCode.QUEUED], [str(unique_id)])
+        return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_AssignResources_allowed(self):
         """
@@ -669,7 +673,7 @@ class CentralNode(SKABaseDevice):
         "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
         "The individual string should contain dish numbers in string format with "
         "preceding zeroes upto 3 digits. E.g. 0001, 0002",
-        dtype_out="str",
+        dtype_out="DevVarLongStringArray",
         doc_out="information-only string",
     )
     @DebugIt()
@@ -698,7 +702,7 @@ class CentralNode(SKABaseDevice):
         dtype_in="str",
         doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
         "releaseALL boolean as true and receptor_ids.",
-        dtype_out="str",
+        dtype_out="DevVarLongStringArray",
         doc_out="information-only string",
     )
     @DebugIt()
@@ -723,7 +727,7 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("Standby")
         return handler.check_allowed()
 
-    @command()
+    @command(dtype_out="DevVarLongStringArray",)
     @DebugIt()
     def Standby(self):
         """
@@ -748,7 +752,7 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("TelescopeStandby")
         return handler.check_allowed()
 
-    @command()
+    @command(dtype_out="DevVarLongStringArray",)
     @DebugIt()
     def TelescopeStandby(self):
         """
@@ -774,7 +778,7 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("Off")
         return handler.check_allowed()
 
-    @command()
+    @command(dtype_out="DevVarLongStringArray",)
     def Off(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, 

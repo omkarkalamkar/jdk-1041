@@ -34,7 +34,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             return ret_code, message
 
         # send commands to sub-devices
-
+        # import debugpy; debugpy.debug_this_thread()
         try:
             self.tm_leaf_csp_master_adapter.On()
         except Exception as e:
@@ -53,7 +53,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
         
         for adapter in self.tm_dish_adapters:
             try:
-                self.logger.info(adapter.proxy.command_list_query())
                 adapter.SetStandbyFPMode()
             except Exception as e:
                 return self.generate_command_result(ResultCode.FAILED, f"Error in calling SetStandbyFPMode in TM Dish Leaf {adapter.dev_name}: {e}")

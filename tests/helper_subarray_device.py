@@ -1,9 +1,10 @@
 import time
 from ska_tango_base.base import OpStateModel
 from ska_tango_base.subarray import SubarrayComponentManager
-from ska_tango_base.subarray import SubarrayObsStateModel
-from tests.helper_state_device import HelperStateDevice
+from ska_tango_base.subarray import SubarrayObsStateModel, SKASubarray
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import HealthState
+from tango.server import command
 
 class EmptySubArrayComponentManager(SubarrayComponentManager):
     def __init__(self, 
@@ -31,7 +32,7 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
     def release_all(self):
         """Release all resources."""
         self._assigned_resources = []
-        time.sleep(1)
+        
         return (ResultCode.OK, "")
 
     def configure(self, configuration):
@@ -42,12 +43,12 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         :type configuration: dict
         """
         self.logger("%s", configuration)
-        time.sleep(1)
+        
         return (ResultCode.OK, "")
 
     def deconfigure(self):
         """Deconfigure this component."""
-        time.sleep(1)
+        
         return (ResultCode.OK, "")
 
     def scan(self, args):
@@ -57,22 +58,22 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
 
     def end_scan(self):
         """End scanning."""
-        time.sleep(1)
+        
         return (ResultCode.OK, "")
 
     def abort(self):
         """Tell the component to abort whatever it was doing."""
-        time.sleep(1)
+        
         return (ResultCode.OK, "")
 
     def obsreset(self):
         """Reset the component to unconfigured but do not release resources."""
-        time.sleep(1)
+        
         return (ResultCode.OK, "")
 
     def restart(self):
         """Deconfigure and release all resources."""
-        time.sleep(1)
+        
         return (ResultCode.OK, "")
 
     @property
@@ -98,10 +99,10 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         return set()
 
 
-class HelperSubArrayDevice(HelperStateDevice):
+class HelperSubArrayDevice(SKASubarray):
     """A generic device for triggering state changes with a command"""
 
-    class InitCommand(HelperStateDevice.InitCommand):
+    class InitCommand(SKASubarray.InitCommand):
         def do(self):
             super().do()
             device = self.target
@@ -122,3 +123,40 @@ class HelperSubArrayDevice(HelperStateDevice):
             logger=self.logger
         )
         return cm
+
+    @command(
+        dtype_in="DevState",
+        doc_in="state to assign",
+    )
+    def SetDirectState(self, argin):
+        """
+        Trigger a DevState change
+        """
+        # import debugpy; debugpy.debug_this_thread()
+        if self.dev_state() != argin:
+            self.set_state(argin)
+            self.push_change_event("State", self.dev_state())
+
+    @command(
+        dtype_in=int,
+        doc_in="state to assign",
+    )
+    def SetDirectHealthState(self, argin):
+        """
+        Trigger a HealthState change
+        """
+        # import debugpy; debugpy.debug_this_thread()
+        value = HealthState(argin)
+        if(self._health_state != value):
+            self._health_state = HealthState(argin)
+            self.push_change_event("healthState", self._health_state)
+
+    def is_TelescopeOn_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def TelescopeOn(self):
+        return [[ResultCode.OK], [""]]

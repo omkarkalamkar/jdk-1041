@@ -18,10 +18,14 @@ class EmptyComponentManager(BaseComponentManager):
         super().__init__(op_state_model, *args, **kwargs)
 
 
-class HelperStateDevice(SKASubarray):
+class HelperStateDevice(SKABaseDevice):
     """A generic device for triggering state changes with a command"""
 
-    class InitCommand(SKASubarray.InitCommand):
+    def init_device(self):
+        super().init_device()
+        self._health_state = HealthState.OK
+
+    class InitCommand(SKABaseDevice.InitCommand):
         def do(self):
             super().do()
             device = self.target
@@ -87,7 +91,6 @@ class HelperStateDevice(SKASubarray):
         doc_out="(ReturnType, 'informational message')",
     )
     def TelescopeOn(self):
-        time.sleep(0.1)
         return [[ResultCode.OK], [""]]
 
     def is_SetStandbyFPMode_allowed(self):
@@ -99,7 +102,6 @@ class HelperStateDevice(SKASubarray):
     )
     def SetStandbyFPMode(self):
         # import debugpy; debugpy.debug_this_thread()
-        time.sleep(0.1)
         return [[ResultCode.OK], [""]]
 
     def is_SetOperateMode_allowed(self):
@@ -110,5 +112,4 @@ class HelperStateDevice(SKASubarray):
         doc_out="(ReturnType, 'informational message')",
     )
     def SetOperateMode(self):
-        time.sleep(0.1)
         return [[ResultCode.OK], [""]]

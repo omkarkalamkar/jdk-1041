@@ -384,7 +384,7 @@ class DeviceInfo:
             "healthState": self.healthState,
             "ping": str(self.ping),
             "last_event_arrived": str(self.last_event_arrived),
-            "exception_occurred": str(self.exception)
+            "faulty": str(self.faulty)
         }
         return result
 

@@ -48,6 +48,7 @@ class EventReceiver:
 
     def subscribe_events(self, devInfo):
         try:
+            # import debugpy; debugpy.debug_this_thread()
             proxy = self._dev_factory.get_device(devInfo.dev_name)
             proxy.subscribe_event("healthState",tango.EventType.CHANGE_EVENT,self.handle_health_state_event,stateless=True)
             proxy.subscribe_event("State",tango.EventType.CHANGE_EVENT,self.handle_state_event,stateless=True)
@@ -60,7 +61,8 @@ class EventReceiver:
         # import debugpy; debugpy.debug_this_thread()
         if evt.err:
             error = evt.errors[0]
-            self._logger.error("%s %s", error.reason, error.desc)
+            self._logger.error("Received error from device %s: %s %s", evt.device.dev_name(), error.reason, error.desc)
+            self._component_manager.update_event_failure(evt.device.dev_name())
             return
 
         new_value = evt.attr_value.value
@@ -71,6 +73,7 @@ class EventReceiver:
         if evt.err:
             error = evt.errors[0]
             self._logger.error("%s %s", error.reason, error.desc)
+            self._component_manager.update_event_failure(evt.device.dev_name())
             return
 
         new_value = evt.attr_value.value
@@ -81,6 +84,7 @@ class EventReceiver:
         if evt.err:
             error = evt.errors[0]
             self._logger.error("%s %s", error.reason, error.desc)
+            self._component_manager.update_event_failure(evt.device.dev_name())
             return
 
         new_value = evt.attr_value.value

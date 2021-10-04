@@ -5,6 +5,7 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 import time
+import threading
 from tango import DevState
 from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import HealthState, ObsState
@@ -54,7 +55,7 @@ class CNComponentManager(BaseComponentManager):
             managed; for testing purposes only
         """
         self.logger = logger
-
+        self.lock = threading.Lock()
         self._component = _component or Component(logger)
         
         if _monitoring_loop:
@@ -264,8 +265,13 @@ class CNComponentManager(BaseComponentManager):
         :param exception: an exception
         :type Exception
         """
-        with device_info.lock:
+        with self.lock:
             self.component.update_device_exception(device_info, exception)
+
+    def update_event_failure(self, dev_name):
+        with self.lock:
+            devInfo = self.component.get_device(dev_name)
+            devInfo.last_event_arrived = time.time()
 
     def update_device_info(self, device_info):
         """
@@ -275,7 +281,7 @@ class CNComponentManager(BaseComponentManager):
         :param device_info: a device info
         :type device_info: DeviceInfo
         """
-        with device_info.lock:
+        with self.lock:
             self.component.update_device(device_info)
 
         self._aggregate_health_state()
@@ -291,8 +297,8 @@ class CNComponentManager(BaseComponentManager):
         :param health_state: health state of the device
         :type health_state: HealthState
         """
-        devInfo = self.component.get_device(dev_name)
-        with devInfo.lock:
+        with self.lock:
+            devInfo = self.component.get_device(dev_name)
             devInfo.healthState = health_state
             devInfo.last_event_arrived = time.time()
 
@@ -309,8 +315,8 @@ class CNComponentManager(BaseComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        devInfo = self.component.get_device(dev_name)
-        with devInfo.lock:
+        with self.lock:
+            devInfo = self.component.get_device(dev_name)
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
 
@@ -326,8 +332,8 @@ class CNComponentManager(BaseComponentManager):
         :param obs_state: obs state of the device
         :type obs_state: ObsState
         """
-        devInfo = self.component.get_device(dev_name)
-        with devInfo.lock:
+        with self.lock:
+            devInfo = self.component.get_device(dev_name)
             devInfo.obsState = obs_state
             devInfo.last_event_arrived = time.time()
             self._update_resources(devInfo)
@@ -357,8 +363,8 @@ class CNComponentManager(BaseComponentManager):
         if self._health_state_aggregator is None:
             self._health_state_aggregator = HealthStateAggragator(self)
 
-        new_state = self._health_state_aggregator.aggregate()
-        with self.component.lock:
+        with self.lock:
+            new_state = self._health_state_aggregator.aggregate()
             self.component.telescope_health_state = new_state
 
     def _aggregate_state(self):
@@ -375,8 +381,8 @@ class CNComponentManager(BaseComponentManager):
         if self._telescope_state_aggregator is None:
             self._telescope_state_aggregator = TelescopeStateAggragator(self)
 
-        new_state = self._telescope_state_aggregator.aggregate()
-        with self.component.lock:
+        with self.lock:
+            new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
     def _aggregate_tm_op_state(self):
@@ -386,8 +392,8 @@ class CNComponentManager(BaseComponentManager):
         if self._tm_op_state_aggregator is None:
             self._tm_op_state_aggregator = TMCOpStateAggragator(self)
 
-        new_state = self._tm_op_state_aggregator.aggregate()
-        with self.component.lock:
+        with self.lock:
+            new_state = self._tm_op_state_aggregator.aggregate()
             self.component.tmc_op_state = new_state
 
     def _update_resources(self, subarray_dev_info):

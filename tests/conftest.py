@@ -44,6 +44,7 @@ def tango_context(devices_to_load, request):
     if not true_context:
         with MultiDeviceTestContext(devices_to_load, process=False) as context:
             DevFactory._test_context = context
+            logging.info("test context set")
             yield context
     else:
         yield None
@@ -62,7 +63,6 @@ def multi_device_tango_context(
     Creates and returns a TANGO MultiDeviceTestContext object, with
     tango.DeviceProxy patched to work around a name-resolving issue.
     """
-
     def _get_open_port():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(("", 0))

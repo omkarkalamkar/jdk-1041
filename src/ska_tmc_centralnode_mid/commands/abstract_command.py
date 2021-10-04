@@ -1,3 +1,4 @@
+from debugpy import debug_this_thread
 from tango import DevState
 
 from ska_tango_base.commands import BaseCommand
@@ -55,6 +56,7 @@ class AbstractTelescopeOnOff(TMCCommand):
             raise Exception("TelescopeOnOff() is not allowed in current state %s", self.op_state_model.op_state)
 
         # for this command I need a number of sub-devices
+        # import debugpy; debugpy.debug_this_thread()
         devInfo = component_manager.get_device(component_manager.input_parameter.tm_leaf_csp_master_dev_name)
         if devInfo is None or devInfo.faulty:
             raise Exception("TM Csp Master Leaf node not available")
@@ -123,6 +125,7 @@ class AbstractTelescopeOnOff(TMCCommand):
             devInfo = component_manager.get_device(dev_name)
             if not devInfo.faulty:
                 try:
+                    # import debugpy; debugpy.debug_this_thread()
                     self.tm_dish_adapters.append(self._adapter_factory.get_or_create_adapter(dev_name, AdapterType.DISH))
                     num_working += 1
                 except Exception as e:
