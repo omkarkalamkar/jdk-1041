@@ -16,7 +16,8 @@ class AdapterFactory:
 
     def get_or_create_adapter(self, dev_name, adapter_type=AdapterType.BASE):
         """
-        Get or create a generic adapter
+        Get a generic adapter for a device if already created 
+        or create new adapter as per the device type and add to adpter list
 
         :param dev_name: device name
         :type str
