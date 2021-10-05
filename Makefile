@@ -6,7 +6,7 @@
 # CAR_OCI_REGISTRY_HOST and PROJECT are combined to define
 # the Docker tag for this project. The definition below inherits the standard
 # value for CAR_OCI_REGISTRY_HOST (=artefact.skao.int) and overwrites
-# PROJECT to give a final Docker tag of 
+# PROJECT to give a final Docker tag of
 # artefact.skao.int/ska-telescope/ska-tmc-centralnode-mid
 
 
@@ -36,5 +36,15 @@ PROJECT = ska-tmc-centralnode-mid
 # include your own private variables for custom deployment configuration
 -include PrivateRules.mak
 
+# Unit test command
+unit-test:
+	chmod 755 run_tox.sh; \
+	./run_tox.sh;
 
-.PHONY: all test lint help
+# Lint command
+old-lint:
+	chmod 755 run_lint.sh; \
+	./run_lint.sh;
+
+# .PHONY is additive
+.PHONY: unit-test old-lint
