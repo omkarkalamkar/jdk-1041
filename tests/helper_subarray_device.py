@@ -1,5 +1,3 @@
-import time
-
 from ska_tango_base.base import OpStateModel
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
@@ -148,6 +146,7 @@ class HelperSubArrayDevice(SKASubarray):
         Trigger a HealthState change
         """
         # import debugpy; debugpy.debug_this_thread()
+        # # pylint: disable=E0203
         value = HealthState(argin)
         if self._health_state != value:
             self._health_state = HealthState(argin)

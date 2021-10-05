@@ -1,0 +1,22 @@
+name: "sdpsubarayleafnode-{{.Release.Name}}"
+function: observation-execution
+domain: subarray
+instances: ["01"]
+command: "python3 /app/tests/helper_subarray_device.py"
+server:
+  name: "Subarrays"
+  instances:
+    - name: "01"
+      classes:
+        - name: "HelperSubArrayDevice"
+          devices:
+            - name: "ska_mid/tm_subarray_node/1"
+            - name: "ska_mid/tm_leaf_node/csp_subarray01"
+            - name: "ska_mid/tm_leaf_node/sdp_subarray01"
+depends_on:
+  - device: sys/database/2
+image:
+  registry: "{{.Values.centralnodemid.image.registry}}"
+  image: "{{.Values.centralnodemid.image.image}}"
+  tag: "{{.Values.centralnodemid.image.tag}}"
+  pullPolicy: "{{.Values.centralnodemid.image.pullPolicy}}"

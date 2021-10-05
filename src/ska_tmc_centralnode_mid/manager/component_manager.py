@@ -71,9 +71,11 @@ class CNComponentManager(BaseComponentManager):
         self.lock = threading.Lock()
         self._component = _component or Component(logger)
 
+        self._monitoring_loop = None
         if _monitoring_loop:
             self._monitoring_loop = MonitoringLoop(self, logger)
 
+        self._event_receiver = None
         if _event_receiver:
             self._event_receiver = EventReceiver(self, logger)
 
@@ -401,6 +403,7 @@ class CNComponentManager(BaseComponentManager):
 
         with self.lock:
             new_state = self._telescope_state_aggregator.aggregate()
+            # import debugpy; debugpy.debug_this_thread()
             self.component.telescope_state = new_state
 
     def _aggregate_tm_op_state(self):
