@@ -1,14 +1,15 @@
 from ska_tmc_centralnode_mid.model.input import InputParameter
 
+
 def test_properties():
     input = InputParameter(None)
     input.tm_subarray_dev_names = ("1", "2")
     assert input.tm_subarray_dev_names == ("1", "2")
     input.csp_subarray_dev_names = ("3", "4")
     assert input.csp_subarray_dev_names == ("3", "4")
-    input.tm_dish_dev_names = ("5")
+    input.tm_dish_dev_names = "5"
     assert input.tm_dish_dev_names == ("5")
-    input.sdp_subarray_dev_names = ("6")
+    input.sdp_subarray_dev_names = "6"
     assert input.sdp_subarray_dev_names == ("6")
     input.csp_master_dev_name = "7"
     assert input.csp_master_dev_name == "7"

@@ -1,50 +1,54 @@
-
 import time
-import pytest
+
 import mock
-from ska_tmc_centralnode_mid.manager.adapters import BaseAdapter, SubArrayAdapter, DishAdapter
-from tests.helper_adapter_factory import HelperAdapterFactory
+import pytest
 from ska_tango_base.commands import ResultCode
-from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
-from tests.settings import  logger
-from tests.helper_subarray_device import HelperSubArrayDevice
 from ska_tango_base.obs.obs_device import SKAObsDevice
 from test_cm_all_working import create_cm
-from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_faulty_devices
+
+from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode_mid.manager.adapters import (
+    BaseAdapter,
+    DishAdapter,
+    SubArrayAdapter,
+)
 from ska_tmc_centralnode_mid.manager.command_executor import CommandExecutor
+from tests.helper_adapter_factory import HelperAdapterFactory
+from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.settings import (
+    DEVICE_LIST,
+    SLEEP_TIME,
+    TIMEOUT,
+    count_faulty_devices,
+    logger,
+)
+
 
 @pytest.fixture()
 def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [
-                {
-                    "name": "ska_mid/tm_subarray_node/1"
-                }
-            ],
+            "devices": [{"name": "ska_mid/tm_subarray_node/1"}],
         },
         {
             "class": SKAObsDevice,
             "devices": [
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_master"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_master"
-                },
-                {
-                    "name": "mid_d0001/elt/master"
-                }
-            ]
-        }
+                {"name": "ska_mid/tm_leaf_node/csp_master"},
+                {"name": "ska_mid/tm_leaf_node/sdp_master"},
+                {"name": "mid_d0001/elt/master"},
+            ],
+        },
     )
+
 
 def test_command_executor(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", len(cm.checked_devices), elapsed_time)
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
 
     # import debugpy; debugpy.debug_this_thread()
     executor = CommandExecutor(logger)
@@ -59,9 +63,8 @@ def test_command_executor(tango_context):
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
         time.sleep(SLEEP_TIME)
-    
+
     for command_result in executor.command_executed:
         assert command_result["Command"] == "TelescopeOn"
         assert command_result["ResultCode"] == ResultCode.OK
         assert command_result["Message"] == ""
-

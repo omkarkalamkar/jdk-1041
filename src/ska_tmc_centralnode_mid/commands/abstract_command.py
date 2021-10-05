@@ -1,13 +1,14 @@
 from debugpy import debug_this_thread
+from ska_tango_base.commands import BaseCommand, ResultCode
 from tango import DevState
 
-from ska_tango_base.commands import BaseCommand
-from ska_tango_base.commands import ResultCode
-from ska_tmc_centralnode_mid.manager.adapters import AdapterType, AdapterFactory
+from ska_tmc_centralnode_mid.manager.adapters import (
+    AdapterFactory,
+    AdapterType,
+)
 
 
 class TMCCommand(BaseCommand):
-
     def __init__(self, target, *args, logger=None, **kwargs):
         super().__init__(target, args, logger, kwargs)
 
@@ -16,7 +17,7 @@ class TMCCommand(BaseCommand):
             self.logger.error(message)
         self.logger.info(message)
         return (result_code, message)
-    
+
     def adapter_error_message_result(self, dev_name, e):
         message = f"Error in creating adapter for {dev_name}: {e}"
         self.logger.error(message)
@@ -24,8 +25,15 @@ class TMCCommand(BaseCommand):
 
 
 class AbstractTelescopeOnOff(TMCCommand):
-
-    def __init__(self, target, pop_state_model, adapter_factory = AdapterFactory(), *args, logger=None, **kwargs):
+    def __init__(
+        self,
+        target,
+        pop_state_model,
+        adapter_factory=AdapterFactory(),
+        *args,
+        logger=None,
+        **kwargs,
+    ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
         self._adapter_factory = adapter_factory
@@ -38,7 +46,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         """
         Checks whether this command is allowed
         It checks that the device is in a state
-        to perform this command and that all the 
+        to perform this command and that all the
         component needed for the operation are not faulty
 
         :return: True if this command is allowed
@@ -47,30 +55,39 @@ class AbstractTelescopeOnOff(TMCCommand):
 
         """
         component_manager = self.target
-        
+
         if self.op_state_model.op_state in [
             DevState.FAULT,
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
-            raise Exception("TelescopeOnOff() is not allowed in current state %s", self.op_state_model.op_state)
+            raise Exception(
+                "TelescopeOnOff() is not allowed in current state %s",
+                self.op_state_model.op_state,
+            )
 
         # for this command I need a number of sub-devices
         # import debugpy; debugpy.debug_this_thread()
-        devInfo = component_manager.get_device(component_manager.input_parameter.tm_leaf_csp_master_dev_name)
+        devInfo = component_manager.get_device(
+            component_manager.input_parameter.tm_leaf_csp_master_dev_name
+        )
         if devInfo is None or devInfo.faulty:
             raise Exception("TM Csp Master Leaf node not available")
-        
-        devInfo = component_manager.get_device(component_manager.input_parameter.tm_leaf_sdp_master_dev_name)
+
+        devInfo = component_manager.get_device(
+            component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+        )
         if devInfo is None or devInfo.faulty:
             raise Exception("TM SDP Master Leaf node not available")
-        
+
         subarray_count = 0
-        for dev_name in component_manager.input_parameter.tm_subarray_dev_names:
+        for (
+            dev_name
+        ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
             if devInfo is not None and not devInfo.faulty:
                 subarray_count += 1
-        if subarray_count == 0: 
+        if subarray_count == 0:
             raise Exception("No TM Subarray available")
 
         dish_count = 0
@@ -78,43 +95,57 @@ class AbstractTelescopeOnOff(TMCCommand):
             devInfo = component_manager.get_device(dev_name)
             if devInfo is not None and not devInfo.faulty:
                 dish_count += 1
-        if dish_count == 0: 
+        if dish_count == 0:
             raise Exception("No Dish available")
 
         return True
 
     def init_adapters(self, cmd_name, component_manager):
-        
+
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
-        
+
         try:
             self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
-                component_manager.input_parameter.tm_leaf_csp_master_dev_name)
+                component_manager.input_parameter.tm_leaf_csp_master_dev_name
+            )
         except Exception as e:
-            return self.adapter_error_message_result(component_manager.input_parameter.tm_leaf_csp_master_dev_name, e)
-        
+            return self.adapter_error_message_result(
+                component_manager.input_parameter.tm_leaf_csp_master_dev_name,
+                e,
+            )
+
         try:
             self.tm_leaf_sdp_master_adapter = self._adapter_factory.get_or_create_adapter(
-                component_manager.input_parameter.tm_leaf_sdp_master_dev_name)
+                component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+            )
         except Exception as e:
-            return self.adapter_error_message_result(component_manager.input_parameter.tm_leaf_sdp_master_dev_name, e)
+            return self.adapter_error_message_result(
+                component_manager.input_parameter.tm_leaf_sdp_master_dev_name,
+                e,
+            )
 
         error_dev_names = []
         num_working = 0
 
-        for dev_name in component_manager.input_parameter.tm_subarray_dev_names:
+        for (
+            dev_name
+        ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
             if not devInfo.faulty:
                 try:
-                    self.tm_subarray_adapters.append(self._adapter_factory.get_or_create_adapter(dev_name))
+                    self.tm_subarray_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(dev_name)
+                    )
                     num_working += 1
                 except Exception as e:
-                    self.logger.warning("Error in creating adapter for %s: %s", dev_name, e)
+                    self.logger.warning(
+                        "Error in creating adapter for %s: %s", dev_name, e
+                    )
                     error_dev_names.append(dev_name)
-        
+
         if num_working == 0:
             message = f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}"
             return self.generate_command_result(ResultCode.FAILED, message)
@@ -126,24 +157,40 @@ class AbstractTelescopeOnOff(TMCCommand):
             if not devInfo.faulty:
                 try:
                     # import debugpy; debugpy.debug_this_thread()
-                    self.tm_dish_adapters.append(self._adapter_factory.get_or_create_adapter(dev_name, AdapterType.DISH))
+                    self.tm_dish_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.DISH
+                        )
+                    )
                     num_working += 1
                 except Exception as e:
-                    self.logger.warning("Error in creating adapter for %s: %s", dev_name, e)
+                    self.logger.warning(
+                        "Error in creating adapter for %s: %s", dev_name, e
+                    )
                     error_dev_names.append(dev_name)
-        
+
         if num_working == 0:
-            message = f"Error in creating dish adapters {'.'.join(error_dev_names)}"
+            message = (
+                f"Error in creating dish adapters {'.'.join(error_dev_names)}"
+            )
             return self.generate_command_result(ResultCode.FAILED, message)
-        
+
         return ResultCode.OK, ""
 
     def do(self):
         raise NotImplementedError("This class must be inherited!")
 
-class AbstractAssignReleaseResources(TMCCommand):
 
-    def __init__(self, target, pop_state_model, adapter_factory = AdapterFactory(), *args, logger=None, **kwargs):
+class AbstractAssignReleaseResources(TMCCommand):
+    def __init__(
+        self,
+        target,
+        pop_state_model,
+        adapter_factory=AdapterFactory(),
+        *args,
+        logger=None,
+        **kwargs,
+    ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
         self._adapter_factory = adapter_factory
@@ -159,7 +206,7 @@ class AbstractAssignReleaseResources(TMCCommand):
         :rtype: boolean
 
         :raises: DevFailed if this command is not allowed to be run in current device state
-        
+
         """
         component_manager = self.target
 
@@ -168,14 +215,19 @@ class AbstractAssignReleaseResources(TMCCommand):
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
-            raise Exception("AssignReleaseResources() is not allowed in current state %s", self.op_state_model.op_state)
-        
+            raise Exception(
+                "AssignReleaseResources() is not allowed in current state %s",
+                self.op_state_model.op_state,
+            )
+
         subarray_count = 0
-        for dev_name in component_manager.input_parameter.tm_subarray_dev_names:
+        for (
+            dev_name
+        ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
             if devInfo is not None and not devInfo.faulty:
                 subarray_count += 1
-        if subarray_count == 0: 
+        if subarray_count == 0:
             raise Exception("No TM Subarray available")
 
         dish_count = 0
@@ -183,34 +235,42 @@ class AbstractAssignReleaseResources(TMCCommand):
             devInfo = component_manager.get_device(dev_name)
             if devInfo is not None and not devInfo.faulty:
                 dish_count += 1
-        if dish_count == 0: 
+        if dish_count == 0:
             raise Exception("No Dish available")
 
         return True
 
     def init_adapters(self, cmd_name, component_manager):
-        
+
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
 
         error_dev_names = []
         num_working = 0
 
-        for dev_name in component_manager.input_parameter.tm_subarray_dev_names:
+        for (
+            dev_name
+        ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
             if not devInfo.faulty:
                 try:
-                    self.tm_subarray_adapters.append(self._adapter_factory.get_or_create_adapter(dev_name, AdapterType.SUBARRAY))
+                    self.tm_subarray_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.SUBARRAY
+                        )
+                    )
                     num_working += 1
                 except Exception as e:
-                    self.logger.warning("Error in creating adapter for %s: %s", dev_name, e)
+                    self.logger.warning(
+                        "Error in creating adapter for %s: %s", dev_name, e
+                    )
                     error_dev_names.append(dev_name)
-        
+
         if num_working == 0:
             return self.generate_command_result(
-                ResultCode.FAILED,  
-                f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}")
-        
+                ResultCode.FAILED,
+                f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
+            )
 
         error_dev_names = []
         num_working = 0
@@ -218,15 +278,22 @@ class AbstractAssignReleaseResources(TMCCommand):
             devInfo = component_manager.get_device(dev_name)
             if not devInfo.faulty:
                 try:
-                    self.tm_dish_adapters.append(self._adapter_factory.get_or_create_adapter(dev_name, AdapterType.DISH))
+                    self.tm_dish_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.DISH
+                        )
+                    )
                     num_working += 1
                 except Exception as e:
-                    self.logger.warning("Error in creating adapter for %s: %s", dev_name, e)
+                    self.logger.warning(
+                        "Error in creating adapter for %s: %s", dev_name, e
+                    )
                     error_dev_names.append(dev_name)
-        
+
         if num_working == 0:
-            return self.generate_command_result( 
-                ResultCode.FAILED,  
-                f"Error in creating dish adapters {'.'.join(error_dev_names)}")
-        
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                f"Error in creating dish adapters {'.'.join(error_dev_names)}",
+            )
+
         return (ResultCode.OK, "")

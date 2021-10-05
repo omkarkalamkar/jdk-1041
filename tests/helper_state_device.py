@@ -1,19 +1,21 @@
 import logging
 import time
+
 from ska_tango_base.base import OpStateModel
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.base.component_manager import BaseComponentManager
-from ska_tango_base.subarray import SubarrayComponentManager
-from ska_tango_base.control_model import HealthState, ObsState
-from ska_tango_base.subarray import SKASubarray, SubarrayObsStateModel
-from tango.server import command, attribute
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import HealthState, ObsState
+from ska_tango_base.subarray import (
+    SKASubarray,
+    SubarrayComponentManager,
+    SubarrayObsStateModel,
+)
+from tango.server import attribute, command
+
 
 class EmptyComponentManager(BaseComponentManager):
-    def __init__(self, 
-                op_state_model,
-                logger=None,
-                *args, **kwargs):
+    def __init__(self, op_state_model, logger=None, *args, **kwargs):
         self.logger = logger
         super().__init__(op_state_model, *args, **kwargs)
 
@@ -42,12 +44,9 @@ class HelperStateDevice(SKABaseDevice):
 
     def create_component_manager(self):
         self.op_state_model = OpStateModel(
-            logger=self.logger,
-            callback=super()._update_state)
-        cm =  EmptyComponentManager(
-            self.op_state_model, 
-            logger=self.logger
+            logger=self.logger, callback=super()._update_state
         )
+        cm = EmptyComponentManager(self.op_state_model, logger=self.logger)
         return cm
 
     def always_executed_hook(self):
@@ -79,7 +78,7 @@ class HelperStateDevice(SKABaseDevice):
         """
         # import debugpy; debugpy.debug_this_thread()
         value = HealthState(argin)
-        if(self._health_state != value):
+        if self._health_state != value:
             self._health_state = HealthState(argin)
             self.push_change_event("healthState", self._health_state)
 

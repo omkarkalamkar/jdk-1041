@@ -1,73 +1,84 @@
+import json
+import time
+
 import pytest
 import tango
-import time
-import json
-from tango.test_utils import DeviceTestContext
-from ska_tmc_centralnode_mid.central_node import CentralNode
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
-from ska_tango_base.control_model import HealthState, TestMode, SimulationMode, ControlMode
-from tango import DevState
+from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import (
+    ControlMode,
+    HealthState,
+    SimulationMode,
+    TestMode,
+)
 from ska_tango_base.obs.obs_device import SKAObsDevice
+from tango import DevState
+from tango.test_utils import DeviceTestContext
+
+from ska_tmc_centralnode_mid.central_node import CentralNode
+from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_faulty_devices
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from ska_tango_base.commands import ResultCode
+from tests.settings import (
+    DEVICE_LIST,
+    SLEEP_TIME,
+    TIMEOUT,
+    count_faulty_devices,
+    logger,
+)
 
 devices_to_test = [
-        {
-            "class": HelperSubArrayDevice,
-            "devices": [
-                {
-                    "name": "ska_mid/tm_subarray_node/1"
+    {
+        "class": HelperSubArrayDevice,
+        "devices": [
+            {"name": "ska_mid/tm_subarray_node/1"},
+            {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
+            {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+        ],
+    },
+    {
+        "class": HelperStateDevice,
+        "devices": [
+            {"name": "ska_mid/tm_leaf_node/d0001"},
+            {"name": "ska_mid/tm_leaf_node/csp_master"},
+            {"name": "ska_mid/tm_leaf_node/sdp_master"},
+        ],
+    },
+    {
+        "class": CentralNode,
+        "devices": [
+            {
+                "name": "ska_mid/tm_central/central_node",
+                "properties": {
+                    "CspMasterLeafNodeFQDN": [
+                        "ska_mid/tm_leaf_node/csp_master"
+                    ],
+                    "SdpMasterLeafNodeFQDN": [
+                        "ska_mid/tm_leaf_node/sdp_master"
+                    ],
+                    "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
+                    "TMMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
+                    "TMMidCspSubarrayLeafNodes": [
+                        "ska_mid/tm_leaf_node/csp_subarray01"
+                    ],
+                    "TMMidSdpSubarrayLeafNodes": [
+                        "ska_mid/tm_leaf_node/sdp_subarray01"
+                    ],
+                    "NumDishes": [1],
                 },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray01"
-                }
-            ],
-        },
-        {
-            "class": HelperStateDevice,
-            "devices": [
-                {
-                    "name": "ska_mid/tm_leaf_node/d0001"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_master"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_master"
-                }
-            ]
-        },
-        {
-            "class": CentralNode,
-            "devices": [
-                {
-                    "name": "ska_mid/tm_central/central_node",
-                    "properties": {
-                        "CspMasterLeafNodeFQDN": ["ska_mid/tm_leaf_node/csp_master"],
-                        "SdpMasterLeafNodeFQDN": ["ska_mid/tm_leaf_node/sdp_master"],
-                        "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
-                        "TMMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
-                        "TMMidCspSubarrayLeafNodes": ["ska_mid/tm_leaf_node/csp_subarray01"],
-                        "TMMidSdpSubarrayLeafNodes": ["ska_mid/tm_leaf_node/sdp_subarray01"],
-                        "NumDishes": [1]
-                    },
-                }
-            ],
-        }
-    ]
+            }
+        ],
+    },
+]
+
 
 def checked_devices(json_model):
     result = 0
     for dev in json_model["devices"]:
-        if int(dev["ping"]) > 0 and dev["faulty"] == 'False':
+        if int(dev["ping"]) > 0 and dev["faulty"] == "False":
             result += 1
     return result
+
 
 def test_on_command(multi_device_tango_context):
     # import debugpy; debugpy.debug_this_thread()

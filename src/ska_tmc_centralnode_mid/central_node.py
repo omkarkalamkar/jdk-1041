@@ -1,36 +1,41 @@
 """
-Central Node is a coordinator of the complete M&C system. 
+Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Tango imports
 import json
-from tango import DebugIt, AttrWriteType, DevState, DevString
-from tango.server import run, attribute, command, device_property
-
-from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
-from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
 # Additional import
 from ska_tango_base import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
+from tango import AttrWriteType, DebugIt, DevState, DevString
+from tango.server import attribute, command, device_property, run
+
+from ska_tmc_centralnode_mid.commands.assign_resources_command import (
+    AssignResources,
+)
+from ska_tmc_centralnode_mid.commands.release_resources_command import (
+    ReleaseResources,
+)
+from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
 from ska_tmc_centralnode_mid.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
-from ska_tmc_centralnode_mid.commands.telescope_standby_command import TelescopeStandby
-from ska_tmc_centralnode_mid.commands.assign_resources_command import AssignResources
-from ska_tmc_centralnode_mid.commands.release_resources_command import ReleaseResources
-from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
+from ska_tmc_centralnode_mid.commands.telescope_standby_command import (
+    TelescopeStandby,
+)
+from ska_tmc_centralnode_mid.manager.component_manager import (
+    CNComponentManager,
+)
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
-
+from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
 
-__all__ = [
-    "CentralNode",
-    "main"
-]
+__all__ = ["CentralNode", "main"]
+
 
 class CentralNode(SKABaseDevice):
     """
@@ -64,7 +69,9 @@ class CentralNode(SKABaseDevice):
     )
 
     DishLeafNodePrefix = device_property(
-        dtype="str", default_value="", doc="Device name prefix for Dish Leaf Node"
+        dtype="str",
+        default_value="",
+        doc="Device name prefix for Dish Leaf Node",
     )
 
     TMMidCspSubarrayLeafNodes = device_property(
@@ -81,7 +88,7 @@ class CentralNode(SKABaseDevice):
 
     CspMasterLeafNodeFQDN = device_property(dtype="str")
 
-    CspMasterFQDN = device_property(dtype="str")    
+    CspMasterFQDN = device_property(dtype="str")
 
     SdpMasterLeafNodeFQDN = device_property(dtype="str")
 
@@ -112,31 +119,27 @@ class CentralNode(SKABaseDevice):
     telescopeState = attribute(
         dtype="DevState",
         access=AttrWriteType.READ,
-        doc="DevState of telescope"
+        doc="DevState of telescope",
     )
 
     imaging = attribute(
         dtype=ModesAvailability,
         access=AttrWriteType.READ,
-        doc="Imaging Attribute"
+        doc="Imaging Attribute",
     )
 
     pss = attribute(
-        dtype=ModesAvailability,
-        access=AttrWriteType.READ,
-        doc="PSS Attribute"
+        dtype=ModesAvailability, access=AttrWriteType.READ, doc="PSS Attribute"
     )
 
     pst = attribute(
-        dtype=ModesAvailability,
-        access=AttrWriteType.READ,
-        doc="PST Attribute"
+        dtype=ModesAvailability, access=AttrWriteType.READ, doc="PST Attribute"
     )
 
     vlbi = attribute(
         dtype=ModesAvailability,
         access=AttrWriteType.READ,
-        doc="VLBI Attribute"
+        doc="VLBI Attribute",
     )
 
     desiredTelescopeState = attribute(
@@ -152,87 +155,98 @@ class CentralNode(SKABaseDevice):
     )
 
     CspMasterDevName = attribute(
-        dtype='DevString',
+        dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
     SdpMasterDevName = attribute(
-        dtype='DevString',
+        dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
     LeafCspMasterDevName = attribute(
-        dtype='DevString',
+        dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
     LeafSdpMasterDevName = attribute(
-        dtype='DevString',
+        dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
     TMOpState = attribute(
-        dtype='DevState',
+        dtype="DevState",
     )
 
     SubarrayDevNames = attribute(
-        dtype=('DevString',),
+        dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=16,
     )
 
     CspSubarrayDevNames = attribute(
-        dtype=('DevString',),
+        dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=16,
     )
 
     SdpSubarrayDevNames = attribute(
-        dtype=('DevString',),
+        dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=16,
     )
 
     DishDevNames = attribute(
-        dtype=('DevString',),
+        dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=100,
     )
 
     CommandExecuted = attribute(
-        dtype=(('DevString',),),
-        max_dim_x=4, max_dim_y=100,
+        dtype=(("DevString",),),
+        max_dim_x=4,
+        max_dim_y=100,
     )
-    
+
     InternalModel = attribute(
-        dtype='DevString',
+        dtype="DevString",
         access=AttrWriteType.READ,
         doc="Json String representing the entire internal model.",
     )
 
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
+            logger=self.logger, callback=super()._update_state
+        )
+        cm = CNComponentManager(
+            self.op_state_model,
             logger=self.logger,
-            callback=super()._update_state)
-        cm =  CNComponentManager(
-            self.op_state_model, 
-            logger=self.logger,
-            _update_device_callback = self.update_device_callback,
-            _update_telescope_state_callback = self.update_telescope_state_callback,
-            _update_telescope_health_state_callback = self.update_telescope_health_state_callback,
-            _update_tmc_op_state_callback = self.update_tmc_op_state_callback,
-            _update_subarray_health_state_callback = self.update_subarray_health_state_callback
+            _update_device_callback=self.update_device_callback,
+            _update_telescope_state_callback=self.update_telescope_state_callback,
+            _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
+            _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
+            _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
         )
         cm.input_parameter.tm_dish_dev_names = []
         for dish in range(1, (self.NumDishes + 1)):
-            cm.input_parameter.tm_dish_dev_names.append(self.DishLeafNodePrefix + f"000{dish}")
+            cm.input_parameter.tm_dish_dev_names.append(
+                self.DishLeafNodePrefix + f"000{dish}"
+            )
         cm.input_parameter.tm_subarray_dev_names = self.TMMidSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
-        cm.input_parameter.tm_leaf_csp_master_dev_name = self.CspMasterLeafNodeFQDN or ""
+        cm.input_parameter.tm_leaf_csp_master_dev_name = (
+            self.CspMasterLeafNodeFQDN or ""
+        )
         cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
-        cm.input_parameter.tm_leaf_sdp_master_dev_name = self.SdpMasterLeafNodeFQDN or ""
-        cm.input_parameter.csp_subarray_dev_names = self.TMMidCspSubarrayLeafNodes
-        cm.input_parameter.sdp_subarray_dev_names = self.TMMidSdpSubarrayLeafNodes
+        cm.input_parameter.tm_leaf_sdp_master_dev_name = (
+            self.SdpMasterLeafNodeFQDN or ""
+        )
+        cm.input_parameter.csp_subarray_dev_names = (
+            self.TMMidCspSubarrayLeafNodes
+        )
+        cm.input_parameter.sdp_subarray_dev_names = (
+            self.TMMidSdpSubarrayLeafNodes
+        )
         cm.update_input_parameter()
         return cm
 
@@ -242,13 +256,13 @@ class CentralNode(SKABaseDevice):
         #     self.push_change_event("InternalModel", devInfo.to_json())
         # except Exception as e:
         #     self.logger.info("%s", e)
-    
+
     def update_telescope_state_callback(self, telescope_state):
         self.push_change_event("telescopeState", telescope_state)
-    
+
     def update_telescope_health_state_callback(self, telescope_health_state):
         self.push_change_event("telescopeHealthState", telescope_health_state)
-    
+
     def update_tmc_op_state_callback(self, tmc_op_state):
         self.push_change_event("TMOpState", tmc_op_state)
 
@@ -267,6 +281,7 @@ class CentralNode(SKABaseDevice):
         """
         A class for the TMC CentralNode's init_device() method.
         """
+
         def do(self):
             """
             Initializes the attributes and properties of the Central Node.
@@ -288,7 +303,9 @@ class CentralNode(SKABaseDevice):
             device.set_change_event("TMOpState", True, True)
 
             device.op_state_model.perform_action("component_on")
-            device.component_manager.command_executor.add_command_execution("0", "Init", ResultCode.OK, "")
+            device.component_manager.command_executor.add_command_execution(
+                "0", "Init", ResultCode.OK, ""
+            )
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
@@ -312,7 +329,9 @@ class CentralNode(SKABaseDevice):
 
     def read_subarray1HealthState(self):
         # PROTECTED REGION ID(CentralNode.subarray1_healthstate_read) ENABLED START #
-        for dev_name in self.component_manager.input_parameter.tm_subarray_dev_names:
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
             if "1" in dev_name:
                 return self.component_manager.get_device(dev_name).healthState
         return HealthState.UNKNOWN
@@ -320,7 +339,9 @@ class CentralNode(SKABaseDevice):
 
     def read_subarray2HealthState(self):
         # PROTECTED REGION ID(CentralNode.subarray2_healthstate_read) ENABLED START #
-        for dev_name in self.component_manager.input_parameter.tm_subarray_dev_names:
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
             if "2" in dev_name:
                 return self.component_manager.get_device(dev_name).healthState
         return HealthState.UNKNOWN
@@ -328,7 +349,9 @@ class CentralNode(SKABaseDevice):
 
     def read_subarray3HealthState(self):
         # PROTECTED REGION ID(CentralNode.subarray3HealthState_read) ENABLED START #
-        for dev_name in self.component_manager.input_parameter.tm_subarray_dev_names:
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
             if "3" in dev_name:
                 return self.component_manager.get_device(dev_name).healthState
         return HealthState.UNKNOWN
@@ -373,16 +396,23 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
         return self.component_manager.component.to_json()
         # PROTECTED REGION END #    //  CentralNode.activity_message_read
-    
+
     def read_CommandExecuted(self):
         # PROTECTED REGION ID(Counter.CommandExecuted_read) ENABLED START #
         """Return the CommandExecuted attribute."""
         result = []
         i = 0
-        for command_executed in reversed(self.component_manager.command_executor.command_executed):
+        for command_executed in reversed(
+            self.component_manager.command_executor.command_executed
+        ):
             if i == 100:
                 break
-            single_res = [str(command_executed["Id"]), str(command_executed["Command"]), str(command_executed["ResultCode"]), str(command_executed["Message"])]
+            single_res = [
+                str(command_executed["Id"]),
+                str(command_executed["Command"]),
+                str(command_executed["ResultCode"]),
+                str(command_executed["Message"]),
+            ]
             result.append(single_res)
             i += 1
         return result
@@ -417,26 +447,34 @@ class CentralNode(SKABaseDevice):
     def read_LeafCspMasterDevName(self):
         # PROTECTED REGION ID(Counter.LeafCspMasterDevName_read) ENABLED START #
         """Return the LeafCspMasterDevName attribute."""
-        return self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
+        return (
+            self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
+        )
         # PROTECTED REGION END #    //  Counter.LeafCspMasterDevName_read
 
     def write_LeafCspMasterDevName(self, value):
         # PROTECTED REGION ID(Counter.LeafCspMasterDevName_write) ENABLED START #
         """Set the LeafCspMasterDevName attribute."""
-        self.component_manager.input_parameter.tm_leaf_csp_master_dev_name = value
+        self.component_manager.input_parameter.tm_leaf_csp_master_dev_name = (
+            value
+        )
         self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.LeafCspMasterDevName_write
 
     def read_LeafSdpMasterDevName(self):
         # PROTECTED REGION ID(Counter.LeafSdpMasterDevName_read) ENABLED START #
         """Return the LeafSdpMasterDevName attribute."""
-        return self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+        return (
+            self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+        )
         # PROTECTED REGION END #    //  Counter.LeafSdpMasterDevName_read
 
     def write_LeafSdpMasterDevName(self, value):
         # PROTECTED REGION ID(Counter.LeafSdpMasterDevName_write) ENABLED START #
         """Set the LeafSdpMasterDevName attribute."""
-        self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name = value
+        self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name = (
+            value
+        )
         self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.LeafSdpMasterDevName_write
 
@@ -497,7 +535,6 @@ class CentralNode(SKABaseDevice):
         self.component_manager.input_parameter.tm_dish_dev_names = value
         self.component_manager.update_input_parameter()
         # PROTECTED REGION END #    //  Counter.DishDevNames_write
-    
 
     # --------
     # Commands
@@ -521,13 +558,15 @@ class CentralNode(SKABaseDevice):
     @DebugIt()
     def StartUpTelescope(self):
         """
-        This command invokes SetOperateMode() command on DishLeadNode, 
+        This command invokes SetOperateMode() command on DishLeadNode,
         TelescopeOn() command on CspMasterLeafNode, SdpMasterLeafNode and SubarrayNode
         """
         handler = self.get_command_object("StartUpTelescope")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_StandByTelescope_allowed(self):
@@ -547,14 +586,16 @@ class CentralNode(SKABaseDevice):
     )
     def StandByTelescope(self):
         """
-        This command invokes SetStandbyLPMode() command on DishLeafNode, TelescopeStandBy() command 
-        on CspMasterLeafNode and SdpMasterLeafNode and TelescopeOff() command 
+        This command invokes SetStandbyLPMode() command on DishLeafNode, TelescopeStandBy() command
+        on CspMasterLeafNode and SdpMasterLeafNode and TelescopeOff() command
         on SubarrayNode.
         """
         handler = self.get_command_object("StandByTelescope")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_StowAntennas_allowed(self):
@@ -580,7 +621,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("StowAntennas")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler, argin)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler, argin
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_TelescopeOff_allowed(self):
@@ -597,14 +640,16 @@ class CentralNode(SKABaseDevice):
     @command(dtype_out="DevVarLongStringArray")
     def TelescopeOff(self):
         """
-        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command 
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
         on CspMasterLeafNode and SdpMasterLeafNode.
 
         """
         handler = self.get_command_object("TelescopeOff")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_TelescopeOn_allowed(self):
@@ -628,7 +673,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("TelescopeOn")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_On_allowed(self):
@@ -643,7 +690,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("On")
         return handler.check_allowed()
 
-    @command(dtype_out="DevVarLongStringArray",)   
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
     @DebugIt()
     def On(self):
         """
@@ -653,7 +702,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("On")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_AssignResources_allowed(self):
@@ -684,7 +735,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("AssignResources")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler, argin)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler, argin
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_ReleaseResources_allowed(self):
@@ -713,7 +766,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("ReleaseResources")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler, argin)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler, argin
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_Standby_allowed(self):
@@ -727,7 +782,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("Standby")
         return handler.check_allowed()
 
-    @command(dtype_out="DevVarLongStringArray",)
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
     @DebugIt()
     def Standby(self):
         """
@@ -738,7 +795,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("Standby")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_telescope_standby_allowed(self):
@@ -752,7 +811,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("TelescopeStandby")
         return handler.check_allowed()
 
-    @command(dtype_out="DevVarLongStringArray",)
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
     @DebugIt()
     def TelescopeStandby(self):
         """
@@ -763,7 +824,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("TelescopeStandby")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_Off_allowed(self):
@@ -774,14 +837,16 @@ class CentralNode(SKABaseDevice):
 
         :rtype: boolean
         """
-        
+
         handler = self.get_command_object("Off")
         return handler.check_allowed()
 
-    @command(dtype_out="DevVarLongStringArray",)
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
     def Off(self):
         """
-        This command invokes SetStandbyLPMode() command on DishLeafNode, 
+        This command invokes SetStandbyLPMode() command on DishLeafNode,
         TelescopeOff() command on CspMasterLeafNode and
         SdpMasterLeafNode.
 
@@ -789,7 +854,9 @@ class CentralNode(SKABaseDevice):
         handler = self.get_command_object("Off")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(handler)
+        unique_id = self.component_manager.command_executor.enqueue_command(
+            handler
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def init_command_objects(self):
@@ -809,10 +876,16 @@ class CentralNode(SKABaseDevice):
             ("ReleaseResources", ReleaseResources),
             ("StowAntennas", StowAntennas),
             ("Standby", TelescopeStandby),
-            ("TelescopeStandby", TelescopeStandby)
+            ("TelescopeStandby", TelescopeStandby),
         ]:
-            command_obj = command_class(self.component_manager, self.op_state_model, *args, logger=self.logger)
+            command_obj = command_class(
+                self.component_manager,
+                self.op_state_model,
+                *args,
+                logger=self.logger,
+            )
             self.register_command_object(command_name, command_obj)
+
 
 # ----------
 # Run server

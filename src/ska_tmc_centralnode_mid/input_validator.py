@@ -9,16 +9,22 @@
 
 # standard Python imports
 import json
-from json import JSONDecodeError
 import logging
+from json import JSONDecodeError
 
 from marshmallow import ValidationError
+from ska_tmc_cdm.messages.central_node.assign_resources import (
+    AssignResourcesRequest,
+)
 
 # SKA specific imports
 from ska_tmc_cdm.schemas import CODEC
-from ska_tmc_cdm.messages.central_node.assign_resources import AssignResourcesRequest
-from ska_tmc_centralnode_mid.exceptions import ResourceNotPresentError
-from ska_tmc_centralnode_mid.exceptions import SubarrayNotPresentError, InvalidJSONError
+
+from ska_tmc_centralnode_mid.exceptions import (
+    InvalidJSONError,
+    ResourceNotPresentError,
+    SubarrayNotPresentError,
+)
 
 module_logger = logging.getLogger(__name__)
 
@@ -27,7 +33,9 @@ class AssignResourceValidator:
 
     """Class to validate the input string of AssignResources command of Central Node"""
 
-    def __init__(self, subarray_list, receptor_list, dish_prefix, logger=module_logger):
+    def __init__(
+        self, subarray_list, receptor_list, dish_prefix, logger=module_logger
+    ):
         self.logger = logger
         self._subarrays = []
         self._receptor_list = []
@@ -58,7 +66,7 @@ class AssignResourceValidator:
         """
         ret_val = False
         self.logger.debug("Subarray ID: %d", subarray_id)
-        if not subarray_id in self._subarrays:
+        if subarray_id not in self._subarrays:
             self.logger.debug("The subarray does not exist.")
         else:
             ret_val = True
@@ -105,7 +113,7 @@ class AssignResourceValidator:
             ResourceNotPresentError: When a receptor in the receptor_id_list is not present.
         """
 
-        ## Check if JSON is correct
+        # Check if JSON is correct
         self.logger.info("Checking JSON format.")
         try:
             assign_request = CODEC.loads(AssignResourcesRequest, input_string)
@@ -118,7 +126,7 @@ class AssignResourceValidator:
             )
             raise InvalidJSONError(exception_message)
 
-        ## Validate subarray ID
+        # Validate subarray ID
         # TODO: Use the object returned by cdm library instead of parsing
         # JSON string.
         assign_request = json.loads(input_string)
@@ -131,7 +139,7 @@ class AssignResourceValidator:
             raise SubarrayNotPresentError(exception_message)
         self.logger.debug("SubarrayID validation successful.")
 
-        ## Validate receptorIDList
+        # Validate receptorIDList
         try:
             receptor_list = assign_request["dish"]["receptor_ids"]
             assert len(receptor_list) > 0
@@ -143,8 +151,9 @@ class AssignResourceValidator:
             assign_request["dish"]["receptor_ids"]
         )
         if non_existing_receptors:
-            exception_message = "The following Receptor id(s) do not exist: " + str(
-                non_existing_receptors
+            exception_message = (
+                "The following Receptor id(s) do not exist: "
+                + str(non_existing_receptors)
             )
             raise ResourceNotPresentError(exception_message)
         self.logger.debug("receptor_id_list validation successful.")

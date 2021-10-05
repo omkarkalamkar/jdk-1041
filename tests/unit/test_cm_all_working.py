@@ -1,17 +1,27 @@
-import pytest
 import logging
 import time
-from ska_tango_base.control_model import HealthState
 
-from ska_tango_base.obs.obs_device import SKAObsDevice
+import pytest
 import tango
-from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
+from ska_tango_base.control_model import HealthState
+from ska_tango_base.obs.obs_device import SKAObsDevice
+
 from ska_tmc_centralnode_mid.central_node import CentralNode
-from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from ska_tmc_centralnode_mid.manager.component_manager import (
+    CNComponentManager,
+)
+from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 from tests.helper_subarray_device import HelperSubArrayDevice
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, count_faulty_devices
+from tests.settings import (
+    DEVICE_LIST,
+    SLEEP_TIME,
+    TIMEOUT,
+    count_faulty_devices,
+    logger,
+)
+
 
 @pytest.fixture()
 def devices_to_load():
@@ -19,42 +29,32 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {
-                    "name": "ska_mid/tm_subarray_node/1"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray01"
-                }
+                {"name": "ska_mid/tm_subarray_node/1"},
+                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
+                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
             ],
         },
         {
             "class": SKAObsDevice,
             "devices": [
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_master"
-                },
-                {
-                    "name": "mid_csp/elt/master"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_master"
-                },
-                {
-                    "name": "mid_sdp/elt/master"
-                },
-                {
-                    "name": "mid_d0001/elt/master"
-                }
-            ]
-        }
+                {"name": "ska_mid/tm_leaf_node/csp_master"},
+                {"name": "mid_csp/elt/master"},
+                {"name": "ska_mid/tm_leaf_node/sdp_master"},
+                {"name": "mid_sdp/elt/master"},
+                {"name": "mid_d0001/elt/master"},
+            ],
+        },
     )
 
-def create_cm(p_monitoring_loop = True, p_event_receiver = True):
+
+def create_cm(p_monitoring_loop=True, p_event_receiver=True):
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(op_state_model, logger=logger, _monitoring_loop=p_monitoring_loop, _event_receiver=p_event_receiver)
+    cm = CNComponentManager(
+        op_state_model,
+        logger=logger,
+        _monitoring_loop=p_monitoring_loop,
+        _event_receiver=p_event_receiver,
+    )
     for dev in DEVICE_LIST:
         cm.add_device(dev)
     start_time = time.time()
@@ -68,6 +68,7 @@ def create_cm(p_monitoring_loop = True, p_event_receiver = True):
             pytest.fail("Timeout occurred while executing the test")
 
     return cm, start_time
+
 
 def test_all_working(tango_context):
     logger.info("%s", tango_context)

@@ -1,18 +1,23 @@
 """
 ReleaseResources class for CentralNode.
 """
+import ast
+
 # PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
 # Standard Python imports
 import json
-import ast
 
 import tango
-from tango import DevState, DevFailed
+from ska_tango_base.commands import ResultCode
+from tango import DevFailed, DevState
+
+from ska_tmc_centralnode_mid.commands.abstract_command import (
+    AbstractAssignReleaseResources,
+)
 
 # Additional import
 from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
-from ska_tango_base.commands import ResultCode
-from ska_tmc_centralnode_mid.commands.abstract_command import AbstractAssignReleaseResources
+
 
 class ReleaseResources(AbstractAssignReleaseResources):
     """
@@ -27,8 +32,15 @@ class ReleaseResources(AbstractAssignReleaseResources):
     releaseALL Flag is False is not yet supported.
     """
 
-    def __init__(self, target, pop_state_model, adapter_factory = AdapterFactory(),
-                *args, logger=None, **kwargs):
+    def __init__(
+        self,
+        target,
+        pop_state_model,
+        adapter_factory=AdapterFactory(),
+        *args,
+        logger=None,
+        **kwargs
+    ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
         self._adapter_factory = adapter_factory
@@ -56,7 +68,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                     "transaction_id": "txn-....-00001",
                     "subarray_id": 1,
                     "release_all": true,
-                    "receptor_ids": [       
+                    "receptor_ids": [
                     ]
                 }
 
@@ -81,7 +93,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                     "interface": "https://schema.skao.int/ska-tmc-releaseresources/2.0",
                     "subarray_id": 1,
                     "release_all": true,
-                    "receptor_ids": [       
+                    "receptor_ids": [
                     ]
                     }
 
@@ -90,22 +102,33 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         """
         component_manager = self.target
-        ret_code, message = self.init_adapters("ReleaseResources", component_manager)
+        ret_code, message = self.init_adapters(
+            "ReleaseResources", component_manager
+        )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
         try:
             jsonArgument = json.loads(argin)
         except Exception as e:
-            return self.generate_command_result(ResultCode.FAILED, ("Problem in loading the JSON string: %s", e))
-        
-        if not 'transaction_id' in jsonArgument:
-            return self.generate_command_result(ResultCode.FAILED, "transaction_id key is not present in the input json argument.")
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
 
-        if 'transaction_id' in jsonArgument:
+        if "transaction_id" not in jsonArgument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "transaction_id key is not present in the input json argument.",
+            )
+
+        if "transaction_id" in jsonArgument:
             del jsonArgument["transaction_id"]
 
-        if not 'subarray_id' in jsonArgument:
-            return self.generate_command_result(ResultCode.FAILED, "subarray_id key is not present in the input json argument.")
+        if "subarray_id" not in jsonArgument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
 
         subarrayID = jsonArgument["subarray_id"]
 
@@ -115,19 +138,32 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 my_subarray_adapter = adapter
 
         if my_subarray_adapter is None:
-            return self.generate_command_result(ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("SubArray Id %s is not existing!", subarrayID),
+            )
 
-        if jsonArgument["release_all"] == True:
+        if jsonArgument["release_all"]:
             # Invoke "ReleaseAllResources" on SubarrayNode
             try:
                 return_val = my_subarray_adapter.ReleaseAllResources()
-                self.logger.info("Command result from Subarray: %s", return_val)
+                self.logger.info(
+                    "Command result from Subarray: %s", return_val
+                )
                 # Leave the monitoring loop to do the updates on the resources!
                 # component_manager.add_command_execution("ReleaseResources", ResultCode.OK, "")
                 return (ResultCode.OK, "")
             except Exception as e:
-                return self.generate_command_result(ResultCode.FAILED, ("Error in calling ReleaseAllResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    (
+                        "Error in calling ReleaseAllResources on subarray %s: %s",
+                        my_subarray_adapter.dev_name,
+                        e,
+                    ),
+                )
         else:
-            return (ResultCode.FAILED, "Partial release resources not supported!")
-
-        
+            return (
+                ResultCode.FAILED,
+                "Partial release resources not supported!",
+            )

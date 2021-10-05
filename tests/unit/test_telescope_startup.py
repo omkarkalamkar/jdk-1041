@@ -1,15 +1,17 @@
-
-from logging import debug
-from ska_tango_base.subarray import SKASubarray
-import tango
 import time
+from logging import debug
+
 import pytest
+import tango
 from ska_tango_base.control_model import HealthState
-from tests.settings import count_faulty_devices, logger, TIMEOUT
+from ska_tango_base.subarray import SKASubarray
 from test_cm_all_working import create_cm
+
+from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from tests.settings import TIMEOUT, count_faulty_devices, logger
+
 
 @pytest.fixture()
 def devices_to_load():
@@ -17,40 +19,27 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {
-                    "name": "ska_mid/tm_subarray_node/1"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_subarray01"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_subarray01"
-                },
+                {"name": "ska_mid/tm_subarray_node/1"},
+                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
+                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
             ],
         },
         {
             "class": HelperStateDevice,
             "devices": [
-                {
-                    "name": "ska_mid/tm_leaf_node/csp_master"
-                },
-                {
-                    "name": "mid_csp/elt/master"
-                },
-                {
-                    "name": "ska_mid/tm_leaf_node/sdp_master"
-                },
-                {
-                    "name": "mid_sdp/elt/master"
-                },
-                {
-                    "name": "mid_d0001/elt/master"
-                }
-            ]
-        }        
+                {"name": "ska_mid/tm_leaf_node/csp_master"},
+                {"name": "mid_csp/elt/master"},
+                {"name": "ska_mid/tm_leaf_node/sdp_master"},
+                {"name": "mid_sdp/elt/master"},
+                {"name": "mid_d0001/elt/master"},
+            ],
+        },
     )
 
-def create_cm_no_faulty_devices(tango_context, p_monitoring_loop, p_event_receiver):
+
+def create_cm_no_faulty_devices(
+    tango_context, p_monitoring_loop, p_event_receiver
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(p_monitoring_loop, p_event_receiver)
     num_faulty = count_faulty_devices(cm)
@@ -59,9 +48,10 @@ def create_cm_no_faulty_devices(tango_context, p_monitoring_loop, p_event_receiv
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
     return cm
 
+
 def test_aggregation_default(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    ## Why is this in fault state initially?
+    # Why is this in fault state initially?
     assert cm.component.telescope_state == tango.DevState.UNKNOWN
     assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
     assert cm.component.telescope_health_state == HealthState.OK

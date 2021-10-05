@@ -1,11 +1,19 @@
+import json
+
 import pytest
 import tango
-import json
+from ska_tango_base.control_model import (
+    ControlMode,
+    HealthState,
+    SimulationMode,
+    TestMode,
+)
+from tango import DevState
 from tango.test_utils import DeviceTestContext
+
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
-from ska_tango_base.control_model import HealthState, TestMode, SimulationMode, ControlMode
-from tango import DevState
+
 
 @pytest.fixture
 def central_node_device(request):
@@ -20,6 +28,7 @@ def central_node_device(request):
         for instance in instance_list.value_string:
             yield tango.DeviceProxy(instance)
             break
+
 
 def test_attributes(central_node_device):
     assert central_node_device.HealthState == HealthState.OK
@@ -56,7 +65,7 @@ def test_attributes(central_node_device):
     central_node_device.LeafSdpMasterDevName = "leafsdp"
     assert central_node_device.LeafSdpMasterDevName == "leafsdp"
     assert central_node_device.TMOpState == DevState.UNKNOWN
-    assert len(central_node_device.CommandExecuted) == 1 # init
+    assert len(central_node_device.CommandExecuted) == 1  # init
     assert len(central_node_device.SubarrayDevNames) == 0
     central_node_device.SubarrayDevNames = ["subarray1"]
     assert len(central_node_device.SubarrayDevNames) == 1
@@ -74,5 +83,3 @@ def test_attributes(central_node_device):
     assert "tmc_op_state" in json_model
     assert "telescope_health_state" in json_model
     assert "devices" in json_model
-
-

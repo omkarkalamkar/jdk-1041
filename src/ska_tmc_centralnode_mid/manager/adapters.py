@@ -1,21 +1,22 @@
-
 import enum
+
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
+
 
 class AdapterType(enum.IntEnum):
     BASE = 0
     SUBARRAY = 1
     DISH = 2
 
-class AdapterFactory():
 
+class AdapterFactory:
     def __init__(self) -> None:
         self._adapters = []
         self._dev_factory = DevFactory()
 
-    def get_or_create_adapter(self, dev_name, adapter_type = AdapterType.BASE):
+    def get_or_create_adapter(self, dev_name, adapter_type=AdapterType.BASE):
         """
-        Get or create a generic adapter 
+        Get or create a generic adapter
 
         :param dev_name: device name
         :type str
@@ -25,18 +26,24 @@ class AdapterFactory():
                 return adapter
 
         new_adapter = None
-        if adapter_type ==  AdapterType.DISH:
-            new_adapter = DishAdapter(dev_name, self._dev_factory.get_device(dev_name))
+        if adapter_type == AdapterType.DISH:
+            new_adapter = DishAdapter(
+                dev_name, self._dev_factory.get_device(dev_name)
+            )
         elif adapter_type == AdapterType.SUBARRAY:
-            new_adapter = SubArrayAdapter(dev_name, self._dev_factory.get_device(dev_name))
+            new_adapter = SubArrayAdapter(
+                dev_name, self._dev_factory.get_device(dev_name)
+            )
         else:
-            new_adapter = BaseAdapter(dev_name, self._dev_factory.get_device(dev_name))
+            new_adapter = BaseAdapter(
+                dev_name, self._dev_factory.get_device(dev_name)
+            )
 
         self._adapters.append(new_adapter)
         return new_adapter
 
-class BaseAdapter:
 
+class BaseAdapter:
     def __init__(self, dev_name, proxy) -> None:
         self._proxy = proxy
         self._dev_name = dev_name
@@ -57,9 +64,9 @@ class BaseAdapter:
 
     def StandBy(self):
         self.proxy.TelescopeStandBy()
-    
-class SubArrayAdapter(BaseAdapter):
 
+
+class SubArrayAdapter(BaseAdapter):
     def __init__(self, dev_name, proxy) -> None:
         super().__init__(dev_name, proxy)
 
@@ -71,7 +78,6 @@ class SubArrayAdapter(BaseAdapter):
 
 
 class DishAdapter(BaseAdapter):
-
     def __init__(self, dev_name, proxy) -> None:
         super().__init__(dev_name, proxy)
 

@@ -2,11 +2,15 @@
 AssignResources class for CentralNode.
 """
 import json
-from tango import DevState, DevFailed
-from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
+
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
-from ska_tmc_centralnode_mid.commands.abstract_command import AbstractAssignReleaseResources
+from tango import DevFailed, DevState
+
+from ska_tmc_centralnode_mid.commands.abstract_command import (
+    AbstractAssignReleaseResources,
+)
+from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
 
 
 class AssignResources(AbstractAssignReleaseResources):
@@ -19,9 +23,18 @@ class AssignResources(AbstractAssignReleaseResources):
     it will throw error message regarding the prior existence of resource.
     """
 
-    def __init__(self, target, pop_state_model, adapter_factory = AdapterFactory(), 
-                skuid = SkuidClient('ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870'),
-                *args, logger=None, **kwargs):
+    def __init__(
+        self,
+        target,
+        pop_state_model,
+        adapter_factory=AdapterFactory(),
+        skuid=SkuidClient(
+            "ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870"
+        ),
+        *args,
+        logger=None,
+        **kwargs
+    ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
         self._adapter_factory = adapter_factory
@@ -137,8 +150,10 @@ class AssignResources(AbstractAssignReleaseResources):
         """
 
         component_manager = self.target
-        
-        ret_code, message = self.init_adapters("AssignResources", component_manager)
+
+        ret_code, message = self.init_adapters(
+            "AssignResources", component_manager
+        )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
@@ -153,13 +168,19 @@ class AssignResources(AbstractAssignReleaseResources):
         # json_argument = input_validator.loads(argin)
 
         try:
-            json_argument= json.loads(argin)
+            json_argument = json.loads(argin)
         except Exception as e:
-            return self.generate_command_result(ResultCode.FAILED, ("Problem in loading the JSON string: %s", e))
-        
-        if not 'sdp' in json_argument:
-            return self.generate_command_result(ResultCode.FAILED, "sdp key is not present in the input json argument.")
-        
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
+
+        if "sdp" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "sdp key is not present in the input json argument.",
+            )
+
         sdp_keys = list(json_argument["sdp"].keys())
         sdp_values = list(json_argument["sdp"].values())
         if "" in sdp_values:
@@ -167,17 +188,25 @@ class AssignResources(AbstractAssignReleaseResources):
             try:
                 self.update_resource_config_file(json_argument, id)
             except Exception as e:
-                return self.generate_command_result(ResultCode.FAILED, ("Errors in input json argument: %s", e))
+                return self.generate_command_result(
+                    ResultCode.FAILED, ("Errors in input json argument: %s", e)
+                )
 
         # get subarray ID
-        if not 'transaction_id' in json_argument:
-            return self.generate_command_result(ResultCode.FAILED, "transaction_id key is not present in the input json argument.")
+        if "transaction_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "transaction_id key is not present in the input json argument.",
+            )
 
-        if 'transaction_id' in json_argument:
+        if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
-        
-        if not 'subarray_id' in json_argument:
-            return self.generate_command_result(ResultCode.FAILED, "subarray_id key is not present in the input json argument.")
+
+        if "subarray_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
 
         subarrayID = int(json_argument["subarray_id"])
 
@@ -187,32 +216,55 @@ class AssignResources(AbstractAssignReleaseResources):
                 my_subarray_adapter = adapter
 
         if my_subarray_adapter is None:
-            return self.generate_command_result(ResultCode.FAILED, ("SubArray Id %s is not existing!", subarrayID))
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("SubArray Id %s is not existing!", subarrayID),
+            )
 
         # check allocated dishes
         if "dish" not in json_argument:
-            return self.generate_command_result(ResultCode.FAILED, "dish key is not present in the input json argument.")
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "dish key is not present in the input json argument.",
+            )
         else:
             if "receptor_ids" not in json_argument["dish"]:
-                return self.generate_command_result(ResultCode.FAILED, "dish.receptor_ids key is not present in the input json argument.")
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    "dish.receptor_ids key is not present in the input json argument.",
+                )
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         for receptor_id in receptor_ids:
             dish_ID = "dish" + receptor_id
             if component_manager.is_already_assigned(dish_ID):
-                return self.generate_command_result(ResultCode.FAILED, ("Dish %s is already allocated", dish_ID))
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    ("Dish %s is already allocated", dish_ID),
+                )
 
         try:
             # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
-            resources_allocated_return = my_subarray_adapter.AssignResources(json.dumps(json_argument.copy()))
-            self.logger.info("Command result from Subarray: %s", resources_allocated_return)
+            resources_allocated_return = my_subarray_adapter.AssignResources(
+                json.dumps(json_argument.copy())
+            )
+            self.logger.info(
+                "Command result from Subarray: %s", resources_allocated_return
+            )
             # Leave the monitoring loop to do the updates on the allocated resources!
             return (ResultCode.OK, "")
         except Exception as e:
-            return self.generate_command_result(ResultCode.FAILED, ("Error in calling AssignResources on subarray %s: %s", my_subarray_adapter.dev_name, e))
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                (
+                    "Error in calling AssignResources on subarray %s: %s",
+                    my_subarray_adapter.dev_name,
+                    e,
+                ),
+            )
 
     def update_resource_config_file(self, json_argument, id):
-        '''This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id'''
+        """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
         unique_id = self._skuid.fetch_skuid("eb")
         json_argument["sdp"][id] = unique_id
@@ -220,12 +272,31 @@ class AssignResources(AbstractAssignReleaseResources):
             for i in range(len(json_argument["sdp"]["processing_blocks"])):
                 pb_id = self._skuid.fetch_skuid("pb")
                 json_argument["sdp"]["processing_blocks"][i]["pb_id"] = pb_id
-                if "dependencies" in json_argument["sdp"]["processing_blocks"][i]:
+                if (
+                    "dependencies"
+                    in json_argument["sdp"]["processing_blocks"][i]
+                ):
                     if i == 0:
-                        json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
-                            json_argument["sdp"]["processing_blocks"][i]["pb_id"]
+                        json_argument["sdp"]["processing_blocks"][i][
+                            "dependencies"
+                        ][0]["pb_id"] = json_argument["sdp"][
+                            "processing_blocks"
+                        ][
+                            i
+                        ][
+                            "pb_id"
+                        ]
                     else:
-                        json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
-                            json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
+                        json_argument["sdp"]["processing_blocks"][i][
+                            "dependencies"
+                        ][0]["pb_id"] = json_argument["sdp"][
+                            "processing_blocks"
+                        ][
+                            i - 1
+                        ][
+                            "pb_id"
+                        ]
         else:
-            raise Exception("processing_blocks key not present in the input json argument")
+            raise Exception(
+                "processing_blocks key not present in the input json argument"
+            )

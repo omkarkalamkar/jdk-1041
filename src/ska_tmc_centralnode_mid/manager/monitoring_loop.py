@@ -1,11 +1,17 @@
 import threading
+from concurrent import futures
+from queue import Empty, Queue
 from time import sleep
+
+import tango
+
 from ska_tmc_centralnode_mid import dev_factory
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from ska_tmc_centralnode_mid.model.component import DeviceInfo, SubArrayDeviceInfo
-from concurrent import futures
-import tango
-from queue import Empty, Queue
+from ska_tmc_centralnode_mid.model.component import (
+    DeviceInfo,
+    SubArrayDeviceInfo,
+)
+
 
 class MonitoringLoop:
     """
@@ -15,11 +21,18 @@ class MonitoringLoop:
     It is an infinite loop which ping, get the state, the obsState,
     the healthState and device information of the monitored SKA devices
 
-    TBD: what about scalability? what if we have 1000 devices? 
+    TBD: what about scalability? what if we have 1000 devices?
 
     """
 
-    def __init__(self, component_manager, logger=None, max_workers = 5, proxy_timeout=500, sleep_timeout=1):
+    def __init__(
+        self,
+        component_manager,
+        logger=None,
+        max_workers=5,
+        proxy_timeout=500,
+        sleep_timeout=1,
+    ):
         self._thread = threading.Thread(target=self.run)
         self._stop = False
         self._logger = logger
@@ -44,7 +57,9 @@ class MonitoringLoop:
 
     def run(self):
         while not self._stop:
-            with futures.ThreadPoolExecutor(max_workers=self._max_workers) as executor:
+            with futures.ThreadPoolExecutor(
+                max_workers=self._max_workers
+            ) as executor:
                 not_read_devices_twice = []
                 try:
                     while not self._priority_devices.empty():
@@ -84,5 +99,7 @@ class MonitoringLoop:
                 newDevInfo.dev_info = proxy.info()
                 self._component_manager.update_device_info(newDevInfo)
             except Exception as e:
-                self._logger.debug("Device not working %s %s", devInfo.dev_name, e)
+                self._logger.debug(
+                    "Device not working %s %s", devInfo.dev_name, e
+                )
                 self._component_manager.device_failed(devInfo, e)

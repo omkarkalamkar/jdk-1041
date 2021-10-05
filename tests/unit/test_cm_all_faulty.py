@@ -1,10 +1,23 @@
-import pytest
 import logging
 import time
+
+import pytest
+
 from ska_tmc_centralnode_mid.central_node import CentralNode
-from ska_tmc_centralnode_mid.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode_mid.manager.component_manager import (
+    CNComponentManager,
+)
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
-from tests.settings import DEVICE_LIST, SLEEP_TIME, TIMEOUT, logger, DishLeafNodePrefix, NumDishes, count_faulty_devices
+from tests.settings import (
+    DEVICE_LIST,
+    SLEEP_TIME,
+    TIMEOUT,
+    DishLeafNodePrefix,
+    NumDishes,
+    count_faulty_devices,
+    logger,
+)
+
 
 def test_all_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
@@ -24,4 +37,3 @@ def test_all_devices_faulty():
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
     for devInfo in cm.devices:
         assert devInfo.faulty
-

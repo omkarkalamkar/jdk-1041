@@ -4,18 +4,28 @@ This module provided a reference implementation of a BaseComponentManager.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
-import time
 import threading
-from tango import DevState
+import time
+
 from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import HealthState, ObsState
-from ska_tmc_centralnode_mid.manager.aggregators import TelescopeStateAggragator, HealthStateAggragator, TMCOpStateAggragator
-from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo, SubArrayDeviceInfo
-from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
-from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
-from ska_tmc_centralnode_mid.manager.command_executor import CommandExecutor
+from tango import DevState
 
+from ska_tmc_centralnode_mid.manager.aggregators import (
+    HealthStateAggragator,
+    TelescopeStateAggragator,
+    TMCOpStateAggragator,
+)
+from ska_tmc_centralnode_mid.manager.command_executor import CommandExecutor
+from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
+from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
+from ska_tmc_centralnode_mid.model.component import (
+    Component,
+    DeviceInfo,
+    SubArrayDeviceInfo,
+)
 from ska_tmc_centralnode_mid.model.input import InputParameter
+
 
 class CNComponentManager(BaseComponentManager):
     """
@@ -25,26 +35,29 @@ class CNComponentManager(BaseComponentManager):
 
     * Monitoring its component, e.g. detect that it has been turned off
       or on
-    
-    * Fetching the latest SCM indicator values of the components periodically 
+
+    * Fetching the latest SCM indicator values of the components periodically
       and trigger the TMC and telescope state aggregation
-    
-    * Receiving the change events from the component and trigger 
+
+    * Receiving the change events from the component and trigger
       the TMC and telescope state aggregation
     """
 
-    def __init__(self, 
-        op_state_model, 
-        logger=None, 
+    def __init__(
+        self,
+        op_state_model,
+        logger=None,
         _component=None,
-        _update_device_callback = None,
-        _update_telescope_state_callback = None,
-        _update_telescope_health_state_callback = None,
-        _update_tmc_op_state_callback = None,
-        _update_subarray_health_state_callback = None,
-        _monitoring_loop = True,
-        _event_receiver = True,
-        *args, **kwargs):
+        _update_device_callback=None,
+        _update_telescope_state_callback=None,
+        _update_telescope_health_state_callback=None,
+        _update_tmc_op_state_callback=None,
+        _update_subarray_health_state_callback=None,
+        _monitoring_loop=True,
+        _event_receiver=True,
+        *args,
+        **kwargs,
+    ):
         """
         Initialise a new ComponentManager instance.
 
@@ -57,19 +70,20 @@ class CNComponentManager(BaseComponentManager):
         self.logger = logger
         self.lock = threading.Lock()
         self._component = _component or Component(logger)
-        
+
         if _monitoring_loop:
             self._monitoring_loop = MonitoringLoop(self, logger)
 
         if _event_receiver:
             self._event_receiver = EventReceiver(self, logger)
 
-        self._component.set_op_callbacks(_update_device_callback, 
-                                         _update_telescope_state_callback, 
-                                         _update_telescope_health_state_callback, 
-                                         _update_tmc_op_state_callback,
-                                         _update_subarray_health_state_callback
-                                         )
+        self._component.set_op_callbacks(
+            _update_device_callback,
+            _update_telescope_state_callback,
+            _update_telescope_health_state_callback,
+            _update_tmc_op_state_callback,
+            _update_subarray_health_state_callback,
+        )
 
         super().__init__(op_state_model, *args, **kwargs)
 
@@ -78,9 +92,9 @@ class CNComponentManager(BaseComponentManager):
 
         if _event_receiver:
             self._event_receiver.start()
-        
+
         self._input_parameter = InputParameter(None)
-        
+
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
@@ -88,7 +102,12 @@ class CNComponentManager(BaseComponentManager):
         self._command_executor = CommandExecutor(logger)
         self._command_executor.start()
 
-    def set_aggregators(self, _telescope_state_aggregator, _health_state_aggregator, _tm_op_state_aggregator):
+    def set_aggregators(
+        self,
+        _telescope_state_aggregator,
+        _health_state_aggregator,
+        _tm_op_state_aggregator,
+    ):
         self._telescope_state_aggregator = _telescope_state_aggregator
         self._health_state_aggregator = _health_state_aggregator
         self._tm_op_state_aggregator = _tm_op_state_aggregator
@@ -106,7 +125,7 @@ class CNComponentManager(BaseComponentManager):
     @property
     def component(self):
         """
-        Return the managed component  
+        Return the managed component
 
         :return: the managed component
         :rtype Component
@@ -116,7 +135,7 @@ class CNComponentManager(BaseComponentManager):
     @property
     def devices(self):
         """
-        Return the list of the monitored devices 
+        Return the list of the monitored devices
 
         :return: list of the monitored devices
         """
@@ -125,7 +144,7 @@ class CNComponentManager(BaseComponentManager):
     @property
     def checked_devices(self):
         """
-        Return the list of the checked monitored devices 
+        Return the list of the checked monitored devices
 
         :return: list of the checked monitored devices
         """
@@ -202,7 +221,7 @@ class CNComponentManager(BaseComponentManager):
         """
         if dev_name is None:
             return
-            
+
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
         else:
@@ -231,7 +250,7 @@ class CNComponentManager(BaseComponentManager):
             if self.get_device(dev_name) is None:
                 self.add_device(dev_name)
                 list_dev_names.append(dev_name)
-        
+
         dev_name = self.input_parameter.csp_master_dev_name
         if dev_name != "" and self.get_device(dev_name) is None:
             self.add_device(dev_name)
@@ -246,7 +265,7 @@ class CNComponentManager(BaseComponentManager):
         if dev_name != "" and self.get_device(dev_name) is None:
             self.add_device(dev_name)
             list_dev_names.append(dev_name)
-        
+
         dev_name = self.input_parameter.tm_leaf_sdp_master_dev_name
         if dev_name != "" and self.get_device(dev_name) is None:
             self.add_device(dev_name)
@@ -254,8 +273,8 @@ class CNComponentManager(BaseComponentManager):
 
         for devInfo in self.devices:
             if devInfo.dev_name not in list_dev_names:
-                self.component.remove_device(devInfo.dev_name) 
-    
+                self.component.remove_device(devInfo.dev_name)
+
     def device_failed(self, device_info, exception):
         """
         Set a device to failed and call the relative callback if available
@@ -338,7 +357,6 @@ class CNComponentManager(BaseComponentManager):
             devInfo.last_event_arrived = time.time()
             self._update_resources(devInfo)
 
-    
     def is_already_assigned(self, dishId):
         """
         Check if a Dish is already assigned to a subarray
@@ -357,7 +375,7 @@ class CNComponentManager(BaseComponentManager):
 
     def _aggregate_health_state(self):
         """
-        Aggregates all health states 
+        Aggregates all health states
         and call the relative callback if available
         """
         if self._health_state_aggregator is None:
@@ -398,14 +416,16 @@ class CNComponentManager(BaseComponentManager):
 
     def _update_resources(self, subarray_dev_info):
         """
-        Updates resources for a subarray 
+        Updates resources for a subarray
         the relative callback if available
 
         :param subarray_dev_name: name of the subarray device
         :type subarray_dev_name: str
         """
         if self._monitoring_loop is not None:
-            self._monitoring_loop.add_priority_devices(subarray_dev_info.dev_name)
+            self._monitoring_loop.add_priority_devices(
+                subarray_dev_info.dev_name
+            )
         else:
             # If the monitoring loop is not active
             # I must assume that the subarray is reporting the correct value

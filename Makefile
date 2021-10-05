@@ -14,7 +14,7 @@ CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
 CAR_OCI_REGISTRY_USER ?= ska-telescope
 PROJECT = ska-tmc-centralnode-mid
 
-#
+#KbHrD13unm7H
 # include makefile to pick up the standard Make targets, e.g., 'make build'
 # build, 'make push' docker push procedure, etc. The other Make targets
 # ('make interactive', 'make test', etc.) are defined in this file.
@@ -22,6 +22,11 @@ PROJECT = ska-tmc-centralnode-mid
 #include .make/Makefile.mk
 #include .make/docker.mk
 #include .make/test.mk
+
+# F401 Ignore unused imports because of tagno protected sections
+# W503 Ignore operator at beginning of line as conflicts with black
+# stretch line length to 180 because of super long parameter assignments
+PYTHON_SWITCHES_FOR_FLAKE8=--ignore=F401,W503 --max-line-length=180
 
 # include makefile targets for make submodule
 -include .make/make.mk

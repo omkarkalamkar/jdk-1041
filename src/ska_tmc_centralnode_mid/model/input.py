@@ -1,5 +1,4 @@
 class InputParameter:
-
     def __init__(self, changed_callback) -> None:
         self._tm_subarray_dev_names = ["ska_mid/tm_subarray_node/1"]
         self._csp_subarray_dev_names = ["ska_mid/tm_leaf_node/csp_subarray01"]
@@ -26,7 +25,7 @@ class InputParameter:
     def tm_subarray_dev_names(self, value):
         """
         Input parameter
-        Set the TM Subarray device names to be 
+        Set the TM Subarray device names to be
         managed by the CentralNode
 
         :param value: the TM Subarray device names
@@ -51,7 +50,7 @@ class InputParameter:
     def tm_dish_dev_names(self, value):
         """
         Input parameter
-        Set the TM dish device names to be 
+        Set the TM dish device names to be
         managed by the CentralNode
 
         :param value: the TM dish device names
@@ -76,7 +75,7 @@ class InputParameter:
     def csp_subarray_dev_names(self, value):
         """
         Input parameter
-        Set the CSP Subarray device names to be 
+        Set the CSP Subarray device names to be
         managed by the CentralNode
 
         :param value: the CSP Subarray device names
@@ -101,7 +100,7 @@ class InputParameter:
     def sdp_subarray_dev_names(self, value):
         """
         Input parameter
-        Set the SDP Subarray device names to be 
+        Set the SDP Subarray device names to be
         managed by the CentralNode
 
         :param value: the SDP Subarray device names
@@ -126,7 +125,7 @@ class InputParameter:
     def csp_master_dev_name(self, value):
         """
         Input parameter
-        Set the CSP Master device name to be 
+        Set the CSP Master device name to be
         managed by the CentralNode
 
         :param value: the CSP Master device name
@@ -151,7 +150,7 @@ class InputParameter:
     def sdp_master_dev_name(self, value):
         """
         Input parameter
-        Set the SDP Master device name to be 
+        Set the SDP Master device name to be
         managed by the CentralNode
 
         :param value: the SDP Master device name
@@ -176,7 +175,7 @@ class InputParameter:
     def tm_leaf_csp_master_dev_name(self, value):
         """
         Input parameter
-        Set the CSP Master device name to be 
+        Set the CSP Master device name to be
         managed by the CentralNode
 
         :param value: the CSP Master device name
@@ -201,7 +200,7 @@ class InputParameter:
     def tm_leaf_sdp_master_dev_name(self, value):
         """
         Input parameter
-        Set the SDP Master device name to be 
+        Set the SDP Master device name to be
         managed by the CentralNode
 
         :param value: the SDP Master device name

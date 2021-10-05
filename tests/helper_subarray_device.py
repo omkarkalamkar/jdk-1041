@@ -1,17 +1,20 @@
 import time
+
 from ska_tango_base.base import OpStateModel
-from ska_tango_base.subarray import SubarrayComponentManager
-from ska_tango_base.subarray import SubarrayObsStateModel, SKASubarray
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
+from ska_tango_base.subarray import (
+    SKASubarray,
+    SubarrayComponentManager,
+    SubarrayObsStateModel,
+)
 from tango.server import command
 
+
 class EmptySubArrayComponentManager(SubarrayComponentManager):
-    def __init__(self, 
-                op_state_model, 
-                obs_state_model,
-                logger=None,
-                *args, **kwargs):
+    def __init__(
+        self, op_state_model, obs_state_model, logger=None, *args, **kwargs
+    ):
         self.logger = logger
         super().__init__(op_state_model, obs_state_model, *args, **kwargs)
         self._assigned_resources = []
@@ -32,7 +35,7 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
     def release_all(self):
         """Release all resources."""
         self._assigned_resources = []
-        
+
         return (ResultCode.OK, "")
 
     def configure(self, configuration):
@@ -43,12 +46,12 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         :type configuration: dict
         """
         self.logger("%s", configuration)
-        
+
         return (ResultCode.OK, "")
 
     def deconfigure(self):
         """Deconfigure this component."""
-        
+
         return (ResultCode.OK, "")
 
     def scan(self, args):
@@ -58,22 +61,22 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
 
     def end_scan(self):
         """End scanning."""
-        
+
         return (ResultCode.OK, "")
 
     def abort(self):
         """Tell the component to abort whatever it was doing."""
-        
+
         return (ResultCode.OK, "")
 
     def obsreset(self):
         """Reset the component to unconfigured but do not release resources."""
-        
+
         return (ResultCode.OK, "")
 
     def restart(self):
         """Deconfigure and release all resources."""
-        
+
         return (ResultCode.OK, "")
 
     @property
@@ -113,14 +116,13 @@ class HelperSubArrayDevice(SKASubarray):
 
     def create_component_manager(self):
         self.op_state_model = OpStateModel(
-            logger=self.logger,
-            callback=super()._update_state)
+            logger=self.logger, callback=super()._update_state
+        )
         self.obs_state_model = SubarrayObsStateModel(
             logger=self.logger, callback=self._update_obs_state
         )
-        cm =  EmptySubArrayComponentManager(
-            self.op_state_model, self.obs_state_model,
-            logger=self.logger
+        cm = EmptySubArrayComponentManager(
+            self.op_state_model, self.obs_state_model, logger=self.logger
         )
         return cm
 
@@ -147,7 +149,7 @@ class HelperSubArrayDevice(SKASubarray):
         """
         # import debugpy; debugpy.debug_this_thread()
         value = HealthState(argin)
-        if(self._health_state != value):
+        if self._health_state != value:
             self._health_state = HealthState(argin)
             self.push_change_event("healthState", self._health_state)
 

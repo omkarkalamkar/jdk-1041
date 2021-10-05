@@ -9,10 +9,9 @@ It consists of:
   :py:class:`tango.DevState` enum value, and reported using the tango
   device's special ``state()`` method.
 """
+from ska_tango_base.base import OpStateModel
 from tango import DevState
 from transitions.extensions import LockedMachine as Machine
-
-from ska_tango_base.base import OpStateModel
 
 __all__ = ["TMCOpStateModel"]
 
@@ -112,7 +111,7 @@ class TMCOpStateMachine(Machine):
                 "source": ["ON", "FAULT"],
                 "trigger": "component_fault",
                 "dest": "FAULT",
-            }
+            },
         ]
 
         super().__init__(
@@ -144,8 +143,8 @@ class TMCOpStateModel(OpStateModel):
     * **INIT**: the device is initialising.
     * **ON**: the device is monitoring its telescope component and the
       component is turned on
-    * **FAULT**: the device is affected by a bug and a developer needs 
-      to work on it. All operations are denied. 
+    * **FAULT**: the device is affected by a bug and a developer needs
+      to work on it. All operations are denied.
 
     The actions supported are:
 
@@ -156,7 +155,9 @@ class TMCOpStateModel(OpStateModel):
 
     def __init__(self, logger, callback=None):
         super().__init__(logger, callback=callback)
-        self._op_state_machine = TMCOpStateMachine(callback=self._op_state_changed)
+        self._op_state_machine = TMCOpStateMachine(
+            callback=self._op_state_changed
+        )
 
     _op_state_mapping = {
         "_UNINITIALISED": None,

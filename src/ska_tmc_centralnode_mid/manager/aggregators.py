@@ -1,8 +1,8 @@
-from tango import DevState
 from ska_tango_base.control_model import HealthState
+from tango import DevState
+
 
 class Aggregator:
-
     def __init__(self, cm) -> None:
         self._component_manager = cm
 
@@ -11,7 +11,6 @@ class Aggregator:
 
 
 class TelescopeStateAggragator(Aggregator):
-
     def __init__(self, cm) -> None:
         super().__init__(cm)
 
@@ -27,13 +26,22 @@ class TelescopeStateAggragator(Aggregator):
                 continue
             elif dev.faulty:
                 continue
-            elif name in self._component_manager.input_parameter.tm_dish_dev_names:
+            elif (
+                name
+                in self._component_manager.input_parameter.tm_dish_dev_names
+            ):
                 telescopeStateList.append(dev.state)
                 dish_count += 1
-            elif name == self._component_manager.input_parameter.csp_master_dev_name:
+            elif (
+                name
+                == self._component_manager.input_parameter.csp_master_dev_name
+            ):
                 telescopeStateList.append(dev.state)
                 csp_master = True
-            elif name == self._component_manager.input_parameter.sdp_master_dev_name:
+            elif (
+                name
+                == self._component_manager.input_parameter.sdp_master_dev_name
+            ):
                 telescopeStateList.append(dev.state)
                 sdp_master = True
 
@@ -75,13 +83,22 @@ class HealthStateAggragator(Aggregator):
                 continue
             elif dev.faulty:
                 continue
-            elif name == self._component_manager.input_parameter.csp_master_dev_name:
+            elif (
+                name
+                == self._component_manager.input_parameter.csp_master_dev_name
+            ):
                 healthStateList.append(dev.healthState)
                 csp_master = True
-            elif name == self._component_manager.input_parameter.sdp_master_dev_name:
+            elif (
+                name
+                == self._component_manager.input_parameter.sdp_master_dev_name
+            ):
                 healthStateList.append(dev.healthState)
                 sdp_master = True
-            elif name in self._component_manager.input_parameter.tm_subarray_dev_names:
+            elif (
+                name
+                in self._component_manager.input_parameter.tm_subarray_dev_names
+            ):
                 healthStateList.append(dev.healthState)
                 subarray_count += 1
 
@@ -101,7 +118,6 @@ class HealthStateAggragator(Aggregator):
 
 
 class TMCOpStateAggragator(Aggregator):
-
     def __init__(self, cm) -> None:
         super().__init__(cm)
 
