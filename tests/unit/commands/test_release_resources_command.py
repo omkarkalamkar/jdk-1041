@@ -80,12 +80,14 @@ def test_telescope_release_resources_command_fail_subarray(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    
+
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in ReleaseResources command
     failing_dev = "ska_mid/tm_subarray_node/1"
-    my_adapter_factory.get_or_create_adapter(failing_dev, attrs={"ReleaseAllResources.side_effect": Exception})
+    my_adapter_factory.get_or_create_adapter(
+        failing_dev, attrs={"ReleaseAllResources.side_effect": Exception}
+    )
 
     release_command = ReleaseResources(
         cm, cm.op_state_model, my_adapter_factory

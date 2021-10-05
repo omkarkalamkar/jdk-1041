@@ -57,7 +57,7 @@ def devices_to_test(request):
 
 @pytest.fixture(scope="function")
 def multi_device_tango_context(
-    mocker, devices_to_test  # pylint: disable=redefined-outer-name
+    mocker, devices_to_test, request  # pylint: disable=redefined-outer-name
 ):
     """
     Creates and returns a TANGO MultiDeviceTestContext object, with
@@ -72,18 +72,22 @@ def multi_device_tango_context(
         s.close()
         return port
 
-    HOST = get_host_ip()
-    PORT = _get_open_port()
-    _DeviceProxy = tango.DeviceProxy
-    mocker.patch(
-        "tango.DeviceProxy",
-        wraps=lambda fqdn, *args, **kwargs: _DeviceProxy(
-            "tango://{0}:{1}/{2}#dbase=no".format(HOST, PORT, fqdn),
-            *args,
-            **kwargs
-        ),
-    )
-    with MultiDeviceTestContext(
-        devices_to_test, host=HOST, port=PORT, process=True
-    ) as context:
-        yield context
+    true_context = request.config.getoption("--true-context")
+    if true_context:
+        yield None
+    else:
+        HOST = get_host_ip()
+        PORT = _get_open_port()
+        _DeviceProxy = tango.DeviceProxy
+        mocker.patch(
+            "tango.DeviceProxy",
+            wraps=lambda fqdn, *args, **kwargs: _DeviceProxy(
+                "tango://{0}:{1}/{2}#dbase=no".format(HOST, PORT, fqdn),
+                *args,
+                **kwargs
+            ),
+        )
+        with MultiDeviceTestContext(
+            devices_to_test, host=HOST, port=PORT, process=True
+        ) as context:
+            yield context

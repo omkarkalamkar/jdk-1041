@@ -1,19 +1,19 @@
-from tango import DevState
 from ska_tango_base.control_model import HealthState
+from tango import DevState
+
 
 class Aggregator:
-
-    def __init__(self, cm) -> None:
+    def __init__(self, cm, logger) -> None:
         self._component_manager = cm
+        self._logger = logger
 
     def aggregate(self):
         raise NotImplementedError("To be defined in the lower level classes")
 
 
 class TelescopeStateAggragator(Aggregator):
-
-    def __init__(self, cm) -> None:
-        super().__init__(cm)
+    def __init__(self, cm, logger) -> None:
+        super().__init__(cm, logger)
 
     def aggregate(self):
         # import debugpy; debugpy.debug_this_thread()
@@ -27,20 +27,35 @@ class TelescopeStateAggragator(Aggregator):
                 continue
             elif dev.faulty:
                 continue
-            elif name in self._component_manager.input_parameter.tm_dish_dev_names:
+            elif (
+                name
+                in self._component_manager.input_parameter.tm_dish_dev_names
+            ):
                 telescopeStateList.append(dev.state)
                 dish_count += 1
-            elif name == self._component_manager.input_parameter.csp_master_dev_name:
+            elif (
+                name
+                == self._component_manager.input_parameter.csp_master_dev_name
+            ):
                 telescopeStateList.append(dev.state)
                 csp_master = True
-            elif name == self._component_manager.input_parameter.sdp_master_dev_name:
+            elif (
+                name
+                == self._component_manager.input_parameter.sdp_master_dev_name
+            ):
                 telescopeStateList.append(dev.state)
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
         if not sdp_master and not csp_master:
+            self._logger.info(
+                "missing devices: sdp_master=%s csp_master=%s",
+                sdp_master,
+                csp_master,
+            )
             return DevState.UNKNOWN
         elif dish_count == 0:
+            self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
         elif telescopeSetStateList == set([DevState.ON]):
             return DevState.ON
@@ -57,8 +72,8 @@ class TelescopeStateAggragator(Aggregator):
 
 
 class HealthStateAggragator(Aggregator):
-    def __init__(self, cm) -> None:
-        super().__init__(cm)
+    def __init__(self, cm, logger) -> None:
+        super().__init__(cm, logger)
 
     def aggregate(self):
         # import debugpy; debugpy.debug_this_thread()
@@ -76,19 +91,30 @@ class HealthStateAggragator(Aggregator):
                 continue
             elif dev.faulty:
                 continue
-            elif name == self._component_manager.input_parameter.csp_master_dev_name:
+            elif (
+                name
+                == self._component_manager.input_parameter.csp_master_dev_name
+            ):
                 healthStateList.append(dev.healthState)
                 csp_master = True
-            elif name == self._component_manager.input_parameter.sdp_master_dev_name:
+            elif (
+                name
+                == self._component_manager.input_parameter.sdp_master_dev_name
+            ):
                 healthStateList.append(dev.healthState)
                 sdp_master = True
-            elif name in self._component_manager.input_parameter.tm_subarray_dev_names:
+            elif (
+                name
+                in self._component_manager.input_parameter.tm_subarray_dev_names
+            ):
                 healthStateList.append(dev.healthState)
                 subarray_count += 1
-            elif name in self._component_manager.input_parameter.tm_dish_dev_names:
+            elif (
+                name
+                in self._component_manager.input_parameter.tm_dish_dev_names
+            ):
                 healthStateList.append(dev.healthState)
-                dish_count +=1
-
+                dish_count += 1
 
         healthStateSetList = set(healthStateList)
         if not sdp_master and not csp_master:
@@ -108,9 +134,8 @@ class HealthStateAggragator(Aggregator):
 
 
 class TMCOpStateAggragator(Aggregator):
-
-    def __init__(self, cm) -> None:
-        super().__init__(cm)
+    def __init__(self, cm, logger) -> None:
+        super().__init__(cm, logger)
 
     def aggregate(self):
         tmStateList = []

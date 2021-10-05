@@ -3,6 +3,7 @@ from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.base.component_manager import BaseComponentManager
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
+from tango import DevState
 from tango.server import command, run
 
 
@@ -82,6 +83,8 @@ class HelperStateDevice(SKABaseDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def TelescopeOn(self):
+        if self.dev_state() != DevState.ON:
+            self.set_state(DevState.ON)
         return [[ResultCode.OK], [""]]
 
     def is_SetStandbyFPMode_allowed(self):
@@ -103,6 +106,8 @@ class HelperStateDevice(SKABaseDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def SetOperateMode(self):
+        if self.dev_state() != DevState.ON:
+            self.set_state(DevState.ON)
         return [[ResultCode.OK], [""]]
 
 

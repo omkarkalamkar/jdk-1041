@@ -252,12 +252,9 @@ class CentralNode(SKABaseDevice):
 
     def update_device_callback(self, devInfo):
         self.push_change_event("InternalModel", devInfo.to_json())
-        # try:
-        #     self.push_change_event("InternalModel", devInfo.to_json())
-        # except Exception as e:
-        #     self.logger.info("%s", e)
 
     def update_telescope_state_callback(self, telescope_state):
+        self.logger.info("telescopeState %s", telescope_state)
         self.push_change_event("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
@@ -294,13 +291,13 @@ class CentralNode(SKABaseDevice):
             super().do()
             device = self.target
 
-            device.set_change_event("subarray1HealthState", True, True)
-            device.set_change_event("subarray2HealthState", True, True)
-            device.set_change_event("subarray3HealthState", True, True)
-            device.set_change_event("telescopeHealthState", True, True)
-            device.set_change_event("telescopeState", True, True)
-            device.set_change_event("InternalModel", True, True)
-            device.set_change_event("TMOpState", True, True)
+            device.set_change_event("subarray1HealthState", True, False)
+            device.set_change_event("subarray2HealthState", True, False)
+            device.set_change_event("subarray3HealthState", True, False)
+            device.set_change_event("telescopeHealthState", True, False)
+            device.set_change_event("telescopeState", True, False)
+            device.set_change_event("InternalModel", True, False)
+            device.set_change_event("TMOpState", True, False)
 
             device.op_state_model.perform_action("component_on")
             device.component_manager.command_executor.add_command_execution(

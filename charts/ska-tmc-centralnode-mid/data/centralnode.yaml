@@ -39,6 +39,15 @@ server:
         - name: "NumDishes"
           values:
           - "1"
+        - name: "SkaLevel"
+          values:
+            - "1"
+        - name: "LoggingTargetsDefault"
+          values:
+            - "tango::logger"
+        - name: "LoggingLevelDefault"
+          values:
+            - "5"
 depends_on:
   - device: sys/database/2
 image:

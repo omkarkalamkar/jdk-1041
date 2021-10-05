@@ -163,22 +163,22 @@ def set_device_standby(devFactory, cm, expected_elapsed_time):
     assert elapsed_time < expected_elapsed_time
 
 
-def test_tmc_state_standby(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_device_standby(devFactory, cm, 1.5)
-    assert cm.component.tmc_op_state == tango.DevState.STANDBY
+# def test_tmc_state_standby(tango_context):
+#     devFactory = DevFactory()
+#     cm = create_cm_no_faulty_devices(tango_context, True, True)
+#     set_device_standby(devFactory, cm, 1.5)
+#     assert cm.component.tmc_op_state == tango.DevState.STANDBY
 
 
-def test_tmc_state_standby_only_monitoring_loop(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, False)
-    set_device_standby(devFactory, cm, 1.5)
-    assert cm.component.tmc_op_state == tango.DevState.STANDBY
+# def test_tmc_state_standby_only_monitoring_loop(tango_context):
+#     devFactory = DevFactory()
+#     cm = create_cm_no_faulty_devices(tango_context, True, False)
+#     set_device_standby(devFactory, cm, 1.5)
+#     assert cm.component.tmc_op_state == tango.DevState.STANDBY
 
 
-def test_tmc_state_standby_only_events(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_device_standby(devFactory, cm, 1.5)
-    assert cm.component.tmc_op_state == tango.DevState.STANDBY
+# def test_tmc_state_standby_only_events(tango_context):
+#     devFactory = DevFactory()
+#     cm = create_cm_no_faulty_devices(tango_context, False, True)
+#     set_device_standby(devFactory, cm, 1.5)
+#     assert cm.component.tmc_op_state == tango.DevState.STANDBY

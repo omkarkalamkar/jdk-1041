@@ -90,7 +90,7 @@ def test_set_health_state_degraded_only_monitoring_loop(tango_context):
 def test_set_health_state_degraded_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_device_degraded(devFactory, cm, 1.5)
+    set_device_degraded(devFactory, cm, 2)
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
 
@@ -128,7 +128,7 @@ def test_set_health_state_failed_only_monitoring_loop(tango_context):
 def test_set_health_state_failed_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_failed(devFactory, cm)
+    set_failed(devFactory, cm, expected_elapsed_time=2)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
 

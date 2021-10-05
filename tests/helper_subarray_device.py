@@ -6,6 +6,7 @@ from ska_tango_base.subarray import (
     SubarrayComponentManager,
     SubarrayObsStateModel,
 )
+from tango import DevState
 from tango.server import command, run
 
 
@@ -160,6 +161,8 @@ class HelperSubArrayDevice(SKASubarray):
         doc_out="(ReturnType, 'informational message')",
     )
     def TelescopeOn(self):
+        if self.dev_state() != DevState.ON:
+            self.set_state(DevState.ON)
         return [[ResultCode.OK], [""]]
 
 
@@ -173,6 +176,7 @@ def main(args=None, **kwargs):
     :return: HelperSubArrayDevice TANGO object.
     """
     return run((HelperSubArrayDevice,), args=args, **kwargs)
+
 
 if __name__ == "__main__":
     main()

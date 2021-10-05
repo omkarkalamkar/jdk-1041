@@ -381,7 +381,9 @@ class CNComponentManager(BaseComponentManager):
         and call the relative callback if available
         """
         if self._health_state_aggregator is None:
-            self._health_state_aggregator = HealthStateAggragator(self)
+            self._health_state_aggregator = HealthStateAggragator(
+                self, self.logger
+            )
 
         with self.lock:
             new_state = self._health_state_aggregator.aggregate()
@@ -399,7 +401,9 @@ class CNComponentManager(BaseComponentManager):
         Aggregates telescope state
         """
         if self._telescope_state_aggregator is None:
-            self._telescope_state_aggregator = TelescopeStateAggragator(self)
+            self._telescope_state_aggregator = TelescopeStateAggragator(
+                self, self.logger
+            )
 
         with self.lock:
             new_state = self._telescope_state_aggregator.aggregate()
@@ -411,7 +415,9 @@ class CNComponentManager(BaseComponentManager):
         Aggregates tm devices states
         """
         if self._tm_op_state_aggregator is None:
-            self._tm_op_state_aggregator = TMCOpStateAggragator(self)
+            self._tm_op_state_aggregator = TMCOpStateAggragator(
+                self, self.logger
+            )
 
         with self.lock:
             new_state = self._tm_op_state_aggregator.aggregate()

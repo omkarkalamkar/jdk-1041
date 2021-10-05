@@ -14,9 +14,7 @@ class HelperAdapterFactory(AdapterFactory):
         self.adapters = []
 
     def get_or_create_adapter(
-        self, dev_name, adapter_type=AdapterType.BASE, proxy=None,
-        attrs=None
-
+        self, dev_name, adapter_type=AdapterType.BASE, proxy=None, attrs=None
     ):
         if proxy is None:
             proxy = mock.Mock(attrs)

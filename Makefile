@@ -13,6 +13,7 @@
 CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
 CAR_OCI_REGISTRY_USER ?= ska-telescope
 PROJECT = ska-tmc-centralnode-mid
+KUBE_APP = ska-tmc-centralnode-mid
 
 # KUBE_NAMESPACE defines the Kubernetes Namespace that will be deployed to
 # using Helm.  If this does not already exist it will be created
@@ -61,7 +62,7 @@ PYTHON_VARS_AFTER_PYTEST = -m "not post_deployment"
 -include PrivateRules.mak
 
 clean: 
-	@rm -rf .coverage .coverage* .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
+	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
 			charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
 
 unit-test: python-do-test

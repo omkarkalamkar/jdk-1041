@@ -4,28 +4,13 @@ import time
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import (
-    ControlMode,
-    HealthState,
-    SimulationMode,
-    TestMode,
-)
-from ska_tango_base.obs.obs_device import SKAObsDevice
 from tango import DevState
-from tango.test_utils import DeviceTestContext
 
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import (
-    DEVICE_LIST,
-    SLEEP_TIME,
-    TIMEOUT,
-    count_faulty_devices,
-    logger,
-)
+from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 devices_to_test = [
     {
@@ -39,9 +24,12 @@ devices_to_test = [
     {
         "class": HelperStateDevice,
         "devices": [
-            {"name": "ska_mid/tm_leaf_node/d0001"},
             {"name": "ska_mid/tm_leaf_node/csp_master"},
+            {"name": "mid_csp/elt/master"},
             {"name": "ska_mid/tm_leaf_node/sdp_master"},
+            {"name": "mid_sdp/elt/master"},
+            {"name": "mid_d0001/elt/master"},
+            {"name": "ska_mid/tm_leaf_node/d0001"},
         ],
     },
     {
@@ -53,9 +41,11 @@ devices_to_test = [
                     "CspMasterLeafNodeFQDN": [
                         "ska_mid/tm_leaf_node/csp_master"
                     ],
+                    "CspMasterFQDN": ["mid_csp/elt/master"],
                     "SdpMasterLeafNodeFQDN": [
                         "ska_mid/tm_leaf_node/sdp_master"
                     ],
+                    "SdpMasterFQDN": ["mid_sdp/elt/master"],
                     "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
                     "TMMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
                     "TMMidCspSubarrayLeafNodes": [
@@ -80,28 +70,34 @@ def checked_devices(json_model):
     return result
 
 
+@pytest.mark.post_deployment
 def test_on_command(multi_device_tango_context):
+    pytest.num_events_arrived = 0
     # import debugpy; debugpy.debug_this_thread()
+
     def event_callback(evt):
-        assert not evt.error
+        assert not evt.err
+        pytest.num_events_arrived += 1
+
     logger.info("%s", multi_device_tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
     central_node.set_timeout_millis(30000000)
     json_model = json.loads(central_node.InternalModel)
     start_time = time.time()
-    while checked_devices(json_model) != 6:
+    while checked_devices(json_model) != 8:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
         json_model = json.loads(central_node.InternalModel)
+    initial_len = len(central_node.CommandExecuted)
     (result, unique_id) = central_node.On()
     logger.info(result)
     logger.info(unique_id)
     assert result[0] == ResultCode.QUEUED
     start_time = time.time()
-    while len(central_node.CommandExecuted) != 2:
+    while len(central_node.CommandExecuted) != initial_len + 1:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
@@ -111,5 +107,18 @@ def test_on_command(multi_device_tango_context):
         if command[0] == unique_id[0]:
             assert command[2] == "ResultCode.OK"
 
-    central_node.subscribe_event("InternalModel", event_callback)
-    # wait 
+    central_node.subscribe_event(
+        "InternalModel",
+        tango.EventType.CHANGE_EVENT,
+        event_callback,
+        stateless=True,
+    )
+    # wait
+    start_time = time.time()
+    while pytest.num_events_arrived <= 1:
+        time.sleep(SLEEP_TIME)
+        elapsed_time = time.time() - start_time
+        if elapsed_time > TIMEOUT:
+            pytest.fail("Timeout occurred while executing the test")
+
+    assert pytest.num_events_arrived > 1

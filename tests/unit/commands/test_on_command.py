@@ -80,7 +80,9 @@ def test_telescope_on_command_fail_subarray(tango_context):
     # include exception in TelescopeOn command
     failing_dev = "ska_mid/tm_subarray_node/1"
 
-    my_adapter_factory.get_or_create_adapter(failing_dev, attrs = {"TelescopeOn.side_effect": Exception})
+    my_adapter_factory.get_or_create_adapter(
+        failing_dev, attrs={"TelescopeOn.side_effect": Exception}
+    )
 
     on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
     (result_code, message) = on_command.do()
@@ -99,7 +101,9 @@ def test_telescope_on_command_fail_sdp(tango_context):
 
     # include exception in TelescopeOn command
     failing_dev = "ska_mid/tm_leaf_node/sdp_master"
-    my_adapter_factory.get_or_create_adapter(failing_dev, attrs = {"TelescopeOn.side_effect": Exception})
+    my_adapter_factory.get_or_create_adapter(
+        failing_dev, attrs={"TelescopeOn.side_effect": Exception}
+    )
 
     on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
     (result_code, message) = on_command.do()
