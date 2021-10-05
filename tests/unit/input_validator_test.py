@@ -175,7 +175,7 @@ class TestAssignResourceValidator:
             "ska_mid/tm_leaf_node/d",
         )
 
-        with pytest.raises(SubarrayNotPresentError) as excinfo:  # noqa F841
+        with pytest.raises(SubarrayNotPresentError) as excinfo:  # noqa W0612
             input_validator.loads(json.dumps(input_json))
 
     # @pytest.mark.skip(reason="Behavior of this test case has changed in tox env.")
@@ -195,5 +195,5 @@ class TestAssignResourceValidator:
             "ska_mid/tm_leaf_node/d",
         )
 
-        with pytest.raises(ResourceNotPresentError) as excinfo:  # noqa F841
+        with pytest.raises(ResourceNotPresentError) as excinfo:  # noqa W0612
             input_validator.loads(json.dumps(input_json))
