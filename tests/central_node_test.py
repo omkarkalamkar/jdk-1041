@@ -1,3 +1,4 @@
+# pylint: disable=unused-variable,W0612
 # Standard Python imports
 import contextlib
 import importlib
@@ -100,11 +101,11 @@ def mock_obstate_check():
     dut_properties = {"TMMidSubarrayNodes": "ska_mid/tm_subarray_node/1"}
     with mock.patch.object(
         TangoClient, "_get_deviceproxy", return_value=Mock()
-    ) as mock_obj:  # noqa W0612
+    ) as mock_obj:
         tango_client_obj = TangoClient(dut_properties["TMMidSubarrayNodes"])
         with mock.patch.object(
             TangoClient, "get_attribute", Mock(return_value=ObsState.EMPTY)
-        ) as mock_obj_obstate:  # noqa W0612
+        ) as mock_obj_obstate:
             yield tango_client_obj
 
 
@@ -133,7 +134,7 @@ def mock_tango_server_helper():
             "mid_sdp/elt/master",
             "mid_d0001/elt/master",
         ),
-    ) as mock_obj:  # noqa W0612
+    ) as mock_obj:
         tango_server_obj = TangoServerHelper.get_instance()
         yield tango_server_obj
 
@@ -326,7 +327,7 @@ def mock_subarray_call_release_resources_success(arg1, arg2):
 def mock_tango_client():
     with mock.patch.object(
         TangoClient, "_get_deviceproxy", return_value=MagicMock()
-    ) as mock_obj:  # noqa W0612
+    ) as mock_obj:
         tango_client_obj = TangoClient("ska_mid/tm_subarray_node/1")
         yield tango_client_obj
 
@@ -683,7 +684,7 @@ def mock_csp_master_proxy(mock_tango_server_helper, mock_tango_client):
     ) as tango_context:
         with mock.patch.object(
             TangoClient, "_get_deviceproxy", return_value=Mock()
-        ) as mock_obj:  # noqa W0612
+        ) as mock_obj:
             tango_client_obj = TangoClient(dut_properties["CspMasterFQDN"])
             yield tango_context.device, tango_client_obj, dut_properties[
                 "CspMasterFQDN"
@@ -725,7 +726,7 @@ def mock_sdp_master_proxy(mock_tango_server_helper, mock_tango_client):
     ) as tango_context:
         with mock.patch.object(
             TangoClient, "_get_deviceproxy", return_value=Mock()
-        ) as mock_obj:  # noqa W0612
+        ) as mock_obj:
             tango_client_obj = TangoClient(dut_properties["SdpMasterFQDN"])
             yield tango_context.device, tango_client_obj, dut_properties[
                 "SdpMasterFQDN"
@@ -767,7 +768,7 @@ def mock_subarraynode2_proxy(mock_tango_server_helper, mock_tango_client):
     ) as tango_context:
         with mock.patch.object(
             TangoClient, "_get_deviceproxy", return_value=Mock()
-        ) as mock_obj:  # noqa W0612
+        ) as mock_obj:
             tango_client_obj = TangoClient(dut_properties["subarray2_fqdn"])
             yield tango_context.device, tango_client_obj, dut_properties[
                 "subarray2_fqdn"
@@ -826,7 +827,7 @@ def mock_subarraynode3_proxy(mock_tango_server_helper, mock_tango_client):
     ) as tango_context:
         with mock.patch.object(
             TangoClient, "_get_deviceproxy", return_value=Mock()
-        ) as mock_obj:  # noqa W0612
+        ) as mock_obj:
             tango_client_obj = TangoClient(dut_properties["subarray3_fqdn"])
             yield tango_context.device, tango_client_obj, dut_properties[
                 "subarray3_fqdn"
