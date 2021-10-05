@@ -1,4 +1,5 @@
-# pylint: disable=unused-variable,W0612
+# disable unused local variables
+# pylint: disable=unused-variable,W0612,F841
 # Standard Python imports
 import contextlib
 import importlib
