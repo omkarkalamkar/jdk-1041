@@ -42,9 +42,6 @@ PYTHON_SWITCHES_FOR_FLAKE8=--ignore=F401,W503 --max-line-length=180
 -include PrivateRules.mak
 
 
-python-pre-lint:
-	pip3 install black
-
 # Unit test command
 unit-test:
 	chmod 755 run_tox.sh; \
