@@ -1,4 +1,4 @@
-# pylint: disable=unused-variable,W0612,F841
+# pylint: disable=unused-variable,W0612
 # flake8: noqa
 # standard python imports
 import json
