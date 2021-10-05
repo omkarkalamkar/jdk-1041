@@ -38,18 +38,6 @@ unit tests:
     paths:
       - ./build
 
-
-# linting:
-#   stage: linting
-#   image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.10
-#   tags:
-#     - docker-executor
-#   script:
-#     - make lint
-#   artifacts:
-#     paths:
-#       - ./build
-
 # .release docker image:
 #   stage: release
 #   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
