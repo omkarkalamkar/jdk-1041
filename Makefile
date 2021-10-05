@@ -19,9 +19,22 @@ PROJECT = ska-tmc-centralnode-mid
 # build, 'make push' docker push procedure, etc. The other Make targets
 # ('make interactive', 'make test', etc.) are defined in this file.
 #
-include .make/Makefile.mk
-include .make/docker.mk
-include .make/test.mk
+#include .make/Makefile.mk
+#include .make/docker.mk
+#include .make/test.mk
+
+# include makefile targets for make submodule
+-include .make/make.mk
+# include makefile targets for releases
+-include .make/release.mk
+# include makefile targets for Python
+-include .make/python.mk
+# include makefile targets for OCI Images
+-include .make/oci.mk
+# include makefile targets for Makefile help
+-include .make/help.mk
+# include your own private variables for custom deployment configuration
+-include PrivateRules.mak
 
 
 .PHONY: all test lint help
