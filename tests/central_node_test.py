@@ -1,5 +1,5 @@
-# disable unused local variables
 # pylint: disable=unused-variable,W0612,F841
+# flake8: noqa
 # Standard Python imports
 import contextlib
 import importlib
