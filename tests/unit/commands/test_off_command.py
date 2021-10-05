@@ -79,10 +79,7 @@ def test_telescope_off_command_fail_subarray(tango_context):
 
     # include exception in TelescopeOff command
     failing_dev = "ska_mid/tm_subarray_node/1"
-
-    attrs = {"TelescopeOff.side_effect": Exception}
-    subarrayMock = mock.Mock(**attrs)
-    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+    my_adapter_factory.get_or_create_adapter(failing_dev, attrs = {"TelescopeOff.side_effect": Exception})
 
     off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
     (result_code, message) = off_command.do()
@@ -101,11 +98,8 @@ def test_telescope_off_command_fail_csp(tango_context):
 
     # include exception in TelescopeOff command
     failing_dev = "ska_mid/tm_leaf_node/csp_master"
-
-    attrs = {"TelescopeOff.side_effect": Exception}
-    cspMasterLeafMock = mock.Mock(**attrs)
     my_adapter_factory.get_or_create_adapter(
-        failing_dev, proxy=cspMasterLeafMock
+        failing_dev, attrs = {"TelescopeOff.side_effect": Exception}
     )
 
     off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)

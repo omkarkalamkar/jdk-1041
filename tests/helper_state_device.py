@@ -1,17 +1,9 @@
-import logging
-import time
-
 from ska_tango_base.base import OpStateModel
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.base.component_manager import BaseComponentManager
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import HealthState, ObsState
-from ska_tango_base.subarray import (
-    SKASubarray,
-    SubarrayComponentManager,
-    SubarrayObsStateModel,
-)
-from tango.server import attribute, command
+from ska_tango_base.control_model import HealthState
+from tango.server import command, run
 
 
 class EmptyComponentManager(BaseComponentManager):
@@ -112,3 +104,21 @@ class HelperStateDevice(SKABaseDevice):
     )
     def SetOperateMode(self):
         return [[ResultCode.OK], [""]]
+
+
+def main(args=None, **kwargs):
+    # PROTECTED REGION ID(CentralNode.main) ENABLED START #
+    """
+    Runs the CentralNode.
+    :param args: Arguments internal to TANGO
+
+    :param kwargs: Arguments internal to TANGO
+
+    :return: CentralNode TANGO object.
+    """
+    return run((HelperStateDevice,), args=args, **kwargs)
+    # PROTECTED REGION END #    //  CentralNode.main
+
+
+if __name__ == "__main__":
+    main()

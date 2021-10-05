@@ -4,7 +4,7 @@ domain: subarray
 instances: ["01"]
 command: "python3 /app/tests/helper_subarray_device.py"
 server:
-  name: "Subarrays"
+  name: "helper_subarray_device"
   instances:
     - name: "01"
       classes:

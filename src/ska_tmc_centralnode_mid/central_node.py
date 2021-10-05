@@ -251,7 +251,7 @@ class CentralNode(SKABaseDevice):
         return cm
 
     def update_device_callback(self, devInfo):
-        pass
+        self.push_change_event("InternalModel", devInfo.to_json())
         # try:
         #     self.push_change_event("InternalModel", devInfo.to_json())
         # except Exception as e:

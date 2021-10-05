@@ -1,50 +1,44 @@
-name: "centralnode-{{.Release.Name}}"
+name: "centralnode-test"
 function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
 command: "python3 /app/src/ska_tmc_centralnode_mid/central_node.py"
 server:
-  name: "CentralNodeDS"
+  name: "central_node"
   instances:
-    - name: "01"
-      classes:
-        - name: "CentralNode"
-          devices:
-            - name: "ska_mid/tm_central/central_node"
-              properties:
-                - name: "CspMasterLeafNodeFQDN"
-                  values:
-                    - "ska_mid/tm_leaf_node/csp_master"
-                - name: "CspMasterFQDN"
-                  values:
-                    - "mid_csp/elt/master"
-                - name: "SdpMasterLeafNodeFQDN"
-                  values:
-                    - "ska_mid/tm_leaf_node/sdp_master"
-                - name: "SdpMasterFQDN"
-                  values:
-                    - "mid_sdp/elt/master"
-                - name: "DishLeafNodePrefix"
-                  values:
-                    - "ska_mid/tm_leaf_node/d"
-                - name: "TMMidSubarrayNodes"
-                  values:
-                    {{- range  ( regexSplit " " ((.Values.subarray_count | int) | seq ) -1 )  }}
-                    - "ska_mid/tm_subarray_node/{{ . }}"
-                    {{- end }}
-                - name: "TMMidCspSubarrayLeafNodes"
-                  values:
-                    {{- range  ( regexSplit " " ((.Values.subarray_count | int) | seq ) -1 )  }}
-                    - "ska_mid/tm_leaf_node/csp_subarray0{{ . }}"
-                    {{- end }}
-                - name: "TMMidSdpSubarrayLeafNodes"
-                  values:
-                    {{- range  ( regexSplit " " ((.Values.subarray_count | int) | seq ) -1 )  }}
-                    - "ska_mid/tm_leaf_node/sdp_subarray0{{ . }}"
-                    {{- end }}
-                - name: "NumDishes"
-                  values:
-                    - "{{ coalesce (len .Values.dishes) .instances }}"
+  - name: "01"
+    classes:
+    - name: "CentralNode"
+      devices:
+      - name: "ska_mid/tm_central/central_node"
+        properties:
+        - name: "CspMasterLeafNodeFQDN"
+          values:
+          - "ska_mid/tm_leaf_node/csp_master"
+        - name: "CspMasterFQDN"
+          values:
+          - "mid_csp/elt/master"
+        - name: "SdpMasterLeafNodeFQDN"
+          values:
+          - "ska_mid/tm_leaf_node/sdp_master"
+        - name: "SdpMasterFQDN"
+          values:
+          - "mid_sdp/elt/master"
+        - name: "DishLeafNodePrefix"
+          values:
+          - "ska_mid/tm_leaf_node/d"
+        - name: "TMMidSubarrayNodes"
+          values:
+          - "ska_mid/tm_subarray_node/1"
+        - name: "TMMidCspSubarrayLeafNodes"
+          values:
+          - "ska_mid/tm_leaf_node/csp_subarray01"
+        - name: "TMMidSdpSubarrayLeafNodes"
+          values:
+          - "ska_mid/tm_leaf_node/sdp_subarray01"
+        - name: "NumDishes"
+          values:
+          - "1"
 depends_on:
   - device: sys/database/2
 image:

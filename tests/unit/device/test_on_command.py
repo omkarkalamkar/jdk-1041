@@ -82,6 +82,8 @@ def checked_devices(json_model):
 
 def test_on_command(multi_device_tango_context):
     # import debugpy; debugpy.debug_this_thread()
+    def event_callback(evt):
+        assert not evt.error
     logger.info("%s", multi_device_tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -108,3 +110,6 @@ def test_on_command(multi_device_tango_context):
     for command in central_node.CommandExecuted:
         if command[0] == unique_id[0]:
             assert command[2] == "ResultCode.OK"
+
+    central_node.subscribe_event("InternalModel", event_callback)
+    # wait 

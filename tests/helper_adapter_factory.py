@@ -14,8 +14,13 @@ class HelperAdapterFactory(AdapterFactory):
         self.adapters = []
 
     def get_or_create_adapter(
-        self, dev_name, adapter_type=AdapterType.BASE, proxy=mock.Mock()
+        self, dev_name, adapter_type=AdapterType.BASE, proxy=None,
+        attrs=None
+
     ):
+        if proxy is None:
+            proxy = mock.Mock(attrs)
+
         for adapter in self.adapters:
             if adapter.dev_name == dev_name:
                 return adapter

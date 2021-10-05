@@ -1,58 +1,75 @@
 display: ":0"
 xauthority: "~/.Xauthority"
 
+enabled: true
+
+system: SW-infrastructure
+subsystem: ska-tmc-centralnode-mid
+telescope: SKA-mid
+
 subarray_count: 1
 dishes: ["01"]
 
+labels:
+  app: ska-tmc-centralnode-mid
+
 global:
-  retry: 
-  - "--sleep=1"
-  - "--tries=100"
-  sub-system:
-    ska-tango-base:
-      enabled: false
+  minikube: true
   tango_host: databaseds-tango-base-test:10000
-  dsconfig:
-    timeout: 300s
-    image:
+  tries: 10
+  sleep: 5
+
+dsconfig:
+  configuration_file: data/configuration.json
+  timeout: 300s
+  image:
       registry: artefact.skao.int
       image: ska-tango-images-tango-dsconfig
       tag: 1.5.1
       pullPolicy: IfNotPresent
-  itango:
-    image:
-      registry: artefact.skao.int
-      image: ska-tango-images-tango-itango
-      tag: 9.3.5
-      pullPolicy: IfNotPresent
+
+itango:
+  image:
+    registry: artefact.skao.int
+    image: ska-tango-images-tango-itango
+    tag: 9.3.5
+    pullPolicy: IfNotPresent
+
 
 centralnodemid:
   image:
-    registry: artefact.skao.int/ska-telescope
+    registry: artefact.skao.int
     image: ska-tmc-centralnode-mid
     tag: 0.3.0
     pullPolicy: IfNotPresent
 
-ska-tango-base:
-  vnc:
-    replicas: 1
-    enabled: false
-  tangorest:
-    enabled: true
-    replicas: 1
-  tangodb:
-    use_pv: false
+resources:
+  limits:
+    cpu: 100m
+    memory: 100Mi
+  requests:
+    cpu: 50m
+    memory: 50Mi    
 
 deviceServers:
   leafs:
     enabled: false
     instances: ["01"]
     file: "data/leafs.yaml"
+
   subarrays:
     enabled: false
     instances: ["01"]
     file: "data/subarrays.yaml"
+
   centralnode:
     enabled: true
     instances: ["01"]
     file: "data/centralnode.yaml"
+
+
+nodeSelector: {}
+
+affinity: {}
+
+tolerations: []

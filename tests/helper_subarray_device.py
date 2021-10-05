@@ -6,7 +6,7 @@ from ska_tango_base.subarray import (
     SubarrayComponentManager,
     SubarrayObsStateModel,
 )
-from tango.server import command
+from tango.server import command, run
 
 
 class EmptySubArrayComponentManager(SubarrayComponentManager):
@@ -161,3 +161,18 @@ class HelperSubArrayDevice(SKASubarray):
     )
     def TelescopeOn(self):
         return [[ResultCode.OK], [""]]
+
+
+def main(args=None, **kwargs):
+    """
+    Runs the HelperSubArrayDevice.
+    :param args: Arguments internal to TANGO
+
+    :param kwargs: Arguments internal to TANGO
+
+    :return: HelperSubArrayDevice TANGO object.
+    """
+    return run((HelperSubArrayDevice,), args=args, **kwargs)
+
+if __name__ == "__main__":
+    main()

@@ -4,7 +4,7 @@ domain: subarray
 instances: ["01"]
 command: "python3 /app/tests/helper_state_device.py"
 server:
-  name: "Leafnodes"
+  name: "helper_state_device"
   instances:
     - name: "01"
       classes:

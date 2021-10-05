@@ -50,5 +50,5 @@ gilab_values.yaml
 charts/ska-tmc-centralnode-mid/Chart.lock
 output.yaml
 charts/ska-tmc-centralnode-mid/charts/
-charts/test-umbrella/Chart.lock
-charts/test-umbrella/charts/
+charts/test-parent/Chart.lock
+charts/test-parent/charts/
