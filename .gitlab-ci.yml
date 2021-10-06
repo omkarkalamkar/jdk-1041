@@ -69,6 +69,7 @@ test:
     - make uninstall-chart
     - make delete_namespace
     - mv charts/build charts/post-deployment
+  allow_failure: true
   environment:
     name: test
     kubernetes:

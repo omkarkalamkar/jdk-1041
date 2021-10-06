@@ -435,4 +435,6 @@ class SubArrayDeviceInfo(DeviceInfo):
                 result.append(res)
             super_dict["resources"] = result
         super_dict["resources"] = result
+        super_dict["id"] = self.id
+        super_dict["obsState"] = str(ObsState(self.obsState))
         return super_dict
