@@ -71,7 +71,7 @@ endif
 -include .make/help.mk
 -include PrivateRules.mak
 
-clean: 
+clean:
 	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
 			charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
 
@@ -97,4 +97,3 @@ python-pre-test: ## Overriding python.mk
 
 # .PHONY is additive
 .PHONY: unit-test
-
