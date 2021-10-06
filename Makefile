@@ -33,6 +33,7 @@ UMBRELLA_CHART_PATH ?= charts/$(HELM_CHART)/
 K8S_CHARTS ?= ska-tmc-centralnode-mid test-parent## list of charts
 
 CI_PROJECT_DIR ?= .
+OCI_IMAGES = ska-tmc-centralnode-mid
 
 XAUTHORITY ?= $(HOME)/.Xauthority
 THIS_HOST := $(shell ip a 2> /dev/null | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n1)

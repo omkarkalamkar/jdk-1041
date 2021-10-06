@@ -412,7 +412,6 @@ class CNComponentManager(BaseComponentManager):
 
         with self.lock:
             new_state = self._telescope_state_aggregator.aggregate()
-            self.logger.info("telescopeState=ì: %s", new_state)
             self.component.telescope_state = new_state
 
     def _aggregate_tm_op_state(self):
