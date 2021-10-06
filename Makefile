@@ -54,6 +54,7 @@ PYTHON_VARS_AFTER_PYTEST = -m "not post_deployment"
 
 CI_REGISTRY ?= gitlab.com
 ifneq ($(CI_JOB_ID),)
+CAR_OCI_REGISTRY_HOST = $(CI_REGISTRY)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.repository=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
 	--set central_node.centralnodemid.image.tag=$(CI_COMMIT_SHORT_SHA)
 else
