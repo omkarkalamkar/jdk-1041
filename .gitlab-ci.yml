@@ -28,13 +28,16 @@ stages:
   - pages
   - scan
 
-build-image:
+gilab-build-image:
   stage: build
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
   tags:
     - k8srunner
   script:
-    - make oci-build
+    - export IMG="$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+    - docker build --pull --tag "$IMG" .
+    - echo -n "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - docker push "$IMG"
 
 join_linting_reports:
   stage: join-reports
