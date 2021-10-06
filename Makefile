@@ -11,7 +11,6 @@
 
 
 CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
-CAR_OCI_REGISTRY_USER ?= ska-telescope
 PROJECT = ska-tmc-centralnode-mid
 KUBE_APP = ska-tmc-centralnode-mid
 
@@ -33,7 +32,6 @@ UMBRELLA_CHART_PATH ?= charts/$(HELM_CHART)/
 K8S_CHARTS ?= ska-tmc-centralnode-mid test-parent## list of charts
 
 CI_PROJECT_DIR ?= .
-OCI_IMAGES = ska-tmc-centralnode-mid
 
 XAUTHORITY ?= $(HOME)/.Xauthority
 THIS_HOST := $(shell ip a 2> /dev/null | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n1)
@@ -53,6 +51,14 @@ ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3
 PYTHON_VARS_BEFORE_PYTEST = PYTHONPATH=.:src:src/ska_tango_examples
 
 PYTHON_VARS_AFTER_PYTEST = -m "not post_deployment"
+
+CI_REGISTRY ?= gitlab.com
+ifneq ($(CI_JOB_ID),)
+CUSTOM_VALUES = --set central_node.centralnodemid.image.repository=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
+	--set central_node.centralnodemid.image.tag=$(CI_COMMIT_SHORT_SHA)
+else
+CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
+endif
 
 -include .make/make.mk
 -include .make/release.mk
@@ -77,7 +83,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set ska-tango-base.display=$(DISPLAY) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
-	--set central_node.centralnodemid.image.tag=$(VERSION) \
+	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 
 requirements: ## Install Dependencies

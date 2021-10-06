@@ -28,6 +28,16 @@ stages:
   - pages
   - scan
 
+build-image:
+  stage: build
+  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
+  dependencies:
+    - unit_test
+  tags:
+    - k8srunner
+  script:
+    - make oci-build
+
 join_linting_reports:
   stage: join-reports
   tags:
