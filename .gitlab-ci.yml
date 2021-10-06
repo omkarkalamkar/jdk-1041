@@ -90,6 +90,7 @@ include:
     ref: st-912-set-python-defaults
     file: 'gitlab-ci/includes/python.gitlab-ci.yml'
 
+
   # # OCI images build and publish
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/oci-image.gitlab-ci.yml'
