@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 SLEEP_TIME = 0.1
-TIMEOUT = 10
+TIMEOUT = 30
 
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
