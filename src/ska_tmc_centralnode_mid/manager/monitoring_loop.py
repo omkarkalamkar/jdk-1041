@@ -31,7 +31,7 @@ class MonitoringLoop:
         logger=None,
         max_workers=5,
         proxy_timeout=500,
-        sleep_timeout=1,
+        sleep_time=1,
     ):
         self._thread = threading.Thread(target=self.run)
         self._stop = False
@@ -39,7 +39,7 @@ class MonitoringLoop:
         self._thread.setDaemon(True)
         self._component_manager = component_manager
         self._proxy_timeout = proxy_timeout
-        self._sleep_timeout = sleep_timeout
+        self._sleep_time = sleep_time
         self._max_workers = max_workers
         self._dev_factory = DevFactory()
         self._priority_devices = Queue(0)
@@ -74,7 +74,7 @@ class MonitoringLoop:
                     if devInfo not in not_read_devices_twice:
                         executor.submit(self.device_task, devInfo)
 
-            sleep(self._sleep_timeout)
+            sleep(self._sleep_time)
 
     def device_task(self, devInfo):
         with tango.EnsureOmniThread():

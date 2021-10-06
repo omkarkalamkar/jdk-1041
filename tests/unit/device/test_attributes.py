@@ -11,6 +11,7 @@ from ska_tango_base.control_model import (
 from tango import DevState
 from tango.test_utils import DeviceTestContext
 
+from ska_tmc_centralnode_mid import release
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 
@@ -83,3 +84,7 @@ def test_attributes(central_node_device):
     assert "tmc_op_state" in json_model
     assert "telescope_health_state" in json_model
     assert "devices" in json_model
+    assert central_node_device.versionId == release.version
+    assert central_node_device.buildState == (
+        "{},{},{}".format(release.name, release.version, release.description)
+    )

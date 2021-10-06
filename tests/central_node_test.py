@@ -692,29 +692,6 @@ def mock_csp_master_proxy(mock_tango_server_helper, mock_tango_client):
             ], event_subscription_map
 
 
-# @pytest.mark.skip("will be reworked")
-# def test_telescope_health_state_matches_csp_master_leaf_node_health_state_after_start(
-#     mock_csp_master_proxy, health_state, mock_tango_server_helper
-# ):
-#     (
-#         device_proxy,
-#         tango_client_obj,
-#         csp_master_fqdn,
-#         event_subscription_map,
-#     ) = mock_csp_master_proxy
-#     tango_server_obj = mock_tango_server_helper
-#     tango_server_obj.read_property.side_effect = Mock(return_value=["fqdn"])
-#     with mock.patch.object(
-#         TangoClient, "_get_deviceproxy", return_value=Mock()
-#     ) as mock_obj:
-#         with mock.patch.object(
-#             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
-#         ):
-#             tango_client_obj = TangoClient("mid_csp/elt/master")
-#             device_proxy.TelescopeOn()
-#     assert device_proxy.telescopeHealthState == health_state
-
-
 @pytest.fixture(scope="function")
 def mock_sdp_master_proxy(mock_tango_server_helper, mock_tango_client):
     dut_properties = {"SdpMasterFQDN": "mid_sdp/elt/master"}
@@ -732,29 +709,6 @@ def mock_sdp_master_proxy(mock_tango_server_helper, mock_tango_client):
             yield tango_context.device, tango_client_obj, dut_properties[
                 "SdpMasterFQDN"
             ], event_subscription_map
-
-
-# @pytest.mark.skip("will be reworked")
-# def test_telescope_health_state_is_ok_when_sdp_master_node_is_ok_after_start(
-#     mock_sdp_master_proxy, health_state, mock_tango_server_helper
-# ):
-#     (
-#         device_proxy,
-#         tango_client_obj,
-#         csp_master_fqdn,
-#         event_subscription_map,
-#     ) = mock_sdp_master_proxy
-#     tango_server_obj = mock_tango_server_helper
-#     tango_server_obj.read_property.side_effect = Mock(return_value=["fqdn"])
-#     with mock.patch.object(
-#         TangoClient, "_get_deviceproxy", return_value=Mock()
-#     ) as mock_obj:
-#         with mock.patch.object(
-#             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
-#         ):
-#             tango_client_obj = TangoClient("mid_sdp/elt/master")
-#             device_proxy.TelescopeOn()
-#     assert device_proxy.telescopeHealthState == health_state
 
 
 @pytest.fixture(scope="function")
@@ -776,46 +730,6 @@ def mock_subarraynode2_proxy(mock_tango_server_helper, mock_tango_client):
             ], event_subscription_map
 
 
-# @pytest.mark.skip("will be reworked")
-# def test_telescope_health_state_is_ok_when_subarray1_is_ok_after_start(
-#     mock_subarraynode_device, health_state
-# ):
-#     (
-#         device_proxy,
-#         tango_client_obj,
-#         subarray1_fqdn,
-#         event_subscription_map,
-#         tango_server_obj,
-#     ) = mock_subarraynode_device
-#     tango_server_obj.read_property.side_effect = Mock(return_value=["fqdn"])
-#     tango_client_obj = TangoClient("ska_mid/tm_subarray_node/1")
-#     device_proxy.TelescopeOn()
-#     assert device_proxy.telescopeHealthState == health_state
-
-
-# @pytest.mark.skip("will be reworked")
-# def test_telescope_health_state_is_ok_when_subarray2_is_ok_after_start(
-#     mock_subarraynode2_proxy, health_state, mock_tango_server_helper
-# ):
-#     (
-#         device_proxy,
-#         tango_client_obj,
-#         subarray2_fqdn,
-#         event_subscription_map,
-#     ) = mock_subarraynode2_proxy
-#     tango_server_obj = mock_tango_server_helper
-#     tango_server_obj.read_property.side_effect = Mock(return_value=["fqdn"])
-#     with mock.patch.object(
-#         TangoClient, "_get_deviceproxy", return_value=Mock()
-#     ) as mock_obj:
-#         with mock.patch.object(
-#             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
-#         ):
-#             tango_client_obj = TangoClient("ska_mid/tm_subarray_node/2")
-#             device_proxy.TelescopeOn()
-#     assert device_proxy.telescopeHealthState == health_state
-
-
 @pytest.fixture(scope="function")
 def mock_subarraynode3_proxy(mock_tango_server_helper, mock_tango_client):
     dut_properties = {"subarray3_fqdn": "ska_mid/tm_subarray_node/3"}
@@ -835,29 +749,6 @@ def mock_subarraynode3_proxy(mock_tango_server_helper, mock_tango_client):
             ], event_subscription_map
 
 
-# @pytest.mark.skip("will be reworked")
-# def test_telescope_health_state_is_ok_when_subarray3_is_ok_after_start(
-#     mock_subarraynode3_proxy, health_state, mock_tango_server_helper
-# ):
-#     (
-#         device_proxy,
-#         tango_client_obj,
-#         subarray3_fqdn,
-#         event_subscription_map,
-#     ) = mock_subarraynode3_proxy
-#     tango_server_obj = mock_tango_server_helper
-#     tango_server_obj.read_property.side_effect = Mock(return_value=["fqdn"])
-#     with mock.patch.object(
-#         TangoClient, "_get_deviceproxy", return_value=Mock()
-#     ) as mock_obj:
-#         with mock.patch.object(
-#             TangoClient, "subscribe_attribute", side_effect=dummy_subscriber
-#         ):
-#             tango_client_obj = TangoClient("ska_mid/tm_subarray_node/3")
-#             device_proxy.TelescopeOn()
-#     assert device_proxy.telescopeHealthState == health_state
-
-
 # Throw Devfailed exception for command with argument
 def raise_devfailed_exception(*args):
     tango.Except.throw_exception(
@@ -866,24 +757,6 @@ def raise_devfailed_exception(*args):
         " ",
         tango.ErrSeverity.ERR,
     )
-
-
-# @pytest.mark.skip("will be reworked")
-# def test_version_id():
-#     """Test for versionId"""
-#     with fake_tango_system(CentralNode) as tango_context:
-#         assert tango_context.device.versionId == release.version
-
-
-# @pytest.mark.skip("will be reworked")
-# def test_build_state():
-#     """Test for buildState"""
-#     with fake_tango_system(CentralNode) as tango_context:
-#         assert tango_context.device.buildState == (
-#             "{},{},{}".format(
-#                 release.name, release.version, release.description
-#             )
-#         )
 
 
 def any_method(with_name=None):

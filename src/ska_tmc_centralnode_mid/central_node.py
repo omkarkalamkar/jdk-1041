@@ -7,6 +7,8 @@ of state and mode attributes defined by the SKA Control Model.
 # Tango imports
 import json
 
+from ska_ser_skuid.client import SkuidClient
+
 # Additional import
 from ska_tango_base import SKABaseDevice
 from ska_tango_base.commands import ResultCode
@@ -14,6 +16,7 @@ from ska_tango_base.control_model import HealthState
 from tango import AttrWriteType, DebugIt, DevState, DevString
 from tango.server import attribute, command, device_property, run
 
+from ska_tmc_centralnode_mid import release
 from ska_tmc_centralnode_mid.commands.assign_resources_command import (
     AssignResources,
 )
@@ -93,6 +96,21 @@ class CentralNode(SKABaseDevice):
     SdpMasterLeafNodeFQDN = device_property(dtype="str")
 
     SdpMasterFQDN = device_property(dtype="str")
+
+    SkuidServiceNamePort = device_property(
+        dtype="DevString",
+        default_value="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
+    )
+
+    MaxWorkerMonitoringLoop = device_property(
+        dtype="DevUShort", default_value=5
+    )
+
+    ProxyTimeoutMonitoringLoop = device_property(
+        dtype="DevUShort", default_value=1
+    )
+
+    SleepTime = device_property(dtype="DevFloat", default_value=1)
 
     # ----------
     # Attributes
@@ -226,6 +244,9 @@ class CentralNode(SKABaseDevice):
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
+            max_workers=self.MaxWorkerMonitoringLoop,
+            proxy_timeout=self.ProxyTimeoutMonitoringLoop,
+            sleep_time=self.SleepTime,
         )
         cm.input_parameter.tm_dish_dev_names = []
         for dish in range(1, (self.NumDishes + 1)):
@@ -295,6 +316,10 @@ class CentralNode(SKABaseDevice):
             super().do()
             device = self.target
 
+            device._build_state = "{},{},{}".format(
+                release.name, release.version, release.description
+            )
+            device._version_id = release.version
             device.set_change_event("subarray1HealthState", True, False)
             device.set_change_event("subarray2HealthState", True, False)
             device.set_change_event("subarray3HealthState", True, False)
@@ -873,7 +898,6 @@ class CentralNode(SKABaseDevice):
             ("TelescopeOff", TelescopeOff),
             ("StartUpTelescope", TelescopeOn),
             ("StandByTelescope", TelescopeOff),
-            ("AssignResources", AssignResources),
             ("ReleaseResources", ReleaseResources),
             ("StowAntennas", StowAntennas),
             ("Standby", TelescopeStandby),
@@ -886,6 +910,14 @@ class CentralNode(SKABaseDevice):
                 logger=self.logger,
             )
             self.register_command_object(command_name, command_obj)
+        assign_resources_obj = AssignResources(
+            self.component_manager,
+            self.op_state_model,
+            skuid=SkuidClient(skuid_url=self.SkuidServiceNamePort),
+            *args,
+            logger=self.logger,
+        )
+        self.register_command_object("AssignResources", assign_resources_obj)
 
 
 # ----------

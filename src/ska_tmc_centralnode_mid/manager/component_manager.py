@@ -55,6 +55,9 @@ class CNComponentManager(BaseComponentManager):
         _update_subarray_health_state_callback=None,
         _monitoring_loop=True,
         _event_receiver=True,
+        max_workers=5,
+        proxy_timeout=500,
+        sleep_time=1,
         *args,
         **kwargs,
     ):
@@ -73,11 +76,22 @@ class CNComponentManager(BaseComponentManager):
 
         self._monitoring_loop = None
         if _monitoring_loop:
-            self._monitoring_loop = MonitoringLoop(self, logger)
+            self._monitoring_loop = MonitoringLoop(
+                self,
+                logger,
+                max_workers=max_workers,
+                proxy_timeout=proxy_timeout,
+                sleep_time=sleep_time,
+            )
 
         self._event_receiver = None
         if _event_receiver:
-            self._event_receiver = EventReceiver(self, logger)
+            self._event_receiver = EventReceiver(
+                self,
+                logger,
+                proxy_timeout=proxy_timeout,
+                sleep_time=sleep_time,
+            )
 
         self._component.set_op_callbacks(
             _update_device_callback,

@@ -54,6 +54,7 @@ PYTHON_VARS_AFTER_PYTEST = -m "not post_deployment"
 
 CI_REGISTRY ?= gitlab.com
 ifneq ($(CI_JOB_ID),)
+IMAGE_TO_TEST = $(CI_REGISTRY)/ska-telescope/$(PROJECT):$(VERSION)
 CAR_OCI_REGISTRY_HOST = $(CI_REGISTRY)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope \
@@ -70,7 +71,7 @@ endif
 -include .make/help.mk
 -include PrivateRules.mak
 
-clean:
+clean: 
 	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
 			charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
 

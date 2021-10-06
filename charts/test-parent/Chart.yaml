@@ -23,3 +23,6 @@ dependencies:
   version: 0.1.0
   repository: file://../ska-tmc-centralnode-mid
   alias: central_node
+- name: ska-ser-skuid
+  version: 0.3.0
+  repository: https://artefact.skao.int/repository/helm-internal
