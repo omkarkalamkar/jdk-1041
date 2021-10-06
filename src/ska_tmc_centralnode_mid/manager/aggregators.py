@@ -28,8 +28,7 @@ class TelescopeStateAggragator(Aggregator):
             elif dev.faulty:
                 continue
             elif (
-                name
-                in self._component_manager.input_parameter.dish_dev_names
+                name in self._component_manager.input_parameter.dish_dev_names
             ):
                 telescopeStateList.append(dev.state)
                 dish_count += 1
@@ -49,8 +48,10 @@ class TelescopeStateAggragator(Aggregator):
         telescopeSetStateList = set(telescopeStateList)
         if not sdp_master and not csp_master:
             self._logger.info(
-                "missing devices: sdp_master=%s csp_master=%s",
+                "missing devices: %s=%s %s=%s",
+                self._component_manager.input_parameter.sdp_master_dev_name,
                 sdp_master,
+                self._component_manager.input_parameter.csp_master_dev_name,
                 csp_master,
             )
             return DevState.UNKNOWN
@@ -68,6 +69,9 @@ class TelescopeStateAggragator(Aggregator):
         elif DevState.STANDBY in telescopeSetStateList:
             return DevState.STANDBY
         else:
+            self._logger.info(
+                "telescopeSetStateList: %s", telescopeSetStateList
+            )
             return DevState.UNKNOWN
 
 
@@ -110,8 +114,7 @@ class HealthStateAggragator(Aggregator):
                 healthStateList.append(dev.healthState)
                 subarray_count += 1
             elif (
-                name
-                in self._component_manager.input_parameter.dish_dev_names
+                name in self._component_manager.input_parameter.dish_dev_names
             ):
                 healthStateList.append(dev.healthState)
                 dish_count += 1

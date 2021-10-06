@@ -17,7 +17,7 @@ DEVICE_LIST = [
     "ska_mid/tm_leaf_node/csp_subarray01",
     "ska_mid/tm_leaf_node/sdp_subarray01",
     "ska_mid/tm_leaf_node/d0001",
-    "mid_d0001/elt/master"
+    "mid_d0001/elt/master",
 ]
 
 
