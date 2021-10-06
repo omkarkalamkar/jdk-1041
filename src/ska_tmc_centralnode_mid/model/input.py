@@ -2,7 +2,8 @@ class InputParameter:
     def __init__(self, changed_callback) -> None:
         self._tm_subarray_dev_names = ["ska_mid/tm_subarray_node/1"]
         self._csp_subarray_dev_names = ["ska_mid/tm_leaf_node/csp_subarray01"]
-        self._tm_dish_dev_names = ["mid_d0001/elt/master"]
+        self._tm_dish_dev_names = ["ska_mid/tm_leaf_node/d0001"]
+        self._dish_dev_names = ["mid_d0001/elt/master"]
         self._sdp_subarray_dev_names = ["ska_mid/tm_leaf_node/sdp_subarray01"]
         self._csp_master_dev_name = "mid_csp/elt/master"
         self._sdp_master_dev_name = "mid_sdp/elt/master"
@@ -57,6 +58,31 @@ class InputParameter:
         :type value: tuple
         """
         self._tm_dish_dev_names = value
+        if self._changed_callback is not None:
+            self._changed_callback()
+
+    @property
+    def dish_dev_names(self):
+        """
+        Input parameter
+        Return the dish device names
+
+        :return: the TM dish device names
+        :rtype: tuple
+        """
+        return self._dish_dev_names
+
+    @dish_dev_names.setter
+    def dish_dev_names(self, value):
+        """
+        Input parameter
+        Set the dish device names to be
+        managed by the CentralNode
+
+        :param value: the TM dish device names
+        :type value: tuple
+        """
+        self._dish_dev_names = value
         if self._changed_callback is not None:
             self._changed_callback()
 

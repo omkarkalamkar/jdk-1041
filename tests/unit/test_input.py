@@ -9,6 +9,8 @@ def test_properties():
     assert input.csp_subarray_dev_names == ("3", "4")
     input.tm_dish_dev_names = "5"
     assert input.tm_dish_dev_names == ("5")
+    input.dish_dev_names = "5"
+    assert input.dish_dev_names == ("5")
     input.sdp_subarray_dev_names = "6"
     assert input.sdp_subarray_dev_names == ("6")
     input.csp_master_dev_name = "7"

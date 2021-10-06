@@ -31,6 +31,7 @@ def devices_to_load():
                 {"name": "mid_csp/elt/master"},
                 {"name": "mid_sdp/elt/master"},
                 {"name": "mid_d0001/elt/master"},
+                {"name": "ska_mid/tm_leaf_node/d0001"},
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
             ],
@@ -52,6 +53,9 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
     proxy.SetDirectState(tango.DevState.ON)
     assert proxy.State() == tango.DevState.ON
     proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_master")
+    proxy.SetDirectState(tango.DevState.ON)
+    assert proxy.State() == tango.DevState.ON
+    proxy = devFactory.get_device("ska_mid/tm_leaf_node/d0001")
     proxy.SetDirectState(tango.DevState.ON)
     assert proxy.State() == tango.DevState.ON
     # wait for the propagations by event or polling

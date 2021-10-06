@@ -32,7 +32,7 @@ def devices_to_load():
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid_d0001/elt/master"},
+                {"name": "ska_mid/tm_leaf_node/d0001"},
             ],
         },
     )

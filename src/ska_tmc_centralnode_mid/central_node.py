@@ -232,6 +232,10 @@ class CentralNode(SKABaseDevice):
             cm.input_parameter.tm_dish_dev_names.append(
                 self.DishLeafNodePrefix + f"000{dish}"
             )
+        for dish in range(1, (self.NumDishes + 1)):
+            cm.input_parameter.dish_dev_names.append(
+                f"{'mid_d'}000{[dish]}{'/elt/master'}"
+            )
         cm.input_parameter.tm_subarray_dev_names = self.TMMidSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
         cm.input_parameter.tm_leaf_csp_master_dev_name = (

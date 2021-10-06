@@ -29,7 +29,7 @@ class TelescopeStateAggragator(Aggregator):
                 continue
             elif (
                 name
-                in self._component_manager.input_parameter.tm_dish_dev_names
+                in self._component_manager.input_parameter.dish_dev_names
             ):
                 telescopeStateList.append(dev.state)
                 dish_count += 1
@@ -111,7 +111,7 @@ class HealthStateAggragator(Aggregator):
                 subarray_count += 1
             elif (
                 name
-                in self._component_manager.input_parameter.tm_dish_dev_names
+                in self._component_manager.input_parameter.dish_dev_names
             ):
                 healthStateList.append(dev.healthState)
                 dish_count += 1

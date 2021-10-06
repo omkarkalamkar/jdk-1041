@@ -31,6 +31,7 @@ def devices_to_load():
                 {"name": "mid_csp/elt/master"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
                 {"name": "mid_sdp/elt/master"},
+                {"name": "ska_mid/tm_leaf_node/d0001"},
                 {"name": "mid_d0001/elt/master"},
             ],
         },
@@ -51,12 +52,10 @@ def create_cm_no_faulty_devices(
 
 def test_aggregation_default(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    # Why is this in fault state initially?
     assert cm.component.telescope_state == tango.DevState.UNKNOWN
     assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
     assert cm.component.telescope_health_state == HealthState.OK
 
-    # without monitoring loop every thing is UNKNOWN
     cm = create_cm_no_faulty_devices(tango_context, False, True)
     assert cm.component.telescope_state == tango.DevState.UNKNOWN
     assert cm.component.tmc_op_state == tango.DevState.UNKNOWN

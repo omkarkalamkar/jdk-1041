@@ -51,7 +51,8 @@ def test_some_working_other_faulty(tango_context):
         cm.add_device(dev)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
-    num_devices = len(DEVICE_LIST) + NumDishes
+    # the device list contains one duplicate of the dishes
+    num_devices = len(DEVICE_LIST) + NumDishes - 1
     while num_devices != len(cm.checked_devices):
         logger.info("Faulty devices %s", num_faulty)
         time.sleep(SLEEP_TIME)

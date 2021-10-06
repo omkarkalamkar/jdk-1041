@@ -238,6 +238,11 @@ class CNComponentManager(BaseComponentManager):
                 self.add_device(dev_name)
                 list_dev_names.append(dev_name)
 
+        for dev_name in self.input_parameter.dish_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
         for dev_name in self.input_parameter.tm_subarray_dev_names:
             if self.get_device(dev_name) is None:
                 self.add_device(dev_name)

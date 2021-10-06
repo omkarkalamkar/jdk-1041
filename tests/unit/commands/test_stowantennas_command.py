@@ -35,7 +35,7 @@ def devices_to_load():
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid_d0001/elt/master"},
+                {"name": "ska_mid/tm_leaf_node/d0001"},
             ],
         },
     )
@@ -71,7 +71,7 @@ def test_telescope_stow_antennas_fail_dish(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in SetStowMode command
-    failing_dev = "mid_d0001/elt/master"
+    failing_dev = "ska_mid/tm_leaf_node/d0001"
 
     attrs = {"SetStowMode.side_effect": Exception}
     dishMasterLeafMock = mock.Mock(**attrs)
