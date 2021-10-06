@@ -21,6 +21,7 @@ cache:
 
 stages:
   - lint
+  - join-reports
   - build
   - test
   - publish
