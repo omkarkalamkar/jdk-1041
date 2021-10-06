@@ -28,7 +28,7 @@ stages:
   - pages
   - scan
 
-gilab-build-image:
+gilab-image-build:
   stage: build
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
   tags:
