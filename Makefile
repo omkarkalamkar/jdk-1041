@@ -70,11 +70,11 @@ endif
 -include .make/help.mk
 -include PrivateRules.mak
 
-clean: 
+clean:
 	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
 			charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
 
-unit-test: python-do-test
+unit-test: python-test
 
 HELM_CHARTS_TO_PUBLISH ?= ska-tmc-central-node
 
@@ -91,9 +91,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 requirements: ## Install Dependencies
 	python3 -m pip install -r requirements.txt -r requirements-dev.txt
 
-python-pre-lint: requirements## Overriding python.mk 
-
-python-pre-test: requirements## Overriding python.mk 
+python-pre-test: ## Overriding python.mk
 	@mkdir -p build;
 
 # .PHONY is additive
