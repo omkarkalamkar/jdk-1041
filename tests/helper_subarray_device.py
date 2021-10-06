@@ -19,7 +19,8 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         self._assigned_resources = []
 
     def assign(self, resources):
-        self._assigned_resources = resources
+        self.logger.info("Resources: %s", resources)
+        self._assigned_resources = ["0001"]
         return (ResultCode.OK, "")
 
     def release(self, resources):
@@ -164,6 +165,27 @@ class HelperSubArrayDevice(SKASubarray):
         if self.dev_state() != DevState.ON:
             self.set_state(DevState.ON)
         return [[ResultCode.OK], [""]]
+
+    def is_TelescopeOff_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def TelescopeOff(self):
+        if self.dev_state() != DevState.OFF:
+            self.set_state(DevState.OFF)
+        return [[ResultCode.OK], [""]]
+
+    def is_AssignResources_allowed(self):
+        """
+        Check if command `AssignResources` is allowed in the current device state.
+
+        :return: ``True`` if the command is allowed
+        :rtype: boolean
+        """
+        return True
 
 
 def main(args=None, **kwargs):

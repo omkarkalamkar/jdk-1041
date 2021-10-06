@@ -312,6 +312,7 @@ class CNComponentManager(BaseComponentManager):
         with self.lock:
             devInfo = self.component.get_device(dev_name)
             devInfo.last_event_arrived = time.time()
+            devInfo.update_faulty(False)
 
     def update_device_info(self, device_info):
         """
@@ -341,6 +342,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.healthState = health_state
             devInfo.last_event_arrived = time.time()
+            devInfo.update_faulty(False)
 
         self._aggregate_health_state()
 
@@ -359,6 +361,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
+            devInfo.update_faulty(False)
 
         self._aggregate_state()
 
@@ -376,6 +379,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.obsState = obs_state
             devInfo.last_event_arrived = time.time()
+            devInfo.update_faulty(False)
             self._update_resources(devInfo)
 
     def is_already_assigned(self, dishId):

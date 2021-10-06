@@ -52,9 +52,11 @@ PYTHON_VARS_BEFORE_PYTEST = PYTHONPATH=.:src:src/ska_tango_examples
 
 PYTHON_VARS_AFTER_PYTEST = -m "not post_deployment"
 
+MARK = "post_deployment"
+
 CI_REGISTRY ?= gitlab.com
 ifneq ($(CI_JOB_ID),)
-IMAGE_TO_TEST = $(CI_REGISTRY)/ska-telescope/$(PROJECT):$(VERSION)
+IMAGE_TO_TEST = $(CI_REGISTRY)/ska-telescope/$(PROJECT):$(CI_COMMIT_SHORT_SHA)
 CAR_OCI_REGISTRY_HOST = $(CI_REGISTRY)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope \

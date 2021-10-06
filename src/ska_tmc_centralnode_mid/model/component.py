@@ -353,11 +353,9 @@ class DeviceInfo:
         self.healthState = devInfo.healthState
         self.ping = devInfo.ping
         self.last_event_arrived = devInfo.last_event_arrived
-        self.exception = devInfo.exception
-        self._faulty = devInfo.faulty
         self.lock = devInfo.lock
 
-    def update_faulty(self, faulty, exception):
+    def update_faulty(self, faulty, exception=None):
         """
         Set device faulty
 
@@ -393,12 +391,13 @@ class DeviceInfo:
     def to_dict(self):
         result = {
             "dev_name": self.dev_name,
-            "state": self.state,
-            "obsState": self.obsState,
-            "healthState": self.healthState,
+            "state": str(DevState(self.state)),
+            "obsState": str(ObsState(self.obsState)),
+            "healthState": str(HealthState(self.healthState)),
             "ping": str(self.ping),
             "last_event_arrived": str(self.last_event_arrived),
             "faulty": str(self.faulty),
+            "exception": str(self.exception),
         }
         return result
 
@@ -431,7 +430,9 @@ class SubArrayDeviceInfo(DeviceInfo):
     def to_dict(self):
         super_dict = super().to_dict()
         result = []
-        for res in self.resources:
-            result.append(res)
+        if self.resources is not None:
+            for res in self.resources:
+                result.append(res)
+            super_dict["resources"] = result
         super_dict["resources"] = result
         return super_dict

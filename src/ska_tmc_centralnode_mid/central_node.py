@@ -220,6 +220,12 @@ class CentralNode(SKABaseDevice):
         max_dim_x=100,
     )
 
+    TMLeafDishDevNames = attribute(
+        dtype=("DevString",),
+        access=AttrWriteType.READ_WRITE,
+        max_dim_x=100,
+    )
+
     CommandExecuted = attribute(
         dtype=(("DevString",),),
         max_dim_x=4,
@@ -253,6 +259,7 @@ class CentralNode(SKABaseDevice):
             cm.input_parameter.tm_dish_dev_names.append(
                 self.DishLeafNodePrefix + f"000{dish}"
             )
+        cm.input_parameter.dish_dev_names = []
         for dish in range(1, (self.NumDishes + 1)):
             cm.input_parameter.dish_dev_names.append(
                 f"{'mid_d'}000{dish}{'/elt/master'}"
@@ -552,10 +559,23 @@ class CentralNode(SKABaseDevice):
     def read_DishDevNames(self):
         # PROTECTED REGION ID(Counter.DishDevNames_read) ENABLED START #
         """Return the DishDevNames attribute."""
-        return self.component_manager.input_parameter.tm_dish_dev_names
+        return self.component_manager.input_parameter.dish_dev_names
         # PROTECTED REGION END #    //  Counter.DishDevNames_read
 
     def write_DishDevNames(self, value):
+        # PROTECTED REGION ID(Counter.DishDevNames_write) ENABLED START #
+        """Set the DishDevNames attribute."""
+        self.component_manager.input_parameter.dish_dev_names = value
+        self.component_manager.update_input_parameter()
+        # PROTECTED REGION END #    //  Counter.DishDevNames_write
+
+    def read_TMLeafDishDevNames(self):
+        # PROTECTED REGION ID(Counter.DishDevNames_read) ENABLED START #
+        """Return the DishDevNames attribute."""
+        return self.component_manager.input_parameter.tm_dish_dev_names
+        # PROTECTED REGION END #    //  Counter.DishDevNames_read
+
+    def write_TMLeafDishDevNames(self, value):
         # PROTECTED REGION ID(Counter.DishDevNames_write) ENABLED START #
         """Set the DishDevNames attribute."""
         self.component_manager.input_parameter.tm_dish_dev_names = value

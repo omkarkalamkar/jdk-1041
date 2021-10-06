@@ -1,3 +1,4 @@
+import sys
 import threading
 import time
 from queue import Empty, Queue
@@ -113,11 +114,13 @@ class CommandExecutor:
                             id, command_name, result_code, message
                         )
                     except Exception as err:
-                        self._logger.error(
-                            "Unmanaged exception during call to command %s with argin %s: %s",
-                            command_name,
-                            argin,
-                            err,
+                        self._logger.exception(
+                            (
+                                "Unmanaged exception during call to command %s with argin %s: %s",
+                                command_name,
+                                argin,
+                            ),
+                            exc_info=1,
                         )
                         self.add_command_execution(
                             id, command_name, ResultCode.FAILED, str(err)

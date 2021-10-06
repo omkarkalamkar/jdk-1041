@@ -87,6 +87,18 @@ class HelperStateDevice(SKABaseDevice):
             self.set_state(DevState.ON)
         return [[ResultCode.OK], [""]]
 
+    def is_TelescopeOff_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def TelescopeOff(self):
+        if self.dev_state() != DevState.OFF:
+            self.set_state(DevState.OFF)
+        return [[ResultCode.OK], [""]]
+
     def is_SetStandbyFPMode_allowed(self):
         return True
 
@@ -96,6 +108,18 @@ class HelperStateDevice(SKABaseDevice):
     )
     def SetStandbyFPMode(self):
         # import debugpy; debugpy.debug_this_thread()
+        return [[ResultCode.OK], [""]]
+
+    def is_SetStandbyLPMode_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def SetStandbyLPMode(self):
+        if self.dev_state() != DevState.OFF:
+            self.set_state(DevState.OFF)
         return [[ResultCode.OK], [""]]
 
     def is_SetOperateMode_allowed(self):

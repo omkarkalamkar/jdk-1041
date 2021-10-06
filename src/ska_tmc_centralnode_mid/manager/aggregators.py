@@ -69,9 +69,9 @@ class TelescopeStateAggragator(Aggregator):
         elif DevState.STANDBY in telescopeSetStateList:
             return DevState.STANDBY
         else:
-            self._logger.info(
-                "telescopeSetStateList: %s", telescopeSetStateList
-            )
+            # self._logger.info(
+            #     "telescopeSetStateList: %s", telescopeSetStateList
+            # )
             return DevState.UNKNOWN
 
 

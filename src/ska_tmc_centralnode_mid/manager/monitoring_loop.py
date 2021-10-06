@@ -3,6 +3,7 @@ from concurrent import futures
 from queue import Empty, Queue
 from time import sleep
 
+import numpy as np
 import tango
 
 from ska_tmc_centralnode_mid import dev_factory
@@ -85,14 +86,25 @@ class MonitoringLoop:
                 newDevInfo = None
                 if "subarray" in devInfo.dev_name.lower():
                     newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
-                    newDevInfo.resources = proxy.assignedResources
+                    newDevInfo.from_dev_info(devInfo)
+                    assignedRes = proxy.assignedResources
+                    if assignedRes is not None:
+                        newDevInfo.resources = np.asarray(
+                            proxy.assignedResources
+                        )
+                    self._logger.info(
+                        "%s assignedResources: %s",
+                        devInfo.dev_name,
+                        newDevInfo.resources,
+                    )
                     newDevInfo.obsState = proxy.obsState
                     for s in devInfo.dev_name:
                         if s.isdigit():
                             newDevInfo.id = int(s)
                 else:
                     newDevInfo = DeviceInfo(devInfo.dev_name)
-                newDevInfo.from_dev_info(devInfo)
+                    newDevInfo.from_dev_info(devInfo)
+
                 newDevInfo.ping = proxy.ping()
                 newDevInfo.state = proxy.State()
                 newDevInfo.healthState = proxy.HealthState
