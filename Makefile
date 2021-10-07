@@ -73,6 +73,9 @@ endif
 -include .make/help.mk
 -include PrivateRules.mak
 
+# flag this up for the oneshot /Dockerfile
+OCI_IMAGES=ska-tmc-centralnode-mid
+
 clean:
 	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
 			charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
