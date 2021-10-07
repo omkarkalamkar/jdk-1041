@@ -40,13 +40,15 @@ my_python_test:
     - '[ -f .make/python.mk ] || (echo "File python.mk not included in Makefile; exit 1")'
     - 'make help | grep python.mk:python-test'
     - pip3 install poetry black isort
+    - poetry config virtualenvs.create false
   script:
     - |
       if [[ -f pyproject.toml ]]; then
-        poetry export --format requirements.txt --output poetry-requirements.txt --without-hashes;
-        pip3 install -r poetry-requirements.txt;
+        echo "Installing with poetry";
+        poetry install --no-root;
       else
         if  [[ -f requirements.txt ]]; then
+          echo "Installing with pip";
           pip3 install -r poetry-requirements.txt;
         fi;
       fi;
