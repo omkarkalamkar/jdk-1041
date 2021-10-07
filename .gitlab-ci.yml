@@ -41,7 +41,6 @@ my_python_test:
     - 'make help | grep python.mk:python-test'
     - pip3 install poetry black isort
     - poetry config virtualenvs.create false
-  script:
     - |
       if [[ -f pyproject.toml ]]; then
         echo "Installing with poetry";
@@ -52,7 +51,8 @@ my_python_test:
           pip3 install -r poetry-requirements.txt;
         fi;
       fi;
-      make python-test;
+  script:
+    - make python-test;
   artifacts:
     name: "$CI_PROJECT_NAME-$CI_JOB_ID"
     paths:
