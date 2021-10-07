@@ -28,49 +28,6 @@ stages:
   - pages
   - scan
 
-
-
-my_python_test:
-  allow_failure: true
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.14
-  stage: lint
-  tags:
-    - k8srunner
-  before_script:
-    - '[ -f .make/python.mk ] || (echo "File python.mk not included in Makefile; exit 1")'
-    - 'make help | grep python.mk:python-test'
-    - pip3 install poetry black isort
-    - poetry config virtualenvs.create false
-    - |
-      if [[ -f pyproject.toml ]]; then
-        echo "Installing with poetry";
-        poetry install --no-root;
-      else
-        if  [[ -f requirements.txt ]]; then
-          echo "Installing with pip";
-          pip3 install -r poetry-requirements.txt;
-        fi;
-      fi;
-  script:
-    - make python-test;
-  artifacts:
-    name: "$CI_PROJECT_NAME-$CI_JOB_ID"
-    paths:
-      - build/
-    reports:
-      junit: build/reports/unit-tests.xml
-    when: always
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "push"'
-      exists:
-        - pyproject.toml
-        - setup.py
-
-
-
-
-
-
 gilab-image-build:
   stage: build
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
