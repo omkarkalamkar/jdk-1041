@@ -94,11 +94,11 @@ class MonitoringLoop:
                         )
                     else:
                         newDevInfo.resources = []
-                    self._logger.info(
-                        "%s assignedResources: %s",
-                        devInfo.dev_name,
-                        newDevInfo.resources,
-                    )
+                    # self._logger.info(
+                    #     "%s assignedResources: %s",
+                    #     devInfo.dev_name,
+                    #     newDevInfo.resources,
+                    # )
                     newDevInfo.obsState = proxy.obsState
                     for s in devInfo.dev_name:
                         if s.isdigit():

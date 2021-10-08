@@ -93,8 +93,12 @@ def test_assign_res_command(multi_device_tango_context):
 
     json_model = json.loads(central_node.InternalModel)
     start_time = time.time()
-    while checked_devices(json_model) != 9:
-        logger.debug("checked devices: %s", checked_devices(json_model))
+    checked_devs = checked_devices(json_model)
+    while checked_devs != 9:
+        new_checked_devs = checked_devices(json_model)
+        if checked_devs != new_checked_devs:
+            checked_devs = new_checked_devs
+            logger.debug("checked devices: %s", checked_devs)
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
@@ -118,7 +122,7 @@ def test_assign_res_command(multi_device_tango_context):
             assert command[2] == "ResultCode.OK"
 
     start_time = time.time()
-    while pytest.num_events_arrived <= 1:
+    while pytest.num_events_arrived <= 2:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
@@ -126,10 +130,19 @@ def test_assign_res_command(multi_device_tango_context):
 
     assert pytest.num_events_arrived > 1
 
-    json_model = json.loads(central_node.InternalModel)
-    for device in json_model["devices"]:
-        if device["dev_name"] == "ska_mid/tm_subarray_node/1":
-            assert len(device["resources"]) > 0
-            break
+    def get_device(json_model):
+        for device in json_model["devices"]:
+            if device["dev_name"] == "ska_mid/tm_subarray_node/1":
+                return device
+        return None
 
-    (result, unique_id) = central_node.Off()
+    device = get_device(json.loads(central_node.InternalModel))
+    start_time = time.time()
+    while len(device["resources"]) == 0:
+        time.sleep(SLEEP_TIME)
+        device = get_device(json.loads(central_node.InternalModel))
+        elapsed_time = time.time() - start_time
+        if elapsed_time > TIMEOUT:
+            pytest.fail("Timeout occurred while executing the test")
+
+    assert len(device["resources"]) > 0

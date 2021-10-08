@@ -9,7 +9,7 @@ from ska_tango_base.commands import ResultCode
 
 class CommandExecutor:
     def __init__(
-        self, logger, max_queue_size=1, queue_fetch_timeout=1
+        self, logger, max_queue_size=100, queue_fetch_timeout=1
     ) -> None:
         self._logger = logger
         self._max_queue_size = max_queue_size

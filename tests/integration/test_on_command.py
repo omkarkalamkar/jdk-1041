@@ -91,7 +91,12 @@ def test_on_command(multi_device_tango_context):
 
     json_model = json.loads(central_node.InternalModel)
     start_time = time.time()
-    while checked_devices(json_model) != 9:
+    checked_devs = checked_devices(json_model)
+    while checked_devs != 9:
+        new_checked_devs = checked_devices(json_model)
+        if checked_devs != new_checked_devs:
+            checked_devs = new_checked_devs
+            logger.debug("checked devices: %s", checked_devs)
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
