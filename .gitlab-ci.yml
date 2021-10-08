@@ -52,6 +52,7 @@ join_linting_reports:
     when: always
 
 test:
+  retry: 2
   stage: test
   variables:
     MINIKUBE: "false"
