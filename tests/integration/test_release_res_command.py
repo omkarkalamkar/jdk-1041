@@ -64,17 +64,20 @@ devices_to_test = [
     },
 ]
 
+
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     path = join(dirname(__file__), "..", "data", assign_input_file)
     with open(path, "r") as f:
         assign_input_str = f.read()
     return assign_input_str
 
+
 def get_release_input_str(release_input_file="command_ReleaseResources.json"):
     path = join(dirname(__file__), "..", "data", release_input_file)
     with open(path, "r") as f:
         release_input_str = f.read()
     return release_input_str
+
 
 @pytest.mark.post_deployment
 def test_release_res_command(multi_device_tango_context):
@@ -142,5 +145,5 @@ def test_release_res_command(multi_device_tango_context):
         if device["dev_name"] == "ska_mid/tm_subarray_node/1":
             assert len(device["resources"]) == 0
             break
-    
+
     (result, unique_id) = central_node.Off()

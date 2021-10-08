@@ -131,5 +131,5 @@ def test_assign_res_command(multi_device_tango_context):
         if device["dev_name"] == "ska_mid/tm_subarray_node/1":
             assert len(device["resources"]) > 0
             break
-    
+
     (result, unique_id) = central_node.Off()
