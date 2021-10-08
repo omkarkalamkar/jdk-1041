@@ -103,7 +103,7 @@ def test_standby_command(multi_device_tango_context):
             pytest.fail("Timeout occurred while executing the test")
         json_model = json.loads(central_node.InternalModel)
     initial_len = len(central_node.CommandExecuted)
-    (result, unique_id) = central_node.on()
+    (result, unique_id) = central_node.On()
     (result, unique_id) = central_node.Standby()
     logger.info("Result is: %s", result)
     logger.info("Unique id: %s", unique_id)
@@ -117,6 +117,8 @@ def test_standby_command(multi_device_tango_context):
 
     for command in central_node.CommandExecuted:
         if command[0] == unique_id[0]:
+            if command[2] != "ResultCode.OK":
+                logger.error("Message: %s", command[3])
             assert command[2] == "ResultCode.OK"
 
     start_time = time.time()
@@ -127,3 +129,19 @@ def test_standby_command(multi_device_tango_context):
             pytest.fail("Timeout occurred while executing the test")
 
     assert pytest.num_events_arrived > 1
+
+    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master.SetDirectState(DevState.STANDBY)
+    # sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    # sdp_master.SetDirectState(DevState.STANDBY)
+    # dish_master.SetDirectState(DevState.STANDBY)
+    # dish_master = dev_factory.get_device("mid_d0001/elt/master")
+
+    start_time = time.time()
+    while central_node.telescopeState != DevState.STANDBY:
+        time.sleep(SLEEP_TIME)
+        elapsed_time = time.time() - start_time
+        if elapsed_time > TIMEOUT:
+            pytest.fail("Timeout occurred while executing the test")
+
+    assert central_node.telescopeState == DevState.STANDBY
