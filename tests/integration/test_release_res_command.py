@@ -132,7 +132,7 @@ def test_release_res_command(multi_device_tango_context):
             assert command[2] == "ResultCode.OK"
 
     start_time = time.time()
-    while pytest.num_events_arrived <= 1:
+    while pytest.num_events_arrived <= 3:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
