@@ -64,16 +64,20 @@ devices_to_test = [
     },
 ]
 
-
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     path = join(dirname(__file__), "..", "data", assign_input_file)
     with open(path, "r") as f:
         assign_input_str = f.read()
     return assign_input_str
 
+def get_release_input_str(release_input_file="command_ReleaseResources.json"):
+    path = join(dirname(__file__), "..", "data", release_input_file)
+    with open(path, "r") as f:
+        release_input_str = f.read()
+    return release_input_str
 
 @pytest.mark.post_deployment
-def test_assign_res_command(multi_device_tango_context):
+def test_release_res_command(multi_device_tango_context):
     pytest.num_events_arrived = 0
 
     def event_callback(evt):
@@ -92,6 +96,7 @@ def test_assign_res_command(multi_device_tango_context):
     )
 
     json_model = json.loads(central_node.InternalModel)
+    logger.info("json_model: %s", json_model["devices"])
     start_time = time.time()
     while checked_devices(json_model) != 9:
         logger.debug("checked devices: %s", checked_devices(json_model))
@@ -101,16 +106,22 @@ def test_assign_res_command(multi_device_tango_context):
             pytest.fail("Timeout occurred while executing the test")
         json_model = json.loads(central_node.InternalModel)
     initial_len = len(central_node.CommandExecuted)
+    # (result, unique_id) = central_node.Off()
     (result, unique_id) = central_node.On()
     assign_input_str = get_assign_input_str()
     (result, unique_id) = central_node.AssignResources(assign_input_str)
+    logger.info("command executed: %s", central_node.CommandExecuted)
+    release_input_str = get_release_input_str()
+    (result, unique_id) = central_node.ReleaseResources(release_input_str)
     assert result[0] == ResultCode.QUEUED
     start_time = time.time()
-    while len(central_node.CommandExecuted) != initial_len + 2:
+    while len(central_node.CommandExecuted) != initial_len + 3:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
+        if elapsed_time > 100:
             pytest.fail("Timeout occurred while executing the test")
+
+    logger.info("command executed: %s", central_node.CommandExecuted)
 
     for command in central_node.CommandExecuted:
         if command[0] == unique_id[0]:
@@ -129,7 +140,7 @@ def test_assign_res_command(multi_device_tango_context):
     json_model = json.loads(central_node.InternalModel)
     for device in json_model["devices"]:
         if device["dev_name"] == "ska_mid/tm_subarray_node/1":
-            assert len(device["resources"]) > 0
+            assert len(device["resources"]) == 0
             break
     
     (result, unique_id) = central_node.Off()

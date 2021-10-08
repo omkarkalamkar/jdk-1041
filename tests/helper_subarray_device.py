@@ -187,6 +187,15 @@ class HelperSubArrayDevice(SKASubarray):
         """
         return True
 
+    def is_ReleaseAllResources_allowed(self):
+        """
+        Check if command `ReleaseAllResources` is allowed in the current device state.
+
+        :return: ``True`` if the command is allowed
+        :rtype: boolean
+        """
+        return True
+
 
 def main(args=None, **kwargs):
     """
