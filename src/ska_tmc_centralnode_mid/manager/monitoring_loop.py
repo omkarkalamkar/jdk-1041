@@ -92,6 +92,8 @@ class MonitoringLoop:
                         newDevInfo.resources = np.asarray(
                             proxy.assignedResources
                         )
+                    else:
+                        newDevInfo.resources = []
                     self._logger.info(
                         "%s assignedResources: %s",
                         devInfo.dev_name,
