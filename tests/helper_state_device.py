@@ -134,6 +134,16 @@ class HelperStateDevice(SKABaseDevice):
             self.set_state(DevState.ON)
         return [[ResultCode.OK], [""]]
 
+    def is_SetStowMode_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def SetStowMode(self, argin):
+        return [[ResultCode.OK], [""]]
+
 
 def main(args=None, **kwargs):
     # PROTECTED REGION ID(CentralNode.main) ENABLED START #
