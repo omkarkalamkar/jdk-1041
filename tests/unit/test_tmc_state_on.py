@@ -1,17 +1,17 @@
 import time
-from logging import debug
 
 import pytest
 import tango
-from ska_tango_base.control_model import HealthState
-from ska_tango_base.subarray import SKASubarray
-from test_cm_all_working import create_cm
-from test_telescope_startup import create_cm_no_faulty_devices
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import TIMEOUT, count_faulty_devices, logger
+from tests.settings import (
+    TIMEOUT,
+    create_cm_no_faulty_devices,
+    ensure_tmc_op_state,
+    set_devices_state,
+)
 
 
 @pytest.fixture()
@@ -40,33 +40,21 @@ def devices_to_load():
 
 
 def set_devices_on(cm, devFactory, expected_elapsed_time):
-    proxy = devFactory.get_device("ska_mid/tm_subarray_node/1")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_subarray01")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_subarray01")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/csp_master")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/sdp_master")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("ska_mid/tm_leaf_node/d0001")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    # wait for the propagations by event or polling
-    start_time = time.time()
-    elapsed_time = 0
-    while cm.component.tmc_op_state != tango.DevState.ON:
-        elapsed_time = time.time() - start_time
-        time.sleep(0.1)
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-    assert elapsed_time < expected_elapsed_time
+    set_devices_state(
+        devices=[
+            "ska_mid/tm_subarray_node/1",
+            "ska_mid/tm_leaf_node/csp_subarray01",
+            "ska_mid/tm_leaf_node/sdp_subarray01",
+            "ska_mid/tm_leaf_node/csp_master",
+            "ska_mid/tm_leaf_node/sdp_master",
+            "ska_mid/tm_leaf_node/d0001",
+        ],
+        devFactory=devFactory,
+        state=tango.DevState.ON,
+        cm=cm,
+        expected_elapsed_time=expected_elapsed_time,
+    )
+    ensure_tmc_op_state(cm, tango.DevState.ON, expected_elapsed_time)
 
 
 def test_tmc_state_on(tango_context):

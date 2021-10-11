@@ -137,11 +137,6 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=1.5):
     proxy = devFactory.get_device("mid_csp/elt/master")
     proxy.SetDirectHealthState(HealthState.UNKNOWN)
     assert proxy.HealthState == HealthState.UNKNOWN
-    # set_unknown(devFactory, "ska_mid/tm_subarray_node/1")
-    # set_unknown(devFactory, "mid_csp/elt/master")
-    # set_unknown(devFactory, "mid_sdp/elt/master")
-    # set_unknown(devFactory, "ska_mid/tm_subarray_node/2")
-    # set_unknown(devFactory, "ska_mid/tm_subarray_node/3")
     start_time = time.time()
     elapsed_time = 0
     while cm.component.telescope_health_state != HealthState.UNKNOWN:

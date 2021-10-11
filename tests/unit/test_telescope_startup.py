@@ -1,16 +1,10 @@
-import time
-from logging import debug
-
 import pytest
 import tango
 from ska_tango_base.control_model import HealthState
-from ska_tango_base.subarray import SKASubarray
-from test_cm_all_working import create_cm
 
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import TIMEOUT, count_faulty_devices, logger
+from tests.settings import create_cm_no_faulty_devices
 
 
 @pytest.fixture()
@@ -36,18 +30,6 @@ def devices_to_load():
             ],
         },
     )
-
-
-def create_cm_no_faulty_devices(
-    tango_context, p_monitoring_loop, p_event_receiver
-):
-    logger.info("%s", tango_context)
-    cm, start_time = create_cm(p_monitoring_loop, p_event_receiver)
-    num_faulty = count_faulty_devices(cm)
-    assert num_faulty == 0
-    elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
-    return cm
 
 
 def test_aggregation_default(tango_context):

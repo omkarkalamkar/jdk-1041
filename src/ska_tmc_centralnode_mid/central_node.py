@@ -107,7 +107,7 @@ class CentralNode(SKABaseDevice):
     )
 
     ProxyTimeoutMonitoringLoop = device_property(
-        dtype="DevUShort", default_value=1
+        dtype="DevUShort", default_value=500
     )
 
     SleepTime = device_property(dtype="DevFloat", default_value=1)

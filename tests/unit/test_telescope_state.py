@@ -1,17 +1,17 @@
 import time
-from logging import debug
 
 import pytest
 import tango
-from ska_tango_base.control_model import HealthState
-from ska_tango_base.subarray import SKASubarray
-from test_cm_all_working import create_cm
-from test_telescope_startup import create_cm_no_faulty_devices
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import TIMEOUT, count_faulty_devices, logger
+from tests.settings import (
+    TIMEOUT,
+    create_cm_no_faulty_devices,
+    ensure_telescope_state,
+    set_device_state,
+)
 
 
 @pytest.fixture()
@@ -40,24 +40,10 @@ def devices_to_load():
 
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
-    proxy = devFactory.get_device("mid_csp/elt/master")
-    proxy.SetDirectState(tango.DevState.INIT)
-    assert proxy.State() == tango.DevState.INIT
-    proxy = devFactory.get_device("mid_sdp/elt/master")
-    proxy.SetDirectState(tango.DevState.DISABLE)
-    assert proxy.State() == tango.DevState.DISABLE
-    proxy = devFactory.get_device("mid_d0001/elt/master")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
-    # wait for the propagations by event or polling
-    start_time = time.time()
-    elapsed_time = 0
-    while cm.component.telescope_state != tango.DevState.INIT:
-        elapsed_time = time.time() - start_time
-        time.sleep(0.1)
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-    assert elapsed_time < expected_elapsed_time
+    set_device_state("mid_csp/elt/master", tango.DevState.INIT, devFactory)
+    set_device_state("mid_sdp/elt/master", tango.DevState.DISABLE, devFactory)
+    set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
+    ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
 def test_telescope_state_init(tango_context):
@@ -82,24 +68,10 @@ def test_telescope_state_init_only_events(tango_context):
 
 
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
-    proxy = devFactory.get_device("mid_csp/elt/master")
-    proxy.SetDirectState(tango.DevState.FAULT)
-    assert proxy.State() == tango.DevState.FAULT
-    proxy = devFactory.get_device("mid_sdp/elt/master")
-    proxy.SetDirectState(tango.DevState.STANDBY)
-    assert proxy.State() == tango.DevState.STANDBY
-    proxy = devFactory.get_device("mid_d0001/elt/master")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
-    # wait for the propagations by event or polling
-    start_time = time.time()
-    elapsed_time = 0
-    while cm.component.telescope_state != tango.DevState.FAULT:
-        elapsed_time = time.time() - start_time
-        time.sleep(0.1)
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-    assert elapsed_time < expected_elapsed_time
+    set_device_state("mid_csp/elt/master", tango.DevState.FAULT, devFactory)
+    set_device_state("mid_sdp/elt/master", tango.DevState.STANDBY, devFactory)
+    set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
+    ensure_telescope_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
 def test_telescope_state_fault_over_standby(tango_context):
@@ -126,24 +98,10 @@ def test_telescope_state_fault_over_standby_only_events(tango_context):
 
 
 def set_device_standby(devFactory, cm, expected_elapsed_time):
-    proxy = devFactory.get_device("mid_csp/elt/master")
-    proxy.SetDirectState(tango.DevState.STANDBY)
-    assert proxy.State() == tango.DevState.STANDBY
-    proxy = devFactory.get_device("mid_sdp/elt/master")
-    proxy.SetDirectState(tango.DevState.ON)
-    assert proxy.State() == tango.DevState.ON
-    proxy = devFactory.get_device("mid_d0001/elt/master")
-    proxy.SetDirectState(tango.DevState.OFF)
-    assert proxy.State() == tango.DevState.OFF
-    # wait for the propagations by event or polling
-    start_time = time.time()
-    elapsed_time = 0
-    while cm.component.telescope_state != tango.DevState.STANDBY:
-        elapsed_time = time.time() - start_time
-        time.sleep(0.1)
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-    assert elapsed_time < expected_elapsed_time
+    set_device_state("mid_csp/elt/master", tango.DevState.STANDBY, devFactory)
+    set_device_state("mid_sdp/elt/master", tango.DevState.ON, devFactory)
+    set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
+    ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
 
 def test_telescope_state_standby(tango_context):
