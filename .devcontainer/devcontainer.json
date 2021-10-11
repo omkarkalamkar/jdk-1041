@@ -35,7 +35,7 @@
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],
     // Use 'postCreateCommand' to run commands after the container is created.
-    "postCreateCommand": "python3 -m pip install --extra-index-url https://artefact.skao.int/repository/pypi-internal/simple -rrequirements.txt -rrequirements-tst.txt",
+    "postCreateCommand": "python3 -m pip install --extra-index-url https://artefact.skao.int/repository/pypi-internal/simple -rrequirements.txt -rrequirements-dev.txt",
     // Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
     "remoteUser": "tango",
     "remoteEnv": {
