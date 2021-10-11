@@ -6,12 +6,26 @@ package.
 """
 import threading
 import time
-from tango import DevState
+
 from ska_tango_base.base import BaseComponentManager
-from ska_tango_base.control_model import HealthState
-from ska_tmc_centralnode_mid.model.component import Component, DeviceInfo, SubArrayDeviceInfo
-from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
+from ska_tango_base.control_model import HealthState, ObsState
+from tango import DevState
+
+from ska_tmc_centralnode_mid.manager.aggregators import (
+    HealthStateAggragator,
+    TelescopeStateAggragator,
+    TMCOpStateAggragator,
+)
+from ska_tmc_centralnode_mid.manager.command_executor import CommandExecutor
 from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
+from ska_tmc_centralnode_mid.manager.monitoring_loop import MonitoringLoop
+from ska_tmc_centralnode_mid.model.component import (
+    Component,
+    DeviceInfo,
+    SubArrayDeviceInfo,
+)
+from ska_tmc_centralnode_mid.model.input import InputParameter
+
 
 class CNComponentManager(BaseComponentManager):
     """
@@ -21,26 +35,32 @@ class CNComponentManager(BaseComponentManager):
 
     * Monitoring its component, e.g. detect that it has been turned off
       or on
-    
-    * Fetching the latest SCM indicator values of the components periodically 
+
+    * Fetching the latest SCM indicator values of the components periodically
       and trigger the TMC and telescope state aggregation
-    
-    * Receiving the change events from the component and trigger 
+
+    * Receiving the change events from the component and trigger
       the TMC and telescope state aggregation
     """
 
-    def __init__(self, 
-        op_state_model, 
-        logger=None, 
+    def __init__(
+        self,
+        op_state_model,
+        logger=None,
         _component=None,
-        _update_device_callback = None,
-        _update_telescope_state_callback = None,
-        _update_telescope_health_state_callback = None,
-        _update_tmc_op_state_callback = None,
-        _update_subarray_health_state_callback = None,
-        _monitoring_loop = True,
-        _event_receiver = True,
-        *args, **kwargs):
+        _update_device_callback=None,
+        _update_telescope_state_callback=None,
+        _update_telescope_health_state_callback=None,
+        _update_tmc_op_state_callback=None,
+        _update_subarray_health_state_callback=None,
+        _monitoring_loop=True,
+        _event_receiver=True,
+        max_workers=5,
+        proxy_timeout=500,
+        sleep_time=1,
+        *args,
+        **kwargs,
+    ):
         """
         Initialise a new ComponentManager instance.
 
@@ -51,21 +71,35 @@ class CNComponentManager(BaseComponentManager):
             managed; for testing purposes only
         """
         self.logger = logger
-
+        self.lock = threading.Lock()
         self._component = _component or Component(logger)
-        
+
+        self._monitoring_loop = None
         if _monitoring_loop:
-            self._monitoring_loop = MonitoringLoop(self, logger)
+            self._monitoring_loop = MonitoringLoop(
+                self,
+                logger,
+                max_workers=max_workers,
+                proxy_timeout=proxy_timeout,
+                sleep_time=sleep_time,
+            )
 
+        self._event_receiver = None
         if _event_receiver:
-            self._event_receiver = EventReceiver(self, logger)
+            self._event_receiver = EventReceiver(
+                self,
+                logger,
+                proxy_timeout=proxy_timeout,
+                sleep_time=sleep_time,
+            )
 
-        self._component.set_op_callbacks(_update_device_callback, 
-                                         _update_telescope_state_callback, 
-                                         _update_telescope_health_state_callback, 
-                                         _update_tmc_op_state_callback,
-                                         _update_subarray_health_state_callback
-                                         )
+        self._component.set_op_callbacks(
+            _update_device_callback,
+            _update_telescope_state_callback,
+            _update_telescope_health_state_callback,
+            _update_tmc_op_state_callback,
+            _update_subarray_health_state_callback,
+        )
 
         super().__init__(op_state_model, *args, **kwargs)
 
@@ -75,33 +109,39 @@ class CNComponentManager(BaseComponentManager):
         if _event_receiver:
             self._event_receiver.start()
 
-        self._adapters = []
+        self._input_parameter = InputParameter(None)
+
+        self._telescope_state_aggregator = None
+        self._health_state_aggregator = None
+        self._tm_op_state_aggregator = None
+
+        self._command_executor = CommandExecutor(logger)
+        self._command_executor.start()
+
+    def set_aggregators(
+        self,
+        _telescope_state_aggregator,
+        _health_state_aggregator,
+        _tm_op_state_aggregator,
+    ):
+        self._telescope_state_aggregator = _telescope_state_aggregator
+        self._health_state_aggregator = _health_state_aggregator
+        self._tm_op_state_aggregator = _tm_op_state_aggregator
 
     @property
-    def adapters(self):
+    def input_parameter(self):
         """
-        Return the list of the adapters used
+        Return the input parameter
 
-        :return: list of adapters
-        :rtype BaseAdapter
+        :return: input parameter
+        :rtype InputParameter
         """
-        return self._adapters
-
-    def add_adapter(self, adapter):
-        """
-        Add an adapter at the list of adpters
-        if not present
-
-        :param adapter: adapter object
-        :type adapter: BaseAdapter
-        """
-        if adapter not in self.adapters:
-            self._adapters.append(adapter)
+        return self._input_parameter
 
     @property
     def component(self):
         """
-        Return the managed component  
+        Return the managed component
 
         :return: the managed component
         :rtype Component
@@ -111,7 +151,7 @@ class CNComponentManager(BaseComponentManager):
     @property
     def devices(self):
         """
-        Return the list of the monitored devices 
+        Return the list of the monitored devices
 
         :return: list of the monitored devices
         """
@@ -120,7 +160,7 @@ class CNComponentManager(BaseComponentManager):
     @property
     def checked_devices(self):
         """
-        Return the list of the checked monitored devices 
+        Return the list of the checked monitored devices
 
         :return: list of the checked monitored devices
         """
@@ -136,6 +176,18 @@ class CNComponentManager(BaseComponentManager):
                 result.append(dev)
                 continue
         return result
+
+    @property
+    def command_in_progress(self):
+        return self._command_executor.command_in_progress
+
+    @property
+    def command_executor(self):
+        return self._command_executor
+
+    @property
+    def command_executed(self):
+        return self._command_executor._command_executed
 
     def get_device(self, dev_name):
         """
@@ -157,8 +209,11 @@ class CNComponentManager(BaseComponentManager):
         :param num_dishes: number of dishes
         :type num_dishes: int
         """
+        result = []
         for dish in range(1, (num_dishes + 1)):
             self.add_device(dln_prefix + f"000{dish}")
+            result.append(dln_prefix + f"000{dish}")
+        return result
 
     def add_multiple_devices(self, device_list):
         """
@@ -167,8 +222,11 @@ class CNComponentManager(BaseComponentManager):
         :param device_list: list of device names
         :type list: list[str]
         """
+        result = []
         for dev_name in device_list:
             self.add_device(dev_name)
+            result.append(dev_name)
+        return result
 
     def add_device(self, dev_name):
         """
@@ -179,7 +237,7 @@ class CNComponentManager(BaseComponentManager):
         """
         if dev_name is None:
             return
-            
+
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
         else:
@@ -187,7 +245,57 @@ class CNComponentManager(BaseComponentManager):
 
         self.component.update_device(devInfo)
 
-    
+    def update_input_parameter(self):
+        list_dev_names = []
+        for dev_name in self.input_parameter.tm_dish_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.input_parameter.dish_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.input_parameter.tm_subarray_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.input_parameter.csp_subarray_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.input_parameter.sdp_subarray_dev_names:
+            if self.get_device(dev_name) is None:
+                self.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        dev_name = self.input_parameter.csp_master_dev_name
+        if dev_name != "" and self.get_device(dev_name) is None:
+            self.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.input_parameter.tm_leaf_csp_master_dev_name
+        if dev_name != "" and self.get_device(dev_name) is None:
+            self.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.input_parameter.sdp_master_dev_name
+        if dev_name != "" and self.get_device(dev_name) is None:
+            self.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.input_parameter.tm_leaf_sdp_master_dev_name
+        if dev_name != "" and self.get_device(dev_name) is None:
+            self.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        for devInfo in self.devices:
+            if devInfo.dev_name not in list_dev_names:
+                self.component.remove_device(devInfo.dev_name)
+
     def device_failed(self, device_info, exception):
         """
         Set a device to failed and call the relative callback if available
@@ -197,8 +305,14 @@ class CNComponentManager(BaseComponentManager):
         :param exception: an exception
         :type Exception
         """
-        with device_info.lock:
+        with self.lock:
             self.component.update_device_exception(device_info, exception)
+
+    def update_event_failure(self, dev_name):
+        with self.lock:
+            devInfo = self.component.get_device(dev_name)
+            devInfo.last_event_arrived = time.time()
+            devInfo.update_faulty(False)
 
     def update_device_info(self, device_info):
         """
@@ -208,7 +322,7 @@ class CNComponentManager(BaseComponentManager):
         :param device_info: a device info
         :type device_info: DeviceInfo
         """
-        with device_info.lock:
+        with self.lock:
             self.component.update_device(device_info)
 
         self._aggregate_health_state()
@@ -224,10 +338,11 @@ class CNComponentManager(BaseComponentManager):
         :param health_state: health state of the device
         :type health_state: HealthState
         """
-        devInfo = self.component.get_device(dev_name)
-        with devInfo.lock:
+        with self.lock:
+            devInfo = self.component.get_device(dev_name)
             devInfo.healthState = health_state
             devInfo.last_event_arrived = time.time()
+            devInfo.update_faulty(False)
 
         self._aggregate_health_state()
 
@@ -242,10 +357,11 @@ class CNComponentManager(BaseComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        devInfo = self.component.get_device(dev_name)
-        with devInfo.lock:
+        with self.lock:
+            devInfo = self.component.get_device(dev_name)
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
+            devInfo.update_faulty(False)
 
         self._aggregate_state()
 
@@ -259,46 +375,42 @@ class CNComponentManager(BaseComponentManager):
         :param obs_state: obs state of the device
         :type obs_state: ObsState
         """
-        devInfo = self.component.get_device(dev_name)
-        with devInfo.lock:
+        with self.lock:
+            devInfo = self.component.get_device(dev_name)
             devInfo.obsState = obs_state
             devInfo.last_event_arrived = time.time()
-            self._update_resources(dev_name)
+            devInfo.update_faulty(False)
+            self._update_resources(devInfo)
+
+    def is_already_assigned(self, dishId):
+        """
+        Check if a Dish is already assigned to a subarray
+
+        :param dishId: id of the dish
+        :type dishId: str
+
+        :return True is already assigned, False otherwise
+        """
+        for devInfo in self.devices:
+            if isinstance(devInfo, SubArrayDeviceInfo):
+                if dishId in devInfo.resources:
+                    return True
+
+        return False
 
     def _aggregate_health_state(self):
         """
-        Aggregates all health states 
+        Aggregates all health states
         and call the relative callback if available
         """
-        # import debugpy; debugpy.debug_this_thread()
-        healthStateList = []
-        # get states of CspMaster, SdpMaster and DishMaster devices
-        # what if one of them is not working (i.e. faulty flag)? i.e. Csp, Sdp or dishes
-        # number of dishes is also variable
-        for dev in self.checked_devices:
-            name = dev.dev_name.lower()
-            if "leaf" in name:
-                continue
-            if "csp" in name and "master" in name:
-                healthStateList.append(dev.healthState)
-            if "sdp" in name and "master" in name:
-                healthStateList.append(dev.healthState)
-            if "tm" in name and "subarray" in name:
-                healthStateList.append(dev.healthState)
+        if self._health_state_aggregator is None:
+            self._health_state_aggregator = HealthStateAggragator(
+                self, self.logger
+            )
 
-        healthStateSetList = set(healthStateList)
-        if healthStateSetList == set([HealthState.OK]):
-            with self.component.lock:
-                self.component.telescope_health_state = HealthState.OK
-        elif HealthState.FAILED in healthStateSetList:
-            with self.component.lock:
-                self.component.telescope_health_state = HealthState.FAILED
-        elif HealthState.DEGRADED in healthStateSetList:
-            with self.component.lock:
-                self.component.telescope_health_state = HealthState.DEGRADED
-        else:
-            with self.component.lock:
-                self.component.telescope_health_state = HealthState.UNKNOWN
+        with self.lock:
+            new_state = self._health_state_aggregator.aggregate()
+            self.component.telescope_health_state = new_state
 
     def _aggregate_state(self):
         """
@@ -311,83 +423,43 @@ class CNComponentManager(BaseComponentManager):
         """
         Aggregates telescope state
         """
-        # import debugpy; debugpy.debug_this_thread()
-        telescopeStateList = []
-        # get states of CspMaster, SdpMaster and DishMaster devices
-        # what if one of them is not working (i.e. faulty flag)? i.e. Csp, Sdp or dishes
-        # number of dishes is also variable: at least one?
-        for dev in self.checked_devices:
-            name = dev.dev_name.lower()
-            # if dev.faulty:
-                # what I do?
-            if "leaf" in name:
-                continue
-            elif "csp" in name and "master" in name:
-                telescopeStateList.append(dev.state)
-            elif "sdp" in name and "master" in name:
-                telescopeStateList.append(dev.state)
-            elif "mid_d" in name and "master" in name:
-                telescopeStateList.append(dev.state)
+        if self._telescope_state_aggregator is None:
+            self._telescope_state_aggregator = TelescopeStateAggragator(
+                self, self.logger
+            )
 
-        telescopeSetStateList = set(telescopeStateList)
-        if telescopeSetStateList == set([DevState.ON]):
-            with self.component.lock:
-                self.component.telescope_state = DevState.ON
-        elif telescopeSetStateList == set([DevState.OFF]):
-            with self.component.lock:
-                self.component.telescope_state = DevState.OFF
-        elif DevState.INIT in telescopeSetStateList:
-            with self.component.lock:
-                self.component.telescope_state = DevState.INIT
-        elif DevState.FAULT in telescopeSetStateList:
-            with self.component.lock:
-                self.component.telescope_state = DevState.FAULT
-        elif DevState.STANDBY in telescopeSetStateList:
-            with self.component.lock:
-                self.component.telescope_state = DevState.STANDBY
-        else:
-            with self.component.lock:
-                self.component.telescope_state = DevState.UNKNOWN
+        with self.lock:
+            new_state = self._telescope_state_aggregator.aggregate()
+            self.component.telescope_state = new_state
 
     def _aggregate_tm_op_state(self):
         """
         Aggregates tm devices states
         """
-        tmStateList = []
-        # get states of all TM devices
-        # what if one of them is not working? i.e. tm subarray
-        # number of devices is also variable, how to handle that number
-        for dev in self.checked_devices:
-            name = dev.dev_name.lower()
-            if "tm" in name:
-                tmStateList.append(dev.state)
+        if self._tm_op_state_aggregator is None:
+            self._tm_op_state_aggregator = TMCOpStateAggragator(
+                self, self.logger
+            )
 
-        tmSetStateList = set(tmStateList)
-        if tmSetStateList == set([DevState.ON]):
-            with self.component.lock:
-                self.component.tmc_op_state = DevState.ON
-        elif tmSetStateList == set([DevState.OFF]):
-            raise Exception("OFF State not allowed")
-        elif DevState.INIT in tmSetStateList:
-            with self.component.lock:
-                self.component.tmc_op_state = DevState.INIT
-        elif DevState.FAULT in tmSetStateList:
-            with self.component.lock:
-                self.component.tmc_op_state = DevState.FAULT
-        elif DevState.STANDBY in tmSetStateList:
-            with self.component.lock:
-                self.component.tmc_op_state = DevState.STANDBY
-        else:
-            with self.component.lock:
-                self.component.tmc_op_state = DevState.UNKNOWN
+        with self.lock:
+            new_state = self._tm_op_state_aggregator.aggregate()
+            self.component.tmc_op_state = new_state
 
-    def _update_resources(self, subarray_dev_name):
+    def _update_resources(self, subarray_dev_info):
         """
-        Updates resources for a subarray 
+        Updates resources for a subarray
         the relative callback if available
 
         :param subarray_dev_name: name of the subarray device
         :type subarray_dev_name: str
         """
-        pass
-
+        if self._monitoring_loop is not None:
+            self._monitoring_loop.add_priority_devices(
+                subarray_dev_info.dev_name
+            )
+        else:
+            # If the monitoring loop is not active
+            # I must assume that the subarray is reporting the correct value
+            # and I need to update the assigned resources in the device info
+            if subarray_dev_info.obsState == ObsState.EMPTY:
+                subarray_dev_info.resources = []

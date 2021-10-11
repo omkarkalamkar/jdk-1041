@@ -38,7 +38,7 @@ class DevFactory:
         """
         if green_mode is None:
             green_mode = self.default_green_mode
-
+        # import debugpy; debugpy.debug_this_thread()
         if DevFactory._test_context is None:
             if dev_name not in self.dev_proxys:
                 self.logger.debug("Creating Proxy for %s", dev_name)

@@ -1,205 +1,144 @@
+# pylint: disable=unused-variable,W0612
+# flake8: noqa
 # standard python imports
-import pytest
 import json
-
 from os.path import dirname, join
+
+import pytest
+
+from ska_tmc_centralnode_mid.exceptions import (
+    InvalidJSONError,
+    ResourceNotPresentError,
+    ResourceReassignmentError,
+    SubarrayNotPresentError,
+)
 
 # other imports
 from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
-from ska_tmc_centralnode_mid.exceptions import (
-    ResourceReassignmentError,
-    ResourceNotPresentError,
-)
-from ska_tmc_centralnode_mid.exceptions import SubarrayNotPresentError, InvalidJSONError
-from ska_tmc_centralnode_mid import const
 
 # Sample 'good' JSON
 
 sample_assign_resources_request = {
-  "interface": "https://schema.skao.int/ska-tmc-assignresources/2.0",
-  "transaction_id": "txn-....-00001",
-  "subarray_id": 1,
-  "dish": {
-    "receptor_ids": [
-      "0001"
-    ]
-  },
-  "sdp": {
-    "interface": "https://schema.skao.int/ska-sdp-assignres/0.3",
-    "eb_id": "eb-mvp01-20200325-00001",
-    "max_length": 100.0,
-    "scan_types": [
-      {
-        "scan_type_id": "science_A",
-        "reference_frame": "ICRS",
-        "ra": "02:42:40.771",
-        "dec": "-00:00:47.84",
-        "channels": [
-          {
-            "count": 744,
-            "start": 0,
-            "stride": 2,
-            "freq_min": 0.35e9,
-            "freq_max": 0.368e9,
-            "link_map": [
-              [
-                0,
-                0
-              ],
-              [
-                200,
-                1
-              ],
-              [
-                744,
-                2
-              ],
-              [
-                944,
-                3
-              ]
-            ]
-          },
-          {
-            "count": 744,
-            "start": 2000,
-            "stride": 1,
-            "freq_min": 0.36e9,
-            "freq_max": 0.368e9,
-            "link_map": [
-              [
-                2000,
-                4
-              ],
-              [
-                2200,
-                5
-              ]
-            ]
-          }
-        ]
-      },
-      {
-        "scan_type_id": "calibration_B",
-        "reference_frame": "ICRS",
-        "ra": "12:29:06.699",
-        "dec": "02:03:08.598",
-        "channels": [
-          {
-            "count": 744,
-            "start": 0,
-            "stride": 2,
-            "freq_min": 0.35e9,
-            "freq_max": 0.368e9,
-            "link_map": [
-              [
-                0,
-                0
-              ],
-              [
-                200,
-                1
-              ],
-              [
-                744,
-                2
-              ],
-              [
-                944,
-                3
-              ]
-            ]
-          },
-          {
-            "count": 744,
-            "start": 2000,
-            "stride": 1,
-            "freq_min": 0.36e9,
-            "freq_max": 0.368e9,
-            "link_map": [
-              [
-                2000,
-                4
-              ],
-              [
-                2200,
-                5
-              ]
-            ]
-          }
-        ]
-      }
-    ],
-    "processing_blocks": [
-      {
-        "pb_id": "pb-mvp01-20200325-00001",
-        "workflow": {
-          "kind": "realtime",
-          "name": "vis_receive",
-          "version": "0.1.0"
-        },
-        "parameters": {
-          
-        }
-      },
-      {
-        "pb_id": "pb-mvp01-20200325-00002",
-        "workflow": {
-          "kind": "realtime",
-          "name": "test_realtime",
-          "version": "0.1.0"
-        },
-        "parameters": {
-          
-        }
-      },
-      {
-        "pb_id": "pb-mvp01-20200325-00003",
-        "workflow": {
-          "kind": "batch",
-          "name": "ical",
-          "version": "0.1.0"
-        },
-        "parameters": {
-          
-        },
-        "dependencies": [
-          {
-            "pb_id": "pb-mvp01-20200325-00001",
-            "kind": [
-              "visibilities"
-            ]
-          }
-        ]
-      },
-      {
-        "pb_id": "pb-mvp01-20200325-00004",
-        "workflow": {
-          "kind": "batch",
-          "name": "dpreb",
-          "version": "0.1.0"
-        },
-        "parameters": {
-          
-        },
-        "dependencies": [
-          {
-            "pb_id": "pb-mvp01-20200325-00003",
-            "kind": [
-              "calibration"
-            ]
-          }
-        ]
-      }
-    ]
-  }
+    "interface": "https://schema.skao.int/ska-tmc-assignresources/2.0",
+    "transaction_id": "txn-....-00001",
+    "subarray_id": 1,
+    "dish": {"receptor_ids": ["0001"]},
+    "sdp": {
+        "interface": "https://schema.skao.int/ska-sdp-assignres/0.3",
+        "eb_id": "eb-mvp01-20200325-00001",
+        "max_length": 100.0,
+        "scan_types": [
+            {
+                "scan_type_id": "science_A",
+                "reference_frame": "ICRS",
+                "ra": "02:42:40.771",
+                "dec": "-00:00:47.84",
+                "channels": [
+                    {
+                        "count": 744,
+                        "start": 0,
+                        "stride": 2,
+                        "freq_min": 0.35e9,
+                        "freq_max": 0.368e9,
+                        "link_map": [[0, 0], [200, 1], [744, 2], [944, 3]],
+                    },
+                    {
+                        "count": 744,
+                        "start": 2000,
+                        "stride": 1,
+                        "freq_min": 0.36e9,
+                        "freq_max": 0.368e9,
+                        "link_map": [[2000, 4], [2200, 5]],
+                    },
+                ],
+            },
+            {
+                "scan_type_id": "calibration_B",
+                "reference_frame": "ICRS",
+                "ra": "12:29:06.699",
+                "dec": "02:03:08.598",
+                "channels": [
+                    {
+                        "count": 744,
+                        "start": 0,
+                        "stride": 2,
+                        "freq_min": 0.35e9,
+                        "freq_max": 0.368e9,
+                        "link_map": [[0, 0], [200, 1], [744, 2], [944, 3]],
+                    },
+                    {
+                        "count": 744,
+                        "start": 2000,
+                        "stride": 1,
+                        "freq_min": 0.36e9,
+                        "freq_max": 0.368e9,
+                        "link_map": [[2000, 4], [2200, 5]],
+                    },
+                ],
+            },
+        ],
+        "processing_blocks": [
+            {
+                "pb_id": "pb-mvp01-20200325-00001",
+                "workflow": {
+                    "kind": "realtime",
+                    "name": "vis_receive",
+                    "version": "0.1.0",
+                },
+                "parameters": {},
+            },
+            {
+                "pb_id": "pb-mvp01-20200325-00002",
+                "workflow": {
+                    "kind": "realtime",
+                    "name": "test_realtime",
+                    "version": "0.1.0",
+                },
+                "parameters": {},
+            },
+            {
+                "pb_id": "pb-mvp01-20200325-00003",
+                "workflow": {
+                    "kind": "batch",
+                    "name": "ical",
+                    "version": "0.1.0",
+                },
+                "parameters": {},
+                "dependencies": [
+                    {
+                        "pb_id": "pb-mvp01-20200325-00001",
+                        "kind": ["visibilities"],
+                    }
+                ],
+            },
+            {
+                "pb_id": "pb-mvp01-20200325-00004",
+                "workflow": {
+                    "kind": "batch",
+                    "name": "dpreb",
+                    "version": "0.1.0",
+                },
+                "parameters": {},
+                "dependencies": [
+                    {
+                        "pb_id": "pb-mvp01-20200325-00003",
+                        "kind": ["calibration"],
+                    }
+                ],
+            },
+        ],
+    },
 }
 
 
 class TestAssignResourceValidator:
     """Class to test the AssignResourceValidator class methods"""
 
-    _test_subarray_list = ["test/subarray/1", "test/subarray/2", "test/subarray/3"]
+    _test_subarray_list = [
+        "test/subarray/1",
+        "test/subarray/2",
+        "test/subarray/3",
+    ]
     _test_receptor_id_list = [
         "ska_mid/tm_leaf_node/d0001",
         "ska_mid/tm_leaf_node/d0002",
@@ -240,7 +179,6 @@ class TestAssignResourceValidator:
 
         with pytest.raises(SubarrayNotPresentError) as excinfo:
             input_validator.loads(json.dumps(input_json))
-        assert const.ERR_SUBARRAY_ID_DOES_NOT_EXIST in str(excinfo.value)
 
     # @pytest.mark.skip(reason="Behavior of this test case has changed in tox env.")
     def test_validate_incorrect_receptor_id(self):
@@ -261,5 +199,3 @@ class TestAssignResourceValidator:
 
         with pytest.raises(ResourceNotPresentError) as excinfo:
             input_validator.loads(json.dumps(input_json))
-        
-        assert const.ERR_RECEPTOR_ID_DOES_NOT_EXIST in str(excinfo.value)

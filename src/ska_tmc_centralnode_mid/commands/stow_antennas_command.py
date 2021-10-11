@@ -1,41 +1,45 @@
-"""
-StowAntennas class for CentralNode.
-"""
-# PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
-# Tango imports
-import tango
-from tango import DevState, DevFailed
+from ska_tango_base.commands import ResultCode
+from tango import DevState
 
-# Additional import
-from ska_tango_base.commands import BaseCommand
-from tmc.common.tango_client import TangoClient
-from tmc.common.tango_server_helper import TangoServerHelper
-from ska_tmc_centralnode_mid import const
-
-# PROTECTED REGION END #    //  CentralNode.additional_import
+from ska_tmc_centralnode_mid.commands.abstract_command import TMCCommand
+from ska_tmc_centralnode_mid.manager.adapters import (
+    AdapterFactory,
+    AdapterType,
+)
 
 
-class StowAntennas(BaseCommand):
+class StowAntennas(TMCCommand):
     """
     A class for CentralNode's StowAntennas() command.
 
     Invokes the command SetStowMode on the specified receptors.
 
     """
-    def __init__(self, target, pop_state_model, *args, logger=None, **kwargs):
+
+    def __init__(
+        self,
+        target,
+        pop_state_model,
+        adapter_factory=AdapterFactory(),
+        *args,
+        logger=None,
+        **kwargs,
+    ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
+        self._adapter_factory = adapter_factory
+        self.tm_dish_adapters = []
 
     def check_allowed(self):
-
         """
-        Checks whether this command is allowed to be run in current device state
+        Checks whether this command is allowed
+        It checks that the device is in a state
+        to perform this command and that all the
+        component needed for the operation are not faulty
 
-        :return: True if this command is allowed to be run in current device state
+        :return: True if this command is allowed
 
         :rtype: boolean
-
-        :raises: DevFailed if this command is not allowed to be run in current device state
 
         """
         if self.op_state_model.op_state in [
@@ -43,13 +47,54 @@ class StowAntennas(BaseCommand):
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
-            tango.Except.throw_exception(
-                f"Command StowAntennas is not allowed in current state {self.op_state_model.op_state}.",
-                "Failed to invoke StowAntennas command on CentralNode.",
-                "CentralNode.StowAntennas()",
-                tango.ErrSeverity.ERR,
+            raise Exception(
+                "StowAntennas() is not allowed in current state %s",
+                self.op_state_model.op_state,
             )
+
+        # for this command I need a number of sub-devices
+        component_manager = self.target
+
+        dish_count = 0
+        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
+            devInfo = component_manager.get_device(dev_name)
+            if devInfo is not None and not devInfo.faulty:
+                dish_count += 1
+        if dish_count == 0:
+            raise Exception("No Dish available")
+
         return True
+
+    def init_adapters(self, component_manager):
+
+        self.tm_dish_adapters = []
+
+        error_dev_names = []
+        num_working = 0
+
+        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
+            devInfo = component_manager.get_device(dev_name)
+            if not devInfo.faulty:
+                try:
+                    self.tm_dish_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.DISH
+                        )
+                    )
+                    num_working += 1
+                except Exception as e:
+                    self.logger.warning(
+                        "Error in creating adapter for %s: %s", dev_name, e
+                    )
+                    error_dev_names.append(dev_name)
+
+        if num_working == 0:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                f"Error in creating dish adapters {'.'.join(error_dev_names)}",
+            )
+
+        return ResultCode.OK, ""
 
     def do(self, argin):
         """
@@ -58,60 +103,24 @@ class StowAntennas(BaseCommand):
         param argin:
             List of Receptors to be stowed.
 
-        return:
-            None
-
-        raises:
-            DevFailed if error occurs while invoking command of DishLeafNode
-
-            ValueError if error occurs if input argument json string contains invalid value
-
         """
-        self.logger.info(type(self.target))
-        this_server = TangoServerHelper.get_instance()
-        dln_prefix = this_server.read_property("DishLeafNodePrefix")[0]
-        try:
-            for leafId in range(0, len(argin)):
-                float(argin[leafId])
-            log_msg = const.STR_STOW_CMD_ISSUED_CN
-            self.logger.info(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
-            for i in range(0, len(argin)):
-                device_name = dln_prefix + argin[i]
-                try:
-                    device_proxy = TangoClient(device_name)
-                    device_proxy.send_command(const.CMD_SET_STOW_MODE)
+        component_manager = self.target
 
-                except DevFailed as dev_failed:
-                    log_msg = f"{const.ERR_EXE_STOW_CMD}{dev_failed}"
-                    self.logger.exception(dev_failed)
-                    this_server.write_attr("activityMessage", const.ERR_EXE_STOW_CMD, False)
-                    tango.Except.throw_exception(
-                        const.STR_CMD_FAILED,
-                        log_msg,
-                        "CentralNode.StowAntennasCommand",
-                        tango.ErrSeverity.ERR,
+        ret_code, message = self.init_adapters(component_manager)
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        for i in range(0, len(argin)):
+            for adapter in self.tm_dish_adapters:
+                if argin[i] not in adapter.dev_name:
+                    continue
+
+                try:
+                    adapter.SetStowMode()
+                except Exception as e:
+                    return self.generate_command_result(
+                        ResultCode.FAILED,
+                        f"Error in calling SetStowMode in TM Dish Leaf {adapter.dev_name}: {e}",
                     )
 
-        except ValueError as value_error:
-            log_msg = f"{const.ERR_STOW_ARGIN}{value_error}"
-            self.logger.exception(value_error)
-            this_server.write_attr("activityMessage", const.ERR_STOW_ARGIN, False)
-            tango.Except.throw_exception(
-                const.STR_CMD_FAILED,
-                log_msg,
-                "CentralNode.StowAntennasCommand",
-                tango.ErrSeverity.ERR,
-            )
-
-        except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_EXE_STOW_CMD}{dev_failed}"
-            self.logger.exception(dev_failed)
-            this_server.write_attr("activityMessage", const.ERR_EXE_STOW_CMD, False)
-            tango.Except.throw_exception(
-                const.STR_CMD_FAILED,
-                log_msg,
-                "CentralNode.StowAntennasCommand",
-                tango.ErrSeverity.ERR,
-            )
-
+        return (ResultCode.OK, "")

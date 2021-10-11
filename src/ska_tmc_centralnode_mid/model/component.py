@@ -1,8 +1,11 @@
+import json
 import threading
+
 from ska_tango_base.control_model import HealthState, ObsState
 from tango import DevState
-import json
-from ska_tmc_centralnode_mid.const import ModesAvailability
+
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
+
 
 class Component:
     """
@@ -33,18 +36,27 @@ class Component:
         self._update_tmc_op_state_callback = None
         self._update_subarray_health_state_callback = None
         self.lock = threading.Lock()
+        self._desired_telescope_state = DevState.ON
 
-    def set_op_callbacks(self, 
-        _update_device_callback = None,
-        _update_telescope_state_callback = None,
-        _update_telescope_health_state_callback = None,
-        _update_tmc_op_state_callback = None,
-        _update_subarray_health_state_callback = None,):
+    def set_op_callbacks(
+        self,
+        _update_device_callback=None,
+        _update_telescope_state_callback=None,
+        _update_telescope_health_state_callback=None,
+        _update_tmc_op_state_callback=None,
+        _update_subarray_health_state_callback=None,
+    ):
         self._update_device_callback = _update_device_callback
-        self._update_telescope_state_callback = _update_telescope_state_callback
-        self._update_telescope_health_state_callback = _update_telescope_health_state_callback
+        self._update_telescope_state_callback = (
+            _update_telescope_state_callback
+        )
+        self._update_telescope_health_state_callback = (
+            _update_telescope_health_state_callback
+        )
         self._update_tmc_op_state_callback = _update_tmc_op_state_callback
-        self._update_subarray_health_state_callback = _update_subarray_health_state_callback
+        self._update_subarray_health_state_callback = (
+            _update_subarray_health_state_callback
+        )
 
     def _invoke_device_callback(self, devInfo):
         if self._update_device_callback is not None:
@@ -56,8 +68,10 @@ class Component:
 
     def _invoke_telescope_health_state_callback(self):
         if self._update_telescope_health_state_callback is not None:
-            self._update_telescope_health_state_callback(self.telescope_health_state)
-    
+            self._update_telescope_health_state_callback(
+                self.telescope_health_state
+            )
+
     def _invoke_tmc_op_state_callback(self):
         if self._update_tmc_op_state_callback is not None:
             self._update_tmc_op_state_callback(self.tmc_op_state)
@@ -65,7 +79,28 @@ class Component:
     def _invoke_subarray_health_state_callback(self, devInfo):
         if self._update_subarray_health_state_callback is not None:
             self._update_subarray_health_state_callback(devInfo)
-    
+
+    @property
+    def desired_telescope_state(self):
+        """
+        Return desired telescope state
+
+        :return: desired telescope state
+        :rtype: DevState
+        """
+        return self._pst
+
+    @desired_telescope_state.setter
+    def desired_telescope_state(self, value):
+        """
+        Set desired telescope state
+
+        :param value: desired telescope state
+        :type value: DevState
+        """
+        if not value == self._desired_telescope_state:
+            self._desired_telescope_state = value
+
     @property
     def devices(self):
         """
@@ -89,6 +124,16 @@ class Component:
                 return devInfo
         return None
 
+    def remove_device(self, dev_name):
+        """
+        Remove a device from the list
+
+        :param dev_name: name of the device
+        """
+        for devInfo in self.devices:
+            if devInfo.dev_name == dev_name:
+                self.devices.remove(devInfo)
+
     def update_device(self, devInfo):
         """
         Update (or add if missing) Device Information into the list of the component.
@@ -99,6 +144,9 @@ class Component:
             self._devices.append(devInfo)
         else:
             index = self._devices.index(devInfo)
+            if isinstance(devInfo, SubArrayDeviceInfo):
+                if devInfo.healthState != self._devices[index].healthState:
+                    self._invoke_subarray_health_state_callback(devInfo)
             self._devices[index] = devInfo
 
         self._invoke_device_callback(devInfo)
@@ -163,26 +211,6 @@ class Component:
         if self._telescope_health_state != value:
             self._telescope_health_state = value
             self._invoke_telescope_health_state_callback()
-
-    @property
-    def cn_health_state(self):
-        """
-        Return the central node health state
-
-        :return: the central node health state
-        :rtype: HealthState
-        """
-        return self._health_state
-
-    # def set_cn_health_state(self, value):
-    #     """
-    #     Set central node health state
-
-    #     :param value: the new central node health state
-    #     :type value: HealthState
-    #     """
-    #     if isinstance(value, HealthState):
-    #         self._health_state = value
 
     @property
     def tmc_op_state(self):
@@ -290,23 +318,7 @@ class Component:
         if isinstance(value, ModesAvailability):
             self._pst = value
 
-    @property
-    def sub_array_obs_state(self, id):
-
-        """
-        Return the subarray obsState
-
-        :param id: id of the subarray
-        :return: the subarray obsState
-        :rtype: ObsState
-        """
-        for devInfo in self._devices:
-            if isinstance(devInfo, SubArrayDeviceInfo):
-                if devInfo.id == id:
-                    return devInfo.obsState
-        return None
-
-    def default(self):
+    def to_json(self):
         return json.dumps(self.to_dict())
 
     def to_dict(self):
@@ -317,10 +329,11 @@ class Component:
             "telescope_state": self._telescope_state,
             "tmc_op_state": self._tmc_op_state,
             "telescope_health_state": self._telescope_health_state,
-            "devices": devices
+            "devices": devices,
         }
 
         return result
+
 
 class DeviceInfo:
     def __init__(self, dev_name: str, _faulty=False):
@@ -337,15 +350,12 @@ class DeviceInfo:
     def from_dev_info(self, devInfo):
         self.dev_name = devInfo.dev_name
         self.state = devInfo.state
-        self.obsState = devInfo.obsState
         self.healthState = devInfo.healthState
         self.ping = devInfo.ping
         self.last_event_arrived = devInfo.last_event_arrived
-        self.exception = devInfo.exception
-        self._faulty = devInfo.faulty
         self.lock = devInfo.lock
 
-    def update_faulty(self, faulty, exception):
+    def update_faulty(self, faulty, exception=None):
         """
         Set device faulty
 
@@ -370,7 +380,7 @@ class DeviceInfo:
         return self._faulty
 
     def __eq__(self, other):
-        if (isinstance(other, DeviceInfo)):
+        if isinstance(other, DeviceInfo):
             return self.dev_name == other.dev_name
         else:
             return False
@@ -381,29 +391,35 @@ class DeviceInfo:
     def to_dict(self):
         result = {
             "dev_name": self.dev_name,
-            "state": self.state,
-            "obsState": self.obsState,
-            "healthState": self.healthState,
+            "state": str(DevState(self.state)),
+            "obsState": str(ObsState(self.obsState)),
+            "healthState": str(HealthState(self.healthState)),
             "ping": str(self.ping),
             "last_event_arrived": str(self.last_event_arrived),
-            "exception_occurred": str(self.exception)
+            "faulty": str(self.faulty),
+            "exception": str(self.exception),
         }
         return result
+
 
 class SubArrayDeviceInfo(DeviceInfo):
     def __init__(self, dev_name, _faulty=False):
         super(SubArrayDeviceInfo, self).__init__(dev_name, _faulty)
         self.id = -1
         self.resources = []
+        self.obsState = ObsState.EMPTY
 
     def from_dev_info(self, subarrayDevInfo):
         super().from_dev_info(subarrayDevInfo)
-        if (isinstance(subarrayDevInfo, SubArrayDeviceInfo)):
+        if isinstance(subarrayDevInfo, SubArrayDeviceInfo):
             self.id = subarrayDevInfo.id
             self.resources = subarrayDevInfo.resources
+            self.obsState = subarrayDevInfo.obsState
 
     def __eq__(self, other):
-        if (isinstance(other, SubArrayDeviceInfo) or isinstance(other, DeviceInfo)):
+        if isinstance(other, SubArrayDeviceInfo) or isinstance(
+            other, DeviceInfo
+        ):
             return self.dev_name == other.dev_name
         else:
             return False
@@ -414,8 +430,11 @@ class SubArrayDeviceInfo(DeviceInfo):
     def to_dict(self):
         super_dict = super().to_dict()
         result = []
-        for res in self.resources:
-            result.append(res)
-        super_dict['resources'] = result
+        if self.resources is not None:
+            for res in self.resources:
+                result.append(res)
+            super_dict["resources"] = result
+        super_dict["resources"] = result
+        super_dict["id"] = self.id
+        super_dict["obsState"] = str(ObsState(self.obsState))
         return super_dict
-

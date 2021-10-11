@@ -1,29 +1,16 @@
-"""
-TelescopeOn class for CentralNode.
-"""
-# PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
-# Standard Python imports
-import time
-from concurrent.futures import ThreadPoolExecutor
-import threading
-#Tango imports
-import tango
-from tango import DevState, DevFailed
+from ska_tango_base.commands import BaseCommand, ResultCode
+from tango import DevState
 
-# Additional import
-from ska_tango_base import SKABaseDevice
-from ska_tango_base.commands import BaseCommand
-from ska_tango_base.commands import ResultCode
-from tmc.common.tango_client import TangoClient
-from tmc.common.tango_server_helper import TangoServerHelper
-from ska_tmc_centralnode_mid import const
-from ska_tmc_centralnode_mid.device_data import DeviceData
-from ska_tmc_centralnode_mid.health_state_aggregator import HealthStateAggregator
-from ska_tmc_centralnode_mid.desired_telescope_state import DesiredTelescopeState
+from ska_tmc_centralnode_mid.commands.abstract_command import (
+    AbstractTelescopeOnOff,
+)
+from ska_tmc_centralnode_mid.manager.adapters import (
+    AdapterFactory,
+    AdapterType,
+)
 
-# PROTECTED REGION END #    //  CentralNode.additional_import
 
-class TelescopeOn(BaseCommand):
+class TelescopeOn(AbstractTelescopeOnOff):
     """
     A class for CentralNode's TelescopeOn() command.
 
@@ -32,33 +19,18 @@ class TelescopeOn(BaseCommand):
 
     """
 
-    def __init__(self, target, pop_state_model, *args, logger=None, **kwargs):
-        super().__init__(target, args, logger, kwargs)
-        self.op_state_model = pop_state_model
-
-    def check_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state
-
-        :return: True if this command is allowed to be run in current device state
-
-        :rtype: boolean
-
-        :raises: DevFailed if this command is not allowed to be run in current device state
-
-        """
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            tango.Except.throw_exception(
-                f"Command TelescopeOn is not allowed in current state {self.op_state_model.op_state}.",
-                "Failed to invoke TelescopeOn command on CentralNode.",
-                "CentralNode.TelescopeOn()",
-                tango.ErrSeverity.ERR,
-            )
-        return True
+    def __init__(
+        self,
+        target,
+        pop_state_model,
+        adapter_factory=AdapterFactory(),
+        *args,
+        logger=None,
+        **kwargs,
+    ):
+        super().__init__(
+            target, pop_state_model, adapter_factory, args, logger, kwargs
+        )
 
     def do(self):
         """
@@ -68,182 +40,57 @@ class TelescopeOn(BaseCommand):
             None.
 
         """
-        device_data = DeviceData.get_instance()
-        this_server = TangoServerHelper.get_instance()
-        device_data.command_in_progress = "TelescopeOn"
-        this_server.write_attr("commandInProgress", device_data.command_in_progress, False)
-        desired_telescope_state_obj = DesiredTelescopeState()
-        desired_telescope_state_obj.update_desired_telescope_state()
-        self.csp_master_ln_fqdn = this_server.read_property("CspMasterLeafNodeFQDN")[0]
-        self.sdp_master_ln_fqdn = this_server.read_property("SdpMasterLeafNodeFQDN")[0]
-        self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
+        component_manager = self.target
+
+        component_manager.component.desired_telescope_state = DevState.ON
+
+        ret_code, message = self.init_adapters(
+            "TelescopeOn", component_manager
+        )
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        # send commands to sub-devices
+        # import debugpy; debugpy.debug_this_thread()
         try:
-            # create thread
-            self.logger.info("Starting thread to execute telescope on command.")
-            telescope_on_thread = threading.Thread(
-                target=self.execute_telescope_on,
-            )
-            telescope_on_thread.start() 
+            self.tm_leaf_csp_master_adapter.On()
         except Exception as e:
-            self.logger.exception(f"Exception in creating telescope_on thread:{e}")
-        self.logger.info("Started thread to execute telescope on command.")
-    
-    def execute_telescope_on(self):
-        # Calling TelescopeOn command asynchronously
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                f"Error in calling Telescope On in TM CSP Master Leaf {self.tm_leaf_csp_master_adapter.dev_name}: {e}",
+            )
+
         try:
-            device_data = DeviceData.get_instance()
-            this_server = TangoServerHelper.get_instance()
-            self.startup_subarray(self.tm_mid_subarrays)
-            self.startup_dish(device_data._dish_leaf_node_devices)
-            self.startup_sdp(self.sdp_master_ln_fqdn)
-            self.startup_csp(self.csp_master_ln_fqdn)
-            self.logger.info("Completed thread to execute telescope on command.")
-            this_server.write_attr("commandInProgress", "", False)
+            self.tm_leaf_sdp_master_adapter.On()
         except Exception as e:
-            self.logger.error(f"Exception in creating telescope_on thread:{e}")
-        
-    def startup_csp(self, csp_fqdn):
-        """
-        Create TangoClient for CspMasterLeaf node and call
-        startup method.
-
-        :return: None
-        """
-        self.logger.info("Invoking telescopeOn command on CspMasterLeafNode")
-        csp_mln_client = TangoClient(csp_fqdn)
-        self.startup_leaf_node(csp_mln_client)
-
-    def startup_sdp(self, sdp_fqdn):
-        """
-        Create TangoClient for SdpMasterLeaf node and call
-        startup method.
-
-        :return: None
-        """
-        self.logger.info("Invoking telescopeOn command on SdpMasterLeafNode")
-        sdp_mln_client = TangoClient(sdp_fqdn)
-        self.startup_leaf_node(sdp_mln_client)
-
-    def startup_dish(self, dish_fqdn):
-        """
-        Create TangoClient for DishLeaf node and call
-        startup method.
-
-        :return: None
-        """
-        total_dishes = len(dish_fqdn)
-        dish_ln_thread_status = {}
-        self.logger.info("Invoking telescopeOn command on DishLeafNode")
-        with ThreadPoolExecutor(total_dishes) as executor:
-            for dish in dish_fqdn:
-                dish_ln_client = TangoClient(dish)
-                dish_ln_thread_status[dish] = executor.submit(self.startup_dish_leaf_node, dish_ln_client)
-
-
-    def startup_subarray(self, subarray_fqdn_list):
-        """
-        Create TangoClient for Subarray node and call
-        startup method.
-
-        :return: None
-        """
-        total_subarrays = len(subarray_fqdn_list)
-        subarray_thread_status = {}
-        self.logger.info("Invoking telescopeOn command on SubarrayNode")
-        with ThreadPoolExecutor(total_subarrays) as executor:
-            for subarray_fqdn in subarray_fqdn_list:
-                subarray_client = TangoClient(subarray_fqdn)
-                subarray_thread_status[subarray_fqdn] = executor.submit(self.startup_leaf_node,
-                                                              subarray_client)
-
-    def telescopeon_cmd_ended_cb(self, event):
-        """
-        Callback function immediately executed when the asynchronous invoked
-        command returns.
-
-        :param event: a CmdDoneEvent object. This class is used to pass data
-            to the callback method in asynchronous callback model for command
-            execution.
-
-        :type: CmdDoneEvent object
-            It has the following members:
-                - device     : (DeviceProxy) The DeviceProxy object on which the call was executed.
-                - cmd_name   : (str) The command name
-                - argout_raw : (DeviceData) The command argout
-                - argout     : The command argout
-                - err        : (bool) A boolean flag set to true if the command failed. False otherwise
-                - errors     : (sequence<DevError>) The error stack
-                - ext
-
-        :return: none
-        """
-        # Update logs and activity message attribute with received event
-        this_server = TangoServerHelper.get_instance()
-        if event.err:
-            log_msg = f"{const.ERR_INVOKING_CMD}{event.cmd_name}\n{event.errors}"
-            self.logger.error(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
-        else:
-            log_msg = f"{const.STR_COMMAND}{event.cmd_name}{const.STR_INVOKE_SUCCESS}"
-            self.logger.info(log_msg)
-            this_server.write_attr("activityMessage", log_msg, False)
-
-    def startup_leaf_node(self, tango_client, param=None):
-        """
-        Invoke Telescope On command on leaf nodes.
-
-        :param tango_client: Proxy of corresponding node.
-
-        :return: None
-
-        :raises: Devfailed exception if error occures while  executing On command on leaf node.
-        """
-        try:
-            tango_client.send_command_async(const.CMD_TELESCOPE_ON, param, self.telescopeon_cmd_ended_cb)
-            log_msg = "Telescope On command invoked successfully on {}".format(
-                tango_client.get_device_fqdn()
-            )
-            self.logger.debug(log_msg)
-
-        except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
-            self.logger.exception(dev_failed)
-            tango.Except.throw_exception(
-                const.STR_ON_EXEC,
-                log_msg,
-                "CentralNode.TelescopeOnCommand",
-                tango.ErrSeverity.ERR,
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                f"Error in calling Telescope On in TM SDP Master Leaf {self.tm_leaf_sdp_master_adapter.dev_name}: {e}",
             )
 
-    def startup_dish_leaf_node(self, tango_client, param=None):
-        """
-        Invoke Telescope On, SetStandbyFPMode and SetOperateMode commands on Dish leaf nodes.
+        for adapter in self.tm_subarray_adapters:
+            try:
+                adapter.On()
+            except Exception as e:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}",
+                )
 
-        :param tango_client: Proxy of corresponding node.
+        for adapter in self.tm_dish_adapters:
+            try:
+                adapter.SetStandbyFPMode()
+            except Exception as e:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    f"Error in calling SetStandbyFPMode in TM Dish Leaf {adapter.dev_name}: {e}",
+                )
+            try:
+                adapter.SetOperateMode()
+            except Exception as e:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    f"Error in calling SetOperateMode in TM Dish Leaf {adapter.dev_name}: {e}",
+                )
 
-        :return: None
-
-        :raises: Devfailed exception if error occures while  executing Telescope On command on Dish leaf node.
-        """
-        try:
-            tango_client.send_command(const.CMD_SET_STANDBYFP_MODE)
-            log_msg = "SetStandbyFPMode command invoked successfully on {}".format(
-                tango_client.get_device_fqdn()
-            )
-            self.logger.debug(log_msg)
-            time.sleep(0.2)
-            tango_client.send_command_async(const.CMD_SET_OPERATE_MODE, param, self.telescopeon_cmd_ended_cb)
-            log_msg = "SetOperateMode command invoked successfully on {}".format(
-                tango_client.get_device_fqdn()
-            )
-            self.logger.debug(log_msg)
-
-        except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_EXE_ON_CMD}{dev_failed}"
-            self.logger.exception(dev_failed)
-            tango.Except.throw_exception(
-                const.STR_ON_EXEC,
-                log_msg,
-                "CentralNode.TelescopeOnCommand",
-                tango.ErrSeverity.ERR,
-            )
+        return (ResultCode.OK, "")

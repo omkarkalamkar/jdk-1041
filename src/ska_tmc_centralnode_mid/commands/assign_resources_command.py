@@ -2,23 +2,18 @@
 AssignResources class for CentralNode.
 """
 import json
-import ast
-import os
-# Tango imports
-import tango
-from tango import DevState, DevFailed
-from ska_tango_base.commands import BaseCommand
-from tmc.common.tango_client import TangoClient
-from tmc.common.tango_server_helper import TangoServerHelper
-from ska_tmc_centralnode_mid import const
-from ska_tmc_centralnode_mid.receptor_reassignment_checker import ReceptorReassignmentChecker
-from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
-from ska_tmc_centralnode_mid.device_data import DeviceData
-from ska_tmc_centralnode_mid.exceptions import ResourceReassignmentError, ResourceNotPresentError
-from ska_tmc_centralnode_mid.exceptions import SubarrayNotPresentError, InvalidJSONError
-from ska_ser_skuid.client import SkuidClient
 
-class AssignResources(BaseCommand):
+from ska_ser_skuid.client import SkuidClient
+from ska_tango_base.commands import ResultCode
+from tango import DevFailed, DevState
+
+from ska_tmc_centralnode_mid.commands.abstract_command import (
+    AbstractAssignReleaseResources,
+)
+from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
+
+
+class AssignResources(AbstractAssignReleaseResources):
     """
     A class for CentralNode's AssignResources() command.
 
@@ -28,35 +23,24 @@ class AssignResources(BaseCommand):
     it will throw error message regarding the prior existence of resource.
     """
 
-    def __init__(self, target, pop_state_model, *args, logger=None, **kwargs):
+    def __init__(
+        self,
+        target,
+        pop_state_model,
+        adapter_factory=AdapterFactory(),
+        skuid=SkuidClient(
+            "ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870"
+        ),
+        *args,
+        logger=None,
+        **kwargs
+    ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
-
-    def check_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state
-
-        :return: True if this command is allowed to be run in current device state
-
-        :rtype: boolean
-
-        :raises: DevFailed if this command is not allowed to be run
-            in current device state
-
-        """
-
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            tango.Except.throw_exception(
-                f"Command AssignResources is not allowed in current state {self.op_state_model.op_state}.",
-                "Failed to invoke AssignResources command on CentralNode.",
-                "CentralNode.AssignResources()",
-                tango.ErrSeverity.ERR,
-            )
-        return True
+        self._adapter_factory = adapter_factory
+        self.tm_dish_adapters = []
+        self.tm_subarray_adapters = []
+        self._skuid = skuid
 
     def do(self, argin):
         """
@@ -163,153 +147,156 @@ class AssignResources(BaseCommand):
         return:
             None
 
-        raises:
-            DevFailed when the API fails to allocate resources.
-
         """
-        device_data = DeviceData.get_instance()
-        device_data.receptor_ids = []
-        argout = []
 
-        ## Validate the input JSON string.
+        component_manager = self.target
 
-        this_server = TangoServerHelper.get_instance()
-        self.tm_mid_subarrays = this_server.read_property("TMMidSubarrayNodes")
-        self.dln_prefix = this_server.read_property("DishLeafNodePrefix")[0]
+        ret_code, message = self.init_adapters(
+            "AssignResources", component_manager
+        )
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
+        # self.logger.info("Validating input string.")
+        # input_validator = AssignResourceValidator(
+        #     self.tm_mid_subarrays,
+        #     device_data._dish_leaf_node_devices,
+        #     self.dln_prefix,
+        #     self.logger,
+        # )
+        # json_argument = input_validator.loads(argin)
+
         try:
-            # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
-            # self.logger.info("Validating input string.")
-            # input_validator = AssignResourceValidator(
-            #     self.tm_mid_subarrays,
-            #     device_data._dish_leaf_node_devices,
-            #     self.dln_prefix,
-            #     self.logger,
-            # )
-            # json_argument = input_validator.loads(argin)
+            json_argument = json.loads(argin)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
 
-            json_argument= json.loads(argin)
-            sdp_keys = list(json_argument["sdp"].keys())
-            sdp_values = list(json_argument["sdp"].values())
-            if "" in sdp_values:
-                id = sdp_keys[sdp_values.index("")]
+        if "sdp" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "sdp key is not present in the input json argument.",
+            )
+
+        sdp_keys = list(json_argument["sdp"].keys())
+        sdp_values = list(json_argument["sdp"].values())
+        if "" in sdp_values:
+            id = sdp_keys[sdp_values.index("")]
+            try:
                 self.update_resource_config_file(json_argument, id)
+            except Exception as e:
+                return self.generate_command_result(
+                    ResultCode.FAILED, ("Errors in input json argument: %s", e)
+                )
 
-            # Create subarray proxy
-            if 'transaction_id' in json_argument:
-                del json_argument["transaction_id"]
-            subarrayID = int(json_argument["subarray_id"])
-            subarrayFqdn = device_data.subarray_FQDN_dict[subarrayID]
-            ## check for duplicate allocation
-            self.logger.info("Checking for resource reallocation.")
-            if device_data.check_resources is None:
-                device_data.check_resources = ReceptorReassignmentChecker(self.logger)
-            device_data.check_resources.do(json_argument["dish"]["receptor_ids"])
-
-            # Allocate resources to subarray
-            # Remove Subarray Id key from input json argument and send the json with
-            # receptor Id list and SDP block to TMC Subarray Node
-            self.logger.info("Allocating resource to subarray %d", subarrayID)
-            input_json_subarray = json_argument.copy()
-            input_to_sa = json.dumps(input_json_subarray)
-            subarray_client = TangoClient(subarrayFqdn)
-
-            resources_allocated_return = subarray_client.send_command(
-                const.CMD_ASSIGN_RESOURCES, input_to_sa
+        # get subarray ID
+        if "transaction_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "transaction_id key is not present in the input json argument.",
             )
 
-            # Note: resources_allocated_return[1] contains the JSON string containing
-            # allocated resources.
-            # resources_allocated = resources_allocated_return[1]
-            log_msg = f"Return value from subarray node:{resources_allocated_return}" 
-            self.logger.info(log_msg)
-            resources_allocated = ast.literal_eval(resources_allocated_return[1][0])
-            log_msg = f"resources_assigned:{resources_allocated}"
-            self.logger.debug(log_msg)
-            device_data.resource_manager.update_resource_matrix(
-                resources_allocated, subarrayID
+        if "transaction_id" in json_argument:
+            del json_argument["transaction_id"]
+
+        if "subarray_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
             )
 
-            # Allocation successful
-            this_server.write_attr("activityMessage", const.STR_ASSIGN_RESOURCES_SUCCESS, False)
-            self.logger.debug(const.STR_ASSIGN_RESOURCES_SUCCESS)
+        subarrayID = int(json_argument["subarray_id"])
 
-            # Prepare output argument
-            argout = {"dish": {"receptor_ids_allocated": device_data.receptor_ids}}
-            self.logger.debug(argout)
-        except (
-            InvalidJSONError,
-            ResourceNotPresentError,
-            SubarrayNotPresentError,
-        ) as error:
-            self.logger.exception("Exception in AssignResource(): %s", str(error))
-            this_server.write_attr("activityMessage", f"Exception in validating input:{error}", False)
+        my_subarray_adapter = None
+        for adapter in self.tm_subarray_adapters:
+            if str(subarrayID) in adapter.dev_name:
+                my_subarray_adapter = adapter
 
-            log_msg = f"{const.STR_ASSIGN_RES_EXEC}{error}"
-            self.logger.exception(error)
-            tango.Except.throw_exception(
-                const.STR_RESOURCE_ALLOCATION_FAILED,
-                log_msg,
-                "CentralNode.AssignResourcesCommand",
-                tango.ErrSeverity.ERR,
+        if my_subarray_adapter is None:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("SubArray Id %s is not existing!", subarrayID),
             )
 
-        except ResourceReassignmentError as resource_error:
-            self.logger.exception(
-                "List of the dishes that are already allocated: %s",
-                str(resource_error.resources_reallocation),
+        # check allocated dishes
+        if "dish" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "dish key is not present in the input json argument.",
             )
-            this_server.write_attr("activityMessage", f"{const.STR_DISH_DUPLICATE}{resource_error.resources_reallocation}", False)
+        else:
+            if "receptor_ids" not in json_argument["dish"]:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    "dish.receptor_ids key is not present in the input json argument.",
+                )
 
-            log_msg = f"{const.STR_DISH_DUPLICATE}{resource_error}"
-            self.logger.exception(resource_error)
-            tango.Except.throw_exception(
-                const.STR_RESOURCE_ALLOCATION_FAILED,
-                log_msg,
-                "CentralNode.AssignResourcesCommand",
-                tango.ErrSeverity.ERR,
-            )
-        except ValueError as ve:
-            self.logger.exception("Exception in AssignResources command: %s", str(ve))
-            this_server.write_attr("activityMessage", f"Invalid value in input:{ve}", False)
+        receptor_ids = json_argument["dish"]["receptor_ids"]
+        for receptor_id in receptor_ids:
+            dish_ID = "dish" + receptor_id
+            if component_manager.is_already_assigned(dish_ID):
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    ("Dish %s is already allocated", dish_ID),
+                )
 
-            log_msg = f"{const.STR_ASSIGN_RES_EXEC}{ve}"    
-            self.logger.exception(ve)
-            tango.Except.throw_exception(
-                const.STR_RESOURCE_ALLOCATION_FAILED,
-                log_msg,
-                "CentralNode.AssignResourcesCommand",
-                tango.ErrSeverity.ERR,
+        try:
+            # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
+            resources_allocated_return = my_subarray_adapter.AssignResources(
+                json.dumps(json_argument.copy())
             )
-        except DevFailed as dev_failed:
-            log_msg = f"{const.ERR_ASSGN_RESOURCES}{dev_failed}"
-            self.logger.exception(dev_failed)
-            tango.Except.throw_exception(
-                const.STR_CMD_FAILED,
-                log_msg,
-                "CentralNode.AssignResourcesCommand",
-                tango.ErrSeverity.ERR,
+            self.logger.info(
+                "Command result from Subarray: %s", resources_allocated_return
             )
-        message = json.dumps(argout)
-        self.logger.info(message)
-        return message
+            # Leave the monitoring loop to do the updates on the allocated resources!
+            return (ResultCode.OK, "")
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                (
+                    "Error in calling AssignResources on subarray %s: %s",
+                    my_subarray_adapter.dev_name,
+                    e,
+                ),
+            )
 
     def update_resource_config_file(self, json_argument, id):
-        '''This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id'''
-        # Here, 'ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870' is fixed URL to access SKUID service running on port 9870
-        client = SkuidClient('ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870')
+        """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
-        unique_id = client.fetch_skuid("eb")
+        unique_id = self._skuid.fetch_skuid("eb")
         json_argument["sdp"][id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
             for i in range(len(json_argument["sdp"]["processing_blocks"])):
-                pb_id = client.fetch_skuid("pb")
+                pb_id = self._skuid.fetch_skuid("pb")
                 json_argument["sdp"]["processing_blocks"][i]["pb_id"] = pb_id
-                if "dependencies" in json_argument["sdp"]["processing_blocks"][i]:
+                if (
+                    "dependencies"
+                    in json_argument["sdp"]["processing_blocks"][i]
+                ):
                     if i == 0:
-                        json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
-                            json_argument["sdp"]["processing_blocks"][i]["pb_id"]
+                        json_argument["sdp"]["processing_blocks"][i][
+                            "dependencies"
+                        ][0]["pb_id"] = json_argument["sdp"][
+                            "processing_blocks"
+                        ][
+                            i
+                        ][
+                            "pb_id"
+                        ]
                     else:
-                        json_argument["sdp"]["processing_blocks"][i]["dependencies"][0]["pb_id"] = \
-                            json_argument["sdp"]["processing_blocks"][i - 1]["pb_id"]
-
-        # PROTECTED REGION END #    //  CentralNode.AssignResources
+                        json_argument["sdp"]["processing_blocks"][i][
+                            "dependencies"
+                        ][0]["pb_id"] = json_argument["sdp"][
+                            "processing_blocks"
+                        ][
+                            i - 1
+                        ][
+                            "pb_id"
+                        ]
+        else:
+            raise Exception(
+                "processing_blocks key not present in the input json argument"
+            )
