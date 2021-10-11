@@ -12,8 +12,7 @@ from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.integration.device_to_load import devices_to_load
-from tests.integration.test_on_command import checked_devices
+from tests.integration.common import devices_to_load, ensure_checked_devices
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
@@ -50,20 +49,7 @@ def test_release_res_command(tango_context):
         stateless=True,
     )
 
-    json_model = json.loads(central_node.InternalModel)
-    # logger.info("json_model: %s", json_model["devices"])
-    start_time = time.time()
-    checked_devs = checked_devices(json_model)
-    while checked_devs != 9:
-        new_checked_devs = checked_devices(json_model)
-        if checked_devs != new_checked_devs:
-            checked_devs = new_checked_devs
-            logger.debug("checked devices: %s", checked_devs)
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-        json_model = json.loads(central_node.InternalModel)
+    ensure_checked_devices(central_node)
     initial_len = len(central_node.CommandExecuted)
     # (result, unique_id) = central_node.Off()
     (result, unique_id) = central_node.On()
