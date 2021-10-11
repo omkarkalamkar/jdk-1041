@@ -104,6 +104,7 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
 
 class HelperSubArrayDevice(SKASubarray):
     """A generic device for triggering state changes with a command"""
+
     def init_device(self):
         super().init_device()
         self._health_state = HealthState.OK
