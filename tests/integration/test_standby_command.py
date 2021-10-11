@@ -10,8 +10,9 @@ from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import SLEEP_TIME, TIMEOUT, logger
 from tests.integration.device_to_load import devices_to_load
+from tests.settings import SLEEP_TIME, TIMEOUT, logger
+
 
 def checked_devices(json_model):
     result = 0

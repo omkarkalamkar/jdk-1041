@@ -12,9 +12,10 @@ from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.integration.device_to_load import devices_to_load
 from tests.integration.test_on_command import checked_devices
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
-from tests.integration.device_to_load import devices_to_load
+
 
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     path = join(dirname(__file__), "..", "data", assign_input_file)

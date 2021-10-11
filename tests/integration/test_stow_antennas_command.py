@@ -12,9 +12,10 @@ from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.integration.device_to_load import devices_to_load
 from tests.integration.test_on_command import checked_devices
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
-from tests.integration.device_to_load import devices_to_load
+
 
 @pytest.mark.xfail(reason="Need to debug")
 def test_stow_antennas_command(tango_context):
