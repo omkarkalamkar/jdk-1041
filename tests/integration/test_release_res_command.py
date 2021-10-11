@@ -14,56 +14,7 @@ from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.integration.test_on_command import checked_devices
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
-
-devices_to_test = [
-    {
-        "class": HelperSubArrayDevice,
-        "devices": [
-            {"name": "ska_mid/tm_subarray_node/1"},
-            {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
-            {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
-        ],
-    },
-    {
-        "class": HelperStateDevice,
-        "devices": [
-            {"name": "ska_mid/tm_leaf_node/csp_master"},
-            {"name": "mid_csp/elt/master"},
-            {"name": "ska_mid/tm_leaf_node/sdp_master"},
-            {"name": "mid_sdp/elt/master"},
-            {"name": "mid_d0001/elt/master"},
-            {"name": "ska_mid/tm_leaf_node/d0001"},
-        ],
-    },
-    {
-        "class": CentralNode,
-        "devices": [
-            {
-                "name": "ska_mid/tm_central/central_node",
-                "properties": {
-                    "CspMasterLeafNodeFQDN": [
-                        "ska_mid/tm_leaf_node/csp_master"
-                    ],
-                    "CspMasterFQDN": ["mid_csp/elt/master"],
-                    "SdpMasterLeafNodeFQDN": [
-                        "ska_mid/tm_leaf_node/sdp_master"
-                    ],
-                    "SdpMasterFQDN": ["mid_sdp/elt/master"],
-                    "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
-                    "TMMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
-                    "TMMidCspSubarrayLeafNodes": [
-                        "ska_mid/tm_leaf_node/csp_subarray01"
-                    ],
-                    "TMMidSdpSubarrayLeafNodes": [
-                        "ska_mid/tm_leaf_node/sdp_subarray01"
-                    ],
-                    "NumDishes": [1],
-                },
-            }
-        ],
-    },
-]
-
+from tests.integration.device_to_load import devices_to_load
 
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     path = join(dirname(__file__), "..", "data", assign_input_file)
@@ -80,14 +31,14 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
 
 
 @pytest.mark.post_deployment
-def test_release_res_command(multi_device_tango_context):
+def test_release_res_command(tango_context):
     pytest.num_events_arrived = 0
 
     def event_callback(evt):
         assert not evt.err
         pytest.num_events_arrived += 1
 
-    logger.info("%s", multi_device_tango_context)
+    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
 

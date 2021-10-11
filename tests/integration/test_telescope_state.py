@@ -12,55 +12,7 @@ from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
-
-devices_to_test = [
-    {
-        "class": HelperSubArrayDevice,
-        "devices": [
-            {"name": "ska_mid/tm_subarray_node/1"},
-            {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
-            {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
-        ],
-    },
-    {
-        "class": HelperStateDevice,
-        "devices": [
-            {"name": "ska_mid/tm_leaf_node/csp_master"},
-            {"name": "mid_csp/elt/master"},
-            {"name": "ska_mid/tm_leaf_node/sdp_master"},
-            {"name": "mid_sdp/elt/master"},
-            {"name": "mid_d0001/elt/master"},
-            {"name": "ska_mid/tm_leaf_node/d0001"},
-        ],
-    },
-    {
-        "class": CentralNode,
-        "devices": [
-            {
-                "name": "ska_mid/tm_central/central_node",
-                "properties": {
-                    "CspMasterLeafNodeFQDN": [
-                        "ska_mid/tm_leaf_node/csp_master"
-                    ],
-                    "CspMasterFQDN": ["mid_csp/elt/master"],
-                    "SdpMasterLeafNodeFQDN": [
-                        "ska_mid/tm_leaf_node/sdp_master"
-                    ],
-                    "SdpMasterFQDN": ["mid_sdp/elt/master"],
-                    "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
-                    "TMMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
-                    "TMMidCspSubarrayLeafNodes": [
-                        "ska_mid/tm_leaf_node/csp_subarray01"
-                    ],
-                    "TMMidSdpSubarrayLeafNodes": [
-                        "ska_mid/tm_leaf_node/sdp_subarray01"
-                    ],
-                    "NumDishes": [1],
-                },
-            }
-        ],
-    },
-]
+from tests.integration.device_to_load import devices_to_load
 
 
 def checked_devices(json_model):
@@ -72,7 +24,7 @@ def checked_devices(json_model):
 
 
 @pytest.mark.post_deployment
-def test_telescope_state(multi_device_tango_context):
+def test_telescope_state(tango_context):
     # import debugpy; debugpy.debug_this_thread()
     pytest.event_arrived = False
 
@@ -82,7 +34,7 @@ def test_telescope_state(multi_device_tango_context):
         if evt.attr_value.value == DevState.ON:
             pytest.event_arrived = True
 
-    logger.info("%s", multi_device_tango_context)
+    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
 
