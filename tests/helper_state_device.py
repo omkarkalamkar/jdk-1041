@@ -141,7 +141,7 @@ class HelperStateDevice(SKABaseDevice):
         dtype_out="DevVarLongStringArray",
         doc_out="(ReturnType, 'informational message')",
     )
-    def SetStowMode(self, argin):
+    def SetStowMode(self):
         return [[ResultCode.OK], [""]]
 
     def is_TelescopeStandBy_allowed(self):

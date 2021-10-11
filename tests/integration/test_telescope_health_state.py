@@ -1,7 +1,5 @@
 import json
 import time
-from logging import debug
-from os.path import dirname, join
 
 import pytest
 import tango
@@ -10,9 +8,9 @@ from tango import DevState
 
 from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from ska_tango_base.control_model import HealthState
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.integration.test_on_command import checked_devices
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 devices_to_test = [
@@ -65,21 +63,31 @@ devices_to_test = [
 ]
 
 
-# @pytest.mark.xfail(reason="Need to debug")
+def checked_devices(json_model):
+    result = 0
+    for dev in json_model["devices"]:
+        if int(dev["ping"]) > 0 and dev["faulty"] == "False":
+            result += 1
+    return result
+
+
 @pytest.mark.post_deployment
-def test_stow_antennas_command(multi_device_tango_context):
-    pytest.num_events_arrived = 0
+def test_telescope_health_state(multi_device_tango_context):
+    # import debugpy; debugpy.debug_this_thread()
+    pytest.event_arrived = False
 
     def event_callback(evt):
         assert not evt.err
-        pytest.num_events_arrived += 1
+        logger.info(evt.attr_value.value)
+        if evt.attr_value.value == HealthState.DEGRADED:
+            pytest.event_arrived = True
 
     logger.info("%s", multi_device_tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
 
     central_node.subscribe_event(
-        "InternalModel",
+        "telescopeHealthState",
         tango.EventType.CHANGE_EVENT,
         event_callback,
         stateless=True,
@@ -94,31 +102,22 @@ def test_stow_antennas_command(multi_device_tango_context):
             checked_devs = new_checked_devs
             logger.debug("checked devices: %s", checked_devs)
         time.sleep(SLEEP_TIME)
+        # logger.info("%s", json_model)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
         json_model = json.loads(central_node.InternalModel)
-    initial_len = len(central_node.CommandExecuted)
-    (result, unique_id) = central_node.On()
-    (result, unique_id) = central_node.StowAntennas(["1"])
-    assert result[0] == ResultCode.QUEUED
+
+    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master.SetDirectHealthState(HealthState.DEGRADED)
+    
     start_time = time.time()
-    while len(central_node.CommandExecuted) != initial_len + 2:
+    while not pytest.event_arrived:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
-    for command in central_node.CommandExecuted:
-        if command[0] == unique_id[0]:
-            logger.info("command result: %s", command)
-            assert command[2] == "ResultCode.OK"
+    assert pytest.event_arrived
 
-    start_time = time.time()
-    while pytest.num_events_arrived <= 2:
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-
-    assert pytest.num_events_arrived > 1
+    assert central_node.telescopeHealthState == HealthState.DEGRADED
