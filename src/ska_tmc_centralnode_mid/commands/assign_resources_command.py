@@ -181,9 +181,9 @@ class AssignResources(AbstractAssignReleaseResources):
                 "sdp key is not present in the input json argument.",
             )
 
-        sdp_keys = list(json_argument["sdp"].keys())
-        sdp_values = list(json_argument["sdp"].values())
-        if "" in sdp_values:
+        if json_argument["sdp"]["eb_id"] == "":
+            sdp_keys = list(json_argument["sdp"].keys())
+            sdp_values = list(json_argument["sdp"].values())
             id = sdp_keys[sdp_values.index("")]
             try:
                 self.update_resource_config_file(json_argument, id)
