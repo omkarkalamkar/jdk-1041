@@ -65,11 +65,13 @@ else
 CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
 endif
 
--include .make/make.mk
--include .make/release.mk
--include .make/python.mk
--include .make/oci.mk
 -include .make/k8s.mk
+-include .make/python.mk
+-include .make/helm.mk
+-include .make/oci.mk
+-include .make/docs.mk
+-include .make/release.mk
+-include .make/make.mk
 -include .make/help.mk
 -include PrivateRules.mak
 
@@ -78,7 +80,7 @@ OCI_IMAGES=ska-tmc-centralnode-mid
 
 clean:
 	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
-			charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
+			charts/build charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
 
 unit-test: python-test
 
