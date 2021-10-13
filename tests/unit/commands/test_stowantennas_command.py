@@ -7,20 +7,11 @@ from ska_tango_base.obs.obs_device import SKAObsDevice
 from test_cm_all_working import create_cm
 
 from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
-from ska_tmc_centralnode_mid.manager.adapters import (
-    BaseAdapter,
-    DishAdapter,
-    SubArrayAdapter,
-)
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
+from ska_tmc_centralnode_mid.manager.adapters import DishAdapter
 from tests.helper_adapter_factory import HelperAdapterFactory
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import (
-    DEVICE_LIST,
-    SLEEP_TIME,
-    TIMEOUT,
-    count_faulty_devices,
-    logger,
-)
+from tests.settings import logger
 
 
 @pytest.fixture()
@@ -97,5 +88,5 @@ def test_telescope_stow_antennas_fail_check_allowed(tango_context):
     my_adapter_factory = HelperAdapterFactory()
     cm.input_parameter.tm_dish_dev_names = []
     stow_command = StowAntennas(cm, cm.op_state_model, my_adapter_factory)
-    with pytest.raises(Exception):
+    with pytest.raises(CommandNotAllowed):
         stow_command.check_allowed()

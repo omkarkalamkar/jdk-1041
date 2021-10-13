@@ -11,6 +11,7 @@ from test_cm_all_working import create_cm
 from ska_tmc_centralnode_mid.commands.assign_resources_command import (
     AssignResources,
 )
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from ska_tmc_centralnode_mid.manager.adapters import (
     DishAdapter,
     SubArrayAdapter,
@@ -217,7 +218,7 @@ def test_telescope_assign_resources_fail_check_allowed(tango_context):
     assign_res_command = AssignResources(
         cm, cm.op_state_model, my_adapter_factory
     )
-    with pytest.raises(Exception):
+    with pytest.raises(CommandNotAllowed):
         assign_res_command.check_allowed()
 
 

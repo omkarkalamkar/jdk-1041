@@ -8,7 +8,6 @@ from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
-pytest.num_events_arrived = 0
 pytest.event_arrived = False
 
 
@@ -86,18 +85,6 @@ def ensure_checked_devices(central_node):
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
         json_model = json.loads(central_node.InternalModel)
-
-
-def assert_events_arrived():
-    start_time = time.time()
-    while pytest.num_events_arrived <= 1:
-        logger.info("waiting events: %s", pytest.num_events_arrived)
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-
-    assert pytest.num_events_arrived > 1
 
 
 def assert_event_arrived():

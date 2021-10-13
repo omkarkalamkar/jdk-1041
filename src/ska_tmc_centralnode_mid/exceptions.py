@@ -24,3 +24,7 @@ class ResourceNotPresentError(ValueError):
 
 class SubarrayNotPresentError(ValueError):
     """Raised when a subarray is requested but not present."""
+
+
+class CommandNotAllowed(Exception):
+    """Raised when a command is not allowed."""
