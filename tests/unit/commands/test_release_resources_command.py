@@ -106,7 +106,7 @@ def test_telescope_release_resources_command_empty_input_json(tango_context):
     release_command, _ = get_release_resources_command_obj()
     assert release_command.check_allowed()
     (result_code, _) = release_command.do("")
-    
+
     assert result_code == ResultCode.FAILED
 
 
