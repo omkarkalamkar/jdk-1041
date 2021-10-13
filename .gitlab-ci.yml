@@ -16,21 +16,6 @@ stages:
   - pages
   - scan
 
-helm-chart-lint:
-  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
-  stage: lint
-  tags:
-    - k8srunner
-  before_script:
-    - '[ -f .make/k8s.mk ] || (echo "File k8s.mk not included in Makefile; exit 1")'
-    - 'make help | grep helm.mk:helm-lint'
-  script:
-    - make helm-lint
-  artifacts:
-    paths:
-      - build/
-    when: always
-
 join_linting_reports:
   stage: join-reports
   tags:
@@ -73,7 +58,7 @@ test:
     reports:
       junit: charts/post-deployment/reports/unit-tests.xml
 
-helm-chart-publish:
+my-helm-chart-publish:
   stage: publish
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
   tags:
