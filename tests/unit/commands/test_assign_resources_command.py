@@ -220,6 +220,7 @@ def test_telescope_assign_resources_fail_check_allowed(tango_context):
     with pytest.raises(Exception):
         assign_res_command.check_allowed()
 
+
 def test_telescope_assign_resources_command_already_assigned(tango_context):
     logger.info("%s", tango_context)
     # assign_res_command, _ = get_assign_resources_command_obj()
@@ -248,7 +249,7 @@ def test_telescope_assign_resources_command_already_assigned(tango_context):
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
+    assert assign_res_command.check_allowed()
     (result_code, message) = assign_res_command.do(assign_input_str)
     assert result_code == ResultCode.FAILED
     assert "dish0001" in message
-    
