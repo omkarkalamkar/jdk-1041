@@ -55,14 +55,14 @@ PYTHON_VARS_AFTER_PYTEST = -m "not post_deployment"
 MARK = "post_deployment"
 
 CI_REGISTRY ?= gitlab.com
+CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
 ifneq ($(CI_JOB_ID),)
-CAR_OCI_REGISTRY_HOST = $(CI_REGISTRY)
+ifneq ($(CI_COMMIT_TAG),)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
 	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
 IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
-else
-CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
+endif
 endif
 
 -include .make/k8s.mk
