@@ -10,8 +10,8 @@ from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
 logger = logging.getLogger(__name__)
 
-SLEEP_TIME = 0.1
-TIMEOUT = 50
+SLEEP_TIME = 0.5
+TIMEOUT = 10
 
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10

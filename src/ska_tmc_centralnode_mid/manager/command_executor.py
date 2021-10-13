@@ -47,11 +47,6 @@ class CommandExecutor:
             self._stop = True
             self._worker_thread.join()
 
-    def start(self):
-        if not self._worker_thread.is_alive():
-            self._stop = True
-            self._worker_thread.start()
-
     def enqueue_command(self, command_object, argin=None):
         """Adds the Command to the queue.
 
@@ -91,6 +86,8 @@ class CommandExecutor:
         with tango.EnsureOmniThread():
             while not self._stop:
                 try:
+                    # import debugpy; debugpy.debug_this_thread()
+                    self._command_in_progress = "None"
                     (command_object, argin, id) = self._work_queue.get(
                         block=True, timeout=self._queue_fetch_timeout
                     )
@@ -119,6 +116,7 @@ class CommandExecutor:
                                 "Unmanaged exception during call to command %s with argin %s: %s",
                                 command_name,
                                 argin,
+                                str(err),
                             ),
                             exc_info=1,
                         )

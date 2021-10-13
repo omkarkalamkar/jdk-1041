@@ -66,6 +66,7 @@ def test_telescope_release_resources_command(tango_context):
     release_command, my_adapter_factory = get_release_resources_command_obj()
 
     release_input_str = get_release_input_str()
+    assert release_command.check_allowed()
     (result_code, _) = release_command.do(release_input_str)
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
@@ -93,6 +94,7 @@ def test_telescope_release_resources_command_fail_subarray(tango_context):
         cm, cm.op_state_model, my_adapter_factory
     )
     release_input_str = get_release_input_str()
+    assert release_command.check_allowed()
     (result_code, message) = release_command.do(release_input_str)
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
@@ -102,8 +104,9 @@ def test_telescope_release_resources_command_empty_input_json(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     release_command, _ = get_release_resources_command_obj()
-
+    assert release_command.check_allowed()
     (result_code, _) = release_command.do("")
+
     assert result_code == ResultCode.FAILED
 
 
@@ -116,6 +119,7 @@ def test_telescope_release_resources_command_missing_transaction_id(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     del json_argument["transaction_id"]
+    assert release_command.check_allowed()
     (result_code, message) = release_command.do(json.dumps(json_argument))
 
     assert result_code == ResultCode.FAILED
@@ -131,6 +135,7 @@ def test_telescope_release_resources_command_missing_subarray_id(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
+    assert release_command.check_allowed()
     (result_code, message) = release_command.do(json.dumps(json_argument))
 
     assert result_code == ResultCode.FAILED

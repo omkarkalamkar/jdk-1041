@@ -57,7 +57,7 @@ MARK = "post_deployment"
 CI_REGISTRY ?= gitlab.com
 CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
 ifneq ($(CI_JOB_ID),)
-ifneq ($(CI_COMMIT_TAG),)
+ifeq ($(CI_COMMIT_TAG),)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
 	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)

@@ -116,7 +116,6 @@ class CNComponentManager(BaseComponentManager):
         self._tm_op_state_aggregator = None
 
         self._command_executor = CommandExecutor(logger)
-        self._command_executor.start()
 
     def set_aggregators(
         self,

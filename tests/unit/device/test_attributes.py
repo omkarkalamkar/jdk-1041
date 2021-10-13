@@ -52,7 +52,7 @@ def test_attributes(central_node_device):
     assert central_node_device.subarray2HealthState == HealthState.UNKNOWN
     assert central_node_device.subarray3HealthState == HealthState.UNKNOWN
     assert central_node_device.desiredTelescopeState == DevState.ON
-    assert central_node_device.commandInProgress == ""
+    assert central_node_device.commandInProgress == "None"
     assert central_node_device.CspMasterDevName == ""
     central_node_device.CspMasterDevName = "csp"
     assert central_node_device.CspMasterDevName == "csp"
@@ -79,6 +79,8 @@ def test_attributes(central_node_device):
     assert len(central_node_device.DishDevNames) == 0
     central_node_device.DishDevNames = ["dish1"]
     assert len(central_node_device.DishDevNames) == 1
+    central_node_device.TMLeafDishDevNames = ["dish1"]
+    assert len(central_node_device.TMLeafDishDevNames) == 1
     json_model = json.loads(central_node_device.InternalModel)
     assert "telescope_state" in json_model
     assert "tmc_op_state" in json_model
