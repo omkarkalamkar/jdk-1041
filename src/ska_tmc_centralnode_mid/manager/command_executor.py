@@ -120,7 +120,7 @@ class CommandExecutor:
                                 "Unmanaged exception during call to command %s with argin %s: %s",
                                 command_name,
                                 argin,
-                                str(err)
+                                str(err),
                             ),
                             exc_info=1,
                         )

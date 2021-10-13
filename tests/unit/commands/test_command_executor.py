@@ -67,6 +67,7 @@ def test_command_executor(tango_context):
         assert command_result["ResultCode"] == ResultCode.OK
         assert command_result["Message"] == ""
 
+
 def test_command_executor_raise_exception(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -88,4 +89,3 @@ def test_command_executor_raise_exception(tango_context):
     for command_result in executor.command_executed:
         assert command_result["Command"] == "Mock"
         assert command_result["ResultCode"] == ResultCode.FAILED
-
