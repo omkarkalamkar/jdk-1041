@@ -96,9 +96,6 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 
-ciccio: 
-	echo $(CUSTOM_VALUES)
-
 requirements: ## Install Dependencies
 	python3 -m pip install -r requirements.txt -r requirements-dev.txt
 
