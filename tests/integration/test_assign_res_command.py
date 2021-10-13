@@ -7,11 +7,7 @@ import tango
 from ska_tango_base.commands import ResultCode
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from tests.integration.common import (
-    assert_events_arrived,
-    devices_to_load,
-    ensure_checked_devices,
-)
+from tests.integration.common import devices_to_load, ensure_checked_devices
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
@@ -58,8 +54,6 @@ def test_assign_res_command(tango_context):
         if command[0] == unique_id[0]:
             logger.info("command result: %s", command)
             assert command[2] == "ResultCode.OK"
-
-    assert_events_arrived()
 
     def get_device(json_model):
         for device in json_model["devices"]:
