@@ -6,7 +6,11 @@ from ska_tango_base.commands import ResultCode
 from tango import DevState
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from tests.integration.common import devices_to_load, ensure_checked_devices
+from tests.integration.common import (
+    assert_event_arrived,
+    devices_to_load,
+    ensure_checked_devices,
+)
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
@@ -64,20 +68,6 @@ def test_telescope_state(tango_context):
     sdp_subarray.SetDirectState(DevState.ON)
     dish_master.SetDirectState(DevState.ON)
 
-    start_time = time.time()
-    while not pytest.event_arrived:
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-
-    assert pytest.event_arrived
-
-    # start_time = time.time()
-    # while central_node.telescopeState != DevState.ON:
-    #     time.sleep(SLEEP_TIME)
-    #     elapsed_time = time.time() - start_time
-    #     if elapsed_time > TIMEOUT:
-    #         pytest.fail("Timeout occurred while executing the test")
+    assert_event_arrived()
 
     assert central_node.telescopeState == DevState.ON
