@@ -148,6 +148,8 @@ class TMCOpStateAggragator(Aggregator):
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
             if "tm" in name:
+                if dev.faulty:
+                    continue
                 tmStateList.append(dev.state)
 
         tmSetStateList = set(tmStateList)
