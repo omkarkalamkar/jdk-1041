@@ -68,6 +68,7 @@ def test_telescope_assign_resources_command(tango_context):
     assign_res_command, my_adapter_factory = get_assign_resources_command_obj()
 
     assign_input_str = get_assign_input_str()
+    assert assign_res_command.check_allowed()
     (result_code, _) = assign_res_command.do(assign_input_str)
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
@@ -82,6 +83,7 @@ def test_telescope_assign_resources_command_missing_eb_id_key(tango_context):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["eb_id"] = ""
+    assert assign_res_command.check_allowed()
     (result_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
@@ -112,6 +114,7 @@ def test_telescope_assign_resources_command_fail_subarray(tango_context):
         cm, cm.op_state_model, my_adapter_factory, skuid
     )
     assign_input_str = get_assign_input_str()
+    assert assign_res_command.check_allowed()
     (result_code, message) = assign_res_command.do(assign_input_str)
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
@@ -121,7 +124,7 @@ def test_telescope_assign_resources_command_empty_input_json(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _ = get_assign_resources_command_obj()
-
+    assert assign_res_command.check_allowed()
     (result_code, _) = assign_res_command.do("")
     assert result_code == ResultCode.FAILED
 
@@ -134,6 +137,7 @@ def test_telescope_assign_resources_command_missing_sdp_key(tango_context):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
+    assert assign_res_command.check_allowed()
     (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "sdp" in message
@@ -149,6 +153,7 @@ def test_telescope_assign_resources_command_missing_transaction_id(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["transaction_id"]
+    assert assign_res_command.check_allowed()
     (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "transaction_id" in message
@@ -162,6 +167,7 @@ def test_telescope_assign_resources_command_missing_subarray_id(tango_context):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
+    assert assign_res_command.check_allowed()
     (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "subarray_id" in message
@@ -175,6 +181,7 @@ def test_telescope_assign_resources_command_missing_dish(tango_context):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]
+    assert assign_res_command.check_allowed()
     (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "dish" in message
@@ -190,6 +197,7 @@ def test_telescope_assign_resources_command_missing_receptor_ids(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]["receptor_ids"]
+    assert assign_res_command.check_allowed()
     (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "receptor_ids" in message

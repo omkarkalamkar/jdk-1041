@@ -54,6 +54,7 @@ def test_telescope_on_command(tango_context):
 
     my_adapter_factory = HelperAdapterFactory()
     on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
+    assert on_command.check_allowed()
     (result_code, _) = on_command.do()
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
@@ -85,6 +86,7 @@ def test_telescope_on_command_fail_subarray(tango_context):
     )
 
     on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
+    assert on_command.check_allowed()
     (result_code, message) = on_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
@@ -106,6 +108,7 @@ def test_telescope_on_command_fail_sdp(tango_context):
     )
 
     on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
+    assert on_command.check_allowed()
     (result_code, message) = on_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message

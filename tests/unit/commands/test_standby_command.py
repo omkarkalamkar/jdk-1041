@@ -91,6 +91,7 @@ def test_telescope_standby_command_fail_subarray(tango_context):
     standby_command = TelescopeStandby(
         cm, cm.op_state_model, my_adapter_factory
     )
+    assert standby_command.check_allowed()
     (result_code, message) = standby_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
@@ -117,6 +118,7 @@ def test_telescope_standby_command_fail_dish(tango_context):
     standby_command = TelescopeStandby(
         cm, cm.op_state_model, my_adapter_factory
     )
+    assert standby_command.check_allowed()
     (result_code, message) = standby_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message

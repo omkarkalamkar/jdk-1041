@@ -80,6 +80,7 @@ def test_telescope_stow_antennas_fail_dish(tango_context):
     )
 
     stow_command = StowAntennas(cm, cm.op_state_model, my_adapter_factory)
+    assert stow_command.check_allowed()
     (result_code, message) = stow_command.do(["1"])
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
