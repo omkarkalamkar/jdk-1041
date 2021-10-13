@@ -49,8 +49,6 @@ def test_command_executor(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-
-    # import debugpy; debugpy.debug_this_thread()
     executor = CommandExecutor(logger)
     my_adapter_factory = HelperAdapterFactory()
     on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
@@ -68,3 +66,26 @@ def test_command_executor(tango_context):
         assert command_result["Command"] == "TelescopeOn"
         assert command_result["ResultCode"] == ResultCode.OK
         assert command_result["Message"] == ""
+
+def test_command_executor_raise_exception(tango_context):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    executor = CommandExecutor(logger)
+    attrs = {"do.side_effect": Exception}
+    on_command = mock.Mock(**attrs)
+    executor.enqueue_command(on_command, None)
+    start_time = time.time()
+    while 1 != len(executor.command_executed):
+        elapsed_time = time.time() - start_time
+        if elapsed_time > TIMEOUT:
+            pytest.fail("Timeout occurred while executing the test")
+        time.sleep(SLEEP_TIME)
+
+    for command_result in executor.command_executed:
+        assert command_result["Command"] == "Mock"
+        assert command_result["ResultCode"] == ResultCode.FAILED
+

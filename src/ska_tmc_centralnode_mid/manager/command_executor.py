@@ -113,12 +113,14 @@ class CommandExecutor:
                         self.add_command_execution(
                             id, command_name, result_code, message
                         )
+                        self._command_in_progress = "None"
                     except Exception as err:
                         self._logger.exception(
                             (
                                 "Unmanaged exception during call to command %s with argin %s: %s",
                                 command_name,
                                 argin,
+                                str(err)
                             ),
                             exc_info=1,
                         )
