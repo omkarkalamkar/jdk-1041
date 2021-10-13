@@ -15,6 +15,7 @@ from ska_tmc_centralnode_mid.manager.adapters import (
     DishAdapter,
     SubArrayAdapter,
 )
+from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
 from tests.helper_adapter_factory import HelperAdapterFactory
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import count_faulty_devices, logger
@@ -210,3 +211,36 @@ def test_telescope_assign_resources_fail_check_allowed(tango_context):
     )
     with pytest.raises(Exception):
         assign_res_command.check_allowed()
+
+def test_telescope_assign_resources_command_already_assigned(tango_context):
+    logger.info("%s", tango_context)
+    # assign_res_command, _ = get_assign_resources_command_obj()
+
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+
+    my_adapter_factory = HelperAdapterFactory()
+
+    attrs = {"fetch_skuid.return_value": 123}
+    skuid = mock.Mock(**attrs)
+
+    assign_res_command = AssignResources(
+        cm, cm.op_state_model, my_adapter_factory, skuid
+    )
+    # dish0001 is assigned to Subarray1
+    subarray = "ska_mid/tm_subarray_node/1"
+    for devInfo in cm.devices:
+        if isinstance(devInfo, SubArrayDeviceInfo):
+            if devInfo.dev_name == subarray:
+                devInfo.resources.append("dish0001")
+                logger.info("devInfo is: %s", devInfo.resources)
+
+    # Invoke AssignResources to assign already allocated resource - dish0001
+    assign_input_str = get_assign_input_str()
+    (result_code, message) = assign_res_command.do(assign_input_str)
+    assert result_code == ResultCode.FAILED
+    assert "dish0001" in message
+    

@@ -147,7 +147,7 @@ def dummy_subscriber_State(attribute, fqdn, state):
     fake_event.attr_value.value = state
     return fake_event
 
-
+# Covered in Unit test
 # @pytest.mark.skip(reason="Test case is failing randmonly")
 # def test_state_aggregator_callback(mock_subarray):
 #     device_proxy, tango_client_obj, _ = mock_subarray
@@ -193,7 +193,7 @@ def dummy_subscriber_telescopeState(attribute, fqdn, telescope_state):
     fake_event.attr_value.value = telescope_state
     return fake_event
 
-
+# Covered in Unit test case
 # @pytest.mark.skip(reason="Behaviour of the test case is random")
 # def test_telescopeState_aggregator_callback(mock_subarray):
 #     device_proxy, tango_client_obj, _ = mock_subarray
@@ -250,7 +250,7 @@ def central_node_test_info(request):
     }
     return test_info
 
-
+# Remove it - TMC StandBy command no need
 # def test_standby_class_command_method(subarray_state_model, mock_subarray):
 #     _, tango_client_obj, _ = mock_subarray
 #     standby_cmd = Standby(device_data, subarray_state_model)
@@ -260,6 +260,7 @@ def central_node_test_info(request):
 #         const.CMD_STANDBY, None
 #     )
 
+# Remove it - TMC ON command no need
 # @pytest.mark.skip("reworked")
 # def test_on_class_command_method(subarray_state_model, mock_subarray):
 #     _, tango_client_obj, _ = mock_subarray
@@ -269,6 +270,7 @@ def central_node_test_info(request):
 #     tango_client_obj.deviceproxy.command_inout.assert_called_with(const.CMD_ON, None)
 
 
+# Covered in Unit test
 # @pytest.mark.skip("will be reworked")
 # def test_telescope_on_class_command_method(
 #     subarray_state_model, mock_subarray
@@ -282,7 +284,7 @@ def central_node_test_info(request):
 #     # )
 #     assert device_proxy.desiredTelescopeState == DevState.ON
 
-
+# Covered in Unit test
 # @pytest.mark.skip("will be reworked")
 # def test_telescope_standby_class_command_method(
 #     subarray_state_model, mock_subarray
@@ -298,7 +300,7 @@ def central_node_test_info(request):
 #     )
 #     assert device_proxy.desiredTelescopeState == DevState.STANDBY
 
-
+# TANGO command test - covered in integration test
 # @pytest.mark.skip("will be reworked")
 # def test_telescope_off(mock_obstate_check, mock_subarray):
 #     device_proxy, tango_client_obj, _ = mock_subarray
@@ -346,7 +348,7 @@ def mock_subarray(mock_tango_server_helper, mock_tango_client):
     ) as tango_context:
         yield tango_context.device, tango_client_obj, tango_server_obj
 
-
+# Remove it - TMC OFF command no need
 # @pytest.mark.skip("reworked")
 # def test_off_class_command_method(subarray_state_model, mock_subarray):
 #     _, tango_client_obj, _ = mock_subarray
@@ -363,7 +365,7 @@ def mock_subarray(mock_tango_server_helper, mock_tango_client):
 def mock_update_resource_config_file():
     pass
 
-
+# Discuss the aspect of Subarray returning response
 # @pytest.mark.skip("will be reworked")
 # @mock.patch(
 #     "ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file"
@@ -391,7 +393,7 @@ def mock_update_resource_config_file():
 #     message = device_proxy.AssignResources(assign_input_str)
 #     assert json.loads(message) == success_response
 
-
+# Covered in Unit test
 # @mock.patch(
 #     "ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file"
 # )
@@ -417,7 +419,7 @@ def mock_update_resource_config_file():
 #         df
 #     )
 
-
+# Covered in Unit test case
 # @pytest.mark.skip("will be reworked")
 # def test_assign_resources_invalid_json_value(
 #     mock_tango_server_helper, mock_tango_client
@@ -435,7 +437,7 @@ def mock_update_resource_config_file():
 #             tango_context.device.AssignResources(assign_release_invalid_str)
 #         assert const.STR_RESOURCE_ALLOCATION_FAILED in str(df.value)
 
-
+# Covered in Unit test case
 # @pytest.mark.skip("will be reworked")
 # def test_assign_resources_invalid_key(
 #     mock_tango_server_helper, mock_tango_client
@@ -454,7 +456,7 @@ def mock_update_resource_config_file():
 #             result = tango_context.device.AssignResources(assign_invalid_key)
 #         assert "test" in result
 
-
+# This scenario needs to be covered in unit tests - Added an unit test.
 # @mock.patch(
 #     "ska_tmc_centralnode_mid.commands.assign_resources_command.AssignResources.update_resource_config_file"
 # )
@@ -504,7 +506,7 @@ def mock_update_resource_config_file():
 #                 device_proxy.AssignResources(json.dumps(reallocation_request))
 #             assert const.ERR_RECEPTOR_ID_REALLOCATION in str(df.value)
 
-
+# Covered in unit test
 # # # Test cases for commands
 # @pytest.mark.skip("will be reworked")
 # def test_stow_antennas_should_set_stow_mode_on_leaf_nodes(
@@ -534,7 +536,7 @@ def mock_update_resource_config_file():
 #                 CMD_SET_STOW_MODE, None
 #             )
 
-
+# Covered in unit test
 # @pytest.mark.skip("will be reworked")
 # def test_stow_antennas_should_raise_devfailed_exception(
 #     mock_tango_server_helper, mock_tango_client
@@ -566,6 +568,7 @@ def mock_update_resource_config_file():
 #             assert const.ERR_EXE_STOW_CMD in str(df.value)
 
 
+# Need to emplement excpetion block and unit test
 # #     """Negative Test for StowAntennas"""
 # @pytest.mark.skip("will be reworked")
 # def test_stow_antennas_invalid_value(
@@ -582,7 +585,7 @@ def mock_update_resource_config_file():
 
 #         assert const.ERR_STOW_ARGIN in str(df.value)
 
-
+# Covered in integration tests
 # @pytest.mark.skip("will be reworked")
 # def test_release_resources(mock_subarray):
 #     device_proxy, tango_client_obj, _ = mock_subarray
@@ -593,7 +596,7 @@ def mock_update_resource_config_file():
 #     message = device_proxy.ReleaseResources(release_input_str)
 #     assert json.dumps(release_all_success) in message
 
-
+# Covered in Unit test
 # @pytest.mark.skip("will be reworked")
 # def test_release_resources_should_raise_devfailed_exception(
 #     mock_tango_server_helper, mock_tango_client
@@ -618,7 +621,7 @@ def mock_update_resource_config_file():
 #                 tango_context.device.ReleaseResources(release_input_str)
 #             assert const.ERR_DEVFAILED_MSG in str(df.value)
 
-
+# Covered in Unit test
 # @pytest.mark.skip("will be reworked")
 # def test_release_resources_invalid_json_value(
 #     mock_tango_server_helper, mock_tango_client
@@ -630,7 +633,7 @@ def mock_update_resource_config_file():
 #             tango_context.device.ReleaseResources(assign_release_invalid_str)
 #         assert const.ERR_INVALID_JSON in str(df.value)
 
-
+# Covered in Unit test
 # @pytest.mark.skip("will be reworked")
 # def test_release_resources_invalid_key(
 #     mock_tango_server_helper, mock_tango_client
@@ -648,7 +651,7 @@ def command_without_arg_devfailed(request):
     cmd_name = request.param
     return cmd_name
 
-
+# Covered in Unit test
 # def test_command_without_arg_should_raise_devfailed_exception(
 #     mock_subarray, command_without_arg_devfailed, mock_tango_server_helper
 # ):
@@ -660,7 +663,7 @@ def command_without_arg_devfailed(request):
 #         any_method(with_name="telescopeon_cmd_ended_cb")
 #     assert device_proxy.state() == DevState.FAULT
 
-
+# Covered in Unit test
 # def test_telescopeoff_should_raise_devfailed_exception(
 #     mock_subarray, mock_tango_server_helper
 # ):
