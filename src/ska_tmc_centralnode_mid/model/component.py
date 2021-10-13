@@ -158,6 +158,7 @@ class Component:
         :param devInfo: a DeviceInfo object
         """
         if devInfo not in self._devices:
+            devInfo.update_faulty(True, exception)
             self._devices.append(devInfo)
             self._invoke_device_callback(devInfo)
         else:
