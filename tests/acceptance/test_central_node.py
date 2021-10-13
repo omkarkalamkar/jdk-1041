@@ -33,9 +33,9 @@ def internal_model(central_node):
 def call_command(central_node, command_name):
     try:
         pytest.command_result = central_node.command_inout(command_name)
-    except CommandNotAllowed as ex:
-        logger.warning("CommandNotAllowed: %s", str(ex))
-        pytest.command_result = "Not allowed"
+    except Exception as ex:
+        assert "CommandNotAllowed" in str(ex)
+        pytest.command_result = "CommandNotAllowed"
 
 
 @then("it correctly reports the failed and working devices")
@@ -77,7 +77,7 @@ def check_internal_model(device_list):
     )
 )
 def check_command(central_node, seconds):
-    if pytest.command_result == "Not allowed":
+    if pytest.command_result == "CommandNotAllowed":
         return
 
     assert pytest.command_result[0][0] == ResultCode.QUEUED
