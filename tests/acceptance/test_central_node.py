@@ -8,6 +8,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
 from tango import Database, DeviceProxy, DevState
 
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from tests.settings import SLEEP_TIME, logger
 
 
@@ -30,7 +31,11 @@ def internal_model(central_node):
 
 @when(parsers.parse('I call the command "{command_name}"'))
 def call_command(central_node, command_name):
-    pytest.command_result = central_node.command_inout(command_name)
+    try:
+        pytest.command_result = central_node.command_inout(command_name)
+    except CommandNotAllowed as ex:
+        logger.warning("CommandNotAllowed: %s", str(ex))
+        pytest.command_result = "Not allowed"
 
 
 @then("it correctly reports the failed and working devices")
@@ -72,6 +77,9 @@ def check_internal_model(device_list):
     )
 )
 def check_command(central_node, seconds):
+    if pytest.command_result == "Not allowed":
+        return
+
     assert pytest.command_result[0][0] == ResultCode.QUEUED
     unique_id = pytest.command_result[1][0]
     start_time = time.time()

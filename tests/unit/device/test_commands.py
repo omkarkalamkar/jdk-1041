@@ -1,19 +1,9 @@
-import json
-
 import pytest
 import tango
-from ska_tango_base.control_model import (
-    ControlMode,
-    HealthState,
-    SimulationMode,
-    TestMode,
-)
-from tango import DevState
 from tango.test_utils import DeviceTestContext
 
-from ska_tmc_centralnode_mid import release
 from ska_tmc_centralnode_mid.central_node import CentralNode
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 
 
 @pytest.fixture
@@ -32,7 +22,7 @@ def central_node_device(request):
 
 
 def test_commands(central_node_device):
-    with pytest.raises(Exception):
+    with pytest.raises(CommandNotAllowed):
         central_node_device.On()
         central_node_device.TelescopeOn()
         central_node_device.Off()

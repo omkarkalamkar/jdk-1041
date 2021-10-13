@@ -1,26 +1,19 @@
 import time
 
-import mock
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.obs.obs_device import SKAObsDevice
 from test_cm_all_working import create_cm
 
 from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from ska_tmc_centralnode_mid.manager.adapters import (
-    BaseAdapter,
     DishAdapter,
     SubArrayAdapter,
 )
 from tests.helper_adapter_factory import HelperAdapterFactory
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import (
-    DEVICE_LIST,
-    SLEEP_TIME,
-    TIMEOUT,
-    count_faulty_devices,
-    logger,
-)
+from tests.settings import logger
 
 
 @pytest.fixture()
@@ -125,5 +118,5 @@ def test_telescope_on_fail_check_allowed(tango_context):
     my_adapter_factory = HelperAdapterFactory()
     cm.input_parameter.tm_dish_dev_names = []
     on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
-    with pytest.raises(Exception):
+    with pytest.raises(CommandNotAllowed):
         on_command.check_allowed()

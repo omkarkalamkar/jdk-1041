@@ -2,6 +2,7 @@ from ska_tango_base.commands import ResultCode
 from tango import DevState
 
 from ska_tmc_centralnode_mid.commands.abstract_command import TMCCommand
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from ska_tmc_centralnode_mid.manager.adapters import (
     AdapterFactory,
     AdapterType,
@@ -47,7 +48,7 @@ class StowAntennas(TMCCommand):
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
-            raise Exception(
+            raise CommandNotAllowed(
                 "StowAntennas() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
@@ -61,7 +62,7 @@ class StowAntennas(TMCCommand):
             if devInfo is not None and not devInfo.faulty:
                 dish_count += 1
         if dish_count == 0:
-            raise Exception("No Dish available")
+            raise CommandNotAllowed("No Dish available")
 
         return True
 
