@@ -94,7 +94,7 @@ class Component:
         :return: desired telescope state
         :rtype: DevState
         """
-        return self._pst
+        return self._desired_telescope_state
 
     @desired_telescope_state.setter
     def desired_telescope_state(self, value):
