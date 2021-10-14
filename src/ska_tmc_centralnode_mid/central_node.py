@@ -250,6 +250,7 @@ class CentralNode(SKABaseDevice):
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
+            _update_imaging_callback=self.update_imaging_callback,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
             sleep_time=self.SleepTime,
@@ -288,6 +289,10 @@ class CentralNode(SKABaseDevice):
     def update_telescope_state_callback(self, telescope_state):
         self.logger.info("telescopeState %s", telescope_state)
         self.push_change_event("telescopeState", telescope_state)
+
+    def update_imaging_callback(self, imaging):
+        self.logger.info("imaging %s", imaging)
+        self.push_change_event("imaging", imaging)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         self.push_change_event("telescopeHealthState", telescope_health_state)

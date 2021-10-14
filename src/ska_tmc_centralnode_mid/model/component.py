@@ -45,6 +45,7 @@ class Component:
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_subarray_health_state_callback=None,
+        _update_imaging_callback=None,
     ):
         self._update_device_callback = _update_device_callback
         self._update_telescope_state_callback = (
@@ -57,6 +58,7 @@ class Component:
         self._update_subarray_health_state_callback = (
             _update_subarray_health_state_callback
         )
+        self._update_imaging_callback = _update_imaging_callback
 
     def _invoke_device_callback(self, devInfo):
         if self._update_device_callback is not None:
@@ -79,6 +81,10 @@ class Component:
     def _invoke_subarray_health_state_callback(self, devInfo):
         if self._update_subarray_health_state_callback is not None:
             self._update_subarray_health_state_callback(devInfo)
+
+    def _invoke_imaging_callback(self):
+        if self._update_imaging_callback is not None:
+            self._update_imaging_callback(self.imaging)
 
     @property
     def desired_telescope_state(self):
@@ -275,7 +281,9 @@ class Component:
         :type value: ModesAvailability
         """
         if isinstance(value, ModesAvailability):
-            self._imaging = value
+            if self._imaging != value:
+                self._imaging = value
+                self._invoke_imaging_callback()
 
     @property
     def pss(self):

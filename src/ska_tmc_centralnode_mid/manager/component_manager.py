@@ -24,6 +24,7 @@ from ska_tmc_centralnode_mid.model.component import (
     DeviceInfo,
     SubArrayDeviceInfo,
 )
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from ska_tmc_centralnode_mid.model.input import InputParameter
 
 
@@ -53,6 +54,7 @@ class CNComponentManager(BaseComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_subarray_health_state_callback=None,
+        _update_imaging_callback=None,
         _monitoring_loop=True,
         _event_receiver=True,
         max_workers=5,
@@ -99,6 +101,7 @@ class CNComponentManager(BaseComponentManager):
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_subarray_health_state_callback,
+            _update_imaging_callback,
         )
 
         super().__init__(op_state_model, *args, **kwargs)
@@ -326,6 +329,7 @@ class CNComponentManager(BaseComponentManager):
 
         self._aggregate_health_state()
         self._aggregate_state()
+        self._update_imaging()
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -363,6 +367,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo.update_faulty(False)
 
         self._aggregate_state()
+        self._update_imaging()
 
     def update_device_obs_state(self, dev_name, obs_state):
         """
@@ -462,3 +467,27 @@ class CNComponentManager(BaseComponentManager):
             # and I need to update the assigned resources in the device info
             if subarray_dev_info.obsState == ObsState.EMPTY:
                 subarray_dev_info.resources = []
+
+    def _update_imaging(self):
+        """
+        Checks if CSP is ON and if atleast one Dish is ON. If both the conditions are true,
+        it sets imaging to be available.
+        """
+        dish_on = False
+        csp_state = DevState.UNKNOWN
+
+        for dev in self.checked_devices:
+            name = dev.dev_name.lower()
+            if (
+                name in self.input_parameter.dish_dev_names
+                and dev.state == DevState.ON
+            ):
+                dish_on = True
+                break
+
+        for dev in self.checked_devices:
+            name = dev.dev_name.lower()
+            if name == self.input_parameter.csp_master_dev_name:
+                csp_state = dev.state
+                if csp_state == DevState.ON and dish_on == True:
+                    self.component.imaging = ModesAvailability.available
