@@ -339,6 +339,7 @@ class CentralNode(SKABaseDevice):
             device.set_change_event("telescopeState", True, False)
             device.set_change_event("InternalModel", True, False)
             device.set_change_event("TMOpState", True, False)
+            device.set_change_event("imaging", True, False)
 
             device.op_state_model.perform_action("component_on")
             device.component_manager.command_executor.add_command_execution(

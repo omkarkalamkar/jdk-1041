@@ -475,19 +475,21 @@ class CNComponentManager(BaseComponentManager):
         """
         dish_on = False
         csp_state = DevState.UNKNOWN
+        with self.lock:
+            for dev in self.checked_devices:
+                name = dev.dev_name.lower()
+                if (
+                    name in self.input_parameter.dish_dev_names
+                    and dev.state == DevState.ON
+                ):
+                    dish_on = True
+                    break
 
-        for dev in self.checked_devices:
-            name = dev.dev_name.lower()
-            if (
-                name in self.input_parameter.dish_dev_names
-                and dev.state == DevState.ON
-            ):
-                dish_on = True
-                break
-
-        for dev in self.checked_devices:
-            name = dev.dev_name.lower()
-            if name == self.input_parameter.csp_master_dev_name:
-                csp_state = dev.state
-                if csp_state == DevState.ON and dish_on == True:
-                    self.component.imaging = ModesAvailability.available
+            for dev in self.checked_devices:
+                name = dev.dev_name.lower()
+                if name == self.input_parameter.csp_master_dev_name:
+                    csp_state = dev.state
+                    if csp_state == DevState.ON and dish_on == True:
+                        self.component.imaging = ModesAvailability.available
+                    else:
+                        self.component.imaging = ModesAvailability.not_available
