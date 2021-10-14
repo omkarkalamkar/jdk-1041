@@ -489,7 +489,7 @@ class CNComponentManager(BaseComponentManager):
                 name = dev.dev_name.lower()
                 if name == self.input_parameter.csp_master_dev_name:
                     csp_state = dev.state
-                    if csp_state == DevState.ON and dish_on == True:
+                    if csp_state == DevState.ON and dish_on:
                         self.component.imaging = ModesAvailability.available
                     else:
                         self.component.imaging = (
