@@ -492,4 +492,6 @@ class CNComponentManager(BaseComponentManager):
                     if csp_state == DevState.ON and dish_on == True:
                         self.component.imaging = ModesAvailability.available
                     else:
-                        self.component.imaging = ModesAvailability.not_available
+                        self.component.imaging = (
+                            ModesAvailability.not_available
+                        )
