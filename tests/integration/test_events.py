@@ -67,13 +67,19 @@ def test_command_in_progress_events(tango_context):
     central_node.Off()
 
     start_time = time.time()
-    while pytest.num_events_arrived < 3:
+    while pytest.num_events_arrived < 5:
         logger.info("waiting events: %s", pytest.num_events_arrived)
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
-    assert pytest.num_events_arrived == 3
+    # None
+    # TelescopeOn
+    # None
+    # TelescopeOff
+    # None
+    # totale 5
+    assert pytest.num_events_arrived == 5
 
     central_node.unsubscribe_event(event_id)

@@ -21,7 +21,7 @@ class CommandExecutor:
         self._queue_fetch_timeout = queue_fetch_timeout
 
         self._command_executed = []
-        self._command_in_progress = ""
+        self._command_in_progress = "None"
 
         self._worker_thread = threading.Thread(
             target=self._run,
@@ -44,11 +44,12 @@ class CommandExecutor:
 
     @command_in_progress.setter
     def command_in_progress(self, value):
-        self._command_in_progress = value
-        if self._update_command_in_progress_callback is not None:
-            self._update_command_in_progress_callback(
-                self._command_in_progress
-            )
+        if self._command_in_progress != value:
+            self._command_in_progress = value
+            if self._update_command_in_progress_callback is not None:
+                self._update_command_in_progress_callback(
+                    self._command_in_progress
+                )
 
     @property
     def queue_full(self):
@@ -98,13 +99,13 @@ class CommandExecutor:
             while not self._stop:
                 try:
                     # import debugpy; debugpy.debug_this_thread()
-                    self._command_in_progress = "None"
+                    self.command_in_progress = "None"
                     (command_object, argin, id) = self._work_queue.get(
                         block=True, timeout=self._queue_fetch_timeout
                     )
                     command_name = type(command_object).__name__
                     try:
-                        self._command_in_progress = command_name
+                        self.command_in_progress = command_name
                         result_code = None
                         message = None
                         if argin is None:
