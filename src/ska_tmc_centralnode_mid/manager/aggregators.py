@@ -23,9 +23,7 @@ class TelescopeStateAggragator(Aggregator):
         sdp_master = False
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
-            if "leaf" in name:
-                continue
-            elif dev.faulty:
+            if dev.faulty:
                 continue
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
@@ -91,9 +89,7 @@ class HealthStateAggragator(Aggregator):
         # number of dishes is also variable
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
-            if "leaf" in name:
-                continue
-            elif dev.faulty:
+            if dev.faulty:
                 continue
             elif (
                 name

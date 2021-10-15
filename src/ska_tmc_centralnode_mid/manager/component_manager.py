@@ -120,6 +120,11 @@ class CNComponentManager(BaseComponentManager):
 
         self._command_executor = CommandExecutor(logger)
 
+    def stop(self):
+        self._monitoring_loop.stop()
+        self._event_receiver.stop()
+        self._command_executor.stop()
+
     def set_aggregators(
         self,
         _telescope_state_aggregator,

@@ -239,6 +239,11 @@ class CentralNode(SKABaseDevice):
     )
 
     def create_component_manager(self):
+        # if the init is called more than once
+        # I need to stop all threads
+        # if self.component_manager is not None:
+        #     self.component_manager.stop()
+
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )

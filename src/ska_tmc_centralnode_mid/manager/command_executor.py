@@ -43,9 +43,8 @@ class CommandExecutor:
         return self._work_queue.full()
 
     def stop(self):
-        if self._worker_thread.is_alive():
-            self._stop = True
-            self._worker_thread.join()
+        self._stop = True
+        # self._worker_thread.join()
 
     def enqueue_command(self, command_object, argin=None):
         """Adds the Command to the queue.
