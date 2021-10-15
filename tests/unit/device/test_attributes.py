@@ -67,7 +67,8 @@ def test_attributes(central_node_device):
     assert central_node_device.LeafSdpMasterDevName == "leafsdp"
     assert central_node_device.TMOpState == DevState.UNKNOWN
     assert len(central_node_device.CommandExecuted) == 1  # init
-    assert len(central_node_device.CommandExecutedAsList) == 1  # init
+    assert "Init" in central_node_device.LastCommandExecuted  # init
+    assert "OK" in central_node_device.LastCommandExecuted  # init
     assert len(central_node_device.SubarrayDevNames) == 0
     central_node_device.SubarrayDevNames = ["subarray1"]
     assert len(central_node_device.SubarrayDevNames) == 1

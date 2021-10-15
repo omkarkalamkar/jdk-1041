@@ -232,10 +232,10 @@ class CentralNode(SKABaseDevice):
         max_dim_y=100,
     )
 
-    CommandExecutedAsList = attribute(
-        dtype=("DevString",),
+    LastCommandExecuted = attribute(
+        dtype="DevString",
         access=AttrWriteType.READ,
-        max_dim_x=100,
+        doc="Last command executed as string: uniqueid, command name, .result and message",
     )
 
     InternalModel = attribute(
@@ -468,26 +468,19 @@ class CentralNode(SKABaseDevice):
         return result
         # PROTECTED REGION END #    //  CentralNode.CommandExecuted_read
 
-    def read_CommandExecutedAsList(self):
+    def read_LastCommandExecuted(self):
         # PROTECTED REGION ID(CentralNode.CommandExecuted_read) ENABLED START #
         """Return the CommandExecuted attribute as list of string."""
-        result = []
-        i = 0
         for command_executed in reversed(
             self.component_manager.command_executor.command_executed
         ):
-            if i == 100:
-                break
-            single_res = (
-                "%s    %s    %s    %s",
+            single_res = "{0} {1} {2} {3}".format(
                 str(command_executed["Id"]),
                 str(command_executed["Command"]),
                 str(command_executed["ResultCode"]),
                 str(command_executed["Message"]),
             )
-            result.append(str(single_res))
-            i += 1
-        return result
+            return single_res
         # PROTECTED REGION END #    //  CentralNode.CommandExecuted_read
 
     def read_CspMasterDevName(self):
