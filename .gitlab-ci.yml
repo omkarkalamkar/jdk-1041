@@ -3,10 +3,6 @@ image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
 
-cache:
-  paths:
-    - build
-
 stages:
   - lint
   - join-reports
@@ -57,17 +53,6 @@ test:
       - charts/post-deployment
     reports:
       junit: charts/post-deployment/reports/unit-tests.xml
-
-my-helm-chart-publish:
-  stage: publish
-  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
-  tags:
-    - k8srunner
-  before_script:
-    - '[ -f .make/k8s.mk ] || (echo "File k8s.mk not included in Makefile; exit 1")'
-    - 'make help | grep helm.mk:helm-publish'
-  script:
-    - make helm-publish
 
 include:
   # # Helm Chart linting and Publish
