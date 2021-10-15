@@ -72,34 +72,10 @@ class ReleaseResources(AbstractAssignReleaseResources):
                     ]
                 }
 
-        Note: From Jive, enter input as: {"interface":"https://schema.skao.int/ska-tmc-releaseresources/1.0",
-        "subarray_id":1,"release_all":true,"receptor_ids":[]}
+            Note: From Jive, enter input as: {"interface":"https://schema.skao.int/ska-tmc-releaseresources/1.0",
+            "subarray_id":1,"release_all":true,"receptor_ids":[]}
 
-        return:
-            A tuple containing a return code and a string in josn format on successful release
-            of all the resources. The JSON string contains following values:
-
-            release_all:
-                Boolean(True or False). If True, all the resources are successfully released from the
-                Subarray.
-
-            receptor_ids:
-                DevVarStringArray. If release_all is True, receptor_ids is empty. Else list returns
-                resources (device names) that are noe released from the subarray.
-
-            Example:
-                argout =
-                    {
-                    "interface": "https://schema.skao.int/ska-tmc-releaseresources/2.0",
-                    "subarray_id": 1,
-                    "release_all": true,
-                    "receptor_ids": [
-                    ]
-                    }
-
-        return:
-            None
-
+        :return: None
         """
         component_manager = self.target
         ret_code, message = self.init_adapters(

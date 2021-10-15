@@ -141,7 +141,7 @@ class CNComponentManager(BaseComponentManager):
         Return the input parameter
 
         :return: input parameter
-        :rtype InputParameter
+        :rtype: InputParameter
         """
         return self._input_parameter
 
@@ -151,7 +151,7 @@ class CNComponentManager(BaseComponentManager):
         Return the managed component
 
         :return: the managed component
-        :rtype Component
+        :rtype: Component
         """
         return self._component
 
@@ -310,7 +310,7 @@ class CNComponentManager(BaseComponentManager):
         :param device_info: a device info
         :type device_info: DeviceInfo
         :param exception: an exception
-        :type Exception
+        :type: Exception
         """
         with self.lock:
             self.component.update_device_exception(device_info, exception)
