@@ -9,7 +9,11 @@ from ska_tango_base.commands import ResultCode
 
 class CommandExecutor:
     def __init__(
-        self, logger, max_queue_size=100, queue_fetch_timeout=1
+        self,
+        logger,
+        max_queue_size=100,
+        queue_fetch_timeout=1,
+        _update_command_in_progress_callback=None,
     ) -> None:
         self._logger = logger
         self._max_queue_size = max_queue_size
@@ -26,6 +30,10 @@ class CommandExecutor:
         self._stop = False
         self._worker_thread.start()
 
+        self._update_command_in_progress_callback = (
+            _update_command_in_progress_callback
+        )
+
     @property
     def command_executed(self):
         return self._command_executed
@@ -37,6 +45,10 @@ class CommandExecutor:
     @command_in_progress.setter
     def command_in_progress(self, value):
         self._command_in_progress = value
+        if self._update_command_in_progress_callback is not None:
+            self._update_command_in_progress_callback(
+                self._command_in_progress
+            )
 
     @property
     def queue_full(self):

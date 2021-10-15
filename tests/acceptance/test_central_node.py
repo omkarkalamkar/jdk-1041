@@ -52,7 +52,7 @@ def check_internal_model(device_list):
             assert dev["exception"] != "None"
             continue
 
-        assert int(running_dev.State()) == int(dev["state"])
+        assert "DevState." + str(running_dev.State()) == dev["state"]
         assert str(HealthState(running_dev.healthState)) == dev["healthState"]
 
         if "subarray" in dev["dev_name"]:

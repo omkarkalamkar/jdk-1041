@@ -400,7 +400,7 @@ class DeviceInfo:
     def to_dict(self):
         result = {
             "dev_name": self.dev_name,
-            "state": str(DevState(self.state)),
+            "state": self._dev_state_2_str(DevState(self.state)),
             "obsState": str(ObsState(self.obsState)),
             "healthState": str(HealthState(self.healthState)),
             "ping": str(self.ping),
@@ -409,6 +409,36 @@ class DeviceInfo:
             "exception": str(self.exception),
         }
         return result
+
+    def _dev_state_2_str(self, value):
+        if value == DevState.ON:
+            return "DevState.ON"
+        elif value == DevState.OFF:
+            return "DevState.OFF"
+        elif value == DevState.CLOSE:
+            return "DevState.CLOSE"
+        elif value == DevState.OPEN:
+            return "DevState.OPEN"
+        elif value == DevState.INSERT:
+            return "DevState.INSERT"
+        elif value == DevState.EXTRACT:
+            return "DevState.EXTRACT"
+        elif value == DevState.MOVING:
+            return "DevState.MOVING"
+        elif value == DevState.STANDBY:
+            return "DevState.STANDBY"
+        elif value == DevState.FAULT:
+            return "DevState.FAULT"
+        elif value == DevState.INIT:
+            return "DevState.INIT"
+        elif value == DevState.RUNNING:
+            return "DevState.RUNNING"
+        elif value == DevState.ALARM:
+            return "DevState.ALARM"
+        elif value == DevState.DISABLE:
+            return "DevState.DISABLE"
+        else:
+            return "DevState.UNKNOWN"
 
 
 class SubArrayDeviceInfo(DeviceInfo):

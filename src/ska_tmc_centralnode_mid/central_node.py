@@ -244,6 +244,12 @@ class CentralNode(SKABaseDevice):
         doc="Json String representing the entire internal model.",
     )
 
+    LastDeviceInfoChanged = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ,
+        doc="Json String representing the last device changed in the internal model.",
+    )
+
     def create_component_manager(self):
         # if the init is called more than once
         # I need to stop all threads
@@ -262,6 +268,7 @@ class CentralNode(SKABaseDevice):
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
             _update_imaging_callback=self.update_imaging_callback,
+            _update_command_in_progress_callback=self.update_command_in_progress_callback,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
             sleep_time=self.SleepTime,
@@ -295,7 +302,8 @@ class CentralNode(SKABaseDevice):
         return cm
 
     def update_device_callback(self, devInfo):
-        self.push_change_event("InternalModel", devInfo.to_json())
+        self._LastDeviceInfoChanged = devInfo.to_json()
+        self.push_change_event("LastDeviceInfoChanged", devInfo.to_json())
 
     def update_telescope_state_callback(self, telescope_state):
         self.logger.info("telescopeState %s", telescope_state)
@@ -304,6 +312,9 @@ class CentralNode(SKABaseDevice):
     def update_imaging_callback(self, imaging):
         self.logger.info("imaging %s", imaging)
         self.push_change_event("imaging", imaging)
+
+    def update_command_in_progress_callback(self, command_in_progress):
+        self.push_change_event("commandInProgress", command_in_progress)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         self.push_change_event("telescopeHealthState", telescope_health_state)
@@ -343,14 +354,16 @@ class CentralNode(SKABaseDevice):
                 release.name, release.version, release.description
             )
             device._version_id = release.version
+            device._LastDeviceInfoChanged = ""
             device.set_change_event("subarray1HealthState", True, False)
             device.set_change_event("subarray2HealthState", True, False)
             device.set_change_event("subarray3HealthState", True, False)
             device.set_change_event("telescopeHealthState", True, False)
             device.set_change_event("telescopeState", True, False)
-            device.set_change_event("InternalModel", True, False)
+            device.set_change_event("LastDeviceInfoChanged", True, False)
             device.set_change_event("TMOpState", True, False)
             device.set_change_event("imaging", True, False)
+            device.set_change_event("commandInProgress", True, False)
 
             device.op_state_model.perform_action("component_on")
             device.component_manager.command_executor.add_command_execution(
@@ -447,6 +460,11 @@ class CentralNode(SKABaseDevice):
         return self.component_manager.component.to_json()
         # PROTECTED REGION END #    //  CentralNode.activity_message_read
 
+    def read_LastDeviceInfoChanged(self):
+        # PROTECTED REGION ID(CentralNode.LastDeviceInfoChanged_read) ENABLED START #
+        return self._LastDeviceInfoChanged
+        # PROTECTED REGION END #    //  CentralNode.LastDeviceInfoChanged_read
+
     def read_CommandExecuted(self):
         # PROTECTED REGION ID(CentralNode.CommandExecuted_read) ENABLED START #
         """Return the CommandExecuted attribute."""
@@ -469,8 +487,8 @@ class CentralNode(SKABaseDevice):
         # PROTECTED REGION END #    //  CentralNode.CommandExecuted_read
 
     def read_LastCommandExecuted(self):
-        # PROTECTED REGION ID(CentralNode.CommandExecuted_read) ENABLED START #
-        """Return the CommandExecuted attribute as list of string."""
+        # PROTECTED REGION ID(CentralNode.LastCommandExecuted_read) ENABLED START #
+        """Return the LastCommandExecuted attribute as list of string."""
         for command_executed in reversed(
             self.component_manager.command_executor.command_executed
         ):
@@ -481,7 +499,7 @@ class CentralNode(SKABaseDevice):
                 str(command_executed["Message"]),
             )
             return single_res
-        # PROTECTED REGION END #    //  CentralNode.CommandExecuted_read
+        # PROTECTED REGION END #    //  CentralNode.LastCommandExecuted_read
 
     def read_CspMasterDevName(self):
         # PROTECTED REGION ID(CentralNode.CspMasterDevName_read) ENABLED START #

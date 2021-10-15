@@ -55,6 +55,7 @@ class CNComponentManager(BaseComponentManager):
         _update_tmc_op_state_callback=None,
         _update_subarray_health_state_callback=None,
         _update_imaging_callback=None,
+        _update_command_in_progress_callback=None,
         _monitoring_loop=True,
         _event_receiver=True,
         max_workers=5,
@@ -118,7 +119,10 @@ class CNComponentManager(BaseComponentManager):
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
-        self._command_executor = CommandExecutor(logger)
+        self._command_executor = CommandExecutor(
+            logger,
+            _update_command_in_progress_callback=_update_command_in_progress_callback,
+        )
 
     def stop(self):
         self._monitoring_loop.stop()
