@@ -478,7 +478,7 @@ class CentralNode(SKABaseDevice):
             del dev["dev_name"]
             result[dev_name] = dev
         return json.dumps(result)
-        
+
     def read_LastDeviceInfoChanged(self):
         # PROTECTED REGION ID(CentralNode.LastDeviceInfoChanged_read) ENABLED START #
         return self._LastDeviceInfoChanged
