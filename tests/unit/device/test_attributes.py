@@ -88,6 +88,11 @@ def test_attributes(central_node_device):
     assert "tmc_op_state" in json_model
     assert "telescope_health_state" in json_model
     assert "devices" in json_model
+    json_model = json.loads(central_node_device.TranformedInternalModel)
+    assert "telescope_state" in json_model
+    assert "tmc_op_state" in json_model
+    assert "telescope_health_state" in json_model
+    assert "devices" not in json_model
     assert central_node_device.versionId == release.version
     assert central_node_device.buildState == (
         "{},{},{}".format(release.name, release.version, release.description)

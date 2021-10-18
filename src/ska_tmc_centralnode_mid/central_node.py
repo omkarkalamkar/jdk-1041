@@ -244,6 +244,12 @@ class CentralNode(SKABaseDevice):
         doc="Json String representing the entire internal model.",
     )
 
+    TranformedInternalModel = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ,
+        doc="Json String representing the entire internal model transformed for better reading.",
+    )
+
     LastDeviceInfoChanged = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
@@ -460,6 +466,19 @@ class CentralNode(SKABaseDevice):
         return self.component_manager.component.to_json()
         # PROTECTED REGION END #    //  CentralNode.activity_message_read
 
+    def read_TranformedInternalModel(self):
+        json_model = json.loads(self.component_manager.component.to_json())
+        result = {
+            "telescope_state": json_model["telescope_state"],
+            "tmc_op_state": json_model["tmc_op_state"],
+            "telescope_health_state": json_model["telescope_health_state"],
+        }
+        for dev in json_model["devices"]:
+            dev_name = dev["dev_name"]
+            del dev["dev_name"]
+            result[dev_name] = dev
+        return json.dumps(result)
+        
     def read_LastDeviceInfoChanged(self):
         # PROTECTED REGION ID(CentralNode.LastDeviceInfoChanged_read) ENABLED START #
         return self._LastDeviceInfoChanged
