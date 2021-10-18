@@ -124,6 +124,9 @@ class CNComponentManager(BaseComponentManager):
             _update_command_in_progress_callback=_update_command_in_progress_callback,
         )
 
+    def reset(self):
+        pass
+
     def stop(self):
         self._monitoring_loop.stop()
         self._event_receiver.stop()
