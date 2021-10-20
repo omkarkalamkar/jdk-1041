@@ -56,7 +56,6 @@ PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tango_examples \
 							 SKUID_URL=ska-ser-skuid-$(HELM_RELEASE)-svc.$(KUBE_NAMESPACE).svc.cluster.local:9870 \
 
 MARK ?= not post_deployment## What -m opt to pass to pytest
-COUNT ?= 1## pytest number of repetitions of a test to run
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= ## A specific test file to pass to pytest
 ADD_ARGS ?= ## Additional args to pass to pytest
@@ -74,7 +73,7 @@ ADD_ARGS=--true-context
 MARK=post_deployment
 endif
 
-PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' --count=$(COUNT) $(ADD_ARGS) $(FILE)
+PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
 
 
 -include .make/k8s.mk
