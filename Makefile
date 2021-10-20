@@ -51,14 +51,15 @@ K8S_TEST_RUNNER = test-runner-$(RELEASE_NAME)
 
 ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.5
 
-PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tango_examples \
-							 TANGO_HOST=$(TANGO_HOST) \
-							 SKUID_URL=ska-ser-skuid-$(HELM_RELEASE)-svc.$(KUBE_NAMESPACE).svc.cluster.local:9870 \
+PYTHON_TEST_FILE ?=
+
+PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tmc_centralnode_mid:tests \
+							 TANGO_HOST=$(TANGO_HOST)
 
 MARK ?= not post_deployment## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= ## A specific test file to pass to pytest
-ADD_ARGS ?= ## Additional args to pass to pytest
+ADD_ARGS ?= --forked ## Additional args to pass to pytest
 
 
 CI_REGISTRY ?= gitlab.com
@@ -74,7 +75,6 @@ MARK=post_deployment
 endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
-
 
 -include .make/k8s.mk
 -include .make/python.mk
