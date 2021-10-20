@@ -30,6 +30,7 @@ PYTHON_SWITCHES_FOR_FLAKE8=--ignore=F401,W503 --max-line-length=180
 HELM_CHART=test-parent
 UMBRELLA_CHART_PATH ?= charts/$(HELM_CHART)/
 K8S_CHARTS ?= ska-tmc-centralnode-mid test-parent## list of charts
+K8S_CHART ?= $(HELM_CHART)
 
 CI_PROJECT_DIR ?= .
 
@@ -37,6 +38,8 @@ XAUTHORITY ?= $(HOME)/.Xauthority
 THIS_HOST := $(shell ip a 2> /dev/null | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n1)
 DISPLAY ?= $(THIS_HOST):0
 JIVE ?= false# Enable jive
+MINIKUBE ?= true ## Minikube or not
+TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
 
 CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode-mid
 CI_ENVIRONMENT_SLUG ?= ska-tmc-centralnode-mid
@@ -44,23 +47,22 @@ $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH
 
 # Test runner - run to completion job in K8s
 # name of the pod running the k8s_tests
-TEST_RUNNER = test-runner-$(CI_JOB_ID)-$(RELEASE_NAME)
+K8S_TEST_RUNNER = test-runner-$(RELEASE_NAME)
 
 ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.5
 
 PYTHON_VARS_BEFORE_PYTEST = PYTHONPATH=.:src:src/ska_tango_examples
 
-PYTHON_VARS_AFTER_PYTEST = -m "not post_deployment"
-
-MARK = "post_deployment"
+PYTHON_VARS_AFTER_PYTEST = -m 'not post_deployment'
 
 CI_REGISTRY ?= gitlab.com
 CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
+K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/$(PROJECT):$(VERSION)
 ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
 	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
-IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
+K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
 endif
 
 -include .make/k8s.mk
