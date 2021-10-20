@@ -51,8 +51,10 @@ K8S_TEST_RUNNER = test-runner-$(RELEASE_NAME)
 
 ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.5
 
+## override so that this picks up setup.cfg from the project root
 PYTHON_TEST_FILE ?=
 
+# Set the specific environment variables required for pytest
 PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tmc_centralnode_mid:tests \
 							 TANGO_HOST=$(TANGO_HOST)
 
@@ -70,16 +72,23 @@ CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
 	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
 K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
-ADD_ARGS=--true-context
-MARK=post_deployment
 endif
 
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
 ADD_ARGS +=  --forked
 endif
+ifeq ($(MAKECMDGOALS),k8s-test)
+ADD_ARGS +=  --true-context
+MARK = post_deployment
+endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
+
+# override python.mk python-pre-test target
+python-pre-test:
+	@echo "python-pre-test: running with: $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) pytest $(PYTHON_VARS_AFTER_PYTEST) \
+	 --cov=src --cov-report=term-missing --cov-report xml:build/reports/code-coverage.xml --junitxml=build/reports/unit-tests.xml $(PYTHON_TEST_FILE)"
 
 -include .make/k8s.mk
 -include .make/python.mk
@@ -114,9 +123,6 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 
 requirements: ## Install Dependencies
 	python3 -m pip install -r requirements.txt -r requirements-dev.txt
-
-python-pre-test: ## Overriding python.mk
-	@mkdir -p build;
 
 # .PHONY is additive
 .PHONY: unit-test
