@@ -59,7 +59,7 @@ PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tmc_centralnode_mid:tests 
 MARK ?= not post_deployment## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= ## A specific test file to pass to pytest
-ADD_ARGS ?= --forked ## Additional args to pass to pytest
+ADD_ARGS ?= ## Additional args to pass to pytest
 
 
 CI_REGISTRY ?= gitlab.com
@@ -72,6 +72,11 @@ CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
 ADD_ARGS=--true-context
 MARK=post_deployment
+endif
+
+# override for python-test - must not have the above --true-context
+ifeq ($(MAKECMDGOALS),python-test)
+ADD_ARGS +=  --forked
 endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
