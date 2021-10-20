@@ -51,9 +51,16 @@ K8S_TEST_RUNNER = test-runner-$(RELEASE_NAME)
 
 ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.5
 
-PYTHON_VARS_BEFORE_PYTEST = PYTHONPATH=.:src:src/ska_tango_examples
+PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tango_examples \
+							 TANGO_HOST=$(TANGO_HOST) \
+							 SKUID_URL=ska-ser-skuid-$(HELM_RELEASE)-svc.$(KUBE_NAMESPACE).svc.cluster.local:9870 \
 
-PYTHON_VARS_AFTER_PYTEST = -m 'not post_deployment'
+MARK ?= not post_deployment## What -m opt to pass to pytest
+COUNT ?= 1## pytest number of repetitions of a test to run
+# run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
+FILE ?= ## A specific test file to pass to pytest
+ADD_ARGS ?= ## Additional args to pass to pytest
+
 
 CI_REGISTRY ?= gitlab.com
 CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
@@ -63,7 +70,12 @@ CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
 	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
 K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
+ADD_ARGS=--true-context
+MARK=post_deployment
 endif
+
+PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' --count=$(COUNT) $(ADD_ARGS) $(FILE)
+
 
 -include .make/k8s.mk
 -include .make/python.mk

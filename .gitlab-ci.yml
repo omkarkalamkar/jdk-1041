@@ -24,35 +24,35 @@ join_linting_reports:
       - build/
     when: always
 
-test:
-  retry: 2
-  stage: test
-  variables:
-    MINIKUBE: "false"
-  tags:
-    - k8srunner
-  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
-  script:
-    - kubectl version
-    - make install-chart
-    - make wait
-    - make smoke-test
-    - make test-deployment
-  after_script:
-    - make uninstall-chart
-    - make delete_namespace
-    - mv charts/build charts/post-deployment
-  # allow_failure: true
-  environment:
-    name: test
-    kubernetes:
-      namespace: ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
-  artifacts:
-    name: "$CI_PROJECT_NAME-$CI_JOB_ID"
-    paths:
-      - charts/post-deployment
-    reports:
-      junit: charts/post-deployment/reports/unit-tests.xml
+# test:
+#   retry: 2
+#   stage: test
+#   variables:
+#     MINIKUBE: "false"
+#   tags:
+#     - k8srunner
+#   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
+#   script:
+#     - kubectl version
+#     - make install-chart
+#     - make wait
+#     - make smoke-test
+#     - make test-deployment
+#   after_script:
+#     - make uninstall-chart
+#     - make delete_namespace
+#     - mv charts/build charts/post-deployment
+#   # allow_failure: true
+#   environment:
+#     name: test
+#     kubernetes:
+#       namespace: ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA
+#   artifacts:
+#     name: "$CI_PROJECT_NAME-$CI_JOB_ID"
+#     paths:
+#       - charts/post-deployment
+#     reports:
+#       junit: charts/post-deployment/reports/unit-tests.xml
 
 include:
   # # Helm Chart linting and Publish
@@ -70,6 +70,10 @@ include:
   # # Docs pages
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/docs-pages.gitlab-ci.yml'
+
+# k8s steps
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/k8s.gitlab-ci.yml'
 
   # Create Gitlab CI badges from CI metrics
   # https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
