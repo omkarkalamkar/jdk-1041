@@ -58,7 +58,7 @@ PYTHON_TEST_FILE ?=
 PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tmc_centralnode_mid:tests \
 							 TANGO_HOST=$(TANGO_HOST)
 
-MARK ?= not post_deployment## What -m opt to pass to pytest
+MARK ?= ## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= ## A specific test file to pass to pytest
 ADD_ARGS ?= ## Additional args to pass to pytest
@@ -77,10 +77,11 @@ endif
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
 ADD_ARGS +=  --forked
+MARK = not post_deployment and not acceptance
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context
-MARK = post_deployment
+MARK = post_deployment or acceptance
 endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
@@ -105,7 +106,8 @@ OCI_IMAGES=ska-tmc-centralnode-mid
 
 clean:
 	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
-			charts/build charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
+			charts/build charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage \
+			tests/.pytest_cache
 
 unit-test: python-test
 

@@ -71,5 +71,5 @@ def test_telescope_state_on_only_monitoring_loop(tango_context):
 def test_telescope_state_on_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_devices_on(cm, devFactory, 3)
+    set_devices_on(cm, devFactory, 5)
     assert cm.component.telescope_state == tango.DevState.ON
