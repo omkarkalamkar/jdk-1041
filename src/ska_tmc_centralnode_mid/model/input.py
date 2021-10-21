@@ -1,4 +1,20 @@
 class InputParameter:
+    def __init__(self) -> None:
+        pass
+
+    def update(self, component_manager):
+        raise NotImplementedError("This class must be inherited!")
+
+
+class InputParameterLow(InputParameter):
+    def __init__(self) -> None:
+        pass
+
+    def update(self, component_manager):
+        pass
+
+
+class InputParameterMid(InputParameter):
     def __init__(self, changed_callback) -> None:
         self._tm_subarray_dev_names = ["ska_mid/tm_subarray_node/1"]
         self._csp_subarray_dev_names = ["ska_mid/tm_leaf_node/csp_subarray01"]
@@ -235,3 +251,54 @@ class InputParameter:
         self._tm_leaf_sdp_master_dev_name = value
         if self._changed_callback is not None:
             self._changed_callback()
+
+    def update(self, component_manager):
+        list_dev_names = []
+        for dev_name in self.tm_dish_dev_names:
+            if component_manager.get_device(dev_name) is None:
+                component_manager.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.dish_dev_names:
+            if component_manager.get_device(dev_name) is None:
+                component_manager.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.tm_subarray_dev_names:
+            if component_manager.get_device(dev_name) is None:
+                component_manager.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.csp_subarray_dev_names:
+            if component_manager.get_device(dev_name) is None:
+                component_manager.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        for dev_name in self.sdp_subarray_dev_names:
+            if component_manager.get_device(dev_name) is None:
+                component_manager.add_device(dev_name)
+                list_dev_names.append(dev_name)
+
+        dev_name = self.csp_master_dev_name
+        if dev_name != "" and component_manager.get_device(dev_name) is None:
+            component_manager.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.tm_leaf_csp_master_dev_name
+        if dev_name != "" and component_manager.get_device(dev_name) is None:
+            component_manager.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.sdp_master_dev_name
+        if dev_name != "" and component_manager.get_device(dev_name) is None:
+            component_manager.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.tm_leaf_sdp_master_dev_name
+        if dev_name != "" and component_manager.get_device(dev_name) is None:
+            component_manager.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        for devInfo in component_manager.devices:
+            if devInfo.dev_name not in list_dev_names:
+                component_manager.component.remove_device(devInfo.dev_name)

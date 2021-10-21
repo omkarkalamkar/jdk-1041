@@ -7,6 +7,7 @@ from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
+from ska_tmc_centralnode_mid.model.input import InputParameterMid
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 from tests.settings import (
     DEVICE_LIST,
@@ -21,7 +22,9 @@ from tests.settings import (
 
 def test_all_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(op_state_model, logger=logger)
+    cm = CNComponentManager(
+        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
+    )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     cm.add_multiple_devices(DEVICE_LIST)
     start_time = time.time()

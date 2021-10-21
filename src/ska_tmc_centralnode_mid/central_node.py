@@ -33,6 +33,7 @@ from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
+from ska_tmc_centralnode_mid.model.input import InputParameterMid
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
 # PROTECTED REGION END #    //  CentralNode.additional_import
@@ -277,6 +278,7 @@ class CentralNode(SKABaseDevice):
             _update_command_in_progress_callback=self.update_command_in_progress_callback,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
+            _input_parameter=InputParameterMid(None),
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.tm_dish_dev_names = []

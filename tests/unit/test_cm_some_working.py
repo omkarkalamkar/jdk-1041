@@ -8,6 +8,7 @@ from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
+from ska_tmc_centralnode_mid.model.input import InputParameterMid
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
@@ -45,7 +46,9 @@ def test_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
 
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(op_state_model, logger=logger)
+    cm = CNComponentManager(
+        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
+    )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     for dev in DEVICE_LIST:
         cm.add_device(dev)

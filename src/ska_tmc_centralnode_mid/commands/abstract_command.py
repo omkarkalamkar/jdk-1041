@@ -7,6 +7,7 @@ from ska_tmc_centralnode_mid.manager.adapters import (
     AdapterFactory,
     AdapterType,
 )
+from ska_tmc_centralnode_mid.model.input import InputParameterMid
 
 
 class TMCCommand(BaseCommand):
@@ -23,6 +24,48 @@ class TMCCommand(BaseCommand):
         message = f"Error in creating adapter for {dev_name}: {e}"
         self.logger.error(message)
         return ResultCode.FAILED, message
+
+    def check_allowed(self):
+        component_manager = self.target
+
+        if isinstance(component_manager.input_parameter, InputParameterMid):
+            self.check_allowed_mid()
+        else:
+            self.check_allowed_low()
+
+    def init_adapeters(self):
+        component_manager = self.target
+
+        if isinstance(component_manager.input_parameter, InputParameterMid):
+            self.init_adapeters_mid()
+        else:
+            self.init_adapeters_low()
+
+    def do(self):
+        component_manager = self.target
+
+        if isinstance(component_manager.input_parameter, InputParameterMid):
+            self.do_mid()
+        else:
+            self.do_low()
+
+    def check_allowed_mid(self):
+        raise NotImplementedError("This class must be inherited!")
+
+    def check_allowed_low(self):
+        raise NotImplementedError("This class must be inherited!")
+
+    def init_adapeters_mid(self):
+        raise NotImplementedError("This class must be inherited!")
+
+    def init_adapeters_low(self):
+        raise NotImplementedError("This class must be inherited!")
+
+    def do_mid(self):
+        raise NotImplementedError("This class must be inherited!")
+
+    def do_low(self):
+        raise NotImplementedError("This class must be inherited!")
 
 
 class AbstractTelescopeOnOff(TMCCommand):

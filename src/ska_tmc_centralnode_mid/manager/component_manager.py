@@ -25,7 +25,10 @@ from ska_tmc_centralnode_mid.model.component import (
     SubArrayDeviceInfo,
 )
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
-from ska_tmc_centralnode_mid.model.input import InputParameter
+from ska_tmc_centralnode_mid.model.input import (
+    InputParameter,
+    InputParameterMid,
+)
 
 
 class CNComponentManager(BaseComponentManager):
@@ -47,6 +50,7 @@ class CNComponentManager(BaseComponentManager):
     def __init__(
         self,
         op_state_model,
+        _input_parameter,
         logger=None,
         _component=None,
         _update_device_callback=None,
@@ -113,7 +117,7 @@ class CNComponentManager(BaseComponentManager):
         if _event_receiver:
             self._event_receiver.start()
 
-        self._input_parameter = InputParameter(None)
+        self._input_parameter = _input_parameter
 
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
@@ -260,55 +264,7 @@ class CNComponentManager(BaseComponentManager):
         self.component.update_device(devInfo)
 
     def update_input_parameter(self):
-        list_dev_names = []
-        for dev_name in self.input_parameter.tm_dish_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        for dev_name in self.input_parameter.dish_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        for dev_name in self.input_parameter.tm_subarray_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        for dev_name in self.input_parameter.csp_subarray_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        for dev_name in self.input_parameter.sdp_subarray_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        dev_name = self.input_parameter.csp_master_dev_name
-        if dev_name != "" and self.get_device(dev_name) is None:
-            self.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.input_parameter.tm_leaf_csp_master_dev_name
-        if dev_name != "" and self.get_device(dev_name) is None:
-            self.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.input_parameter.sdp_master_dev_name
-        if dev_name != "" and self.get_device(dev_name) is None:
-            self.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.input_parameter.tm_leaf_sdp_master_dev_name
-        if dev_name != "" and self.get_device(dev_name) is None:
-            self.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        for devInfo in self.devices:
-            if devInfo.dev_name not in list_dev_names:
-                self.component.remove_device(devInfo.dev_name)
+        self.input_parameter.update(self)
 
     def device_failed(self, device_info, exception):
         """

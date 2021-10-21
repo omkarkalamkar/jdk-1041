@@ -6,6 +6,7 @@ import pytest
 from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
+from ska_tmc_centralnode_mid.model.input import InputParameterMid
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ def create_cm(p_monitoring_loop=True, p_event_receiver=True):
     cm = CNComponentManager(
         op_state_model,
         logger=logger,
+        _input_parameter=InputParameterMid(None),
         _monitoring_loop=p_monitoring_loop,
         _event_receiver=p_event_receiver,
     )

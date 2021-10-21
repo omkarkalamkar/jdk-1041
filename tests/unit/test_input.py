@@ -1,8 +1,8 @@
-from ska_tmc_centralnode_mid.model.input import InputParameter
+from ska_tmc_centralnode_mid.model.input import InputParameterMid
 
 
 def test_properties():
-    input = InputParameter(None)
+    input = InputParameterMid(None)
     input.tm_subarray_dev_names = ("1", "2")
     assert input.tm_subarray_dev_names == ("1", "2")
     input.csp_subarray_dev_names = ("3", "4")
