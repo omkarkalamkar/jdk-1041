@@ -490,17 +490,21 @@ class CNComponentManager(BaseComponentManager):
         with self.lock:
             for dev_name in self.input_parameter.dish_dev_names:
                 dish = self.get_device(dev_name)
-                if dish is not None and not dish.faulty and dish.state == DevState.ON:
+                if (
+                    dish is not None
+                    and not dish.faulty
+                    and dish.state == DevState.ON
+                ):
                     dish_on = True
                     break
 
-            csp_master_device = self.get_device(self.input_parameter.csp_master_dev_name)
+            csp_master_device = self.get_device(
+                self.input_parameter.csp_master_dev_name
+            )
             if csp_master_device is not None and not csp_master_device.faulty:
                 csp_state = csp_master_device.state
 
             if csp_state == DevState.ON and dish_on:
                 self.component.imaging = ModesAvailability.available
             else:
-                self.component.imaging = (
-                    ModesAvailability.not_available
-                )
+                self.component.imaging = ModesAvailability.not_available
