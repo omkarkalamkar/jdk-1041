@@ -2,7 +2,6 @@ import json
 import time
 from os.path import dirname, join
 
-import mock
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.obs.obs_device import SKAObsDevice
@@ -11,13 +10,11 @@ from test_cm_all_working import create_cm
 from ska_tmc_centralnode_mid.commands.release_resources_command import (
     ReleaseResources,
 )
-from ska_tmc_centralnode_mid.manager.adapters import (
-    DishAdapter,
-    SubArrayAdapter,
-)
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
+from ska_tmc_centralnode_mid.manager.adapters import SubArrayAdapter
 from tests.helper_adapter_factory import HelperAdapterFactory
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import count_faulty_devices, logger
+from tests.settings import logger
 
 
 @pytest.fixture()
@@ -66,6 +63,7 @@ def test_telescope_release_resources_command(tango_context):
     release_command, my_adapter_factory = get_release_resources_command_obj()
 
     release_input_str = get_release_input_str()
+    assert release_command.check_allowed()
     (result_code, _) = release_command.do(release_input_str)
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
@@ -93,6 +91,7 @@ def test_telescope_release_resources_command_fail_subarray(tango_context):
         cm, cm.op_state_model, my_adapter_factory
     )
     release_input_str = get_release_input_str()
+    assert release_command.check_allowed()
     (result_code, message) = release_command.do(release_input_str)
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
@@ -102,8 +101,9 @@ def test_telescope_release_resources_command_empty_input_json(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     release_command, _ = get_release_resources_command_obj()
-
+    assert release_command.check_allowed()
     (result_code, _) = release_command.do("")
+
     assert result_code == ResultCode.FAILED
 
 
@@ -116,6 +116,7 @@ def test_telescope_release_resources_command_missing_transaction_id(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     del json_argument["transaction_id"]
+    assert release_command.check_allowed()
     (result_code, message) = release_command.do(json.dumps(json_argument))
 
     assert result_code == ResultCode.FAILED
@@ -131,6 +132,7 @@ def test_telescope_release_resources_command_missing_subarray_id(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
+    assert release_command.check_allowed()
     (result_code, message) = release_command.do(json.dumps(json_argument))
 
     assert result_code == ResultCode.FAILED
@@ -150,5 +152,5 @@ def test_telescope_release_resources_fail_check_allowed(tango_context):
     release_command = ReleaseResources(
         cm, cm.op_state_model, my_adapter_factory
     )
-    with pytest.raises(Exception):
+    with pytest.raises(CommandNotAllowed):
         release_command.check_allowed()

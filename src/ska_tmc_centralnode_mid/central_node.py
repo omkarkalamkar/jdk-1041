@@ -232,13 +232,36 @@ class CentralNode(SKABaseDevice):
         max_dim_y=100,
     )
 
+    LastCommandExecuted = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ,
+        doc="Last command executed as string: uniqueid, command name, .result and message",
+    )
+
     InternalModel = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
         doc="Json String representing the entire internal model.",
     )
 
+    TranformedInternalModel = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ,
+        doc="Json String representing the entire internal model transformed for better reading.",
+    )
+
+    LastDeviceInfoChanged = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ,
+        doc="Json String representing the last device changed in the internal model.",
+    )
+
     def create_component_manager(self):
+        # if the init is called more than once
+        # I need to stop all threads
+        if hasattr(self, "component_manager"):
+            self.component_manager.stop()
+
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )
@@ -250,6 +273,8 @@ class CentralNode(SKABaseDevice):
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
+            _update_imaging_callback=self.update_imaging_callback,
+            _update_command_in_progress_callback=self.update_command_in_progress_callback,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
             sleep_time=self.SleepTime,
@@ -283,11 +308,19 @@ class CentralNode(SKABaseDevice):
         return cm
 
     def update_device_callback(self, devInfo):
-        self.push_change_event("InternalModel", devInfo.to_json())
+        self._LastDeviceInfoChanged = devInfo.to_json()
+        self.push_change_event("LastDeviceInfoChanged", devInfo.to_json())
 
     def update_telescope_state_callback(self, telescope_state):
         self.logger.info("telescopeState %s", telescope_state)
         self.push_change_event("telescopeState", telescope_state)
+
+    def update_imaging_callback(self, imaging):
+        self.logger.info("imaging %s", imaging)
+        self.push_change_event("imaging", imaging)
+
+    def update_command_in_progress_callback(self, command_in_progress):
+        self.push_change_event("commandInProgress", command_in_progress)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         self.push_change_event("telescopeHealthState", telescope_health_state)
@@ -327,13 +360,16 @@ class CentralNode(SKABaseDevice):
                 release.name, release.version, release.description
             )
             device._version_id = release.version
+            device._LastDeviceInfoChanged = ""
             device.set_change_event("subarray1HealthState", True, False)
             device.set_change_event("subarray2HealthState", True, False)
             device.set_change_event("subarray3HealthState", True, False)
             device.set_change_event("telescopeHealthState", True, False)
             device.set_change_event("telescopeState", True, False)
-            device.set_change_event("InternalModel", True, False)
+            device.set_change_event("LastDeviceInfoChanged", True, False)
             device.set_change_event("TMOpState", True, False)
+            device.set_change_event("imaging", True, False)
+            device.set_change_event("commandInProgress", True, False)
 
             device.op_state_model.perform_action("component_on")
             device.component_manager.command_executor.add_command_execution(
@@ -430,8 +466,26 @@ class CentralNode(SKABaseDevice):
         return self.component_manager.component.to_json()
         # PROTECTED REGION END #    //  CentralNode.activity_message_read
 
+    def read_TranformedInternalModel(self):
+        json_model = json.loads(self.component_manager.component.to_json())
+        result = {
+            "telescope_state": json_model["telescope_state"],
+            "tmc_op_state": json_model["tmc_op_state"],
+            "telescope_health_state": json_model["telescope_health_state"],
+        }
+        for dev in json_model["devices"]:
+            dev_name = dev["dev_name"]
+            del dev["dev_name"]
+            result[dev_name] = dev
+        return json.dumps(result)
+
+    def read_LastDeviceInfoChanged(self):
+        # PROTECTED REGION ID(CentralNode.LastDeviceInfoChanged_read) ENABLED START #
+        return self._LastDeviceInfoChanged
+        # PROTECTED REGION END #    //  CentralNode.LastDeviceInfoChanged_read
+
     def read_CommandExecuted(self):
-        # PROTECTED REGION ID(Counter.CommandExecuted_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.CommandExecuted_read) ENABLED START #
         """Return the CommandExecuted attribute."""
         result = []
         i = 0
@@ -449,138 +503,153 @@ class CentralNode(SKABaseDevice):
             result.append(single_res)
             i += 1
         return result
-        # PROTECTED REGION END #    //  Counter.CommandExecuted_read
+        # PROTECTED REGION END #    //  CentralNode.CommandExecuted_read
+
+    def read_LastCommandExecuted(self):
+        # PROTECTED REGION ID(CentralNode.LastCommandExecuted_read) ENABLED START #
+        """Return the LastCommandExecuted attribute as list of string."""
+        for command_executed in reversed(
+            self.component_manager.command_executor.command_executed
+        ):
+            single_res = "{0} {1} {2} {3}".format(
+                str(command_executed["Id"]),
+                str(command_executed["Command"]),
+                str(command_executed["ResultCode"]),
+                str(command_executed["Message"]),
+            )
+            return single_res
+        # PROTECTED REGION END #    //  CentralNode.LastCommandExecuted_read
 
     def read_CspMasterDevName(self):
-        # PROTECTED REGION ID(Counter.CspMasterDevName_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.CspMasterDevName_read) ENABLED START #
         """Return the CspMasterDevName attribute."""
         return self.component_manager.input_parameter.csp_master_dev_name
-        # PROTECTED REGION END #    //  Counter.CspMasterDevName_read
+        # PROTECTED REGION END #    //  CentralNode.CspMasterDevName_read
 
     def write_CspMasterDevName(self, value):
-        # PROTECTED REGION ID(Counter.CspMasterDevName_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.CspMasterDevName_write) ENABLED START #
         """Set the CspMasterDevName attribute."""
         self.component_manager.input_parameter.csp_master_dev_name = value
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.CspMasterDevName_write
+        # PROTECTED REGION END #    //  CentralNode.CspMasterDevName_write
 
     def read_SdpMasterDevName(self):
-        # PROTECTED REGION ID(Counter.SdpMasterDevName_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.SdpMasterDevName_read) ENABLED START #
         """Return the SdpMasterDevName attribute."""
         return self.component_manager.input_parameter.sdp_master_dev_name
-        # PROTECTED REGION END #    //  Counter.SdpMasterDevName_read
+        # PROTECTED REGION END #    //  CentralNode.SdpMasterDevName_read
 
     def write_SdpMasterDevName(self, value):
-        # PROTECTED REGION ID(Counter.SdpMasterDevName_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.SdpMasterDevName_write) ENABLED START #
         """Set the SdpMasterDevName attribute."""
         self.component_manager.input_parameter.sdp_master_dev_name = value
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.SdpMasterDevName_write
+        # PROTECTED REGION END #    //  CentralNode.SdpMasterDevName_write
 
     def read_LeafCspMasterDevName(self):
-        # PROTECTED REGION ID(Counter.LeafCspMasterDevName_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.LeafCspMasterDevName_read) ENABLED START #
         """Return the LeafCspMasterDevName attribute."""
         return (
             self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
         )
-        # PROTECTED REGION END #    //  Counter.LeafCspMasterDevName_read
+        # PROTECTED REGION END #    //  CentralNode.LeafCspMasterDevName_read
 
     def write_LeafCspMasterDevName(self, value):
-        # PROTECTED REGION ID(Counter.LeafCspMasterDevName_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.LeafCspMasterDevName_write) ENABLED START #
         """Set the LeafCspMasterDevName attribute."""
         self.component_manager.input_parameter.tm_leaf_csp_master_dev_name = (
             value
         )
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.LeafCspMasterDevName_write
+        # PROTECTED REGION END #    //  CentralNode.LeafCspMasterDevName_write
 
     def read_LeafSdpMasterDevName(self):
-        # PROTECTED REGION ID(Counter.LeafSdpMasterDevName_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.LeafSdpMasterDevName_read) ENABLED START #
         """Return the LeafSdpMasterDevName attribute."""
         return (
             self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
         )
-        # PROTECTED REGION END #    //  Counter.LeafSdpMasterDevName_read
+        # PROTECTED REGION END #    //  CentralNode.LeafSdpMasterDevName_read
 
     def write_LeafSdpMasterDevName(self, value):
-        # PROTECTED REGION ID(Counter.LeafSdpMasterDevName_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.LeafSdpMasterDevName_write) ENABLED START #
         """Set the LeafSdpMasterDevName attribute."""
         self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name = (
             value
         )
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.LeafSdpMasterDevName_write
+        # PROTECTED REGION END #    //  CentralNode.LeafSdpMasterDevName_write
 
     def read_TMOpState(self):
-        # PROTECTED REGION ID(Counter.TMOpState_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.TMOpState_read) ENABLED START #
         """Return the TMOpState attribute."""
         return self.component_manager.component.tmc_op_state
-        # PROTECTED REGION END #    //  Counter.TMOpState_read
+        # PROTECTED REGION END #    //  CentralNode.TMOpState_read
 
     def read_SubarrayDevNames(self):
-        # PROTECTED REGION ID(Counter.SubarrayDevNames_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.SubarrayDevNames_read) ENABLED START #
         """Return the SubarrayDevNames attribute."""
         return self.component_manager.input_parameter.tm_subarray_dev_names
-        # PROTECTED REGION END #    //  Counter.SubarrayDevNames_read
+        # PROTECTED REGION END #    //  CentralNode.SubarrayDevNames_read
 
     def write_SubarrayDevNames(self, value):
-        # PROTECTED REGION ID(Counter.SubarrayDevNames_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.SubarrayDevNames_write) ENABLED START #
         """Set the SubarrayDevNames attribute."""
         self.component_manager.input_parameter.tm_subarray_dev_names = value
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.SubarrayDevNames_write
+        # PROTECTED REGION END #    //  CentralNode.SubarrayDevNames_write
 
     def read_CspSubarrayDevNames(self):
-        # PROTECTED REGION ID(Counter.CspSubarrayDevNames_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.CspSubarrayDevNames_read) ENABLED START #
         """Return the CspSubarrayDevNames attribute."""
         return self.component_manager.input_parameter.csp_subarray_dev_names
-        # PROTECTED REGION END #    //  Counter.CspSubarrayDevNames_read
+        # PROTECTED REGION END #    //  CentralNode.CspSubarrayDevNames_read
 
     def write_CspSubarrayDevNames(self, value):
-        # PROTECTED REGION ID(Counter.CspSubarrayDevNames_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.CspSubarrayDevNames_write) ENABLED START #
         """Set the CspSubarrayDevNames attribute."""
         self.component_manager.input_parameter.csp_subarray_dev_names = value
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.CspSubarrayDevNames_write
+        # PROTECTED REGION END #    //  CentralNode.CspSubarrayDevNames_write
 
     def read_SdpSubarrayDevNames(self):
-        # PROTECTED REGION ID(Counter.SdpSubarrayDevNames_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.SdpSubarrayDevNames_read) ENABLED START #
         """Return the SdpSubarrayDevNames attribute."""
         return self.component_manager.input_parameter.sdp_subarray_dev_names
-        # PROTECTED REGION END #    //  Counter.SdpSubarrayDevNames_read
+        # PROTECTED REGION END #    //  CentralNode.SdpSubarrayDevNames_read
 
     def write_SdpSubarrayDevNames(self, value):
-        # PROTECTED REGION ID(Counter.SdpSubarrayDevNames_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.SdpSubarrayDevNames_write) ENABLED START #
         """Set the SdpSubarrayDevNames attribute."""
         self.component_manager.input_parameter.sdp_subarray_dev_names = value
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.SdpSubarrayDevNames_write
+        # PROTECTED REGION END #    //  CentralNode.SdpSubarrayDevNames_write
 
     def read_DishDevNames(self):
-        # PROTECTED REGION ID(Counter.DishDevNames_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.DishDevNames_read) ENABLED START #
         """Return the DishDevNames attribute."""
         return self.component_manager.input_parameter.dish_dev_names
-        # PROTECTED REGION END #    //  Counter.DishDevNames_read
+        # PROTECTED REGION END #    //  CentralNode.DishDevNames_read
 
     def write_DishDevNames(self, value):
-        # PROTECTED REGION ID(Counter.DishDevNames_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.DishDevNames_write) ENABLED START #
         """Set the DishDevNames attribute."""
         self.component_manager.input_parameter.dish_dev_names = value
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.DishDevNames_write
+        # PROTECTED REGION END #    //  CentralNode.DishDevNames_write
 
     def read_TMLeafDishDevNames(self):
-        # PROTECTED REGION ID(Counter.DishDevNames_read) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.DishDevNames_read) ENABLED START #
         """Return the DishDevNames attribute."""
         return self.component_manager.input_parameter.tm_dish_dev_names
-        # PROTECTED REGION END #    //  Counter.DishDevNames_read
+        # PROTECTED REGION END #    //  CentralNode.DishDevNames_read
 
     def write_TMLeafDishDevNames(self, value):
-        # PROTECTED REGION ID(Counter.DishDevNames_write) ENABLED START #
+        # PROTECTED REGION ID(CentralNode.DishDevNames_write) ENABLED START #
         """Set the DishDevNames attribute."""
         self.component_manager.input_parameter.tm_dish_dev_names = value
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  Counter.DishDevNames_write
+        # PROTECTED REGION END #    //  CentralNode.DishDevNames_write
 
     # --------
     # Commands

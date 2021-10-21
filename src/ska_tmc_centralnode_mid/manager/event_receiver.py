@@ -49,7 +49,7 @@ class EventReceiver:
 
     def stop(self):
         self._stop = True
-        self._thread.join()
+        # self._thread.join()
 
     def run(self):
         while not self._stop:

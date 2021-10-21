@@ -16,8 +16,9 @@ labels:
 global:
   minikube: true
   tango_host: databaseds-tango-base-test:10000
-  tries: 10
-  sleep: 5
+  retry:
+  - "--tries=10"
+  - "--sleep=5"
 
 dsconfig:
   configuration_file: data/configuration.json
@@ -40,7 +41,7 @@ centralnodemid:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode-mid
-    tag: 0.3.0
+    tag: 0.3.1
     pullPolicy: IfNotPresent
 
 resources:
@@ -66,6 +67,13 @@ deviceServers:
     enabled: true
     instances: ["01"]
     file: "data/centralnode.yaml"
+    CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
+    CspMasterFQDN: "mid_csp/elt/master"
+    SdpMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/sdp_master"
+    SdpMasterFQDN: "mid_sdp/elt/master"
+    subarray_count: 1
+    DishLeafNodePrefix: "ska_mid/tm_leaf_node/d"
+    NumDishes: 1
 
 
 nodeSelector: {}

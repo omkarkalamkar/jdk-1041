@@ -9,6 +9,7 @@ from test_cm_all_working import create_cm
 from ska_tmc_centralnode_mid.commands.telescope_standby_command import (
     TelescopeStandby,
 )
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from ska_tmc_centralnode_mid.manager.adapters import (
     BaseAdapter,
     DishAdapter,
@@ -16,13 +17,7 @@ from ska_tmc_centralnode_mid.manager.adapters import (
 )
 from tests.helper_adapter_factory import HelperAdapterFactory
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import (
-    DEVICE_LIST,
-    SLEEP_TIME,
-    TIMEOUT,
-    count_faulty_devices,
-    logger,
-)
+from tests.settings import logger
 
 
 @pytest.fixture()
@@ -91,6 +86,7 @@ def test_telescope_standby_command_fail_subarray(tango_context):
     standby_command = TelescopeStandby(
         cm, cm.op_state_model, my_adapter_factory
     )
+    assert standby_command.check_allowed()
     (result_code, message) = standby_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
@@ -117,6 +113,7 @@ def test_telescope_standby_command_fail_dish(tango_context):
     standby_command = TelescopeStandby(
         cm, cm.op_state_model, my_adapter_factory
     )
+    assert standby_command.check_allowed()
     (result_code, message) = standby_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
@@ -135,5 +132,5 @@ def test_telescope_standby_fail_check_allowed(tango_context):
     standby_command = TelescopeStandby(
         cm, cm.op_state_model, my_adapter_factory
     )
-    with pytest.raises(Exception):
+    with pytest.raises(CommandNotAllowed):
         standby_command.check_allowed()

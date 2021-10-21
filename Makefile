@@ -30,6 +30,7 @@ PYTHON_SWITCHES_FOR_FLAKE8=--ignore=F401,W503 --max-line-length=180
 HELM_CHART=test-parent
 UMBRELLA_CHART_PATH ?= charts/$(HELM_CHART)/
 K8S_CHARTS ?= ska-tmc-centralnode-mid test-parent## list of charts
+K8S_CHART ?= $(HELM_CHART)
 
 CI_PROJECT_DIR ?= .
 
@@ -37,6 +38,8 @@ XAUTHORITY ?= $(HOME)/.Xauthority
 THIS_HOST := $(shell ip a 2> /dev/null | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n1)
 DISPLAY ?= $(THIS_HOST):0
 JIVE ?= false# Enable jive
+MINIKUBE ?= true ## Minikube or not
+TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
 
 CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode-mid
 CI_ENVIRONMENT_SLUG ?= ska-tmc-centralnode-mid
@@ -44,32 +47,57 @@ $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH
 
 # Test runner - run to completion job in K8s
 # name of the pod running the k8s_tests
-TEST_RUNNER = test-runner-$(CI_JOB_ID)-$(RELEASE_NAME)
+K8S_TEST_RUNNER = test-runner-$(RELEASE_NAME)
 
 ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.5
 
-PYTHON_VARS_BEFORE_PYTEST = PYTHONPATH=.:src:src/ska_tango_examples
+## override so that this picks up setup.cfg from the project root
+PYTHON_TEST_FILE ?=
 
-PYTHON_VARS_AFTER_PYTEST = -m "not post_deployment"
+# Set the specific environment variables required for pytest
+PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tmc_centralnode_mid:tests \
+							 TANGO_HOST=$(TANGO_HOST)
 
-MARK = "post_deployment"
+MARK ?= ## What -m opt to pass to pytest
+# run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
+FILE ?= ## A specific test file to pass to pytest
+ADD_ARGS ?= ## Additional args to pass to pytest
+
 
 CI_REGISTRY ?= gitlab.com
-ifneq ($(CI_JOB_ID),)
-IMAGE_TO_TEST = $(CI_REGISTRY)/ska-telescope/$(PROJECT):$(CI_COMMIT_SHORT_SHA)
-CAR_OCI_REGISTRY_HOST = $(CI_REGISTRY)
-CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
-	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope \
-	--set central_node.centralnodemid.image.tag=$(CI_COMMIT_SHORT_SHA)
-else
 CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
+K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/$(PROJECT):$(VERSION)
+ifneq ($(CI_JOB_ID),)
+CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
+	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
+	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
+K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
 endif
 
--include .make/make.mk
--include .make/release.mk
--include .make/python.mk
--include .make/oci.mk
+# override for python-test - must not have the above --true-context
+ifeq ($(MAKECMDGOALS),python-test)
+ADD_ARGS +=  --forked
+MARK = not post_deployment and not acceptance
+endif
+ifeq ($(MAKECMDGOALS),k8s-test)
+ADD_ARGS +=  --true-context
+MARK = post_deployment or acceptance
+endif
+
+PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
+
+# override python.mk python-pre-test target
+python-pre-test:
+	@echo "python-pre-test: running with: $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) pytest $(PYTHON_VARS_AFTER_PYTEST) \
+	 --cov=src --cov-report=term-missing --cov-report xml:build/reports/code-coverage.xml --junitxml=build/reports/unit-tests.xml $(PYTHON_TEST_FILE)"
+
 -include .make/k8s.mk
+-include .make/python.mk
+-include .make/helm.mk
+-include .make/oci.mk
+-include .make/docs.mk
+-include .make/release.mk
+-include .make/make.mk
 -include .make/help.mk
 -include PrivateRules.mak
 
@@ -78,7 +106,8 @@ OCI_IMAGES=ska-tmc-centralnode-mid
 
 clean:
 	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
-			charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage
+			charts/build charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage \
+			tests/.pytest_cache
 
 unit-test: python-test
 
@@ -96,9 +125,6 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 
 requirements: ## Install Dependencies
 	python3 -m pip install -r requirements.txt -r requirements-dev.txt
-
-python-pre-test: ## Overriding python.mk
-	@mkdir -p build;
 
 # .PHONY is additive
 .PHONY: unit-test

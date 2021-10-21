@@ -7,6 +7,37 @@ from tango import DevState
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 
 
+def dev_state_2_str(value):
+    if value == DevState.ON:
+        return "DevState.ON"
+    elif value == DevState.OFF:
+        return "DevState.OFF"
+    elif value == DevState.CLOSE:
+        return "DevState.CLOSE"
+    elif value == DevState.OPEN:
+        return "DevState.OPEN"
+    elif value == DevState.INSERT:
+        return "DevState.INSERT"
+    elif value == DevState.EXTRACT:
+        return "DevState.EXTRACT"
+    elif value == DevState.MOVING:
+        return "DevState.MOVING"
+    elif value == DevState.STANDBY:
+        return "DevState.STANDBY"
+    elif value == DevState.FAULT:
+        return "DevState.FAULT"
+    elif value == DevState.INIT:
+        return "DevState.INIT"
+    elif value == DevState.RUNNING:
+        return "DevState.RUNNING"
+    elif value == DevState.ALARM:
+        return "DevState.ALARM"
+    elif value == DevState.DISABLE:
+        return "DevState.DISABLE"
+    else:
+        return "DevState.UNKNOWN"
+
+
 class Component:
     """
     A component class for Central Node
@@ -45,6 +76,7 @@ class Component:
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_subarray_health_state_callback=None,
+        _update_imaging_callback=None,
     ):
         self._update_device_callback = _update_device_callback
         self._update_telescope_state_callback = (
@@ -57,6 +89,7 @@ class Component:
         self._update_subarray_health_state_callback = (
             _update_subarray_health_state_callback
         )
+        self._update_imaging_callback = _update_imaging_callback
 
     def _invoke_device_callback(self, devInfo):
         if self._update_device_callback is not None:
@@ -80,6 +113,10 @@ class Component:
         if self._update_subarray_health_state_callback is not None:
             self._update_subarray_health_state_callback(devInfo)
 
+    def _invoke_imaging_callback(self):
+        if self._update_imaging_callback is not None:
+            self._update_imaging_callback(self.imaging)
+
     @property
     def desired_telescope_state(self):
         """
@@ -88,7 +125,7 @@ class Component:
         :return: desired telescope state
         :rtype: DevState
         """
-        return self._pst
+        return self._desired_telescope_state
 
     @desired_telescope_state.setter
     def desired_telescope_state(self, value):
@@ -158,6 +195,7 @@ class Component:
         :param devInfo: a DeviceInfo object
         """
         if devInfo not in self._devices:
+            devInfo.update_faulty(True, exception)
             self._devices.append(devInfo)
             self._invoke_device_callback(devInfo)
         else:
@@ -274,7 +312,9 @@ class Component:
         :type value: ModesAvailability
         """
         if isinstance(value, ModesAvailability):
-            self._imaging = value
+            if self._imaging != value:
+                self._imaging = value
+                self._invoke_imaging_callback()
 
     @property
     def pss(self):
@@ -326,9 +366,13 @@ class Component:
         for dev in self.devices:
             devices.append(dev.to_dict())
         result = {
-            "telescope_state": self._telescope_state,
-            "tmc_op_state": self._tmc_op_state,
-            "telescope_health_state": self._telescope_health_state,
+            "telescope_state": dev_state_2_str(
+                DevState(self._telescope_state)
+            ),
+            "tmc_op_state": dev_state_2_str(DevState(self._tmc_op_state)),
+            "telescope_health_state": str(
+                HealthState(self._telescope_health_state)
+            ),
             "devices": devices,
         }
 
@@ -391,7 +435,7 @@ class DeviceInfo:
     def to_dict(self):
         result = {
             "dev_name": self.dev_name,
-            "state": str(DevState(self.state)),
+            "state": dev_state_2_str(DevState(self.state)),
             "obsState": str(ObsState(self.obsState)),
             "healthState": str(HealthState(self.healthState)),
             "ping": str(self.ping),

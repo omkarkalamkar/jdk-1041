@@ -6,8 +6,12 @@ import tango
 from tango import DevState
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from tests.integration.common import devices_to_load, ensure_checked_devices
-from tests.settings import SLEEP_TIME, TIMEOUT, logger
+from tests.integration.common import (
+    assert_event_arrived,
+    devices_to_load,
+    ensure_checked_devices,
+)
+from tests.settings import logger
 
 
 @pytest.mark.post_deployment
@@ -25,7 +29,7 @@ def test_tmc_state(tango_context):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
 
-    central_node.subscribe_event(
+    event_id = central_node.subscribe_event(
         "TMOpState",
         tango.EventType.CHANGE_EVENT,
         event_callback,
@@ -51,13 +55,8 @@ def test_tmc_state(tango_context):
     sdp_subarray_ln.SetDirectState(DevState.ON)
     dish_ln.SetDirectState(DevState.ON)
 
-    start_time = time.time()
-    while not pytest.event_arrived:
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-
-    assert pytest.event_arrived
+    assert_event_arrived()
 
     assert central_node.TMOpState == DevState.FAULT
+
+    central_node.unsubscribe_event(event_id)

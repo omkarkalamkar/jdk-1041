@@ -24,6 +24,7 @@ from ska_tmc_centralnode_mid.model.component import (
     DeviceInfo,
     SubArrayDeviceInfo,
 )
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from ska_tmc_centralnode_mid.model.input import InputParameter
 
 
@@ -53,6 +54,8 @@ class CNComponentManager(BaseComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_subarray_health_state_callback=None,
+        _update_imaging_callback=None,
+        _update_command_in_progress_callback=None,
         _monitoring_loop=True,
         _event_receiver=True,
         max_workers=5,
@@ -99,6 +102,7 @@ class CNComponentManager(BaseComponentManager):
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_subarray_health_state_callback,
+            _update_imaging_callback,
         )
 
         super().__init__(op_state_model, *args, **kwargs)
@@ -115,8 +119,18 @@ class CNComponentManager(BaseComponentManager):
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
-        self._command_executor = CommandExecutor(logger)
-        self._command_executor.start()
+        self._command_executor = CommandExecutor(
+            logger,
+            _update_command_in_progress_callback=_update_command_in_progress_callback,
+        )
+
+    def reset(self):
+        pass
+
+    def stop(self):
+        self._monitoring_loop.stop()
+        self._event_receiver.stop()
+        self._command_executor.stop()
 
     def set_aggregators(
         self,
@@ -134,7 +148,7 @@ class CNComponentManager(BaseComponentManager):
         Return the input parameter
 
         :return: input parameter
-        :rtype InputParameter
+        :rtype: InputParameter
         """
         return self._input_parameter
 
@@ -144,7 +158,7 @@ class CNComponentManager(BaseComponentManager):
         Return the managed component
 
         :return: the managed component
-        :rtype Component
+        :rtype: Component
         """
         return self._component
 
@@ -303,7 +317,7 @@ class CNComponentManager(BaseComponentManager):
         :param device_info: a device info
         :type device_info: DeviceInfo
         :param exception: an exception
-        :type Exception
+        :type: Exception
         """
         with self.lock:
             self.component.update_device_exception(device_info, exception)
@@ -327,6 +341,7 @@ class CNComponentManager(BaseComponentManager):
 
         self._aggregate_health_state()
         self._aggregate_state()
+        self._update_imaging()
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -364,6 +379,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo.update_faulty(False)
 
         self._aggregate_state()
+        self._update_imaging()
 
     def update_device_obs_state(self, dev_name, obs_state):
         """
@@ -463,3 +479,32 @@ class CNComponentManager(BaseComponentManager):
             # and I need to update the assigned resources in the device info
             if subarray_dev_info.obsState == ObsState.EMPTY:
                 subarray_dev_info.resources = []
+
+    def _update_imaging(self):
+        """
+        Checks if CSP is ON and if atleast one Dish is ON. If both the conditions are true,
+        it sets imaging to be available.
+        """
+        dish_on = False
+        csp_state = DevState.UNKNOWN
+        with self.lock:
+            for dev_name in self.input_parameter.dish_dev_names:
+                dish = self.get_device(dev_name)
+                if (
+                    dish is not None
+                    and not dish.faulty
+                    and dish.state == DevState.ON
+                ):
+                    dish_on = True
+                    break
+
+            csp_master_device = self.get_device(
+                self.input_parameter.csp_master_dev_name
+            )
+            if csp_master_device is not None and not csp_master_device.faulty:
+                csp_state = csp_master_device.state
+
+            if csp_state == DevState.ON and dish_on:
+                self.component.imaging = ModesAvailability.available
+            else:
+                self.component.imaging = ModesAvailability.not_available

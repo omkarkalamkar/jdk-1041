@@ -20,22 +20,9 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
 
 @pytest.mark.post_deployment
 def test_assign_res_command(tango_context):
-    pytest.num_events_arrived = 0
-
-    def event_callback(evt):
-        assert not evt.err
-        pytest.num_events_arrived += 1
-
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
-
-    central_node.subscribe_event(
-        "InternalModel",
-        tango.EventType.CHANGE_EVENT,
-        event_callback,
-        stateless=True,
-    )
 
     ensure_checked_devices(central_node)
     initial_len = len(central_node.CommandExecuted)
@@ -54,15 +41,6 @@ def test_assign_res_command(tango_context):
         if command[0] == unique_id[0]:
             logger.info("command result: %s", command)
             assert command[2] == "ResultCode.OK"
-
-    start_time = time.time()
-    while pytest.num_events_arrived <= 2:
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-
-    assert pytest.num_events_arrived > 1
 
     def get_device(json_model):
         for device in json_model["devices"]:

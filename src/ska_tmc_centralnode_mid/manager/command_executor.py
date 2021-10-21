@@ -9,7 +9,11 @@ from ska_tango_base.commands import ResultCode
 
 class CommandExecutor:
     def __init__(
-        self, logger, max_queue_size=100, queue_fetch_timeout=1
+        self,
+        logger,
+        max_queue_size=100,
+        queue_fetch_timeout=1,
+        _update_command_in_progress_callback=None,
     ) -> None:
         self._logger = logger
         self._max_queue_size = max_queue_size
@@ -17,7 +21,7 @@ class CommandExecutor:
         self._queue_fetch_timeout = queue_fetch_timeout
 
         self._command_executed = []
-        self._command_in_progress = ""
+        self._command_in_progress = "None"
 
         self._worker_thread = threading.Thread(
             target=self._run,
@@ -25,6 +29,10 @@ class CommandExecutor:
         )
         self._stop = False
         self._worker_thread.start()
+
+        self._update_command_in_progress_callback = (
+            _update_command_in_progress_callback
+        )
 
     @property
     def command_executed(self):
@@ -36,21 +44,20 @@ class CommandExecutor:
 
     @command_in_progress.setter
     def command_in_progress(self, value):
-        self._command_in_progress = value
+        if self._command_in_progress != value:
+            self._command_in_progress = value
+            if self._update_command_in_progress_callback is not None:
+                self._update_command_in_progress_callback(
+                    self._command_in_progress
+                )
 
     @property
     def queue_full(self):
         return self._work_queue.full()
 
     def stop(self):
-        if self._worker_thread.is_alive():
-            self._stop = True
-            self._worker_thread.join()
-
-    def start(self):
-        if not self._worker_thread.is_alive():
-            self._stop = True
-            self._worker_thread.start()
+        self._stop = True
+        # self._worker_thread.join()
 
     def enqueue_command(self, command_object, argin=None):
         """Adds the Command to the queue.
@@ -91,12 +98,14 @@ class CommandExecutor:
         with tango.EnsureOmniThread():
             while not self._stop:
                 try:
+                    # import debugpy; debugpy.debug_this_thread()
+                    self.command_in_progress = "None"
                     (command_object, argin, id) = self._work_queue.get(
                         block=True, timeout=self._queue_fetch_timeout
                     )
                     command_name = type(command_object).__name__
                     try:
-                        self._command_in_progress = command_name
+                        self.command_in_progress = command_name
                         result_code = None
                         message = None
                         if argin is None:
@@ -119,6 +128,7 @@ class CommandExecutor:
                                 "Unmanaged exception during call to command %s with argin %s: %s",
                                 command_name,
                                 argin,
+                                str(err),
                             ),
                             exc_info=1,
                         )

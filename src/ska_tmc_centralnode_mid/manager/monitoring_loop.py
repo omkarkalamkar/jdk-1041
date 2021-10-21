@@ -51,7 +51,7 @@ class MonitoringLoop:
 
     def stop(self):
         self._stop = True
-        self._thread.join()
+        # self._thread.join()
 
     def add_priority_devices(self, dev_name):
         self._priority_devices.put(dev_name)

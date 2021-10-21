@@ -53,3 +53,4 @@ charts/ska-tmc-centralnode-mid/charts/
 charts/test-parent/Chart.lock
 charts/test-parent/charts/
 code-coverage
+pytest-logs.txt

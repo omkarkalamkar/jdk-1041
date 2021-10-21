@@ -4,12 +4,13 @@ import pytest
 import tango
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     TIMEOUT,
     create_cm_no_faulty_devices,
-    ensure_telescope_state,
+    ensure_imaging,
     set_devices_state,
 )
 
@@ -39,37 +40,49 @@ def devices_to_load():
     )
 
 
-def set_devices_on(cm, devFactory, expected_elapsed_time):
+def test_imaging_available(tango_context):
+    cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
         devices=[
             "mid_csp/elt/master",
-            "mid_sdp/elt/master",
             "mid_d0001/elt/master",
         ],
-        devFactory=devFactory,
+        devFactory=DevFactory(),
         state=tango.DevState.ON,
         cm=cm,
-        expected_elapsed_time=expected_elapsed_time,
+        expected_elapsed_time=1.5,
     )
-    ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=1.5)
+    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=1.5)
+    assert cm.component.imaging == ModesAvailability.available
 
 
-def test_telescope_state_on(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_devices_on(cm, devFactory, 1.5)
-    assert cm.component.telescope_state == tango.DevState.ON
-
-
-def test_telescope_state_on_only_monitoring_loop(tango_context):
-    devFactory = DevFactory()
+def test_imaging_available_only_monitoring_loop(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, False)
-    set_devices_on(cm, devFactory, 1.5)
-    assert cm.component.telescope_state == tango.DevState.ON
+    set_devices_state(
+        devices=[
+            "mid_csp/elt/master",
+            "mid_d0001/elt/master",
+        ],
+        devFactory=DevFactory(),
+        state=tango.DevState.ON,
+        cm=cm,
+        expected_elapsed_time=1.5,
+    )
+    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=1.5)
+    assert cm.component.imaging == ModesAvailability.available
 
 
-def test_telescope_state_on_only_events(tango_context):
-    devFactory = DevFactory()
+def test_imaging_available_only_events(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_devices_on(cm, devFactory, 5)
-    assert cm.component.telescope_state == tango.DevState.ON
+    set_devices_state(
+        devices=[
+            "mid_csp/elt/master",
+            "mid_d0001/elt/master",
+        ],
+        devFactory=DevFactory(),
+        state=tango.DevState.ON,
+        cm=cm,
+        expected_elapsed_time=2,
+    )
+    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=2)
+    assert cm.component.imaging == ModesAvailability.available

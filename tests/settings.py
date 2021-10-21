@@ -10,8 +10,8 @@ from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
 logger = logging.getLogger(__name__)
 
-SLEEP_TIME = 0.1
-TIMEOUT = 50
+SLEEP_TIME = 0.5
+TIMEOUT = 10
 
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
@@ -87,6 +87,17 @@ def ensure_tmc_op_state(cm, state, expected_elapsed_time):
     start_time = time.time()
     elapsed_time = 0
     while cm.component.tmc_op_state != state:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail("Timeout occurred while executing the test")
+    assert elapsed_time < expected_elapsed_time
+
+
+def ensure_imaging(cm, value, expected_elapsed_time):
+    start_time = time.time()
+    elapsed_time = 0
+    while cm.component.imaging != value:
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
