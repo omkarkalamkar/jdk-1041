@@ -38,7 +38,7 @@ setup(
     include_package_data=True,
     test_suite="test",
     entry_points={
-        "console_scripts": ["CentralNodeDS=ska_tmc_centralnode_mid.central_node:main"]
+        "console_scripts": ["CentralNodeDS=ska_tmc_centralnode_mid.central_node_mid:main"]
     },
     author="Team NCRA",
     author_email="telmgt-internal@googlegroups.com",

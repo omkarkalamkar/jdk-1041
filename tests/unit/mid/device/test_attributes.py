@@ -12,7 +12,7 @@ from tango import DevState
 from tango.test_utils import DeviceTestContext
 
 from ska_tmc_centralnode_mid import release
-from ska_tmc_centralnode_mid.central_node import CentralNode
+from ska_tmc_centralnode_mid.central_node_mid import CentralNodeMid
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 
 
@@ -21,11 +21,13 @@ def central_node_device(request):
     """Create DeviceProxy for tests"""
     true_context = request.config.getoption("--true-context")
     if not true_context:
-        with DeviceTestContext(CentralNode) as proxy:
+        with DeviceTestContext(CentralNodeMid) as proxy:
             yield proxy
     else:
         database = tango.Database()
-        instance_list = database.get_device_exported_for_class("CentralNode")
+        instance_list = database.get_device_exported_for_class(
+            "CentralNodeMid"
+        )
         for instance in instance_list.value_string:
             yield tango.DeviceProxy(instance)
             break
@@ -88,7 +90,7 @@ def test_attributes(central_node_device):
     assert "tmc_op_state" in json_model
     assert "telescope_health_state" in json_model
     assert "devices" in json_model
-    json_model = json.loads(central_node_device.TranformedInternalModel)
+    json_model = json.loads(central_node_device.TransformedInternalModel)
     assert "telescope_state" in json_model
     assert "tmc_op_state" in json_model
     assert "telescope_health_state" in json_model

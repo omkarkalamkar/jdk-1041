@@ -6,9 +6,8 @@ import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
-from tango import Database, DeviceProxy, DevState
+from tango import Database, DeviceProxy
 
-from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from tests.settings import SLEEP_TIME, logger
 
 

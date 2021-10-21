@@ -1,10 +1,8 @@
 import time
 
-import mock
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.obs.obs_device import SKAObsDevice
-from test_cm_all_working import create_cm
 
 from ska_tmc_centralnode_mid.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
@@ -14,7 +12,7 @@ from ska_tmc_centralnode_mid.manager.adapters import (
 )
 from tests.helper_adapter_factory import HelperAdapterFactory
 from tests.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import logger
+from tests.settings import create_cm, logger
 
 
 @pytest.fixture()

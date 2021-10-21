@@ -9,7 +9,7 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-CentralNodeDS = 'ska_tmc_centralnode_mid.central_node:main'
+CentralNodeDS = 'ska_tmc_centralnode_mid.central_node_mid:main'
 
 [[tool.poetry.source]]
 name = 'ska-nexus'

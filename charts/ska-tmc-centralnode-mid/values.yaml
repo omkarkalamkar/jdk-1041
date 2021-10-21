@@ -66,7 +66,7 @@ deviceServers:
   centralnode:
     enabled: true
     instances: ["01"]
-    file: "data/centralnode.yaml"
+    file: "data/centralnode_mid.yaml"
     CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
     CspMasterFQDN: "mid_csp/elt/master"
     SdpMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/sdp_master"

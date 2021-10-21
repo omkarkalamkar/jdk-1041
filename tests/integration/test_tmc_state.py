@@ -1,14 +1,11 @@
-import json
-import time
-
 import pytest
 import tango
 from tango import DevState
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from tests.integration.common import devices_to_load  # noqa F401
 from tests.integration.common import (
     assert_event_arrived,
-    devices_to_load,
     ensure_checked_devices,
 )
 from tests.settings import logger

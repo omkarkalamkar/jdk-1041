@@ -1,13 +1,10 @@
-from ska_tango_base.commands import BaseCommand, ResultCode
+from ska_tango_base.commands import ResultCode
 from tango import DevState
 
 from ska_tmc_centralnode_mid.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
-from ska_tmc_centralnode_mid.manager.adapters import (
-    AdapterFactory,
-    AdapterType,
-)
+from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
 
 
 class TelescopeOn(AbstractTelescopeOnOff):

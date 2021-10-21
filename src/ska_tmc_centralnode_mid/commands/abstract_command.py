@@ -1,4 +1,3 @@
-from debugpy import debug_this_thread
 from ska_tango_base.commands import BaseCommand, ResultCode
 from tango import DevState
 

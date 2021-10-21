@@ -5,7 +5,6 @@ import json
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
-from tango import DevFailed, DevState
 
 from ska_tmc_centralnode_mid.commands.abstract_command import (
     AbstractAssignReleaseResources,

@@ -2,13 +2,13 @@ name: "centralnode-test"
 function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
-command: "python3 /app/src/ska_tmc_centralnode_mid/central_node.py"
+command: "python3 /app/src/ska_tmc_centralnode_mid/central_node_mid.py"
 server:
-  name: "central_node"
+  name: "central_node_mid"
   instances:
   - name: "01"
     classes:
-    - name: "CentralNode"
+    - name: "CentralNodeMid"
       devices:
       - name: "ska_mid/tm_central/central_node"
         properties:
@@ -30,7 +30,7 @@ server:
         - name: "NumDishes"
           values:
           - "{{.Values.deviceServers.centralnode.NumDishes}}"
-        - name: "TMMidSubarrayNodes"
+        - name: "TMSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
           - "ska_mid/tm_subarray_node/{{ . }}"

@@ -9,8 +9,8 @@ Central Node Mid
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: src.ska_tmc_centralnode_mid.central_node
-.. autoclass:: src.ska_tmc_centralnode_mid.central_node.CentralNode
+.. automodule:: src.ska_tmc_centralnode_mid.central_node_mid
+.. autoclass:: src.ska_tmc_centralnode_mid.central_nodeMid.CentralNodeMid
    :members:
    :undoc-members:
 .. automodule:: src.ska_tmc_centralnode_mid.dev_factory

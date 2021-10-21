@@ -3,11 +3,13 @@ import time
 from os.path import dirname, join
 
 import pytest
-import tango
 from ska_tango_base.commands import ResultCode
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from tests.integration.common import devices_to_load, ensure_checked_devices
+from tests.integration.common import (  # noqa F401
+    devices_to_load,
+    ensure_checked_devices,
+)
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 

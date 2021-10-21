@@ -8,7 +8,7 @@ import threading
 import time
 
 from ska_tango_base.base import BaseComponentManager
-from ska_tango_base.control_model import HealthState, ObsState
+from ska_tango_base.control_model import ObsState
 from tango import DevState
 
 from ska_tmc_centralnode_mid.manager.aggregators import (
@@ -25,10 +25,6 @@ from ska_tmc_centralnode_mid.model.component import (
     SubArrayDeviceInfo,
 )
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
-from ska_tmc_centralnode_mid.model.input import (
-    InputParameter,
-    InputParameterMid,
-)
 
 
 class CNComponentManager(BaseComponentManager):

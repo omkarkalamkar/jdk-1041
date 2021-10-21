@@ -1,5 +1,3 @@
-import time
-
 import pytest
 import tango
 
@@ -7,7 +5,6 @@ from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
-    TIMEOUT,
     create_cm_no_faulty_devices,
     ensure_telescope_state,
     set_device_state,

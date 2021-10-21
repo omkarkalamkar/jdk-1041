@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from ska_tmc_centralnode_mid.central_node import CentralNode
+from ska_tmc_centralnode_mid.central_node_mid import CentralNodeMid
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
@@ -34,7 +34,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": CentralNode,
+            "class": CentralNodeMid,
             "devices": [
                 {
                     "name": "ska_mid/tm_central/central_node",

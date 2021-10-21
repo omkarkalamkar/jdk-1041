@@ -1,16 +1,12 @@
-import logging
 import time
 
 import pytest
-from ska_tango_base.base.base_device import SKABaseDevice
 
-from ska_tmc_centralnode_mid.central_node import CentralNode
 from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
 from ska_tmc_centralnode_mid.model.input import InputParameterMid
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
-from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST,
     SLEEP_TIME,
@@ -21,42 +17,17 @@ from tests.settings import (
     logger,
 )
 
-WORKING_DEVICES = 3
 
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": SKABaseDevice,
-            "devices": [{"name": "ska_mid/tm_central/central_node"}],
-        },
-        {
-            "class": HelperSubArrayDevice,
-            "devices": [
-                {"name": "ska_mid/tm_subarray_node/1"},
-                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
-                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
-            ],
-        },
-    )
-
-
-def test_some_working_other_faulty(tango_context):
-    logger.info("%s", tango_context)
-
+def test_all_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
         op_state_model, _input_parameter=InputParameterMid(None), logger=logger
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
-    for dev in DEVICE_LIST:
-        cm.add_device(dev)
+    cm.add_multiple_devices(DEVICE_LIST)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
-    # the device list contains one duplicate of the dishes
-    num_devices = len(DEVICE_LIST) + NumDishes - 1
-    while num_devices != len(cm.checked_devices):
+    while num_faulty != len(cm.devices):
         logger.info("Faulty devices %s", num_faulty)
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
@@ -65,4 +36,5 @@ def test_some_working_other_faulty(tango_context):
         num_faulty = count_faulty_devices(cm)
     elapsed_time = time.time() - start_time
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
-    assert num_faulty == num_devices - WORKING_DEVICES
+    for devInfo in cm.devices:
+        assert devInfo.faulty

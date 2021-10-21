@@ -24,7 +24,7 @@ RELEASE_NAME ?= test
 # F401 Ignore unused imports because of tagno protected sections
 # W503 Ignore operator at beginning of line as conflicts with black
 # stretch line length to 180 because of super long parameter assignments
-PYTHON_SWITCHES_FOR_FLAKE8=--ignore=F401,W503 --max-line-length=180
+PYTHON_SWITCHES_FOR_FLAKE8=--ignore=W503 --max-line-length=180
 
 # UMBRELLA_CHART_PATH Path of the umbrella chart to work with
 HELM_CHART=test-parent

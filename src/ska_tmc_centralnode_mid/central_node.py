@@ -3,45 +3,23 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
-# PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
-# Tango imports
 import json
 
-from ska_ser_skuid.client import SkuidClient
-
-# Additional import
 from ska_tango_base import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
-from tango import AttrWriteType, DebugIt, DevState, DevString
-from tango.server import attribute, command, device_property, run
+from tango import AttrWriteType, DebugIt
+from tango.server import attribute, command, device_property
 
 from ska_tmc_centralnode_mid import release
-from ska_tmc_centralnode_mid.commands.assign_resources_command import (
-    AssignResources,
-)
-from ska_tmc_centralnode_mid.commands.release_resources_command import (
-    ReleaseResources,
-)
-from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
-from ska_tmc_centralnode_mid.commands.telescope_off_command import TelescopeOff
-from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
-from ska_tmc_centralnode_mid.commands.telescope_standby_command import (
-    TelescopeStandby,
-)
 from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from ska_tmc_centralnode_mid.model.input import InputParameterMid
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
-# PROTECTED REGION END #    //  CentralNode.additional_import
 
-__all__ = ["CentralNode", "main"]
-
-
-class CentralNode(SKABaseDevice):
+class AbstractCentralNode(SKABaseDevice):
     """
     Central Node is a coordinator of the complete Telescope system
 
@@ -60,43 +38,11 @@ class CentralNode(SKABaseDevice):
         doc="Device name of TMAlarmHandler ",
     )
 
-    TMMidSubarrayNodes = device_property(
+    TMSubarrayNodes = device_property(
         dtype=("str",),
         doc="List of TM Mid Subarray Node devices",
         default_value=tuple(),
     )
-
-    NumDishes = device_property(
-        dtype="uint",
-        default_value=0,
-        doc="Number of Dishes",
-    )
-
-    DishLeafNodePrefix = device_property(
-        dtype="str",
-        default_value="",
-        doc="Device name prefix for Dish Leaf Node",
-    )
-
-    TMMidCspSubarrayLeafNodes = device_property(
-        dtype=("str",),
-        doc="List of TM Mid CspSubarrayLeafNode devices",
-        default_value=tuple(),
-    )
-
-    TMMidSdpSubarrayLeafNodes = device_property(
-        dtype=("str",),
-        doc="List of TM Mid SdpSubarrayLeafNode devices",
-        default_value=tuple(),
-    )
-
-    CspMasterLeafNodeFQDN = device_property(dtype="str")
-
-    CspMasterFQDN = device_property(dtype="str")
-
-    SdpMasterLeafNodeFQDN = device_property(dtype="str")
-
-    SdpMasterFQDN = device_property(dtype="str")
 
     SkuidServiceNamePort = device_property(
         dtype="DevString",
@@ -141,26 +87,6 @@ class CentralNode(SKABaseDevice):
         doc="DevState of telescope",
     )
 
-    imaging = attribute(
-        dtype=ModesAvailability,
-        access=AttrWriteType.READ,
-        doc="Imaging Attribute",
-    )
-
-    pss = attribute(
-        dtype=ModesAvailability, access=AttrWriteType.READ, doc="PSS Attribute"
-    )
-
-    pst = attribute(
-        dtype=ModesAvailability, access=AttrWriteType.READ, doc="PST Attribute"
-    )
-
-    vlbi = attribute(
-        dtype=ModesAvailability,
-        access=AttrWriteType.READ,
-        doc="VLBI Attribute",
-    )
-
     desiredTelescopeState = attribute(
         dtype="DevState",
         access=AttrWriteType.READ,
@@ -173,26 +99,6 @@ class CentralNode(SKABaseDevice):
         doc="commandInProgress attribute of Central Node.",
     )
 
-    CspMasterDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    SdpMasterDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    LeafCspMasterDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    LeafSdpMasterDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
     TMOpState = attribute(
         dtype="DevState",
     )
@@ -201,30 +107,6 @@ class CentralNode(SKABaseDevice):
         dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=16,
-    )
-
-    CspSubarrayDevNames = attribute(
-        dtype=("DevString",),
-        access=AttrWriteType.READ_WRITE,
-        max_dim_x=16,
-    )
-
-    SdpSubarrayDevNames = attribute(
-        dtype=("DevString",),
-        access=AttrWriteType.READ_WRITE,
-        max_dim_x=16,
-    )
-
-    DishDevNames = attribute(
-        dtype=("DevString",),
-        access=AttrWriteType.READ_WRITE,
-        max_dim_x=100,
-    )
-
-    TMLeafDishDevNames = attribute(
-        dtype=("DevString",),
-        access=AttrWriteType.READ_WRITE,
-        max_dim_x=100,
     )
 
     CommandExecuted = attribute(
@@ -245,7 +127,7 @@ class CentralNode(SKABaseDevice):
         doc="Json String representing the entire internal model.",
     )
 
-    TranformedInternalModel = attribute(
+    TransformedInternalModel = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
         doc="Json String representing the entire internal model transformed for better reading.",
@@ -257,58 +139,6 @@ class CentralNode(SKABaseDevice):
         doc="Json String representing the last device changed in the internal model.",
     )
 
-    def create_component_manager(self):
-        # if the init is called more than once
-        # I need to stop all threads
-        if hasattr(self, "component_manager"):
-            self.component_manager.stop()
-
-        self.op_state_model = TMCOpStateModel(
-            logger=self.logger, callback=super()._update_state
-        )
-        cm = CNComponentManager(
-            self.op_state_model,
-            logger=self.logger,
-            _update_device_callback=self.update_device_callback,
-            _update_telescope_state_callback=self.update_telescope_state_callback,
-            _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
-            _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
-            _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
-            _update_imaging_callback=self.update_imaging_callback,
-            _update_command_in_progress_callback=self.update_command_in_progress_callback,
-            max_workers=self.MaxWorkerMonitoringLoop,
-            proxy_timeout=self.ProxyTimeoutMonitoringLoop,
-            _input_parameter=InputParameterMid(None),
-            sleep_time=self.SleepTime,
-        )
-        cm.input_parameter.tm_dish_dev_names = []
-        for dish in range(1, (self.NumDishes + 1)):
-            cm.input_parameter.tm_dish_dev_names.append(
-                self.DishLeafNodePrefix + f"000{dish}"
-            )
-        cm.input_parameter.dish_dev_names = []
-        for dish in range(1, (self.NumDishes + 1)):
-            cm.input_parameter.dish_dev_names.append(
-                f"{'mid_d'}000{dish}{'/elt/master'}"
-            )
-        cm.input_parameter.tm_subarray_dev_names = self.TMMidSubarrayNodes
-        cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
-        cm.input_parameter.tm_leaf_csp_master_dev_name = (
-            self.CspMasterLeafNodeFQDN or ""
-        )
-        cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
-        cm.input_parameter.tm_leaf_sdp_master_dev_name = (
-            self.SdpMasterLeafNodeFQDN or ""
-        )
-        cm.input_parameter.csp_subarray_dev_names = (
-            self.TMMidCspSubarrayLeafNodes
-        )
-        cm.input_parameter.sdp_subarray_dev_names = (
-            self.TMMidSdpSubarrayLeafNodes
-        )
-        cm.update_input_parameter()
-        return cm
-
     def update_device_callback(self, devInfo):
         self._LastDeviceInfoChanged = devInfo.to_json()
         self.push_change_event("LastDeviceInfoChanged", devInfo.to_json())
@@ -316,10 +146,6 @@ class CentralNode(SKABaseDevice):
     def update_telescope_state_callback(self, telescope_state):
         self.logger.info("telescopeState %s", telescope_state)
         self.push_change_event("telescopeState", telescope_state)
-
-    def update_imaging_callback(self, imaging):
-        self.logger.info("imaging %s", imaging)
-        self.push_change_event("imaging", imaging)
 
     def update_command_in_progress_callback(self, command_in_progress):
         self.push_change_event("commandInProgress", command_in_progress)
@@ -370,7 +196,6 @@ class CentralNode(SKABaseDevice):
             device.set_change_event("telescopeState", True, False)
             device.set_change_event("LastDeviceInfoChanged", True, False)
             device.set_change_event("TMOpState", True, False)
-            device.set_change_event("imaging", True, False)
             device.set_change_event("commandInProgress", True, False)
 
             device.op_state_model.perform_action("component_on")
@@ -380,95 +205,55 @@ class CentralNode(SKABaseDevice):
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
-        # PROTECTED REGION ID(CentralNode.always_executed_hook) ENABLED START #
         pass
-        # PROTECTED REGION END #    //  CentralNode.always_executed_hook
 
     def delete_device(self):
-        # PROTECTED REGION ID(CentralNode.delete_device) ENABLED START #
         pass
-        # PROTECTED REGION END #    //  CentralNode.delete_device
 
     # ------------------
     # Attributes methods
     # ------------------
 
     def read_telescopeHealthState(self):
-        # PROTECTED REGION ID(CentralNode.telescope_healthstate_read) ENABLED START #
         return self.component_manager.component.telescope_health_state
-        # PROTECTED REGION END #    //  CentralNode.telescope_healthstate_read
 
     def read_subarray1HealthState(self):
-        # PROTECTED REGION ID(CentralNode.subarray1_healthstate_read) ENABLED START #
         for (
             dev_name
         ) in self.component_manager.input_parameter.tm_subarray_dev_names:
             if "1" in dev_name:
                 return self.component_manager.get_device(dev_name).healthState
         return HealthState.UNKNOWN
-        # PROTECTED REGION END #    //  CentralNode.subarray1_healthstate_read
 
     def read_subarray2HealthState(self):
-        # PROTECTED REGION ID(CentralNode.subarray2_healthstate_read) ENABLED START #
         for (
             dev_name
         ) in self.component_manager.input_parameter.tm_subarray_dev_names:
             if "2" in dev_name:
                 return self.component_manager.get_device(dev_name).healthState
         return HealthState.UNKNOWN
-        # PROTECTED REGION END #    //  CentralNode.subarray2_healthstate_read
 
     def read_subarray3HealthState(self):
-        # PROTECTED REGION ID(CentralNode.subarray3HealthState_read) ENABLED START #
         for (
             dev_name
         ) in self.component_manager.input_parameter.tm_subarray_dev_names:
             if "3" in dev_name:
                 return self.component_manager.get_device(dev_name).healthState
         return HealthState.UNKNOWN
-        # PROTECTED REGION END #    //  CentralNode.subarray3HealthState_read
 
     def read_telescopeState(self):
-        # PROTECTED REGION ID(CentralNode.telescope_state_read) ENABLED START #
         return self.component_manager.component.telescope_state
-        # PROTECTED REGION END #    //  CentralNode.telescope_state_read
-
-    def read_imaging(self):
-        # PROTECTED REGION ID(CentralNode.imaging_read) ENABLED START #
-        return self.component_manager.component.imaging
-        # PROTECTED REGION END #    //  CentralNode.imaging_read
-
-    def read_pss(self):
-        # PROTECTED REGION ID(CentralNode.PSS_read) ENABLED START #
-        return self.component_manager.component.pss
-        # PROTECTED REGION END #    //  CentralNode.PSS_read
-
-    def read_pst(self):
-        # PROTECTED REGION ID(CentralNode.PST_read) ENABLED START #
-        return self.component_manager.component.pst
-        # PROTECTED REGION END #    //  CentralNode.PST_read
-
-    def read_vlbi(self):
-        # PROTECTED REGION ID(CentralNode.VLBI_read) ENABLED START #
-        return self.component_manager.component.vlbi
-        # PROTECTED REGION END #    //  CentralNode.VLBI_read
 
     def read_desiredTelescopeState(self):
-        # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
         return self.component_manager.component.desired_telescope_state
-        # PROTECTED REGION END #    //  CentralNode.desired_telescope_state_read
 
     def read_commandInProgress(self):
-        # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
         return self.component_manager.command_executor.command_in_progress
-        # PROTECTED REGION END #    //  CentralNode.activity_message_read
 
     def read_InternalModel(self):
-        # PROTECTED REGION ID(CentralNode.desired_telescope_state_read) ENABLED START #
         return self.component_manager.component.to_json()
-        # PROTECTED REGION END #    //  CentralNode.activity_message_read
 
-    def read_TranformedInternalModel(self):
+    def read_TransformedInternalModel(self):
         json_model = json.loads(self.component_manager.component.to_json())
         result = {
             "telescope_state": json_model["telescope_state"],
@@ -482,12 +267,9 @@ class CentralNode(SKABaseDevice):
         return json.dumps(result)
 
     def read_LastDeviceInfoChanged(self):
-        # PROTECTED REGION ID(CentralNode.LastDeviceInfoChanged_read) ENABLED START #
         return self._LastDeviceInfoChanged
-        # PROTECTED REGION END #    //  CentralNode.LastDeviceInfoChanged_read
 
     def read_CommandExecuted(self):
-        # PROTECTED REGION ID(CentralNode.CommandExecuted_read) ENABLED START #
         """Return the CommandExecuted attribute."""
         result = []
         i = 0
@@ -505,10 +287,8 @@ class CentralNode(SKABaseDevice):
             result.append(single_res)
             i += 1
         return result
-        # PROTECTED REGION END #    //  CentralNode.CommandExecuted_read
 
     def read_LastCommandExecuted(self):
-        # PROTECTED REGION ID(CentralNode.LastCommandExecuted_read) ENABLED START #
         """Return the LastCommandExecuted attribute as list of string."""
         for command_executed in reversed(
             self.component_manager.command_executor.command_executed
@@ -520,138 +300,19 @@ class CentralNode(SKABaseDevice):
                 str(command_executed["Message"]),
             )
             return single_res
-        # PROTECTED REGION END #    //  CentralNode.LastCommandExecuted_read
-
-    def read_CspMasterDevName(self):
-        # PROTECTED REGION ID(CentralNode.CspMasterDevName_read) ENABLED START #
-        """Return the CspMasterDevName attribute."""
-        return self.component_manager.input_parameter.csp_master_dev_name
-        # PROTECTED REGION END #    //  CentralNode.CspMasterDevName_read
-
-    def write_CspMasterDevName(self, value):
-        # PROTECTED REGION ID(CentralNode.CspMasterDevName_write) ENABLED START #
-        """Set the CspMasterDevName attribute."""
-        self.component_manager.input_parameter.csp_master_dev_name = value
-        self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.CspMasterDevName_write
-
-    def read_SdpMasterDevName(self):
-        # PROTECTED REGION ID(CentralNode.SdpMasterDevName_read) ENABLED START #
-        """Return the SdpMasterDevName attribute."""
-        return self.component_manager.input_parameter.sdp_master_dev_name
-        # PROTECTED REGION END #    //  CentralNode.SdpMasterDevName_read
-
-    def write_SdpMasterDevName(self, value):
-        # PROTECTED REGION ID(CentralNode.SdpMasterDevName_write) ENABLED START #
-        """Set the SdpMasterDevName attribute."""
-        self.component_manager.input_parameter.sdp_master_dev_name = value
-        self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.SdpMasterDevName_write
-
-    def read_LeafCspMasterDevName(self):
-        # PROTECTED REGION ID(CentralNode.LeafCspMasterDevName_read) ENABLED START #
-        """Return the LeafCspMasterDevName attribute."""
-        return (
-            self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
-        )
-        # PROTECTED REGION END #    //  CentralNode.LeafCspMasterDevName_read
-
-    def write_LeafCspMasterDevName(self, value):
-        # PROTECTED REGION ID(CentralNode.LeafCspMasterDevName_write) ENABLED START #
-        """Set the LeafCspMasterDevName attribute."""
-        self.component_manager.input_parameter.tm_leaf_csp_master_dev_name = (
-            value
-        )
-        self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.LeafCspMasterDevName_write
-
-    def read_LeafSdpMasterDevName(self):
-        # PROTECTED REGION ID(CentralNode.LeafSdpMasterDevName_read) ENABLED START #
-        """Return the LeafSdpMasterDevName attribute."""
-        return (
-            self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
-        )
-        # PROTECTED REGION END #    //  CentralNode.LeafSdpMasterDevName_read
-
-    def write_LeafSdpMasterDevName(self, value):
-        # PROTECTED REGION ID(CentralNode.LeafSdpMasterDevName_write) ENABLED START #
-        """Set the LeafSdpMasterDevName attribute."""
-        self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name = (
-            value
-        )
-        self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.LeafSdpMasterDevName_write
 
     def read_TMOpState(self):
-        # PROTECTED REGION ID(CentralNode.TMOpState_read) ENABLED START #
         """Return the TMOpState attribute."""
         return self.component_manager.component.tmc_op_state
-        # PROTECTED REGION END #    //  CentralNode.TMOpState_read
 
     def read_SubarrayDevNames(self):
-        # PROTECTED REGION ID(CentralNode.SubarrayDevNames_read) ENABLED START #
         """Return the SubarrayDevNames attribute."""
         return self.component_manager.input_parameter.tm_subarray_dev_names
-        # PROTECTED REGION END #    //  CentralNode.SubarrayDevNames_read
 
     def write_SubarrayDevNames(self, value):
-        # PROTECTED REGION ID(CentralNode.SubarrayDevNames_write) ENABLED START #
         """Set the SubarrayDevNames attribute."""
         self.component_manager.input_parameter.tm_subarray_dev_names = value
         self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.SubarrayDevNames_write
-
-    def read_CspSubarrayDevNames(self):
-        # PROTECTED REGION ID(CentralNode.CspSubarrayDevNames_read) ENABLED START #
-        """Return the CspSubarrayDevNames attribute."""
-        return self.component_manager.input_parameter.csp_subarray_dev_names
-        # PROTECTED REGION END #    //  CentralNode.CspSubarrayDevNames_read
-
-    def write_CspSubarrayDevNames(self, value):
-        # PROTECTED REGION ID(CentralNode.CspSubarrayDevNames_write) ENABLED START #
-        """Set the CspSubarrayDevNames attribute."""
-        self.component_manager.input_parameter.csp_subarray_dev_names = value
-        self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.CspSubarrayDevNames_write
-
-    def read_SdpSubarrayDevNames(self):
-        # PROTECTED REGION ID(CentralNode.SdpSubarrayDevNames_read) ENABLED START #
-        """Return the SdpSubarrayDevNames attribute."""
-        return self.component_manager.input_parameter.sdp_subarray_dev_names
-        # PROTECTED REGION END #    //  CentralNode.SdpSubarrayDevNames_read
-
-    def write_SdpSubarrayDevNames(self, value):
-        # PROTECTED REGION ID(CentralNode.SdpSubarrayDevNames_write) ENABLED START #
-        """Set the SdpSubarrayDevNames attribute."""
-        self.component_manager.input_parameter.sdp_subarray_dev_names = value
-        self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.SdpSubarrayDevNames_write
-
-    def read_DishDevNames(self):
-        # PROTECTED REGION ID(CentralNode.DishDevNames_read) ENABLED START #
-        """Return the DishDevNames attribute."""
-        return self.component_manager.input_parameter.dish_dev_names
-        # PROTECTED REGION END #    //  CentralNode.DishDevNames_read
-
-    def write_DishDevNames(self, value):
-        # PROTECTED REGION ID(CentralNode.DishDevNames_write) ENABLED START #
-        """Set the DishDevNames attribute."""
-        self.component_manager.input_parameter.dish_dev_names = value
-        self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.DishDevNames_write
-
-    def read_TMLeafDishDevNames(self):
-        # PROTECTED REGION ID(CentralNode.DishDevNames_read) ENABLED START #
-        """Return the DishDevNames attribute."""
-        return self.component_manager.input_parameter.tm_dish_dev_names
-        # PROTECTED REGION END #    //  CentralNode.DishDevNames_read
-
-    def write_TMLeafDishDevNames(self, value):
-        # PROTECTED REGION ID(CentralNode.DishDevNames_write) ENABLED START #
-        """Set the DishDevNames attribute."""
-        self.component_manager.input_parameter.tm_dish_dev_names = value
-        self.component_manager.update_input_parameter()
-        # PROTECTED REGION END #    //  CentralNode.DishDevNames_write
 
     # --------
     # Commands
@@ -712,34 +373,6 @@ class CentralNode(SKABaseDevice):
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
-        )
-        return [[ResultCode.QUEUED], [str(unique_id)]]
-
-    def is_StowAntennas_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state.
-
-        :return: True if this command is allowed to be run in current device state.
-
-        :rtype: boolean
-        """
-        handler = self.get_command_object("StowAntennas")
-        return handler.check_allowed()
-
-    @command(
-        dtype_in=("str",),
-        doc_in="List of Receptors to be stowed",
-        dtype_out="DevVarLongStringArray",
-    )
-    def StowAntennas(self, argin):
-        """
-        This command stows the specified receptors.
-        """
-        handler = self.get_command_object("StowAntennas")
-        if self.component_manager.command_executor.queue_full:
-            return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(
-            handler, argin
         )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
@@ -917,7 +550,7 @@ class CentralNode(SKABaseDevice):
         )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    def is_telescope_standby_allowed(self):
+    def is_TelescopeStandby_allowed(self):
         """
         Checks whether this command is allowed to be run in current device state.
 
@@ -976,59 +609,60 @@ class CentralNode(SKABaseDevice):
         )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
+    def create_component_manager(self):
+        # if the init is called more than once
+        # I need to stop all threads
+        if hasattr(self, "component_manager"):
+            self.component_manager.stop()
+
+        self.op_state_model = TMCOpStateModel(
+            logger=self.logger, callback=super()._update_state
+        )
+        cm = CNComponentManager(
+            self.op_state_model,
+            logger=self.logger,
+            _update_device_callback=self.update_device_callback,
+            _update_telescope_state_callback=self.update_telescope_state_callback,
+            _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
+            _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
+            _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
+            _update_imaging_callback=self.update_imaging_callback,
+            _update_command_in_progress_callback=self.update_command_in_progress_callback,
+            max_workers=self.MaxWorkerMonitoringLoop,
+            proxy_timeout=self.ProxyTimeoutMonitoringLoop,
+            _input_parameter=InputParameterMid(None),
+            sleep_time=self.SleepTime,
+        )
+        cm.input_parameter.tm_dish_dev_names = []
+        for dish in range(1, (self.NumDishes + 1)):
+            cm.input_parameter.tm_dish_dev_names.append(
+                self.DishLeafNodePrefix + f"000{dish}"
+            )
+        cm.input_parameter.dish_dev_names = []
+        for dish in range(1, (self.NumDishes + 1)):
+            cm.input_parameter.dish_dev_names.append(
+                f"{'mid_d'}000{dish}{'/elt/master'}"
+            )
+        cm.input_parameter.tm_subarray_dev_names = self.TMSubarrayNodes
+        cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
+        cm.input_parameter.tm_leaf_csp_master_dev_name = (
+            self.CspMasterLeafNodeFQDN or ""
+        )
+        cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
+        cm.input_parameter.tm_leaf_sdp_master_dev_name = (
+            self.SdpMasterLeafNodeFQDN or ""
+        )
+        cm.input_parameter.csp_subarray_dev_names = (
+            self.TMMidCspSubarrayLeafNodes
+        )
+        cm.input_parameter.sdp_subarray_dev_names = (
+            self.TMMidSdpSubarrayLeafNodes
+        )
+        cm.update_input_parameter()
+        return cm
+
     def init_command_objects(self):
         """
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        args = ()
-        for (command_name, command_class) in [
-            ("On", TelescopeOn),
-            ("TelescopeOn", TelescopeOn),
-            ("Off", TelescopeOff),
-            ("TelescopeOff", TelescopeOff),
-            ("StartUpTelescope", TelescopeOn),
-            ("StandByTelescope", TelescopeOff),
-            ("ReleaseResources", ReleaseResources),
-            ("StowAntennas", StowAntennas),
-            ("Standby", TelescopeStandby),
-            ("TelescopeStandby", TelescopeStandby),
-        ]:
-            command_obj = command_class(
-                self.component_manager,
-                self.op_state_model,
-                *args,
-                logger=self.logger,
-            )
-            self.register_command_object(command_name, command_obj)
-        assign_resources_obj = AssignResources(
-            self.component_manager,
-            self.op_state_model,
-            skuid=SkuidClient(skuid_url=self.SkuidServiceNamePort),
-            *args,
-            logger=self.logger,
-        )
-        self.register_command_object("AssignResources", assign_resources_obj)
-
-
-# ----------
-# Run server
-# ----------
-
-
-def main(args=None, **kwargs):
-    # PROTECTED REGION ID(CentralNode.main) ENABLED START #
-    """
-    Runs the CentralNode.
-    :param args: Arguments internal to TANGO
-
-    :param kwargs: Arguments internal to TANGO
-
-    :return: CentralNode TANGO object.
-    """
-    return run((CentralNode,), args=args, **kwargs)
-    # PROTECTED REGION END #    //  CentralNode.main
-
-
-if __name__ == "__main__":
-    main()

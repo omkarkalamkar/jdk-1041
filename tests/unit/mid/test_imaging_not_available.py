@@ -1,5 +1,3 @@
-import time
-
 import pytest
 import tango
 
@@ -8,7 +6,6 @@ from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from tests.helper_state_device import HelperStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
-    TIMEOUT,
     create_cm_no_faulty_devices,
     ensure_imaging,
     set_devices_state,
@@ -40,7 +37,7 @@ def devices_to_load():
     )
 
 
-def test_imaging_available(tango_context):
+def test_imaging_not_available(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
         devices=[
@@ -48,15 +45,17 @@ def test_imaging_available(tango_context):
             "mid_d0001/elt/master",
         ],
         devFactory=DevFactory(),
-        state=tango.DevState.ON,
+        state=tango.DevState.OFF,
         cm=cm,
         expected_elapsed_time=1.5,
     )
-    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=1.5)
-    assert cm.component.imaging == ModesAvailability.available
+    ensure_imaging(
+        cm, ModesAvailability.not_available, expected_elapsed_time=1.5
+    )
+    assert cm.component.imaging == ModesAvailability.not_available
 
 
-def test_imaging_available_only_monitoring_loop(tango_context):
+def test_imaging_not_available_only_monitoring_loop(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, False)
     set_devices_state(
         devices=[
@@ -64,15 +63,17 @@ def test_imaging_available_only_monitoring_loop(tango_context):
             "mid_d0001/elt/master",
         ],
         devFactory=DevFactory(),
-        state=tango.DevState.ON,
+        state=tango.DevState.OFF,
         cm=cm,
         expected_elapsed_time=1.5,
     )
-    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=1.5)
-    assert cm.component.imaging == ModesAvailability.available
+    ensure_imaging(
+        cm, ModesAvailability.not_available, expected_elapsed_time=1.5
+    )
+    assert cm.component.imaging == ModesAvailability.not_available
 
 
-def test_imaging_available_only_events(tango_context):
+def test_imaging_not_available_only_events(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, False, True)
     set_devices_state(
         devices=[
@@ -80,9 +81,11 @@ def test_imaging_available_only_events(tango_context):
             "mid_d0001/elt/master",
         ],
         devFactory=DevFactory(),
-        state=tango.DevState.ON,
+        state=tango.DevState.OFF,
         cm=cm,
         expected_elapsed_time=2,
     )
-    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=2)
-    assert cm.component.imaging == ModesAvailability.available
+    ensure_imaging(
+        cm, ModesAvailability.not_available, expected_elapsed_time=2
+    )
+    assert cm.component.imaging == ModesAvailability.not_available

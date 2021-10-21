@@ -1,21 +1,13 @@
 """
 ReleaseResources class for CentralNode.
 """
-import ast
-
-# PROTECTED REGION ID(CentralNode.additionnal_import) ENABLED START #
-# Standard Python imports
 import json
 
-import tango
 from ska_tango_base.commands import ResultCode
-from tango import DevFailed, DevState
 
 from ska_tmc_centralnode_mid.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
-
-# Additional import
 from ska_tmc_centralnode_mid.manager.adapters import AdapterFactory
 
 
