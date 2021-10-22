@@ -28,25 +28,31 @@ class TMCCommand(BaseCommand):
         component_manager = self.target
 
         if isinstance(component_manager.input_parameter, InputParameterMid):
-            self.check_allowed_mid()
+            result = self.check_allowed_mid()
         else:
-            self.check_allowed_low()
+            result = self.check_allowed_low()
 
-    def init_adapeters(self):
+        return result
+
+    def init_adapters(self):
         component_manager = self.target
 
         if isinstance(component_manager.input_parameter, InputParameterMid):
-            self.init_adapeters_mid()
+            result, message = self.init_adapters_mid()
         else:
-            self.init_adapeters_low()
+            result, message = self.init_adapters_low()
+
+        return result, message
 
     def do(self):
         component_manager = self.target
 
         if isinstance(component_manager.input_parameter, InputParameterMid):
-            self.do_mid()
+            result = self.do_mid()
         else:
-            self.do_low()
+            result = self.do_low()
+
+        return result
 
     def check_allowed_mid(self):
         raise NotImplementedError("This class must be inherited!")
@@ -54,10 +60,10 @@ class TMCCommand(BaseCommand):
     def check_allowed_low(self):
         raise NotImplementedError("This class must be inherited!")
 
-    def init_adapeters_mid(self):
+    def init_adapters_mid(self):
         raise NotImplementedError("This class must be inherited!")
 
-    def init_adapeters_low(self):
+    def init_adapters_low(self):
         raise NotImplementedError("This class must be inherited!")
 
     def do_mid(self):
@@ -85,7 +91,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
 
-    def check_allowed(self):
+    def check_allowed_mid(self):
         """
         Checks whether this command is allowed
         It checks that the device is in a state
@@ -131,7 +137,7 @@ class AbstractTelescopeOnOff(TMCCommand):
             if devInfo is not None and not devInfo.faulty:
                 subarray_count += 1
         if subarray_count == 0:
-            raise CommandNotAllowed("No TM Subarray available")
+            raise CommandNotAllowed("No TM Mid Subarray available")
 
         dish_count = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
@@ -143,12 +149,57 @@ class AbstractTelescopeOnOff(TMCCommand):
 
         return True
 
-    def init_adapters(self, cmd_name, component_manager):
+    def check_allowed_low(self):
+        """
+        Checks whether this command is allowed
+        It checks that the device is in a state
+        to perform this command and that all the
+        component needed for the operation are not faulty
+
+        :return: True if this command is allowed
+
+        :rtype: boolean
+
+        """
+        component_manager = self.target
+
+        if self.op_state_model.op_state in [
+            DevState.FAULT,
+            DevState.UNKNOWN,
+            DevState.DISABLE,
+        ]:
+            raise CommandNotAllowed(
+                "TelescopeOnOff() is not allowed in current state %s",
+                self.op_state_model.op_state,
+            )
+
+        # for this command I need a number of sub-devices
+        # import debugpy; debugpy.debug_this_thread()
+        devInfo = component_manager.get_device(
+            component_manager.input_parameter.mccs_master_leaf_node
+        )
+        if devInfo is None or devInfo.faulty:
+            raise CommandNotAllowed("TM Mccs Master Leaf node not available")
+
+        subarray_count = 0
+        for (
+            dev_name
+        ) in component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = component_manager.get_device(dev_name)
+            if devInfo is not None and not devInfo.faulty:
+                subarray_count += 1
+        if subarray_count == 0:
+            raise CommandNotAllowed("No TM Low Subarray available")
+
+        return True
+
+    def init_adapters_mid(self):
 
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
+        component_manager = self.target
 
         try:
             self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
@@ -180,7 +231,9 @@ class AbstractTelescopeOnOff(TMCCommand):
             if not devInfo.faulty:
                 try:
                     self.tm_subarray_adapters.append(
-                        self._adapter_factory.get_or_create_adapter(dev_name)
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.SUBARRAY
+                        )
                     )
                     num_working += 1
                 except Exception as e:
@@ -220,8 +273,53 @@ class AbstractTelescopeOnOff(TMCCommand):
 
         return ResultCode.OK, ""
 
-    def do(self):
-        raise NotImplementedError("This class must be inherited!")
+    def init_adapters_low(self):
+
+        self.tm_leaf_mccs_master_adapter = None
+        self.tm_subarray_adapters = []
+        component_manager = self.target
+
+        try:
+            self.tm_leaf_mccs_master_adapter = (
+                self._adapter_factory.get_or_create_adapter(
+                    component_manager.input_parameter.mccs_master_leaf_node
+                )
+            )
+        except Exception as e:
+            return self.adapter_error_message_result(
+                component_manager.input_parameter.mccs_master_leaf_node,
+                e,
+            )
+
+        error_dev_names = []
+        num_working = 0
+
+        for (
+            dev_name
+        ) in component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = component_manager.get_device(dev_name)
+            if not devInfo.faulty:
+                try:
+                    self.tm_subarray_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.SUBARRAY
+                        )
+                    )
+                    num_working += 1
+                except Exception as e:
+                    self.logger.warning(
+                        "Error in creating adapter for %s: %s", dev_name, e
+                    )
+                    error_dev_names.append(dev_name)
+
+        if num_working == 0:
+            message = f"Error in creating tm subarray low adapters {'.'.join(error_dev_names)}"
+            return self.generate_command_result(ResultCode.FAILED, message)
+
+        return ResultCode.OK, ""
+
+    # def do(self):
+    #     raise NotImplementedError("This class must be inherited!")
 
 
 class AbstractAssignReleaseResources(TMCCommand):

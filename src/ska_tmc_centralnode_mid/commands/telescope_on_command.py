@@ -1,3 +1,6 @@
+import json
+import time
+
 from ska_tango_base.commands import ResultCode
 from tango import DevState
 
@@ -21,6 +24,8 @@ class TelescopeOn(AbstractTelescopeOnOff):
         target,
         pop_state_model,
         adapter_factory=AdapterFactory(),
+        timeout_mccs=3000,
+        step_sleep=0.1,
         *args,
         logger=None,
         **kwargs,
@@ -28,8 +33,10 @@ class TelescopeOn(AbstractTelescopeOnOff):
         super().__init__(
             target, pop_state_model, adapter_factory, args, logger, kwargs
         )
+        self._timeout_mccs = timeout_mccs
+        self._step_sleep = step_sleep
 
-    def do(self):
+    def do_mid(self):
         """
         Method to invoke Telescope On command on Lower level devices.
 
@@ -41,9 +48,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         component_manager.component.desired_telescope_state = DevState.ON
 
-        ret_code, message = self.init_adapters(
-            "TelescopeOn", component_manager
-        )
+        ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
@@ -91,3 +96,74 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 )
 
         return (ResultCode.OK, "")
+
+    def do_low(self):
+        """
+        Method to invoke Telescope On command on Lower level devices.
+
+        param argin:
+            None.
+
+        """
+        component_manager = self.target
+        # Checks if Mccs Off command is completed.
+        # Check lates MCCS implementation and uncomment this method call if required. If not needed this method can be removed.
+        # self.check_mccs_off_completed()
+
+        component_manager.component.desired_telescope_state = DevState.ON
+
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        # send commands to sub-devices
+        # import debugpy; debugpy.debug_this_thread()
+        try:
+            self.tm_leaf_mccs_master_adapter.On()
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                f"Error in calling Telescope On in TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
+            )
+
+        for adapter in self.tm_subarray_adapters:
+            try:
+                adapter.On()
+            except Exception as e:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}",
+                )
+
+        return (ResultCode.OK, "")
+
+    def check_mccs_off_completed(self):
+        component_manager = self.target
+        mccs_off = False
+        start_time = time.time()
+        mccs_devname = component_manager.input_parameter.mccs_master_dev_name
+
+        while not mccs_off:
+            mccs_cmd_result = json.loads(
+                component_manager.get_device(mccs_devname).commandResult
+            )
+
+            self.logger.error("MCCS %s is not OFF", mccs_devname)
+
+            if (
+                "Off" in mccs_cmd_result["status"]
+                or mccs_cmd_result["status"] == ""
+            ):
+                if (
+                    mccs_cmd_result["result_code"] == 0
+                    or mccs_cmd_result["result_code"] == 4
+                ):
+                    mccs_off = True
+
+            elapsed_time = time.time() - start_time
+            if elapsed_time > self._timeout_mccs:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    "Timeout in waiting for MCCS to be in OFF state",
+                )
+            time.sleep(self._step_sleep)

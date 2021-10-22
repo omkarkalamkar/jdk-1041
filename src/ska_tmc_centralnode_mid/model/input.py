@@ -36,6 +36,7 @@ class InputParameterLow(InputParameter):
     def __init__(self, changed_callback) -> None:
         self._tm_subarray_dev_names = ["ska_low/tm_subarray_node/1"]
         self._mccs_master_leaf_node = "ska_low/tm_leaf_node/mccs_master"
+        self._mccs_master_dev_name = "low-mccs/control/control"
         self._changed_callback = changed_callback
 
     @property
@@ -60,6 +61,31 @@ class InputParameterLow(InputParameter):
         :type value: str
         """
         self._mccs_master_leaf_node = value
+        if self._changed_callback is not None:
+            self._changed_callback()
+
+    @property
+    def mccs_master_dev_name(self):
+        """
+        Input parameter
+        Return the MCCS Master device name
+
+        :return: the MCCS Master device name
+        :rtype: str
+        """
+        return self._mccs_master_dev_name
+
+    @mccs_master_dev_name.setter
+    def mccs_master_dev_name(self, value):
+        """
+        Input parameter
+        Set the MCCS Master device name to be
+        managed by the CentralNode
+
+        :param value: the MCCS Master device name
+        :type value: str
+        """
+        self._mccs_master_dev_name = value
         if self._changed_callback is not None:
             self._changed_callback()
 
