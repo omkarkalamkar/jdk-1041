@@ -39,7 +39,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
 
-    def do(self, argin):
+    def do_mid(self, argin):
         """
         Method to invoke ReleaseResources command on Subarray.
 

@@ -32,7 +32,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
 
-    def do_mid(self):
+    def do_mid(self, argin=None):
         """
         Method to invoke telescopeoff command on Lower level devices.
         param:
@@ -121,7 +121,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         return (ResultCode.OK, "")
 
-    def do_low(self):
+    def do_low(self, argin=None):
         """
         Method to invoke telescopeoff command on Lower level devices.
         param:

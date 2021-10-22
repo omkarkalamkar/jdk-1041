@@ -44,13 +44,13 @@ class TMCCommand(BaseCommand):
 
         return result, message
 
-    def do(self):
+    def do(self, argin=None):
         component_manager = self.target
 
         if isinstance(component_manager.input_parameter, InputParameterMid):
-            result = self.do_mid()
+            result = self.do_mid(argin)
         else:
-            result = self.do_low()
+            result = self.do_low(argin)
 
         return result
 
@@ -66,10 +66,10 @@ class TMCCommand(BaseCommand):
     def init_adapters_low(self):
         raise NotImplementedError("This class must be inherited!")
 
-    def do_mid(self):
+    def do_mid(self, argin=None):
         raise NotImplementedError("This class must be inherited!")
 
-    def do_low(self):
+    def do_low(self, argin=None):
         raise NotImplementedError("This class must be inherited!")
 
 

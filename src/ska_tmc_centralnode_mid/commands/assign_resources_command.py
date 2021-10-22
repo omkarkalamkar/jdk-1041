@@ -41,7 +41,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.tm_subarray_adapters = []
         self._skuid = skuid
 
-    def do(self, argin):
+    def do_mid(self, argin):
         """
         Method to invoke AssignResources command on Subarray.
 

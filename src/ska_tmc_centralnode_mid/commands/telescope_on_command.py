@@ -36,7 +36,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self._timeout_mccs = timeout_mccs
         self._step_sleep = step_sleep
 
-    def do_mid(self):
+    def do_mid(self, argin=None):
         """
         Method to invoke Telescope On command on Lower level devices.
 
@@ -97,7 +97,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         return (ResultCode.OK, "")
 
-    def do_low(self):
+    def do_low(self, argin=None):
         """
         Method to invoke Telescope On command on Lower level devices.
 
