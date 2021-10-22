@@ -25,7 +25,7 @@ def central_node(device_name):
 
 @when("I get the attribute InternalModel of the CentralNode device")
 def internal_model(central_node):
-    pytest.InternalModel = central_node.InternalModel
+    pytest.internal_model = central_node.InternalModel
 
 
 @when(parsers.parse('I call the command "{command_name}"'))
@@ -39,7 +39,7 @@ def call_command(central_node, command_name):
 
 @then("it correctly reports the failed and working devices")
 def check_internal_model(device_list):
-    json_model = json.loads(pytest.InternalModel)
+    json_model = json.loads(pytest.internal_model)
     for dev in json_model["devices"]:
         running_dev = None
         for exported_dev in device_list.value_string:
@@ -47,7 +47,7 @@ def check_internal_model(device_list):
                 running_dev = DeviceProxy(exported_dev)
 
         if running_dev is None:
-            assert dev["faulty"] == "True"
+            assert dev["unresponsive"] == "True"
             assert dev["exception"] != "None"
             continue
 

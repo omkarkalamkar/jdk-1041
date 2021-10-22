@@ -37,4 +37,4 @@ def test_all_devices_faulty():
     elapsed_time = time.time() - start_time
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
     for devInfo in cm.devices:
-        assert devInfo.faulty
+        assert devInfo.unresponsive

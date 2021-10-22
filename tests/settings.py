@@ -33,7 +33,7 @@ DEVICE_LIST = [
 def count_faulty_devices(cm):
     result = 0
     for devInfo in cm.checked_devices:
-        if devInfo.faulty:
+        if devInfo.unresponsive:
             result += 1
     return result
 

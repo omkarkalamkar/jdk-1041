@@ -180,7 +180,7 @@ class CNComponentManager(BaseComponentManager):
         """
         result = []
         for dev in self.component.devices:
-            if dev.faulty:
+            if dev.unresponsive:
                 result.append(dev)
                 continue
             if dev.ping > 0:
@@ -260,7 +260,8 @@ class CNComponentManager(BaseComponentManager):
         self.component.update_device(devInfo)
 
     def update_input_parameter(self):
-        self.input_parameter.update(self)
+        with self.lock:
+            self.input_parameter.update(self)
 
     def device_failed(self, device_info, exception):
         """
@@ -278,7 +279,7 @@ class CNComponentManager(BaseComponentManager):
         with self.lock:
             devInfo = self.component.get_device(dev_name)
             devInfo.last_event_arrived = time.time()
-            devInfo.update_faulty(False)
+            devInfo.update_unresponsive(False)
 
     def update_device_info(self, device_info):
         """
@@ -309,7 +310,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.healthState = health_state
             devInfo.last_event_arrived = time.time()
-            devInfo.update_faulty(False)
+            devInfo.update_unresponsive(False)
 
         self._aggregate_health_state()
 
@@ -328,7 +329,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
-            devInfo.update_faulty(False)
+            devInfo.update_unresponsive(False)
 
         self._aggregate_state()
         self._update_imaging()
@@ -347,7 +348,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.obsState = obs_state
             devInfo.last_event_arrived = time.time()
-            devInfo.update_faulty(False)
+            devInfo.update_unresponsive(False)
             self._update_resources(devInfo)
 
     def is_already_assigned(self, dishId):
@@ -444,7 +445,7 @@ class CNComponentManager(BaseComponentManager):
                 dish = self.get_device(dev_name)
                 if (
                     dish is not None
-                    and not dish.faulty
+                    and not dish.unresponsive
                     and dish.state == DevState.ON
                 ):
                     dish_on = True
@@ -453,7 +454,10 @@ class CNComponentManager(BaseComponentManager):
             csp_master_device = self.get_device(
                 self.input_parameter.csp_master_dev_name
             )
-            if csp_master_device is not None and not csp_master_device.faulty:
+            if (
+                csp_master_device is not None
+                and not csp_master_device.unresponsive
+            ):
                 csp_state = csp_master_device.state
 
             if csp_state == DevState.ON and dish_on:

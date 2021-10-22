@@ -609,6 +609,7 @@ class AbstractCentralNode(SKABaseDevice):
         )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
+    # default ska mid
     def create_component_manager(self):
         # if the init is called more than once
         # I need to stop all threads

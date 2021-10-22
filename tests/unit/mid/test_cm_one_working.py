@@ -59,6 +59,6 @@ def test_one_working_other_faulty(tango_context):
     subarrayDevInfo = cm.get_device("ska_mid/tm_subarray_node/1")
     for devInfo in cm.devices:
         if devInfo == subarrayDevInfo:
-            assert not devInfo.faulty
+            assert not devInfo.unresponsive
         else:
-            assert devInfo.faulty
+            assert devInfo.unresponsive

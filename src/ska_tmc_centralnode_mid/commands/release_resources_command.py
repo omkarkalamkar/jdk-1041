@@ -69,10 +69,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         :return: None
         """
-        component_manager = self.target
-        ret_code, message = self.init_adapters(
-            "ReleaseResources", component_manager
-        )
+        ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
         try:

@@ -23,7 +23,7 @@ class TelescopeStateAggragator(Aggregator):
         sdp_master = False
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
-            if dev.faulty:
+            if dev.unresponsive:
                 continue
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
@@ -150,7 +150,7 @@ class HealthStateAggragator(Aggregator):
         # number of dishes is also variable
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
-            if dev.faulty:
+            if dev.unresponsive:
                 continue
             elif (
                 name
@@ -205,7 +205,7 @@ class TMCOpStateAggragator(Aggregator):
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
             if "tm" in name:
-                if dev.faulty:
+                if dev.unresponsive:
                     continue
                 tmStateList.append(dev.state)
 

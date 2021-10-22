@@ -66,7 +66,7 @@ def devices_to_load():
 def checked_devices(json_model):
     result = 0
     for dev in json_model["devices"]:
-        if int(dev["ping"]) > 0 and dev["faulty"] == "False":
+        if int(dev["ping"]) > 0 and dev["unresponsive"] == "False":
             result += 1
     return result
 

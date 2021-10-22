@@ -120,13 +120,13 @@ class AbstractTelescopeOnOff(TMCCommand):
         devInfo = component_manager.get_device(
             component_manager.input_parameter.tm_leaf_csp_master_dev_name
         )
-        if devInfo is None or devInfo.faulty:
+        if devInfo is None or devInfo.unresponsive:
             raise CommandNotAllowed("TM Csp Master Leaf node not available")
 
         devInfo = component_manager.get_device(
             component_manager.input_parameter.tm_leaf_sdp_master_dev_name
         )
-        if devInfo is None or devInfo.faulty:
+        if devInfo is None or devInfo.unresponsive:
             raise CommandNotAllowed("TM SDP Master Leaf node not available")
 
         subarray_count = 0
@@ -134,15 +134,15 @@ class AbstractTelescopeOnOff(TMCCommand):
             dev_name
         ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
+            if devInfo is not None and not devInfo.unresponsive:
                 subarray_count += 1
         if subarray_count == 0:
-            raise CommandNotAllowed("No TM Mid Subarray available")
+            raise CommandNotAllowed("No TM Subarray available")
 
         dish_count = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
+            if devInfo is not None and not devInfo.unresponsive:
                 dish_count += 1
         if dish_count == 0:
             raise CommandNotAllowed("No Dish available")
@@ -228,7 +228,7 @@ class AbstractTelescopeOnOff(TMCCommand):
             dev_name
         ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
+            if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -250,7 +250,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         num_working = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
+            if not devInfo.unresponsive:
                 try:
                     # import debugpy; debugpy.debug_this_thread()
                     self.tm_dish_adapters.append(
@@ -318,9 +318,6 @@ class AbstractTelescopeOnOff(TMCCommand):
 
         return ResultCode.OK, ""
 
-    # def do(self):
-    #     raise NotImplementedError("This class must be inherited!")
-
 
 class AbstractAssignReleaseResources(TMCCommand):
     def __init__(
@@ -338,7 +335,7 @@ class AbstractAssignReleaseResources(TMCCommand):
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
 
-    def check_allowed(self):
+    def check_allowed_mid(self):
         """
         Checks whether this command is allowed to be run in current device state
 
@@ -366,7 +363,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             dev_name
         ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
+            if devInfo is not None and not devInfo.unresponsive:
                 subarray_count += 1
         if subarray_count == 0:
             raise CommandNotAllowed("No TM Subarray available")
@@ -374,14 +371,15 @@ class AbstractAssignReleaseResources(TMCCommand):
         dish_count = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
+            if devInfo is not None and not devInfo.unresponsive:
                 dish_count += 1
         if dish_count == 0:
             raise CommandNotAllowed("No Dish available")
 
         return True
 
-    def init_adapters(self, cmd_name, component_manager):
+    def init_adapters_mid(self):
+        component_manager = self.target
 
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
@@ -393,7 +391,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             dev_name
         ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
+            if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -417,7 +415,7 @@ class AbstractAssignReleaseResources(TMCCommand):
         num_working = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
+            if not devInfo.unresponsive:
                 try:
                     self.tm_dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
