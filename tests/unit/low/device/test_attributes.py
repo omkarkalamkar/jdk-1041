@@ -13,7 +13,6 @@ from tango.test_utils import DeviceTestContext
 
 from ska_tmc_centralnode_mid import release
 from ska_tmc_centralnode_mid.central_node_low import CentralNodeLow
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 
 
 @pytest.fixture
@@ -51,9 +50,13 @@ def test_attributes(central_node_device):
     assert central_node_device.subarray3HealthState == HealthState.UNKNOWN
     assert central_node_device.desiredTelescopeState == DevState.ON
     assert central_node_device.commandInProgress == "None"
-    assert central_node_device.MCCSMasterLeafNodeName == ""
-    central_node_device.MCCSMasterLeafNodeName = "mccs"
-    assert central_node_device.MCCSMasterLeafNodeName == "mccs"
+    assert central_node_device.mccsMasterLeafNodeName == ""
+    central_node_device.mccsMasterLeafNodeName = "mccs_leaf"
+    assert central_node_device.mccsMasterLeafNodeName == "mccs_leaf"
+    assert central_node_device.mccsMasterNodeName == ""
+    central_node_device.mccsMasterNodeName = "mccs"
+    assert central_node_device.mccsMasterNodeName == "mccs"
+    
     assert central_node_device.TMOpState == DevState.UNKNOWN
     assert len(central_node_device.CommandExecuted) == 1  # init
     assert "Init" in central_node_device.LastCommandExecuted  # init

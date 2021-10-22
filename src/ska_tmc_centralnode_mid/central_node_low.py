@@ -6,7 +6,7 @@ of state and mode attributes defined by the SKA Control Model.
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from tango import AttrWriteType
-from tango.server import attribute, command, device_property, run
+from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode_mid.central_node import AbstractCentralNode
 from ska_tmc_centralnode_mid.commands.assign_resources_command import (
@@ -15,13 +15,11 @@ from ska_tmc_centralnode_mid.commands.assign_resources_command import (
 from ska_tmc_centralnode_mid.commands.release_resources_command import (
     ReleaseResources,
 )
-from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
 from ska_tmc_centralnode_mid.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode_mid.commands.telescope_standby_command import (
     TelescopeStandby,
 )
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
@@ -41,11 +39,18 @@ class CentralNodeLow(AbstractCentralNode):
     # Device Properties
     # -----------------
     MCCSMasterLeafNodeFQDN = device_property(dtype="str")
+
+    MCCSMasterNodeFQDN = device_property(dtype="str")
     # ----------
     # Attributes
     # ----------
 
-    MCCSMasterLeafNodeName = attribute(
+    mccsMasterLeafNodeName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    mccsMasterNodeName = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
@@ -75,14 +80,24 @@ class CentralNodeLow(AbstractCentralNode):
     # Attributes methods
     # ------------------
 
-    def read_MCCSMasterLeafNodeName(self):
+    def read_mccsMasterLeafNodeName(self):
         """Return the CspMasterDevName attribute."""
         return self.component_manager.input_parameter.mccs_master_leaf_node
 
-    def write_MCCSMasterLeafNodeName(self, value):
+    def write_mccsMasterLeafNodeName(self, value):
         """Set the CspMasterDevName attribute."""
         self.component_manager.input_parameter.mccs_master_leaf_node = value
         self.component_manager.update_input_parameter()
+
+    def read_mccsMasterNodeName(self):
+        """Return the CspMasterDevName attribute."""
+        return self.component_manager.input_parameter.mccs_master_dev_name
+
+    def write_mccsMasterNodeName(self, value):
+        """Set the CspMasterDevName attribute."""
+        self.component_manager.input_parameter.mccs_master_dev_name = value
+        self.component_manager.update_input_parameter()
+
 
     def init_command_objects(self):
         """
@@ -142,7 +157,12 @@ class CentralNodeLow(AbstractCentralNode):
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.tm_subarray_dev_names = self.TMSubarrayNodes
-        cm.input_parameter.mccs_master_leaf_node = self.MCCSMasterLeafNodeFQDN or ""
+        cm.input_parameter.mccs_master_leaf_node = (
+            self.MCCSMasterLeafNodeFQDN or ""
+        )
+        cm.input_parameter.mccs_master_dev_name = (
+            self.MCCSMasterNodeFQDN or ""
+        )
         cm.update_input_parameter()
         return cm
 
