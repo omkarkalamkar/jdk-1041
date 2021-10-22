@@ -56,7 +56,7 @@ def test_attributes(central_node_device):
     assert central_node_device.mccsMasterNodeName == ""
     central_node_device.mccsMasterNodeName = "mccs"
     assert central_node_device.mccsMasterNodeName == "mccs"
-    
+
     assert central_node_device.TMOpState == DevState.UNKNOWN
     assert len(central_node_device.CommandExecuted) == 1  # init
     assert "Init" in central_node_device.LastCommandExecuted  # init

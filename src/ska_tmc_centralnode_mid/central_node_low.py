@@ -98,7 +98,6 @@ class CentralNodeLow(AbstractCentralNode):
         self.component_manager.input_parameter.mccs_master_dev_name = value
         self.component_manager.update_input_parameter()
 
-
     def init_command_objects(self):
         """
         Initialises the command handlers for commands supported by this device.
@@ -160,9 +159,7 @@ class CentralNodeLow(AbstractCentralNode):
         cm.input_parameter.mccs_master_leaf_node = (
             self.MCCSMasterLeafNodeFQDN or ""
         )
-        cm.input_parameter.mccs_master_dev_name = (
-            self.MCCSMasterNodeFQDN or ""
-        )
+        cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""
         cm.update_input_parameter()
         return cm
 
