@@ -11,7 +11,7 @@ class Aggregator:
         raise NotImplementedError("To be defined in the lower level classes")
 
 
-class TelescopeStateAggragator(Aggregator):
+class TelescopeStateAggragatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -85,7 +85,7 @@ class TelescopeStateAggragatorLow(Aggregator):
 
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
-            if dev.faulty:
+            if dev.unresponsive:
                 continue
             elif (
                 name
@@ -134,7 +134,7 @@ class TelescopeStateAggragatorLow(Aggregator):
             return DevState.UNKNOWN
 
 
-class HealthStateAggragator(Aggregator):
+class HealthStateAggragatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -183,6 +183,62 @@ class HealthStateAggragator(Aggregator):
             return HealthState.UNKNOWN
         elif dish_count == 0:
             return HealthState.UNKNOWN
+        elif healthStateSetList == set([HealthState.OK]):
+            return HealthState.OK
+        elif HealthState.FAILED in healthStateSetList:
+            return HealthState.FAILED
+        elif HealthState.DEGRADED in healthStateSetList:
+            return HealthState.DEGRADED
+        else:
+            return HealthState.UNKNOWN
+
+
+
+class HealthStateAggragatorLow(Aggregator):
+    def __init__(self, cm, logger) -> None:
+        super().__init__(cm, logger)
+
+    def aggregate(self):
+        # import debugpy; debugpy.debug_this_thread()
+        healthStateList = []
+        subarray_count = 0
+        mccs_master = False
+        # get health states of MCCS Master devices
+        for dev in self._component_manager.checked_devices:
+            name = dev.dev_name.lower()
+            if dev.unresponsive:
+                continue
+            # elif (
+            #     name
+            #     == self._component_manager.input_parameter.csp_master_dev_name
+            # ):
+            #     healthStateList.append(dev.healthState)
+            #     csp_master = True
+            # elif (
+            #     name
+            #     == self._component_manager.input_parameter.sdp_master_dev_name
+            # ):
+            #     healthStateList.append(dev.healthState)
+            #     sdp_master = True
+            elif (
+                name
+                in self._component_manager.input_parameter.tm_subarray_dev_names
+            ):
+                healthStateList.append(dev.healthState)
+                subarray_count += 1
+            elif (
+                name in self._component_manager.input_parameter.mccs_master_dev_name
+            ):
+                healthStateList.append(dev.healthState)
+                mccs_master = True
+
+        healthStateSetList = set(healthStateList)
+        if not mccs_master:
+            return HealthState.UNKNOWN
+        elif subarray_count == 0:
+            return HealthState.UNKNOWN
+        # elif not sdp_master and not csp_master == 0:
+        #     return HealthState.UNKNOWN
         elif healthStateSetList == set([HealthState.OK]):
             return HealthState.OK
         elif HealthState.FAILED in healthStateSetList:
