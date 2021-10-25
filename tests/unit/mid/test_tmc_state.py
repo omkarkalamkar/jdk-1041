@@ -61,7 +61,7 @@ def test_tmc_state_init_only_monitoring_loop(tango_context):
 def test_tmc_state_init_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_device_init(devFactory, cm, 1.5)
+    set_device_init(devFactory, cm, 2)
     assert cm.component.tmc_op_state == tango.DevState.INIT
 
 

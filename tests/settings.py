@@ -59,8 +59,6 @@ def create_cm(
         _event_receiver=p_event_receiver,
     )
 
-    logger.info("DEVICE_LIST BEFORE: %s", DEVICE_LIST_MID)
-    logger.info("DEVICE_LIST BEFORE: %s", DEVICE_LIST_LOW)
     if isinstance(input_parameter, InputParameterMid):
         DEVICE_LIST = DEVICE_LIST_MID
     else:
