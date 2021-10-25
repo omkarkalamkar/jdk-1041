@@ -178,7 +178,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         devInfo = component_manager.get_device(
             component_manager.input_parameter.mccs_master_leaf_node
         )
-        if devInfo is None or devInfo.faulty:
+        if devInfo is None or devInfo.unresponsive:
             raise CommandNotAllowed("TM Mccs Master Leaf node not available")
 
         subarray_count = 0
@@ -186,7 +186,7 @@ class AbstractTelescopeOnOff(TMCCommand):
             dev_name
         ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
+            if devInfo is not None and not devInfo.unresponsive:
                 subarray_count += 1
         if subarray_count == 0:
             raise CommandNotAllowed("No TM Low Subarray available")
@@ -298,7 +298,7 @@ class AbstractTelescopeOnOff(TMCCommand):
             dev_name
         ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
+            if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -406,7 +406,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             dev_name
         ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
+            if devInfo is not None and not devInfo.unresponsive:
                 subarray_count += 1
         if subarray_count == 0:
             raise CommandNotAllowed("No TM Subarray low available")
@@ -485,7 +485,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             dev_name
         ) in component_manager.input_parameter.tm_subarray_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
+            if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
