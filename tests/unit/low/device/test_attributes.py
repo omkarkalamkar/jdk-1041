@@ -51,8 +51,11 @@ def test_attributes(central_node_device):
     assert central_node_device.desiredTelescopeState == DevState.ON
     assert central_node_device.commandInProgress == "None"
     assert central_node_device.mccsMasterLeafNodeName == ""
-    central_node_device.mccsMasterLeafNodeName = "mccs_leaf"
-    assert central_node_device.mccsMasterLeafNodeName == "mccs_leaf"
+    central_node_device.mccsMasterLeafNodeName = "mccs_master_leaf"
+    assert central_node_device.mccsMasterLeafNodeName == "mccs_master_leaf"
+    assert central_node_device.mccsSubarrayLeafNodeName == ""
+    central_node_device.mccsSubarrayLeafNodeName = "mccs_subarray_leaf"
+    assert central_node_device.mccsSubarrayLeafNodeName == "mccs_subarray_leaf"
     assert central_node_device.mccsMasterNodeName == ""
     central_node_device.mccsMasterNodeName = "mccs"
     assert central_node_device.mccsMasterNodeName == "mccs"

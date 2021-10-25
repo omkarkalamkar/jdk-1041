@@ -36,6 +36,7 @@ class InputParameterLow(InputParameter):
     def __init__(self, changed_callback) -> None:
         self._tm_subarray_dev_names = ["ska_low/tm_subarray_node/1"]
         self._mccs_master_leaf_node = "ska_low/tm_leaf_node/mccs_master"
+        self._mccs_subarray_leaf_node = "ska_low/tm_leaf_node/mccs_subarray01"
         self._mccs_master_dev_name = "low-mccs/control/control"
         self._changed_callback = changed_callback
 
@@ -61,6 +62,31 @@ class InputParameterLow(InputParameter):
         :type value: str
         """
         self._mccs_master_leaf_node = value
+        if self._changed_callback is not None:
+            self._changed_callback()
+
+    @property
+    def mccs_subarray_leaf_node(self):
+        """
+        Input parameter
+        Return the TM Leaf MCCS Subarray device name
+
+        :return: the TM Leaf MCCS Subarray device name
+        :rtype: str
+        """
+        return self._mccs_subarray_leaf_node
+
+    @mccs_subarray_leaf_node.setter
+    def mccs_subarray_leaf_node(self, value):
+        """
+        Input parameter
+        Set the TM Leaf MCCS Subarray device name to be
+        managed by the CentralNode
+
+        :param value: the TM Leaf MCCS Subarray device name
+        :type value: str
+        """
+        self._mccs_subarray_leaf_node = value
         if self._changed_callback is not None:
             self._changed_callback()
 
@@ -97,6 +123,16 @@ class InputParameterLow(InputParameter):
                 list_dev_names.append(dev_name)
 
         dev_name = self.mccs_master_leaf_node
+        if dev_name != "" and component_manager.get_device(dev_name) is None:
+            component_manager.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.mccs_subarray_leaf_node
+        if dev_name != "" and component_manager.get_device(dev_name) is None:
+            component_manager.add_device(dev_name)
+            list_dev_names.append(dev_name)
+
+        dev_name = self.mccs_master_dev_name
         if dev_name != "" and component_manager.get_device(dev_name) is None:
             component_manager.add_device(dev_name)
             list_dev_names.append(dev_name)
