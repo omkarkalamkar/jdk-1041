@@ -193,7 +193,6 @@ class HealthStateAggragatorMid(Aggregator):
             return HealthState.UNKNOWN
 
 
-
 class HealthStateAggragatorLow(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
@@ -227,7 +226,8 @@ class HealthStateAggragatorLow(Aggregator):
                 healthStateList.append(dev.healthState)
                 subarray_count += 1
             elif (
-                name in self._component_manager.input_parameter.mccs_master_dev_name
+                name
+                in self._component_manager.input_parameter.mccs_master_dev_name
             ):
                 healthStateList.append(dev.healthState)
                 mccs_master = True

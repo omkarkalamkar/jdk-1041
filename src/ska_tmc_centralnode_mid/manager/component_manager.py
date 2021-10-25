@@ -300,7 +300,8 @@ class CNComponentManager(BaseComponentManager):
 
         self._aggregate_health_state()
         self._aggregate_state()
-        self._update_imaging()
+        if isinstance(self.input_parameter, InputParameterMid):
+            self._update_imaging()
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -338,7 +339,8 @@ class CNComponentManager(BaseComponentManager):
             devInfo.update_unresponsive(False)
 
         self._aggregate_state()
-        self._update_imaging()
+        if isinstance(self.input_parameter, InputParameterMid):
+            self._update_imaging()
 
     def update_device_obs_state(self, dev_name, obs_state):
         """
