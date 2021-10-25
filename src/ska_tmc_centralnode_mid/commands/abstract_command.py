@@ -378,11 +378,46 @@ class AbstractAssignReleaseResources(TMCCommand):
 
         return True
 
-    def init_adapters_mid(self):
+    def check_allowed_low(self):
+        """
+        Checks whether this command is allowed to be run in current device state
+
+        :return: True if this command is allowed to be run in current device state
+
+        :rtype: boolean
+
+        :raises: DevFailed if this command is not allowed to be run in current device state
+
+        """
         component_manager = self.target
+
+        if self.op_state_model.op_state in [
+            DevState.FAULT,
+            DevState.UNKNOWN,
+            DevState.DISABLE,
+        ]:
+            raise CommandNotAllowed(
+                "AssignReleaseResources() is not allowed in current state %s",
+                self.op_state_model.op_state,
+            )
+
+        subarray_count = 0
+        for (
+            dev_name
+        ) in component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = component_manager.get_device(dev_name)
+            if devInfo is not None and not devInfo.faulty:
+                subarray_count += 1
+        if subarray_count == 0:
+            raise CommandNotAllowed("No TM Subarray low available")
+
+        return True
+
+    def init_adapters_mid(self):
 
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
+        component_manager = self.target
 
         error_dev_names = []
         num_working = 0
@@ -433,6 +468,41 @@ class AbstractAssignReleaseResources(TMCCommand):
             return self.generate_command_result(
                 ResultCode.FAILED,
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}",
+            )
+
+        return (ResultCode.OK, "")
+
+    def init_adapters_low(self):
+
+        self.tm_leaf_mccs_master_adapter = None
+        self.tm_subarray_adapters = []
+        component_manager = self.target
+
+        error_dev_names = []
+        num_working = 0
+
+        for (
+            dev_name
+        ) in component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = component_manager.get_device(dev_name)
+            if not devInfo.faulty:
+                try:
+                    self.tm_subarray_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.SUBARRAY
+                        )
+                    )
+                    num_working += 1
+                except Exception as e:
+                    self.logger.warning(
+                        "Error in creating adapter for %s: %s", dev_name, e
+                    )
+                    error_dev_names.append(dev_name)
+
+        if num_working == 0:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
             )
 
         return (ResultCode.OK, "")
