@@ -10,7 +10,7 @@ from ska_tmc_centralnode_mid.model.input import InputParameterMid
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
-    DEVICE_LIST,
+    DEVICE_LIST_MID,
     SLEEP_TIME,
     TIMEOUT,
     DishLeafNodePrefix,
@@ -43,7 +43,7 @@ def test_one_working_other_faulty(tango_context):
         op_state_model, _input_parameter=InputParameterMid(None), logger=logger
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
-    for dev in DEVICE_LIST:
+    for dev in DEVICE_LIST_MID:
         cm.add_device(dev)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)

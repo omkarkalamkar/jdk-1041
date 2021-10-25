@@ -8,7 +8,7 @@ from ska_tmc_centralnode_mid.manager.component_manager import (
 from ska_tmc_centralnode_mid.model.input import InputParameterMid
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 from tests.settings import (
-    DEVICE_LIST,
+    DEVICE_LIST_MID,
     SLEEP_TIME,
     TIMEOUT,
     DishLeafNodePrefix,
@@ -24,7 +24,7 @@ def test_all_devices_faulty():
         op_state_model, _input_parameter=InputParameterMid(None), logger=logger
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
-    cm.add_multiple_devices(DEVICE_LIST)
+    cm.add_multiple_devices(DEVICE_LIST_MID)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
     while num_faulty != len(cm.devices):

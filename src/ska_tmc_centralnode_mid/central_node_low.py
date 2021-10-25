@@ -40,12 +40,19 @@ class CentralNodeLow(AbstractCentralNode):
     # -----------------
     MCCSMasterLeafNodeFQDN = device_property(dtype="str")
 
+    MCCSSubarrayLeafNodeFQDN = device_property(dtype="str")
+
     MCCSMasterNodeFQDN = device_property(dtype="str")
     # ----------
     # Attributes
     # ----------
 
     mccsMasterLeafNodeName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    mccsSubarrayLeafNodeName = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
@@ -81,12 +88,21 @@ class CentralNodeLow(AbstractCentralNode):
     # ------------------
 
     def read_mccsMasterLeafNodeName(self):
-        """Return the CspMasterDevName attribute."""
+        """Return the MccsMasterLeafNodeName attribute."""
         return self.component_manager.input_parameter.mccs_master_leaf_node
 
     def write_mccsMasterLeafNodeName(self, value):
-        """Set the CspMasterDevName attribute."""
+        """Set the MccsMasterLeafNodeName attribute."""
         self.component_manager.input_parameter.mccs_master_leaf_node = value
+        self.component_manager.update_input_parameter()
+
+    def read_mccsSubarrayLeafNodeName(self):
+        """Return the MccsSubarrayLeafNodeName attribute."""
+        return self.component_manager.input_parameter.mccs_subarray_leaf_node
+
+    def write_mccsSubarrayLeafNodeName(self, value):
+        """Set the MccsSubarrayNodeDevName attribute."""
+        self.component_manager.input_parameter.mccs_subarray_leaf_node = value
         self.component_manager.update_input_parameter()
 
     def read_mccsMasterNodeName(self):
@@ -158,6 +174,9 @@ class CentralNodeLow(AbstractCentralNode):
         cm.input_parameter.tm_subarray_dev_names = self.TMSubarrayNodes
         cm.input_parameter.mccs_master_leaf_node = (
             self.MCCSMasterLeafNodeFQDN or ""
+        )
+        cm.input_parameter.mccs_subarray_leaf_node = (
+            self.MCCSSubarrayLeafNodeFQDN or ""
         )
         cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""
         cm.update_input_parameter()

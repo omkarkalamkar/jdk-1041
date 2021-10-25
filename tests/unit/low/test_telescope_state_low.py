@@ -23,7 +23,7 @@ def devices_to_load():
         {
             "class": HelperStateDevice,
             "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_controller"},
+                {"name": "ska_low/tm_leaf_node/mccs_master"},
                 {"name": "low-mccs/control/control"},
             ],
         },
