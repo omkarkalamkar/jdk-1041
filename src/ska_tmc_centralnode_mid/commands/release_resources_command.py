@@ -31,7 +31,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         adapter_factory=AdapterFactory(),
         *args,
         logger=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
@@ -69,7 +69,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         :return: None
         """
-        ret_code, message = self.init_adapters()
+        ret_code, message = self.init_adapters_mid()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
         try:
@@ -132,3 +132,93 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "Partial release resources not supported!",
             )
+
+    def do_low(self, argin):
+        """
+        Method to invoke ReleaseResources command on Subarray Node.
+
+        :param argin: The string in JSON format. The JSON contains following values:
+
+            subarray_id:
+                DevShort. Mandatory.
+
+            release_all:
+                Boolean(True or False). Mandatory. True when all the resources to be released from Subarray.
+
+            Example:
+                {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
+            Note: From Jive, enter input as:
+                {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
+                without any space.
+        return:
+            None
+
+        raises:
+            ValueError if input argument json string contains invalid value
+
+            KeyError if input argument json string contains invalid key
+
+            DevFailed if the command execution or command invocation on SubarrayNode is not successful
+
+        """
+
+        ret_code, message = self.init_adapters_low()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        try:
+            json_argument = json.loads(argin)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
+
+        if "subarray_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
+
+        subarrayID = int(json_argument["subarray_id"])
+
+        my_subarray_adapter = None
+        for adapter in self.tm_subarray_adapters:
+            if str(subarrayID) in adapter.dev_name:
+                my_subarray_adapter = adapter
+
+        if my_subarray_adapter is None:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("SubArray Id %s is not existing!", subarrayID),
+            )
+
+        if json_argument["release_all"] is True:
+            try:
+                # Invoke ReleaseAllResources on SubarrayNode
+                my_subarray_adapter.ReleaseResources()
+            except Exception as e:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    (
+                        "Error in calling ReleaseResources on subarray %s: %s",
+                        my_subarray_adapter.dev_name,
+                        e,
+                    ),
+                )
+            # Invoke ReleaseAllResources on MCCS Master Leaf Node
+            # Send updated input string with inteface key to MCCS Master for ReleaseResource Command
+            json_argument[
+                "interface"
+            ] = "https://schema.skao.int/ska-low-mccs-releaseresources/1.0"
+            if "transaction_id" in json_argument:
+                del json_argument["transaction_id"]
+                try:
+                    self.tm_leaf_mccs_master_adapter.ReleaseAllResources(
+                        json.dumps(json_argument)
+                    )
+                except Exception as e:
+                    return self.generate_command_result(
+                        ResultCode.FAILED,
+                        f"Error in calling ReleaseResource command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
+                    )
