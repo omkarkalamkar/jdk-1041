@@ -6,7 +6,10 @@ import pytest
 from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
-from ska_tmc_centralnode_mid.model.input import InputParameterMid
+from ska_tmc_centralnode_mid.model.input import (
+    InputParameterLow,
+    InputParameterMid,
+)
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
 logger = logging.getLogger(__name__)
@@ -79,11 +82,47 @@ def create_cm(
     return cm, start_time
 
 
+def create_cm_low(p_monitoring_loop=True, p_event_receiver=True):
+    op_state_model = TMCOpStateModel(logger)
+    cm = CNComponentManager(
+        op_state_model,
+        logger=logger,
+        _input_parameter=InputParameterLow(None),
+        _monitoring_loop=p_monitoring_loop,
+        _event_receiver=p_event_receiver,
+    )
+    for dev in DEVICE_LIST_LOW:
+        cm.add_device(dev)
+    start_time = time.time()
+    num_devices = len(DEVICE_LIST_LOW)
+    if not p_monitoring_loop:
+        return cm, start_time
+    while num_devices != len(cm.checked_devices):
+        time.sleep(SLEEP_TIME)
+        elapsed_time = time.time() - start_time
+        if elapsed_time > TIMEOUT:
+            pytest.fail("Timeout occurred while executing the test")
+
+    return cm, start_time
+
+
 def create_cm_no_faulty_devices(
     tango_context, p_monitoring_loop, p_event_receiver
 ):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(p_monitoring_loop, p_event_receiver)
+    num_faulty = count_faulty_devices(cm)
+    assert num_faulty == 0
+    elapsed_time = time.time() - start_time
+    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
+    return cm
+
+
+def create_cm_no_faulty_devices_low(
+    tango_context, p_monitoring_loop, p_event_receiver
+):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm_low(p_monitoring_loop, p_event_receiver)
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time

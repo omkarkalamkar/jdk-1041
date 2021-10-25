@@ -12,8 +12,10 @@ from ska_tango_base.control_model import ObsState
 from tango import DevState
 
 from ska_tmc_centralnode_mid.manager.aggregators import (
-    HealthStateAggragator,
-    TelescopeStateAggragator,
+    HealthStateAggragatorLow,
+    HealthStateAggragatorMid,
+    TelescopeStateAggragatorLow,
+    TelescopeStateAggragatorMid,
     TMCOpStateAggragator,
 )
 from ska_tmc_centralnode_mid.manager.command_executor import CommandExecutor
@@ -25,6 +27,10 @@ from ska_tmc_centralnode_mid.model.component import (
     SubArrayDeviceInfo,
 )
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
+from ska_tmc_centralnode_mid.model.input import (
+    InputParameterLow,
+    InputParameterMid,
+)
 
 
 class CNComponentManager(BaseComponentManager):
@@ -373,9 +379,16 @@ class CNComponentManager(BaseComponentManager):
         and call the relative callback if available
         """
         if self._health_state_aggregator is None:
-            self._health_state_aggregator = HealthStateAggragator(
-                self, self.logger
-            )
+            if isinstance(self._input_parameter, InputParameterLow):
+                self._health_state_aggregator = HealthStateAggragatorLow(
+                    self, self.logger
+                )
+            elif isinstance(self._input_parameter, InputParameterMid):
+                self._health_state_aggregator = HealthStateAggragatorMid(
+                    self, self.logger
+                )
+            else:
+                pass
 
         with self.lock:
             new_state = self._health_state_aggregator.aggregate()
@@ -393,9 +406,16 @@ class CNComponentManager(BaseComponentManager):
         Aggregates telescope state
         """
         if self._telescope_state_aggregator is None:
-            self._telescope_state_aggregator = TelescopeStateAggragator(
-                self, self.logger
-            )
+            if isinstance(self._input_parameter, InputParameterLow):
+                self._telescope_state_aggregator = TelescopeStateAggragatorLow(
+                    self, self.logger
+                )
+            elif isinstance(self._input_parameter, InputParameterMid):
+                self._telescope_state_aggregator = TelescopeStateAggragatorMid(
+                    self, self.logger
+                )
+            else:
+                pass
 
         with self.lock:
             new_state = self._telescope_state_aggregator.aggregate()
