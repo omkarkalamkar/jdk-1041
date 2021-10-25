@@ -12,8 +12,8 @@ from ska_tango_base.control_model import ObsState
 from tango import DevState
 
 from ska_tmc_centralnode_mid.manager.aggregators import (
-    HealthStateAggragatorMid,
     HealthStateAggragatorLow,
+    HealthStateAggragatorMid,
     TelescopeStateAggragatorLow,
     TelescopeStateAggragatorMid,
     TMCOpStateAggragator,
@@ -26,11 +26,11 @@ from ska_tmc_centralnode_mid.model.component import (
     DeviceInfo,
     SubArrayDeviceInfo,
 )
+from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 from ska_tmc_centralnode_mid.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
 
 
 class CNComponentManager(BaseComponentManager):
@@ -382,13 +382,13 @@ class CNComponentManager(BaseComponentManager):
             if isinstance(self._input_parameter, InputParameterLow):
                 self._health_state_aggregator = HealthStateAggragatorLow(
                     self, self.logger
-                    )
+                )
             elif isinstance(self._input_parameter, InputParameterMid):
                 self._health_state_aggregator = HealthStateAggragatorMid(
                     self, self.logger
-                    )
+                )
             else:
-                pass 
+                pass
 
         with self.lock:
             new_state = self._health_state_aggregator.aggregate()
@@ -409,13 +409,13 @@ class CNComponentManager(BaseComponentManager):
             if isinstance(self._input_parameter, InputParameterLow):
                 self._telescope_state_aggregator = TelescopeStateAggragatorLow(
                     self, self.logger
-                    )
+                )
             elif isinstance(self._input_parameter, InputParameterMid):
                 self._telescope_state_aggregator = TelescopeStateAggragatorMid(
                     self, self.logger
-                    )
+                )
             else:
-                pass 
+                pass
 
         with self.lock:
             new_state = self._telescope_state_aggregator.aggregate()

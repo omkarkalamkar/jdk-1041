@@ -7,8 +7,8 @@ from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
 from ska_tmc_centralnode_mid.model.input import (
+    InputParameterLow,
     InputParameterMid,
-    InputParameterLow
 )
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
@@ -33,16 +33,10 @@ DEVICE_LIST_MID = [
 ]
 
 DEVICE_LIST_LOW = [
-<<<<<<< HEAD
-    "ska_low/tm_subarray_node/1",
-    "ska_low/tm_leaf_node/mccs_controller",
-    "low-mccs/control/control",
-=======
     "ska_low/tm_leaf_node/mccs_master",
     "low-mccs/control/control",
     "ska_low/tm_subarray_node/1",
     "ska_low/tm_leaf_node/mccs_subarray01",
->>>>>>> 962ba3cb200c901ee52adc7263eea07be4c8aa93
 ]
 
 
