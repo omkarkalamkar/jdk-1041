@@ -85,7 +85,7 @@ class TelescopeStateAggragatorLow(Aggregator):
 
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
-            if dev.faulty:
+            if dev.unresponsive:
                 continue
             elif (
                 name

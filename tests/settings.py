@@ -17,7 +17,7 @@ TIMEOUT = 10
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
 
-DEVICE_LIST = [
+DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_master",
     "mid_csp/elt/master",
     "ska_mid/tm_leaf_node/sdp_master",
@@ -29,6 +29,13 @@ DEVICE_LIST = [
     "mid_d0001/elt/master",
 ]
 
+DEVICE_LIST_LOW = [
+    "ska_low/tm_leaf_node/mccs_master",
+    "low-mccs/control/control",
+    "ska_low/tm_subarray_node/1",
+    "ska_low/tm_leaf_node/mccs_subarray01",
+]
+
 
 def count_faulty_devices(cm):
     result = 0
@@ -38,15 +45,27 @@ def count_faulty_devices(cm):
     return result
 
 
-def create_cm(p_monitoring_loop=True, p_event_receiver=True):
+def create_cm(
+    p_monitoring_loop=True,
+    p_event_receiver=True,
+    input_parameter=InputParameterMid(None),
+):
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
         op_state_model,
         logger=logger,
-        _input_parameter=InputParameterMid(None),
+        _input_parameter=input_parameter,
         _monitoring_loop=p_monitoring_loop,
         _event_receiver=p_event_receiver,
     )
+
+    logger.info("DEVICE_LIST BEFORE: %s", DEVICE_LIST_MID)
+    logger.info("DEVICE_LIST BEFORE: %s", DEVICE_LIST_LOW)
+    if isinstance(input_parameter, InputParameterMid):
+        DEVICE_LIST = DEVICE_LIST_MID
+    else:
+        DEVICE_LIST = DEVICE_LIST_LOW
+
     for dev in DEVICE_LIST:
         cm.add_device(dev)
     start_time = time.time()
