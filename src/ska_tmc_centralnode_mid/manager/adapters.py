@@ -69,11 +69,11 @@ class BaseAdapter:
     def AssignResources(self, argin):
         self._proxy.AssignResources(argin)
 
-    def ReleaseAllResources(self, argin):
-        self._proxy.ReleaseAllResources(argin)
+    def ReleaseAllResources(self):
+        self._proxy.ReleaseAllResources()
 
-    def ReleaseResources(self):
-        self._proxy.ReleaseResources()
+    def ReleaseResources(self, argin):
+        self._proxy.ReleaseResources(argin)
 
 
 class SubArrayAdapter(BaseAdapter):
@@ -83,11 +83,11 @@ class SubArrayAdapter(BaseAdapter):
     def AssignResources(self, argin):
         return self._proxy.AssignResources(argin)
 
-    def ReleaseAllResources(self, argin):
-        return self._proxy.ReleaseAllResources(argin)
+    def ReleaseAllResources(self):
+        return self._proxy.ReleaseAllResources()
 
-    def ReleaseResources(self):
-        return self._proxy.ReleaseResources()
+    def ReleaseResources(self, argin):
+        return self._proxy.ReleaseResources(argin)
 
 
 class DishAdapter(BaseAdapter):
