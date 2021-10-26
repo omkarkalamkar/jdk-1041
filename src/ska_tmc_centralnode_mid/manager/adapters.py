@@ -85,7 +85,7 @@ class SubArrayAdapter(BaseAdapter):
 
     def ReleaseAllResources(self, argin):
         return self._proxy.ReleaseAllResources(argin)
-    
+
     def ReleaseResources(self):
         return self._proxy.ReleaseResources()
 

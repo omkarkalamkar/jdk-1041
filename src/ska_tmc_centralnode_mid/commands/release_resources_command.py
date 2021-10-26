@@ -224,4 +224,3 @@ class ReleaseResources(AbstractAssignReleaseResources):
                     )
 
             return (ResultCode.OK, "")
-

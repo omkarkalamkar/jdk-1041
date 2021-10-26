@@ -1,4 +1,3 @@
-import json
 import time
 from os.path import dirname, join
 
@@ -9,9 +8,8 @@ from ska_tango_base.obs.obs_device import SKAObsDevice
 from ska_tmc_centralnode_mid.commands.release_resources_command import (
     ReleaseResources,
 )
-from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
-from ska_tmc_centralnode_mid.model.input import InputParameterLow
 from ska_tmc_centralnode_mid.manager.adapters import SubArrayAdapter
+from ska_tmc_centralnode_mid.model.input import InputParameterLow
 from tests.helper_adapter_factory import HelperAdapterFactory
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
@@ -37,7 +35,9 @@ def devices_to_load():
 
 
 def get_release_input_str(release_input_file="command_ReleaseResources.json"):
-    path = join(dirname(__file__), "..", "..", "data","low", release_input_file)
+    path = join(
+        dirname(__file__), "..", "..", "data", "low", release_input_file
+    )
     with open(path, "r") as f:
         release_input_str = f.read()
     return release_input_str
@@ -70,4 +70,3 @@ def test_telescope_release_resources_command(tango_context):
     for adapter in my_adapter_factory.adapters:
         if isinstance(adapter, SubArrayAdapter):
             adapter.proxy.ReleaseResources.assert_called()
-    
