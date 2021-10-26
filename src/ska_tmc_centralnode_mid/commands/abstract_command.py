@@ -96,7 +96,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         Checks whether this command is allowed
         It checks that the device is in a state
         to perform this command and that all the
-        component needed for the operation are not faulty
+        component needed for the operation are not unresponsive
 
         :return: True if this command is allowed
 
@@ -154,7 +154,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         Checks whether this command is allowed
         It checks that the device is in a state
         to perform this command and that all the
-        component needed for the operation are not faulty
+        component needed for the operation are not unresponsive
 
         :return: True if this command is allowed
 
@@ -366,7 +366,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             if devInfo is not None and not devInfo.unresponsive:
                 subarray_count += 1
         if subarray_count == 0:
-            raise CommandNotAllowed("No TM Subarray available")
+            raise CommandNotAllowed("No TM Low Subarray available")
 
         dish_count = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
@@ -400,6 +400,12 @@ class AbstractAssignReleaseResources(TMCCommand):
                 "AssignReleaseResources() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
+        
+        devInfo = component_manager.get_device(
+            component_manager.input_parameter.mccs_master_leaf_node
+        )
+        if devInfo is None or devInfo.unresponsive:
+            raise CommandNotAllowed("TM Mccs Master Leaf node not available")
 
         subarray_count = 0
         for (
@@ -409,7 +415,7 @@ class AbstractAssignReleaseResources(TMCCommand):
             if devInfo is not None and not devInfo.unresponsive:
                 subarray_count += 1
         if subarray_count == 0:
-            raise CommandNotAllowed("No TM Subarray low available")
+            raise CommandNotAllowed("No TM Low Subarray available")
 
         return True
 
@@ -477,6 +483,18 @@ class AbstractAssignReleaseResources(TMCCommand):
         self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
         component_manager = self.target
+
+        try:
+            self.tm_leaf_mccs_master_adapter = (
+                self._adapter_factory.get_or_create_adapter(
+                    component_manager.input_parameter.mccs_master_leaf_node
+                )
+            )
+        except Exception as e:
+            return self.adapter_error_message_result(
+                component_manager.input_parameter.mccs_master_leaf_node,
+                e,
+            )
 
         error_dev_names = []
         num_working = 0
