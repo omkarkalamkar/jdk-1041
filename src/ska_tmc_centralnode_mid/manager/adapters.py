@@ -66,6 +66,15 @@ class BaseAdapter:
     def StandBy(self):
         self.proxy.TelescopeStandBy()
 
+    def AssignResources(self, argin):
+        self._proxy.AssignResources(argin)
+
+    def ReleaseAllResources(self):
+        self._proxy.ReleaseAllResources()
+
+    def ReleaseResources(self, argin):
+        self._proxy.ReleaseResources(argin)
+
 
 class SubArrayAdapter(BaseAdapter):
     def __init__(self, dev_name, proxy) -> None:
@@ -76,6 +85,9 @@ class SubArrayAdapter(BaseAdapter):
 
     def ReleaseAllResources(self):
         return self._proxy.ReleaseAllResources()
+
+    def ReleaseResources(self, argin):
+        return self._proxy.ReleaseResources(argin)
 
 
 class DishAdapter(BaseAdapter):

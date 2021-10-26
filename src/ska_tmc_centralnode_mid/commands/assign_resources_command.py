@@ -41,7 +41,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.tm_subarray_adapters = []
         self._skuid = skuid
 
-    def do_mid(self, argin):
+    def do_mid(self, argin=None):
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -297,7 +297,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 "processing_blocks key not present in the input json argument"
             )
 
-    def do_low(self, argin):
+    def do_low(self, argin=None):
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -354,17 +354,40 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        try:
-            subarray_cmd_data = self.create_subarray_cmd_data(json_argument)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED, ("Errors in input json argument: %s", e)
-            )
-
         if "subarray_id" not in json_argument:
             return self.generate_command_result(
                 ResultCode.FAILED,
                 "subarray_id key is not present in the input json argument.",
+            )
+
+        if "mccs" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs key is not present in the input json argument.",
+            )
+
+        if "subarray_beam_ids" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.subarray_beam_ids key is not present in the input json argument.",
+            )
+
+        if "station_ids" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.station_ids key is not present in the input json argument.",
+            )
+
+        if "channel_blocks" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.channel_blocks key is not present in the input json argument.",
+            )
+
+        if "transaction_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "transaction_id key is not present in the input json argument.",
             )
 
         subarrayID = int(json_argument["subarray_id"])
@@ -378,6 +401,13 @@ class AssignResources(AbstractAssignReleaseResources):
             return self.generate_command_result(
                 ResultCode.FAILED,
                 ("SubArray Id %s is not existing!", subarrayID),
+            )
+
+        try:
+            subarray_cmd_data = self.create_subarray_cmd_data(json_argument)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED, ("Errors in input json argument: %s", e)
             )
 
         try:
@@ -406,6 +436,8 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 f"Error in calling AssignResource command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
             )
+
+        return (ResultCode.OK, "")
 
     def create_mccs_cmd_data(self, json_argument):
         """

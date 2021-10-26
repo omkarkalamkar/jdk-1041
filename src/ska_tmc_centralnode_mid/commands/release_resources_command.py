@@ -180,6 +180,12 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 "subarray_id key is not present in the input json argument.",
             )
 
+        if "transaction_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "transaction_id key is not present in the input json argument.",
+            )
+
         subarrayID = int(json_argument["subarray_id"])
 
         my_subarray_adapter = None
@@ -196,7 +202,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if json_argument["release_all"] is True:
             try:
                 # Invoke ReleaseAllResources on SubarrayNode
-                my_subarray_adapter.ReleaseResources()
+                my_subarray_adapter.ReleaseAllResources()
             except Exception as e:
                 return self.generate_command_result(
                     ResultCode.FAILED,
@@ -214,11 +220,13 @@ class ReleaseResources(AbstractAssignReleaseResources):
             if "transaction_id" in json_argument:
                 del json_argument["transaction_id"]
                 try:
-                    self.tm_leaf_mccs_master_adapter.ReleaseAllResources(
+                    self.tm_leaf_mccs_master_adapter.ReleaseResources(
                         json.dumps(json_argument)
                     )
                 except Exception as e:
                     return self.generate_command_result(
                         ResultCode.FAILED,
-                        f"Error in calling ReleaseResource command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
+                        f"Error in calling ReleaseAllResource command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
                     )
+
+            return (ResultCode.OK, "")
