@@ -83,10 +83,10 @@ def create_cm(
 
 
 def create_cm_no_faulty_devices(
-    tango_context, 
-    p_monitoring_loop, 
-    p_event_receiver, 
-    input_parameter=InputParameterMid(None)
+    tango_context,
+    p_monitoring_loop,
+    p_event_receiver,
+    input_parameter=InputParameterMid(None),
 ):
     logger.info("%s", tango_context)
     if isinstance(input_parameter, InputParameterMid):
@@ -94,7 +94,9 @@ def create_cm_no_faulty_devices(
     else:
         input_parameter = InputParameterLow(None)
 
-    cm, start_time = create_cm(p_monitoring_loop, p_event_receiver, input_parameter)
+    cm, start_time = create_cm(
+        p_monitoring_loop, p_event_receiver, input_parameter
+    )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time
