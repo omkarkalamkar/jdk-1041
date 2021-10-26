@@ -1,3 +1,4 @@
+import json
 import time
 from os.path import dirname, join
 
@@ -8,6 +9,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_centralnode_mid.commands.assign_resources_command import (
     AssignResources,
 )
+from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from ska_tmc_centralnode_mid.manager.adapters import SubArrayAdapter
 from ska_tmc_centralnode_mid.model.input import InputParameterLow
 from tests.helper_adapter_factory import HelperAdapterFactory
@@ -72,3 +74,151 @@ def test_telescope_assign_resources_command(tango_context):
     for adapter in my_adapter_factory.adapters:
         if isinstance(adapter, SubArrayAdapter):
             adapter.proxy.AssignResources.assert_called()
+
+
+def test_telescope_assign_resources_command_fail_subarray(tango_context):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+
+    my_adapter_factory = HelperAdapterFactory()
+
+    attrs = {"fetch_skuid.return_value": 123}
+    skuid = mock.Mock(**attrs)
+
+    # include exception in AssignResources command
+    failing_dev = "ska_low/tm_subarray_node/1"
+    attrs = {"AssignResources.side_effect": Exception}
+    subarrayMock = mock.Mock(**attrs)
+    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+
+    assign_res_command = AssignResources(
+        cm, cm.op_state_model, my_adapter_factory, skuid
+    )
+    assign_input_str = get_assign_input_str()
+    assert assign_res_command.check_allowed()
+    (result_code, message) = assign_res_command.do(assign_input_str)
+    assert result_code == ResultCode.FAILED
+    assert failing_dev in message
+
+
+def test_telescope_assign_resources_command_missing_subarray_beam_ids_key(
+    tango_context,
+):
+    logger.info("%s", tango_context)
+    assign_res_command, my_adapter_factory = get_assign_resources_command_obj()
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    json_argument["mccs"]["subarray_beam_ids"] = ""
+    assert assign_res_command.check_allowed()
+    (result_code, _) = assign_res_command.do(json.dumps(json_argument))
+    assert result_code == ResultCode.OK
+    for adapter in my_adapter_factory.adapters:
+        if isinstance(adapter, SubArrayAdapter):
+            adapter.proxy.AssignResources.assert_called()
+
+
+def test_telescope_assign_resources_command_empty_input_json(tango_context):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _ = get_assign_resources_command_obj()
+    assert assign_res_command.check_allowed()
+    (result_code, _) = assign_res_command.do("")
+    assert result_code == ResultCode.FAILED
+
+
+def test_telescope_assign_resources_command_missing_transaction_id(
+    tango_context,
+):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _ = get_assign_resources_command_obj()
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["transaction_id"]
+    assert assign_res_command.check_allowed()
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert result_code == ResultCode.FAILED
+    assert "transaction_id" in message
+
+
+def test_telescope_assign_resources_command_missing_subarray_id(tango_context):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _ = get_assign_resources_command_obj()
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["subarray_id"]
+    assert assign_res_command.check_allowed()
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert result_code == ResultCode.FAILED
+    assert "subarray_id" in message
+
+
+def test_telescope_assign_resources_command_missing_mccs(tango_context):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _ = get_assign_resources_command_obj()
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["mccs"]
+    assert assign_res_command.check_allowed()
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert result_code == ResultCode.FAILED
+    assert "mccs" in message
+
+
+def test_telescope_assign_resources_command_missing_channel_blocks(
+    tango_context,
+):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _ = get_assign_resources_command_obj()
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["mccs"]["channel_blocks"]
+    assert assign_res_command.check_allowed()
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert result_code == ResultCode.FAILED
+    assert "channel_blocks" in message
+
+
+def test_telescope_assign_resources_command_missing_station_ids(
+    tango_context,
+):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _ = get_assign_resources_command_obj()
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["mccs"]["station_ids"]
+    assert assign_res_command.check_allowed()
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert result_code == ResultCode.FAILED
+    assert "station_ids" in message
+
+
+def test_telescope_assign_resources_fail_check_allowed(tango_context):
+
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    my_adapter_factory = HelperAdapterFactory()
+    cm.input_parameter.mccs_master_leaf_node = []
+    assign_res_command = AssignResources(
+        cm, cm.op_state_model, my_adapter_factory
+    )
+    with pytest.raises(CommandNotAllowed):
+        assign_res_command.check_allowed()
