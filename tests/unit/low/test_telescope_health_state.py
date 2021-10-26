@@ -13,7 +13,7 @@ from tests.settings import TIMEOUT, create_cm_no_faulty_devices
 @pytest.fixture()
 def devices_to_load():
     return (
-              {
+        {
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": "ska_low/tm_subarray_node/1"},
@@ -31,12 +31,16 @@ def devices_to_load():
 
 
 def test_set_health_state_ok(tango_context):
-    cm = create_cm_no_faulty_devices(tango_context, True, True, InputParameterLow(None))
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, True, InputParameterLow(None)
+    )
     assert cm.component.telescope_health_state == HealthState.OK
 
 
 def test_set_health_state_ok_only_monitoring_loop(tango_context):
-    cm = create_cm_no_faulty_devices(tango_context, True, False, InputParameterLow(None))
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, False, InputParameterLow(None)
+    )
     assert cm.component.telescope_health_state == HealthState.OK
 
 
@@ -69,14 +73,18 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
 
 def test_set_health_state_degraded(tango_context):
     devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, True, InputParameterLow(None))
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, True, InputParameterLow(None)
+    )
     set_device_degraded(devFactory, cm, 1.5)
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
 
 def test_set_health_state_degraded_only_monitoring_loop(tango_context):
     devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, False, InputParameterLow(None))
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, False, InputParameterLow(None)
+    )
     set_device_degraded(devFactory, cm, 1.5)
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
@@ -107,14 +115,18 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
 
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, True, InputParameterLow(None))
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, True, InputParameterLow(None)
+    )
     set_failed(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
 
 def test_set_health_state_failed_only_monitoring_loop(tango_context):
     devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, False, InputParameterLow(None))
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, False, InputParameterLow(None)
+    )
     set_failed(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
@@ -142,14 +154,18 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=1.5):
 
 def test_set_health_state_unknown(tango_context):
     devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, True, InputParameterLow(None))
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, True, InputParameterLow(None)
+    )
     set_device_unknown(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.UNKNOWN
 
 
 def test_set_health_state_unknown_only_monitoring_loop(tango_context):
     devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, True, False, InputParameterLow(None))
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, False, InputParameterLow(None)
+    )
     set_device_unknown(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.UNKNOWN
 
