@@ -69,4 +69,6 @@ def test_telescope_release_resources_command(tango_context):
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
         if isinstance(adapter, SubArrayAdapter):
+            adapter.proxy.ReleaseAllResources.assert_called()
+        else:
             adapter.proxy.ReleaseResources.assert_called()

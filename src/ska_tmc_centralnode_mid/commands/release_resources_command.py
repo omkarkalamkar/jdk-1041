@@ -196,7 +196,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if json_argument["release_all"] is True:
             try:
                 # Invoke ReleaseAllResources on SubarrayNode
-                my_subarray_adapter.ReleaseResources()
+                my_subarray_adapter.ReleaseAllResources()
             except Exception as e:
                 return self.generate_command_result(
                     ResultCode.FAILED,
@@ -214,7 +214,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             if "transaction_id" in json_argument:
                 del json_argument["transaction_id"]
                 try:
-                    self.tm_leaf_mccs_master_adapter.ReleaseAllResources(
+                    self.tm_leaf_mccs_master_adapter.ReleaseResources(
                         json.dumps(json_argument)
                     )
                 except Exception as e:
