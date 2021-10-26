@@ -1,19 +1,14 @@
-import json
 import time
 from os.path import dirname, join
 
 import mock
 import pytest
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.obs.obs_device import SKAObsDevice
 
 from ska_tmc_centralnode_mid.commands.assign_resources_command import (
     AssignResources,
 )
-from ska_tmc_centralnode_mid.commands.telescope_on_command import TelescopeOn
-from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from ska_tmc_centralnode_mid.manager.adapters import SubArrayAdapter
-from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.model.input import InputParameterLow
 from tests.helper_adapter_factory import HelperAdapterFactory
 from tests.helper_state_device import HelperStateDevice
@@ -40,9 +35,10 @@ def devices_to_load():
     )
 
 
-
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
-    path = join(dirname(__file__), "..", "..", "data", "low", assign_input_file)
+    path = join(
+        dirname(__file__), "..", "..", "data", "low", assign_input_file
+    )
     with open(path, "r") as f:
         assign_input_str = f.read()
     return assign_input_str

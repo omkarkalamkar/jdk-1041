@@ -41,7 +41,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.tm_subarray_adapters = []
         self._skuid = skuid
 
-    def do_mid(self, argin = None):
+    def do_mid(self, argin=None):
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -297,7 +297,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 "processing_blocks key not present in the input json argument"
             )
 
-    def do_low(self, argin = None):
+    def do_low(self, argin=None):
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -408,7 +408,6 @@ class AssignResources(AbstractAssignReleaseResources):
             )
 
         return (ResultCode.OK, "")
-
 
     def create_mccs_cmd_data(self, json_argument):
         """

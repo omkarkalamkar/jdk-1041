@@ -400,7 +400,7 @@ class AbstractAssignReleaseResources(TMCCommand):
                 "AssignReleaseResources() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
-        
+
         devInfo = component_manager.get_device(
             component_manager.input_parameter.mccs_master_leaf_node
         )
