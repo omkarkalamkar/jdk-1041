@@ -180,6 +180,12 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 "subarray_id key is not present in the input json argument.",
             )
 
+        if "transaction_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "transaction_id key is not present in the input json argument.",
+            )
+
         subarrayID = int(json_argument["subarray_id"])
 
         my_subarray_adapter = None
