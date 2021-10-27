@@ -13,6 +13,7 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 # @pytest.mark.xfail(reason="Need to debug")
 @pytest.mark.post_deployment
+@pytest.mark.SKA_mid
 def test_stow_antennas_command(tango_context):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()

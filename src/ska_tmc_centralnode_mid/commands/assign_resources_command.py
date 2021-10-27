@@ -345,10 +345,6 @@ class AssignResources(AbstractAssignReleaseResources):
             AssertionError if  Mccs On command is not completed.
 
         """
-        # Checks if Mccs Off command is completed.
-        # Check lates MCCS implementation and uncomment this method call if required. If not needed this method can be removed.
-        # self.check_mccs_off_completed()
-
         ret_code, message = self.init_adapters_low()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -483,26 +479,3 @@ class AssignResources(AbstractAssignReleaseResources):
             del json_argument["sdp"]
         input_to_subarray = json.dumps(json_argument)
         return input_to_subarray
-
-    def check_mccs_off_completed(self):
-        component_manager = self.target
-        mccs_off = False
-        start_time = time.time()
-        mccs_devname = component_manager.input_parameter.mccs_master_dev_name
-
-        while not mccs_off:
-            mccs_cmd_result = json.loads(
-                component_manager.get_device(mccs_devname).commandResult
-            )
-
-            self.logger.error("MCCS %s is not OFF", mccs_devname)
-            if mccs_cmd_result["result_code"] == 0:
-                mccs_off = True
-
-            elapsed_time = time.time() - start_time
-            if elapsed_time > 3000:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    "Timeout in waiting for MCCS to be in OFF state",
-                )
-            time.sleep(0.1)

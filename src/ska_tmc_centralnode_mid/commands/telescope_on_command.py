@@ -106,9 +106,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         """
         component_manager = self.target
-        # Checks if Mccs Off command is completed.
-        # Check lates MCCS implementation and uncomment this method call if required. If not needed this method can be removed.
-        # self.check_mccs_off_completed()
 
         component_manager.component.desired_telescope_state = DevState.ON
 
@@ -136,34 +133,3 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 )
 
         return (ResultCode.OK, "")
-
-    def check_mccs_off_completed(self):
-        component_manager = self.target
-        mccs_off = False
-        start_time = time.time()
-        mccs_devname = component_manager.input_parameter.mccs_master_dev_name
-
-        while not mccs_off:
-            mccs_cmd_result = json.loads(
-                component_manager.get_device(mccs_devname).commandResult
-            )
-
-            self.logger.error("MCCS %s is not OFF", mccs_devname)
-
-            if (
-                "Off" in mccs_cmd_result["status"]
-                or mccs_cmd_result["status"] == ""
-            ):
-                if (
-                    mccs_cmd_result["result_code"] == 0
-                    or mccs_cmd_result["result_code"] == 4
-                ):
-                    mccs_off = True
-
-            elapsed_time = time.time() - start_time
-            if elapsed_time > self._timeout_mccs:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    "Timeout in waiting for MCCS to be in OFF state",
-                )
-            time.sleep(self._step_sleep)

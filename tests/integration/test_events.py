@@ -12,6 +12,7 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
 @pytest.mark.post_deployment
+@pytest.mark.SKA_mid
 def test_internal_model_events(tango_context):
     pytest.num_events_arrived = 0
 

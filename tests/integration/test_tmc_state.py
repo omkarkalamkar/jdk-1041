@@ -12,6 +12,7 @@ from tests.settings import logger
 
 
 @pytest.mark.post_deployment
+@pytest.mark.SKA_mid
 def test_tmc_state(tango_context):
     # import debugpy; debugpy.debug_this_thread()
     pytest.event_arrived = False
