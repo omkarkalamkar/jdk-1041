@@ -2,7 +2,6 @@
 AssignResources class for CentralNode.
 """
 import json
-import time
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode

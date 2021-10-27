@@ -1,6 +1,3 @@
-import json
-import time
-
 from ska_tango_base.commands import ResultCode
 from tango import DevState
 

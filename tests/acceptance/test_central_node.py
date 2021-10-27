@@ -132,6 +132,7 @@ def test_internal_model_mid(central_node_name):
 def test_run_commands_mid(central_node_name, command_name):
     pass
 
+
 @pytest.mark.post_deployment
 @pytest.mark.acceptance
 @pytest.mark.SKA_low
