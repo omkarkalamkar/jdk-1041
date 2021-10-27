@@ -1,0 +1,51 @@
+import pytest
+import tango
+from ska_tango_base.control_model import HealthState
+
+from ska_tmc_centralnode_mid.model.input import InputParameterLow
+from tests.helper_state_device import HelperStateDevice
+from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.settings import create_cm_no_faulty_devices
+
+
+@pytest.fixture()
+def devices_to_load():
+    return (
+        {
+            "class": HelperSubArrayDevice,
+            "devices": [
+                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
+            ],
+        },
+        {
+            "class": HelperStateDevice,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/mccs_master"},
+                {"name": "low-mccs/control/control"},
+            ],
+        },
+    )
+
+
+def test_aggregation_default(tango_context):
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, True, InputParameterLow(None)
+    )
+    assert cm.component.telescope_state == tango.DevState.UNKNOWN
+    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
+    assert cm.component.telescope_health_state == HealthState.OK
+
+    cm = create_cm_no_faulty_devices(
+        tango_context, False, True, InputParameterLow(None)
+    )
+    assert cm.component.telescope_state == tango.DevState.UNKNOWN
+    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
+    assert cm.component.telescope_health_state == HealthState.UNKNOWN
+
+    cm = create_cm_no_faulty_devices(
+        tango_context, True, False, InputParameterLow(None)
+    )
+    assert cm.component.telescope_state == tango.DevState.UNKNOWN
+    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
+    assert cm.component.telescope_health_state == HealthState.OK
