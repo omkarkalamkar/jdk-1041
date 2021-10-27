@@ -11,9 +11,7 @@ from tests.integration.common import (
 from tests.settings import logger
 
 
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_tmc_state(tango_context):
+def tmc_state(tango_context, central_node_name):
     # import debugpy; debugpy.debug_this_thread()
     pytest.event_arrived = False
 
@@ -25,7 +23,7 @@ def test_tmc_state(tango_context):
 
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(central_node_name)
 
     event_id = central_node.subscribe_event(
         "TMOpState",
@@ -45,16 +43,29 @@ def test_tmc_state(tango_context):
         "ska_mid/tm_leaf_node/sdp_subarray01"
     )
     dish_ln = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
-
+    mccs_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/mccs_master")
     # set state not handled directly by central node
     csp_master_ln.SetDirectState(DevState.FAULT)
     sdp_master_ln.SetDirectState(DevState.ON)
     csp_subarray_ln.SetDirectState(DevState.ON)
     sdp_subarray_ln.SetDirectState(DevState.ON)
     dish_ln.SetDirectState(DevState.ON)
+    mccs_master_ln.SetDirectState(DevState.FAULT)
 
     assert_event_arrived()
 
     assert central_node.TMOpState == DevState.FAULT
 
     central_node.unsubscribe_event(event_id)
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_tmc_state_mid(tango_context):
+    tmc_state(tango_context, "ska_mid/tm_central/central_node")
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_tmc_state_low(tango_context):
+    tmc_state(tango_context, "ska_low/tm_central/central_node")

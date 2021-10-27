@@ -13,24 +13,20 @@ from tests.integration.common import (  # noqa F401
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-def get_assign_input_str(assign_input_file="command_AssignResources.json"):
-    path = join(dirname(__file__), "..", "data", assign_input_file)
+def get_assign_input_str(path):
     with open(path, "r") as f:
         assign_input_str = f.read()
     return assign_input_str
 
 
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_assign_res_command(tango_context):
+def assign_resouces(tango_context, central_node_name, assign_input_str):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(central_node_name)
 
     ensure_checked_devices(central_node)
     initial_len = len(central_node.CommandExecuted)
     (result, unique_id) = central_node.On()
-    assign_input_str = get_assign_input_str()
     (result, unique_id) = central_node.AssignResources(assign_input_str)
     assert result[0] == ResultCode.QUEUED
     start_time = time.time()
@@ -51,13 +47,54 @@ def test_assign_res_command(tango_context):
                 return device
         return None
 
-    device = get_device(json.loads(central_node.InternalModel))
-    start_time = time.time()
-    while len(device["resources"]) == 0:
-        time.sleep(SLEEP_TIME)
+    if "ska_mid" in central_node_name:
         device = get_device(json.loads(central_node.InternalModel))
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
+        start_time = time.time()
+        while len(device["resources"]) == 0:
+            time.sleep(SLEEP_TIME)
+            device = get_device(json.loads(central_node.InternalModel))
+            elapsed_time = time.time() - start_time
+            if elapsed_time > TIMEOUT:
+                pytest.fail("Timeout occurred while executing the test")
 
-    assert len(device["resources"]) > 0
+        assert len(device["resources"]) > 0
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_assign_res_command_mid(tango_context, central_node_name):
+    return assign_resouces(
+        tango_context,
+        central_node_name,
+        get_assign_input_str(
+            join(
+                dirname(__file__), "..", "data", "command_AssignResources.json"
+            )
+        ),
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_low/tm_central/central_node")],
+)
+def test_assign_res_command_low(tango_context, central_node_name):
+    return assign_resouces(
+        tango_context,
+        central_node_name,
+        get_assign_input_str(
+            join(
+                dirname(__file__),
+                "..",
+                "data",
+                "low",
+                "command_AssignResources.json",
+            )
+        ),
+    )

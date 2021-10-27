@@ -11,12 +11,10 @@ from tests.integration.common import (  # noqa: F401
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_init_command(tango_context):
+def init_command(tango_context, central_node_name):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(central_node_name)
     ensure_checked_devices(central_node)
     initial_len = len(central_node.CommandExecuted)
     (result, unique_id) = central_node.On()
@@ -36,3 +34,23 @@ def test_init_command(tango_context):
     central_node.Init()
     assert len(central_node.CommandExecuted) == 1
     ensure_checked_devices(central_node)
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_low/tm_central/central_node")],
+)
+def test_init_command_low(tango_context, central_node_name):
+    init_command(tango_context, central_node_name)
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_init_command_mid(tango_context, central_node_name):
+    init_command(tango_context, central_node_name)

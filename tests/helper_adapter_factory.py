@@ -5,6 +5,7 @@ from ska_tmc_centralnode_mid.manager.adapters import (
     AdapterType,
     BaseAdapter,
     DishAdapter,
+    MCCSAdapter,
     SubArrayAdapter,
 )
 
@@ -28,6 +29,8 @@ class HelperAdapterFactory(AdapterFactory):
             new_adapter = DishAdapter(dev_name, proxy)
         elif adapter_type == AdapterType.SUBARRAY:
             new_adapter = SubArrayAdapter(dev_name, proxy)
+        elif adapter_type == AdapterType.MCCS:
+            new_adapter = MCCSAdapter(dev_name, proxy)
         else:
             new_adapter = BaseAdapter(dev_name, proxy)
 

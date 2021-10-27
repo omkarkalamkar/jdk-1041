@@ -14,9 +14,7 @@ from tests.integration.common import (
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_telescope_state(tango_context):
+def telescope_state(tango_context, central_node_name):
     # import debugpy; debugpy.debug_this_thread()
     pytest.event_arrived = False
 
@@ -28,7 +26,7 @@ def test_telescope_state(tango_context):
 
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(central_node_name)
 
     event_id = central_node.subscribe_event(
         "telescopeState",
@@ -61,6 +59,7 @@ def test_telescope_state(tango_context):
         "ska_mid/tm_leaf_node/sdp_subarray01"
     )
     dish_master = dev_factory.get_device("mid_d0001/elt/master")
+    mccs_master = dev_factory.get_device("low-mccs/control/control")
 
     # set state not handled directly by central node
     csp_master.SetDirectState(DevState.ON)
@@ -68,9 +67,22 @@ def test_telescope_state(tango_context):
     csp_subarray.SetDirectState(DevState.ON)
     sdp_subarray.SetDirectState(DevState.ON)
     dish_master.SetDirectState(DevState.ON)
+    mccs_master.SetDirectState(DevState.ON)
 
     assert_event_arrived()
 
     assert central_node.telescopeState == DevState.ON
 
     central_node.unsubscribe_event(event_id)
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_telescope_state_mid(tango_context):
+    telescope_state(tango_context, "ska_mid/tm_central/central_node")
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_telescope_state_low(tango_context):
+    telescope_state(tango_context, "ska_low/tm_central/central_node")

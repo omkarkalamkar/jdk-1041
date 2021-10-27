@@ -226,7 +226,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 except Exception as e:
                     return self.generate_command_result(
                         ResultCode.FAILED,
-                        f"Error in calling ReleaseAllResource command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
+                        f"Error in calling ReleaseResources command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
                     )
 
             return (ResultCode.OK, "")

@@ -282,7 +282,8 @@ class AbstractTelescopeOnOff(TMCCommand):
         try:
             self.tm_leaf_mccs_master_adapter = (
                 self._adapter_factory.get_or_create_adapter(
-                    component_manager.input_parameter.mccs_master_leaf_node
+                    component_manager.input_parameter.mccs_master_leaf_node,
+                    AdapterType.MCCS,
                 )
             )
         except Exception as e:
@@ -487,7 +488,8 @@ class AbstractAssignReleaseResources(TMCCommand):
         try:
             self.tm_leaf_mccs_master_adapter = (
                 self._adapter_factory.get_or_create_adapter(
-                    component_manager.input_parameter.mccs_master_leaf_node
+                    component_manager.input_parameter.mccs_master_leaf_node,
+                    AdapterType.MCCS,
                 )
             )
         except Exception as e:

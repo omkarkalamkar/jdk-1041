@@ -29,7 +29,6 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
 
         :param resources: resources to be released
         """
-        self.logger("%s", resources)
         return (ResultCode.OK, "")
 
     def release_all(self):
@@ -204,6 +203,15 @@ class HelperSubArrayDevice(SKASubarray):
         return True
 
     def is_ReleaseAllResources_allowed(self):
+        """
+        Check if command `ReleaseAllResources` is allowed in the current device state.
+
+        :return: ``True`` if the command is allowed
+        :rtype: boolean
+        """
+        return True
+
+    def is_ReleaseResources_allowed(self):
         """
         Check if command `ReleaseAllResources` is allowed in the current device state.
 

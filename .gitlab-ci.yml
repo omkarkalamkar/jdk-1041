@@ -53,10 +53,6 @@ include:
 # retry to template job for python-test
 python-test:
   retry: 2
-  environment:
-    name: noenv
-    kubernetes:
-      namespace: noenv
 
 low-k8s-test:
   extends: k8s-test
