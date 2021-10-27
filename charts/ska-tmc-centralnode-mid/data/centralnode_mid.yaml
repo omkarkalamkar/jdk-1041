@@ -14,22 +14,22 @@ server:
         properties:
         - name: "CspMasterLeafNodeFQDN"
           values:
-          - "{{.Values.deviceServers.centralnode.CspMasterLeafNodeFQDN}}"
+          - "{{.Values.deviceServers.centralnode.mid.CspMasterLeafNodeFQDN}}"
         - name: "CspMasterFQDN"
           values:
-          - "{{.Values.deviceServers.centralnode.CspMasterFQDN}}"
+          - "{{.Values.deviceServers.centralnode.mid.CspMasterFQDN}}"
         - name: "SdpMasterLeafNodeFQDN"
           values:
-          - "{{.Values.deviceServers.centralnode.SdpMasterLeafNodeFQDN}}"
+          - "{{.Values.deviceServers.centralnode.mid.SdpMasterLeafNodeFQDN}}"
         - name: "SdpMasterFQDN"
           values:
-          - "{{.Values.deviceServers.centralnode.SdpMasterFQDN}}"
+          - "{{.Values.deviceServers.centralnode.mid.SdpMasterFQDN}}"
         - name: "DishLeafNodePrefix"
           values:
-          - "{{.Values.deviceServers.centralnode.DishLeafNodePrefix}}"
+          - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
         - name: "NumDishes"
           values:
-          - "{{.Values.deviceServers.centralnode.NumDishes}}"
+          - "{{.Values.deviceServers.centralnode.mid.NumDishes}}"
         - name: "TMSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
@@ -38,12 +38,12 @@ server:
         - name: "TMMidCspSubarrayLeafNodes"
           values: 
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_mid/tm_leaf_node/csp_subarray0{{ . }}"
+          - "ska_mid/tm_leaf_node/csp_subarray{{ printf "%02s" . }}"
           {{- end }}
         - name: "TMMidSdpSubarrayLeafNodes"
           values: 
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_mid/tm_leaf_node/sdp_subarray0{{ . }}"
+          - "ska_mid/tm_leaf_node/sdp_subarray{{ printf "%02s" . }}"
           {{- end }}
         - name: "SkaLevel"
           values:

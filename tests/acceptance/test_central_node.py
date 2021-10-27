@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 import pytest
-from pytest_bdd import given, parsers, scenarios, then, when
+from pytest_bdd import given, parsers, scenario, then, when
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
 from tango import Database, DeviceProxy
@@ -17,10 +17,10 @@ def device_list():
     return db.get_device_exported("*")
 
 
-@given(parsers.parse('a CentralNode device called "{device_name}"'))
-def central_node(device_name):
+@given(parsers.parse("a CentralNode device called <central_node_name>"))
+def central_node(central_node_name):
     """a device called sys/tg_test/1."""
-    return DeviceProxy(device_name)
+    return DeviceProxy(central_node_name)
 
 
 @when("I get the attribute InternalModel of the CentralNode device")
@@ -28,7 +28,7 @@ def internal_model(central_node):
     pytest.internal_model = central_node.InternalModel
 
 
-@when(parsers.parse('I call the command "{command_name}"'))
+@when(parsers.parse("I call the command <command_name>"))
 def call_command(central_node, command_name):
     try:
         pytest.command_result = central_node.command_inout(command_name)
@@ -99,4 +99,69 @@ def check_command(central_node, seconds):
             pytest.fail("Timeout occurred while executing the test")
 
 
-scenarios("../features/centralnode.feature")
+@pytest.mark.post_deployment
+@pytest.mark.acceptance
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+@scenario(
+    "../features/centralnode.feature",
+    "Check internal model according to the TANGO ecosystem deployed",
+)
+def test_internal_model_mid(central_node_name):
+    pass
+
+
+@pytest.mark.post_deployment
+@pytest.mark.acceptance
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    ["central_node_name", "command_name"],
+    [
+        ("ska_mid/tm_central/central_node", "On"),
+        ("ska_mid/tm_central/central_node", "Off"),
+        ("ska_mid/tm_central/central_node", "Standby"),
+        ("ska_mid/tm_central/central_node", "StartUpTelescope"),
+        ("ska_mid/tm_central/central_node", "StandByTelescope"),
+        ("ska_mid/tm_central/central_node", "TelescopeStandby"),
+    ],
+)
+@scenario("../features/centralnode.feature", "Run Commands")
+def test_run_commands_mid(central_node_name, command_name):
+    pass
+
+
+@pytest.mark.post_deployment
+@pytest.mark.acceptance
+@pytest.mark.SKA_low
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_low/tm_central/central_node")],
+)
+@scenario(
+    "../features/centralnode.feature",
+    "Check internal model according to the TANGO ecosystem deployed",
+)
+def test_internal_model_low(central_node_name):
+    pass
+
+
+@pytest.mark.post_deployment
+@pytest.mark.acceptance
+@pytest.mark.SKA_low
+@pytest.mark.parametrize(
+    ["central_node_name", "command_name"],
+    [
+        ("ska_low/tm_central/central_node", "On"),
+        ("ska_low/tm_central/central_node", "Off"),
+        ("ska_low/tm_central/central_node", "Standby"),
+        ("ska_low/tm_central/central_node", "StartUpTelescope"),
+        ("ska_low/tm_central/central_node", "StandByTelescope"),
+        ("ska_low/tm_central/central_node", "TelescopeStandby"),
+    ],
+)
+@scenario("../features/centralnode.feature", "Run Commands")
+def test_run_commands_low(central_node_name, command_name):
+    pass

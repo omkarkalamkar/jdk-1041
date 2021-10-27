@@ -28,6 +28,7 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
 
 
 @pytest.mark.post_deployment
+@pytest.mark.SKA_mid
 def test_release_res_command(tango_context):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()

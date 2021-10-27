@@ -21,6 +21,7 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
 
 
 @pytest.mark.post_deployment
+@pytest.mark.SKA_mid
 def test_assign_res_command(tango_context):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()

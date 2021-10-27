@@ -13,6 +13,7 @@
 CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
 PROJECT = ska-tmc-centralnode-mid
 KUBE_APP = ska-tmc-centralnode-mid
+TELESCOPE ?= SKA-mid
 
 # KUBE_NAMESPACE defines the Kubernetes Namespace that will be deployed to
 # using Helm.  If this does not already exist it will be created
@@ -81,7 +82,7 @@ MARK = not post_deployment and not acceptance
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context
-MARK = post_deployment or acceptance
+MARK = $(shell echo $(TELESCOPE) | sed s/-/_/) and (post_deployment or acceptance)
 endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
@@ -120,6 +121,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set ska-tango-base.display=$(DISPLAY) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
+	--set central_node.telescope=$(TELESCOPE) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 
