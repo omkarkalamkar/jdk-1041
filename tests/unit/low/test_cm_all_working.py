@@ -1,10 +1,10 @@
 import time
 
 import pytest
-from ska_tango_base.obs.obs_device import SKAObsDevice
 
 from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
 from ska_tmc_centralnode_mid.model.input import InputParameterLow
+from tests.helper_state_mccsdevice import HelperMCCSStateDevice
 from tests.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import count_faulty_devices, create_cm, logger
 
@@ -20,7 +20,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": SKAObsDevice,
+            "class": HelperMCCSStateDevice,
             "devices": [
                 {"name": "ska_low/tm_leaf_node/mccs_master"},
                 {"name": "low-mccs/control/control"},

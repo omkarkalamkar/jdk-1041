@@ -482,3 +482,28 @@ class SubArrayDeviceInfo(DeviceInfo):
         super_dict["id"] = self.id
         super_dict["obsState"] = str(ObsState(self.obsState))
         return super_dict
+
+
+class MCCSDeviceInfo(DeviceInfo):
+    def __init__(self, dev_name, _unresponsive=False):
+        super(MCCSDeviceInfo, self).__init__(dev_name, _unresponsive)
+        self.resources = "None"
+
+    def from_dev_info(self, mccsDevInfo):
+        super().from_dev_info(mccsDevInfo)
+        if isinstance(mccsDevInfo, MCCSDeviceInfo):
+            self.resources = mccsDevInfo.resources
+
+    def __eq__(self, other):
+        if isinstance(other, MCCSDeviceInfo) or isinstance(other, DeviceInfo):
+            return self.dev_name == other.dev_name
+        else:
+            return False
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
+
+    def to_dict(self):
+        super_dict = super().to_dict()
+        super_dict["resources"] = self.resources
+        return super_dict

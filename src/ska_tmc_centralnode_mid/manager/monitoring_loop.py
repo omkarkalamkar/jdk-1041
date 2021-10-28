@@ -5,10 +5,12 @@ from time import sleep
 
 import numpy as np
 import tango
+from tango import AttrDataFormat
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from ska_tmc_centralnode_mid.model.component import (
     DeviceInfo,
+    MCCSDeviceInfo,
     SubArrayDeviceInfo,
 )
 
@@ -29,7 +31,7 @@ class MonitoringLoop:
         self,
         component_manager,
         logger=None,
-        max_workers=5,
+        max_workers=1,
         proxy_timeout=500,
         sleep_time=1,
     ):
@@ -83,28 +85,28 @@ class MonitoringLoop:
                 proxy = self._dev_factory.get_device(devInfo.dev_name)
                 proxy.set_timeout_millis(self._proxy_timeout)
                 newDevInfo = None
-                if "subarray" in devInfo.dev_name.lower():
-                    newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
-                    newDevInfo.from_dev_info(devInfo)
-                    assignedRes = proxy.assignedResources
-                    if assignedRes is not None:
-                        newDevInfo.resources = np.asarray(
-                            proxy.assignedResources
-                        )
-                    else:
-                        newDevInfo.resources = []
-                    # self._logger.info(
-                    #     "%s assignedResources: %s",
-                    #     devInfo.dev_name,
-                    #     newDevInfo.resources,
-                    # )
-                    newDevInfo.obsState = proxy.obsState
-                    for s in devInfo.dev_name:
-                        if s.isdigit():
-                            newDevInfo.id = int(s)
-                else:
+                attrInfoEx = proxy.attribute_query("assignedResources")
+                if attrInfoEx is None:
                     newDevInfo = DeviceInfo(devInfo.dev_name)
                     newDevInfo.from_dev_info(devInfo)
+                else:
+                    if attrInfoEx.data_format == AttrDataFormat.SCALAR:
+                        newDevInfo = MCCSDeviceInfo(devInfo.dev_name)
+                        newDevInfo.resources = proxy.assignedResources
+                    else:
+                        newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
+                        newDevInfo.from_dev_info(devInfo)
+                        assignedRes = proxy.assignedResources
+                        if assignedRes is not None:
+                            newDevInfo.resources = np.asarray(
+                                proxy.assignedResources
+                            )
+                        else:
+                            newDevInfo.resources = []
+                        newDevInfo.obsState = proxy.obsState
+                        for s in devInfo.dev_name:
+                            if s.isdigit():
+                                newDevInfo.id = int(s)
 
                 newDevInfo.ping = proxy.ping()
                 newDevInfo.state = proxy.State()

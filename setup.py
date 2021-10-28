@@ -36,7 +36,7 @@ setup(
     packages=setuptools.find_namespace_packages(where="src"),
     package_dir={"": "src"},
     include_package_data=True,
-    test_suite="test",
+    test_suite="tests",
     entry_points={
         "console_scripts": ["CentralNodeDS=ska_tmc_centralnode_mid.central_node_mid:main"]
     },
