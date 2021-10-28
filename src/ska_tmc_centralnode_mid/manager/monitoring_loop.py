@@ -85,11 +85,14 @@ class MonitoringLoop:
                 proxy = self._dev_factory.get_device(devInfo.dev_name)
                 proxy.set_timeout_millis(self._proxy_timeout)
                 newDevInfo = None
-                attrInfoEx = proxy.attribute_query("assignedResources")
-                if attrInfoEx is None:
+
+                attr_list = proxy.get_attribute_list()
+                self._logger.info("Attribute list is: %s", attr_list)
+                if "assignedResources" not in attr_list:
                     newDevInfo = DeviceInfo(devInfo.dev_name)
                     newDevInfo.from_dev_info(devInfo)
                 else:
+                    attrInfoEx = proxy.attribute_query("assignedResources")
                     if attrInfoEx.data_format == AttrDataFormat.SCALAR:
                         newDevInfo = MCCSDeviceInfo(devInfo.dev_name)
                         newDevInfo.resources = proxy.assignedResources
