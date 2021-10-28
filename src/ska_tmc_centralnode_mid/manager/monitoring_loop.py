@@ -80,7 +80,8 @@ class MonitoringLoop:
     def get_assignedResources_attributes(self, proxy):
         try:
             return proxy.attribute_query("assignedResources")
-        except:
+        except Exception as ex:
+            self._logger.debug(str(ex))
             return None
 
     def device_task(self, devInfo):
@@ -95,6 +96,7 @@ class MonitoringLoop:
                     newDevInfo = DeviceInfo(devInfo.dev_name)
                     newDevInfo.from_dev_info(devInfo)
                 else:
+                    attrInfoEx = proxy.attribute_query("assignedResources")
                     if attrInfoEx.data_format == AttrDataFormat.SCALAR:
                         newDevInfo = MCCSDeviceInfo(devInfo.dev_name)
                         newDevInfo.resources = proxy.assignedResources

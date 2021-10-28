@@ -53,15 +53,10 @@ resources:
     memory: 30Mi
 
 deviceServers:
-  leafs:
+  mockDevices:
     enabled: false
     instances: ["01"]
-    file: "data/leafs.yaml"
-
-  subarrays:
-    enabled: false
-    instances: ["01"]
-    file: "data/subarrays.yaml"
+    file: "data/mockdevices.yaml"
 
   centralnode:
     enabled: true

@@ -1,13 +1,21 @@
-name: "sdpsubarayleafnode-{{.Release.Name}}"
-function: observation-execution
-domain: subarray
+name: "mock-devices-{{.Release.Name}}"
+function: testing
+domain: mock_devices
 instances: ["01"]
-command: "python3 /app/tests/helper_subarray_device.py"
+command: "python3 /app/tests/helpers/helper_main.py"
 server:
-  name: "helper_subarray_device"
+  name: "helper_main"
   instances:
     - name: "01"
       classes:
+        - name: "HelperStateDevice"
+          devices:
+            - name: "ska_mid/tm_leaf_node/csp_master"
+            - name: "mid_csp/elt/master"
+            - name: "ska_mid/tm_leaf_node/sdp_master"
+            - name: "mid_sdp/elt/master"
+            - name: "mid_d0001/elt/master"
+            - name: "ska_mid/tm_leaf_node/d0001"
         - name: "HelperSubArrayDevice"
           devices:
             - name: "ska_mid/tm_subarray_node/1"

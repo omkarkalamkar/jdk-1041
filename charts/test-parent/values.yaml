@@ -38,8 +38,5 @@ central_node:
     leafs:
       enabled: true
 
-    subarrays:
-      enabled: true
-
-    centralnode:
+    mockDevices:
       enabled: true

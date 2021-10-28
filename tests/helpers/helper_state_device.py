@@ -4,7 +4,7 @@ from ska_tango_base.base.component_manager import BaseComponentManager
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
 from tango import DevState
-from tango.server import command, run
+from tango.server import command
 
 
 class EmptyComponentManager(BaseComponentManager):

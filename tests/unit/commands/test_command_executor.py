@@ -2,8 +2,8 @@ import time
 
 import mock
 import pytest
+from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.obs.obs_device import SKAObsDevice
 
 from ska_tmc_centralnode_mid.commands.assign_resources_command import (
     AssignResources,
@@ -26,7 +26,7 @@ def devices_to_load():
             "devices": [{"name": "ska_mid/tm_subarray_node/1"}],
         },
         {
-            "class": SKAObsDevice,
+            "class": SKABaseDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},

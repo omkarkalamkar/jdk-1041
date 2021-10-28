@@ -7,7 +7,7 @@ from ska_tango_base.subarray import (
     SubarrayObsStateModel,
 )
 from tango import DevState
-from tango.server import command, run
+from tango.server import command
 
 
 class EmptySubArrayComponentManager(SubarrayComponentManager):
