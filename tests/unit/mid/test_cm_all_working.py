@@ -4,7 +4,7 @@ import pytest
 from ska_tango_base.obs.obs_device import SKAObsDevice
 
 from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
-from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import count_faulty_devices, create_cm, logger
 
 

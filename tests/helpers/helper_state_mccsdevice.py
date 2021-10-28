@@ -1,10 +1,12 @@
+import json
+
 from ska_tango_base.base import OpStateModel
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.base.component_manager import BaseComponentManager
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
 from tango import DevState
-from tango.server import command, run
+from tango.server import attribute, command, run
 
 
 class EmptyComponentManager(BaseComponentManager):
@@ -13,7 +15,7 @@ class EmptyComponentManager(BaseComponentManager):
         super().__init__(op_state_model, *args, **kwargs)
 
 
-class HelperStateDevice(SKABaseDevice):
+class HelperMCCSStateDevice(SKABaseDevice):
     """A generic device for triggering state changes with a command"""
 
     def init_device(self):
@@ -24,16 +26,23 @@ class HelperStateDevice(SKABaseDevice):
         def do(self):
             super().do()
             device = self.target
+            device._assigned_resources = "None"
             device.set_change_event("State", True, False)
             device.set_change_event("healthState", True, False)
             return (ResultCode.OK, "")
 
-    # def init_command_objects(self):
-    #     super().init_command_objects()
-    #     component_args = (self.component_manager, self.op_state_model, self.logger)
-    #     self.register_command_object("TelescopeStandby", self.StandbyCommand(*component_args))
-    #     self.register_command_object("TelescopeOff", self.OffCommand(*component_args))
-    #     self.register_command_object("TelescopeOn", self.OnCommand(*component_args))
+        # ----------
+
+    # Attributes
+    # ----------
+    @attribute(dtype="DevString")
+    def assignedResources(self) -> str:
+        """
+        Return the assigned resources attribute.
+
+        :return: assignedResources attribute
+        """
+        return self._assigned_resources
 
     def create_component_manager(self):
         self.op_state_model = OpStateModel(
@@ -156,20 +165,25 @@ class HelperStateDevice(SKABaseDevice):
             self.set_state(DevState.STANDBY)
         return [[ResultCode.OK], [""]]
 
+    def is_AssignResources_allowed(self):
+        return True
 
-def main(args=None, **kwargs):
-    # PROTECTED REGION ID(CentralNode.main) ENABLED START #
-    """
-    Runs the CentralNode.
-    :param args: Arguments internal to TANGO
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def AssignResources(self):
+        tmpDict = {"resources": ["0001"]}
+        self._assigned_resources = json.dumps(tmpDict)
+        return [[ResultCode.OK], [""]]
 
-    :param kwargs: Arguments internal to TANGO
+    def is_ReleaseResources_allowed(self):
+        return True
 
-    :return: CentralNode TANGO object.
-    """
-    return run((HelperStateDevice,), args=args, **kwargs)
-    # PROTECTED REGION END #    //  CentralNode.main
-
-
-if __name__ == "__main__":
-    main()
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def ReleaseResources(self):
+        self._assigned_resources = "None"
+        return [[ResultCode.OK], [""]]

@@ -4,8 +4,8 @@ import time
 import pytest
 
 from ska_tmc_centralnode_mid.central_node_mid import CentralNodeMid
-from tests.helper_state_device import HelperStateDevice
-from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.helper_state_device import HelperStateDevice
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 pytest.event_arrived = False

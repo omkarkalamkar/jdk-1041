@@ -8,7 +8,7 @@ from ska_tmc_centralnode_mid.manager.component_manager import (
 )
 from ska_tmc_centralnode_mid.model.input import InputParameterLow
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
-from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
     SLEEP_TIME,

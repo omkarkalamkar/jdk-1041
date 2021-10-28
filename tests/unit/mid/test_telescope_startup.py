@@ -2,8 +2,8 @@ import pytest
 import tango
 from ska_tango_base.control_model import HealthState
 
-from tests.helper_state_device import HelperStateDevice
-from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.helper_state_device import HelperStateDevice
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm_no_faulty_devices
 
 

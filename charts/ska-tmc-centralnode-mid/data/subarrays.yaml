@@ -15,6 +15,8 @@ server:
             - name: "ska_mid/tm_leaf_node/sdp_subarray01"
             - name: "ska_low/tm_subarray_node/1"
             - name: "ska_low/tm_leaf_node/mccs_subarray01"
+        - name: "HelperMCCSStateDevice"
+          devices:
             - name: "ska_low/tm_leaf_node/mccs_master"
             - name: "low-mccs/control/control"
 depends_on:

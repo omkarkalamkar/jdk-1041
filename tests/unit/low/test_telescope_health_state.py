@@ -5,8 +5,8 @@ from ska_tango_base.control_model import HealthState
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from ska_tmc_centralnode_mid.model.input import InputParameterLow
-from tests.helper_state_device import HelperStateDevice
-from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.helper_state_mccsdevice import HelperMCCSStateDevice
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import TIMEOUT, create_cm_no_faulty_devices
 
 
@@ -21,7 +21,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperStateDevice,
+            "class": HelperMCCSStateDevice,
             "devices": [
                 {"name": "ska_low/tm_leaf_node/mccs_master"},
                 {"name": "low-mccs/control/control"},

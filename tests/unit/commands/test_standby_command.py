@@ -13,8 +13,8 @@ from ska_tmc_centralnode_mid.manager.adapters import (
     DishAdapter,
     SubArrayAdapter,
 )
-from tests.helper_adapter_factory import HelperAdapterFactory
-from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.helper_adapter_factory import HelperAdapterFactory
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
 

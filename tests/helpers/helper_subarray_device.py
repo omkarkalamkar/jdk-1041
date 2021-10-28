@@ -219,19 +219,3 @@ class HelperSubArrayDevice(SKASubarray):
         :rtype: boolean
         """
         return True
-
-
-def main(args=None, **kwargs):
-    """
-    Runs the HelperSubArrayDevice.
-    :param args: Arguments internal to TANGO
-
-    :param kwargs: Arguments internal to TANGO
-
-    :return: HelperSubArrayDevice TANGO object.
-    """
-    return run((HelperSubArrayDevice,), args=args, **kwargs)
-
-
-if __name__ == "__main__":
-    main()

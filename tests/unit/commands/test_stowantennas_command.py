@@ -8,8 +8,8 @@ from ska_tango_base.obs.obs_device import SKAObsDevice
 from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
 from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
 from ska_tmc_centralnode_mid.manager.adapters import DishAdapter
-from tests.helper_adapter_factory import HelperAdapterFactory
-from tests.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.helper_adapter_factory import HelperAdapterFactory
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
 

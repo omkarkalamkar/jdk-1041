@@ -31,7 +31,7 @@ class MonitoringLoop:
         self,
         component_manager,
         logger=None,
-        max_workers=1,
+        max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
     ):
@@ -52,7 +52,6 @@ class MonitoringLoop:
 
     def stop(self):
         self._stop = True
-        # self._thread.join()
 
     def add_priority_devices(self, dev_name):
         self._priority_devices.put(dev_name)
@@ -78,6 +77,12 @@ class MonitoringLoop:
 
             sleep(self._sleep_time)
 
+    def get_assignedResources_attributes(self, proxy):
+        try:
+            return proxy.attribute_query("assignedResources")
+        except:
+            return None
+
     def device_task(self, devInfo):
         with tango.EnsureOmniThread():
             try:
@@ -85,7 +90,7 @@ class MonitoringLoop:
                 proxy = self._dev_factory.get_device(devInfo.dev_name)
                 proxy.set_timeout_millis(self._proxy_timeout)
                 newDevInfo = None
-                attrInfoEx = proxy.attribute_query("assignedResources")
+                attrInfoEx = self.get_assignedResources_attributes(proxy)
                 if attrInfoEx is None:
                     newDevInfo = DeviceInfo(devInfo.dev_name)
                     newDevInfo.from_dev_info(devInfo)
