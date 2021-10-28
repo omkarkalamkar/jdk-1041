@@ -1,7 +1,7 @@
 import time
 
 import pytest
-from ska_tango_base.obs.obs_device import SKAObsDevice
+from ska_tango_base.base.base_device import SKABaseDevice
 
 from ska_tmc_centralnode_mid.model.component import SubArrayDeviceInfo
 from tests.helper_subarray_device import HelperSubArrayDevice
@@ -20,7 +20,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": SKAObsDevice,
+            "class": SKABaseDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
                 {"name": "mid_csp/elt/master"},
