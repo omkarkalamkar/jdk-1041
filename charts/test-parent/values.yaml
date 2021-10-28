@@ -35,8 +35,8 @@ ska-ser-skuid:
 
 central_node:
   deviceServers:
-    leafs:
+    mocks:
       enabled: true
 
-    mockDevices:
+    centralnode:
       enabled: true

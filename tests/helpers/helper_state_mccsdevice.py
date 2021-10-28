@@ -169,10 +169,12 @@ class HelperMCCSStateDevice(SKABaseDevice):
         return True
 
     @command(
+        dtype_in="DevString",
+        doc_in="JSON-encoded string with the resources to add to subarray",
         dtype_out="DevVarLongStringArray",
         doc_out="(ReturnType, 'informational message')",
     )
-    def AssignResources(self):
+    def AssignResources(self, argin):
         tmpDict = {"resources": ["0001"]}
         self._assigned_resources = json.dumps(tmpDict)
         return [[ResultCode.OK], [""]]
@@ -181,9 +183,11 @@ class HelperMCCSStateDevice(SKABaseDevice):
         return True
 
     @command(
+        dtype_in="DevString",
+        doc_in="JSON-encoded string with the resources to remove from the subarray",
         dtype_out="DevVarLongStringArray",
         doc_out="(ReturnType, 'informational message')",
     )
-    def ReleaseResources(self):
+    def ReleaseResources(self, argin):
         self._assigned_resources = "None"
         return [[ResultCode.OK], [""]]
