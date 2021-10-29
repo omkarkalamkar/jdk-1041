@@ -106,7 +106,7 @@ python-pre-test:
 OCI_IMAGES=ska-tmc-centralnode-mid
 
 clean:
-	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
+	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ */*/*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
 			charts/build charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage \
 			tests/.pytest_cache
 

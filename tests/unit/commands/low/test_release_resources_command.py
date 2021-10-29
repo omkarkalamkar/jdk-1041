@@ -62,7 +62,7 @@ def get_release_resources_command_obj():
     return release_command, my_adapter_factory
 
 
-def test_telescope_release_resources_command(tango_context):
+def test_telescope_low_release_resources_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     release_command, my_adapter_factory = get_release_resources_command_obj()
@@ -78,7 +78,7 @@ def test_telescope_release_resources_command(tango_context):
             adapter.proxy.ReleaseResources.assert_called()
 
 
-def test_telescope_release_resources_command_fail_subarray(tango_context):
+def test_telescope_low_release_resources_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -104,7 +104,7 @@ def test_telescope_release_resources_command_fail_subarray(tango_context):
     assert failing_dev in message
 
 
-def test_telescope_release_resources_command_empty_input_json(tango_context):
+def test_telescope_low_release_resources_command_empty_input_json(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     release_command, _ = get_release_resources_command_obj()
@@ -114,7 +114,7 @@ def test_telescope_release_resources_command_empty_input_json(tango_context):
     assert result_code == ResultCode.FAILED
 
 
-def test_telescope_release_resources_command_missing_transaction_id(
+def test_telescope_low_release_resources_command_missing_transaction_id(
     tango_context,
 ):
     logger.info("%s", tango_context)
@@ -130,7 +130,7 @@ def test_telescope_release_resources_command_missing_transaction_id(
     assert "transaction_id" in message
 
 
-def test_telescope_release_resources_command_missing_subarray_id(
+def test_telescope_low_release_resources_command_missing_subarray_id(
     tango_context,
 ):
     logger.info("%s", tango_context)
@@ -146,7 +146,7 @@ def test_telescope_release_resources_command_missing_subarray_id(
     assert "subarray_id" in message
 
 
-def test_telescope_release_resources_fail_check_allowed(tango_context):
+def test_telescope_low_release_resources_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
