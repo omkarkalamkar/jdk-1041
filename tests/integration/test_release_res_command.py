@@ -13,21 +13,14 @@ from tests.integration.common import (  # noqa F401
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-def get_assign_input_str(assign_input_file="command_AssignResources.json"):
-    path = join(dirname(__file__), "..", "data", assign_input_file)
+def get_input_str(path):
     with open(path, "r") as f:
         assign_input_str = f.read()
     return assign_input_str
 
-
-def get_release_input_str(release_input_file="command_ReleaseResources.json"):
-    path = join(dirname(__file__), "..", "data", release_input_file)
-    with open(path, "r") as f:
-        release_input_str = f.read()
-    return release_input_str
-
-
-def release_resources(tango_context, central_node_name):
+def release_resources(
+    tango_context, central_node_name, assign_input_str, release_input_str
+):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -35,10 +28,7 @@ def release_resources(tango_context, central_node_name):
     initial_len = len(central_node.CommandExecuted)
     # (result, unique_id) = central_node.Off()
     (result, unique_id) = central_node.On()
-    assign_input_str = get_assign_input_str()
     (result, unique_id) = central_node.AssignResources(assign_input_str)
-    # logger.info("command executed: %s", central_node.CommandExecuted)
-    release_input_str = get_release_input_str()
     (result, unique_id) = central_node.ReleaseResources(release_input_str)
     if result[0] != ResultCode.QUEUED:
         logger.error("Result: %s message: %s", result[0], unique_id)
@@ -79,10 +69,45 @@ def release_resources(tango_context, central_node_name):
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(tango_context):
-    return release_resources(tango_context, "ska_mid/tm_central/central_node")
+    return release_resources(
+        tango_context,
+        "ska_mid/tm_central/central_node",
+        get_input_str(
+            join(
+                dirname(__file__), "..", "data", "command_AssignResources.json"
+            )
+        ),
+        get_input_str(
+            join(
+                dirname(__file__),
+                "..",
+                "data",
+                "command_ReleaseResources.json",
+            )
+        ),
+    )
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(tango_context):
-    return release_resources(tango_context, "ska_low/tm_central/central_node")
+    return release_resources(
+        tango_context,
+        "ska_low/tm_central/central_node",
+        get_input_str(
+            join(
+                dirname(__file__),
+                "..",
+                "data",
+                "command_mccs_AssignResources.json",
+            )
+        ),
+        get_input_str(
+            join(
+                dirname(__file__),
+                "..",
+                "data",
+                "command_mccs_ReleaseResources.json",
+            )
+        ),
+    )
