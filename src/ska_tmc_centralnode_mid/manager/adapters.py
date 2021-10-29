@@ -7,6 +7,7 @@ class AdapterType(enum.IntEnum):
     BASE = 0
     SUBARRAY = 1
     DISH = 2
+    MCCS = 3
 
 
 class AdapterFactory:
@@ -33,6 +34,10 @@ class AdapterFactory:
             )
         elif adapter_type == AdapterType.SUBARRAY:
             new_adapter = SubArrayAdapter(
+                dev_name, self._dev_factory.get_device(dev_name)
+            )
+        elif adapter_type == AdapterType.MCCS:
+            new_adapter = MCCSAdapter(
                 dev_name, self._dev_factory.get_device(dev_name)
             )
         else:
@@ -76,6 +81,20 @@ class SubArrayAdapter(BaseAdapter):
 
     def ReleaseAllResources(self):
         return self._proxy.ReleaseAllResources()
+
+    def ReleaseResources(self, argin):
+        return self._proxy.ReleaseResources(argin)
+
+
+class MCCSAdapter(BaseAdapter):
+    def __init__(self, dev_name, proxy) -> None:
+        super().__init__(dev_name, proxy)
+
+    def AssignResources(self, argin):
+        return self._proxy.AssignResources(argin)
+
+    def ReleaseResources(self, argin):
+        return self._proxy.ReleaseResources(argin)
 
 
 class DishAdapter(BaseAdapter):

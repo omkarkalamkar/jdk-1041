@@ -59,23 +59,25 @@ class StowAntennas(TMCCommand):
         dish_count = 0
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.faulty:
+            if devInfo is not None and not devInfo.unresponsive:
                 dish_count += 1
         if dish_count == 0:
             raise CommandNotAllowed("No Dish available")
 
         return True
 
-    def init_adapters(self, component_manager):
+    def init_adapters(self):
 
         self.tm_dish_adapters = []
 
         error_dev_names = []
         num_working = 0
 
+        component_manager = self.target
+
         for dev_name in component_manager.input_parameter.tm_dish_dev_names:
             devInfo = component_manager.get_device(dev_name)
-            if not devInfo.faulty:
+            if not devInfo.unresponsive:
                 try:
                     self.tm_dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -105,9 +107,8 @@ class StowAntennas(TMCCommand):
             List of Receptors to be stowed.
 
         """
-        component_manager = self.target
 
-        ret_code, message = self.init_adapters(component_manager)
+        ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 

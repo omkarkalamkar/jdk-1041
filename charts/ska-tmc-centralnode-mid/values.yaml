@@ -49,31 +49,32 @@ resources:
     cpu: 100m
     memory: 100Mi
   requests:
-    cpu: 50m
-    memory: 50Mi
+    cpu: 10m
+    memory: 30Mi
 
 deviceServers:
-  leafs:
+  mocks:
     enabled: false
     instances: ["01"]
-    file: "data/leafs.yaml"
-
-  subarrays:
-    enabled: false
-    instances: ["01"]
-    file: "data/subarrays.yaml"
+    file: "data/mockdevices.yaml"
 
   centralnode:
     enabled: true
     instances: ["01"]
-    file: "data/centralnode.yaml"
-    CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
-    CspMasterFQDN: "mid_csp/elt/master"
-    SdpMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/sdp_master"
-    SdpMasterFQDN: "mid_sdp/elt/master"
     subarray_count: 1
-    DishLeafNodePrefix: "ska_mid/tm_leaf_node/d"
-    NumDishes: 1
+    mid:
+      file: "data/centralnode_mid.yaml"
+      CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
+      CspMasterFQDN: "mid_csp/elt/master"
+      SdpMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/sdp_master"
+      SdpMasterFQDN: "mid_sdp/elt/master"
+      DishLeafNodePrefix: "ska_mid/tm_leaf_node/d"
+      NumDishes: 1
+    low: 
+      file: "data/centralnode_low.yaml"
+      MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
+      MCCSMasterNodeFQDN: "low-mccs/control/control"
+
 
 
 nodeSelector: {}

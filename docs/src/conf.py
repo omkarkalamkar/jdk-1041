@@ -29,7 +29,7 @@ autodoc_mock_imports = [
     "ska_tango_base.SKASubarray",
     "numpy",
     "ska_tmc_centralnode_mid",
-    "ska_tmc_centralnode_mid.central_node",
+    "ska_tmc_centralnode_mid.central_node_mid",
     "marshmallow",
     "ska-tmc-cdm.messages",
     "ska-tmc-cdm.schemas",

@@ -6,6 +6,10 @@ import pytest
 from ska_tmc_centralnode_mid.manager.component_manager import (
     CNComponentManager,
 )
+from ska_tmc_centralnode_mid.model.input import (
+    InputParameterLow,
+    InputParameterMid,
+)
 from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
 
 logger = logging.getLogger(__name__)
@@ -16,7 +20,7 @@ TIMEOUT = 10
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
 
-DEVICE_LIST = [
+DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_master",
     "mid_csp/elt/master",
     "ska_mid/tm_leaf_node/sdp_master",
@@ -28,23 +32,41 @@ DEVICE_LIST = [
     "mid_d0001/elt/master",
 ]
 
+DEVICE_LIST_LOW = [
+    "ska_low/tm_leaf_node/mccs_master",
+    "low-mccs/control/control",
+    "ska_low/tm_subarray_node/1",
+    "ska_low/tm_leaf_node/mccs_subarray01",
+]
+
 
 def count_faulty_devices(cm):
     result = 0
     for devInfo in cm.checked_devices:
-        if devInfo.faulty:
+        if devInfo.unresponsive:
             result += 1
     return result
 
 
-def create_cm(p_monitoring_loop=True, p_event_receiver=True):
+def create_cm(
+    p_monitoring_loop=True,
+    p_event_receiver=True,
+    input_parameter=InputParameterMid(None),
+):
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
         op_state_model,
         logger=logger,
+        _input_parameter=input_parameter,
         _monitoring_loop=p_monitoring_loop,
         _event_receiver=p_event_receiver,
     )
+
+    if isinstance(input_parameter, InputParameterMid):
+        DEVICE_LIST = DEVICE_LIST_MID
+    else:
+        DEVICE_LIST = DEVICE_LIST_LOW
+
     for dev in DEVICE_LIST:
         cm.add_device(dev)
     start_time = time.time()
@@ -61,10 +83,20 @@ def create_cm(p_monitoring_loop=True, p_event_receiver=True):
 
 
 def create_cm_no_faulty_devices(
-    tango_context, p_monitoring_loop, p_event_receiver
+    tango_context,
+    p_monitoring_loop,
+    p_event_receiver,
+    input_parameter=InputParameterMid(None),
 ):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm(p_monitoring_loop, p_event_receiver)
+    if isinstance(input_parameter, InputParameterMid):
+        input_parameter = InputParameterMid(None)
+    else:
+        input_parameter = InputParameterLow(None)
+
+    cm, start_time = create_cm(
+        p_monitoring_loop, p_event_receiver, input_parameter
+    )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time

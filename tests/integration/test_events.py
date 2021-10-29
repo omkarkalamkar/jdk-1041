@@ -4,12 +4,14 @@ import pytest
 import tango
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from tests.integration.common import devices_to_load, ensure_checked_devices
+from tests.integration.common import (  # noqa F401
+    devices_to_load,
+    ensure_checked_devices,
+)
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-@pytest.mark.post_deployment
-def test_internal_model_events(tango_context):
+def internal_model_events(tango_context, centralnode_name):
     pytest.num_events_arrived = 0
 
     def event_callback(evt):
@@ -18,7 +20,7 @@ def test_internal_model_events(tango_context):
 
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(centralnode_name)
 
     event_id = central_node.subscribe_event(
         "LastDeviceInfoChanged",
@@ -42,8 +44,7 @@ def test_internal_model_events(tango_context):
     central_node.unsubscribe_event(event_id)
 
 
-@pytest.mark.post_deployment
-def test_command_in_progress_events(tango_context):
+def command_in_progress_events(tango_context, central_node_name):
     pytest.num_events_arrived = 0
 
     def event_callback(evt):
@@ -52,7 +53,7 @@ def test_command_in_progress_events(tango_context):
 
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(central_node_name)
 
     event_id = central_node.subscribe_event(
         "commandInProgress",
@@ -83,3 +84,31 @@ def test_command_in_progress_events(tango_context):
     assert pytest.num_events_arrived == 5
 
     central_node.unsubscribe_event(event_id)
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_internal_model_events_mid(tango_context):
+    internal_model_events(tango_context, "ska_mid/tm_central/central_node")
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_internal_model_events_low(tango_context):
+    internal_model_events(tango_context, "ska_low/tm_central/central_node")
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_command_in_progress_events_mid(tango_context):
+    command_in_progress_events(
+        tango_context, "ska_mid/tm_central/central_node"
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_command_in_progress_events_low(tango_context):
+    command_in_progress_events(
+        tango_context, "ska_low/tm_central/central_node"
+    )

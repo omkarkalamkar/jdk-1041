@@ -1,3 +1,4 @@
+import json
 import threading
 from concurrent import futures
 from queue import Empty, Queue
@@ -5,11 +6,12 @@ from time import sleep
 
 import numpy as np
 import tango
+from tango import AttrDataFormat
 
-from ska_tmc_centralnode_mid import dev_factory
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 from ska_tmc_centralnode_mid.model.component import (
     DeviceInfo,
+    MCCSDeviceInfo,
     SubArrayDeviceInfo,
 )
 
@@ -51,7 +53,6 @@ class MonitoringLoop:
 
     def stop(self):
         self._stop = True
-        # self._thread.join()
 
     def add_priority_devices(self, dev_name):
         self._priority_devices.put(dev_name)
@@ -83,30 +84,7 @@ class MonitoringLoop:
                 # import debugpy; debugpy.debug_this_thread()
                 proxy = self._dev_factory.get_device(devInfo.dev_name)
                 proxy.set_timeout_millis(self._proxy_timeout)
-                newDevInfo = None
-                if "subarray" in devInfo.dev_name.lower():
-                    newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
-                    newDevInfo.from_dev_info(devInfo)
-                    assignedRes = proxy.assignedResources
-                    if assignedRes is not None:
-                        newDevInfo.resources = np.asarray(
-                            proxy.assignedResources
-                        )
-                    else:
-                        newDevInfo.resources = []
-                    # self._logger.info(
-                    #     "%s assignedResources: %s",
-                    #     devInfo.dev_name,
-                    #     newDevInfo.resources,
-                    # )
-                    newDevInfo.obsState = proxy.obsState
-                    for s in devInfo.dev_name:
-                        if s.isdigit():
-                            newDevInfo.id = int(s)
-                else:
-                    newDevInfo = DeviceInfo(devInfo.dev_name)
-                    newDevInfo.from_dev_info(devInfo)
-
+                newDevInfo = self.create_device_info(devInfo, proxy)
                 newDevInfo.ping = proxy.ping()
                 newDevInfo.state = proxy.State()
                 newDevInfo.healthState = proxy.HealthState
@@ -117,3 +95,35 @@ class MonitoringLoop:
                     "Device not working %s: %s", devInfo.dev_name, e
                 )
                 self._component_manager.device_failed(devInfo, e)
+
+    def create_device_info(self, devInfo, proxy):
+        newDevInfo = None
+        attrInfoEx = self.get_assignedResources_attributes(proxy)
+        if attrInfoEx is None:
+            newDevInfo = DeviceInfo(devInfo.dev_name)
+            newDevInfo.from_dev_info(devInfo)
+        else:
+            attrInfoEx = proxy.attribute_query("assignedResources")
+            if attrInfoEx.data_format == AttrDataFormat.SCALAR:
+                newDevInfo = MCCSDeviceInfo(devInfo.dev_name)
+                newDevInfo.resources = json.loads(proxy.assignedResources)
+            else:
+                newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
+                newDevInfo.from_dev_info(devInfo)
+                assignedRes = proxy.assignedResources
+                if assignedRes is not None:
+                    newDevInfo.resources = np.asarray(proxy.assignedResources)
+                else:
+                    newDevInfo.resources = []
+                newDevInfo.obsState = proxy.obsState
+                for s in devInfo.dev_name:
+                    if s.isdigit():
+                        newDevInfo.id = int(s)
+        return newDevInfo
+
+    def get_assignedResources_attributes(self, proxy):
+        try:
+            return proxy.attribute_query("assignedResources")
+        except Exception as ex:
+            self._logger.debug(str(ex))
+            return None

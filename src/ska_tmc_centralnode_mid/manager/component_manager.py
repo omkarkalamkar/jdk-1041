@@ -8,12 +8,14 @@ import threading
 import time
 
 from ska_tango_base.base import BaseComponentManager
-from ska_tango_base.control_model import HealthState, ObsState
+from ska_tango_base.control_model import ObsState
 from tango import DevState
 
 from ska_tmc_centralnode_mid.manager.aggregators import (
-    HealthStateAggragator,
-    TelescopeStateAggragator,
+    HealthStateAggragatorLow,
+    HealthStateAggragatorMid,
+    TelescopeStateAggragatorLow,
+    TelescopeStateAggragatorMid,
     TMCOpStateAggragator,
 )
 from ska_tmc_centralnode_mid.manager.command_executor import CommandExecutor
@@ -25,7 +27,10 @@ from ska_tmc_centralnode_mid.model.component import (
     SubArrayDeviceInfo,
 )
 from ska_tmc_centralnode_mid.model.enum import ModesAvailability
-from ska_tmc_centralnode_mid.model.input import InputParameter
+from ska_tmc_centralnode_mid.model.input import (
+    InputParameterLow,
+    InputParameterMid,
+)
 
 
 class CNComponentManager(BaseComponentManager):
@@ -47,6 +52,7 @@ class CNComponentManager(BaseComponentManager):
     def __init__(
         self,
         op_state_model,
+        _input_parameter,
         logger=None,
         _component=None,
         _update_device_callback=None,
@@ -113,7 +119,7 @@ class CNComponentManager(BaseComponentManager):
         if _event_receiver:
             self._event_receiver.start()
 
-        self._input_parameter = InputParameter(None)
+        self._input_parameter = _input_parameter
 
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
@@ -180,7 +186,7 @@ class CNComponentManager(BaseComponentManager):
         """
         result = []
         for dev in self.component.devices:
-            if dev.faulty:
+            if dev.unresponsive:
                 result.append(dev)
                 continue
             if dev.ping > 0:
@@ -260,55 +266,8 @@ class CNComponentManager(BaseComponentManager):
         self.component.update_device(devInfo)
 
     def update_input_parameter(self):
-        list_dev_names = []
-        for dev_name in self.input_parameter.tm_dish_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        for dev_name in self.input_parameter.dish_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        for dev_name in self.input_parameter.tm_subarray_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        for dev_name in self.input_parameter.csp_subarray_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        for dev_name in self.input_parameter.sdp_subarray_dev_names:
-            if self.get_device(dev_name) is None:
-                self.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        dev_name = self.input_parameter.csp_master_dev_name
-        if dev_name != "" and self.get_device(dev_name) is None:
-            self.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.input_parameter.tm_leaf_csp_master_dev_name
-        if dev_name != "" and self.get_device(dev_name) is None:
-            self.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.input_parameter.sdp_master_dev_name
-        if dev_name != "" and self.get_device(dev_name) is None:
-            self.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.input_parameter.tm_leaf_sdp_master_dev_name
-        if dev_name != "" and self.get_device(dev_name) is None:
-            self.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        for devInfo in self.devices:
-            if devInfo.dev_name not in list_dev_names:
-                self.component.remove_device(devInfo.dev_name)
+        with self.lock:
+            self.input_parameter.update(self)
 
     def device_failed(self, device_info, exception):
         """
@@ -326,7 +285,7 @@ class CNComponentManager(BaseComponentManager):
         with self.lock:
             devInfo = self.component.get_device(dev_name)
             devInfo.last_event_arrived = time.time()
-            devInfo.update_faulty(False)
+            devInfo.update_unresponsive(False)
 
     def update_device_info(self, device_info):
         """
@@ -341,7 +300,8 @@ class CNComponentManager(BaseComponentManager):
 
         self._aggregate_health_state()
         self._aggregate_state()
-        self._update_imaging()
+        if isinstance(self.input_parameter, InputParameterMid):
+            self._update_imaging()
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -357,7 +317,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.healthState = health_state
             devInfo.last_event_arrived = time.time()
-            devInfo.update_faulty(False)
+            devInfo.update_unresponsive(False)
 
         self._aggregate_health_state()
 
@@ -376,10 +336,11 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
-            devInfo.update_faulty(False)
+            devInfo.update_unresponsive(False)
 
         self._aggregate_state()
-        self._update_imaging()
+        if isinstance(self.input_parameter, InputParameterMid):
+            self._update_imaging()
 
     def update_device_obs_state(self, dev_name, obs_state):
         """
@@ -395,7 +356,7 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.obsState = obs_state
             devInfo.last_event_arrived = time.time()
-            devInfo.update_faulty(False)
+            devInfo.update_unresponsive(False)
             self._update_resources(devInfo)
 
     def is_already_assigned(self, dishId):
@@ -420,9 +381,16 @@ class CNComponentManager(BaseComponentManager):
         and call the relative callback if available
         """
         if self._health_state_aggregator is None:
-            self._health_state_aggregator = HealthStateAggragator(
-                self, self.logger
-            )
+            if isinstance(self._input_parameter, InputParameterLow):
+                self._health_state_aggregator = HealthStateAggragatorLow(
+                    self, self.logger
+                )
+            elif isinstance(self._input_parameter, InputParameterMid):
+                self._health_state_aggregator = HealthStateAggragatorMid(
+                    self, self.logger
+                )
+            else:
+                pass
 
         with self.lock:
             new_state = self._health_state_aggregator.aggregate()
@@ -440,9 +408,16 @@ class CNComponentManager(BaseComponentManager):
         Aggregates telescope state
         """
         if self._telescope_state_aggregator is None:
-            self._telescope_state_aggregator = TelescopeStateAggragator(
-                self, self.logger
-            )
+            if isinstance(self._input_parameter, InputParameterLow):
+                self._telescope_state_aggregator = TelescopeStateAggragatorLow(
+                    self, self.logger
+                )
+            elif isinstance(self._input_parameter, InputParameterMid):
+                self._telescope_state_aggregator = TelescopeStateAggragatorMid(
+                    self, self.logger
+                )
+            else:
+                pass
 
         with self.lock:
             new_state = self._telescope_state_aggregator.aggregate()
@@ -492,7 +467,7 @@ class CNComponentManager(BaseComponentManager):
                 dish = self.get_device(dev_name)
                 if (
                     dish is not None
-                    and not dish.faulty
+                    and not dish.unresponsive
                     and dish.state == DevState.ON
                 ):
                     dish_on = True
@@ -501,7 +476,10 @@ class CNComponentManager(BaseComponentManager):
             csp_master_device = self.get_device(
                 self.input_parameter.csp_master_dev_name
             )
-            if csp_master_device is not None and not csp_master_device.faulty:
+            if (
+                csp_master_device is not None
+                and not csp_master_device.unresponsive
+            ):
                 csp_state = csp_master_device.state
 
             if csp_state == DevState.ON and dish_on:

@@ -195,14 +195,14 @@ class Component:
         :param devInfo: a DeviceInfo object
         """
         if devInfo not in self._devices:
-            devInfo.update_faulty(True, exception)
+            devInfo.update_unresponsive(True, exception)
             self._devices.append(devInfo)
             self._invoke_device_callback(devInfo)
         else:
             index = self._devices.index(devInfo)
             intDevInfo = self._devices[index]
             intDevInfo.state = DevState.UNKNOWN
-            intDevInfo.update_faulty(True, exception)
+            intDevInfo.update_unresponsive(True, exception)
             self._invoke_device_callback(intDevInfo)
 
     @property
@@ -380,7 +380,7 @@ class Component:
 
 
 class DeviceInfo:
-    def __init__(self, dev_name: str, _faulty=False):
+    def __init__(self, dev_name: str, _unresponsive=False):
         self.dev_name = dev_name
         self.state = DevState.UNKNOWN
         self.obsState = ObsState.EMPTY
@@ -388,7 +388,7 @@ class DeviceInfo:
         self.ping = -1
         self.last_event_arrived = None
         self.exception = None
-        self._faulty = _faulty
+        self._unresponsive = _unresponsive
         self.lock = threading.Lock()
 
     def from_dev_info(self, devInfo):
@@ -399,29 +399,29 @@ class DeviceInfo:
         self.last_event_arrived = devInfo.last_event_arrived
         self.lock = devInfo.lock
 
-    def update_faulty(self, faulty, exception=None):
+    def update_unresponsive(self, value, exception=None):
         """
-        Set device faulty
+        Set device unresponsive
 
-        :param faulty: boolean
+        :param: value unresponsive boolean
         """
-        self._faulty = faulty
+        self._unresponsive = value
         self.exception = exception
-        if self._faulty:
+        if self._unresponsive:
             self.state = DevState.UNKNOWN
             self.obsState = ObsState.EMPTY
             self.healthState = HealthState.UNKNOWN
             self.ping = -1
 
     @property
-    def faulty(self):
+    def unresponsive(self):
         """
-        Return whether this device is currently experiencing a fault.
+        Return whether this device is currently unresponsive.
 
         :return: whether this device is faulting
         :rtype: bool
         """
-        return self._faulty
+        return self._unresponsive
 
     def __eq__(self, other):
         if isinstance(other, DeviceInfo):
@@ -440,15 +440,15 @@ class DeviceInfo:
             "healthState": str(HealthState(self.healthState)),
             "ping": str(self.ping),
             "last_event_arrived": str(self.last_event_arrived),
-            "faulty": str(self.faulty),
+            "unresponsive": str(self.unresponsive),
             "exception": str(self.exception),
         }
         return result
 
 
 class SubArrayDeviceInfo(DeviceInfo):
-    def __init__(self, dev_name, _faulty=False):
-        super(SubArrayDeviceInfo, self).__init__(dev_name, _faulty)
+    def __init__(self, dev_name, _unresponsive=False):
+        super(SubArrayDeviceInfo, self).__init__(dev_name, _unresponsive)
         self.id = -1
         self.resources = []
         self.obsState = ObsState.EMPTY
@@ -481,4 +481,29 @@ class SubArrayDeviceInfo(DeviceInfo):
         super_dict["resources"] = result
         super_dict["id"] = self.id
         super_dict["obsState"] = str(ObsState(self.obsState))
+        return super_dict
+
+
+class MCCSDeviceInfo(DeviceInfo):
+    def __init__(self, dev_name, _unresponsive=False):
+        super(MCCSDeviceInfo, self).__init__(dev_name, _unresponsive)
+        self.resources = {}
+
+    def from_dev_info(self, mccsDevInfo):
+        super().from_dev_info(mccsDevInfo)
+        if isinstance(mccsDevInfo, MCCSDeviceInfo):
+            self.resources = mccsDevInfo.resources
+
+    def __eq__(self, other):
+        if isinstance(other, MCCSDeviceInfo) or isinstance(other, DeviceInfo):
+            return self.dev_name == other.dev_name
+        else:
+            return False
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
+
+    def to_dict(self):
+        super_dict = super().to_dict()
+        super_dict["resources"] = self.resources
         return super_dict

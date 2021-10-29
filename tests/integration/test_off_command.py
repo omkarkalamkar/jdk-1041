@@ -1,19 +1,20 @@
 import time
 
 import pytest
-import tango
 from ska_tango_base.commands import ResultCode
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from tests.integration.common import devices_to_load, ensure_checked_devices
+from tests.integration.common import (  # noqa F401
+    devices_to_load,
+    ensure_checked_devices,
+)
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-@pytest.mark.post_deployment
-def test_off_command(tango_context):
+def off_command(tango_context, centralnode_name):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(centralnode_name)
     ensure_checked_devices(central_node)
     initial_len = len(central_node.CommandExecuted)
     (result, unique_id) = central_node.On()
@@ -31,3 +32,15 @@ def test_off_command(tango_context):
     for command in central_node.CommandExecuted:
         if command[0] == unique_id[0]:
             assert command[2] == "ResultCode.OK"
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_off_command_mid(tango_context):
+    off_command(tango_context, "ska_mid/tm_central/central_node")
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_off_command_low(tango_context):
+    off_command(tango_context, "ska_low/tm_central/central_node")

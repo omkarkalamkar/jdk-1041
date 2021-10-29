@@ -11,7 +11,7 @@ class Aggregator:
         raise NotImplementedError("To be defined in the lower level classes")
 
 
-class TelescopeStateAggragator(Aggregator):
+class TelescopeStateAggragatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -23,7 +23,7 @@ class TelescopeStateAggragator(Aggregator):
         sdp_master = False
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
-            if dev.faulty:
+            if dev.unresponsive:
                 continue
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
@@ -73,7 +73,68 @@ class TelescopeStateAggragator(Aggregator):
             return DevState.UNKNOWN
 
 
-class HealthStateAggragator(Aggregator):
+class TelescopeStateAggragatorLow(Aggregator):
+    def __init__(self, cm, logger) -> None:
+        super().__init__(cm, logger)
+
+    def aggregate(self):
+        # Currently there is only MCCS in the Low. But this algorithm leaves a
+        #  place to consider CSP and SDP states when they will be integrated.
+        telescopeStateList = []
+        mccs_master = False
+
+        for dev in self._component_manager.checked_devices:
+            name = dev.dev_name.lower()
+            if dev.unresponsive:
+                continue
+            elif (
+                name
+                == self._component_manager.input_parameter.mccs_master_dev_name
+            ):
+                telescopeStateList.append(dev.state)
+                mccs_master = True
+            # TODO: Enable this block when CSP and SDP are integrated
+            # elif (
+            #     name
+            #     == self._component_manager.input_parameter.csp_master_dev_name
+            # ):
+            #   telescopeStateList.append(dev.state)
+            #   csp_master = True
+            # elif (
+            #     name
+            #     == self._component_manager.input_parameter.sdp_master_dev_name
+            # ):
+            #   telescopeStateList.append(dev.state)
+            #   sdp_master = True
+
+        telescopeSetStateList = set(telescopeStateList)
+        # TODO: Enable this block when CSP and SDP are integrated
+        # if not sdp_master and not csp_master:
+        #     self._logger.info(
+        #         "missing devices: %s=%s %s=%s",
+        #         self._component_manager.input_parameter.sdp_master_dev_name,
+        #         sdp_master,
+        #         self._component_manager.input_parameter.csp_master_dev_name,
+        #         csp_master,
+        #     )
+        #     return DevState.UNKNOWN
+        if not mccs_master:
+            return DevState.UNKNOWN
+        elif telescopeSetStateList == set([DevState.ON]):
+            return DevState.ON
+        elif telescopeSetStateList == set([DevState.OFF]):
+            return DevState.OFF
+        elif DevState.INIT in telescopeSetStateList:
+            return DevState.INIT
+        elif DevState.FAULT in telescopeSetStateList:
+            return DevState.FAULT
+        elif DevState.STANDBY in telescopeSetStateList:
+            return DevState.STANDBY
+        else:
+            return DevState.UNKNOWN
+
+
+class HealthStateAggragatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -89,7 +150,7 @@ class HealthStateAggragator(Aggregator):
         # number of dishes is also variable
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
-            if dev.faulty:
+            if dev.unresponsive:
                 continue
             elif (
                 name
@@ -132,6 +193,62 @@ class HealthStateAggragator(Aggregator):
             return HealthState.UNKNOWN
 
 
+class HealthStateAggragatorLow(Aggregator):
+    def __init__(self, cm, logger) -> None:
+        super().__init__(cm, logger)
+
+    def aggregate(self):
+        # import debugpy; debugpy.debug_this_thread()
+        healthStateList = []
+        subarray_count = 0
+        mccs_master = False
+        # get health states of MCCS Master devices
+        for dev in self._component_manager.checked_devices:
+            name = dev.dev_name.lower()
+            if dev.unresponsive:
+                continue
+            # elif (
+            #     name
+            #     == self._component_manager.input_parameter.csp_master_dev_name
+            # ):
+            #     healthStateList.append(dev.healthState)
+            #     csp_master = True
+            # elif (
+            #     name
+            #     == self._component_manager.input_parameter.sdp_master_dev_name
+            # ):
+            #     healthStateList.append(dev.healthState)
+            #     sdp_master = True
+            elif (
+                name
+                in self._component_manager.input_parameter.tm_subarray_dev_names
+            ):
+                healthStateList.append(dev.healthState)
+                subarray_count += 1
+            elif (
+                name
+                in self._component_manager.input_parameter.mccs_master_dev_name
+            ):
+                healthStateList.append(dev.healthState)
+                mccs_master = True
+
+        healthStateSetList = set(healthStateList)
+        if not mccs_master:
+            return HealthState.UNKNOWN
+        elif subarray_count == 0:
+            return HealthState.UNKNOWN
+        # elif not sdp_master and not csp_master == 0:
+        #     return HealthState.UNKNOWN
+        elif healthStateSetList == set([HealthState.OK]):
+            return HealthState.OK
+        elif HealthState.FAILED in healthStateSetList:
+            return HealthState.FAILED
+        elif HealthState.DEGRADED in healthStateSetList:
+            return HealthState.DEGRADED
+        else:
+            return HealthState.UNKNOWN
+
+
 class TMCOpStateAggragator(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
@@ -144,7 +261,7 @@ class TMCOpStateAggragator(Aggregator):
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
             if "tm" in name:
-                if dev.faulty:
+                if dev.unresponsive:
                     continue
                 tmStateList.append(dev.state)
 

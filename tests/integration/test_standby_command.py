@@ -1,20 +1,21 @@
 import time
 
 import pytest
-import tango
 from ska_tango_base.commands import ResultCode
 from tango import DevState
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from tests.integration.common import devices_to_load, ensure_checked_devices
+from tests.integration.common import (  # noqa F401
+    devices_to_load,
+    ensure_checked_devices,
+)
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-@pytest.mark.post_deployment
-def test_standby_command(tango_context):
+def standby_command(tango_context, central_node_name):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(central_node_name)
     ensure_checked_devices(central_node)
     initial_len = len(central_node.CommandExecuted)
     (result, unique_id) = central_node.On()
@@ -37,6 +38,8 @@ def test_standby_command(tango_context):
 
     csp_master = dev_factory.get_device("mid_csp/elt/master")
     csp_master.SetDirectState(DevState.STANDBY)
+    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master.SetDirectState(DevState.STANDBY)
     # sdp_master = dev_factory.get_device("mid_sdp/elt/master")
     # sdp_master.SetDirectState(DevState.STANDBY)
     # dish_master.SetDirectState(DevState.STANDBY)
@@ -50,3 +53,15 @@ def test_standby_command(tango_context):
             pytest.fail("Timeout occurred while executing the test")
 
     assert central_node.telescopeState == DevState.STANDBY
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_standby_command_mid(tango_context):
+    standby_command(tango_context, "ska_mid/tm_central/central_node")
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_standby_command_low(tango_context):
+    standby_command(tango_context, "ska_low/tm_central/central_node")

@@ -1,10 +1,9 @@
 # pylint: disable=unused-argument
 import logging
-import socket
 
 import pytest
 import tango
-from tango.test_context import MultiDeviceTestContext, get_host_ip
+from tango.test_context import MultiDeviceTestContext
 
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
 

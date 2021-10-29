@@ -3,9 +3,9 @@ import time
 
 import pytest
 
-from ska_tmc_centralnode_mid.central_node import CentralNode
-from tests.helper_state_device import HelperStateDevice
-from tests.helper_subarray_device import HelperSubArrayDevice
+from ska_tmc_centralnode_mid.central_node_mid import CentralNodeMid
+from tests.helpers.helper_state_device import HelperStateDevice
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 pytest.event_arrived = False
@@ -34,7 +34,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": CentralNode,
+            "class": CentralNodeMid,
             "devices": [
                 {
                     "name": "ska_mid/tm_central/central_node",
@@ -66,7 +66,7 @@ def devices_to_load():
 def checked_devices(json_model):
     result = 0
     for dev in json_model["devices"]:
-        if int(dev["ping"]) > 0 and dev["faulty"] == "False":
+        if int(dev["ping"]) > 0 and dev["unresponsive"] == "False":
             result += 1
     return result
 
@@ -75,7 +75,7 @@ def ensure_checked_devices(central_node):
     json_model = json.loads(central_node.InternalModel)
     start_time = time.time()
     checked_devs = checked_devices(json_model)
-    while checked_devs != 9:
+    while checked_devs != len(json_model["devices"]):
         new_checked_devs = checked_devices(json_model)
         if checked_devs != new_checked_devs:
             checked_devs = new_checked_devs
@@ -83,6 +83,7 @@ def ensure_checked_devices(central_node):
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
+            logger.debug(central_node.InternalModel)
             pytest.fail("Timeout occurred while executing the test")
         json_model = json.loads(central_node.InternalModel)
 

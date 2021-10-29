@@ -35,10 +35,7 @@ ska-ser-skuid:
 
 central_node:
   deviceServers:
-    leafs:
-      enabled: true
-
-    subarrays:
+    mocks:
       enabled: true
 
     centralnode:

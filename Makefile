@@ -13,6 +13,7 @@
 CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
 PROJECT = ska-tmc-centralnode-mid
 KUBE_APP = ska-tmc-centralnode-mid
+TELESCOPE ?= SKA-mid
 
 # KUBE_NAMESPACE defines the Kubernetes Namespace that will be deployed to
 # using Helm.  If this does not already exist it will be created
@@ -24,7 +25,7 @@ RELEASE_NAME ?= test
 # F401 Ignore unused imports because of tagno protected sections
 # W503 Ignore operator at beginning of line as conflicts with black
 # stretch line length to 180 because of super long parameter assignments
-PYTHON_SWITCHES_FOR_FLAKE8=--ignore=F401,W503 --max-line-length=180
+PYTHON_SWITCHES_FOR_FLAKE8=--ignore=W503 --max-line-length=180
 
 # UMBRELLA_CHART_PATH Path of the umbrella chart to work with
 HELM_CHART=test-parent
@@ -81,7 +82,7 @@ MARK = not post_deployment and not acceptance
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context
-MARK = post_deployment or acceptance
+MARK = $(shell echo $(TELESCOPE) | sed s/-/_/) and (post_deployment or acceptance)
 endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
@@ -105,7 +106,7 @@ python-pre-test:
 OCI_IMAGES=ska-tmc-centralnode-mid
 
 clean:
-	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
+	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ */*/*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
 			charts/build charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage \
 			tests/.pytest_cache
 
@@ -120,6 +121,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set ska-tango-base.display=$(DISPLAY) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
+	--set central_node.telescope=$(TELESCOPE) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 

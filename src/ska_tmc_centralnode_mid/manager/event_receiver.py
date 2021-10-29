@@ -4,12 +4,7 @@ from time import sleep
 
 import tango
 
-from ska_tmc_centralnode_mid import dev_factory
 from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from ska_tmc_centralnode_mid.model.component import (
-    DeviceInfo,
-    SubArrayDeviceInfo,
-)
 
 
 class EventReceiver:

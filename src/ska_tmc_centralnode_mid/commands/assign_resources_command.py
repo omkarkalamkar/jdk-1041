@@ -5,7 +5,6 @@ import json
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
-from tango import DevFailed, DevState
 
 from ska_tmc_centralnode_mid.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -33,7 +32,7 @@ class AssignResources(AbstractAssignReleaseResources):
         ),
         *args,
         logger=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
@@ -41,8 +40,10 @@ class AssignResources(AbstractAssignReleaseResources):
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         self._skuid = skuid
+        # self._timeout_mccs = timeout_mccs
+        # self._step_sleep = step_sleep
 
-    def do(self, argin):
+    def do_mid(self, argin=None):
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -148,12 +149,9 @@ class AssignResources(AbstractAssignReleaseResources):
             None
 
         """
-
         component_manager = self.target
 
-        ret_code, message = self.init_adapters(
-            "AssignResources", component_manager
-        )
+        ret_code, message = self.init_adapters_mid()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
@@ -300,3 +298,183 @@ class AssignResources(AbstractAssignReleaseResources):
             raise Exception(
                 "processing_blocks key not present in the input json argument"
             )
+
+    def do_low(self, argin=None):
+        """
+        Method to invoke AssignResources command on Subarray.
+
+        :param argin: The string in JSON format. The JSON contains following values:
+
+           interface:
+                DevString. Mandatory.
+                Version of schema to allocate assign resources.
+
+           subarray_id:
+                DevShort. Mandatory.
+                Sub-Array to allocate resources to
+
+           mccs:
+                subarray_beam_ids:
+                    DevArray. Mandatory
+                    logical ID of beam
+                station_ids:
+                    DevArray. Mandatory
+                    list of stations contributing beams to the data set
+                channel_blocks:
+                    DevArray. Mandatory
+                    list of channels used
+
+
+        Example:
+            {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"mccs":{"subarray_beam_ids":[1],"station_ids":[[1,2]],"channel_blocks":[3]},"sdp":{}}
+
+        Note: Enter input without spaces as:
+        {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/2.0",
+        "transaction_id":"txn-....-00001","subarray_id":1,"mccs":{"subarray_beam_ids":[1],
+        "station_ids":[[1,2]],
+        "channel_blocks":[3]},"sdp":{}}
+        return:
+            None
+
+        raises:
+            KeyError if input argument json string contains invalid key
+
+            ValueError if input argument json string contains invalid value
+
+            AssertionError if  Mccs On command is not completed.
+
+        """
+        ret_code, message = self.init_adapters_low()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        try:
+            json_argument = json.loads(argin)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
+
+        if "subarray_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
+
+        if "mccs" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs key is not present in the input json argument.",
+            )
+
+        if "subarray_beam_ids" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.subarray_beam_ids key is not present in the input json argument.",
+            )
+
+        if "station_ids" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.station_ids key is not present in the input json argument.",
+            )
+
+        if "channel_blocks" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.channel_blocks key is not present in the input json argument.",
+            )
+
+        if "transaction_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "transaction_id key is not present in the input json argument.",
+            )
+
+        subarrayID = int(json_argument["subarray_id"])
+
+        my_subarray_adapter = None
+        for adapter in self.tm_subarray_adapters:
+            if str(subarrayID) in adapter.dev_name:
+                my_subarray_adapter = adapter
+
+        if my_subarray_adapter is None:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("SubArray Id %s is not existing!", subarrayID),
+            )
+
+        try:
+            subarray_cmd_data = self.create_subarray_cmd_data(json_argument)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED, ("Errors in input json argument: %s", e)
+            )
+
+        try:
+            my_subarray_adapter.AssignResources(subarray_cmd_data)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                (
+                    "Error in calling AssignResources on subarray %s: %s",
+                    my_subarray_adapter.dev_name,
+                    e,
+                ),
+            )
+
+        try:
+            input_mccs_master = self.create_mccs_cmd_data(json_argument)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED, ("Errors in input json argument: %s", e)
+            )
+
+        try:
+            self.tm_leaf_mccs_master_adapter.AssignResources(input_mccs_master)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                f"Error in calling AssignResource command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
+            )
+
+        return (ResultCode.OK, "")
+
+    def create_mccs_cmd_data(self, json_argument):
+        """
+        Remove 'sdp' and 'mccs' key from input JSON argument and forward the updated JSON to mccs master leaf node.
+
+        :param json_argument: The string in JSON format.
+
+        :return: The string in JSON format.
+        """
+        mccs_value = json_argument["mccs"]
+        json_argument[
+            "interface"
+        ] = "https://schema.skao.int/ska-low-mccs-assignresources/1.0"
+        if "transaction_id" in json_argument:
+            del json_argument["transaction_id"]
+        if "sdp" in json_argument:
+            del json_argument["sdp"]
+        if "mccs" in json_argument:
+            del json_argument["mccs"]
+        json_argument.update(mccs_value)
+        input_to_mccs = json.dumps(json_argument)
+        return input_to_mccs
+
+    def create_subarray_cmd_data(self, json_argument):
+        """
+        Remove 'subarray id', 'sdp' from json argument and forward the updated JSON to Subarray node.
+
+        :param json_argument: The string in JSON format.
+
+        :return: The string in JSON format.
+        """
+        # Remove subarray_id key from input json argument and send the json to subarray node
+        if "subarray_id" in json_argument:
+            del json_argument["subarray_id"]
+        if "sdp" in json_argument:
+            del json_argument["sdp"]
+        input_to_subarray = json.dumps(json_argument)
+        return input_to_subarray
