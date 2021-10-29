@@ -175,7 +175,12 @@ class HelperMCCSStateDevice(SKABaseDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def AssignResources(self, argin):
-        tmpDict = {"resources": ["0001"]}
+        tmpDict = {
+            "interface": "https://schema.skatelescope.org/ska-low-mccs-assignedresources/1.0",
+            "subarray_beam_ids": [1],
+            "station_ids": [[1, 2]],
+            "channel_blocks": [3],
+        }
         self._assigned_resources = json.dumps(tmpDict)
         return [[ResultCode.OK], [""]]
 
@@ -189,5 +194,11 @@ class HelperMCCSStateDevice(SKABaseDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def ReleaseResources(self, argin):
-        self._assigned_resources = "None"
+        tmpDict = {
+            "interface": "https://schema.skatelescope.org/ska-low-mccs-assignedresources/1.0",
+            "subarray_beam_ids": [],
+            "station_ids": [],
+            "channel_blocks": [],
+        }
+        self._assigned_resources = json.dumps(tmpDict)
         return [[ResultCode.OK], [""]]
