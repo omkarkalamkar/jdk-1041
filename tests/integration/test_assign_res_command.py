@@ -121,8 +121,7 @@ def test_assign_res_command_low(tango_context, central_node_name):
                 dirname(__file__),
                 "..",
                 "data",
-                "low",
-                "command_AssignResources.json",
+                "command_mccs_AssignResources.json",
             )
         ),
     )

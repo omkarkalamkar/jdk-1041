@@ -122,7 +122,9 @@ def test_telescope_low_assign_resources_command_missing_subarray_beam_ids_key(
             adapter.proxy.AssignResources.assert_called()
 
 
-def test_telescope_low_assign_resources_command_empty_input_json(tango_context):
+def test_telescope_low_assign_resources_command_empty_input_json(
+    tango_context,
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _ = get_assign_resources_command_obj()
@@ -147,7 +149,9 @@ def test_telescope_low_assign_resources_command_missing_transaction_id(
     assert "transaction_id" in message
 
 
-def test_telescope_low_assign_resources_command_missing_subarray_id(tango_context):
+def test_telescope_low_assign_resources_command_missing_subarray_id(
+    tango_context,
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _ = get_assign_resources_command_obj()

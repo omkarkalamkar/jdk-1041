@@ -104,7 +104,9 @@ def test_telescope_low_release_resources_command_fail_subarray(tango_context):
     assert failing_dev in message
 
 
-def test_telescope_low_release_resources_command_empty_input_json(tango_context):
+def test_telescope_low_release_resources_command_empty_input_json(
+    tango_context,
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     release_command, _ = get_release_resources_command_obj()
