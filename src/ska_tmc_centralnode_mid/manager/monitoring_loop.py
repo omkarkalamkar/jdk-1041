@@ -1,3 +1,4 @@
+import json
 import threading
 from concurrent import futures
 from queue import Empty, Queue
@@ -105,7 +106,7 @@ class MonitoringLoop:
             attrInfoEx = proxy.attribute_query("assignedResources")
             if attrInfoEx.data_format == AttrDataFormat.SCALAR:
                 newDevInfo = MCCSDeviceInfo(devInfo.dev_name)
-                newDevInfo.resources = proxy.assignedResources
+                newDevInfo.resources = json.loads(proxy.assignedResources)
             else:
                 newDevInfo = SubArrayDeviceInfo(devInfo.dev_name)
                 newDevInfo.from_dev_info(devInfo)

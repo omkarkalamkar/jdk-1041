@@ -5,7 +5,7 @@ from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.base.component_manager import BaseComponentManager
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
-from tango import DevState
+from tango import AttrWriteType, DevState
 from tango.server import attribute, command
 
 
@@ -26,22 +26,16 @@ class HelperMCCSStateDevice(SKABaseDevice):
         def do(self):
             super().do()
             device = self.target
-            device._assigned_resources = "None"
+            device._assigned_resources = "{ }"
             device.set_change_event("State", True, False)
             device.set_change_event("healthState", True, False)
             return (ResultCode.OK, "")
 
         # ----------
 
-    # Attributes
-    # ----------
-    @attribute(dtype="DevString")
-    def assignedResources(self) -> str:
-        """
-        Return the assigned resources attribute.
+    assignedResources = attribute(dtype="DevString", access=AttrWriteType.READ)
 
-        :return: assignedResources attribute
-        """
+    def read_assignedResources(self):
         return self._assigned_resources
 
     def create_component_manager(self):

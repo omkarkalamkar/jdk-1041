@@ -47,22 +47,15 @@ def assign_resouces(tango_context, central_node_name, assign_input_str):
                 return device
         return None
 
-    # def get_mccs_device(json_model):
-    #     for device in json_model["devices"]:
-    #         if device["dev_name"] == "low-mccs/control/control":
-    #             return device
-    #     return None
-
     def get_mccs_device_resources(json_model):
         resources_len = 0
         for device in json_model["devices"]:
-            if device["dev_name"] == "low-mccs/control/control":
+            if device["dev_name"] == "ska_low/tm_leaf_node/mccs_master":
                 mccs_device = device
-        assigned_res_json = json.loads(mccs_device["resources"])
         resources_len = (
-            len(assigned_res_json["subarray_beam_ids"])
-            + len(assigned_res_json["station_ids"])
-            + len(assigned_res_json["channel_blocks"])
+            len(mccs_device["resources"]["subarray_beam_ids"])
+            + len(mccs_device["resources"]["station_ids"])
+            + len(mccs_device["resources"]["channel_blocks"])
         )
 
         return resources_len

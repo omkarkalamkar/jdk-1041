@@ -487,7 +487,7 @@ class SubArrayDeviceInfo(DeviceInfo):
 class MCCSDeviceInfo(DeviceInfo):
     def __init__(self, dev_name, _unresponsive=False):
         super(MCCSDeviceInfo, self).__init__(dev_name, _unresponsive)
-        self.resources = "None"
+        self.resources = {}
 
     def from_dev_info(self, mccsDevInfo):
         super().from_dev_info(mccsDevInfo)
