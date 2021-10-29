@@ -37,7 +37,7 @@ def devices_to_load():
 
 
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
-    path = join(dirname(__file__), "..", "..", "data", assign_input_file)
+    path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
     with open(path, "r") as f:
         assign_input_str = f.read()
     return assign_input_str

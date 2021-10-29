@@ -35,7 +35,9 @@ def devices_to_load():
 
 
 def get_release_input_str(release_input_file="command_ReleaseResources.json"):
-    path = join(dirname(__file__), "..", "..", "data", release_input_file)
+    path = join(
+        dirname(__file__), "..", "..", "..", "data", release_input_file
+    )
     with open(path, "r") as f:
         release_input_str = f.read()
     return release_input_str

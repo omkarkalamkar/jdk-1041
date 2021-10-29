@@ -36,9 +36,11 @@ def devices_to_load():
     )
 
 
-def get_release_input_str(release_input_file="command_ReleaseResources.json"):
+def get_release_input_str(
+    release_input_file="command_mccs_ReleaseResources.json",
+):
     path = join(
-        dirname(__file__), "..", "..", "data", "low", release_input_file
+        dirname(__file__), "..", "..", "..", "data", release_input_file
     )
     with open(path, "r") as f:
         release_input_str = f.read()
