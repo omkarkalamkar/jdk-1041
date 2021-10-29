@@ -41,24 +41,52 @@ def assign_resouces(tango_context, central_node_name, assign_input_str):
             logger.info("command result: %s", command)
             assert command[2] == "ResultCode.OK"
 
-    def get_device(json_model):
+    def get_subarray_device(json_model):
         for device in json_model["devices"]:
             if device["dev_name"] == "ska_mid/tm_subarray_node/1":
                 return device
         return None
 
+    # def get_mccs_device(json_model):
+    #     for device in json_model["devices"]:
+    #         if device["dev_name"] == "low-mccs/control/control":
+    #             return device
+    #     return None
+
+    def get_mccs_device_resources(json_model):
+        resources_len = 0
+        for device in json_model["devices"]:
+            if device["dev_name"] == "low-mccs/control/control":
+                mccs_device = device
+        assigned_res_json = json.loads(mccs_device["resources"])
+        resources_len = len(assigned_res_json["subarray_beam_ids"]) + len(assigned_res_json["station_ids"]) + len(
+            assigned_res_json["channel_blocks"])
+        
+        return resources_len
+
+
     if "ska_mid" in central_node_name:
-        device = get_device(json.loads(central_node.InternalModel))
+        device = get_subarray_device(json.loads(central_node.InternalModel))
         start_time = time.time()
         while len(device["resources"]) == 0:
             time.sleep(SLEEP_TIME)
-            device = get_device(json.loads(central_node.InternalModel))
+            device = get_subarray_device(json.loads(central_node.InternalModel))
             elapsed_time = time.time() - start_time
             if elapsed_time > TIMEOUT:
                 pytest.fail("Timeout occurred while executing the test")
 
         assert len(device["resources"]) > 0
 
+    if "ska_low" in central_node_name:
+        resources_len = get_mccs_device_resources(json.loads(central_node.InternalModel))
+        start_time = time.time()
+        while resources_len == 0:
+            time.sleep(SLEEP_TIME)
+            resources_len = get_mccs_device_resources(json.loads(central_node.InternalModel))
+            elapsed_time = time.time() - start_time
+            if elapsed_time > TIMEOUT:
+                pytest.fail("Timeout occurred while executing the test")
+        assert resources_len > 0
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
