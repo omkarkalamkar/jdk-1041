@@ -11,7 +11,7 @@ class Aggregator:
         raise NotImplementedError("To be defined in the lower level classes")
 
 
-class TelescopeStateAggragatorMid(Aggregator):
+class TelescopeStateAggregatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -73,7 +73,7 @@ class TelescopeStateAggragatorMid(Aggregator):
             return DevState.UNKNOWN
 
 
-class TelescopeStateAggragatorLow(Aggregator):
+class TelescopeStateAggregatorLow(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -134,7 +134,7 @@ class TelescopeStateAggragatorLow(Aggregator):
             return DevState.UNKNOWN
 
 
-class HealthStateAggragatorMid(Aggregator):
+class HealthStateAggregatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -193,7 +193,7 @@ class HealthStateAggragatorMid(Aggregator):
             return HealthState.UNKNOWN
 
 
-class HealthStateAggragatorLow(Aggregator):
+class HealthStateAggregatorLow(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -249,7 +249,7 @@ class HealthStateAggragatorLow(Aggregator):
             return HealthState.UNKNOWN
 
 
-class TMCOpStateAggragator(Aggregator):
+class TMCOpStateAggregator(Aggregator):
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 

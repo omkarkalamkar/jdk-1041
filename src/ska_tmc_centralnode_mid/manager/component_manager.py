@@ -12,11 +12,11 @@ from ska_tango_base.control_model import ObsState
 from tango import DevState
 
 from ska_tmc_centralnode_mid.manager.aggregators import (
-    HealthStateAggragatorLow,
-    HealthStateAggragatorMid,
-    TelescopeStateAggragatorLow,
-    TelescopeStateAggragatorMid,
-    TMCOpStateAggragator,
+    HealthStateAggregatorLow,
+    HealthStateAggregatorMid,
+    TelescopeStateAggregatorLow,
+    TelescopeStateAggregatorMid,
+    TMCOpStateAggregator,
 )
 from ska_tmc_centralnode_mid.manager.command_executor import CommandExecutor
 from ska_tmc_centralnode_mid.manager.event_receiver import EventReceiver
@@ -382,11 +382,11 @@ class CNComponentManager(BaseComponentManager):
         """
         if self._health_state_aggregator is None:
             if isinstance(self._input_parameter, InputParameterLow):
-                self._health_state_aggregator = HealthStateAggragatorLow(
+                self._health_state_aggregator = HealthStateAggregatorLow(
                     self, self.logger
                 )
             elif isinstance(self._input_parameter, InputParameterMid):
-                self._health_state_aggregator = HealthStateAggragatorMid(
+                self._health_state_aggregator = HealthStateAggregatorMid(
                     self, self.logger
                 )
             else:
@@ -409,11 +409,11 @@ class CNComponentManager(BaseComponentManager):
         """
         if self._telescope_state_aggregator is None:
             if isinstance(self._input_parameter, InputParameterLow):
-                self._telescope_state_aggregator = TelescopeStateAggragatorLow(
+                self._telescope_state_aggregator = TelescopeStateAggregatorLow(
                     self, self.logger
                 )
             elif isinstance(self._input_parameter, InputParameterMid):
-                self._telescope_state_aggregator = TelescopeStateAggragatorMid(
+                self._telescope_state_aggregator = TelescopeStateAggregatorMid(
                     self, self.logger
                 )
             else:
@@ -428,7 +428,7 @@ class CNComponentManager(BaseComponentManager):
         Aggregates tm devices states
         """
         if self._tm_op_state_aggregator is None:
-            self._tm_op_state_aggregator = TMCOpStateAggragator(
+            self._tm_op_state_aggregator = TMCOpStateAggregator(
                 self, self.logger
             )
 
