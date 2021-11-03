@@ -20,9 +20,8 @@ setup_dir = os.path.dirname(os.path.abspath(__file__))
 # make sure we use latest info from local code
 sys.path.insert(0, setup_dir)
 
-readme_filename = os.path.join(setup_dir, "README.rst")
-with open(readme_filename) as file:
-    long_description = file.read()
+with open('README.md') as readme_file:
+    readme = readme_file.read()
 
 release_filename = os.path.join(
     setup_dir, "src", "ska_tmc_centralnode_mid", "release.py"
@@ -43,7 +42,7 @@ setup(
     author="Team NCRA",
     author_email="telmgt-internal@googlegroups.com",
     license="BSD-3-Clause",
-    #   long_description=long_description,
+    long_description=readme + '\n\n',
     url="https://www.skaobservatory.org/",
     platforms="Linux",
     install_requires=[
