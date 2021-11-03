@@ -87,6 +87,10 @@ endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
 
+K8S_TEST_TEST_COMMAND = $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
+						pytest \
+						$(PYTHON_VARS_AFTER_PYTEST) | tee pytest.stdout; 
+
 # override python.mk python-pre-test target
 python-pre-test:
 	@echo "python-pre-test: running with: $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) pytest $(PYTHON_VARS_AFTER_PYTEST) \
