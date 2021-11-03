@@ -19,7 +19,6 @@ This project is developing the CentralNode (Mid and Low) component of the Telesc
    :maxdepth: 1
    :caption: Developer guide
 
-   developer_guide/test_harness
    developer_guide/code_quality
 
 
