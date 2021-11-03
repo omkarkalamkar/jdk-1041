@@ -105,12 +105,7 @@ class CommandExecutor:
                     command_name = type(command_object).__name__
                     try:
                         self.command_in_progress = command_name
-                        result_code = None
-                        message = None
-                        if argin is None:
-                            (result_code, message) = command_object.do()
-                        else:
-                            (result_code, message) = command_object.do(argin)
+                        (result_code, message) = command_object.do(argin)
                         self._logger.info(
                             "Command %s with argin %s executed with result: (%s, %s)",
                             command_name,

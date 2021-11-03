@@ -5,7 +5,7 @@
 #
 #
 # Distributed under the terms of the BSD-3-Clause license.
-# See LICENSE.txt for more info.
+# See LICENSE for more info.
 
 """CentralNode
 
