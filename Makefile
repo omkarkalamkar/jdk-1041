@@ -125,8 +125,14 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 
+test-requirements:
+	@poetry export --without-hashes --dev --format requirements.txt --output tests/requirements.txt
+
+k8s-pre-test: python-pre-test test-requirements
+
+
 requirements: ## Install Dependencies
-	python3 -m pip install -r requirements.txt -r requirements-dev.txt
+	poetry install
 
 # .PHONY is additive
 .PHONY: unit-test
