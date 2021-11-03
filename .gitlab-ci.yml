@@ -54,11 +54,19 @@ include:
 python-test:
   retry: 2
 
+k8s-test:
+  variables:
+    TELESCOPE: SKA-mid
+  environment:
+    name: test/$CI_COMMIT_REF_SLUG-mid
+    kubernetes:
+      namespace: ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-mid
+
 low-k8s-test:
   extends: k8s-test
   variables:
     TELESCOPE: SKA-low
   environment:
-    name: test-low
+    name: test/$CI_COMMIT_REF_SLUG-low
     kubernetes:
       namespace: ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-low
