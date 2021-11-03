@@ -1,21 +1,37 @@
-.. ska-tmc-CentralNode-mid documentation master file, created by
-   sphinx-quickstart on Fri Jan 11 10:03:42 2019.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+================================
+CentralNode documentation
+================================
 
-Welcome to ska-tmc-centralnode-mid documentation!
-==================================================
+This project is developing the CentralNode (Mid and Low) component of the Telescope Monitoring and Control (TMC) prototype, for the `Square Kilometre Array`_.
+
+.. _Square Kilometre Array: https://skatelescope.org/
 
 .. toctree::
-  :caption: Table of Contents
-  :maxdepth: 1
-   
-   Central Node Mid<CentralNode>
-   
+   :maxdepth: 1
+   :caption: Getting started
+
+   getting_started/getting_started
+   getting_started/setup_development_environment
+   getting_started/setup_vscode
+   getting_started/setup_deployment_environment
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Developer guide
+
+   developer_guide/test_harness
+   developer_guide/code_quality
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: API
+
+   api/index
+
 
 Indices and tables
-==================
-
+------------------
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
