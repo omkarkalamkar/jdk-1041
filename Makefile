@@ -56,12 +56,12 @@ ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3
 PYTHON_TEST_FILE ?=
 
 # Set the specific environment variables required for pytest
-PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:src:src/ska_tmc_centralnode_mid:tests \
+PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:./src \
 							 TANGO_HOST=$(TANGO_HOST)
 
 MARK ?= ## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
-FILE ?= ## A specific test file to pass to pytest
+FILE ?= tests## A specific test file to pass to pytest
 ADD_ARGS ?= ## Additional args to pass to pytest
 
 
@@ -86,11 +86,6 @@ MARK = $(shell echo $(TELESCOPE) | sed s/-/_/) and (post_deployment or acceptanc
 endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
-
-# override python.mk python-pre-test target
-python-pre-test:
-	@echo "python-pre-test: running with: $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) pytest $(PYTHON_VARS_AFTER_PYTEST) \
-	 --cov=src --cov-report=term-missing --cov-report xml:build/reports/code-coverage.xml --junitxml=build/reports/unit-tests.xml $(PYTHON_TEST_FILE)"
 
 -include .make/k8s.mk
 -include .make/python.mk
@@ -129,7 +124,6 @@ test-requirements:
 	@poetry export --without-hashes --dev --format requirements.txt --output tests/requirements.txt
 
 k8s-pre-test: python-pre-test test-requirements
-
 
 requirements: ## Install Dependencies
 	poetry install
