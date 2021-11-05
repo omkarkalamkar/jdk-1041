@@ -59,3 +59,5 @@ pytest-logs.txt
 setup.py
 setup.cfg
 tests/requirements*
+.vscode
+.devcontainer
