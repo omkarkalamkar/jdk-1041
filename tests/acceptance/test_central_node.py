@@ -11,13 +11,19 @@ from tango import Database, DeviceProxy
 from tests.settings import SLEEP_TIME, logger
 
 
-@given("a TANGO ecosystem with a set of devices deployed")
+@given(
+    "a TANGO ecosystem with a set of devices deployed",
+    target_fixture="device_list",
+)
 def device_list():
     db = Database()
     return db.get_device_exported("*")
 
 
-@given(parsers.parse("a CentralNode device called <central_node_name>"))
+@given(
+    parsers.parse("a CentralNode device called <central_node_name>"),
+    target_fixture="central_node",
+)
 def central_node(central_node_name):
     """a device called sys/tg_test/1."""
     return DeviceProxy(central_node_name)

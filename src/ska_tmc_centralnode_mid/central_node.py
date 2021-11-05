@@ -208,7 +208,10 @@ class AbstractCentralNode(SKABaseDevice):
         pass
 
     def delete_device(self):
-        pass
+        # if the init is called more than once
+        # I need to stop all threads
+        if hasattr(self, "component_manager"):
+            self.component_manager.stop()
 
     # ------------------
     # Attributes methods
@@ -611,11 +614,6 @@ class AbstractCentralNode(SKABaseDevice):
 
     # default ska mid
     def create_component_manager(self):
-        # if the init is called more than once
-        # I need to stop all threads
-        if hasattr(self, "component_manager"):
-            self.component_manager.stop()
-
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )

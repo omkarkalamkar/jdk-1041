@@ -54,3 +54,10 @@ charts/test-parent/Chart.lock
 charts/test-parent/charts/
 code-coverage
 pytest-logs.txt
+
+# Ignore legacy dependency and release systems
+setup.py
+setup.cfg
+tests/requirements*
+.vscode
+.devcontainer
