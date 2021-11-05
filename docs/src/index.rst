@@ -11,10 +11,7 @@ This project is developing the CentralNode (Mid and Low) component of the Telesc
    :caption: Getting started
 
    getting_started/getting_started
-   getting_started/setup_development_environment
-   getting_started/setup_vscode
-   getting_started/setup_deployment_environment
-
+   
 .. toctree::
    :maxdepth: 1
    :caption: Developer guide

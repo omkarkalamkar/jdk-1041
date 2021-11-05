@@ -14,41 +14,12 @@
 #
 
 autodoc_mock_imports = [
-    "PyTango",
-    "tango",
-    "tango.server",
-    "run",
-    "DeviceMeta",
-    "command",
-    "future",
-    "future.utils",
-    "ska",
-    "ska_tango_base",
-    "ska_tango_base.SKABaseDevice",
-    "ska_tango_base.SKAMaster",
-    "ska_tango_base.SKASubarray",
-    "numpy",
-    "ska_tmc_centralnode_mid",
-    "ska_tmc_centralnode_mid.central_node_mid",
-    "marshmallow",
-    "ska-tmc-cdm.messages",
-    "ska-tmc-cdm.schemas",
-    "ska_tmc_centralnode_mid.commands.assign_resources_command",
-    "ska-tmc-cdm.messages.central_node.assign_resources",
-    "AssignResourcesRequest",
-    "CODEC",
-    "ValidationError",
-    "ska_telmodel",
-    "tmc",
 ]
 
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../../"))
-
-import sphinx_rtd_theme
-
+sys.path.insert(0, os.path.abspath("../../src"))
 
 def setup(app):
     app.add_css_file('css/custom.css')

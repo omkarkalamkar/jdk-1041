@@ -12,7 +12,7 @@ help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 generate-api-doc:
-	@sphinx-apidoc -o src/api ../src/
+	@sphinx-apidoc -f -o src/api ../src/
 
 .PHONY: help Makefile
 

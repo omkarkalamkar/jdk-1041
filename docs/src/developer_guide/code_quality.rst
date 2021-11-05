@@ -1,6 +1,6 @@
-############################
+###################################
 CentralNode code quality guidelines
-############################
+###################################
 
 ***********************
 Code formatting / style
@@ -32,9 +32,9 @@ using command ``make python-lint``.
 *************
 Test coverage
 *************
+
 CentralNode uses pytest to test its code, with the pytest-cov plugin for
-measuring coverage. The detailed guidelines are mentioned in the `SKA Software Testing Policy
-and Strategy`_.
+measuring coverage. .
 
 
 
