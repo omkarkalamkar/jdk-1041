@@ -1,16 +1,7 @@
-===
 API
 ===
 
 .. toctree::
-  :caption: CentralNode classes
-  :maxdepth: 1
+   :maxdepth: 4
 
-  Central Node Mid<CentralNode>
-
-.. toctree::
-  :caption: Other modules
-  :maxdepth: 1
-
-  Release<release>
-  
+   ska_tmc_centralnode_mid
