@@ -7,6 +7,10 @@ license = "BSD-3-Clause"
 packages = [
     { include = "ska_tmc_centralnode_mid", from = "src" }
 ]
+include = [
+    { path = 'tests'}
+]
+
 
 [tool.poetry.scripts]
 CentralNodeDS = 'ska_tmc_centralnode_mid.central_node_mid:main'
