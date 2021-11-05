@@ -46,8 +46,8 @@ clusters of Docker containers.
 #. Install minikube and kubectl.
 
 minikube
-^^^^^^^^^^^^^^^^ 
-1. Clone repository deploy-minikube (https://gitlab.com/ska-telescope/sdi/ska-cicd-deploy-minikube) 
+^^^^^^^^^^^^^^^^
+1. Clone repository deploy-minikube (https://gitlab.com/ska-telescope/sdi/ska-cicd-deploy-minikube)
    and navigate to deploy-minikube directory
 
    .. code-block:: bash
@@ -68,7 +68,10 @@ minikube
         me@local:~$ minikube start
 
 kubectl
-^^^^^^^^^^^^^^^^ 
+^^^^^^^^^^^^^^^^
+
+This step is optional as the above `make all` will install `kubectl` for you.  However, if you elect to install `minikube` through a separate process, then the following will be required.
+
 1. Download the latest release with the command:
 
    .. code-block:: bash
@@ -100,15 +103,15 @@ kubectl
 
          me@local:~$ git clone https://gitlab.com/ska-telescope/ska-tmc-centralnode-mid.git
 
-#. Check for a new version of ``ska-cicd-deploy-minikube``. Development is ongoing in 
+#. Check for a new version of ``ska-cicd-deploy-minikube``. Development is ongoing in
    the ska-tmc-centralnode-mid folder, and you want to be running the latest version:
 
    .. code-block:: bash
 
-      me@local:~/ska-tmc-centralnode-mid git submodule update --init --recursive 
+      me@local:~/ska-tmc-centralnode-mid git submodule update --init --recursive
 
 #. If the CentralNode values.yaml (https://gitlab.com/ska-telescope/ska-tmc-centralnode-mid/-/blob/master/charts/ska-tmc-centralnode-mid/values.yaml)
-   is referring to the CentralNode docker image present on CAR Nexuse repository, no need to build 
+   is referring to the CentralNode docker image present on CAR Nexuse repository, no need to build
    the image locally. You can directly proceed to install the deployment.
 
 #. If the latest CentralNode image is not published on CAR yet, you first need to build the docker image:
@@ -132,11 +135,11 @@ kubectl
 
        me@local:~/ska-tmc-centralnode-mid make k8s-install-chart TELESCOPE=SKA-mid
 
-#. Check the deployment using below command:
+#. Check the deployment using below command (timeout is optional, but can help with slow image pull issues):
 
    .. code-block:: bash
 
-          me@local:~/ska-tmc-centralnode-mid make k8s-wait
+          me@local:~/ska-tmc-centralnode-mid make k8s-wait K8S_TIMEOUT=600s
 
 #. Execute the integration test cases from tests/integration folder. Provide the MARK
    to execute Mid or Low specific integration tests:
