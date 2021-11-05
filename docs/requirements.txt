@@ -8,3 +8,4 @@ sphinx-rtd-theme
 sphinx-autodoc-typehints
 sphinxcontrib-plantuml
 typing_extensions
+marshmallow
