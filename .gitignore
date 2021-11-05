@@ -58,5 +58,4 @@ pytest-logs.txt
 # Ignore legacy dependency and release systems
 setup.py
 setup.cfg
-requirements*
 tests/requirements*

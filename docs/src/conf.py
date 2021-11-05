@@ -14,17 +14,6 @@
 #
 
 autodoc_mock_imports = [
-    "astropy",
-    "backoff",
-    "fire",
-    "jsonschema",
-    "numpy",
-    "pyfabil",
-    "scipy",
-    "ska_tango_base",
-    "tango",
-    "uritools",
-    "yaml",
 ]
 
 import os
