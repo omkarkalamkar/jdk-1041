@@ -34,7 +34,7 @@ autodoc_mock_imports = [
     "future.utils",
     "numpy",
     "marshmallow",
-    "ska-tmc-cdm",
+    "ska_tmc_cdm",
     "CODEC",
     "ValidationError",
     "ska_telmodel"
