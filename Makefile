@@ -1,5 +1,5 @@
 #
-# Project makefile for a ska-tmc-centralnode-mid project. You should normally only need to modify
+# Project makefile for a ska-tmc-centralnode project. You should normally only need to modify
 # PROJECT below.
 #
 #
@@ -7,17 +7,17 @@
 # the Docker tag for this project. The definition below inherits the standard
 # value for CAR_OCI_REGISTRY_HOST (=artefact.skao.int) and overwrites
 # PROJECT to give a final Docker tag of
-# artefact.skao.int/ska-telescope/ska-tmc-centralnode-mid
+# artefact.skao.int/ska-telescope/ska-tmc-centralnode
 
 
 CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
-PROJECT = ska-tmc-centralnode-mid
-KUBE_APP = ska-tmc-centralnode-mid
+PROJECT = ska-tmc-centralnode
+KUBE_APP = ska-tmc-centralnode
 TELESCOPE ?= SKA-mid
 
 # KUBE_NAMESPACE defines the Kubernetes Namespace that will be deployed to
 # using Helm.  If this does not already exist it will be created
-KUBE_NAMESPACE ?= ska-tmc-centralnode-mid
+KUBE_NAMESPACE ?= ska-tmc-centralnode
 
 # RELEASE_NAME is the release that all Kubernetes resources will be labelled
 # with
@@ -30,7 +30,7 @@ PYTHON_SWITCHES_FOR_FLAKE8=--ignore=W503 --max-line-length=180
 # UMBRELLA_CHART_PATH Path of the umbrella chart to work with
 HELM_CHART=test-parent
 UMBRELLA_CHART_PATH ?= charts/$(HELM_CHART)/
-K8S_CHARTS ?= ska-tmc-centralnode-mid test-parent## list of charts
+K8S_CHARTS ?= ska-tmc-centralnode test-parent## list of charts
 K8S_CHART ?= $(HELM_CHART)
 
 CI_PROJECT_DIR ?= .
@@ -42,8 +42,8 @@ JIVE ?= false# Enable jive
 MINIKUBE ?= true ## Minikube or not
 TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
 
-CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode-mid
-CI_ENVIRONMENT_SLUG ?= ska-tmc-centralnode-mid
+CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode
+CI_ENVIRONMENT_SLUG ?= ska-tmc-centralnode
 $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH_SLUG)\n    app.gitlab.com/env: $(CI_ENVIRONMENT_SLUG)' > gilab_values.yaml)
 
 # Test runner - run to completion job in K8s
@@ -98,11 +98,11 @@ PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
 -include PrivateRules.mak
 
 # flag this up for the oneshot /Dockerfile
-OCI_IMAGES=ska-tmc-centralnode-mid
+OCI_IMAGES=ska-tmc-centralnode
 
 clean:
-	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ */*/*/*/__pycache__ charts/ska-tmc-centralnode-mid/charts \
-			charts/build charts/test-parent/charts charts/ska-tmc-centralnode-mid/Chart.lock charts/test-parent/Chart.lock code-coverage \
+	@rm -rf .coverage .eggs .pytest_cache build */__pycache__ */*/__pycache__ */*/*/__pycache__ */*/*/*/__pycache__ charts/ska-tmc-centralnode/charts \
+			charts/build charts/test-parent/charts charts/ska-tmc-centralnode/Chart.lock charts/test-parent/Chart.lock code-coverage \
 			tests/.pytest_cache
 
 unit-test: python-test

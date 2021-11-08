@@ -1,8 +1,8 @@
 import pytest
 import tango
 
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
+from ska_tmc_centralnode.dev_factory import DevFactory
+from ska_tmc_centralnode.model.enum import ModesAvailability
 from tests.helpers.helper_state_device import HelperStateDevice
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (

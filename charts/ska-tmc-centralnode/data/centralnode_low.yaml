@@ -1,0 +1,48 @@
+name: "centralnode-test"
+function: telescope-monitoring
+domain: general-monitoring
+instances: ["01"]
+command: "python3 /app/src/ska_tmc_centralnode/central_node_low.py"
+server:
+  name: "central_node_low"
+  instances:
+  - name: "01"
+    classes:
+    - name: "CentralNodeLow"
+      devices:
+      - name: "ska_low/tm_central/central_node"
+        properties:
+        properties:
+        - name: "MCCSMasterLeafNodeFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.low.MCCSMasterLeafNodeFQDN}}"
+        - name: "MCCSMasterNodeFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.low.MCCSMasterNodeFQDN}}"
+        - name: "MCCSSubarrayLeafNodeFQDN"
+          values:
+          {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
+          - "ska_low/tm_leaf_node/mccs_subarray{{ printf "%02s" . }}"
+          {{- end }}
+        - name: "TMSubarrayNodes"
+          values:
+          {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
+          - "ska_low/tm_subarray_node/{{ . }}"
+          {{- end }}
+        - name: "SkaLevel"
+          values:
+            - "1"
+        - name: "LoggingTargetsDefault"
+          values:
+            - "tango::logger"
+        - name: "LoggingLevelDefault"
+          values:
+            - "5"
+depends_on:
+  - device: sys/database/2
+image:
+  registry: "{{.Values.centralnodemid.image.registry}}"
+  image: "{{.Values.centralnodemid.image.image}}"
+  tag: "{{.Values.centralnodemid.image.tag}}"
+  pullPolicy: "{{.Values.centralnodemid.image.pullPolicy}}"
+

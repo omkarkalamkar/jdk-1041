@@ -3,7 +3,7 @@ name: test-parent
 description: An umbrella Helm chart for SKA-TMC-Mid deployment.
 type: application
 version: 0.0.3
-appVersion: 0.3.2
+appVersion: 0.3.3
 icon: https://www.skatelescope.org/wp-content/uploads/2016/07/09545_NEW_LOGO_2014.png
 maintainers:
   - name: Aditya Dange
@@ -19,9 +19,9 @@ dependencies:
 - name: ska-tango-util
   version: 0.3.2
   repository: https://artefact.skao.int/repository/helm-internal
-- name: ska-tmc-centralnode-mid
-  version: 0.1.2
-  repository: file://../ska-tmc-centralnode-mid
+- name: ska-tmc-centralnode
+  version: 0.3.3
+  repository: file://../ska-tmc-centralnode
   alias: central_node
 - name: ska-ser-skuid
   version: 0.3.0

@@ -2,7 +2,7 @@ import pytest
 import tango
 from tango.test_utils import DeviceTestContext
 
-from ska_tmc_centralnode_mid.central_node_mid import CentralNodeMid
+from ska_tmc_centralnode.central_node_mid import CentralNodeMid
 
 
 @pytest.fixture

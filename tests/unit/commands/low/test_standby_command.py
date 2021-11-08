@@ -3,11 +3,11 @@ import time
 import pytest
 from ska_tango_base.commands import ResultCode
 
-from ska_tmc_centralnode_mid.commands.telescope_standby_command import (
+from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
-from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
-from ska_tmc_centralnode_mid.model.input import InputParameterLow
+from ska_tmc_centralnode.exceptions import CommandNotAllowed
+from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_adapter_factory import HelperAdapterFactory
 from tests.helpers.helper_state_mccsdevice import HelperMCCSStateDevice
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice

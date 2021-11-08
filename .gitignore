@@ -47,9 +47,9 @@ unit-tests.xml
 # Miscellaneous
 .DS_Store
 gilab_values.yaml
-charts/ska-tmc-centralnode-mid/Chart.lock
+charts/ska-tmc-centralnode/Chart.lock
 output.yaml
-charts/ska-tmc-centralnode-mid/charts/
+charts/ska-tmc-centralnode/charts/
 charts/test-parent/Chart.lock
 charts/test-parent/charts/
 code-coverage

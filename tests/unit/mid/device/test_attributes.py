@@ -11,9 +11,9 @@ from ska_tango_base.control_model import (
 from tango import DevState
 from tango.test_utils import DeviceTestContext
 
-from ska_tmc_centralnode_mid import release
-from ska_tmc_centralnode_mid.central_node_mid import CentralNodeMid
-from ska_tmc_centralnode_mid.model.enum import ModesAvailability
+from ska_tmc_centralnode import release
+from ska_tmc_centralnode.central_node_mid import CentralNodeMid
+from ska_tmc_centralnode.model.enum import ModesAvailability
 
 
 @pytest.fixture

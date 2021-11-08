@@ -1,4 +1,4 @@
-from ska_tmc_centralnode_mid.model.input import InputParameterLow
+from ska_tmc_centralnode.model.input import InputParameterLow
 
 
 def test_properties():

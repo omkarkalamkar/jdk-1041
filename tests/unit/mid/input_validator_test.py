@@ -6,7 +6,7 @@ from os.path import dirname, join
 
 import pytest
 
-from ska_tmc_centralnode_mid.exceptions import (
+from ska_tmc_centralnode.exceptions import (
     InvalidJSONError,
     ResourceNotPresentError,
     ResourceReassignmentError,
@@ -14,7 +14,7 @@ from ska_tmc_centralnode_mid.exceptions import (
 )
 
 # other imports
-from ska_tmc_centralnode_mid.input_validator import AssignResourceValidator
+from ska_tmc_centralnode.input_validator import AssignResourceValidator
 
 # Sample 'good' JSON
 
