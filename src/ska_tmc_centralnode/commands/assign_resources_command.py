@@ -308,11 +308,11 @@ class AssignResources(AbstractAssignReleaseResources):
             interface:
                 DevString. Mandatory.
                 Version of schema to allocate assign resources.
-            
+
             subarray_id:
                 DevShort. Mandatory.
                 Sub-Array to allocate resources to
-            
+
             mccs:
                 subarray_beam_ids:
                     DevArray. Mandatory
