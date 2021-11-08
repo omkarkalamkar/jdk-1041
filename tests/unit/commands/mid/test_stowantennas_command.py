@@ -5,9 +5,9 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 
-from ska_tmc_centralnode_mid.commands.stow_antennas_command import StowAntennas
-from ska_tmc_centralnode_mid.exceptions import CommandNotAllowed
-from ska_tmc_centralnode_mid.manager.adapters import DishAdapter
+from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
+from ska_tmc_centralnode.exceptions import CommandNotAllowed
+from ska_tmc_centralnode.manager.adapters import DishAdapter
 from tests.helpers.helper_adapter_factory import HelperAdapterFactory
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger

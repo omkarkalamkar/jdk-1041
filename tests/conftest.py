@@ -5,7 +5,7 @@ import pytest
 import tango
 from tango.test_context import MultiDeviceTestContext
 
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from ska_tmc_centralnode.dev_factory import DevFactory
 
 
 def pytest_sessionstart(session):

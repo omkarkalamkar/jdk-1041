@@ -53,7 +53,7 @@ def setup(app):
 
 # -- Project information -----------------------------------------------------
 
-project = "ska-tmc-centralnode-mid"
+project = "ska-tmc-centralnode"
 copyright = "2021, NCRA India"
 author = "NCRA India"
 
@@ -76,6 +76,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
     "sphinx.ext.githubpages",
+    "sphinx.ext.napoleon"
 ]
 
 # Add any paths that contain templates here, relative to this directory.

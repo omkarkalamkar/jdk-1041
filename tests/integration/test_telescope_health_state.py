@@ -2,7 +2,7 @@ import pytest
 import tango
 from ska_tango_base.control_model import HealthState
 
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from ska_tmc_centralnode.dev_factory import DevFactory
 from tests.integration.common import devices_to_load  # noqa F401
 from tests.integration.common import (
     assert_event_arrived,

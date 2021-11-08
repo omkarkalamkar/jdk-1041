@@ -4,7 +4,7 @@ import pytest
 from ska_tango_base.commands import ResultCode
 from tango import DevState
 
-from ska_tmc_centralnode_mid.dev_factory import DevFactory
+from ska_tmc_centralnode.dev_factory import DevFactory
 from tests.integration.common import (  # noqa F401
     devices_to_load,
     ensure_checked_devices,

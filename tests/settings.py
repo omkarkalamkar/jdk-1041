@@ -3,14 +3,12 @@ import time
 
 import pytest
 
-from ska_tmc_centralnode_mid.manager.component_manager import (
-    CNComponentManager,
-)
-from ska_tmc_centralnode_mid.model.input import (
+from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
-from ska_tmc_centralnode_mid.model.op_state_model import TMCOpStateModel
+from ska_tmc_centralnode.model.op_state_model import TMCOpStateModel
 
 logger = logging.getLogger(__name__)
 
