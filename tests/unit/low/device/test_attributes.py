@@ -45,9 +45,6 @@ def test_attributes(central_node_device):
     assert central_node_device.telescopeState == DevState.UNKNOWN
     central_node_device.controlMode = ControlMode.REMOTE
     assert central_node_device.controlMode == ControlMode.REMOTE
-    assert central_node_device.subarray1HealthState == HealthState.UNKNOWN
-    assert central_node_device.subarray2HealthState == HealthState.UNKNOWN
-    assert central_node_device.subarray3HealthState == HealthState.UNKNOWN
     assert central_node_device.desiredTelescopeState == DevState.ON
     assert central_node_device.commandInProgress == "None"
     assert central_node_device.mccsMasterLeafNodeName == ""

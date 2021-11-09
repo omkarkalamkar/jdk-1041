@@ -66,19 +66,6 @@ class AbstractCentralNode(SKABaseDevice):
         doc="Health state of Telescope",
     )
 
-    subarray1HealthState = attribute(
-        dtype=HealthState,
-        doc="Health state of Subarray1",
-    )
-
-    subarray2HealthState = attribute(
-        dtype=HealthState,
-        doc="Health state of Subarray2",
-    )
-    subarray3HealthState = attribute(
-        dtype=HealthState,
-    )
-
     telescopeState = attribute(
         dtype="DevState",
         access=AttrWriteType.READ,
@@ -154,14 +141,6 @@ class AbstractCentralNode(SKABaseDevice):
     def update_tmc_op_state_callback(self, tmc_op_state):
         self.push_change_event("TMOpState", tmc_op_state)
 
-    def update_subarray_health_state_callback(self, devInfo):
-        if "1" in devInfo.dev_name:
-            self.push_change_event("subarray1HealthState", devInfo.healthState)
-        elif "2" in devInfo.dev_name:
-            self.push_change_event("subarray2HealthState", devInfo.healthState)
-        else:
-            self.push_change_event("subarray3HealthState", devInfo.healthState)
-
     # ---------------
     # General methods
     # ---------------
@@ -187,9 +166,6 @@ class AbstractCentralNode(SKABaseDevice):
             )
             device._version_id = release.version
             device._LastDeviceInfoChanged = ""
-            device.set_change_event("subarray1HealthState", True, False)
-            device.set_change_event("subarray2HealthState", True, False)
-            device.set_change_event("subarray3HealthState", True, False)
             device.set_change_event("telescopeHealthState", True, False)
             device.set_change_event("telescopeState", True, False)
             device.set_change_event("LastDeviceInfoChanged", True, False)
@@ -217,30 +193,6 @@ class AbstractCentralNode(SKABaseDevice):
 
     def read_telescopeHealthState(self):
         return self.component_manager.component.telescope_health_state
-
-    def read_subarray1HealthState(self):
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
-            if "1" in dev_name:
-                return self.component_manager.get_device(dev_name).healthState
-        return HealthState.UNKNOWN
-
-    def read_subarray2HealthState(self):
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
-            if "2" in dev_name:
-                return self.component_manager.get_device(dev_name).healthState
-        return HealthState.UNKNOWN
-
-    def read_subarray3HealthState(self):
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
-            if "3" in dev_name:
-                return self.component_manager.get_device(dev_name).healthState
-        return HealthState.UNKNOWN
 
     def read_telescopeState(self):
         return self.component_manager.component.telescope_state
@@ -622,7 +574,6 @@ class AbstractCentralNode(SKABaseDevice):
             _update_telescope_state_callback=self.update_telescope_state_callback,
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
-            _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
             _update_imaging_callback=self.update_imaging_callback,
             _update_command_in_progress_callback=self.update_command_in_progress_callback,
             max_workers=self.MaxWorkerMonitoringLoop,
