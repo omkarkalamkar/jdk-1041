@@ -95,45 +95,45 @@ class CentralNodeMid(AbstractCentralNode):
         doc="VLBI Attribute",
     )
 
-    CspMasterDevName = attribute(
+    cspmasterdevname = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
-    SdpMasterDevName = attribute(
+    sdpmasterdevname = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
-    LeafCspMasterDevName = attribute(
+    leafcspmasterdevname = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
-    LeafSdpMasterDevName = attribute(
+    leafsdpmasterdevname = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
-    CspSubarrayDevNames = attribute(
+    cspsubarraydevnames = attribute(
         dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=16,
     )
 
-    SdpSubarrayDevNames = attribute(
+    sdpsubarraydevnames = attribute(
         dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=16,
     )
 
-    DishDevNames = attribute(
+    dishdevnames = attribute(
         dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=100,
     )
 
-    TMLeafDishDevNames = attribute(
+    tmleafdishdevnames = attribute(
         dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=100,
@@ -183,83 +183,83 @@ class CentralNodeMid(AbstractCentralNode):
     def read_vlbi(self):
         return self.component_manager.component.vlbi
 
-    def read_CspMasterDevName(self):
-        """Return the CspMasterDevName attribute."""
+    def read_cspmasterdevname(self):
+        """Return the cspmasterdevname attribute."""
         return self.component_manager.input_parameter.csp_master_dev_name
 
-    def write_CspMasterDevName(self, value):
-        """Set the CspMasterDevName attribute."""
+    def write_cspmasterdevname(self, value):
+        """Set the cspmasterdevname attribute."""
         self.component_manager.input_parameter.csp_master_dev_name = value
         self.component_manager.update_input_parameter()
 
-    def read_SdpMasterDevName(self):
-        """Return the SdpMasterDevName attribute."""
+    def read_sdpmasterdevname(self):
+        """Return the sdpmasterdevname attribute."""
         return self.component_manager.input_parameter.sdp_master_dev_name
 
-    def write_SdpMasterDevName(self, value):
-        """Set the SdpMasterDevName attribute."""
+    def write_sdpmasterdevname(self, value):
+        """Set the sdpmasterdevname attribute."""
         self.component_manager.input_parameter.sdp_master_dev_name = value
         self.component_manager.update_input_parameter()
 
-    def read_LeafCspMasterDevName(self):
-        """Return the LeafCspMasterDevName attribute."""
+    def read_leafcspmasterdevname(self):
+        """Return the leafcspmasterdevname attribute."""
         return (
             self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
         )
 
-    def write_LeafCspMasterDevName(self, value):
-        """Set the LeafCspMasterDevName attribute."""
+    def write_leafcspmasterdevname(self, value):
+        """Set the leafcspmasterdevname attribute."""
         self.component_manager.input_parameter.tm_leaf_csp_master_dev_name = (
             value
         )
         self.component_manager.update_input_parameter()
 
-    def read_LeafSdpMasterDevName(self):
-        """Return the LeafSdpMasterDevName attribute."""
+    def read_leafsdpmasterdevname(self):
+        """Return the leafsdpmasterdevname attribute."""
         return (
             self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
         )
 
-    def write_LeafSdpMasterDevName(self, value):
-        """Set the LeafSdpMasterDevName attribute."""
+    def write_leafsdpmasterdevname(self, value):
+        """Set the leafsdpmasterdevname attribute."""
         self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name = (
             value
         )
         self.component_manager.update_input_parameter()
 
-    def read_CspSubarrayDevNames(self):
-        """Return the CspSubarrayDevNames attribute."""
+    def read_cspsubarraydevnames(self):
+        """Return the cspsubarraydevnames attribute."""
         return self.component_manager.input_parameter.csp_subarray_dev_names
 
-    def write_CspSubarrayDevNames(self, value):
-        """Set the CspSubarrayDevNames attribute."""
+    def write_cspsubarraydevnames(self, value):
+        """Set the cspsubarraydevnames attribute."""
         self.component_manager.input_parameter.csp_subarray_dev_names = value
         self.component_manager.update_input_parameter()
 
-    def read_SdpSubarrayDevNames(self):
-        """Return the SdpSubarrayDevNames attribute."""
+    def read_sdpsubarraydevnames(self):
+        """Return the sdpsubarraydevnames attribute."""
         return self.component_manager.input_parameter.sdp_subarray_dev_names
 
-    def write_SdpSubarrayDevNames(self, value):
-        """Set the SdpSubarrayDevNames attribute."""
+    def write_sdpsubarraydevnames(self, value):
+        """Set the sdpsubarraydevnames attribute."""
         self.component_manager.input_parameter.sdp_subarray_dev_names = value
         self.component_manager.update_input_parameter()
 
-    def read_DishDevNames(self):
-        """Return the DishDevNames attribute."""
+    def read_dishdevnames(self):
+        """Return the dishdevnames attribute."""
         return self.component_manager.input_parameter.dish_dev_names
 
-    def write_DishDevNames(self, value):
-        """Set the DishDevNames attribute."""
+    def write_dishdevnames(self, value):
+        """Set the dishdevnames attribute."""
         self.component_manager.input_parameter.dish_dev_names = value
         self.component_manager.update_input_parameter()
 
-    def read_TMLeafDishDevNames(self):
-        """Return the DishDevNames attribute."""
+    def read_tmleafdishdevnames(self):
+        """Return the tmleafdishdevnames attribute."""
         return self.component_manager.input_parameter.tm_dish_dev_names
 
-    def write_TMLeafDishDevNames(self, value):
-        """Set the DishDevNames attribute."""
+    def write_tmleafdishdevnames(self, value):
+        """Set the tmleafdishdevnames attribute."""
         self.component_manager.input_parameter.tm_dish_dev_names = value
         self.component_manager.update_input_parameter()
 
