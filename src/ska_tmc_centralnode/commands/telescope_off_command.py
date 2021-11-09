@@ -12,7 +12,7 @@ from ska_tmc_centralnode.manager.adapters import AdapterFactory
 
 class TelescopeOff(AbstractTelescopeOnOff):
     """
-    A class for CentralNode's TelescopeOff() command. Sets the CentralNode into TelescopeState to OFF.
+    A class for CentralNode's TelescopeOff() command. Sets the CentralNode into telescopestate to OFF.
     """
 
     def __init__(

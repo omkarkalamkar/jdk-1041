@@ -26,7 +26,7 @@ def telescope_health_state(tango_context, centralnode_name):
     central_node = dev_factory.get_device(centralnode_name)
 
     event_id = central_node.subscribe_event(
-        "telescopeHealthState",
+        "telescopehealthstate",
         tango.EventType.CHANGE_EVENT,
         event_callback,
         stateless=True,
@@ -41,7 +41,7 @@ def telescope_health_state(tango_context, centralnode_name):
 
     assert_event_arrived()
 
-    assert central_node.telescopeHealthState == HealthState.DEGRADED
+    assert central_node.telescopehealthstate == HealthState.DEGRADED
 
     central_node.unsubscribe_event(event_id)
 

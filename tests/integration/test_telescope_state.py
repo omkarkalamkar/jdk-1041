@@ -29,24 +29,24 @@ def telescope_state(tango_context, central_node_name):
     central_node = dev_factory.get_device(central_node_name)
 
     event_id = central_node.subscribe_event(
-        "telescopeState",
+        "telescopestate",
         tango.EventType.CHANGE_EVENT,
         event_callback,
         stateless=True,
     )
 
     ensure_checked_devices(central_node)
-    initial_len = len(central_node.CommandExecuted)
+    initial_len = len(central_node.commandexecuted)
     (result, unique_id) = central_node.On()
     assert result[0] == ResultCode.QUEUED
     start_time = time.time()
-    while len(central_node.CommandExecuted) != initial_len + 1:
+    while len(central_node.commandexecuted) != initial_len + 1:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
-    for command in central_node.CommandExecuted:
+    for command in central_node.commandexecuted:
         if command[0] == unique_id[0]:
             assert command[2] == "ResultCode.OK"
 
@@ -71,7 +71,7 @@ def telescope_state(tango_context, central_node_name):
 
     assert_event_arrived()
 
-    assert central_node.telescopeState == DevState.ON
+    assert central_node.telescopestate == DevState.ON
 
     central_node.unsubscribe_event(event_id)
 

@@ -17,20 +17,20 @@ def standby_command(tango_context, central_node_name):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     ensure_checked_devices(central_node)
-    initial_len = len(central_node.CommandExecuted)
+    initial_len = len(central_node.commandexecuted)
     (result, unique_id) = central_node.On()
     (result, unique_id) = central_node.Standby()
     logger.info("Result is: %s", result)
     logger.info("Unique id: %s", unique_id)
     assert result[0] == ResultCode.QUEUED
     start_time = time.time()
-    while len(central_node.CommandExecuted) != initial_len + 2:
+    while len(central_node.commandexecuted) != initial_len + 2:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
-    for command in central_node.CommandExecuted:
+    for command in central_node.commandexecuted:
         if command[0] == unique_id[0]:
             if command[2] != "ResultCode.OK":
                 logger.error("Message: %s", command[3])
@@ -46,13 +46,13 @@ def standby_command(tango_context, central_node_name):
     # dish_master = dev_factory.get_device("mid_d0001/elt/master")
 
     start_time = time.time()
-    while central_node.telescopeState != DevState.STANDBY:
+    while central_node.telescopestate != DevState.STANDBY:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
-    assert central_node.telescopeState == DevState.STANDBY
+    assert central_node.telescopestate == DevState.STANDBY
 
 
 @pytest.mark.post_deployment

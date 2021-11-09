@@ -26,7 +26,7 @@ def tmc_state(tango_context, central_node_name):
     central_node = dev_factory.get_device(central_node_name)
 
     event_id = central_node.subscribe_event(
-        "TMOpState",
+        "tmopstate",
         tango.EventType.CHANGE_EVENT,
         event_callback,
         stateless=True,
@@ -54,7 +54,7 @@ def tmc_state(tango_context, central_node_name):
 
     assert_event_arrived()
 
-    assert central_node.TMOpState == DevState.FAULT
+    assert central_node.tmopstate == DevState.FAULT
 
     central_node.unsubscribe_event(event_id)
 

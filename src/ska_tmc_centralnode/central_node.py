@@ -61,64 +61,64 @@ class AbstractCentralNode(SKABaseDevice):
     # Attributes
     # ----------
 
-    telescopeHealthState = attribute(
+    telescopehealthstate = attribute(
         dtype=HealthState,
         doc="Health state of Telescope",
     )
 
-    telescopeState = attribute(
+    telescopestate = attribute(
         dtype="DevState",
         access=AttrWriteType.READ,
         doc="DevState of telescope",
     )
 
-    desiredTelescopeState = attribute(
+    desiredtelescopestate = attribute(
         dtype="DevState",
         access=AttrWriteType.READ,
-        doc="desiredTelescopeState attribute of Central Node.",
+        doc="desiredtelescopestate attribute of Central Node.",
     )
 
-    commandInProgress = attribute(
+    commandinprogress = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
-        doc="commandInProgress attribute of Central Node.",
+        doc="commandinprogress attribute of Central Node.",
     )
 
-    TMOpState = attribute(
+    tmopstate = attribute(
         dtype="DevState",
     )
 
-    SubarrayDevNames = attribute(
+    subarraydevnames = attribute(
         dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=16,
     )
 
-    CommandExecuted = attribute(
+    commandexecuted = attribute(
         dtype=(("DevString",),),
         max_dim_x=4,
         max_dim_y=100,
     )
 
-    LastCommandExecuted = attribute(
+    lastcommandexecuted = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
         doc="Last command executed as string: uniqueid, command name, .result and message",
     )
 
-    InternalModel = attribute(
+    internalmodel = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
         doc="Json String representing the entire internal model.",
     )
 
-    TransformedInternalModel = attribute(
+    transformedinternalmodel = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
         doc="Json String representing the entire internal model transformed for better reading.",
     )
 
-    LastDeviceInfoChanged = attribute(
+    lastdeviceinfochanged = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
         doc="Json String representing the last device changed in the internal model.",
@@ -126,20 +126,20 @@ class AbstractCentralNode(SKABaseDevice):
 
     def update_device_callback(self, devInfo):
         self._LastDeviceInfoChanged = devInfo.to_json()
-        self.push_change_event("LastDeviceInfoChanged", devInfo.to_json())
+        self.push_change_event("lastdeviceinfochanged", devInfo.to_json())
 
     def update_telescope_state_callback(self, telescope_state):
-        self.logger.info("telescopeState %s", telescope_state)
-        self.push_change_event("telescopeState", telescope_state)
+        self.logger.info("telescopestate %s", telescope_state)
+        self.push_change_event("telescopestate", telescope_state)
 
     def update_command_in_progress_callback(self, command_in_progress):
-        self.push_change_event("commandInProgress", command_in_progress)
+        self.push_change_event("commandinprogress", command_in_progress)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
-        self.push_change_event("telescopeHealthState", telescope_health_state)
+        self.push_change_event("telescopehealthstate", telescope_health_state)
 
     def update_tmc_op_state_callback(self, tmc_op_state):
-        self.push_change_event("TMOpState", tmc_op_state)
+        self.push_change_event("tmopstate", tmc_op_state)
 
     # ---------------
     # General methods
@@ -166,11 +166,11 @@ class AbstractCentralNode(SKABaseDevice):
             )
             device._version_id = release.version
             device._LastDeviceInfoChanged = ""
-            device.set_change_event("telescopeHealthState", True, False)
-            device.set_change_event("telescopeState", True, False)
+            device.set_change_event("telescopehealthstate", True, False)
+            device.set_change_event("telescopestate", True, False)
             device.set_change_event("LastDeviceInfoChanged", True, False)
-            device.set_change_event("TMOpState", True, False)
-            device.set_change_event("commandInProgress", True, False)
+            device.set_change_event("tmopstate", True, False)
+            device.set_change_event("commandinprogress", True, False)
 
             device.op_state_model.perform_action("component_on")
             device.component_manager.command_executor.add_command_execution(
@@ -191,22 +191,22 @@ class AbstractCentralNode(SKABaseDevice):
     # Attributes methods
     # ------------------
 
-    def read_telescopeHealthState(self):
+    def read_telescopehealthstate(self):
         return self.component_manager.component.telescope_health_state
 
-    def read_telescopeState(self):
+    def read_telescopestate(self):
         return self.component_manager.component.telescope_state
 
-    def read_desiredTelescopeState(self):
+    def read_desiredtelescopestate(self):
         return self.component_manager.component.desired_telescope_state
 
-    def read_commandInProgress(self):
+    def read_commandinprogress(self):
         return self.component_manager.command_executor.command_in_progress
 
-    def read_InternalModel(self):
+    def read_internalmodel(self):
         return self.component_manager.component.to_json()
 
-    def read_TransformedInternalModel(self):
+    def read_transformedinternalmodel(self):
         json_model = json.loads(self.component_manager.component.to_json())
         result = {
             "telescope_state": json_model["telescope_state"],
@@ -219,11 +219,11 @@ class AbstractCentralNode(SKABaseDevice):
             result[dev_name] = dev
         return json.dumps(result)
 
-    def read_LastDeviceInfoChanged(self):
+    def read_lastdeviceinfochanged(self):
         return self._LastDeviceInfoChanged
 
-    def read_CommandExecuted(self):
-        """Return the CommandExecuted attribute."""
+    def read_commandexecuted(self):
+        """Return the commandexecuted attribute."""
         result = []
         i = 0
         for command_executed in reversed(
@@ -241,8 +241,8 @@ class AbstractCentralNode(SKABaseDevice):
             i += 1
         return result
 
-    def read_LastCommandExecuted(self):
-        """Return the LastCommandExecuted attribute as list of string."""
+    def read_lastcommandexecuted(self):
+        """Return the lastcommandexecuted attribute as list of string."""
         for command_executed in reversed(
             self.component_manager.command_executor.command_executed
         ):
@@ -254,16 +254,16 @@ class AbstractCentralNode(SKABaseDevice):
             )
             return single_res
 
-    def read_TMOpState(self):
-        """Return the TMOpState attribute."""
+    def read_tmopstate(self):
+        """Return the tmopstate attribute."""
         return self.component_manager.component.tmc_op_state
 
-    def read_SubarrayDevNames(self):
-        """Return the SubarrayDevNames attribute."""
+    def read_subarraydevnames(self):
+        """Return the subarraydevnames attribute."""
         return self.component_manager.input_parameter.tm_subarray_dev_names
 
-    def write_SubarrayDevNames(self, value):
-        """Set the SubarrayDevNames attribute."""
+    def write_subarraydevnames(self, value):
+        """Set the subarraydevnames attribute."""
         self.component_manager.input_parameter.tm_subarray_dev_names = value
         self.component_manager.update_input_parameter()
 

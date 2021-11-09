@@ -72,7 +72,7 @@ def checked_devices(json_model):
 
 
 def ensure_checked_devices(central_node):
-    json_model = json.loads(central_node.InternalModel)
+    json_model = json.loads(central_node.internalmodel)
     start_time = time.time()
     checked_devs = checked_devices(json_model)
     while checked_devs != len(json_model["devices"]):
@@ -83,9 +83,9 @@ def ensure_checked_devices(central_node):
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
-            logger.debug(central_node.InternalModel)
+            logger.debug(central_node.internalmodel)
             pytest.fail("Timeout occurred while executing the test")
-        json_model = json.loads(central_node.InternalModel)
+        json_model = json.loads(central_node.internalmodel)
 
 
 def assert_event_arrived():

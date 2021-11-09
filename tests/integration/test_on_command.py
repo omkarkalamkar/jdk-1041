@@ -16,19 +16,19 @@ def on_command(tango_context, centralnode_name):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(centralnode_name)
     ensure_checked_devices(central_node)
-    initial_len = len(central_node.CommandExecuted)
+    initial_len = len(central_node.commandexecuted)
     (result, unique_id) = central_node.On()
     logger.info(result)
     logger.info(unique_id)
     assert result[0] == ResultCode.QUEUED
     start_time = time.time()
-    while len(central_node.CommandExecuted) != initial_len + 1:
+    while len(central_node.commandexecuted) != initial_len + 1:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
-    for command in central_node.CommandExecuted:
+    for command in central_node.commandexecuted:
         if command[0] == unique_id[0]:
             assert command[2] == "ResultCode.OK"
 
