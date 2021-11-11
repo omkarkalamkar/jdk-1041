@@ -59,8 +59,6 @@ def release_resources(
         if elapsed_time > 100:
             pytest.fail("Timeout occurred while executing the test")
 
-    # logger.info("command executed: %s", central_node.commandexecuted)
-
     for command in central_node.commandexecuted:
         if command[0] == unique_id[0]:
             logger.info("command result: %s", command)

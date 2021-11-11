@@ -172,9 +172,6 @@ class Component:
             self._devices.append(devInfo)
         else:
             index = self._devices.index(devInfo)
-            # if isinstance(devInfo, SubArrayDeviceInfo):
-            #     if devInfo.healthState != self._devices[index].healthState:
-            #         self._invoke_subarray_health_state_callback(devInfo)
             self._devices[index] = devInfo
 
         self._invoke_device_callback(devInfo)
