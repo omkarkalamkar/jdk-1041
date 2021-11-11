@@ -37,16 +37,16 @@ Clone this repo:
     cd ska-tmc-centralnode
 
 Install dependencies
-```
+::
     apt update
     apt install -y curl git build-essential libboost-python-dev libtango-dev 
     curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
     source $HOME/.poetry/env
 
 Please note that:
-* the `libtango-dev` will install an old version of the TANGO-controls framework (9.2.5);
-* the best way to get the framework is compiling it (instructions can be found [here](https://gitlab.com/tango-controls/cppTango/-/blob/main/INSTALL.md));
-* the above script has been tested with Ubuntu 20.04.
+ * the `libtango-dev` will install an old version of the TANGO-controls framework (9.2.5);
+ * the best way to get the framework is compiling it (instructions can be found [here](https://gitlab.com/tango-controls/cppTango/-/blob/main/INSTALL.md));
+ * the above script has been tested with Ubuntu 20.04.
 
 *During this step, `libtango-dev` instalation can ask for the Tango Server IP:PORT. Just accept the default proposed value.*
 
