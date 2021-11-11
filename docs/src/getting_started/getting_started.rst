@@ -36,24 +36,27 @@ Clone this repo:
     git clone https://gitlab.com/ska-telescope/ska-tmc-centralnode.git
     cd ska-tmc-centralnode
 
+Install dependencies
+```
+    apt update
+    apt install -y curl git build-essential libboost-python-dev libtango-dev 
+    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
+    source $HOME/.poetry/env
 
-Create a virtualenv:
-::
-    virtualenv venv
-    source venv/bin/activate
+Please note that:
+* the `libtango-dev` will install an old version of the TANGO-controls framework (9.2.5);
+* the best way to get the framework is compiling it (instructions can be found [here](https://gitlab.com/tango-controls/cppTango/-/blob/main/INSTALL.md));
+* the above script has been tested with Ubuntu 20.04.
 
-Build a new Docker image for the project:
-::
-    $ make oci-build
-    [...]
-    [+] Building 111.7s (14/14) FINISHED 
-    [...]
-
+*During this step, `libtango-dev` instalation can ask for the Tango Server IP:PORT. Just accept the default proposed value.*
 
 Install python requirements for linting and unit testing:
 ::
-    $ make requirements
-    poetry install
+    $ poetry install
+
+Activate the poetry environment:
+::
+    $ source $(poetry env info --path)/bin/activate
 
 Run python-test:
 ::
@@ -108,6 +111,14 @@ Helm Charts linting:
     $ make helm-lint
     [...]
     10 chart(s) linted, 0 chart(s) failed
+
+
+Build the container image for the project:
+::
+    $ make oci-build
+    [...]
+    [+] Building 111.7s (14/14) FINISHED 
+    [...]
 
 
 Install the umbrella chart:
