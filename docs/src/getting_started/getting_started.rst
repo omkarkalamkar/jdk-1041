@@ -19,7 +19,8 @@ This project is structured to use k8s for development and testing so that the bu
 Install minikube
 ^^^^^^^^^^^^^^^^
 
-You will need to install `minikube` or equivalent k8s installation in order to set up your test environment. You can follow the instruction at [here](https://gitlab.com/ska-telescope/sdi/deploy-minikube/):
+You will need to install `minikube` or equivalent k8s installation in order to set up your test environment. You can follow the instruction `here
+<https://gitlab.com/ska-telescope/sdi/deploy-minikube/>`_.:
 ::
     git clone git@gitlab.com:ska-telescope/sdi/deploy-minikube.git
     cd deploy-minikube
@@ -45,7 +46,8 @@ Install dependencies
 
 Please note that:
  * the `libtango-dev` will install an old version of the TANGO-controls framework (9.2.5);
- * the best way to get the framework is compiling it (instructions can be found [here](https://gitlab.com/tango-controls/cppTango/-/blob/main/INSTALL.md));
+ * the best way to get the framework is compiling it (instructions can be found `here
+<https://gitlab.com/tango-controls/cppTango/-/blob/main/INSTALL.md>`_;
  * the above script has been tested with Ubuntu 20.04.
 
 *During this step, `libtango-dev` instalation can ask for the Tango Server IP:PORT. Just accept the default proposed value.*
