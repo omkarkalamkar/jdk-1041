@@ -92,7 +92,8 @@ class MonitoringLoop:
                 self._component_manager.update_device_info(newDevInfo)
             except Exception as e:
                 self._logger.error(
-                    "Device not working %s: %s", devInfo.dev_name, e
+                    "Device %s not working. Check internalModel attribute.",
+                    devInfo.dev_name,
                 )
                 self._component_manager.device_failed(devInfo, e)
 
@@ -122,8 +123,8 @@ class MonitoringLoop:
         return newDevInfo
 
     def get_assignedResources_attributes(self, proxy):
-        try:
-            return proxy.attribute_query("assignedResources")
-        except Exception as ex:
-            self._logger.debug(str(ex))
-            return None
+        attr_list = proxy.attribute_list_query()
+        for attr in attr_list:
+            if attr.name == "assignedResources":
+                return attr
+        return None
