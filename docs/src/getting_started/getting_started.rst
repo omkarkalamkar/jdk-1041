@@ -58,6 +58,15 @@ Activate the poetry environment:
 ::
     $ source $(poetry env info --path)/bin/activate
 
+Alternate way to install and activate poetry
+::
+
+Follow the steps till installation of dependencies. then, 
+
+    $ virtualenv cn_venv
+    $ source cn_venv/bin/activate
+    $ make requirements
+
 Run python-test:
 ::
     $ make python-test
