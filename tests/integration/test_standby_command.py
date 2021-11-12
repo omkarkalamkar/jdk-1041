@@ -46,7 +46,7 @@ def standby_command(tango_context, central_node_name):
     # dish_master = dev_factory.get_device("mid_d0001/elt/master")
 
     start_time = time.time()
-    while central_node.telescopestate != DevState.STANDBY:
+    while central_node.telescopeState != DevState.STANDBY:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
