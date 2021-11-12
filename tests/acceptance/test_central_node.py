@@ -31,7 +31,7 @@ def central_node(central_node_name):
 
 @when("I get the attribute InternalModel of the CentralNode device")
 def internal_model(central_node):
-    pytest.internal_model = central_node.internalmodel
+    pytest.internal_model = central_node.internalModel
 
 
 @when(parsers.parse("I call the command <command_name>"))
@@ -90,7 +90,7 @@ def check_command(central_node, seconds):
     start_time = time.time()
     executed = False
     while not executed:
-        for command in central_node.commandexecuted:
+        for command in central_node.commandExecuted:
             if command[0] == unique_id:
                 logger.info("command result: %s", command)
                 assert command[2] == str(ResultCode.OK) or command[2] == str(
