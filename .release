@@ -1,16 +1,16 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.3.3"
+version="0.3.4"
 version_info=version.split(".")
-description="""Central Node Mid"""
+description="""Central Node"""
 author="Team NCRA"
 author_email="telmgt-internal@googlegroups.com"
 license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.3.3
-tag=0.3.3
-tag_description= Fix implementation on CentralNode to fetch eb/sb ids from input json string.
-release_notes=This release contains:<br/><ul><li>  Fix implementation on CentralNode to fetch eb/sb ids from input json string.</li></ul><br/>
+release=0.3.4
+tag=0.3.4
+tag_description= Update CentralNode TANGO attribute names as per cs guidelines.
+release_notes=This release contains:<br/><ul><li>  Update CentralNode TANGO attribute names as per cs guidelines.</li></ul><br/>

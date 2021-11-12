@@ -233,7 +233,6 @@ class Component:
         :param value: the new telescope health state
         :type value: HealthState
         """
-        # if isinstance(value, HealthState):
         if self._telescope_health_state != value:
             self._telescope_health_state = value
             self._invoke_telescope_health_state_callback()
