@@ -45,9 +45,6 @@ def test_attributes(central_node_device):
     assert central_node_device.telescopeState == DevState.UNKNOWN
     central_node_device.controlMode = ControlMode.REMOTE
     assert central_node_device.controlMode == ControlMode.REMOTE
-    assert central_node_device.subarray1HealthState == HealthState.UNKNOWN
-    assert central_node_device.subarray2HealthState == HealthState.UNKNOWN
-    assert central_node_device.subarray3HealthState == HealthState.UNKNOWN
     assert central_node_device.desiredTelescopeState == DevState.ON
     assert central_node_device.commandInProgress == "None"
     assert central_node_device.mccsMasterLeafNodeName == ""
@@ -60,19 +57,19 @@ def test_attributes(central_node_device):
     central_node_device.mccsMasterNodeName = "mccs"
     assert central_node_device.mccsMasterNodeName == "mccs"
 
-    assert central_node_device.TMOpState == DevState.UNKNOWN
-    assert len(central_node_device.CommandExecuted) == 1  # init
-    assert "Init" in central_node_device.LastCommandExecuted  # init
-    assert "OK" in central_node_device.LastCommandExecuted  # init
-    assert len(central_node_device.SubarrayDevNames) == 0
-    central_node_device.SubarrayDevNames = ["subarray1"]
-    assert len(central_node_device.SubarrayDevNames) == 1
-    json_model = json.loads(central_node_device.InternalModel)
+    assert central_node_device.tmOpstate == DevState.UNKNOWN
+    assert len(central_node_device.commandExecuted) == 1  # init
+    assert "Init" in central_node_device.lastCommandExecuted  # init
+    assert "OK" in central_node_device.lastCommandExecuted  # init
+    assert len(central_node_device.subarrayDevNames) == 0
+    central_node_device.subarrayDevNames = ["subarray1"]
+    assert len(central_node_device.subarrayDevNames) == 1
+    json_model = json.loads(central_node_device.internalModel)
     assert "telescope_state" in json_model
     assert "tmc_op_state" in json_model
     assert "telescope_health_state" in json_model
     assert "devices" in json_model
-    json_model = json.loads(central_node_device.TransformedInternalModel)
+    json_model = json.loads(central_node_device.transformedInternalModel)
     assert "telescope_state" in json_model
     assert "tmc_op_state" in json_model
     assert "telescope_health_state" in json_model
