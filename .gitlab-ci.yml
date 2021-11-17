@@ -55,6 +55,7 @@ python-test:
   retry: 2
 
 k8s-test:
+  retry: 2
   variables:
     TELESCOPE: SKA-mid
   environment:
@@ -73,6 +74,7 @@ k8s-test:
       fi
 
 low-k8s-test:
+  retry: 2
   extends: k8s-test
   variables:
     TELESCOPE: SKA-low
