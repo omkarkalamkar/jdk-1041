@@ -148,7 +148,7 @@ def test_run_commands_mid(central_node_name, command_name):
 )
 @scenario(
     "../features/centralnode.feature",
-    "Check internal model according to the TANGO ecosystem deployed",
+    "Monitor Telescope Components",
 )
 def test_internal_model_low(central_node_name):
     pass
@@ -168,6 +168,6 @@ def test_internal_model_low(central_node_name):
         ("ska_low/tm_central/central_node", "TelescopeStandby"),
     ],
 )
-@scenario("../features/centralnode.feature", "Run Commands")
+@scenario("../features/centralnode.feature", "Ability to run commands on central node")
 def test_run_commands_low(central_node_name, command_name):
     pass
