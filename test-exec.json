@@ -4,7 +4,7 @@
     ],
     "name": "Central Node Ececution Results",
     "chart_info": "charts/ska-tmc-centralnode/Chart.yaml",
-    "test_report": "build/report.json",
+    "test_report": "build/reports/report.json",
     "project_id": "XTP",
     "test_environments": [
         "STFC-CI"
