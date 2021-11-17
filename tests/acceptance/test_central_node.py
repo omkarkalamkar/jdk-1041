@@ -168,6 +168,9 @@ def test_internal_model_low(central_node_name):
         ("ska_low/tm_central/central_node", "TelescopeStandby"),
     ],
 )
-@scenario("../features/centralnode.feature", "Ability to run commands on central node")
+@scenario(
+    "../features/centralnode.feature",
+    "Ability to run commands on central node",
+)
 def test_run_commands_low(central_node_name, command_name):
     pass
