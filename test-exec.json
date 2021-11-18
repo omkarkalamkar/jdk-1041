@@ -13,9 +13,6 @@
         "STFC-CI"
     ],
     "description": "Test execution results as generated from https://gitlab.com/ska-telescope/ska-tmc-centralnode\n",
-    "versions": [
-        ""
-    ],
     "environmental_variables": [
         "CI_JOB_URL",
         "CI_COMMIT_TITLE",
