@@ -8,7 +8,7 @@ started with usage and development of the CentralNode.
 Background
 ----------
 Detailed information on how the SKA Software development
-community works is available at the `SKA software developer portal`_.
+community works is available at the `SKA software developer portal <https://developer.skao.int/en/latest/>`_.
 There you will find guidelines, policies, standards and a range of other
 documentation.
 
@@ -19,7 +19,7 @@ This project is structured to use k8s for development and testing so that the bu
 Install minikube
 ^^^^^^^^^^^^^^^^
 
-You will need to install `minikube` or equivalent k8s installation in order to set up your test environment. You can follow the instruction at [here](https://gitlab.com/ska-telescope/sdi/deploy-minikube/):
+You will need to install `minikube` or equivalent k8s installation in order to set up your test environment. You can follow the instruction `here <https://gitlab.com/ska-telescope/sdi/deploy-minikube/>`_:
 ::
     git clone git@gitlab.com:ska-telescope/sdi/deploy-minikube.git
     cd deploy-minikube
@@ -36,24 +36,36 @@ Clone this repo:
     git clone https://gitlab.com/ska-telescope/ska-tmc-centralnode.git
     cd ska-tmc-centralnode
 
-
-Create a virtualenv:
+Install dependencies
 ::
-    virtualenv venv
-    source venv/bin/activate
+    apt update
+    apt install -y curl git build-essential libboost-python-dev libtango-dev 
+    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 -
+    source $HOME/.poetry/env
 
-Build a new Docker image for the project:
-::
-    $ make oci-build
-    [...]
-    [+] Building 111.7s (14/14) FINISHED 
-    [...]
+Please note that:
+ * the `libtango-dev` will install an old version of the TANGO-controls framework (9.2.5);
+ * the best way to get the framework is compiling it (instructions can be found `here <https://gitlab.com/tango-controls/cppTango/-/blob/main/INSTALL.md>`_);
+ * the above script has been tested with Ubuntu 20.04.
 
+*During this step, `libtango-dev` instalation can ask for the Tango Server IP:PORT. Just accept the default proposed value.*
 
 Install python requirements for linting and unit testing:
 ::
+    $ poetry install
+
+Activate the poetry environment:
+::
+    $ source $(poetry env info --path)/bin/activate
+
+Alternate way to install and activate poetry
+::
+
+Follow the steps till installation of dependencies. then, 
+
+    $ virtualenv cn_venv
+    $ source cn_venv/bin/activate
     $ make requirements
-    poetry install
 
 Run python-test:
 ::
@@ -110,6 +122,14 @@ Helm Charts linting:
     10 chart(s) linted, 0 chart(s) failed
 
 
+Build the container image for the project:
+::
+    $ make oci-build
+    [...]
+    [+] Building 111.7s (14/14) FINISHED 
+    [...]
+
+
 Install the umbrella chart:
 ::
     $ make k8s-install-chart
@@ -127,7 +147,7 @@ Test the deployment with (the result of the tests are stored into the folder ``c
     k8s-test: start test runner: test-runner-test -n ska-tmc-centralnode
     k8s-test: sending test folder: tar -cz src/ tests/
     ( cd /home/ubuntu/ska-tmc-centralnode; tar -cz src/ tests/ \
-    | kubectl run test-runner-test -n ska-tmc-centralnode --restart=Never --pod-running-timeout=360s  --image-pull-policy=IfNotPresent --image=artefact.skao.int/ska-tmc-centralnode:0.3.3-dirty --env=INGRESS_HOST=  -iq -- /bin/bash -o pipefail -c " mkfifo results-pipe && tar zx --warning=all && cd tests && ( if [[ -f requirements.txt ]]; then echo 'k8s-test: installing requirements.txt'; pip install -qUr requirements.txt; fi ) && export PYTHONPATH=:/app/src:/app/ska_tmc_centralnode/ && mkdir -p build && ( cd .. && PYTHONPATH=.:./src TANGO_HOST=tango-databaseds:10000  pytest -m 'SKA_mid and (post_deployment or acceptance)'  --true-context tests ./tests | tee pytest.stdout;  ); echo \$? > build/status; pip list > build/pip_list.txt; echo \"k8s_test_command: test command exit is: \$(cat build/status)\"; tar zcf ../results-pipe build;" 2>&1 \
+    | kubectl run test-runner-test -n ska-tmc-centralnode --restart=Never --pod-running-timeout=360s  --image-pull-policy=IfNotPresent --image=artefact.skao.int/ska-tmc-centralnode:0.3.4-dirty --env=INGRESS_HOST=  -iq -- /bin/bash -o pipefail -c " mkfifo results-pipe && tar zx --warning=all && cd tests && ( if [[ -f requirements.txt ]]; then echo 'k8s-test: installing requirements.txt'; pip install -qUr requirements.txt; fi ) && export PYTHONPATH=:/app/src:/app/ska_tmc_centralnode/ && mkdir -p build && ( cd .. && PYTHONPATH=.:./src TANGO_HOST=tango-databaseds:10000  pytest -m 'SKA_mid and (post_deployment or acceptance)'  --true-context tests ./tests | tee pytest.stdout;  ); echo \$? > build/status; pip list > build/pip_list.txt; echo \"k8s_test_command: test command exit is: \$(cat build/status)\"; tar zcf ../results-pipe build;" 2>&1 \
     | grep -vE "^(1\||-+ live log)" --line-buffered &); \
     sleep 1; \
     echo "k8s-test: waiting for test runner to boot up: test-runner-test -n ska-tmc-centralnode"; \

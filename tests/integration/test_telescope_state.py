@@ -36,17 +36,17 @@ def telescope_state(tango_context, central_node_name):
     )
 
     ensure_checked_devices(central_node)
-    initial_len = len(central_node.CommandExecuted)
+    initial_len = len(central_node.commandExecuted)
     (result, unique_id) = central_node.On()
     assert result[0] == ResultCode.QUEUED
     start_time = time.time()
-    while len(central_node.CommandExecuted) != initial_len + 1:
+    while len(central_node.commandExecuted) != initial_len + 1:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
-    for command in central_node.CommandExecuted:
+    for command in central_node.commandExecuted:
         if command[0] == unique_id[0]:
             assert command[2] == "ResultCode.OK"
 

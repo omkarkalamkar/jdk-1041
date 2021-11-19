@@ -23,7 +23,7 @@ def internal_model_events(tango_context, centralnode_name):
     central_node = dev_factory.get_device(centralnode_name)
 
     event_id = central_node.subscribe_event(
-        "LastDeviceInfoChanged",
+        "lastDeviceInfoChanged",
         tango.EventType.CHANGE_EVENT,
         event_callback,
         stateless=True,

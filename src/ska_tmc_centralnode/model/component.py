@@ -65,7 +65,6 @@ class Component:
         self._update_telescope_state_callback = None
         self._update_telescope_health_state_callback = None
         self._update_tmc_op_state_callback = None
-        self._update_subarray_health_state_callback = None
         self.lock = threading.Lock()
         self._desired_telescope_state = DevState.ON
 
@@ -75,7 +74,6 @@ class Component:
         _update_telescope_state_callback=None,
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
-        _update_subarray_health_state_callback=None,
         _update_imaging_callback=None,
     ):
         self._update_device_callback = _update_device_callback
@@ -86,9 +84,6 @@ class Component:
             _update_telescope_health_state_callback
         )
         self._update_tmc_op_state_callback = _update_tmc_op_state_callback
-        self._update_subarray_health_state_callback = (
-            _update_subarray_health_state_callback
-        )
         self._update_imaging_callback = _update_imaging_callback
 
     def _invoke_device_callback(self, devInfo):
@@ -108,10 +103,6 @@ class Component:
     def _invoke_tmc_op_state_callback(self):
         if self._update_tmc_op_state_callback is not None:
             self._update_tmc_op_state_callback(self.tmc_op_state)
-
-    def _invoke_subarray_health_state_callback(self, devInfo):
-        if self._update_subarray_health_state_callback is not None:
-            self._update_subarray_health_state_callback(devInfo)
 
     def _invoke_imaging_callback(self):
         if self._update_imaging_callback is not None:
@@ -181,9 +172,6 @@ class Component:
             self._devices.append(devInfo)
         else:
             index = self._devices.index(devInfo)
-            if isinstance(devInfo, SubArrayDeviceInfo):
-                if devInfo.healthState != self._devices[index].healthState:
-                    self._invoke_subarray_health_state_callback(devInfo)
             self._devices[index] = devInfo
 
         self._invoke_device_callback(devInfo)
@@ -245,7 +233,6 @@ class Component:
         :param value: the new telescope health state
         :type value: HealthState
         """
-        # if isinstance(value, HealthState):
         if self._telescope_health_state != value:
             self._telescope_health_state = value
             self._invoke_telescope_health_state_callback()

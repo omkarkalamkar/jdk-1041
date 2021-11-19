@@ -86,16 +86,16 @@ class CentralNodeLow(AbstractCentralNode):
     # ------------------
 
     def read_mccsMasterLeafNodeName(self):
-        """Return the mccsMasterLeafNodeName attribute."""
+        """Return the mccsmasterleafnodename attribute."""
         return self.component_manager.input_parameter.mccs_master_leaf_node
 
     def write_mccsMasterLeafNodeName(self, value):
-        """Set the mccsMasterLeafNodeName attribute."""
+        """Set the mccsmasterleafnodename attribute."""
         self.component_manager.input_parameter.mccs_master_leaf_node = value
         self.component_manager.update_input_parameter()
 
     def read_mccsSubarrayLeafNodeName(self):
-        """Return the MccsSubarrayLeafNodeName attribute."""
+        """Return the mccsSubarrayLeafNodeName attribute."""
         return self.component_manager.input_parameter.mccs_subarray_leaf_node
 
     def write_mccsSubarrayLeafNodeName(self, value):
@@ -156,7 +156,6 @@ class CentralNodeLow(AbstractCentralNode):
             _update_telescope_state_callback=self.update_telescope_state_callback,
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
-            _update_subarray_health_state_callback=self.update_subarray_health_state_callback,
             _update_imaging_callback=None,
             _update_command_in_progress_callback=self.update_command_in_progress_callback,
             max_workers=self.MaxWorkerMonitoringLoop,

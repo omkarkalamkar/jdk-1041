@@ -25,18 +25,18 @@ def assign_resouces(tango_context, central_node_name, assign_input_str):
     central_node = dev_factory.get_device(central_node_name)
 
     ensure_checked_devices(central_node)
-    initial_len = len(central_node.CommandExecuted)
+    initial_len = len(central_node.commandExecuted)
     (result, unique_id) = central_node.On()
     (result, unique_id) = central_node.AssignResources(assign_input_str)
     assert result[0] == ResultCode.QUEUED
     start_time = time.time()
-    while len(central_node.CommandExecuted) != initial_len + 2:
+    while len(central_node.commandExecuted) != initial_len + 2:
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
-    for command in central_node.CommandExecuted:
+    for command in central_node.commandExecuted:
         if command[0] == unique_id[0]:
             logger.info("command result: %s", command)
             assert command[2] == "ResultCode.OK"
@@ -69,12 +69,12 @@ def assign_resouces(tango_context, central_node_name, assign_input_str):
         return len_subarray_beam_ids + len_station_ids + len_channel_blocks
 
     if "ska_mid" in central_node_name:
-        device = get_subarray_device(json.loads(central_node.InternalModel))
+        device = get_subarray_device(json.loads(central_node.internalModel))
         start_time = time.time()
         while len(device["resources"]) == 0:
             time.sleep(SLEEP_TIME)
             device = get_subarray_device(
-                json.loads(central_node.InternalModel)
+                json.loads(central_node.internalModel)
             )
             elapsed_time = time.time() - start_time
             if elapsed_time > TIMEOUT:
@@ -84,13 +84,13 @@ def assign_resouces(tango_context, central_node_name, assign_input_str):
 
     if "ska_low" in central_node_name:
         resources_len = get_mccs_device_resources(
-            json.loads(central_node.InternalModel)
+            json.loads(central_node.internalModel)
         )
         start_time = time.time()
         while resources_len == 0:
             time.sleep(SLEEP_TIME)
             resources_len = get_mccs_device_resources(
-                json.loads(central_node.InternalModel)
+                json.loads(central_node.internalModel)
             )
             elapsed_time = time.time() - start_time
             if elapsed_time > TIMEOUT:

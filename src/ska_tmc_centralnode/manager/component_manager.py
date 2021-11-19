@@ -59,7 +59,6 @@ class CNComponentManager(BaseComponentManager):
         _update_telescope_state_callback=None,
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
-        _update_subarray_health_state_callback=None,
         _update_imaging_callback=None,
         _update_command_in_progress_callback=None,
         _monitoring_loop=True,
@@ -107,7 +106,6 @@ class CNComponentManager(BaseComponentManager):
             _update_telescope_state_callback,
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
-            _update_subarray_health_state_callback,
             _update_imaging_callback,
         )
 
