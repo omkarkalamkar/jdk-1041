@@ -1,0 +1,21 @@
+{
+    "test_plans": [
+        "XTP-3616"
+    ],
+    "name": "Central Node Ececution Results",
+    "chart_info": "charts/ska-tmc-centralnode/Chart.yaml",
+    "test_report": "build/reports/report.json",
+    "project_id": "XTP",
+    "test_environments": [
+        "STFC-CI"
+    ],
+    "labels": [
+        "STFC-CI"
+    ],
+    "description": "Test execution results as generated from https://gitlab.com/ska-telescope/ska-tmc-centralnode\n",
+    "environmental_variables": [
+        "CI_JOB_URL",
+        "CI_COMMIT_TITLE",
+        "CI_JOB_STARTED_AT"
+    ]
+}

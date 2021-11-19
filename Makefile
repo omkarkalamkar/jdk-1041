@@ -87,6 +87,11 @@ endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
 
+K8S_TEST_TEST_COMMAND = cd .. && $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
+						pytest \
+						$(PYTHON_VARS_AFTER_PYTEST) ./tests \
+						 | tee pytest.stdout && mv build tests/
+
 -include .make/k8s.mk
 -include .make/python.mk
 -include .make/helm.mk
