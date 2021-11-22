@@ -26,14 +26,10 @@ def device_list():
 )
 def central_node():
     database = Database()
-    instance_list = database.get_device_exported_for_class(
-        "CentralNodeLow"
-    )
+    instance_list = database.get_device_exported_for_class("CentralNodeLow")
     for instance in instance_list.value_string:
         return DeviceProxy(instance)
-    instance_list = database.get_device_exported_for_class(
-        "CentralNodeMid"
-    )
+    instance_list = database.get_device_exported_for_class("CentralNodeMid")
     for instance in instance_list.value_string:
         return DeviceProxy(instance)
 
@@ -112,5 +108,6 @@ def check_command(central_node, seconds):
         elapsed_time = time.time() - start_time
         if elapsed_time > float(seconds):
             pytest.fail("Timeout occurred while executing the test")
+
 
 scenarios("../features/centralnode.feature")
