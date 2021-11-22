@@ -85,3 +85,35 @@ low-k8s-test:
       namespace: ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-low
   after_script:
     - *after_script
+
+install_demo_chart:
+  variables:
+    KUBE_NAMESPACE: "demo"
+    RELEASE_NAME: "demo0"
+    WEBJIVE: true
+  tags:
+    - k8srunner
+  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
+  when: manual
+  script:
+    - make k8s-install-chart
+  environment:
+    name: "demo"
+    kubernetes:
+      namespace: $KUBE_NAMESPACE
+
+uninstall_demo_chart:
+  variables:
+    KUBE_NAMESPACE: "demo"
+    RELEASE_NAME: "demo0"
+    WEBJIVE: true
+  tags:
+    - k8srunner
+  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
+  when: manual
+  script:
+    - make k8s-uninstall-chart
+  environment:
+    name: "demo"
+    kubernetes:
+      namespace: $KUBE_NAMESPACE

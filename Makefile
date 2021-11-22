@@ -39,6 +39,7 @@ XAUTHORITY ?= $(HOME)/.Xauthority
 THIS_HOST := $(shell ip a 2> /dev/null | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p' | head -n1)
 DISPLAY ?= $(THIS_HOST):0
 JIVE ?= false# Enable jive
+WEVJIVE ?= false
 MINIKUBE ?= true ## Minikube or not
 TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
 
@@ -122,6 +123,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
 	--set central_node.telescope=$(TELESCOPE) \
+	--set ska-webjive.enabled=$(WEVJIVE) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 
