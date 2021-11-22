@@ -5,6 +5,7 @@ variables:
   SKALLOP_VERSION: "2.7.4"
 
 stages:
+  - lifecycle
   - lint
   - join-reports
   - build
@@ -87,10 +88,11 @@ low-k8s-test:
     - *after_script
 
 install_demo_chart:
+  stage: lifecycle
   variables:
     KUBE_NAMESPACE: "demo"
     RELEASE_NAME: "demo0"
-    WEBJIVE: true
+    WEBJIVE: "true"
   tags:
     - k8srunner
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
@@ -103,10 +105,11 @@ install_demo_chart:
       namespace: $KUBE_NAMESPACE
 
 uninstall_demo_chart:
+  stage: lifecycle
   variables:
     KUBE_NAMESPACE: "demo"
     RELEASE_NAME: "demo0"
-    WEBJIVE: true
+    WEBJIVE: "true"
   tags:
     - k8srunner
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
