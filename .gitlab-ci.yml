@@ -98,7 +98,7 @@ install_demo_chart:
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
   when: manual
   script:
-    - make k8s-install-chart
+    - helm upgrade --install $(RELEASE_NAME) --set global.minikube=false --set ska-webjive.enabled=$(WEBJIVE) charts/test-parent --namespace $(KUBE_NAMESPACE) 
   environment:
     name: "demo"
     kubernetes:
