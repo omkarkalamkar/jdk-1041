@@ -4,7 +4,7 @@
   "version": "1.1.5",
   "user": "user1",
   "insertTime": "2021-11-22T10:06:00.761Z",
-  "updateTime": "2021-11-22T10:06:31.352Z",
+  "updateTime": "2021-11-22T15:22:40.154Z",
   "group": null,
   "groupWriteAccess": false,
   "lastUpdatedBy": "user1",
@@ -689,7 +689,7 @@
       "height": 2,
       "type": "LABEL",
       "inputs": {
-        "text": "CSP Leaf Master Node",
+        "text": "TM CSP Leaf Master Node",
         "textColor": "#000000",
         "backgroundColor": "#ffffff",
         "size": 1,
@@ -710,7 +710,7 @@
       "height": 2,
       "type": "LABEL",
       "inputs": {
-        "text": "SDP Leaf Master Node",
+        "text": "TM SDP Leaf Master Node",
         "textColor": "#000000",
         "backgroundColor": "#ffffff",
         "size": 1,
@@ -1867,7 +1867,7 @@
       "height": 2,
       "type": "LABEL",
       "inputs": {
-        "text": "CSP Subarray Leaf Node",
+        "text": "TM CSP Subarray Leaf Node",
         "textColor": "#000000",
         "backgroundColor": "#ffffff",
         "size": 1,
@@ -2046,7 +2046,7 @@
       "height": 2,
       "type": "LABEL",
       "inputs": {
-        "text": "SDP Subarray Leaf Node",
+        "text": "TSDP Subarray Leaf Node",
         "textColor": "#000000",
         "backgroundColor": "#ffffff",
         "size": 1,
@@ -2303,7 +2303,7 @@
       "height": 2,
       "type": "LABEL",
       "inputs": {
-        "text": "Leaf Master Node",
+        "text": "TM Leaf Master Node",
         "textColor": "#000000",
         "backgroundColor": "#ffffff",
         "size": 1,
