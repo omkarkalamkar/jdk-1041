@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 import pytest
-from pytest_bdd import given, parsers, scenario, then, when
+from pytest_bdd import given, parsers, scenarios, then, when
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
 from tango import Database, DeviceProxy
@@ -21,12 +21,17 @@ def device_list():
 
 
 @given(
-    parsers.parse("a CentralNode device called <central_node_name>"),
+    parsers.parse("a CentralNode device"),
     target_fixture="central_node",
 )
-def central_node(central_node_name):
-    """a device called sys/tg_test/1."""
-    return DeviceProxy(central_node_name)
+def central_node():
+    database = Database()
+    instance_list = database.get_device_exported_for_class("CentralNodeLow")
+    for instance in instance_list.value_string:
+        return DeviceProxy(instance)
+    instance_list = database.get_device_exported_for_class("CentralNodeMid")
+    for instance in instance_list.value_string:
+        return DeviceProxy(instance)
 
 
 @when("I get the attribute InternalModel of the CentralNode device")
@@ -34,7 +39,7 @@ def internal_model(central_node):
     pytest.internal_model = central_node.internalModel
 
 
-@when(parsers.parse("I call the command <command_name>"))
+@when(parsers.parse("I call the command {command_name}"))
 def call_command(central_node, command_name):
     try:
         pytest.command_result = central_node.command_inout(command_name)
@@ -105,75 +110,4 @@ def check_command(central_node, seconds):
             pytest.fail("Timeout occurred while executing the test")
 
 
-@pytest.mark.post_deployment
-@pytest.mark.acceptance
-@pytest.mark.SKA_mid
-@pytest.mark.parametrize(
-    "central_node_name",
-    [("ska_mid/tm_central/central_node")],
-)
-@scenario(
-    "../features/centralnode.feature",
-    "Monitor Telescope Components",
-)
-def test_internal_model_mid(central_node_name):
-    pass
-
-
-@pytest.mark.post_deployment
-@pytest.mark.acceptance
-@pytest.mark.SKA_mid
-@pytest.mark.parametrize(
-    ["central_node_name", "command_name"],
-    [
-        ("ska_mid/tm_central/central_node", "On"),
-        ("ska_mid/tm_central/central_node", "Off"),
-        ("ska_mid/tm_central/central_node", "Standby"),
-        ("ska_mid/tm_central/central_node", "StartUpTelescope"),
-        ("ska_mid/tm_central/central_node", "StandByTelescope"),
-        ("ska_mid/tm_central/central_node", "TelescopeStandby"),
-    ],
-)
-@scenario(
-    "../features/centralnode.feature",
-    "Ability to run commands on central node",
-)
-def test_run_commands_mid(central_node_name, command_name):
-    pass
-
-
-@pytest.mark.post_deployment
-@pytest.mark.acceptance
-@pytest.mark.SKA_low
-@pytest.mark.parametrize(
-    "central_node_name",
-    [("ska_low/tm_central/central_node")],
-)
-@scenario(
-    "../features/centralnode.feature",
-    "Monitor Telescope Components",
-)
-def test_internal_model_low(central_node_name):
-    pass
-
-
-@pytest.mark.post_deployment
-@pytest.mark.acceptance
-@pytest.mark.SKA_low
-@pytest.mark.parametrize(
-    ["central_node_name", "command_name"],
-    [
-        ("ska_low/tm_central/central_node", "On"),
-        ("ska_low/tm_central/central_node", "Off"),
-        ("ska_low/tm_central/central_node", "Standby"),
-        ("ska_low/tm_central/central_node", "StartUpTelescope"),
-        ("ska_low/tm_central/central_node", "StandByTelescope"),
-        ("ska_low/tm_central/central_node", "TelescopeStandby"),
-    ],
-)
-@scenario(
-    "../features/centralnode.feature",
-    "Ability to run commands on central node",
-)
-def test_run_commands_low(central_node_name, command_name):
-    pass
+scenarios("../features/centralnode.feature")

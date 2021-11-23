@@ -40,3 +40,6 @@ central_node:
 
     centralnode:
       enabled: true
+
+ska-webjive:
+  enabled: false

@@ -5,6 +5,7 @@ variables:
   SKALLOP_VERSION: "2.7.4"
 
 stages:
+  - lifecycle
   - lint
   - join-reports
   - build
@@ -85,3 +86,39 @@ low-k8s-test:
       namespace: ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-low
   after_script:
     - *after_script
+
+install_demo_chart:
+  stage: lifecycle
+  variables:
+    KUBE_NAMESPACE: "demo"
+    RELEASE_NAME: "demo0"
+    WEBJIVE: "true"
+  tags:
+    - k8srunner
+  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
+  when: manual
+  script:
+    - make k8s-dep-update
+    - make k8s-namespace
+    - helm upgrade --install $RELEASE_NAME --set global.minikube=false --set ska-webjive.enabled=$WEBJIVE charts/test-parent --namespace $KUBE_NAMESPACE
+  environment:
+    name: "demo"
+    kubernetes:
+      namespace: $KUBE_NAMESPACE
+
+uninstall_demo_chart:
+  stage: lifecycle
+  variables:
+    KUBE_NAMESPACE: "demo"
+    RELEASE_NAME: "demo0"
+    WEBJIVE: "true"
+  tags:
+    - k8srunner
+  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
+  when: manual
+  script:
+    - make k8s-uninstall-chart
+  environment:
+    name: "demo"
+    kubernetes:
+      namespace: $KUBE_NAMESPACE

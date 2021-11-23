@@ -1,0 +1,161 @@
+{
+  "id": "616e62c80c0dd60017aa849e",
+  "name": "CN Command Execution History",
+  "version": "1.1.5",
+  "user": "CREAM",
+  "insertTime": "2021-10-19T06:16:40.191Z",
+  "updateTime": "2021-10-20T10:57:19.151Z",
+  "group": null,
+  "groupWriteAccess": false,
+  "lastUpdatedBy": "CREAM",
+  "widget": [
+    {
+      "id": "1",
+      "x": 10,
+      "y": 17,
+      "canvas": "0",
+      "width": 80,
+      "height": 40,
+      "type": "ATTRIBUTE_LOGGER",
+      "inputs": {
+        "attribute": {
+          "device": "ska_mid/tm_central/central_node",
+          "attribute": "commandinprogress",
+          "label": "commandInProgress"
+        },
+        "linesDisplayed": 50,
+        "showDevice": false,
+        "showAttribute": "Label",
+        "logIfChanged": true
+      },
+      "order": 1
+    },
+    {
+      "id": "2",
+      "x": 9,
+      "y": 3,
+      "canvas": "0",
+      "width": 174,
+      "height": 4,
+      "type": "LABEL",
+      "inputs": {
+        "text": "CN Command Execution History ",
+        "textColor": "#ffffff",
+        "backgroundColor": "#070068",
+        "size": 1.4,
+        "borderWidth": 0,
+        "borderColor": "#070068",
+        "font": "Helvetica",
+        "linkTo": "",
+        "customCss": "padding-left:140px;\npadding-top: 2px;"
+      },
+      "order": 2
+    },
+    {
+      "id": "3",
+      "x": 10,
+      "y": 1,
+      "canvas": "0",
+      "width": 11,
+      "height": 4,
+      "type": "LABEL",
+      "inputs": {
+        "text": " ",
+        "textColor": "#000000",
+        "backgroundColor": "#ffffff",
+        "size": 1,
+        "borderWidth": 0,
+        "borderColor": "#000000",
+        "font": "Helvetica",
+        "linkTo": "",
+        "customCss": "\nbackground-image: url(\"https://www.skatelescope.org/wp-content/uploads/2021/04/skao_logo_2021_colour_rgb_2500x1058px-1-107x45.jpg\");\nbackground-repeat: no-repeat;"
+      },
+      "order": 3
+    },
+    {
+      "id": "4",
+      "x": 98,
+      "y": 17,
+      "canvas": "0",
+      "width": 83,
+      "height": 40,
+      "type": "ATTRIBUTE_LOGGER",
+      "inputs": {
+        "attribute": {
+          "device": "ska_mid/tm_central/central_node",
+          "attribute": "lastcommandexecuted",
+          "label": "LastCommandExecuted"
+        },
+        "linesDisplayed": 50,
+        "showDevice": false,
+        "showAttribute": "Label",
+        "logIfChanged": true
+      },
+      "order": 5
+    },
+    {
+      "id": "5",
+      "x": 9,
+      "y": 9,
+      "canvas": "0",
+      "width": 27,
+      "height": 4,
+      "type": "LABEL",
+      "inputs": {
+        "text": "Mid Telescope Overview Panel",
+        "textColor": "#000000",
+        "backgroundColor": "#ffffff",
+        "size": 1,
+        "borderWidth": 0,
+        "borderColor": "#000000",
+        "font": "Helvetica",
+        "linkTo": "https://k8s.stfc.skao.int/demo/taranta/dashboard?id=616d74420c0dd60017aa7730&mode=run",
+        "customCss": ""
+      },
+      "order": 6
+    },
+    {
+      "id": "6",
+      "x": 8,
+      "y": 15,
+      "canvas": "0",
+      "width": 84,
+      "height": 44,
+      "type": "LABEL",
+      "inputs": {
+        "text": " ",
+        "textColor": "#000000",
+        "backgroundColor": "#ffffff",
+        "size": 1,
+        "borderWidth": 0.1,
+        "borderColor": "#a3a3a3",
+        "font": "Helvetica",
+        "linkTo": "",
+        "customCss": ""
+      },
+      "order": 0
+    },
+    {
+      "id": "7",
+      "x": 96,
+      "y": 15,
+      "canvas": "0",
+      "width": 87,
+      "height": 44,
+      "type": "LABEL",
+      "inputs": {
+        "text": " ",
+        "textColor": "#000000",
+        "backgroundColor": "#ffffff",
+        "size": 1,
+        "borderWidth": 0.1,
+        "borderColor": "#a3a3a3",
+        "font": "Helvetica",
+        "linkTo": "",
+        "customCss": ""
+      },
+      "order": 4
+    }
+  ],
+  "variables": []
+}
