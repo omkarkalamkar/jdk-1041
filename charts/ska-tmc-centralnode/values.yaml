@@ -41,16 +41,16 @@ centralnodemid:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.3.5
+    tag: 0.3.6
     pullPolicy: IfNotPresent
 
 resources:
   limits:
-    cpu: 100m
-    memory: 100Mi
+    cpu: 150m
+    memory: 150Mi
   requests:
-    cpu: 10m
-    memory: 30Mi
+    cpu: 50m
+    memory: 50Mi
 
 deviceServers:
   mocks:

@@ -19,9 +19,9 @@ TELESCOPE ?= SKA-mid
 # using Helm.  If this does not already exist it will be created
 KUBE_NAMESPACE ?= ska-tmc-centralnode
 
-# RELEASE_NAME is the release that all Kubernetes resources will be labelled
+# HELM_RELEASE is the release that all Kubernetes resources will be labelled
 # with
-RELEASE_NAME ?= test
+HELM_RELEASE ?= test
 # F401 Ignore unused imports because of tagno protected sections
 # W503 Ignore operator at beginning of line as conflicts with black
 # stretch line length to 180 because of super long parameter assignments
@@ -41,6 +41,7 @@ DISPLAY ?= $(THIS_HOST):0
 JIVE ?= false# Enable jive
 WEBJIVE ?= false
 MINIKUBE ?= true ## Minikube or not
+FAKE_DEVICES ?= true ## Install fake devices or not
 TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
 
 CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode
@@ -49,7 +50,7 @@ $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH
 
 # Test runner - run to completion job in K8s
 # name of the pod running the k8s_tests
-K8S_TEST_RUNNER = test-runner-$(RELEASE_NAME)
+K8S_TEST_RUNNER = test-runner-$(HELM_RELEASE)
 
 ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.5
 
@@ -123,6 +124,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
 	--set central_node.telescope=$(TELESCOPE) \
+	--set central_node.deviceServers.mocks.enabled=$(FAKE_DEVICES) \
 	--set ska-webjive.enabled=$(WEBJIVE) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml

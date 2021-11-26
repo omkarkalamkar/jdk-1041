@@ -270,7 +270,7 @@ class TMCOpStateAggregator(Aggregator):
             return DevState.ON
         elif tmSetStateList == set([DevState.OFF]):
             #  Untill all TMC devices are refactored, devices report Off state.
-            raise Exception("OFF State not allowed")
+            return DevState.OFF
         elif DevState.INIT in tmSetStateList:
             return DevState.INIT
         elif DevState.FAULT in tmSetStateList:

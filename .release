@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.3.5"
+version="0.3.6"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team NCRA"
@@ -10,7 +10,7 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.3.5
-tag=0.3.5
+release=0.3.6
+tag=0.3.6
 tag_description= Update CentralNode TANGO attribute names as per cs guidelines.
 release_notes=This release contains:<br/><ul><li>  Update CentralNode TANGO attribute names as per cs guidelines.</li></ul><br/>
