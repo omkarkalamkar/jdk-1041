@@ -93,6 +93,7 @@ install_demo_chart:
     KUBE_NAMESPACE: "demo"
     RELEASE_NAME: "demo0"
     WEBJIVE: "true"
+    FAKE_DEVICES: "true"
   tags:
     - k8srunner
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
@@ -100,7 +101,7 @@ install_demo_chart:
   script:
     - make k8s-dep-update
     - make k8s-namespace
-    - helm upgrade --install $RELEASE_NAME --set global.minikube=false --set ska-webjive.enabled=$WEBJIVE charts/test-parent --namespace $KUBE_NAMESPACE
+    - helm upgrade --install $RELEASE_NAME --set global.minikube=false --set ska-webjive.enabled=$WEBJIVE --set central_node.deviceServers.mocks.enabled=$FAKE_DEVICES charts/test-parent --namespace $KUBE_NAMESPACE
   environment:
     name: "demo"
     kubernetes:
