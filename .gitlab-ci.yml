@@ -92,7 +92,7 @@ install_demo_chart:
   variables:
     KUBE_NAMESPACE: "demo"
     HELM_RELEASE: "demo0"
-    WEBJIVE: "true"
+    TARANTA: "true"
     FAKE_DEVICES: "true"
   tags:
     - k8srunner
@@ -110,7 +110,7 @@ uninstall_demo_chart:
   variables:
     KUBE_NAMESPACE: "demo"
     HELM_RELEASE: "demo0"
-    WEBJIVE: "true"
+    TARANTA: "true"
   tags:
     - k8srunner
   image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
