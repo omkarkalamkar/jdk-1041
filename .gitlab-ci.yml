@@ -80,7 +80,7 @@ k8s-test:
     paths:
       - "build_k8s_test/"
     reports:
-      junit: build_k8s_test/reports/report.xml
+      junit: build_k8s_test/reports/unit-tests.xml
     when: always
 
 low-k8s-test:
@@ -100,5 +100,5 @@ low-k8s-test:
     paths:
       - "build_low_k8s_test/"
     reports:
-      junit: build_low_k8s_test/reports/report.xml
+      junit: build_low_k8s_test/reports/unit-tests.xml
     when: always
