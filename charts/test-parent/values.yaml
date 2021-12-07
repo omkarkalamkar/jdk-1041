@@ -41,5 +41,5 @@ central_node:
     centralnode:
       enabled: true
 
-ska-webjive:
+ska-taranta:
   enabled: false
