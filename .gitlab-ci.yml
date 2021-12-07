@@ -75,6 +75,13 @@ k8s-test:
         /usr/local/bin/xtp-xray-upload -f build/cucumber.json -i test-exec.json -v
         fi
     - mv build build_k8s_test
+  artifacts:
+    name: "$CI_PROJECT_NAME-$CI_JOB_ID"
+    paths:
+      - "build_k8s_test/"
+    reports:
+      junit: build_k8s_test/report.xml
+    when: always
 
 low-k8s-test:
   retry: 2
@@ -88,3 +95,10 @@ low-k8s-test:
   after_script:
     - *after_script
     - mv build build_low_k8s_test
+  artifacts:
+    name: "$CI_PROJECT_NAME-$CI_JOB_ID"
+    paths:
+      - "build_low_k8s_test/"
+    reports:
+      junit: build_low_k8s_test/report.xml
+    when: always
