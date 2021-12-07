@@ -74,6 +74,7 @@ k8s-test:
         pip3 install -U "ska-ser-skallop>=$SKALLOP_VERSION" --extra-index-url https://artefact.skao.int/repository/pypi-internal/simple
         /usr/local/bin/xtp-xray-upload -f build/cucumber.json -i test-exec.json -v
         fi
+    - mv build build_k8s_test
 
 low-k8s-test:
   retry: 2
@@ -86,38 +87,4 @@ low-k8s-test:
       namespace: ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-low
   after_script:
     - *after_script
-
-install_demo_chart:
-  stage: lifecycle
-  variables:
-    KUBE_NAMESPACE: "demo"
-    HELM_RELEASE: "demo0"
-    TARANTA: "true"
-    FAKE_DEVICES: "true"
-  tags:
-    - k8srunner
-  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
-  when: manual
-  script:
-    - make k8s-install-chart
-  environment:
-    name: "demo"
-    kubernetes:
-      namespace: $KUBE_NAMESPACE
-
-uninstall_demo_chart:
-  stage: lifecycle
-  variables:
-    KUBE_NAMESPACE: "demo"
-    HELM_RELEASE: "demo0"
-    TARANTA: "true"
-  tags:
-    - k8srunner
-  image: $SKA_K8S_TOOLS_DEPLOY_IMAGE
-  when: manual
-  script:
-    - make k8s-uninstall-chart
-  environment:
-    name: "demo"
-    kubernetes:
-      namespace: $KUBE_NAMESPACE
+    - mv build build_low_k8s_test
