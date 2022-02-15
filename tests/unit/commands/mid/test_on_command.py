@@ -52,10 +52,10 @@ def test_telescope_on_command(tango_context):
             adapter.proxy.SetOperateMode.assert_called()
             continue
         if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.TelescopeOn.assert_called()
+            adapter.proxy.On.assert_called()
             continue
 
-        adapter.proxy.TelescopeOn.assert_called()
+        adapter.proxy.On.assert_called()
 
 
 def test_telescope_on_command_fail_subarray(tango_context):

@@ -43,7 +43,7 @@ def test_low_telescope_on_command(tango_context):
     (result_code, _) = on_command.do()
     assert result_code == ResultCode.OK
     for adapter in my_adapter_factory.adapters:
-        adapter.proxy.TelescopeOn.assert_called()
+        adapter.proxy.On.assert_called()
 
 
 def test_low_telescope_on_command_fail_subarray(tango_context):
