@@ -63,13 +63,19 @@ class BaseAdapter:
         return self._dev_name
 
     def On(self):
-        self.proxy.TelescopeOn()
+        self.proxy.On()
 
     def Off(self):
-        self.proxy.TelescopeOff()
+        self.proxy.Off()
 
     def StandBy(self):
-        self.proxy.TelescopeStandBy()
+        self.proxy.Standby()
+
+    def Disable(self):
+        self.proxy.Disable()
+
+    def Reset(self):
+        self.proxy.Reset()
 
 
 class SubArrayAdapter(BaseAdapter):

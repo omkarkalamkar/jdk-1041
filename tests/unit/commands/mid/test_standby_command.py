@@ -56,10 +56,10 @@ def test_telescope_standby_command(tango_context):
             adapter.proxy.SetStandbyLPMode.assert_called()
             continue
         if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.TelescopeStandBy.assert_called()
+            adapter.proxy.Standby.assert_called()
             continue
 
-        adapter.proxy.TelescopeStandBy.assert_called()
+        adapter.proxy.Standby.assert_called()
 
 
 def test_telescope_standby_command_fail_subarray(tango_context):
@@ -74,9 +74,9 @@ def test_telescope_standby_command_fail_subarray(tango_context):
     # include exception in TelescopeStandby command
     failing_dev = "ska_mid/tm_subarray_node/1"
 
-    attrs = {"TelescopeStandBy.side_effect": Exception}
-    subarrayMock = mock.Mock(**attrs)
-    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+    my_adapter_factory.get_or_create_adapter(
+        failing_dev, attrs={"TelescopeStandBy.side_effect": Exception}
+    )
 
     standby_command = TelescopeStandby(
         cm, cm.op_state_model, my_adapter_factory

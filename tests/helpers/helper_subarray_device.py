@@ -157,6 +157,42 @@ class HelperSubArrayDevice(SKASubarray):
             self._health_state = HealthState(argin)
             self.push_change_event("healthState", self._health_state)
 
+    def is_On_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def On(self):
+        if self.dev_state() != DevState.ON:
+            self.set_state(DevState.ON)
+        return [[ResultCode.OK], [""]]
+
+    def is_Off_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def Off(self):
+        if self.dev_state() != DevState.OFF:
+            self.set_state(DevState.OFF)
+        return [[ResultCode.OK], [""]]
+
+    def is_Standby_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def Standby(self):
+        if self.dev_state() != DevState.STANDBY:
+            self.set_state(DevState.STANDBY)
+        return [[ResultCode.OK], [""]]
+
     def is_TelescopeOn_allowed(self):
         return True
 
