@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.3.7"
+version="0.3.8"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team NCRA"
@@ -10,7 +10,7 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.3.7
-tag=0.3.7
+release=0.3.8
+tag=0.3.8
 tag_description=Invoke On, Off and Standby commands on other TMC devices.
 release_notes=This release contains:<br/><ul><li>Changes to invoke On, Off and Standby commands instead of TelescopeOn, TelescopeOff and TelescopeStandby.</li></ul><br/>
