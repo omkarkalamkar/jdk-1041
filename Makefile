@@ -73,7 +73,7 @@ K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/$(PROJECT):$(VERSION)
 ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
-	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
+	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
 K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
 endif
 
