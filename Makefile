@@ -52,7 +52,7 @@ $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH
 # name of the pod running the k8s_tests
 K8S_TEST_RUNNER = test-runner-$(HELM_RELEASE)
 
-ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.5
+ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.9
 
 ## override so that this picks up setup.cfg from the project root
 PYTHON_TEST_FILE ?=
@@ -72,9 +72,9 @@ CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
 K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/$(PROJECT):$(VERSION)
 ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
-	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/$(PROJECT) \
-	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
-K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/$(PROJECT)/$(PROJECT):$(VERSION)-dev.$(CI_COMMIT_SHORT_SHA)
+	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
+	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
+K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT)/$(PROJECT):$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
 endif
 
 # override for python-test - must not have the above --true-context
