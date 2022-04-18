@@ -114,8 +114,6 @@ clean:
 
 unit-test: python-test
 
-HELM_CHARTS_TO_PUBLISH ?= ska-tmc-central-node
-
 PYTHON_BUILD_TYPE = non_tag_setup
 
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
