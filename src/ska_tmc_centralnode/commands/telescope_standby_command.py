@@ -53,7 +53,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         for adapter in self.tm_subarray_adapters:
             try:
-                adapter.StandBy()
+                adapter.Standby()
             except Exception as e:
                 return self.generate_command_result(
                     ResultCode.FAILED,
@@ -85,7 +85,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             time.sleep(self._step_sleep)
 
         try:
-            self.tm_leaf_csp_master_adapter.StandBy()
+            self.tm_leaf_csp_master_adapter.Standby()
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -94,7 +94,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             )
 
         try:
-            self.tm_leaf_sdp_master_adapter.StandBy()
+            self.tm_leaf_sdp_master_adapter.Standby()
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -142,7 +142,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         for adapter in self.tm_subarray_adapters:
             try:
-                adapter.StandBy()
+                adapter.Standby()
             except Exception as e:
                 return self.generate_command_result(
                     ResultCode.FAILED,
@@ -174,7 +174,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             time.sleep(self._step_sleep)
 
         try:
-            self.tm_leaf_mccs_master_adapter.StandBy()
+            self.tm_leaf_mccs_master_adapter.Standby()
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,

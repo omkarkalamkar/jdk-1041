@@ -17,6 +17,10 @@ from ska_tmc_centralnode.commands.telescope_standby_command import (
 )
 from ska_tmc_centralnode.exceptions import CommandNotAllowed
 from ska_tmc_centralnode.model.input import InputParameterLow
+
+# from tests.helpers.helper_adapter_factory import HelperAdapterFactory
+# from tests.helpers.helper_state_mccsdevice import HelperMCCSStateDevice
+# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
 
@@ -36,7 +40,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.aki
 def test_low_telescope_standby_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -82,7 +85,6 @@ def test_low_telescope_standby_command_fail_subarray(tango_context):
     # assert failing_dev in message
 
 
-@pytest.mark.aki
 def test_low_telescope_standby_command_fail_mccs(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -107,7 +109,6 @@ def test_low_telescope_standby_command_fail_mccs(tango_context):
     # assert failing_dev in message
 
 
-@pytest.mark.aki
 def test_low_telescope_standby_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)

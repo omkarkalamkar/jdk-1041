@@ -9,6 +9,8 @@ import time
 
 from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common.command_executor import CommandExecutor
+from ska_tmc_common.event_receiver import EventReceiver
 from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
@@ -18,8 +20,6 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
-from ska_tmc_centralnode.manager.command_executor import CommandExecutor
-from ska_tmc_centralnode.manager.event_receiver import EventReceiver
 from ska_tmc_centralnode.manager.monitoring_loop import MonitoringLoop
 from ska_tmc_centralnode.model.component import (
     Component,
