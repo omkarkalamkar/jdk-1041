@@ -3,12 +3,16 @@ import time
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common.adapters import DishAdapter, SubArrayAdapter
+from ska_tmc_common.test_helpers.helper_adapter_factory import (
+    HelperAdapterFactory,
+)
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.exceptions import CommandNotAllowed
-from ska_tmc_centralnode.manager.adapters import DishAdapter, SubArrayAdapter
-from tests.helpers.helper_adapter_factory import HelperAdapterFactory
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
 
@@ -30,6 +34,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.xyz
 def test_telescope_off_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -58,6 +63,7 @@ def test_telescope_off_command(tango_context):
         adapter.proxy.Off.assert_called()
 
 
+@pytest.mark.xyz
 def test_telescope_off_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -80,6 +86,7 @@ def test_telescope_off_command_fail_subarray(tango_context):
     assert failing_dev in message
 
 
+@pytest.mark.xyz
 def test_telescope_off_command_fail_csp(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -102,6 +109,7 @@ def test_telescope_off_command_fail_csp(tango_context):
     assert failing_dev in message
 
 
+@pytest.mark.xyz
 def test_telescope_off_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)

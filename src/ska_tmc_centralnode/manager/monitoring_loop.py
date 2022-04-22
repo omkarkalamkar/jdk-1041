@@ -6,9 +6,9 @@ from time import sleep
 
 import numpy as np
 import tango
+from ska_tmc_common.dev_factory import DevFactory
 from tango import AttrDataFormat
 
-from ska_tmc_centralnode.dev_factory import DevFactory
 from ska_tmc_centralnode.model.component import (
     DeviceInfo,
     MCCSDeviceInfo,

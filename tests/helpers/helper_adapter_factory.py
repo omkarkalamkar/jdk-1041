@@ -1,6 +1,5 @@
 import mock
-
-from ska_tmc_centralnode.manager.adapters import (
+from ska_tmc_common.adapters import (
     AdapterFactory,
     AdapterType,
     BaseAdapter,

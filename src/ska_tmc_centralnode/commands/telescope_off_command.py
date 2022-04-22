@@ -2,12 +2,12 @@ import time
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common.adapters import AdapterFactory
 from tango import DevState
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
-from ska_tmc_centralnode.manager.adapters import AdapterFactory
 
 
 class TelescopeOff(AbstractTelescopeOnOff):

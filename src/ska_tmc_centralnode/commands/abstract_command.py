@@ -1,25 +1,15 @@
-from ska_tango_base.commands import BaseCommand, ResultCode
+from ska_tango_base.commands import ResultCode
+from ska_tmc_common.adapters import AdapterFactory, AdapterType
+from ska_tmc_common.tmc_command import TMCCommand
 from tango import DevState
 
 from ska_tmc_centralnode.exceptions import CommandNotAllowed
-from ska_tmc_centralnode.manager.adapters import AdapterFactory, AdapterType
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
-class TMCCommand(BaseCommand):
+class CentralNodeCommand(TMCCommand):
     def __init__(self, target, *args, logger=None, **kwargs):
         super().__init__(target, args, logger, kwargs)
-
-    def generate_command_result(self, result_code, message):
-        if result_code == ResultCode.FAILED:
-            self.logger.error(message)
-        self.logger.info(message)
-        return (result_code, message)
-
-    def adapter_error_message_result(self, dev_name, e):
-        message = f"Error in creating adapter for {dev_name}: {e}"
-        self.logger.error(message)
-        return ResultCode.FAILED, message
 
     def check_allowed(self):
         component_manager = self.target
@@ -51,26 +41,8 @@ class TMCCommand(BaseCommand):
 
         return result
 
-    def check_allowed_mid(self):
-        raise NotImplementedError("This class must be inherited!")
 
-    def check_allowed_low(self):
-        raise NotImplementedError("This class must be inherited!")
-
-    def init_adapters_mid(self):
-        raise NotImplementedError("This class must be inherited!")
-
-    def init_adapters_low(self):
-        raise NotImplementedError("This class must be inherited!")
-
-    def do_mid(self, argin=None):
-        raise NotImplementedError("This class must be inherited!")
-
-    def do_low(self, argin=None):
-        raise NotImplementedError("This class must be inherited!")
-
-
-class AbstractTelescopeOnOff(TMCCommand):
+class AbstractTelescopeOnOff(CentralNodeCommand):
     def __init__(
         self,
         target,
@@ -317,7 +289,7 @@ class AbstractTelescopeOnOff(TMCCommand):
         return ResultCode.OK, ""
 
 
-class AbstractAssignReleaseResources(TMCCommand):
+class AbstractAssignReleaseResources(CentralNodeCommand):
     def __init__(
         self,
         target,

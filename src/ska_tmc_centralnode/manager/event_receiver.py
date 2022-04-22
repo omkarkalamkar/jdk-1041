@@ -3,8 +3,7 @@ from concurrent import futures
 from time import sleep
 
 import tango
-
-from ska_tmc_centralnode.dev_factory import DevFactory
+from ska_tmc_common.dev_factory import DevFactory
 
 
 class EventReceiver:

@@ -6,15 +6,19 @@ import mock
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common.adapters import SubArrayAdapter
+from ska_tmc_common.test_helpers.helper_adapter_factory import (
+    HelperAdapterFactory,
+)
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from ska_tmc_centralnode.exceptions import CommandNotAllowed
-from ska_tmc_centralnode.manager.adapters import SubArrayAdapter
 from ska_tmc_centralnode.model.component import SubArrayDeviceInfo
-from tests.helpers.helper_adapter_factory import HelperAdapterFactory
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
 
@@ -36,6 +40,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.xyz
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
     with open(path, "r") as f:
@@ -43,6 +48,7 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     return assign_input_str
 
 
+@pytest.mark.xyz
 def get_assign_resources_command_obj():
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -61,6 +67,7 @@ def get_assign_resources_command_obj():
     return assign_res_command, my_adapter_factory
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command(tango_context):
     logger.info("%s", tango_context)
     assign_res_command, my_adapter_factory = get_assign_resources_command_obj()
@@ -74,6 +81,7 @@ def test_telescope_assign_resources_command(tango_context):
             adapter.proxy.AssignResources.assert_called()
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_missing_eb_id_key(tango_context):
     logger.info("%s", tango_context)
     assign_res_command, my_adapter_factory = get_assign_resources_command_obj()
@@ -89,6 +97,7 @@ def test_telescope_assign_resources_command_missing_eb_id_key(tango_context):
             adapter.proxy.AssignResources.assert_called()
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -118,6 +127,7 @@ def test_telescope_assign_resources_command_fail_subarray(tango_context):
     assert failing_dev in message
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_empty_input_json(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -127,6 +137,7 @@ def test_telescope_assign_resources_command_empty_input_json(tango_context):
     assert result_code == ResultCode.FAILED
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_missing_sdp_key(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -141,6 +152,7 @@ def test_telescope_assign_resources_command_missing_sdp_key(tango_context):
     assert "sdp" in message
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_missing_transaction_id(
     tango_context,
 ):
@@ -157,6 +169,7 @@ def test_telescope_assign_resources_command_missing_transaction_id(
     assert "transaction_id" in message
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_missing_subarray_id(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -171,6 +184,7 @@ def test_telescope_assign_resources_command_missing_subarray_id(tango_context):
     assert "subarray_id" in message
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_missing_dish(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -185,6 +199,7 @@ def test_telescope_assign_resources_command_missing_dish(tango_context):
     assert "dish" in message
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_missing_receptor_ids(
     tango_context,
 ):
@@ -201,6 +216,7 @@ def test_telescope_assign_resources_command_missing_receptor_ids(
     assert "receptor_ids" in message
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)
@@ -218,6 +234,7 @@ def test_telescope_assign_resources_fail_check_allowed(tango_context):
         assign_res_command.check_allowed()
 
 
+@pytest.mark.xyz
 def test_telescope_assign_resources_command_already_assigned(tango_context):
     logger.info("%s", tango_context)
     # assign_res_command, _ = get_assign_resources_command_obj()
