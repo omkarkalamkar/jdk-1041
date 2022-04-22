@@ -15,9 +15,10 @@ from ska_tmc_centralnode import release
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.model.op_state_model import TMCOpStateModel
+from ska_tmc_centralnode.tmc_base_device import TMCBaseDevice
 
 
-class AbstractCentralNode(SKABaseDevice):
+class AbstractCentralNode(TMCBaseDevice):
     """
     Central Node is a coordinator of the complete Telescope system
 
@@ -47,15 +48,15 @@ class AbstractCentralNode(SKABaseDevice):
         default_value="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
     )
 
-    MaxWorkerMonitoringLoop = device_property(
-        dtype="DevUShort", default_value=5
-    )
+    # MaxWorkerMonitoringLoop = device_property(
+    #     dtype="DevUShort", default_value=5
+    # )
 
-    ProxyTimeoutMonitoringLoop = device_property(
-        dtype="DevUShort", default_value=500
-    )
+    # ProxyTimeoutMonitoringLoop = device_property(
+    #     dtype="DevUShort", default_value=500
+    # )
 
-    SleepTime = device_property(dtype="DevFloat", default_value=1)
+    # SleepTime = device_property(dtype="DevFloat", default_value=1)
 
     # ----------
     # Attributes
@@ -78,11 +79,11 @@ class AbstractCentralNode(SKABaseDevice):
         doc="desiredTelescopeState attribute of Central Node.",
     )
 
-    commandInProgress = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ,
-        doc="commandInProgress attribute of Central Node.",
-    )
+    # commandInProgress = attribute(
+    #     dtype="DevString",
+    #     access=AttrWriteType.READ,
+    #     doc="commandInProgress attribute of Central Node.",
+    # )
 
     tmOpState = attribute(
         dtype="DevState",
@@ -94,11 +95,11 @@ class AbstractCentralNode(SKABaseDevice):
         max_dim_x=16,
     )
 
-    commandExecuted = attribute(
-        dtype=(("DevString",),),
-        max_dim_x=4,
-        max_dim_y=100,
-    )
+    # commandExecuted = attribute(
+    #     dtype=(("DevString",),),
+    #     max_dim_x=4,
+    #     max_dim_y=100,
+    # )
 
     lastCommandExecuted = attribute(
         dtype="DevString",
@@ -118,11 +119,11 @@ class AbstractCentralNode(SKABaseDevice):
         doc="Json String representing the entire internal model transformed for better reading.",
     )
 
-    lastDeviceInfoChanged = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ,
-        doc="Json String representing the last device changed in the internal model.",
-    )
+    # lastDeviceInfoChanged = attribute(
+    #     dtype="DevString",
+    #     access=AttrWriteType.READ,
+    #     doc="Json String representing the last device changed in the internal model.",
+    # )
 
     def update_device_callback(self, devInfo):
         self._LastDeviceInfoChanged = devInfo.to_json()
@@ -200,8 +201,8 @@ class AbstractCentralNode(SKABaseDevice):
     def read_desiredTelescopeState(self):
         return self.component_manager.component.desired_telescope_state
 
-    def read_commandInProgress(self):
-        return self.component_manager.command_executor.command_in_progress
+    # def read_commandInProgress(self):
+    #     return self.component_manager.command_executor.command_in_progress
 
     def read_internalModel(self):
         return self.component_manager.component.to_json()
@@ -219,27 +220,27 @@ class AbstractCentralNode(SKABaseDevice):
             result[dev_name] = dev
         return json.dumps(result)
 
-    def read_lastDeviceInfoChanged(self):
-        return self._LastDeviceInfoChanged
+    # def read_lastDeviceInfoChanged(self):
+    #     return self._LastDeviceInfoChanged
 
-    def read_commandExecuted(self):
-        """Return the commandExecuted attribute."""
-        result = []
-        i = 0
-        for command_executed in reversed(
-            self.component_manager.command_executor.command_executed
-        ):
-            if i == 100:
-                break
-            single_res = [
-                str(command_executed["Id"]),
-                str(command_executed["Command"]),
-                str(command_executed["ResultCode"]),
-                str(command_executed["Message"]),
-            ]
-            result.append(single_res)
-            i += 1
-        return result
+    # def read_commandExecuted(self):
+    #     """Return the commandExecuted attribute."""
+    #     result = []
+    #     i = 0
+    #     for command_executed in reversed(
+    #         self.component_manager.command_executor.command_executed
+    #     ):
+    #         if i == 100:
+    #             break
+    #         single_res = [
+    #             str(command_executed["Id"]),
+    #             str(command_executed["Command"]),
+    #             str(command_executed["ResultCode"]),
+    #             str(command_executed["Message"]),
+    #         ]
+    #         result.append(single_res)
+    #         i += 1
+    #     return result
 
     def read_lastCommandExecuted(self):
         """Return the lastCommandExecuted attribute as list of string."""
