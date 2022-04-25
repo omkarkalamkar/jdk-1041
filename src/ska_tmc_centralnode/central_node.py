@@ -47,6 +47,13 @@ class AbstractCentralNode(TMCBaseDevice):
         default_value="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
     )
 
+    MaxWorkerMonitoringLoop = device_property(
+        dtype="DevUShort", default_value=5
+    )
+
+    ProxyTimeoutMonitoringLoop = device_property(
+        dtype="DevUShort", default_value=500
+    )
     # ----------
     # Attributes
     # ----------
