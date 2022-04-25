@@ -20,7 +20,9 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
-from ska_tmc_centralnode.manager.monitoring_loop import MonitoringLoop
+from ska_tmc_centralnode.manager.monitoring_loop import (
+    CentralNodeMonitoringLoop,
+)
 from ska_tmc_centralnode.model.component import (
     Component,
     DeviceInfo,
@@ -84,7 +86,7 @@ class CNComponentManager(BaseComponentManager):
 
         self._monitoring_loop = None
         if _monitoring_loop:
-            self._monitoring_loop = MonitoringLoop(
+            self._monitoring_loop = CentralNodeMonitoringLoop(
                 self,
                 logger,
                 max_workers=max_workers,

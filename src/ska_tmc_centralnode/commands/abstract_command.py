@@ -1,9 +1,9 @@
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
+from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_command import TMCCommand
 from tango import DevState
 
-from ska_tmc_centralnode.exceptions import CommandNotAllowed
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 

@@ -6,7 +6,7 @@ from os.path import dirname, join
 
 import pytest
 
-from ska_tmc_centralnode.exceptions import (
+from ska_tmc_common.exceptions import (
     InvalidJSONError,
     ResourceNotPresentError,
     ResourceReassignmentError,
