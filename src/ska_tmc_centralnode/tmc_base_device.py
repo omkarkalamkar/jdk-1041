@@ -104,7 +104,7 @@ class TMCBaseDevice(SKABaseDevice):
         if not issubclass(TMCBaseDevice, self.__class__):
             internal_model = self.component_manager.component.to_json()
             if "SubarrayNode" in str(self.__class__):
-                sn_internal_model = self.read_SN_internalModel(
+                sn_internal_model = self.read_device_internalModel(
                     json.loads(internal_model)
                 )
                 return json.dumps(sn_internal_model)
