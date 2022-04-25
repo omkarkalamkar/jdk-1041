@@ -4,11 +4,11 @@ ReleaseResources class for CentralNode.
 import json
 
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
+from ska_tmc_centralnode.manager.adapters import AdapterFactory
 
 
 class ReleaseResources(AbstractAssignReleaseResources):

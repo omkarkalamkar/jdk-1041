@@ -1,6 +1,7 @@
 import time
 
 import pytest
+from ska_tmc_common.device_info import SubArrayDeviceInfo
 from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
     HelperMCCSStateDevice,
 )
@@ -8,7 +9,6 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
 
-from ska_tmc_centralnode.model.component import SubArrayDeviceInfo
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import count_faulty_devices, create_cm, logger
 

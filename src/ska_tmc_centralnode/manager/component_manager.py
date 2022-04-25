@@ -10,6 +10,7 @@ import time
 from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.command_executor import CommandExecutor
+from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
 from tango import DevState
 
@@ -23,11 +24,7 @@ from ska_tmc_centralnode.manager.aggregators import (
 from ska_tmc_centralnode.manager.monitoring_loop import (
     CentralNodeMonitoringLoop,
 )
-from ska_tmc_centralnode.model.component import (
-    Component,
-    DeviceInfo,
-    SubArrayDeviceInfo,
-)
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
@@ -82,7 +79,7 @@ class CNComponentManager(BaseComponentManager):
         """
         self.logger = logger
         self.lock = threading.Lock()
-        self._component = _component or Component(logger)
+        self._component = _component or CentralComponent(logger)
 
         self._monitoring_loop = None
         if _monitoring_loop:

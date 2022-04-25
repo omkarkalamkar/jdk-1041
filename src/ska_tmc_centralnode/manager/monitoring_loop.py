@@ -2,46 +2,35 @@ import json
 
 import numpy as np
 import tango
-from ska_tmc_common.monitoring_loop import MonitoringLoop
+from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 
 # from ska_tmc_common.dev_factory import DevFactory
+# from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
+from ska_tmc_common.monitoring_loop import MonitoringLoop
 from tango import AttrDataFormat
 
-from ska_tmc_centralnode.model.component import (
-    DeviceInfo,
-    MCCSDeviceInfo,
-    SubArrayDeviceInfo,
-)
+from ska_tmc_centralnode.model.component import MCCSDeviceInfo
 
 # import threading
+
 # from concurrent import futures
-# from queue import Empty, Queue
+# from queue import Queue
+
+
 # from time import sleep
 
 
 class CentralNodeMonitoringLoop(MonitoringLoop):
-    """
-    The MonitoringLoop class has the responsibility to monitor
-    the sub devices managed by the central node.
+    # """
+    # The MonitoringLoop class has the responsibility to monitor
+    # the sub devices managed by the central node.
 
-    It is an infinite loop which ping, get the state, the obsState,
-    the healthState and device information of the monitored SKA devices
+    # It is an infinite loop which ping, get the state, the obsState,
+    # the healthState and device information of the monitored SKA devices
 
-    TBD: what about scalability? what if we have 1000 devices?
+    # TBD: what about scalability? what if we have 1000 devices?
 
-    """
-
-    def __init__(
-        self,
-        component_manager,
-        logger=None,
-        max_workers=5,
-        proxy_timeout=500,
-        sleep_time=1,
-    ):
-        super().__init__(
-            component_manager, logger, max_workers, proxy_timeout, sleep_time
-        )
+    # """
 
     # def __init__(
     #     self,
@@ -61,6 +50,17 @@ class CentralNodeMonitoringLoop(MonitoringLoop):
     #     self._max_workers = max_workers
     #     self._dev_factory = DevFactory()
     #     self._priority_devices = Queue(0)
+    def __init__(
+        self,
+        component_manager,
+        logger=None,
+        max_workers=5,
+        proxy_timeout=500,
+        sleep_time=1,
+    ):
+        super().__init__(
+            component_manager, logger, max_workers, proxy_timeout, sleep_time
+        )
 
     # def start(self):
     #     if not self._thread.is_alive():
@@ -93,24 +93,42 @@ class CentralNodeMonitoringLoop(MonitoringLoop):
 
     #         sleep(self._sleep_time)
 
-    def device_task(self, devInfo):
+    # def device_task(self, devInfo):
+    #     with tango.EnsureOmniThread():
+    #         try:
+    #             # import debugpy; debugpy.debug_this_thread()
+    #             proxy = self._dev_factory.get_device(devInfo.dev_name)
+    #             proxy.set_timeout_millis(self._proxy_timeout)
+    #             newDevInfo = self.create_device_info(devInfo, proxy)
+    #             newDevInfo.ping = proxy.ping()
+    #             newDevInfo.state = proxy.State()
+    #             newDevInfo.healthState = proxy.HealthState
+    #             newDevInfo.dev_info = proxy.info()
+    #             self._component_manager.update_device_info(newDevInfo)
+    #         except Exception as e:
+    #             self._logger.error(
+    #                 "Device %s not working. Check internalModel attribute.",
+    #                 devInfo.dev_name,
+    #             )
+    #             self._component_manager.device_failed(devInfo, e)
+    def device_task(self, dev_info):
         with tango.EnsureOmniThread():
             try:
                 # import debugpy; debugpy.debug_this_thread()
-                proxy = self._dev_factory.get_device(devInfo.dev_name)
+                proxy = self._dev_factory.get_device(dev_info.dev_name)
+                new_dev_info = self.create_device_info(dev_info, proxy)
                 proxy.set_timeout_millis(self._proxy_timeout)
-                newDevInfo = self.create_device_info(devInfo, proxy)
-                newDevInfo.ping = proxy.ping()
-                newDevInfo.state = proxy.State()
-                newDevInfo.healthState = proxy.HealthState
-                newDevInfo.dev_info = proxy.info()
-                self._component_manager.update_device_info(newDevInfo)
+                new_dev_info.ping = proxy.ping()
+                new_dev_info.state = proxy.State()
+                new_dev_info.healthState = proxy.HealthState
+                new_dev_info.dev_info = proxy.info()
+                self._component_manager.update_device_info(new_dev_info)
             except Exception as e:
                 self._logger.error(
                     "Device %s not working. Check internalModel attribute.",
-                    devInfo.dev_name,
+                    dev_info.dev_name,
                 )
-                self._component_manager.device_failed(devInfo, e)
+                self._component_manager.device_failed(dev_info, e)
 
     def create_device_info(self, devInfo, proxy):
         newDevInfo = None
