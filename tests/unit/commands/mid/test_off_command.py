@@ -34,7 +34,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.xyz
 def test_telescope_off_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -63,7 +62,6 @@ def test_telescope_off_command(tango_context):
         adapter.proxy.Off.assert_called()
 
 
-@pytest.mark.xyz
 def test_telescope_off_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -86,7 +84,6 @@ def test_telescope_off_command_fail_subarray(tango_context):
     assert failing_dev in message
 
 
-@pytest.mark.xyz
 def test_telescope_off_command_fail_csp(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -109,7 +106,6 @@ def test_telescope_off_command_fail_csp(tango_context):
     assert failing_dev in message
 
 
-@pytest.mark.xyz
 def test_telescope_off_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)

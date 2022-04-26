@@ -16,9 +16,6 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
-
-# from tests.helpers.helper_adapter_factory import HelperAdapterFactory
-# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
 
@@ -63,8 +60,6 @@ def test_telescope_standby_command(tango_context):
             adapter.proxy.SetStandbyLPMode.assert_called()
             continue
         if isinstance(adapter, SubArrayAdapter):
-            log_msg = f"-------------------------------------SubArrayAdapter : {adapter.proxy}"
-            logger.info(log_msg)
             adapter.proxy.Standby.assert_called()
             continue
 

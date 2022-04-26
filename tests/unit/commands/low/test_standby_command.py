@@ -82,7 +82,7 @@ def test_low_telescope_standby_command_fail_subarray(tango_context):
     assert standby_command.check_allowed()
     (result_code, message) = standby_command.do()
     assert result_code == ResultCode.FAILED
-    # assert failing_dev in message
+    assert failing_dev in message
 
 
 def test_low_telescope_standby_command_fail_mccs(tango_context):
@@ -106,7 +106,7 @@ def test_low_telescope_standby_command_fail_mccs(tango_context):
     assert standby_command.check_allowed()
     (result_code, message) = standby_command.do()
     assert result_code == ResultCode.FAILED
-    # assert failing_dev in message
+    assert failing_dev in message
 
 
 def test_low_telescope_standby_fail_check_allowed(tango_context):
