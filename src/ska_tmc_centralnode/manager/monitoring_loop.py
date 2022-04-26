@@ -42,7 +42,7 @@ class CentralNodeMonitoringLoop(MonitoringLoop):
                 proxy.set_timeout_millis(self._proxy_timeout)
                 new_dev_info.ping = proxy.ping()
                 new_dev_info.state = proxy.State()
-                new_dev_info.healthState = proxy.HealthState
+                new_dev_info.health_state = proxy.HealthState
                 new_dev_info.dev_info = proxy.info()
                 self._component_manager.update_device_info(new_dev_info)
             except Exception as e:
@@ -71,7 +71,7 @@ class CentralNodeMonitoringLoop(MonitoringLoop):
                     newDevInfo.resources = np.asarray(proxy.assignedResources)
                 else:
                     newDevInfo.resources = []
-                newDevInfo.obsState = proxy.obsState
+                newDevInfo.obs_state = proxy.obsState
                 for s in devInfo.dev_name:
                     if s.isdigit():
                         newDevInfo.id = int(s)

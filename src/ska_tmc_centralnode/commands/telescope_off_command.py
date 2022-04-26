@@ -71,7 +71,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(adapter.dev_name).obsState
+                    not component_manager.get_device(
+                        adapter.dev_name
+                    ).obs_state
                     == ObsState.EMPTY
                 ):
                     self.logger.error(
@@ -160,7 +162,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(adapter.dev_name).obsState
+                    not component_manager.get_device(
+                        adapter.dev_name
+                    ).obs_state
                     == ObsState.EMPTY
                 ):
                     self.logger.error(

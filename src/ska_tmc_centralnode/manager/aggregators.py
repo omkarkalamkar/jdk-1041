@@ -148,24 +148,24 @@ class HealthStateAggregatorMid(Aggregator):
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                healthStateList.append(dev.healthState)
+                healthStateList.append(dev.health_state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                healthStateList.append(dev.healthState)
+                healthStateList.append(dev.health_state)
                 sdp_master = True
             elif (
                 name
                 in self._component_manager.input_parameter.tm_subarray_dev_names
             ):
-                healthStateList.append(dev.healthState)
+                healthStateList.append(dev.health_state)
                 subarray_count += 1
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
             ):
-                healthStateList.append(dev.healthState)
+                healthStateList.append(dev.health_state)
                 dish_count += 1
 
         healthStateSetList = set(healthStateList)
@@ -215,13 +215,13 @@ class HealthStateAggregatorLow(Aggregator):
                 name
                 in self._component_manager.input_parameter.tm_subarray_dev_names
             ):
-                healthStateList.append(dev.healthState)
+                healthStateList.append(dev.health_state)
                 subarray_count += 1
             elif (
                 name
                 in self._component_manager.input_parameter.mccs_master_dev_name
             ):
-                healthStateList.append(dev.healthState)
+                healthStateList.append(dev.health_state)
                 mccs_master = True
 
         healthStateSetList = set(healthStateList)

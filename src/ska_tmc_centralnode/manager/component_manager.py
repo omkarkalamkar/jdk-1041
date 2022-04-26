@@ -312,7 +312,7 @@ class CNComponentManager(BaseComponentManager):
         """
         with self.lock:
             devInfo = self.component.get_device(dev_name)
-            devInfo.healthState = health_state
+            devInfo.health_state = health_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
 
@@ -351,7 +351,7 @@ class CNComponentManager(BaseComponentManager):
         """
         with self.lock:
             devInfo = self.component.get_device(dev_name)
-            devInfo.obsState = obs_state
+            devInfo.obs_state = obs_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
             self._update_resources(devInfo)
@@ -449,7 +449,7 @@ class CNComponentManager(BaseComponentManager):
             # If the monitoring loop is not active
             # I must assume that the subarray is reporting the correct value
             # and I need to update the assigned resources in the device info
-            if subarray_dev_info.obsState == ObsState.EMPTY:
+            if subarray_dev_info.obs_state == ObsState.EMPTY:
                 subarray_dev_info.resources = []
 
     def _update_imaging(self):
