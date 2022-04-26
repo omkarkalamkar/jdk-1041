@@ -9,6 +9,9 @@ import time
 
 from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common.command_executor import CommandExecutor
+from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
+from ska_tmc_common.event_receiver import EventReceiver
 from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
@@ -18,14 +21,10 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
-from ska_tmc_centralnode.manager.command_executor import CommandExecutor
-from ska_tmc_centralnode.manager.event_receiver import EventReceiver
-from ska_tmc_centralnode.manager.monitoring_loop import MonitoringLoop
-from ska_tmc_centralnode.model.component import (
-    Component,
-    DeviceInfo,
-    SubArrayDeviceInfo,
+from ska_tmc_centralnode.manager.monitoring_loop import (
+    CentralNodeMonitoringLoop,
 )
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
@@ -80,11 +79,11 @@ class CNComponentManager(BaseComponentManager):
         """
         self.logger = logger
         self.lock = threading.Lock()
-        self._component = _component or Component(logger)
+        self._component = _component or CentralComponent(logger)
 
         self._monitoring_loop = None
         if _monitoring_loop:
-            self._monitoring_loop = MonitoringLoop(
+            self._monitoring_loop = CentralNodeMonitoringLoop(
                 self,
                 logger,
                 max_workers=max_workers,
@@ -313,7 +312,7 @@ class CNComponentManager(BaseComponentManager):
         """
         with self.lock:
             devInfo = self.component.get_device(dev_name)
-            devInfo.healthState = health_state
+            devInfo.health_state = health_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
 
@@ -352,7 +351,7 @@ class CNComponentManager(BaseComponentManager):
         """
         with self.lock:
             devInfo = self.component.get_device(dev_name)
-            devInfo.obsState = obs_state
+            devInfo.obs_state = obs_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
             self._update_resources(devInfo)
@@ -450,7 +449,7 @@ class CNComponentManager(BaseComponentManager):
             # If the monitoring loop is not active
             # I must assume that the subarray is reporting the correct value
             # and I need to update the assigned resources in the device info
-            if subarray_dev_info.obsState == ObsState.EMPTY:
+            if subarray_dev_info.obs_state == ObsState.EMPTY:
                 subarray_dev_info.resources = []
 
     def _update_imaging(self):

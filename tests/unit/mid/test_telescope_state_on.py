@@ -1,9 +1,11 @@
 import pytest
 import tango
+from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 
-from ska_tmc_centralnode.dev_factory import DevFactory
-from tests.helpers.helper_state_device import HelperStateDevice
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     create_cm_no_faulty_devices,
     ensure_telescope_state,
@@ -65,6 +67,7 @@ def test_telescope_state_on_only_monitoring_loop(tango_context):
     assert cm.component.telescope_state == tango.DevState.ON
 
 
+@pytest.mark.ak
 def test_telescope_state_on_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)

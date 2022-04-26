@@ -4,14 +4,6 @@ ska\_tmc\_centralnode.manager package
 Submodules
 ----------
 
-ska\_tmc\_centralnode.manager.adapters module
----------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.manager.adapters
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ska\_tmc\_centralnode.manager.aggregators module
 ------------------------------------------------
 
@@ -20,26 +12,11 @@ ska\_tmc\_centralnode.manager.aggregators module
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.manager.command\_executor module
-------------------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.manager.command_executor
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 ska\_tmc\_centralnode.manager.component\_manager module
 -------------------------------------------------------
 
 .. automodule:: ska_tmc_centralnode.manager.component_manager
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ska\_tmc\_centralnode.manager.event\_receiver module
-----------------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.manager.event_receiver
    :members:
    :undoc-members:
    :show-inheritance:

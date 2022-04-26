@@ -19,8 +19,7 @@ from ska_tmc_cdm.messages.central_node.assign_resources import (
 
 # SKA specific imports
 from ska_tmc_cdm.schemas import CODEC
-
-from ska_tmc_centralnode.exceptions import (
+from ska_tmc_common.exceptions import (
     InvalidJSONError,
     ResourceNotPresentError,
     SubarrayNotPresentError,

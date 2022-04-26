@@ -5,6 +5,7 @@ of state and mode attributes defined by the SKA Control Model.
 """
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType
 from tango.server import attribute, device_property, run
 
@@ -22,7 +23,6 @@ from ska_tmc_centralnode.commands.telescope_standby_command import (
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterLow
-from ska_tmc_centralnode.model.op_state_model import TMCOpStateModel
 
 __all__ = ["CentralNodeLow", "main"]
 

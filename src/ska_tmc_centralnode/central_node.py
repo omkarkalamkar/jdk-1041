@@ -8,13 +8,13 @@ import json
 from ska_tango_base import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
+from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
 
 from ska_tmc_centralnode import release
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
-from ska_tmc_centralnode.model.op_state_model import TMCOpStateModel
 
 
 class AbstractCentralNode(SKABaseDevice):

@@ -2,12 +2,12 @@ import time
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common.adapters import AdapterFactory
 from tango import DevState
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
-from ska_tmc_centralnode.manager.adapters import AdapterFactory
 
 
 class TelescopeStandby(AbstractTelescopeOnOff):
@@ -53,7 +53,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         for adapter in self.tm_subarray_adapters:
             try:
-                adapter.StandBy()
+                adapter.Standby()
             except Exception as e:
                 return self.generate_command_result(
                     ResultCode.FAILED,
@@ -69,7 +69,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(adapter.dev_name).obsState
+                    not component_manager.get_device(
+                        adapter.dev_name
+                    ).obs_state
                     == ObsState.EMPTY
                 ):
                     self.logger.error(
@@ -85,7 +87,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             time.sleep(self._step_sleep)
 
         try:
-            self.tm_leaf_csp_master_adapter.StandBy()
+            self.tm_leaf_csp_master_adapter.Standby()
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -94,7 +96,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             )
 
         try:
-            self.tm_leaf_sdp_master_adapter.StandBy()
+            self.tm_leaf_sdp_master_adapter.Standby()
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -142,7 +144,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         for adapter in self.tm_subarray_adapters:
             try:
-                adapter.StandBy()
+                adapter.Standby()
             except Exception as e:
                 return self.generate_command_result(
                     ResultCode.FAILED,
@@ -158,7 +160,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(adapter.dev_name).obsState
+                    not component_manager.get_device(
+                        adapter.dev_name
+                    ).obs_state
                     == ObsState.EMPTY
                 ):
                     self.logger.error(
@@ -174,7 +178,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             time.sleep(self._step_sleep)
 
         try:
-            self.tm_leaf_mccs_master_adapter.StandBy()
+            self.tm_leaf_mccs_master_adapter.Standby()
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
