@@ -33,19 +33,18 @@ class TMCBaseDevice(SKABaseDevice):
     )
     def commandExecuted(self):
         """Return the commandExecuted attribute."""
-        if not issubclass(TMCBaseDevice, self.__class__):
-            result = []
-            for command_executed in reversed(
-                self.component_manager.command_executor.command_executed
-            ):
-                single_res = [
-                    str(command_executed["Id"]),
-                    str(command_executed["Command"]),
-                    str(command_executed["ResultCode"]),
-                    str(command_executed["Message"]),
-                ]
-                result.append(single_res)
-            return result
+        result = []
+        for command_executed in reversed(
+            self.component_manager.command_executor.command_executed
+        ):
+            single_res = [
+                str(command_executed["Id"]),
+                str(command_executed["Command"]),
+                str(command_executed["ResultCode"]),
+                str(command_executed["Message"]),
+            ]
+            result.append(single_res)
+        return result
 
     @attribute(
         dtype="DevString",
@@ -60,52 +59,48 @@ class TMCBaseDevice(SKABaseDevice):
     )
     def lastCommandExecuted(self):
         """Return the lastCommandExecuted attribute as list of string."""
-        if not issubclass(TMCBaseDevice, self.__class__):
-            command_executed = (
-                self.component_manager.command_executor.command_executed[-1]
-            )
-            single_res = "{0} {1} {2} {3}".format(
-                str(command_executed["Id"]),
-                str(command_executed["Command"]),
-                str(command_executed["ResultCode"]),
-                str(command_executed["Message"]),
-            )
-            return single_res
+        command_executed = (
+            self.component_manager.command_executor.command_executed[-1]
+        )
+        single_res = "{0} {1} {2} {3}".format(
+            str(command_executed["Id"]),
+            str(command_executed["Command"]),
+            str(command_executed["ResultCode"]),
+            str(command_executed["Message"]),
+        )
+        return single_res
 
     @attribute(
         dtype="DevString",
         doc="Json String representing the entire internal model transformed for better reading.",
     )
     def transformedInternalModel(self):
-
-        if not issubclass(TMCBaseDevice, self.__class__):
-            json_model = json.loads(self.component_manager.component.to_json())
-            result = {}
-            for dev in json_model["devices"]:
-                dev_name = dev["dev_name"]
-                del dev["dev_name"]
-                result[dev_name] = dev
-            if "CentralNode" in str(self.__class__):
-                result = self.read_device_transformedInternalModel(
-                    result, json_model
-                )
-                return json.dumps(result)
-            elif "SubarrayNode" in str(self.__class__):
-                result = self.read_device_transformedInternalModel(
-                    result, json_model
-                )
-                return json.dumps(result)
+        json_model = json.loads(self.component_manager.component.to_json())
+        result = {}
+        for dev in json_model["devices"]:
+            dev_name = dev["dev_name"]
+            del dev["dev_name"]
+            result[dev_name] = dev
+        if "CentralNode" in str(self.__class__):
+            result = self.read_device_transformedInternalModel(
+                result, json_model
+            )
+            return json.dumps(result)
+        elif "SubarrayNode" in str(self.__class__):
+            result = self.read_device_transformedInternalModel(
+                result, json_model
+            )
+            return json.dumps(result)
 
     @attribute(
         dtype="DevString",
         doc="Json String representing the entire internal model.",
     )
     def internalModel(self):
-        if not issubclass(TMCBaseDevice, self.__class__):
-            internal_model = self.component_manager.component.to_json()
-            if "SubarrayNode" in str(self.__class__):
-                sn_internal_model = self.read_device_internalModel(
-                    json.loads(internal_model)
-                )
-                return json.dumps(sn_internal_model)
-            return internal_model
+        internal_model = self.component_manager.component.to_json()
+        if "SubarrayNode" in str(self.__class__):
+            sn_internal_model = self.read_device_internalModel(
+                json.loads(internal_model)
+            )
+            return json.dumps(sn_internal_model)
+        return internal_model
