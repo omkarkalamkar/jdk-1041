@@ -18,14 +18,15 @@ from ska_tmc_centralnode.model.op_state_model import TMCOpStateModel
 
 class AbstractCentralNode(TMCBaseDevice):
     """
-    Central Node is a coordinator of the complete Telescope system
-
+    Central Node is a coordinator of the complete Telescope system.
+    Central Node is inherited from TMCBaseDevice class which is further inherited
+    from SKABaseDevice class. TMCBaseDevice class contains attributes common
+    to CentralNode and SubarrayNode.
     """
 
     # -----------------
     # Device Properties
     # -----------------
-
     CentralAlarmHandler = device_property(
         dtype="str",
         doc="Device name of CentralAlarmHandler ",
