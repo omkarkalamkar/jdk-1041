@@ -25,7 +25,7 @@ class HelperStateDevice(SKABaseDevice):
             super().do()
             device = self.target
             device.set_change_event("State", True, False)
-            device.set_change_event("health_state", True, False)
+            device.set_change_event("healthState", True, False)
             return (ResultCode.OK, "")
 
     def create_component_manager(self):
@@ -66,7 +66,7 @@ class HelperStateDevice(SKABaseDevice):
         value = HealthState(argin)
         if self._health_state != value:
             self._health_state = HealthState(argin)
-            self.push_change_event("health_state", self._health_state)
+            self.push_change_event("healthState", self._health_state)
 
     def is_On_allowed(self):
         return True
