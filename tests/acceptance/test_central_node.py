@@ -63,12 +63,10 @@ def check_internal_model(device_list):
             continue
 
         assert "DevState." + str(running_dev.State()) == dev["state"]
-        assert (
-            str(HealthState(running_dev.health_state)) == dev["health_state"]
-        )
+        assert str(HealthState(running_dev.healthState)) == dev["healthState"]
 
         if "subarray" in dev["dev_name"]:
-            assert str(ObsState(running_dev.obs_state)) == dev["obs_State"]
+            assert str(ObsState(running_dev.obsState)) == dev["obsState"]
             if running_dev.assignedResources is None:
                 assert dev["resources"] == []
             else:
