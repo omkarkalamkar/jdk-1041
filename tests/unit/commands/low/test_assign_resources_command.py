@@ -13,14 +13,16 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
     HelperMCCSStateDevice,
 )
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
+
+# from ska_tmc_common.test_helpers.helper_subarray_device import (
+#     HelperSubArrayDevice,
+# )
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
 

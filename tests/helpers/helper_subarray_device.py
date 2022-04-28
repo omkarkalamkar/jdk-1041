@@ -1,3 +1,4 @@
+# Note: This helper class module is explicitly required for CentralNode. Hence kept it here and not in ska-tmc-common repo.
 from ska_tango_base.base import OpStateModel
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState

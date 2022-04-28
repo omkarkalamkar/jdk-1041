@@ -51,6 +51,7 @@ def call_command(central_node, command_name):
 @then("it correctly reports the failed and working devices")
 def check_internal_model(device_list):
     json_model = json.loads(pytest.internal_model)
+    print("Json model is", json_model)
     for dev in json_model["devices"]:
         running_dev = None
         for exported_dev in device_list.value_string:
@@ -65,7 +66,7 @@ def check_internal_model(device_list):
         assert "DevState." + str(running_dev.State()) == dev["state"]
         assert str(HealthState(running_dev.healthState)) == dev["healthState"]
 
-        if "subarray" in dev["dev_name"]:
+        if "tm_subarray" in dev["dev_name"]:
             assert str(ObsState(running_dev.obsState)) == dev["obsState"]
             if running_dev.assignedResources is None:
                 assert dev["resources"] == []
