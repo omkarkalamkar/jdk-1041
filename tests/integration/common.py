@@ -3,10 +3,12 @@ import time
 
 import pytest
 from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
+from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
+    HelperMCCSStateDevice,
+)
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
-from ska_tmc_common.test_helpers.helper_state_mccsdevice import HelperMCCSStateDevice
 
 from ska_tmc_centralnode.central_node_mid import CentralNodeMid
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
