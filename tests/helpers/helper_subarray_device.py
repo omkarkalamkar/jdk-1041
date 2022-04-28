@@ -1,27 +1,24 @@
 from ska_tango_base.base import OpStateModel
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import HealthState, ObsState
+from ska_tango_base.control_model import HealthState
 from ska_tango_base.subarray import (
     SKASubarray,
     SubarrayComponentManager,
     SubarrayObsStateModel,
 )
-from tango import AttrWriteType, DevState
-from tango.server import attribute, command
+from tango import DevState
+from tango.server import command
 
 
 class EmptySubArrayComponentManager(SubarrayComponentManager):
-    def __init__(self, op_state_model, obs_state_model, logger=None):
+    def __init__(
+        self, op_state_model, obs_state_model, logger=None, *args, **kwargs
+    ):
         self.logger = logger
-        super().__init__(op_state_model, obs_state_model)
+        super().__init__(op_state_model, obs_state_model, *args, **kwargs)
         self._assigned_resources = []
 
     def assign(self, resources):
-        """
-        Assign resources to the component.
-
-        :param resources: resources to be assign
-        """
         self.logger.info("Resources: %s", resources)
         self._assigned_resources = ["0001"]
         return (ResultCode.OK, "")
@@ -51,6 +48,11 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
 
         return (ResultCode.OK, "")
 
+    def deconfigure(self):
+        """Deconfigure this component."""
+
+        return (ResultCode.OK, "")
+
     def scan(self, args):
         """Start scanning."""
         self.logger("%s", args)
@@ -58,11 +60,6 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
 
     def end_scan(self):
         """End scanning."""
-
-        return (ResultCode.OK, "")
-
-    def end(self):
-        """End Scheduling blocks."""
 
         return (ResultCode.OK, "")
 
@@ -105,35 +102,20 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
 
 
 class HelperSubArrayDevice(SKASubarray):
-    """A generic subarray device for triggering state changes with a command.
-    It can be used as helper device for element subarray node"""
+    """A generic device for triggering state changes with a command"""
 
     def init_device(self):
         super().init_device()
         self._health_state = HealthState.OK
-        self._command_in_progress = ""
 
     class InitCommand(SKASubarray.InitCommand):
         def do(self):
             super().do()
             device = self.target
-            device._receive_addresses = '{"science_A":{"host":[[0,"192.168.0.1"],[2000,"192.168.0.1"]],"port":[[0,9000,1],[2000,9000,1]]}}'
             device.set_change_event("State", True, False)
-            device.set_change_event("obsState", True, False)
-            device.set_change_event("commandInProgress", True, False)
             device.set_change_event("healthState", True, False)
-            device.set_change_event("receiveAddresses", True, False)
+            device.set_change_event("obsState", True, False)
             return (ResultCode.OK, "")
-
-    commandInProgress = attribute(dtype="DevString", access=AttrWriteType.READ)
-
-    receiveAddresses = attribute(dtype="DevString", access=AttrWriteType.READ)
-
-    def read_receiveAddresses(self):
-        return self._receive_addresses
-
-    def read_commandInProgress(self):
-        return self._command_in_progress
 
     def create_component_manager(self):
         self.op_state_model = OpStateModel(
@@ -146,20 +128,6 @@ class HelperSubArrayDevice(SKASubarray):
             self.op_state_model, self.obs_state_model, logger=self.logger
         )
         return cm
-
-    @command(
-        dtype_in=int,
-        doc_in="Set ObsState",
-    )
-    def SetDirectObsState(self, argin):
-        """
-        Trigger a ObsState change
-        """
-        # import debugpy; debugpy.debug_this_thread()
-        value = ObsState(argin)
-        if self._obs_state != value:
-            self._obs_state = value
-            self.push_change_event("obsState", self._obs_state)
 
     @command(
         dtype_in="DevState",
@@ -188,21 +156,6 @@ class HelperSubArrayDevice(SKASubarray):
         if self._health_state != value:
             self._health_state = HealthState(argin)
             self.push_change_event("healthState", self._health_state)
-
-    @command(
-        dtype_in="DevString",
-        doc_in="command in progress",
-    )
-    def SetDirectCommandInProgress(self, argin):
-        """
-        Trigger a CommandInProgress change
-        """
-        # import debugpy; debugpy.debug_this_thread()
-        if self._command_in_progress != argin:
-            self._command_in_progress = argin
-            self.push_change_event(
-                "commandInProgress", self._command_in_progress
-            )
 
     def is_On_allowed(self):
         return True
@@ -240,6 +193,42 @@ class HelperSubArrayDevice(SKASubarray):
             self.set_state(DevState.STANDBY)
         return [[ResultCode.OK], [""]]
 
+    def is_TelescopeOn_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def TelescopeOn(self):
+        if self.dev_state() != DevState.ON:
+            self.set_state(DevState.ON)
+        return [[ResultCode.OK], [""]]
+
+    def is_TelescopeOff_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def TelescopeOff(self):
+        if self.dev_state() != DevState.OFF:
+            self.set_state(DevState.OFF)
+        return [[ResultCode.OK], [""]]
+
+    def is_TelescopeStandBy_allowed(self):
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def TelescopeStandBy(self):
+        if self.dev_state() != DevState.STANDBY:
+            self.set_state(DevState.STANDBY)
+        return [[ResultCode.OK], [""]]
+
     def is_AssignResources_allowed(self):
         """
         Check if command `AssignResources` is allowed in the current device state.
@@ -248,37 +237,6 @@ class HelperSubArrayDevice(SKASubarray):
         :rtype: boolean
         """
         return True
-
-    @command(
-        dtype_in=("str"),
-        doc_in="The input string in JSON format consists of receptorIDList.",
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def AssignResources(self, argin):
-        if self._obs_state != ObsState.IDLE:
-            self._obs_state = ObsState.IDLE
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
-
-    def is_ReleaseResources_allowed(self):
-        """
-        Check if command `ReleaseResources` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
-        """
-        return True
-
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def ReleaseResources(self):
-        if self._obs_state != ObsState.EMPTY:
-            self._obs_state = ObsState.EMPTY
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
 
     def is_ReleaseAllResources_allowed(self):
         """
@@ -289,149 +247,11 @@ class HelperSubArrayDevice(SKASubarray):
         """
         return True
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def ReleaseAllResources(self):
-        if self._obs_state != ObsState.EMPTY:
-            self._obs_state = ObsState.EMPTY
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
-
-    def is_Configure_allowed(self):
+    def is_ReleaseResources_allowed(self):
         """
-        Check if command `Configure` is allowed in the current device state.
+        Check if command `ReleaseAllResources` is allowed in the current device state.
 
         :return: ``True`` if the command is allowed
         :rtype: boolean
         """
         return True
-
-    @command(
-        dtype_in=("str"),
-        doc_in="The input string in JSON format.",
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def Configure(self, argin):
-        if self._obs_state != ObsState.READY:
-            self._obs_state = ObsState.READY
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
-
-    def is_Scan_allowed(self):
-        """
-        Check if command `Scan` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
-        """
-        return True
-
-    @command(
-        dtype_in=("str"),
-        doc_in="The input string in JSON format.",
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def Scan(self, argin):
-        if self._obs_state != ObsState.SCANNING:
-            self._obs_state = ObsState.SCANNING
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
-
-    def is_EndScan_allowed(self):
-        """
-        Check if command `EndScan` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
-        """
-        return True
-
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def EndScan(self):
-        if self._obs_state != ObsState.READY:
-            self._obs_state = ObsState.READY
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
-
-    def is_End_allowed(self):
-        """
-        Check if command `End` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
-        """
-        return True
-
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def End(self):
-        if self._obs_state != ObsState.IDLE:
-            self._obs_state = ObsState.IDLE
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
-
-    def is_ObsReset_allowed(self):
-        """
-        Check if command `ObsReset` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
-        """
-        return True
-
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def ObsReset(self):
-        if self._obs_state != ObsState.IDLE:
-            self._obs_state = ObsState.IDLE
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
-
-    def is_Abort_allowed(self):
-        """
-        Check if command `Abort` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
-        """
-        return True
-
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def Abort(self):
-        if self._obs_state != ObsState.ABORTED:
-            self._obs_state = ObsState.ABORTED
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
-
-    def is_Restart_allowed(self):
-        """
-        Check if command `Restart` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
-        """
-        return True
-
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def Restart(self):
-        if self._obs_state != ObsState.EMPTY:
-            self._obs_state = ObsState.EMPTY
-            self.push_change_event("obsState", self._obs_state)
-        return [[ResultCode.OK], [""]]
