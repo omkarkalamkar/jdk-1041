@@ -1,8 +1,8 @@
 import pytest
 import tango
+from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
-from ska_tmc_centralnode.dev_factory import DevFactory
-from tests.helpers.helper_state_device import HelperStateDevice
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     create_cm_no_faulty_devices,

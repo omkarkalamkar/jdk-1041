@@ -2,9 +2,16 @@ import json
 import time
 
 import pytest
+from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
+from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
+    HelperMCCSStateDevice,
+)
 
 from ska_tmc_centralnode.central_node_mid import CentralNodeMid
-from tests.helpers.helper_state_device import HelperStateDevice
+
+# from ska_tmc_common.test_helpers.helper_subarray_device import (
+#     HelperSubArrayDevice,
+# )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
@@ -31,6 +38,15 @@ def devices_to_load():
                 {"name": "mid_sdp/elt/master"},
                 {"name": "mid_d0001/elt/master"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
+                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
+            ],
+        },
+        {
+            "class": HelperMCCSStateDevice,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/mccs_master"},
+                {"name": "low-mccs/control/control"},
             ],
         },
         {

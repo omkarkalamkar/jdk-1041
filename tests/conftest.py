@@ -3,9 +3,8 @@ import logging
 
 import pytest
 import tango
+from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
-
-from ska_tmc_centralnode.dev_factory import DevFactory
 
 
 def pytest_sessionstart(session):

@@ -2,12 +2,12 @@ import time
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common.adapters import AdapterFactory
 from tango import DevState
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
-from ska_tmc_centralnode.manager.adapters import AdapterFactory
 
 
 class TelescopeOff(AbstractTelescopeOnOff):
@@ -71,7 +71,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(adapter.dev_name).obsState
+                    not component_manager.get_device(
+                        adapter.dev_name
+                    ).obs_state
                     == ObsState.EMPTY
                 ):
                     self.logger.error(
@@ -160,7 +162,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(adapter.dev_name).obsState
+                    not component_manager.get_device(
+                        adapter.dev_name
+                    ).obs_state
                     == ObsState.EMPTY
                 ):
                     self.logger.error(

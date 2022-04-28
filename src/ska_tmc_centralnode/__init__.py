@@ -12,8 +12,9 @@
 Central Node is a coordinator of the complete M&C system.
 """
 
+from ska_tmc_common.dev_factory import DevFactory
+
 from ska_tmc_centralnode import input_validator, release
-from ska_tmc_centralnode.dev_factory import DevFactory
 
 __all__ = ["release", "input_validator", "DevFactory"]
 

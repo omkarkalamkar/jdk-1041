@@ -4,13 +4,19 @@ import mock
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common.command_executor import CommandExecutor
+from ska_tmc_common.test_helpers.helper_adapter_factory import (
+    HelperAdapterFactory,
+)
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
-from ska_tmc_centralnode.manager.command_executor import CommandExecutor
-from tests.helpers.helper_adapter_factory import HelperAdapterFactory
+
+# from ska_tmc_common.test_helpers.helper_subarray_device import (
+#     HelperSubArrayDevice,
+# )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, create_cm, logger
 from tests.unit.commands.mid.test_assign_resources_command import (
