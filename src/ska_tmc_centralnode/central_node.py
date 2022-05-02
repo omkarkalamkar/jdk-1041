@@ -3,6 +3,8 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
+import json
+
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.op_state_model import TMCOpStateModel
@@ -161,11 +163,16 @@ class AbstractCentralNode(TMCBaseDevice):
     def read_desiredTelescopeState(self):
         return self.component_manager.component.desired_telescope_state
 
-    def read_device_transformedInternalModel(self, result, json_model):
-        result["telescope_state"] = json_model["telescope_state"]
-        result["tmc_op_state"] = json_model["tmc_op_state"]
-        result["telescope_health_state"] = json_model["telescope_health_state"]
-        return result
+    def transformedInternalModel_read(self):
+        result = json.loads(super().transformedInternalModel_read())
+        result[
+            "telescope_state"
+        ] = self.component_manager.get_telescope_state()
+        result["tmc_op_state"] = self.component_manager.get_tmc_op_state()
+        result[
+            "telescope_health_state"
+        ] = self.component_manager.get_telescope_health_state()
+        return json.dumps(result)
 
     def read_tmOpState(self):
         """Return the tmOpState attribute."""

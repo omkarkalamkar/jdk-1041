@@ -390,8 +390,12 @@ class CNComponentManager(BaseComponentManager):
                 pass
 
         with self.lock:
-            new_state = self._health_state_aggregator.aggregate()
-            self.component.telescope_health_state = new_state
+            self.component.telescope_health_state = (
+                self._health_state_aggregator.aggregate()
+            )
+
+    def get_telescope_health_state(self):
+        return self.component.telescope_health_state
 
     def _aggregate_state(self):
         """
@@ -420,6 +424,9 @@ class CNComponentManager(BaseComponentManager):
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
+    def get_telescope_state(self):
+        return self.component.telescope_state
+
     def _aggregate_tm_op_state(self):
         """
         Aggregates tm devices states
@@ -430,8 +437,12 @@ class CNComponentManager(BaseComponentManager):
             )
 
         with self.lock:
-            new_state = self._tm_op_state_aggregator.aggregate()
-            self.component.tmc_op_state = new_state
+            self.component.tmc_op_state = (
+                self._tm_op_state_aggregator.aggregate()
+            )
+
+    def get_tmc_op_state(self):
+        return self.component.tmc_op_state
 
     def _update_resources(self, subarray_dev_info):
         """
