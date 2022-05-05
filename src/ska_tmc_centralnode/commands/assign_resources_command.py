@@ -5,7 +5,6 @@ import json
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -26,7 +25,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self,
         target,
         pop_state_model,
-        adapter_factory=AdapterFactory(),
+        adapter_factory=None,
         skuid=SkuidClient(
             "ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870"
         ),
@@ -40,8 +39,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         self._skuid = skuid
-        # self._timeout_mccs = timeout_mccs
-        # self._step_sleep = step_sleep
+        self.init_adapters()
 
     def do_mid(self, argin=None):
         """
@@ -151,10 +149,6 @@ class AssignResources(AbstractAssignReleaseResources):
 
         """
         component_manager = self.target
-
-        ret_code, message = self.init_adapters_mid()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
 
         # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
         # self.logger.info("Validating input string.")
@@ -344,10 +338,6 @@ class AssignResources(AbstractAssignReleaseResources):
             AssertionError if  Mccs On command is not completed.
 
         """
-        ret_code, message = self.init_adapters_low()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
-
         try:
             json_argument = json.loads(argin)
         except Exception as e:

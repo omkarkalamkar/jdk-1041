@@ -4,7 +4,6 @@ ReleaseResources class for CentralNode.
 import json
 
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -28,7 +27,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         self,
         target,
         pop_state_model,
-        adapter_factory=AdapterFactory(),
+        adapter_factory=None,
         *args,
         logger=None,
         **kwargs,
@@ -38,6 +37,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         self._adapter_factory = adapter_factory
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
+        self.init_adapters()
 
     def do_mid(self, argin):
         """
@@ -69,9 +69,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         :return: None
         """
-        ret_code, message = self.init_adapters_mid()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
         try:
             jsonArgument = json.loads(argin)
         except Exception as e:
@@ -161,11 +158,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
             DevFailed if the command execution or command invocation on SubarrayNode is not successful
 
         """
-
-        ret_code, message = self.init_adapters_low()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
-
         try:
             json_argument = json.loads(argin)
         except Exception as e:

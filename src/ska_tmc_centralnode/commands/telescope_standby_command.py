@@ -2,7 +2,6 @@ import time
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tmc_common.adapters import AdapterFactory
 from tango import DevState
 
 from ska_tmc_centralnode.commands.abstract_command import (
@@ -19,7 +18,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self,
         target,
         pop_state_model,
-        adapter_factory=AdapterFactory(),
+        adapter_factory=None,
         timeout_subarrays=3000,
         step_sleep=0.1,
         *args,
@@ -31,6 +30,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
+        self.init_adapters()
 
     def do_mid(self, argin=None):
         """
@@ -46,10 +46,6 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         component_manager = self.target
 
         component_manager.component.desired_telescope_state = DevState.STANDBY
-
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
 
         for adapter in self.tm_subarray_adapters:
             try:
@@ -137,10 +133,6 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         component_manager = self.target
 
         component_manager.component.desired_telescope_state = DevState.STANDBY
-
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
 
         for adapter in self.tm_subarray_adapters:
             try:

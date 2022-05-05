@@ -1,5 +1,4 @@
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import AdapterFactory
 from tango import DevState
 
 from ska_tmc_centralnode.commands.abstract_command import (
@@ -20,7 +19,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self,
         target,
         pop_state_model,
-        adapter_factory=AdapterFactory(),
+        adapter_factory=None,
         timeout_mccs=3000,
         step_sleep=0.1,
         *args,
@@ -32,6 +31,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
         self._timeout_mccs = timeout_mccs
         self._step_sleep = step_sleep
+        self.init_adapters()
 
     def do_mid(self, argin=None):
         """
@@ -44,10 +44,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
         component_manager = self.target
 
         component_manager.component.desired_telescope_state = DevState.ON
-
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
 
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
@@ -105,10 +101,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
         component_manager = self.target
 
         component_manager.component.desired_telescope_state = DevState.ON
-
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
 
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
