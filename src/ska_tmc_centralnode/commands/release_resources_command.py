@@ -70,8 +70,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         :return: None
         """
-        self.init_adapters_mid()
-
         try:
             jsonArgument = json.loads(argin)
         except Exception as e:
@@ -161,8 +159,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
             DevFailed if the command execution or command invocation on SubarrayNode is not successful
 
         """
-        self.init_adapters_low()
-
         try:
             json_argument = json.loads(argin)
         except Exception as e:
