@@ -5,6 +5,7 @@ import json
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -35,7 +36,7 @@ class AssignResources(AbstractAssignReleaseResources):
     ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
-        self._adapter_factory = adapter_factory
+        self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         self._skuid = skuid
