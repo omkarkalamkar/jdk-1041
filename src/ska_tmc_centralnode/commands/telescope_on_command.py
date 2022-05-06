@@ -101,26 +101,29 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         """
         component_manager = self.target
-
         component_manager.component.desired_telescope_state = DevState.ON
 
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
-        try:
-            self.tm_leaf_mccs_master_adapter.On()
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"Error in calling Telescope On in TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
-            )
-
-        for adapter in self.tm_subarray_adapters:
-            try:
-                adapter.On()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}",
-                )
+        for ret_code, message in [
+            self.turn_on_mccs_master(),
+            self.turn_on_mccs_subarray(),
+        ]:
+            if ret_code == ResultCode.FAILED:
+                return ret_code, message
 
         return (ResultCode.OK, "")
+
+    def turn_on_mccs_master(self):
+        return self.send_command(
+            [self.tm_leaf_mccs_master_adapter],
+            "Error in calling TelescopeOn() in TM MCCS Master Leaf",
+            "On",
+        )
+
+    def turn_on_mccs_subarray(self):
+        return self.send_command(
+            self.tm_subarray_adapters,
+            "Error in calling TelescopeOn() in TM Subarray",
+            "On",
+        )
