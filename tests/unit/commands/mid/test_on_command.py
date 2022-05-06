@@ -53,13 +53,13 @@ def test_telescope_on_command(tango_context):
     for adapter in my_adapter_factory.adapters:
         if isinstance(adapter, DishAdapter):
             adapter.proxy.SetStandbyFPMode.assert_called()
-            adapter.proxy.SetOperateMode.assert_called()
+            adapter.proxy.SetOperateMode.assert_called_once_with()
             continue
         if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.On.assert_called()
+            adapter.proxy.On.assert_called_once_with()
             continue
 
-        adapter.proxy.On.assert_called()
+        adapter.proxy.On.assert_called_once_with()
 
 
 def test_telescope_on_command_fail_subarray(tango_context):
