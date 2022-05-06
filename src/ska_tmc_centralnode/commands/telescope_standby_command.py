@@ -50,7 +50,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         ret_code, message = self.turn_standby_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-        
+
         self.logger.info(
             "waiting for ALL Subarray devices obsState to be Empty"
         )
@@ -76,7 +76,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                     "Timeout in waiting for subarrays devices to be empty",
                 )
             time.sleep(self._step_sleep)
-        
+
         for ret_code, message in [
             self.turn_standby_csp(),
             self.turn_standby_sdp(),
