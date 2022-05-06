@@ -1,5 +1,3 @@
-import operator
-
 from ska_tango_base.commands import ResultCode
 from tango import DevState
 
@@ -58,28 +56,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 return ret_code, message
 
         return (ResultCode.OK, "")
-
-    # This method will be moved to abstract class
-    def invoke_command(
-        self,
-        adapters: list,
-        command_caller,
-        description: str,
-    ):
-        try:
-            for adapter in adapters:
-                command_caller(adapter)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"{description} {adapter.dev_name}: {e}",
-            )
-        return (ResultCode.OK, "")
-
-    def send_command(self, adapters, description, command):
-        return self.invoke_command(
-            adapters, operator.methodcaller(command), description
-        )
 
     def turn_on_sdp(self):
         return self.send_command(
