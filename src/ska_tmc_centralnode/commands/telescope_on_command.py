@@ -107,7 +107,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         # import debugpy; debugpy.debug_this_thread()
         for ret_code, message in [
             self.turn_on_mccs_master(),
-            self.turn_on_mccs_subarray(),
+            self.turn_on_subarrays(),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
@@ -118,12 +118,5 @@ class TelescopeOn(AbstractTelescopeOnOff):
         return self.send_command(
             [self.tm_leaf_mccs_master_adapter],
             "Error in calling TelescopeOn() in TM MCCS Master Leaf",
-            "On",
-        )
-
-    def turn_on_mccs_subarray(self):
-        return self.send_command(
-            self.tm_subarray_adapters,
-            "Error in calling TelescopeOn() in TM Subarray",
             "On",
         )
