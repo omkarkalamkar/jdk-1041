@@ -38,6 +38,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
+        self.my_subarray_adapter = None
         self.init_adapters()
 
     def do_mid(self, argin):
@@ -70,61 +71,19 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         :return: None
         """
-        try:
-            jsonArgument = json.loads(argin)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
-            )
 
-        if "transaction_id" not in jsonArgument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "transaction_id key is not present in the input json argument.",
-            )
+        ret_code, message = self.do_common(argin)
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
-        if "transaction_id" in jsonArgument:
-            del jsonArgument["transaction_id"]
-
-        if "subarray_id" not in jsonArgument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
-        subarrayID = jsonArgument["subarray_id"]
-
-        my_subarray_adapter = None
-        for adapter in self.tm_subarray_adapters:
-            if str(subarrayID) in adapter.dev_name:
-                my_subarray_adapter = adapter
-
-        if my_subarray_adapter is None:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarrayID),
-            )
-
+        jsonArgument = json.loads(argin)
         if jsonArgument["release_all"]:
-            # Invoke "ReleaseAllResources" on SubarrayNode
-            try:
-                return_val = my_subarray_adapter.ReleaseAllResources()
-                self.logger.info(
-                    "Command result from Subarray: %s", return_val
-                )
-                # Leave the monitoring loop to do the updates on the resources!
-                # component_manager.add_command_execution("ReleaseResources", ResultCode.OK, "")
-                return (ResultCode.OK, "")
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    (
-                        "Error in calling ReleaseAllResources on subarray %s: %s",
-                        my_subarray_adapter.dev_name,
-                        e,
-                    ),
-                )
+            ret_code, message = self.release_all_resources(
+                self.my_subarray_adapter
+            )
+            if ret_code == ResultCode.FAILED:
+                return ret_code, message
+            return (ResultCode.OK, "")
         else:
             return (
                 ResultCode.FAILED,
@@ -159,67 +118,81 @@ class ReleaseResources(AbstractAssignReleaseResources):
             DevFailed if the command execution or command invocation on SubarrayNode is not successful
 
         """
+
+        ret_code, message = self.do_common(argin)
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        jsonArgument = json.loads(argin)
+        if jsonArgument["release_all"] is True:
+            ret_code, message = self.release_all_resources(
+                self.my_subarray_adapter
+            )
+            if ret_code == ResultCode.FAILED:
+                return ret_code, message
+            # Invoke ReleaseAllResources on MCCS Master Leaf Node
+            # Send updated input string with inteface key to MCCS Master for ReleaseResource Command
+            jsonArgument[
+                "interface"
+            ] = "https://schema.skao.int/ska-low-mccs-releaseresources/1.0"
+            if "transaction_id" in jsonArgument:
+                del jsonArgument["transaction_id"]
+
+                ret_code, message = self.release_resources_mccs(
+                    json.dumps(jsonArgument)
+                )
+                if ret_code == ResultCode.FAILED:
+                    return ret_code, message
+            return (ResultCode.OK, "")
+
+    def release_all_resources(self, adapter):
+        return self.send_command(
+            [adapter],
+            "Error in calling ReleaseResources() on TMC Device",
+            "ReleaseAllResources",
+        )
+
+    def release_resources_mccs(self, arg):
+        return self.send_command(
+            [self.tm_leaf_mccs_master_adapter],
+            "Error in calling ReleaseResources() on TMC Device",
+            "ReleaseResources",
+            arg,
+        )
+
+    def do_common(self, argin):
         try:
-            json_argument = json.loads(argin)
+            jsonArgument = json.loads(argin)
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        if "subarray_id" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
-        if "transaction_id" not in json_argument:
+        if "transaction_id" not in jsonArgument:
             return self.generate_command_result(
                 ResultCode.FAILED,
                 "transaction_id key is not present in the input json argument.",
             )
 
-        subarrayID = int(json_argument["subarray_id"])
+        if "transaction_id" in jsonArgument:
+            del jsonArgument["transaction_id"]
 
-        my_subarray_adapter = None
+        if "subarray_id" not in jsonArgument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
+
+        subarrayID = jsonArgument["subarray_id"]
+
         for adapter in self.tm_subarray_adapters:
             if str(subarrayID) in adapter.dev_name:
-                my_subarray_adapter = adapter
+                self.my_subarray_adapter = adapter
 
-        if my_subarray_adapter is None:
+        if self.my_subarray_adapter is None:
             return self.generate_command_result(
                 ResultCode.FAILED,
                 ("SubArray Id %s is not existing!", subarrayID),
             )
-
-        if json_argument["release_all"] is True:
-            try:
-                # Invoke ReleaseAllResources on SubarrayNode
-                my_subarray_adapter.ReleaseAllResources()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    (
-                        "Error in calling ReleaseResources on subarray %s: %s",
-                        my_subarray_adapter.dev_name,
-                        e,
-                    ),
-                )
-            # Invoke ReleaseAllResources on MCCS Master Leaf Node
-            # Send updated input string with inteface key to MCCS Master for ReleaseResource Command
-            json_argument[
-                "interface"
-            ] = "https://schema.skao.int/ska-low-mccs-releaseresources/1.0"
-            if "transaction_id" in json_argument:
-                del json_argument["transaction_id"]
-                try:
-                    self.tm_leaf_mccs_master_adapter.ReleaseResources(
-                        json.dumps(json_argument)
-                    )
-                except Exception as e:
-                    return self.generate_command_result(
-                        ResultCode.FAILED,
-                        f"Error in calling ReleaseResources command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
-                    )
-
-            return (ResultCode.OK, "")
+        return ResultCode.OK, ""

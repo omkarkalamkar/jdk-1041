@@ -40,6 +40,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         self._skuid = skuid
+        self.my_subarray_adapter = None
         self.init_adapters()
 
     def do_mid(self, argin=None):
@@ -204,16 +205,9 @@ class AssignResources(AbstractAssignReleaseResources):
 
         subarrayID = int(json_argument["subarray_id"])
 
-        my_subarray_adapter = None
-        for adapter in self.tm_subarray_adapters:
-            if str(subarrayID) in adapter.dev_name:
-                my_subarray_adapter = adapter
-
-        if my_subarray_adapter is None:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarrayID),
-            )
+        ret_code, message = self.get_subarray_adapter(subarrayID)
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         # check allocated dishes
         if "dish" not in json_argument:
@@ -237,25 +231,17 @@ class AssignResources(AbstractAssignReleaseResources):
                     ("Dish %s is already allocated", dish_ID),
                 )
 
-        try:
-            # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
-            resources_allocated_return = my_subarray_adapter.AssignResources(
-                json.dumps(json_argument.copy())
-            )
-            self.logger.info(
-                "Command result from Subarray: %s", resources_allocated_return
-            )
-            # Leave the monitoring loop to do the updates on the allocated resources!
-            return (ResultCode.OK, "")
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                (
-                    "Error in calling AssignResources on subarray %s: %s",
-                    my_subarray_adapter.dev_name,
-                    e,
-                ),
-            )
+        # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
+        ret_code, message = self.send_command(
+            [self.my_subarray_adapter],
+            "Error in calling AssignResources on subarray",
+            "AssignResources",
+            json.dumps(json_argument.copy()),
+        )
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        return (ResultCode.OK, "")
 
     def update_resource_config_file(self, json_argument, id):
         """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
@@ -385,12 +371,11 @@ class AssignResources(AbstractAssignReleaseResources):
 
         subarrayID = int(json_argument["subarray_id"])
 
-        my_subarray_adapter = None
-        for adapter in self.tm_subarray_adapters:
-            if str(subarrayID) in adapter.dev_name:
-                my_subarray_adapter = adapter
+        ret_code, message = self.get_subarray_adapter(subarrayID)
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
-        if my_subarray_adapter is None:
+        if self.my_subarray_adapter is None:
             return self.generate_command_result(
                 ResultCode.FAILED,
                 ("SubArray Id %s is not existing!", subarrayID),
@@ -404,31 +389,28 @@ class AssignResources(AbstractAssignReleaseResources):
             )
 
         try:
-            my_subarray_adapter.AssignResources(subarray_cmd_data)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                (
-                    "Error in calling AssignResources on subarray %s: %s",
-                    my_subarray_adapter.dev_name,
-                    e,
-                ),
-            )
-
-        try:
             input_mccs_master = self.create_mccs_cmd_data(json_argument)
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED, ("Errors in input json argument: %s", e)
             )
 
-        try:
-            self.tm_leaf_mccs_master_adapter.AssignResources(input_mccs_master)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"Error in calling AssignResource command on TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
-            )
+        for ret_code, message in [
+            self.send_command(
+                [self.my_subarray_adapter],
+                "Error in calling AssignResources on subarray",
+                "AssignResources",
+                subarray_cmd_data,
+            ),
+            self.send_command(
+                [self.tm_leaf_mccs_master_adapter],
+                "Error in calling AssignResource command on TM MCCS Master Leaf",
+                "AssignResources",
+                input_mccs_master,
+            ),
+        ]:
+            if ret_code == ResultCode.FAILED:
+                return ResultCode.FAILED, message
 
         return (ResultCode.OK, "")
 
@@ -469,3 +451,21 @@ class AssignResources(AbstractAssignReleaseResources):
             del json_argument["sdp"]
         input_to_subarray = json.dumps(json_argument)
         return input_to_subarray
+
+    def get_subarray_adapter(self, subarray_id):
+        for adapter in self.tm_subarray_adapters:
+            if str(subarray_id) in adapter.dev_name:
+                self.my_subarray_adapter = adapter
+
+        if self.my_subarray_adapter is None:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("SubArray Id %s is not existing!", subarray_id),
+            )
+
+        return ResultCode.OK, ""
+
+    # def input_json_validator(self, key, json_string, message):
+    #     if key not in json_string:
+    #         return self.generate_command_result(ResultCode.FAILED, message)
+    #     return ResultCode.OK, ""

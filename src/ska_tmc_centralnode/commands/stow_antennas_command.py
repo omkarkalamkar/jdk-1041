@@ -3,10 +3,10 @@ from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import TMCCommand
+from ska_tmc_centralnode.commands.abstract_command import CentralNodeCommand
 
 
-class StowAntennas(TMCCommand):
+class StowAntennas(CentralNodeCommand):
     """
     A class for CentralNode's StowAntennas() command.
 
@@ -110,12 +110,15 @@ class StowAntennas(TMCCommand):
                 if argin[i] not in adapter.dev_name:
                     continue
 
-                try:
-                    adapter.SetStowMode()
-                except Exception as e:
-                    return self.generate_command_result(
-                        ResultCode.FAILED,
-                        f"Error in calling SetStowMode in TM Dish Leaf {adapter.dev_name}: {e}",
-                    )
+                ret_code, message = self.set_stow_mode_dishes(adapter)
+                if ret_code == ResultCode.FAILED:
+                    return ret_code, message
 
         return (ResultCode.OK, "")
+
+    def set_stow_mode_dishes(self, adapters):
+        return self.send_command(
+            [adapters],
+            "Error in calling StowAntennasCommand() on TMC Dish leaf node",
+            "SetStowMode",
+        )
