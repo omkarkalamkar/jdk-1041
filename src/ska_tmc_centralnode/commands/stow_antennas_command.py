@@ -53,14 +53,9 @@ class StowAntennas(CentralNodeCommand):
 
         # for this command I need a number of sub-devices
         component_manager = self.target
-
-        dish_count = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
-                dish_count += 1
-        if dish_count == 0:
-            raise CommandNotAllowed("No Dish available")
+        component_manager.check_if_device_is_responsive(
+            component_manager.input_parameter.tm_dish_dev_names
+        )
 
         return True
 

@@ -12,6 +12,7 @@ from ska_tango_base.control_model import ObsState
 from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
+from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
@@ -216,6 +217,15 @@ class CNComponentManager(BaseComponentManager):
         :rtype: DeviceInfo
         """
         return self.component.get_device(dev_name)
+
+    def check_if_device_is_responsive(self, dev_names):
+        count = 0
+        for dev_name in dev_names:
+            devInfo = self.get_device(dev_name)
+            if devInfo is not None and not devInfo.unresponsive:
+                count += 1
+        if count == 0:
+            raise CommandNotAllowed(f"{dev_names} not available")
 
     def add_dishes(self, dln_prefix, num_dishes):
         """
