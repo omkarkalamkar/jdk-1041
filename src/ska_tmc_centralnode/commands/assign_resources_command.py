@@ -464,8 +464,3 @@ class AssignResources(AbstractAssignReleaseResources):
             )
 
         return ResultCode.OK, ""
-
-    # def input_json_validator(self, key, json_string, message):
-    #     if key not in json_string:
-    #         return self.generate_command_result(ResultCode.FAILED, message)
-    #     return ResultCode.OK, ""
