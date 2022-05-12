@@ -47,7 +47,7 @@ class CentralNodeCommand(TMCCommand):
         self,
         adapters: list,
         command_caller,
-        description: str,
+        err_msg: str,
     ):
         try:
             for adapter in adapters:
@@ -55,7 +55,7 @@ class CentralNodeCommand(TMCCommand):
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
-                f"{description} {adapter.dev_name}: {e}",
+                f"{err_msg} {adapter.dev_name}: {e}",
             )
         return (ResultCode.OK, "")
 
@@ -113,18 +113,11 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         # for this command I need a number of sub-devices
         # import debugpy; debugpy.debug_this_thread()
-        component_manager.check_if_device_is_responsive(
-            [component_manager.input_parameter.tm_leaf_csp_master_dev_name]
-        )
-        component_manager.check_if_device_is_responsive(
-            [component_manager.input_parameter.tm_leaf_sdp_master_dev_name]
-        )
-        component_manager.check_if_device_is_responsive(
-            component_manager.input_parameter.tm_subarray_dev_names
-        )
-        component_manager.check_if_device_is_responsive(
-            component_manager.input_parameter.tm_dish_dev_names
-        )
+        component_manager.check_if_csp_mln_is_responsive()
+        component_manager.check_if_sdp_mln_is_responsive()
+        component_manager.check_if_subarrays_are_responsive()
+        component_manager.check_if_dishes_are_responsive()
+
         return True
 
     def check_allowed_low(self):
@@ -150,16 +143,13 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 "TelescopeOnOff() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
-        component_manager.check_if_device_is_responsive(
-            [component_manager.input_parameter.mccs_master_leaf_node]
-        )
-        component_manager.check_if_device_is_responsive(
-            component_manager.input_parameter.tm_subarray_dev_names
-        )
+
+        component_manager.check_if_mccs_mln_is_responsive()
+        component_manager.check_if_subarrays_are_responsive()
+
         return True
 
     def init_adapters_mid(self):
-
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
@@ -239,7 +229,6 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
     def init_adapters_low(self):
-
         self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
         component_manager = self.target
@@ -323,12 +312,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                 "AssignReleaseResources() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
-        component_manager.check_if_device_is_responsive(
-            component_manager.input_parameter.tm_subarray_dev_names
-        )
-        component_manager.check_if_device_is_responsive(
-            component_manager.input_parameter.tm_dish_dev_names
-        )
+        component_manager.check_if_subarrays_are_responsive()
+        component_manager.check_if_dishes_are_responsive()
 
         return True
 
@@ -354,12 +339,9 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                 "AssignReleaseResources() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
-        component_manager.check_if_device_is_responsive(
-            [component_manager.input_parameter.mccs_master_leaf_node]
-        )
-        component_manager.check_if_device_is_responsive(
-            component_manager.input_parameter.tm_subarray_dev_names
-        )
+
+        component_manager.check_if_mccs_mln_is_responsive()
+        component_manager.check_if_subarrays_are_responsive()
 
         return True
 

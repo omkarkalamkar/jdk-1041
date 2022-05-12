@@ -53,9 +53,7 @@ class StowAntennas(CentralNodeCommand):
 
         # for this command I need a number of sub-devices
         component_manager = self.target
-        component_manager.check_if_device_is_responsive(
-            component_manager.input_parameter.tm_dish_dev_names
-        )
+        component_manager.check_if_dishes_are_responsive()
 
         return True
 

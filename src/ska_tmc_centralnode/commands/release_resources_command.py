@@ -72,7 +72,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         :return: None
         """
 
-        ret_code, message = self.do_common(argin)
+        ret_code, message = self.validate_input_json(argin)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
@@ -119,7 +119,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         """
 
-        ret_code, message = self.do_common(argin)
+        ret_code, message = self.validate_input_json(argin)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
@@ -160,7 +160,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             arg,
         )
 
-    def do_common(self, argin):
+    def validate_input_json(self, argin):
         try:
             jsonArgument = json.loads(argin)
         except Exception as e:

@@ -218,11 +218,36 @@ class CNComponentManager(BaseComponentManager):
         """
         return self.component.get_device(dev_name)
 
-    def check_if_device_is_responsive(self, dev_names):
+    def check_if_csp_mln_is_responsive(self):
+        return self._check_if_device_is_responsive(
+            [self.input_parameter.tm_leaf_csp_master_dev_name]
+        )
+
+    def check_if_sdp_mln_is_responsive(self):
+        return self._check_if_device_is_responsive(
+            [self.input_parameter.tm_leaf_sdp_master_dev_name]
+        )
+
+    def check_if_subarrays_are_responsive(self):
+        return self._check_if_device_is_responsive(
+            self.input_parameter.tm_subarray_dev_names
+        )
+
+    def check_if_dishes_are_responsive(self):
+        return self._check_if_device_is_responsive(
+            self.input_parameter.tm_dish_dev_names
+        )
+
+    def check_if_mccs_mln_is_responsive(self):
+        return self._check_if_device_is_responsive(
+            [self.input_parameter.mccs_master_leaf_node]
+        )
+
+    def _check_if_device_is_responsive(self, dev_names):
         count = 0
         for dev_name in dev_names:
-            devInfo = self.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
+            dev_info = self.get_device(dev_name)
+            if dev_info is not None and not dev_info.unresponsive:
                 count += 1
         if count == 0:
             raise CommandNotAllowed(f"{dev_names} not available")
