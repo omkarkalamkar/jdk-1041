@@ -1,3 +1,5 @@
+import operator
+
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -40,6 +42,31 @@ class CentralNodeCommand(TMCCommand):
             result = self.do_low(argin)
 
         return result
+
+    def invoke_command(
+        self,
+        adapters: list,
+        command_caller,
+        err_msg: str,
+    ):
+        try:
+            for adapter in adapters:
+                command_caller(adapter)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                f"{err_msg} {adapter.dev_name}: {e}",
+            )
+        return (ResultCode.OK, "")
+
+    def send_command(self, adapters, description, command, argin=None):
+        if argin:
+            return self.invoke_command(
+                adapters, operator.methodcaller(command, argin), description
+            )
+        return self.invoke_command(
+            adapters, operator.methodcaller(command), description
+        )
 
 
 class AbstractTelescopeOnOff(CentralNodeCommand):
@@ -86,35 +113,10 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         # for this command I need a number of sub-devices
         # import debugpy; debugpy.debug_this_thread()
-        devInfo = component_manager.get_device(
-            component_manager.input_parameter.tm_leaf_csp_master_dev_name
-        )
-        if devInfo is None or devInfo.unresponsive:
-            raise CommandNotAllowed("TM Csp Master Leaf node not available")
-
-        devInfo = component_manager.get_device(
-            component_manager.input_parameter.tm_leaf_sdp_master_dev_name
-        )
-        if devInfo is None or devInfo.unresponsive:
-            raise CommandNotAllowed("TM SDP Master Leaf node not available")
-
-        subarray_count = 0
-        for (
-            dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
-                subarray_count += 1
-        if subarray_count == 0:
-            raise CommandNotAllowed("No TM Subarray available")
-
-        dish_count = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
-                dish_count += 1
-        if dish_count == 0:
-            raise CommandNotAllowed("No Dish available")
+        component_manager.check_if_csp_mln_is_responsive()
+        component_manager.check_if_sdp_mln_is_responsive()
+        component_manager.check_if_subarrays_are_responsive()
+        component_manager.check_if_dishes_are_responsive()
 
         return True
 
@@ -142,28 +144,12 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 self.op_state_model.op_state,
             )
 
-        # for this command I need a number of sub-devices
-        # import debugpy; debugpy.debug_this_thread()
-        devInfo = component_manager.get_device(
-            component_manager.input_parameter.mccs_master_leaf_node
-        )
-        if devInfo is None or devInfo.unresponsive:
-            raise CommandNotAllowed("TM Mccs Master Leaf node not available")
-
-        subarray_count = 0
-        for (
-            dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
-                subarray_count += 1
-        if subarray_count == 0:
-            raise CommandNotAllowed("No TM Low Subarray available")
+        component_manager.check_if_mccs_mln_is_responsive()
+        component_manager.check_if_subarrays_are_responsive()
 
         return True
 
     def init_adapters_mid(self):
-
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
@@ -243,7 +229,6 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
     def init_adapters_low(self):
-
         self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
         component_manager = self.target
@@ -294,14 +279,14 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         self,
         target,
         pop_state_model,
-        adapter_factory=AdapterFactory(),
+        adapter_factory=None,
         *args,
         logger=None,
         **kwargs,
     ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
-        self._adapter_factory = adapter_factory
+        self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
 
@@ -327,24 +312,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                 "AssignReleaseResources() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
-
-        subarray_count = 0
-        for (
-            dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
-                subarray_count += 1
-        if subarray_count == 0:
-            raise CommandNotAllowed("No TM Low Subarray available")
-
-        dish_count = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
-                dish_count += 1
-        if dish_count == 0:
-            raise CommandNotAllowed("No Dish available")
+        component_manager.check_if_subarrays_are_responsive()
+        component_manager.check_if_dishes_are_responsive()
 
         return True
 
@@ -371,21 +340,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                 self.op_state_model.op_state,
             )
 
-        devInfo = component_manager.get_device(
-            component_manager.input_parameter.mccs_master_leaf_node
-        )
-        if devInfo is None or devInfo.unresponsive:
-            raise CommandNotAllowed("TM Mccs Master Leaf node not available")
-
-        subarray_count = 0
-        for (
-            dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
-                subarray_count += 1
-        if subarray_count == 0:
-            raise CommandNotAllowed("No TM Low Subarray available")
+        component_manager.check_if_mccs_mln_is_responsive()
+        component_manager.check_if_subarrays_are_responsive()
 
         return True
 

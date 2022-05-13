@@ -1,5 +1,4 @@
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import AdapterFactory
 from tango import DevState
 
 from ska_tmc_centralnode.commands.abstract_command import (
@@ -20,7 +19,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self,
         target,
         pop_state_model,
-        adapter_factory=AdapterFactory(),
+        adapter_factory=None,
         timeout_mccs=3000,
         step_sleep=0.1,
         *args,
@@ -32,6 +31,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
         self._timeout_mccs = timeout_mccs
         self._step_sleep = step_sleep
+        self.init_adapters()
 
     def do_mid(self, argin=None):
         """
@@ -45,54 +45,52 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         component_manager.component.desired_telescope_state = DevState.ON
 
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
-
-        # send commands to sub-devices
-        # import debugpy; debugpy.debug_this_thread()
-        try:
-            self.tm_leaf_csp_master_adapter.On()
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"Error in calling Telescope On in TM CSP Master Leaf {self.tm_leaf_csp_master_adapter.dev_name}: {e}",
-            )
-
-        try:
-            self.tm_leaf_sdp_master_adapter.On()
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"Error in calling Telescope On in TM SDP Master Leaf {self.tm_leaf_sdp_master_adapter.dev_name}: {e}",
-            )
-
-        for adapter in self.tm_subarray_adapters:
-            try:
-                adapter.On()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}",
-                )
-
-        for adapter in self.tm_dish_adapters:
-            try:
-                adapter.SetStandbyFPMode()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling SetStandbyFPMode in TM Dish Leaf {adapter.dev_name}: {e}",
-                )
-            try:
-                adapter.SetOperateMode()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling SetOperateMode in TM Dish Leaf {adapter.dev_name}: {e}",
-                )
+        for ret_code, message in [
+            self.turn_on_csp(),
+            self.turn_on_sdp(),
+            self.turn_on_subarrays(),
+            self.set_standby_fp_mode_dishes(),
+            self.set_operate_mode_dishes(),
+        ]:
+            if ret_code == ResultCode.FAILED:
+                return ret_code, message
 
         return (ResultCode.OK, "")
+
+    def turn_on_sdp(self):
+        return self.send_command(
+            [self.tm_leaf_sdp_master_adapter],
+            "Error in calling TelescopeOn() on TMC SDP Subarray leaf",
+            "On",
+        )
+
+    def turn_on_csp(self):
+        return self.send_command(
+            [self.tm_leaf_csp_master_adapter],
+            "Error in calling TelescopeOn() on TMC CSP Subarray leaf",
+            "On",
+        )
+
+    def turn_on_subarrays(self):
+        return self.send_command(
+            self.tm_subarray_adapters,
+            "Error in calling TelescopeOn() on TMC Subarray",
+            "On",
+        )
+
+    def set_standby_fp_mode_dishes(self):
+        return self.send_command(
+            self.tm_dish_adapters,
+            "Error in calling TelescopeOn() on TMC Dish leaf node",
+            "SetStandbyFPMode",
+        )
+
+    def set_operate_mode_dishes(self):
+        return self.send_command(
+            self.tm_dish_adapters,
+            "Error in calling TelescopeOn() on TMC Dish leaf node",
+            "SetOperateMode",
+        )
 
     def do_low(self, argin=None):
         """
@@ -103,30 +101,22 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         """
         component_manager = self.target
-
         component_manager.component.desired_telescope_state = DevState.ON
-
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
 
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
-        try:
-            self.tm_leaf_mccs_master_adapter.On()
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"Error in calling Telescope On in TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
-            )
-
-        for adapter in self.tm_subarray_adapters:
-            try:
-                adapter.On()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}",
-                )
+        for ret_code, message in [
+            self.turn_on_mccs_master(),
+            self.turn_on_subarrays(),
+        ]:
+            if ret_code == ResultCode.FAILED:
+                return ret_code, message
 
         return (ResultCode.OK, "")
+
+    def turn_on_mccs_master(self):
+        return self.send_command(
+            [self.tm_leaf_mccs_master_adapter],
+            "Error in calling TelescopeOn() in TM MCCS Master Leaf",
+            "On",
+        )

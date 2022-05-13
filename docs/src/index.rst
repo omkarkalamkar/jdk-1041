@@ -1,6 +1,6 @@
-================================
+=========================
 CentralNode documentation
-================================
+=========================
 
 This project is developing the CentralNode (Mid and Low) component of the Telescope Monitoring and Control (TMC) prototype, for the `Square Kilometre Array`_.
 

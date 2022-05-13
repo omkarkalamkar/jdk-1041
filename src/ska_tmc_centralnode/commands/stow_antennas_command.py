@@ -3,10 +3,10 @@ from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import TMCCommand
+from ska_tmc_centralnode.commands.abstract_command import CentralNodeCommand
 
 
-class StowAntennas(TMCCommand):
+class StowAntennas(CentralNodeCommand):
     """
     A class for CentralNode's StowAntennas() command.
 
@@ -18,15 +18,16 @@ class StowAntennas(TMCCommand):
         self,
         target,
         pop_state_model,
-        adapter_factory=AdapterFactory(),
+        adapter_factory=None,
         *args,
         logger=None,
         **kwargs,
     ):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
-        self._adapter_factory = adapter_factory
+        self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_dish_adapters = []
+        self.init_adapters()
 
     def check_allowed(self):
         """
@@ -52,14 +53,7 @@ class StowAntennas(TMCCommand):
 
         # for this command I need a number of sub-devices
         component_manager = self.target
-
-        dish_count = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
-            if devInfo is not None and not devInfo.unresponsive:
-                dish_count += 1
-        if dish_count == 0:
-            raise CommandNotAllowed("No Dish available")
+        component_manager.check_if_dishes_are_responsive()
 
         return True
 
@@ -104,22 +98,20 @@ class StowAntennas(TMCCommand):
             List of Receptors to be stowed.
 
         """
-
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
-
         for i in range(0, len(argin)):
             for adapter in self.tm_dish_adapters:
                 if argin[i] not in adapter.dev_name:
                     continue
 
-                try:
-                    adapter.SetStowMode()
-                except Exception as e:
-                    return self.generate_command_result(
-                        ResultCode.FAILED,
-                        f"Error in calling SetStowMode in TM Dish Leaf {adapter.dev_name}: {e}",
-                    )
+                ret_code, message = self.set_stow_mode_dishes(adapter)
+                if ret_code == ResultCode.FAILED:
+                    return ret_code, message
 
         return (ResultCode.OK, "")
+
+    def set_stow_mode_dishes(self, adapters):
+        return self.send_command(
+            [adapters],
+            "Error in calling StowAntennasCommand() on TMC Dish leaf node",
+            "SetStowMode",
+        )

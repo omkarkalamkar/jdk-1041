@@ -2,7 +2,6 @@ import time
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tmc_common.adapters import AdapterFactory
 from tango import DevState
 
 from ska_tmc_centralnode.commands.abstract_command import (
@@ -19,7 +18,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
         self,
         target,
         pop_state_model,
-        adapter_factory=AdapterFactory(),
+        adapter_factory=None,
         timeout_subarrays=3000,
         step_sleep=0.1,
         *args,
@@ -31,6 +30,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
+        self.init_adapters()
 
     def do_mid(self, argin=None):
         """
@@ -46,21 +46,11 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         """
         component_manager = self.target
-
         component_manager.component.desired_telescope_state = DevState.OFF
 
-        ret_code, message = self.init_adapters()
+        ret_code, message = self.turn_off_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-
-        for adapter in self.tm_subarray_adapters:
-            try:
-                adapter.Off()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}",
-                )
 
         self.logger.info(
             "waiting for ALL Subarray devices obsState to be Empty"
@@ -88,40 +78,51 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
-        try:
-            self.tm_leaf_csp_master_adapter.Off()
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"Error in calling Telescope Off in TM CSP Master Leaf {self.tm_leaf_csp_master_adapter.dev_name}: {e}",
-            )
-
-        try:
-            self.tm_leaf_sdp_master_adapter.Off()
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"Error in calling Telescope Off in TM SDP Master Leaf {self.tm_leaf_sdp_master_adapter.dev_name}: {e}",
-            )
-
-        for adapter in self.tm_dish_adapters:
-            try:
-                adapter.SetStandbyFPMode()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling SetStandbyFPMode in TM Dish Leaf {adapter.dev_name}: {e}",
-                )
-
-            try:
-                adapter.SetStandbyLPMode()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling SetStandbyLPMode in TM Dish Leaf {adapter.dev_name}: {e}",
-                )
+        for ret_code, message in [
+            self.turn_off_csp(),
+            self.turn_off_sdp(),
+            self.set_standby_fp_mode_dishes(),
+            self.set_standby_lp_mode_dishes(),
+        ]:
+            if ret_code == ResultCode.FAILED:
+                return ret_code, message
 
         return (ResultCode.OK, "")
+
+    def turn_off_csp(self):
+        return self.send_command(
+            [self.tm_leaf_csp_master_adapter],
+            "Error in calling TelescopeOff() on TMC CSP Subarray leaf",
+            "Off",
+        )
+
+    def turn_off_sdp(self):
+        return self.send_command(
+            [self.tm_leaf_sdp_master_adapter],
+            "Error in calling TelescopeOff() on TMC SDP Subarray leaf",
+            "Off",
+        )
+
+    def turn_off_subarrays(self):
+        return self.send_command(
+            self.tm_subarray_adapters,
+            "Error in calling TelescopeOff() in TM Subarray",
+            "Off",
+        )
+
+    def set_standby_fp_mode_dishes(self):
+        return self.send_command(
+            self.tm_dish_adapters,
+            "Error in calling TelescopeOff() on TMC Dish leaf node",
+            "SetStandbyFPMode",
+        )
+
+    def set_standby_lp_mode_dishes(self):
+        return self.send_command(
+            self.tm_dish_adapters,
+            "Error in calling TelescopeOff() on TMC Dish leaf node",
+            "SetStandbyLPMode",
+        )
 
     def do_low(self, argin=None):
         """
@@ -137,21 +138,11 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         """
         component_manager = self.target
-
         component_manager.component.desired_telescope_state = DevState.OFF
 
-        ret_code, message = self.init_adapters()
+        ret_code, message = self.turn_off_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-
-        for adapter in self.tm_subarray_adapters:
-            try:
-                adapter.Off()
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    f"Error in calling Telescope On in TM Subarray {adapter.dev_name}: {e}",
-                )
 
         self.logger.info(
             "waiting for ALL Subarray devices obsState to be Empty"
@@ -179,12 +170,15 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
-        try:
-            self.tm_leaf_mccs_master_adapter.Off()
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                f"Error in calling Telescope Off in TM MCCS Master Leaf {self.tm_leaf_mccs_master_adapter.dev_name}: {e}",
-            )
+        ret_code, message = self.turn_off_mccs_mln()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         return (ResultCode.OK, "")
+
+    def turn_off_mccs_mln(self):
+        return self.send_command(
+            [self.tm_leaf_mccs_master_adapter],
+            "Error in calling TelescopeOff() in TM MCCS Master Leaf",
+            "Off",
+        )
