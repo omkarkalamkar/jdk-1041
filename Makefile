@@ -22,6 +22,8 @@ KUBE_NAMESPACE ?= ska-tmc-centralnode
 # HELM_RELEASE is the release that all Kubernetes resources will be labelled
 # with
 HELM_RELEASE ?= test
+HELM_CHARTS_TO_PUBLISH=
+
 # F401 Ignore unused imports because of tagno protected sections
 # W503 Ignore operator at beginning of line as conflicts with black
 # stretch line length to 180 because of super long parameter assignments
