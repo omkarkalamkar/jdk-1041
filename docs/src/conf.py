@@ -39,7 +39,10 @@ autodoc_mock_imports = [
     "ValidationError",
     "ska_telmodel",
     "ska_ser_skuid",
-    "transitions"
+    "transitions",
+    "ska_tmc_common",
+    "ska_ser_log_transactions"
+
 ]
 
 import os
