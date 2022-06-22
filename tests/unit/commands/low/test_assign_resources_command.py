@@ -141,8 +141,6 @@ def test_telescope_low_assign_resources_command_empty_input_json(
     assert result_code == ResultCode.FAILED
 
 
-
-
 def test_telescope_low_assign_resources_command_missing_subarray_id(
     tango_context,
 ):

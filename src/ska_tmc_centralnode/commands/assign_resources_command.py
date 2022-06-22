@@ -369,7 +369,6 @@ class AssignResources(AbstractAssignReleaseResources):
                 "mccs.channel_blocks key is not present in the input json argument.",
             )
 
-
         subarrayID = int(json_argument["subarray_id"])
 
         ret_code, message = self.get_subarray_adapter(subarrayID)

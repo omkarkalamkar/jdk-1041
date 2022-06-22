@@ -147,7 +147,6 @@ def test_telescope_assign_resources_command_missing_sdp_key(tango_context):
     assert "sdp" in message
 
 
-
 def test_telescope_assign_resources_command_missing_subarray_id(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()

@@ -188,7 +188,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-
         if "subarray_id" not in jsonArgument:
             return self.generate_command_result(
                 ResultCode.FAILED,
