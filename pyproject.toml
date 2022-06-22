@@ -20,7 +20,7 @@ name = 'ska-nexus'
 url = 'https://artefact.skao.int/repository/pypi-internal/simple'
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.7.1,<4.0"
 jsonschema = "^4.0.1"
 marshmallow = "^3.13.0"
 fire = "^0.4.0"
@@ -33,6 +33,7 @@ ska-tmc-common = "0.1.24"
 ska-ser-log-transactions = "*"
 ska-ser-skuid = "*"
 mock = "^4.0.3"
+pandas="1.2.3"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
