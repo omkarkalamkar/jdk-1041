@@ -2,7 +2,6 @@
 AssignResources class for CentralNode.
 """
 import json
-import threading
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
@@ -152,14 +151,7 @@ class AssignResources(AbstractAssignReleaseResources):
 
         """
         component_manager = self.target
-        Before_state_thread = threading.Thread(
-            target=component_manager.log_state,
-            args=(
-                0,
-                "Before AssignResources Command",
-            ),
-        )
-        Before_state_thread.start()
+
         # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
         # self.logger.info("Validating input string.")
         # input_validator = AssignResourceValidator(
@@ -239,14 +231,7 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-        thread = threading.Thread(
-            target=self.target.log_state,
-            args=(
-                0.2,
-                "After AssignResources Command",
-            ),
-        )
-        thread.start()
+
         return (ResultCode.OK, "")
 
     def update_resource_config_file(self, json_argument, id):

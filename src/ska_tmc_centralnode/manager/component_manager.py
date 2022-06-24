@@ -7,7 +7,6 @@ package.
 import threading
 import time
 
-import pandas as pd
 from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.command_executor import CommandExecutor
@@ -374,17 +373,6 @@ class CNComponentManager(BaseComponentManager):
         self._aggregate_state()
         if isinstance(self.input_parameter, InputParameterMid):
             self._update_imaging()
-
-    def log_state(self, sleep=0, msg=""):
-        time.sleep(sleep)
-        device_names = [
-            device.to_dict()["dev_name"] for device in self.devices
-        ]
-        dev_states = [device.to_dict()["state"] for device in self.devices]
-        device_states = pd.DataFrame(
-            {"Devices": device_names, "STATE": dev_states}
-        )
-        self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
 
     def update_device_obs_state(self, dev_name, obs_state):
         """

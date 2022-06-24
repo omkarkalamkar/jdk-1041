@@ -286,12 +286,14 @@ class CentralNodeMid(AbstractCentralNode):
         """
         This command stows the specified receptors.
         """
+        self.log_state("Before StowAntennas command")
         handler = self.get_command_object("StowAntennas")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler, argin
         )
+        self.log_state("Before StowAntennas command")
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def init_command_objects(self):

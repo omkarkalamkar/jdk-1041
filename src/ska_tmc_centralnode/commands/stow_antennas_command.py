@@ -1,5 +1,3 @@
-import threading
-
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -100,14 +98,7 @@ class StowAntennas(CentralNodeCommand):
             List of Receptors to be stowed.
 
         """
-        before_state_thread = threading.Thread(
-            target=self.target.log_state,
-            args=(
-                0,
-                "Before StowAntennas Command",
-            ),
-        )
-        before_state_thread.start()
+
         for i in range(0, len(argin)):
             for adapter in self.tm_dish_adapters:
                 if argin[i] not in adapter.dev_name:
@@ -116,15 +107,6 @@ class StowAntennas(CentralNodeCommand):
                 ret_code, message = self.set_stow_mode_dishes(adapter)
                 if ret_code == ResultCode.FAILED:
                     return ret_code, message
-
-        thread = threading.Thread(
-            target=self.target.log_state,
-            args=(
-                0.2,
-                "After StowAntennas Command",
-            ),
-        )
-        thread.start()
 
         return (ResultCode.OK, "")
 

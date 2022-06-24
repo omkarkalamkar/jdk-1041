@@ -2,7 +2,6 @@
 ReleaseResources class for CentralNode.
 """
 import json
-import threading
 
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import AdapterFactory
@@ -72,14 +71,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         :return: None
         """
-        before_state_thread = threading.Thread(
-            target=self.target.log_state,
-            args=(
-                0,
-                "Before ReleaseResources Command",
-            ),
-        )
-        before_state_thread.start()
 
         ret_code, message = self.validate_input_json(argin)
         if ret_code == ResultCode.FAILED:
@@ -92,15 +83,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
             )
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
-
-            thread = threading.Thread(
-                target=self.target.log_state,
-                args=(
-                    0.2,
-                    "After ReleaseResources Command",
-                ),
-            )
-            thread.start()
 
             return (ResultCode.OK, "")
         else:

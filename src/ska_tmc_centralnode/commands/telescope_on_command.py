@@ -1,5 +1,3 @@
-import threading
-
 from ska_tango_base.commands import ResultCode
 from tango import DevState
 
@@ -47,15 +45,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         component_manager.component.desired_telescope_state = DevState.ON
 
-        before_state_thread = threading.Thread(
-            target=component_manager.log_state,
-            args=(
-                0,
-                "Before ON Command",
-            ),
-        )
-        before_state_thread.start()
-
         for ret_code, message in [
             self.turn_on_csp(),
             self.turn_on_sdp(),
@@ -65,15 +54,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
-
-        thread = threading.Thread(
-            target=component_manager.log_state,
-            args=(
-                0.2,
-                "After ON Command",
-            ),
-        )
-        thread.start()
 
         return (ResultCode.OK, "")
 

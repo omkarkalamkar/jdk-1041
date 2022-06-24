@@ -1,4 +1,3 @@
-import threading
 import time
 
 from ska_tango_base.commands import ResultCode
@@ -48,15 +47,6 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         component_manager.component.desired_telescope_state = DevState.STANDBY
 
-        before_state_thread = threading.Thread(
-            target=component_manager.log_state,
-            args=(
-                0,
-                "Before Standby Command",
-            ),
-        )
-        before_state_thread.start()
-
         ret_code, message = self.turn_standby_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -95,15 +85,6 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
-
-        thread = threading.Thread(
-            target=component_manager.log_state,
-            args=(
-                0.2,
-                "After Standby Command",
-            ),
-        )
-        thread.start()
 
         return (ResultCode.OK, "")
 
