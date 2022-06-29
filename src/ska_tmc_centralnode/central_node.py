@@ -151,7 +151,7 @@ class AbstractCentralNode(TMCBaseDevice):
         if hasattr(self, "component_manager"):
             self.component_manager.stop()
 
-    def log_state(self, msg=""):
+    def log_state(self, msg="Device States"):
         device_names = [
             device.to_dict()["dev_name"]
             for device in self.component_manager.devices
@@ -227,14 +227,18 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes SetOperateMode() command on DishLeadNode,
         TelescopeOn() command on CspMasterLeafNode, SdpMasterLeafNode and SubarrayNode
         """
-        self.log_state("Before Telescope StartUp")
+        self.log_state(
+            "Device states before executing Telescope StartUp command"
+        )
         handler = self.get_command_object("StartUpTelescope")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
         )
-        self.log_state("After Telescope StartUp")
+        self.log_state(
+            "Device states after executing Telescope StartUp command"
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_StandByTelescope_allowed(self):
@@ -258,14 +262,18 @@ class AbstractCentralNode(TMCBaseDevice):
         on CspMasterLeafNode and SdpMasterLeafNode and TelescopeOff() command
         on SubarrayNode.
         """
-        self.log_state("Before Telescope Standby")
+        self.log_state(
+            "Device states before executing Telescope StandBy command"
+        )
         handler = self.get_command_object("StandByTelescope")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
         )
-        self.log_state("After Telescope Standby Command")
+        self.log_state(
+            "Device states after executing Telescope StandBy command"
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_TelescopeOff_allowed(self):
@@ -286,14 +294,14 @@ class AbstractCentralNode(TMCBaseDevice):
         on CspMasterLeafNode and SdpMasterLeafNode.
 
         """
-        self.log_state("Before Telescope Off Command")
+        self.log_state("Device states before executing Telescope Off command")
         handler = self.get_command_object("TelescopeOff")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
         )
-        self.log_state("After Telescope Off Command")
+        self.log_state("Device states after executing Telescope Off command")
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_TelescopeOn_allowed(self):
@@ -314,14 +322,14 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes TelescopeOn() command on DishLeadNode, CspMasterLeafNode,
         SdpMasterLeafNode.
         """
-        self.log_state("Before Telescope ON")
+        self.log_state("Device states before executing Telescope On command")
         handler = self.get_command_object("TelescopeOn")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
         )
-        self.log_state("After Telescope ON")
+        self.log_state("Device states after executing Telescope On command")
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_On_allowed(self):
@@ -345,14 +353,14 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
         SdpMasterLeafNode.
         """
-        self.log_state("Before  On Command")
+        self.log_state("Device states before executing On command")
         handler = self.get_command_object("On")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
         )
-        self.log_state("After On Command")
+        self.log_state("Device states after executing On command")
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_AssignResources_allowed(self):
@@ -380,14 +388,16 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         AssignResources command invokes the AssignResources command on lower level devices.
         """
-        self.log_state("Before AssignResources Command")
+        self.log_state(
+            "Device states before executing AssignResources command"
+        )
         handler = self.get_command_object("AssignResources")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler, argin
         )
-        self.log_state("After AssignResources Command")
+        self.log_state("Device states after executing AssignResources command")
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_ReleaseResources_allowed(self):
@@ -413,14 +423,18 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         Release all the resources assigned to the given Subarray.
         """
-        self.log_state("Before ReleaseResources Command")
+        self.log_state(
+            "Device states before executing ReleaseResources command"
+        )
         handler = self.get_command_object("ReleaseResources")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler, argin
         )
-        self.log_state("After ReleaseResources Command")
+        self.log_state(
+            "Device states after executing ReleaseResources command"
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_Standby_allowed(self):
@@ -444,14 +458,14 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode and DishLeafNode.
 
         """
-        self.log_state("Before Standby Command")
+        self.log_state("Device states before executing Standby command")
         handler = self.get_command_object("Standby")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
         )
-        self.log_state("After Standby Command")
+        self.log_state("Device states after executing Standby command")
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_TelescopeStandby_allowed(self):
@@ -475,14 +489,18 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode and DishLeafNode.
 
         """
-        self.log_state("Before  TelescopeStandby Command")
+        self.log_state(
+            "Device states before executing Telescope Standby command"
+        )
         handler = self.get_command_object("TelescopeStandby")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
         )
-        self.log_state("After TelescopeStandby Command")
+        self.log_state(
+            "Device states after executing Telescope Standby command"
+        )
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def is_Off_allowed(self):
@@ -507,14 +525,14 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode.
 
         """
-        self.log_state("Before Off Command")
+        self.log_state("Device states before executing Off command")
         handler = self.get_command_object("Off")
         if self.component_manager.command_executor.queue_full:
             return [[ResultCode.FAILED], ["Queue is full!"]]
         unique_id = self.component_manager.command_executor.enqueue_command(
             handler
         )
-        self.log_state("After Off Command")
+        self.log_state("Device states after executing Off command")
         return [[ResultCode.QUEUED], [str(unique_id)]]
 
     # default ska mid
