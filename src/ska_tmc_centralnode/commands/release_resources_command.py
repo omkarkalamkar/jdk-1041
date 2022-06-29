@@ -169,6 +169,8 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
+        if "transaction_id" in jsonArgument:
+            del jsonArgument["transaction_id"]
 
         if "subarray_id" not in jsonArgument:
             return self.generate_command_result(

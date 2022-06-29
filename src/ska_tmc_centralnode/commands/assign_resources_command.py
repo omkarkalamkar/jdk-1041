@@ -186,6 +186,8 @@ class AssignResources(AbstractAssignReleaseResources):
                 return self.generate_command_result(
                     ResultCode.FAILED, ("Errors in input json argument: %s", e)
                 )
+        if "transaction_id" in json_argument:
+            del json_argument["transaction_id"]
 
         # get subarray ID
         if "subarray_id" not in json_argument:
