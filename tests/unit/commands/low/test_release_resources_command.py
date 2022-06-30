@@ -124,22 +124,6 @@ def test_telescope_low_release_resources_command_empty_input_json(
     assert result_code == ResultCode.FAILED
 
 
-def test_telescope_low_release_resources_command_missing_transaction_id(
-    tango_context,
-):
-    logger.info("%s", tango_context)
-    release_command, _ = get_release_resources_command_obj()
-
-    release_input_str = get_release_input_str()
-    json_argument = json.loads(release_input_str)
-    del json_argument["transaction_id"]
-    assert release_command.check_allowed()
-    (result_code, message) = release_command.do(json.dumps(json_argument))
-
-    assert result_code == ResultCode.FAILED
-    assert "transaction_id" in message
-
-
 def test_telescope_low_release_resources_command_missing_subarray_id(
     tango_context,
 ):

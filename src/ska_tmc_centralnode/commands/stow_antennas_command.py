@@ -98,6 +98,7 @@ class StowAntennas(CentralNodeCommand):
             List of Receptors to be stowed.
 
         """
+
         for i in range(0, len(argin)):
             for adapter in self.tm_dish_adapters:
                 if argin[i] not in adapter.dev_name:

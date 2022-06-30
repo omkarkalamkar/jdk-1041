@@ -186,17 +186,10 @@ class AssignResources(AbstractAssignReleaseResources):
                 return self.generate_command_result(
                     ResultCode.FAILED, ("Errors in input json argument: %s", e)
                 )
-
-        # get subarray ID
-        if "transaction_id" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "transaction_id key is not present in the input json argument.",
-            )
-
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
+        # get subarray ID
         if "subarray_id" not in json_argument:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -361,12 +354,6 @@ class AssignResources(AbstractAssignReleaseResources):
             return self.generate_command_result(
                 ResultCode.FAILED,
                 "mccs.channel_blocks key is not present in the input json argument.",
-            )
-
-        if "transaction_id" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "transaction_id key is not present in the input json argument.",
             )
 
         subarrayID = int(json_argument["subarray_id"])

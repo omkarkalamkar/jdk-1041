@@ -83,6 +83,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             )
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
+
             return (ResultCode.OK, "")
         else:
             return (
@@ -168,13 +169,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
-
-        if "transaction_id" not in jsonArgument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "transaction_id key is not present in the input json argument.",
-            )
-
         if "transaction_id" in jsonArgument:
             del jsonArgument["transaction_id"]
 

@@ -141,22 +141,6 @@ def test_telescope_low_assign_resources_command_empty_input_json(
     assert result_code == ResultCode.FAILED
 
 
-def test_telescope_low_assign_resources_command_missing_transaction_id(
-    tango_context,
-):
-    logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _ = get_assign_resources_command_obj()
-
-    assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    del json_argument["transaction_id"]
-    assert assign_res_command.check_allowed()
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
-    assert "transaction_id" in message
-
-
 def test_telescope_low_assign_resources_command_missing_subarray_id(
     tango_context,
 ):

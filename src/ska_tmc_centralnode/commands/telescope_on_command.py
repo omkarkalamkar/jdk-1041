@@ -20,7 +20,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         target,
         pop_state_model,
         adapter_factory=None,
-        timeout_mccs=3000,
+        timeout_mccs=3,
         step_sleep=0.1,
         *args,
         logger=None,
