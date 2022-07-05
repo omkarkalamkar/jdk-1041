@@ -13,6 +13,8 @@ from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
 from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.op_state_model import TMCOpStateModel
+from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
@@ -33,7 +35,7 @@ from ska_tmc_centralnode.model.input import (
 )
 
 
-class CNComponentManager(BaseComponentManager):
+class CNComponentManager(TmcComponentManager):
     """
     A component manager for The Central Node component.
 
@@ -51,7 +53,6 @@ class CNComponentManager(BaseComponentManager):
 
     def __init__(
         self,
-        op_state_model,
         _input_parameter,
         logger=None,
         _component=None,
@@ -61,7 +62,7 @@ class CNComponentManager(BaseComponentManager):
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
         _update_command_in_progress_callback=None,
-        _monitoring_loop=True,
+        # _monitoring_loop=True,
         _event_receiver=True,
         max_workers=5,
         proxy_timeout=500,
@@ -81,16 +82,17 @@ class CNComponentManager(BaseComponentManager):
         self.logger = logger
         self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
+        self.op_state_model = TMCOpStateModel
 
-        self._monitoring_loop = None
-        if _monitoring_loop:
-            self._monitoring_loop = CentralNodeMonitoringLoop(
-                self,
-                logger,
-                max_workers=max_workers,
-                proxy_timeout=proxy_timeout,
-                sleep_time=sleep_time,
-            )
+        # self._monitoring_loop = None
+        # if _monitoring_loop:
+        #     self._monitoring_loop = CentralNodeMonitoringLoop(
+        #         self,
+        #         logger,
+        #         max_workers=max_workers,
+        #         proxy_timeout=proxy_timeout,
+        #         sleep_time=sleep_time,
+        #     )
 
         self._event_receiver = None
         if _event_receiver:
@@ -109,10 +111,14 @@ class CNComponentManager(BaseComponentManager):
             _update_imaging_callback,
         )
 
-        super().__init__(op_state_model, *args, **kwargs)
+        super().__init__(
+            max_workers,
+            communication_state_changed_callback=None,
+            component_state_changed_callback=None,
+        )
 
-        if _monitoring_loop:
-            self._monitoring_loop.start()
+        # if _monitoring_loop:
+        #     self._monitoring_loop.start()
 
         if _event_receiver:
             self._event_receiver.start()
@@ -123,10 +129,10 @@ class CNComponentManager(BaseComponentManager):
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
-        self._command_executor = CommandExecutor(
-            logger,
-            _update_command_in_progress_callback=_update_command_in_progress_callback,
-        )
+        # self._command_executor = CommandExecutor(
+        #     logger,
+        #     _update_command_in_progress_callback=_update_command_in_progress_callback,
+        # )
 
     def reset(self):
         pass
