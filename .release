@@ -12,5 +12,5 @@ copyright=""""""
 
 release=0.3.13
 tag=0.3.13
-tag_description=Added logs to get device state. Updated timeout. Updated code to support OET interface.
-release_notes=This release contains:<br/><ul><li>Added logs to get device state. Updated timeout. Updated code to support OET interface.</li></ul><br/>
+tag_description=Added logger statements. Updated code to support OET interface.
+release_notes=This release contains:<br/><ul><li>Added logger statements. Updated code to support OET interface.</li></ul><br/>
