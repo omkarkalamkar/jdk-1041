@@ -17,6 +17,7 @@ from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     HealthStateAggregatorMid,
@@ -535,3 +536,15 @@ class CNComponentManager(TmcComponentManager):
                 self.component.imaging = ModesAvailability.available
             else:
                 self.component.imaging = ModesAvailability.not_available
+
+    def telescope_on(self, task_callback=None):
+        """
+        Turn the Telescope On.
+
+        :return: a result code and message
+        """
+        on_command = TelescopeOn
+        task_status, response = self.submit_task(
+            on_command.telescope_on_slow_command, task_callback=task_callback
+        )
+        return task_status, response
