@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.3.12"
+version="0.3.13"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team NCRA"
@@ -10,7 +10,7 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.3.12
-tag=0.3.12
-tag_description=Optimise CentralNode code based on review comments received on SubarrayNode.
-release_notes=This release contains:<br/><ul><li>Optimise CentralNode code based on review comments received on SubarrayNode.</li></ul><br/>
+release=0.3.13
+tag=0.3.13
+tag_description=Added logs to get device state. Updated timeout. Updated code to support OET interface.
+release_notes=This release contains:<br/><ul><li>Added logs to get device state. Updated timeout. Updated code to support OET interface.</li></ul><br/>
