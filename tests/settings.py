@@ -87,9 +87,7 @@ def create_cm_no_faulty_devices(
     else:
         input_parameter = InputParameterLow(None)
 
-    cm, start_time = create_cm(
-        p_event_receiver, input_parameter
-    )
+    cm, start_time = create_cm(p_event_receiver, input_parameter)
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time
