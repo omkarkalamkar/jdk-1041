@@ -36,7 +36,6 @@ def devices_to_load():
         },
     )
 
-
 def test_imaging_available(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
@@ -52,7 +51,6 @@ def test_imaging_available(tango_context):
     ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=1.5)
     assert cm.component.imaging == ModesAvailability.available
 
-
 def test_imaging_available_only_monitoring_loop(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, False)
     set_devices_state(
@@ -67,7 +65,6 @@ def test_imaging_available_only_monitoring_loop(tango_context):
     )
     ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=1.5)
     assert cm.component.imaging == ModesAvailability.available
-
 
 def test_imaging_available_only_events(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, False, True)

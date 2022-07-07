@@ -51,15 +51,11 @@ def create_cm(
     p_event_receiver=True,
     input_parameter=InputParameterMid(None),
 ):
-    op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model,
         logger=logger,
         _input_parameter=input_parameter,
-        _monitoring_loop=p_monitoring_loop,
         _event_receiver=p_event_receiver,
     )
-
     if isinstance(input_parameter, InputParameterMid):
         DEVICE_LIST = DEVICE_LIST_MID
     else:
@@ -82,7 +78,6 @@ def create_cm(
 
 def create_cm_no_faulty_devices(
     tango_context,
-    p_monitoring_loop,
     p_event_receiver,
     input_parameter=InputParameterMid(None),
 ):
@@ -93,7 +88,7 @@ def create_cm_no_faulty_devices(
         input_parameter = InputParameterLow(None)
 
     cm, start_time = create_cm(
-        p_monitoring_loop, p_event_receiver, input_parameter
+        p_event_receiver, input_parameter
     )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0

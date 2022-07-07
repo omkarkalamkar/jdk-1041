@@ -7,6 +7,7 @@ from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from ska_tmc_centralnode.model.component import CentralComponent
 from tests.settings import (
     DEVICE_LIST_MID,
     SLEEP_TIME,
@@ -37,13 +38,13 @@ def devices_to_load():
         },
     )
 
-
+@pytest.mark.cn_cm
 def test_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
 
-    op_state_model = TMCOpStateModel(logger)
+    # op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
+        _input_parameter=InputParameterMid(None), logger=logger
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     for dev in DEVICE_LIST_MID:

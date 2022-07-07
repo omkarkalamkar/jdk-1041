@@ -5,6 +5,7 @@ from tango import DevState
 
 class TelescopeStateAggregatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
+        self._logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
@@ -46,7 +47,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             )
             return DevState.UNKNOWN
         elif dish_count == 0:
-            self._logger.info("dish_count == 0")
+            # self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
         elif telescopeSetStateList == set([DevState.ON]):
             return DevState.ON

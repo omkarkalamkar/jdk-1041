@@ -5,6 +5,8 @@ from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
+import logging
+from ska_tmc_centralnode.model.component import CentralComponent
 from tests.settings import (
     DEVICE_LIST_MID,
     SLEEP_TIME,
@@ -12,15 +14,13 @@ from tests.settings import (
     DishLeafNodePrefix,
     NumDishes,
     count_faulty_devices,
-    logger,
+    logger
 )
 
 
+@pytest.mark.cn_cm
 def test_all_devices_faulty():
-    op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
-    )
+    cm = CNComponentManager(logger=logger, _input_parameter=InputParameterMid(None))
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     cm.add_multiple_devices(DEVICE_LIST_MID)
     start_time = time.time()
