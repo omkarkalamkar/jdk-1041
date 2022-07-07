@@ -548,14 +548,26 @@ class CNComponentManager(TmcComponentManager):
                 self.component.imaging = ModesAvailability.not_available
 
     # TODO: Comment out this code once CM is ready
-    # def telescope_on(self, task_callback=None):
-    #     """
-    #     Turn the Telescope On.
+    def telescope_on(self, task_callback=None):
+        """
+        Turn the Telescope On.
 
-    #     :return: a result code and message
-    #     """
-    #     on_command = TelescopeOn
-    #     task_status, response = self.submit_task(
-    #         on_command.telescope_on_slow_command, task_callback=task_callback
-    #     )
-    #     return task_status, response
+        :return: a result code and message
+        """
+        on_command = TelescopeOn
+        task_status, response = self.submit_task(
+            on_command.telescope_on_slow_command, task_callback=task_callback
+        )
+        return task_status, response
+
+    def check_if_command_is_allowed(self):
+        if self.op_state_model.op_state in [
+            DevState.FAULT,
+            DevState.UNKNOWN,
+            DevState.DISABLE,
+        ]:
+            raise CommandNotAllowed(
+                "Command is not allowed in current state %s",
+                self.op_state_model.op_state,
+            )
+        return True
