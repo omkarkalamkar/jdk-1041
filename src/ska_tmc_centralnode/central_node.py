@@ -123,21 +123,20 @@ class AbstractCentralNode(TMCBaseDevice):
             :rtype: (ReturnCode, str)
             """
             super().do()
-            device = self.target
 
-            device._build_state = "{},{},{}".format(
+            self._device._build_state = "{},{},{}".format(
                 release.name, release.version, release.description
             )
-            device._version_id = release.version
-            device._LastDeviceInfoChanged = ""
-            device.set_change_event("telescopeHealthState", True, False)
-            device.set_change_event("telescopeState", True, False)
-            device.set_change_event("LastDeviceInfoChanged", True, False)
-            device.set_change_event("tmOpState", True, False)
-            device.set_change_event("commandInProgress", True, False)
+            self._device._version_id = release.version
+            self._device._LastDeviceInfoChanged = ""
+            self._device.set_change_event("telescopeHealthState", True, False)
+            self._device.set_change_event("telescopeState", True, False)
+            self._device.set_change_event("LastDeviceInfoChanged", True, False)
+            self._device.set_change_event("tmOpState", True, False)
+            self._device.set_change_event("commandInProgress", True, False)
 
-            device.op_state_model.perform_action("component_on")
-            device.component_manager.command_executor.add_command_execution(
+            self._device.op_state_model.perform_action("component_on")
+            self._device.component_manager.command_executor.add_command_execution(
                 "0", "Init", ResultCode.OK, ""
             )
             return (ResultCode.OK, "")
@@ -537,11 +536,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     # default ska mid
     def create_component_manager(self):
-        # self.op_state_model = TMCOpStateModel(
-        #     logger=self.logger, callback=super()._update_state
-        # )
         cm = CNComponentManager(
-            # self.op_state_model,
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=self.update_telescope_state_callback,
@@ -550,7 +545,7 @@ class AbstractCentralNode(TMCBaseDevice):
             _update_imaging_callback=self.update_imaging_callback,
             _update_command_in_progress_callback=self.update_command_in_progress_callback,
             communication_state_changed_callback=None,
-             component_state_changed_callback=None,
+            component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
             _input_parameter=InputParameterMid(None),

@@ -119,7 +119,6 @@ class CentralNodeLow(AbstractCentralNode):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        args = ()
         for (command_name, method_name) in [("TelescopeOn", "telescope_on")]:
             self.register_command_object(
                 command_name,
@@ -131,28 +130,9 @@ class CentralNodeLow(AbstractCentralNode):
                     logger=None,
                 ),
             )
-        #     command_obj = command_class(
-        #         self.component_manager,
-        #         self.op_state_model,
-        #         *args,
-        #         logger=self.logger,
-        #     )
-        #     self.register_command_object(command_name, command_obj)
-        # assign_resources_obj = AssignResources(
-        #     self.component_manager,
-        #     self.op_state_model,
-        #     skuid=SkuidClient(skuid_url=self.SkuidServiceNamePort),
-        #     *args,
-        #     logger=self.logger,
-        # )
-        # self.register_command_object("AssignResources", assign_resources_obj)
 
     def create_component_manager(self):
-        self.op_state_model = TMCOpStateModel(
-            logger=self.logger, callback=super()._update_state
-        )
         cm = CNComponentManager(
-            self.op_state_model,
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=self.update_telescope_state_callback,
@@ -160,6 +140,8 @@ class CentralNodeLow(AbstractCentralNode):
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=None,
             _update_command_in_progress_callback=self.update_command_in_progress_callback,
+            communication_state_changed_callback=None,
+            component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
             _input_parameter=InputParameterLow(None),

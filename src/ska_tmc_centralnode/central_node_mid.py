@@ -162,10 +162,9 @@ class CentralNodeMid(AbstractCentralNode):
 
             :rtype: (ReturnCode, str)
             """
-            # super().do()
-            device=self._device
+            super().do()
 
-            device.set_change_event("imaging", True, False)
+            self._device.set_change_event("imaging", True, False)
 
             return (ResultCode.OK, "")
 
@@ -303,7 +302,6 @@ class CentralNodeMid(AbstractCentralNode):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        args = ()
         for (command_name, method_name) in [("TelescopeOn", "telescope_on")]:
             self.register_command_object(
                 command_name,
@@ -315,22 +313,6 @@ class CentralNodeMid(AbstractCentralNode):
                     logger=None,
                 ),
             )
-
-            # command_obj = command_class(
-            #     self.component_manager,
-            #     self.op_state_model,
-            #     *args,
-            #     logger=self.logger,
-            # )
-        #     self.register_command_object(command_name, command_obj)
-        # assign_resources_obj = AssignResources(
-        #     self.component_manager,
-        #     self.op_state_model,
-        #     skuid=SkuidClient(skuid_url=self.SkuidServiceNamePort),
-        #     *args,
-        #     logger=self.logger,
-        # )
-        # self.register_command_object("AssignResources", assign_resources_obj)
 
 
 # ----------
