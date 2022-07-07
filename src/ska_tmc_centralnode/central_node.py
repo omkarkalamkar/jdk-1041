@@ -8,8 +8,6 @@ import json
 import pandas as pd
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
-
-# from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
@@ -216,7 +214,6 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         handler = self.get_command_object("TelescopeOn")
         return self.component_manager.check_if_command_is_allowed()
-        # return handler.check_allowed()
 
     @command(dtype_out="DevVarLongStringArray")
     @DebugIt()
@@ -234,7 +231,6 @@ class AbstractCentralNode(TMCBaseDevice):
         )
         self.log_state("Device states after executing Telescope On command")
         return [[ResultCode.QUEUED], [str(unique_id)]]
-
 
     # TODO: Refactor below commands as a part of separate command refactoring
     # def is_StartUpTelescope_allowed(self):

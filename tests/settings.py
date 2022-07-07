@@ -2,7 +2,6 @@ import logging
 import time
 
 import pytest
-from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import (

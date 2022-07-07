@@ -10,14 +10,14 @@ from tango.server import attribute, command, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 
-# from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
-# from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
-from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
-
 # from ska_tmc_centralnode.commands.telescope_standby_command import (
 #     TelescopeStandby,
 # )
 from ska_tmc_centralnode.model.enum import ModesAvailability
+
+# from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
+# from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
+
 
 # from ska_tmc_centralnode.commands.assign_resources_command import (
 #     AssignResources,
@@ -164,12 +164,7 @@ class CentralNodeMid(AbstractCentralNode):
 
             :rtype: (ReturnCode, str)
             """
-<<<<<<< HEAD
-            # super().do()
-            device = self._device
-=======
             super().do()
->>>>>>> 1ebc34bd4c1467ee2b59bd8258cc00d9d7c893b7
 
             self._device.set_change_event("imaging", True, False)
 

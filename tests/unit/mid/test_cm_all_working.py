@@ -34,6 +34,7 @@ def devices_to_load():
         },
     )
 
+
 @pytest.mark.cn_cm
 def test_all_working(tango_context):
     logger.info("%s", tango_context)

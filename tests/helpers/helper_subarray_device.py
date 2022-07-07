@@ -3,6 +3,7 @@ import logging
 from typing import Callable
 
 from ska_tango_base.base import OpStateModel
+
 # from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
 from ska_tango_base.subarray import (
