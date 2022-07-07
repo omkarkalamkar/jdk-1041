@@ -2,7 +2,6 @@ import time
 
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
-from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterLow
@@ -36,11 +35,11 @@ def devices_to_load():
     )
 
 
+@pytest.mark.cn_cm
 def test_low_one_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
-    op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterLow(None), logger=logger
+        _input_parameter=InputParameterLow(None), logger=logger
     )
     for dev in DEVICE_LIST_LOW:
         cm.add_device(dev)

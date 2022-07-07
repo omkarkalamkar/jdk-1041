@@ -212,7 +212,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        handler = self.get_command_object("TelescopeOn")
+        self.get_command_object("TelescopeOn")
         return self.component_manager.check_if_command_is_allowed()
 
     @command(dtype_out="DevVarLongStringArray")

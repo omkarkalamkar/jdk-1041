@@ -101,15 +101,16 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         """
         component_manager = self.target
 
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "TelescopeOnOff() is not allowed in current state %s",
-                self.op_state_model.op_state,
-            )
+        # if self.op_state_model.op_state in [
+        #     DevState.FAULT,
+        #     DevState.UNKNOWN,
+        #     DevState.DISABLE,
+        # ]:
+        #     raise CommandNotAllowed(
+        #         "TelescopeOnOff() is not allowed in current state %s",
+        #         self.op_state_model.op_state,
+        #     )
+        component_manager.check_if_command_is_allowed()
 
         # for this command I need a number of sub-devices
         # import debugpy; debugpy.debug_this_thread()

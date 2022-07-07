@@ -5,7 +5,6 @@ from tango import DevState
 
 class TelescopeStateAggregatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
-        self._logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
@@ -38,13 +37,13 @@ class TelescopeStateAggregatorMid(Aggregator):
 
         telescopeSetStateList = set(telescopeStateList)
         if not sdp_master and not csp_master:
-            self._logger.info(
-                "missing devices: %s=%s %s=%s",
-                self._component_manager.input_parameter.sdp_master_dev_name,
-                sdp_master,
-                self._component_manager.input_parameter.csp_master_dev_name,
-                csp_master,
-            )
+            # self._logger.info(
+            #     "missing devices: %s=%s %s=%s",
+            #     self._component_manager.input_parameter.sdp_master_dev_name,
+            #     sdp_master,
+            #     self._component_manager.input_parameter.csp_master_dev_name,
+            #     csp_master,
+            # )
             return DevState.UNKNOWN
         elif dish_count == 0:
             # self._logger.info("dish_count == 0")

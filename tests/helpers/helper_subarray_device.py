@@ -2,26 +2,14 @@
 import logging
 from typing import Callable
 
-from ska_tango_base.base import OpStateModel
-
-# from ska_tango_base.commands import ResultCode
+from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
-from ska_tango_base.subarray import (
-    SKASubarray,
-    SubarrayComponentManager,
-    SubarrayObsStateModel,
-)
+from ska_tango_base.subarray import SKASubarray, SubarrayComponentManager
 from tango import DevState
 from tango.server import command
 
 
 class EmptySubArrayComponentManager(SubarrayComponentManager):
-    # def __init__(
-    #     self, op_state_model, obs_state_model, logger=None, *args, **kwargs
-    # ):
-    #     self.logger = logger
-    #     super().__init__(op_state_model, obs_state_model, *args, **kwargs)
-    #     self._assigned_resources = []
     def __init__(
         self,
         logger: logging.Logger,

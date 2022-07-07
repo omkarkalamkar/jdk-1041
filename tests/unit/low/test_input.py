@@ -1,6 +1,9 @@
+import pytest
+
 from ska_tmc_centralnode.model.input import InputParameterLow
 
 
+@pytest.mark.cn_cm
 def test_properties():
     input = InputParameterLow(None)
     input.tm_subarray_dev_names = ("1", "2")

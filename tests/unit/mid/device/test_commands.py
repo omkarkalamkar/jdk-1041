@@ -22,14 +22,14 @@ def central_node_device(request):
             break
 
 
+@pytest.mark.cn_cm
 def test_commands(central_node_device):
     try:
-        central_node_device.On()
+        central_node_device.TelescopeOn()
     except Exception as ex:
         assert "CommandNotAllowed" in str(ex)
 
     with pytest.raises(Exception):
-        central_node_device.TelescopeOn()
         central_node_device.Off()
         central_node_device.TelescopeOff()
         central_node_device.StartUpTelescope()
