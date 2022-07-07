@@ -16,7 +16,7 @@ from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
-from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
+# from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     HealthStateAggregatorMid,
@@ -24,13 +24,16 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
+from ska_tmc_centralnode.manager.monitoring_loop import (
+    CentralNodeMonitoringLoop,
+)
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
-from ska_tmc_centralnode.manager.monitoring_loop import CentralNodeMonitoringLoop
+
 
 class CNComponentManager(TmcComponentManager):
     """
@@ -79,10 +82,12 @@ class CNComponentManager(TmcComponentManager):
         self.logger = logger
         self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
-        self.op_state_model = TMCOpStateModel(logger=self.logger, callback=None)
+        self.op_state_model = TMCOpStateModel(
+            logger=self.logger, callback=None
+        )
 
         self._input_parameter = _input_parameter
-        
+
         self._monitoring_loop = None
         if _monitoring_loop:
             self._monitoring_loop = CentralNodeMonitoringLoop(
@@ -109,14 +114,26 @@ class CNComponentManager(TmcComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
         )
-        super().__init__(_input_parameter = self._input_parameter, logger = self.logger, _component = self._component, _event_receiver=True, _monitoring_loop=True, communication_state_changed_callback=None, component_state_changed_callback=None, max_workers=5, proxy_timeout=500, sleep_time=1, *args, **kwargs)
+        super().__init__(
+            _input_parameter=self._input_parameter,
+            logger=self.logger,
+            _component=self._component,
+            _event_receiver=True,
+            _monitoring_loop=True,
+            communication_state_changed_callback=None,
+            component_state_changed_callback=None,
+            max_workers=5,
+            proxy_timeout=500,
+            sleep_time=1,
+            *args,
+            **kwargs,
+        )
 
         if _monitoring_loop:
             self._monitoring_loop.start()
 
         if _event_receiver:
             self._event_receiver.start()
-
 
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None

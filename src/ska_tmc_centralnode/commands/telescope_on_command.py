@@ -33,6 +33,43 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self._step_sleep = step_sleep
         self.init_adapters()
 
+    def telescope_on_slow_command(
+        self,
+        logger: logging.Logger,
+        task_callback: Callable = None,
+        task_abort_event: Optional[threading.Event] = None,
+    ):
+
+        """This is a long running method
+
+        :param logger: logger
+        :type logger: logging.Logger
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :param task_abort_event: Check for abort, defaults to None
+        :type task_abort_event: Event, optional
+        """
+        # Indicate that the task has started
+        if task_callback:
+            task_callback(status=TaskStatus.IN_PROGRESS)
+
+        self.do_mid(argin=None)  # Fire and forget
+
+        # Periodically check that tasks have not been ABORTED
+        if task_abort_event.is_set():
+            # Indicate that the task has been aborted
+            task_callback(
+                status=TaskStatus.ABORTED, result="This task aborted"
+            )
+            return
+
+        if task_callback:
+            # Indicate that the task has completed
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=" TelescopeOn process completed",
+            )
+
     def do_mid(self, argin=None):
         """
         Method to invoke Telescope On command on Lower level devices.
