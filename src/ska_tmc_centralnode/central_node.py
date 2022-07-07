@@ -537,11 +537,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     # default ska mid
     def create_component_manager(self):
-        self.op_state_model = TMCOpStateModel(
-            logger=self.logger, callback=super()._update_state
-        )
+        # self.op_state_model = TMCOpStateModel(
+        #     logger=self.logger, callback=super()._update_state
+        # )
         cm = CNComponentManager(
-            self.op_state_model,
+            # self.op_state_model,
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=self.update_telescope_state_callback,
@@ -549,6 +549,8 @@ class AbstractCentralNode(TMCBaseDevice):
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=self.update_imaging_callback,
             _update_command_in_progress_callback=self.update_command_in_progress_callback,
+            communication_state_changed_callback=None,
+             component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
             _input_parameter=InputParameterMid(None),

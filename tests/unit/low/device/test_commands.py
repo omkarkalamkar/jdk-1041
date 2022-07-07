@@ -5,6 +5,7 @@ from tango.test_utils import DeviceTestContext
 from ska_tmc_centralnode.central_node_low import CentralNodeLow
 
 
+@pytest.mark.on_command
 @pytest.fixture
 def central_node_device(request):
     """Create DeviceProxy for tests"""
@@ -22,9 +23,10 @@ def central_node_device(request):
             break
 
 
+
 def test_commands(central_node_device):
     try:
-        central_node_device.On()
+        central_node_device.TelescopeOn()
     except Exception as ex:
         assert "CommandNotAllowed" in str(ex)
 
