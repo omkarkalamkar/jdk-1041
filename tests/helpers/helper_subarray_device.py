@@ -1,14 +1,15 @@
 # Note: This helper class module is explicitly required for CentralNode. Hence kept it here and not in ska-tmc-common repo.
+import logging
 from typing import Callable
+
 from ska_tango_base.base import OpStateModel
-from ska_tango_base.commands import ResultCode
+# from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
 from ska_tango_base.subarray import (
     SKASubarray,
     SubarrayComponentManager,
     SubarrayObsStateModel,
 )
-import logging
 from tango import DevState
 from tango.server import command
 
@@ -20,11 +21,21 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
     #     self.logger = logger
     #     super().__init__(op_state_model, obs_state_model, *args, **kwargs)
     #     self._assigned_resources = []
-    def __init__(self, logger: logging.Logger, communication_state_callback: Callable, component_state_callback: Callable, **state):
+    def __init__(
+        self,
+        logger: logging.Logger,
+        communication_state_callback: Callable,
+        component_state_callback: Callable,
+        **state
+    ):
         self.logger = logger
-        super().__init__(logger, communication_state_callback, component_state_callback, **state)
+        super().__init__(
+            logger,
+            communication_state_callback,
+            component_state_callback,
+            **state
+        )
         self._assigned_resources = []
-
 
     def assign(self, resources):
         self.logger.info("Resources: %s", resources)
@@ -133,7 +144,9 @@ class HelperSubArrayDevice(SKASubarray):
         #     logger=self.logger, callback=self._update_obs_state
         # )
         cm = EmptySubArrayComponentManager(
-            logger=self.logger, communication_state_callback= None, component_state_callback = None
+            logger=self.logger,
+            communication_state_callback=None,
+            component_state_callback=None,
         )
         return cm
 

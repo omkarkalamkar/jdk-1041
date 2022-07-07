@@ -8,7 +8,8 @@ import json
 import pandas as pd
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
-from ska_tmc_common.op_state_model import TMCOpStateModel
+
+# from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
@@ -550,7 +551,7 @@ class AbstractCentralNode(TMCBaseDevice):
             _update_imaging_callback=self.update_imaging_callback,
             _update_command_in_progress_callback=self.update_command_in_progress_callback,
             communication_state_changed_callback=None,
-             component_state_changed_callback=None,
+            component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
             _input_parameter=InputParameterMid(None),
