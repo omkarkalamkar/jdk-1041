@@ -22,8 +22,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def __init__(
         self,
-        target,
-        pop_state_model,
+        component_manager,
         adapter_factory=None,
         timeout_mccs=3,
         step_sleep=0.1,
@@ -32,7 +31,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         **kwargs,
     ):
         super().__init__(
-            target, pop_state_model, adapter_factory, args, logger, kwargs
+            component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
         self._timeout_mccs = timeout_mccs
         self._step_sleep = step_sleep
@@ -58,22 +57,27 @@ class TelescopeOn(AbstractTelescopeOnOff):
         if task_callback:
             task_callback(status=TaskStatus.IN_PROGRESS)
 
-        self.do_mid(argin=None)  # Fire and forget
+        ret_code, message = self.do_mid(argin=None)  # Fire and forget
+
+        if ret_code == ResultCode.FAILED:
+            task_callback(
+                status=TaskStatus.FAILED,
+                result="TelescopeOn() command has failed",
+            )
+        else:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result="TelesopeOn() command has completed",
+            )
 
         # Periodically check that tasks have not been ABORTED
         if task_abort_event.is_set():
             # Indicate that the task has been aborted
             task_callback(
-                status=TaskStatus.ABORTED, result="This task aborted"
+                status=TaskStatus.ABORTED,
+                result="TelescopeOn() command task is aborted",
             )
             return
-
-        if task_callback:
-            # Indicate that the task has completed
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=" TelescopeOn process completed",
-            )
 
     def do_mid(self, argin=None):
         """
@@ -83,7 +87,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             None.
 
         """
-        component_manager = self.target
+        component_manager = self.component_manager
 
         component_manager.component.desired_telescope_state = DevState.ON
 
@@ -102,35 +106,35 @@ class TelescopeOn(AbstractTelescopeOnOff):
     def turn_on_sdp(self):
         return self.send_command(
             [self.tm_leaf_sdp_master_adapter],
-            "Error in calling TelescopeOn() on TMC SDP Subarray leaf",
+            f"Error in calling TelescopeOn() on {self.tm_leaf_sdp_master_adapter}",
             "On",
         )
 
     def turn_on_csp(self):
         return self.send_command(
             [self.tm_leaf_csp_master_adapter],
-            "Error in calling TelescopeOn() on TMC CSP Subarray leaf",
+            f"Error in calling TelescopeOn() on {self.tm_leaf_csp_master_adapter}",
             "On",
         )
 
     def turn_on_subarrays(self):
         return self.send_command(
             self.tm_subarray_adapters,
-            "Error in calling TelescopeOn() on TMC Subarray",
+            f"Error in calling TelescopeOn() on {self.tm_subarray_adapters}",
             "On",
         )
 
     def set_standby_fp_mode_dishes(self):
         return self.send_command(
             self.tm_dish_adapters,
-            "Error in calling TelescopeOn() on TMC Dish leaf node",
+            f"Error in calling TelescopeOn() on {self.tm_dish_adapters}",
             "SetStandbyFPMode",
         )
 
     def set_operate_mode_dishes(self):
         return self.send_command(
             self.tm_dish_adapters,
-            "Error in calling TelescopeOn() on TMC Dish leaf node",
+            f"Error in calling TelescopeOn() on {self.tm_dish_adapters}",
             "SetOperateMode",
         )
 
@@ -142,7 +146,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             None.
 
         """
-        component_manager = self.target
+        component_manager = self.component_manager
         component_manager.component.desired_telescope_state = DevState.ON
 
         # send commands to sub-devices
@@ -159,6 +163,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
     def turn_on_mccs_master(self):
         return self.send_command(
             [self.tm_leaf_mccs_master_adapter],
-            "Error in calling TelescopeOn() in TM MCCS Master Leaf",
+            f"Error in calling TelescopeOn() in {self.tm_leaf_mccs_master_adapter}",
             "On",
         )

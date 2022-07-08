@@ -10,11 +10,11 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class CentralNodeCommand(TMCCommand):
-    def __init__(self, target, *args, logger=None, **kwargs):
-        super().__init__(target, args, logger, kwargs)
+    def __init__(self, component_manager, *args, logger=None, **kwargs):
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
 
     def check_allowed(self):
-        component_manager = self.target
+        component_manager = self.component_manager
 
         if isinstance(component_manager.input_parameter, InputParameterMid):
             result = self.check_allowed_mid()
@@ -24,7 +24,7 @@ class CentralNodeCommand(TMCCommand):
         return result
 
     def init_adapters(self):
-        component_manager = self.target
+        component_manager = self.component_manager
 
         if isinstance(component_manager.input_parameter, InputParameterMid):
             result, message = self.init_adapters_mid()
@@ -34,7 +34,7 @@ class CentralNodeCommand(TMCCommand):
         return result, message
 
     def do(self, argin=None):
-        component_manager = self.target
+        component_manager = self.component_manager
 
         if isinstance(component_manager.input_parameter, InputParameterMid):
             result = self.do_mid(argin)
@@ -72,15 +72,13 @@ class CentralNodeCommand(TMCCommand):
 class AbstractTelescopeOnOff(CentralNodeCommand):
     def __init__(
         self,
-        target,
-        pop_state_model,
+        component_manager,
         adapter_factory=None,
         *args,
         logger=None,
         **kwargs,
     ):
-        super().__init__(target, args, logger, kwargs)
-        self.op_state_model = pop_state_model
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
@@ -99,17 +97,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         :rtype: boolean
 
         """
-        component_manager = self.target
-
-        # if self.op_state_model.op_state in [
-        #     DevState.FAULT,
-        #     DevState.UNKNOWN,
-        #     DevState.DISABLE,
-        # ]:
-        #     raise CommandNotAllowed(
-        #         "TelescopeOnOff() is not allowed in current state %s",
-        #         self.op_state_model.op_state,
-        #     )
+        component_manager = self.component_manager
         component_manager.check_if_command_is_allowed()
 
         # for this command I need a number of sub-devices
@@ -133,17 +121,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         :rtype: boolean
 
         """
-        component_manager = self.target
-
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "TelescopeOnOff() is not allowed in current state %s",
-                self.op_state_model.op_state,
-            )
+        component_manager = self.component_manager
 
         component_manager.check_if_mccs_mln_is_responsive()
         component_manager.check_if_subarrays_are_responsive()
@@ -155,7 +133,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
-        component_manager = self.target
+        component_manager = self.component_manager
 
         try:
             self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
@@ -232,7 +210,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
     def init_adapters_low(self):
         self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
-        component_manager = self.target
+        component_manager = self.component_manager
 
         try:
             self.tm_leaf_mccs_master_adapter = (
