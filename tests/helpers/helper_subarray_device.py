@@ -119,19 +119,12 @@ class HelperSubArrayDevice(SKASubarray):
     class InitCommand(SKASubarray.InitCommand):
         def do(self):
             super().do()
-            # self._device = self.target
             self._device.set_change_event("State", True, False)
             self._device.set_change_event("healthState", True, False)
             self._device.set_change_event("obsState", True, False)
             return (ResultCode.OK, "")
 
     def create_component_manager(self):
-        # self.op_state_model = OpStateModel(
-        #     logger=self.logger, callback=super()._update_state
-        # )
-        # self.obs_state_model = SubarrayObsStateModel(
-        #     logger=self.logger, callback=self._update_obs_state
-        # )
         cm = EmptySubArrayComponentManager(
             logger=self.logger,
             communication_state_callback=None,
