@@ -15,7 +15,7 @@ from tests.settings import (
 )
 
 
-@pytest.mark.cn_cm
+@pytest.mark.refactor_telescopeon
 def test_all_devices_faulty():
     cm = CNComponentManager(
         logger=logger, _input_parameter=InputParameterMid(None)

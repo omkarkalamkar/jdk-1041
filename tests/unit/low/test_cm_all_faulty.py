@@ -13,7 +13,7 @@ from tests.settings import (
 )
 
 
-@pytest.mark.cn_cm
+@pytest.mark.refactor_telescopeon
 def test_all_low_devices_faulty():
     cm = CNComponentManager(
         _input_parameter=InputParameterLow(None), logger=logger

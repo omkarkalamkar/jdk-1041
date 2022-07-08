@@ -18,7 +18,6 @@ from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 
-# from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     HealthStateAggregatorMid,
@@ -64,8 +63,8 @@ class CNComponentManager(TmcComponentManager):
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
         _update_command_in_progress_callback=None,
-        communication_state_changed_callback=None,
-        component_state_changed_callback=None,
+        communication_state_callback=None,
+        component_state_callback=None,
         _monitoring_loop=True,
         _event_receiver=True,
         max_workers=5,
@@ -122,8 +121,8 @@ class CNComponentManager(TmcComponentManager):
             _component=self._component,
             _event_receiver=True,
             _monitoring_loop=True,
-            communication_state_changed_callback=None,
-            component_state_changed_callback=None,
+            communication_state_callback=None,
+            component_state_callback=None,
             max_workers=5,
             proxy_timeout=500,
             sleep_time=1,
@@ -549,7 +548,6 @@ class CNComponentManager(TmcComponentManager):
             else:
                 self.component.imaging = ModesAvailability.not_available
 
-    # TODO: Comment out this code once CM is ready
     def telescope_on(self, task_callback=None):
         """
         Turn the Telescope On.
@@ -562,6 +560,7 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
+    # TODO: rename this method to is_command_allowed once ska-tmc-common is available
     def check_if_command_is_allowed(self):
         if self.op_state_model.op_state in [
             DevState.FAULT,

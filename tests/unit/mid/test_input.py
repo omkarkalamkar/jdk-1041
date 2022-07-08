@@ -3,7 +3,7 @@ import pytest
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
-@pytest.mark.cn_cm
+@pytest.mark.refactor_telescopeon
 def test_properties():
     input = InputParameterMid(None)
     input.tm_subarray_dev_names = ("1", "2")

@@ -37,7 +37,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.cn_cm
+@pytest.mark.refactor_telescopeon
 def test_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
 

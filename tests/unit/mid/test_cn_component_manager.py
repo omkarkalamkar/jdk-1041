@@ -6,7 +6,7 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.settings import logger
 
 
-@pytest.mark.cn_cm
+@pytest.mark.refactor_telescopeon
 def test_telescope_on():
     cm = CNComponentManager(
         logger=logger, _input_parameter=InputParameterMid(None)
