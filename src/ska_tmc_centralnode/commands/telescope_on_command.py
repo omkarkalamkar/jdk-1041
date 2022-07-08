@@ -58,6 +58,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             task_callback(status=TaskStatus.IN_PROGRESS)
 
         ret_code, message = self.do_mid(argin=None)  # Fire and forget
+        self.logger.info(message)
 
         if ret_code == ResultCode.FAILED:
             task_callback(
