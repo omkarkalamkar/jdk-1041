@@ -17,7 +17,6 @@ from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
-
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     HealthStateAggregatorMid,
@@ -83,10 +82,6 @@ class CNComponentManager(TmcComponentManager):
         self.logger = logger
         self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
-        self.op_state_model = TMCOpStateModel(
-            logger=self.logger, callback=None
-        )
-
         self._input_parameter = _input_parameter
 
         self._monitoring_loop = None
