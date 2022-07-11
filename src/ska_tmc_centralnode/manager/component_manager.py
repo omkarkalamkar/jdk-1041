@@ -552,15 +552,15 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
-    # TODO: rename this method to is_command_allowed once ska-tmc-common is available
-    def check_if_command_is_allowed(self):
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "Command is not allowed in current state %s",
-                self.op_state_model.op_state,
-            )
+    def is_command_allowed(self, command_name=None):
+        if command_name in ["TelescopeOn", "TelescopeOff"]:
+            if self.op_state_model.op_state in [
+                DevState.FAULT,
+                DevState.UNKNOWN,
+                DevState.DISABLE,
+            ]:
+                raise CommandNotAllowed(
+                    "Command is not allowed in current state %s",
+                    self.op_state_model.op_state,
+                )
         return True

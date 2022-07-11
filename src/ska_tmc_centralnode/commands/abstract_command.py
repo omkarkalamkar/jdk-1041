@@ -97,7 +97,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         :rtype: boolean
 
         """
-        self.component_manager.check_if_command_is_allowed()
+        self.component_manager.is_command_allowed()
 
         # for this command I need a number of sub-devices
         # import debugpy; debugpy.debug_this_thread()
@@ -120,7 +120,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         :rtype: boolean
 
         """
-        self.component_manager.check_if_command_is_allowed()
+        self.component_manager.is_command_allowed()
 
         self.component_manager.check_if_mccs_mln_is_responsive()
         self.component_manager.check_if_subarrays_are_responsive()

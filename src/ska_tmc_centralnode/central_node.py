@@ -213,7 +213,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         # self.get_command_object("TelescopeOn")
         return (
-            self.component_manager.check_if_command_is_allowed()
+            self.component_manager.is_command_allowed()
         )  # here instead of this, do we want to call check_allowed() from command class
 
     @command(dtype_out="DevVarLongStringArray")
