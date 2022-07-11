@@ -7,14 +7,15 @@ package.
 import threading
 import time
 
-from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
 from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     HealthStateAggregatorMid,
@@ -33,7 +34,7 @@ from ska_tmc_centralnode.model.input import (
 )
 
 
-class CNComponentManager(BaseComponentManager):
+class CNComponentManager(TmcComponentManager):
     """
     A component manager for The Central Node component.
 
@@ -51,7 +52,6 @@ class CNComponentManager(BaseComponentManager):
 
     def __init__(
         self,
-        op_state_model,
         _input_parameter,
         logger=None,
         _component=None,
@@ -61,6 +61,8 @@ class CNComponentManager(BaseComponentManager):
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
         _update_command_in_progress_callback=None,
+        communication_state_callback=None,
+        component_state_callback=None,
         _monitoring_loop=True,
         _event_receiver=True,
         max_workers=5,
@@ -72,8 +74,6 @@ class CNComponentManager(BaseComponentManager):
         """
         Initialise a new ComponentManager instance.
 
-        :param op_state_model: the op state model used by this component
-            manager
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
@@ -81,6 +81,7 @@ class CNComponentManager(BaseComponentManager):
         self.logger = logger
         self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
+        self._input_parameter = _input_parameter
 
         self._monitoring_loop = None
         if _monitoring_loop:
@@ -108,8 +109,20 @@ class CNComponentManager(BaseComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
         )
-
-        super().__init__(op_state_model, *args, **kwargs)
+        super().__init__(
+            _input_parameter=self._input_parameter,
+            logger=self.logger,
+            _component=self._component,
+            _event_receiver=True,
+            _monitoring_loop=True,
+            communication_state_callback=None,
+            component_state_callback=None,
+            max_workers=5,
+            proxy_timeout=500,
+            sleep_time=1,
+            *args,
+            **kwargs,
+        )
 
         if _monitoring_loop:
             self._monitoring_loop.start()
@@ -117,12 +130,11 @@ class CNComponentManager(BaseComponentManager):
         if _event_receiver:
             self._event_receiver.start()
 
-        self._input_parameter = _input_parameter
-
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
+        # TODO: This can be done as a part of CommandExecutor refactor separate story
         self._command_executor = CommandExecutor(
             logger,
             _update_command_in_progress_callback=_update_command_in_progress_callback,
@@ -173,7 +185,7 @@ class CNComponentManager(BaseComponentManager):
 
         :return: list of the monitored devices
         """
-        return self._component.devices
+        return self._component._devices
 
     @property
     def checked_devices(self):
@@ -183,7 +195,7 @@ class CNComponentManager(BaseComponentManager):
         :return: list of the checked monitored devices
         """
         result = []
-        for dev in self.component.devices:
+        for dev in self.component._devices:
             if dev.unresponsive:
                 result.append(dev)
                 continue
@@ -294,7 +306,6 @@ class CNComponentManager(BaseComponentManager):
             devInfo = SubArrayDeviceInfo(dev_name, False)
         else:
             devInfo = DeviceInfo(dev_name, False)
-
         self.component.update_device(devInfo)
 
     def update_input_parameter(self):
@@ -479,6 +490,7 @@ class CNComponentManager(BaseComponentManager):
     def get_tmc_op_state(self):
         return self.component.tmc_op_state
 
+    # TODO: Modify below method as a part of EventReceiver refactoring
     def _update_resources(self, subarray_dev_info):
         """
         Updates resources for a subarray
@@ -529,3 +541,28 @@ class CNComponentManager(BaseComponentManager):
                 self.component.imaging = ModesAvailability.available
             else:
                 self.component.imaging = ModesAvailability.not_available
+
+    def telescope_on(self, task_callback=None):
+        """
+        Turn the Telescope On.
+
+        :return: a result code and message
+        """
+        on_command = TelescopeOn
+        task_status, response = self.submit_task(
+            on_command.telescope_on_slow_command, task_callback=task_callback
+        )
+        return task_status, response
+
+    # TODO: rename this method to is_command_allowed once ska-tmc-common is available
+    def check_if_command_is_allowed(self):
+        if self.op_state_model.op_state in [
+            DevState.FAULT,
+            DevState.UNKNOWN,
+            DevState.DISABLE,
+        ]:
+            raise CommandNotAllowed(
+                "Command is not allowed in current state %s",
+                self.op_state_model.op_state,
+            )
+        return True

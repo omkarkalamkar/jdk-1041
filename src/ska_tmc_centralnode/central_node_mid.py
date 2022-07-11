@@ -3,25 +3,29 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
-from ska_ser_skuid.client import SkuidClient
-from ska_tango_base.commands import ResultCode
+# from ska_ser_skuid.client import SkuidClient
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from tango import AttrWriteType
 from tango.server import attribute, command, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
-from ska_tmc_centralnode.commands.assign_resources_command import (
-    AssignResources,
-)
-from ska_tmc_centralnode.commands.release_resources_command import (
-    ReleaseResources,
-)
-from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
-from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
-from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
-from ska_tmc_centralnode.commands.telescope_standby_command import (
-    TelescopeStandby,
-)
+
+# from ska_tmc_centralnode.commands.telescope_standby_command import (
+#     TelescopeStandby,
+# )
 from ska_tmc_centralnode.model.enum import ModesAvailability
+
+# from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
+# from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
+
+
+# from ska_tmc_centralnode.commands.assign_resources_command import (
+#     AssignResources,
+# )
+# from ska_tmc_centralnode.commands.release_resources_command import (
+#     ReleaseResources,
+# )
+
 
 __all__ = ["CentralNodeMid", "main"]
 
@@ -161,9 +165,8 @@ class CentralNodeMid(AbstractCentralNode):
             :rtype: (ReturnCode, str)
             """
             super().do()
-            device = self.target
 
-            device.set_change_event("imaging", True, False)
+            self._device.set_change_event("imaging", True, False)
 
             return (ResultCode.OK, "")
 
@@ -301,34 +304,17 @@ class CentralNodeMid(AbstractCentralNode):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        args = ()
-        for (command_name, command_class) in [
-            ("On", TelescopeOn),
-            ("TelescopeOn", TelescopeOn),
-            ("Off", TelescopeOff),
-            ("TelescopeOff", TelescopeOff),
-            ("StartUpTelescope", TelescopeOn),
-            ("StandByTelescope", TelescopeOff),
-            ("ReleaseResources", ReleaseResources),
-            ("StowAntennas", StowAntennas),
-            ("Standby", TelescopeStandby),
-            ("TelescopeStandby", TelescopeStandby),
-        ]:
-            command_obj = command_class(
-                self.component_manager,
-                self.op_state_model,
-                *args,
-                logger=self.logger,
+        for (command_name, method_name) in [("TelescopeOn", "telescope_on")]:
+            self.register_command_object(
+                command_name,
+                SubmittedSlowCommand(
+                    command_name,
+                    self._command_tracker,
+                    self.component_manager,
+                    method_name,
+                    logger=None,
+                ),
             )
-            self.register_command_object(command_name, command_obj)
-        assign_resources_obj = AssignResources(
-            self.component_manager,
-            self.op_state_model,
-            skuid=SkuidClient(skuid_url=self.SkuidServiceNamePort),
-            *args,
-            logger=self.logger,
-        )
-        self.register_command_object("AssignResources", assign_resources_obj)
 
 
 # ----------

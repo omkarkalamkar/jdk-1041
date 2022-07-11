@@ -1,22 +1,29 @@
 # Note: This helper class module is explicitly required for CentralNode. Hence kept it here and not in ska-tmc-common repo.
-from ska_tango_base.base import OpStateModel
+import logging
+from typing import Callable
+
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
-from ska_tango_base.subarray import (
-    SKASubarray,
-    SubarrayComponentManager,
-    SubarrayObsStateModel,
-)
+from ska_tango_base.subarray import SKASubarray, SubarrayComponentManager
 from tango import DevState
 from tango.server import command
 
 
 class EmptySubArrayComponentManager(SubarrayComponentManager):
     def __init__(
-        self, op_state_model, obs_state_model, logger=None, *args, **kwargs
+        self,
+        logger: logging.Logger,
+        communication_state_callback: Callable,
+        component_state_callback: Callable,
+        **state
     ):
         self.logger = logger
-        super().__init__(op_state_model, obs_state_model, *args, **kwargs)
+        super().__init__(
+            logger,
+            communication_state_callback,
+            component_state_callback,
+            **state
+        )
         self._assigned_resources = []
 
     def assign(self, resources):
@@ -112,21 +119,16 @@ class HelperSubArrayDevice(SKASubarray):
     class InitCommand(SKASubarray.InitCommand):
         def do(self):
             super().do()
-            device = self.target
-            device.set_change_event("State", True, False)
-            device.set_change_event("healthState", True, False)
-            device.set_change_event("obsState", True, False)
+            self._device.set_change_event("State", True, False)
+            self._device.set_change_event("healthState", True, False)
+            self._device.set_change_event("obsState", True, False)
             return (ResultCode.OK, "")
 
     def create_component_manager(self):
-        self.op_state_model = OpStateModel(
-            logger=self.logger, callback=super()._update_state
-        )
-        self.obs_state_model = SubarrayObsStateModel(
-            logger=self.logger, callback=self._update_obs_state
-        )
         cm = EmptySubArrayComponentManager(
-            self.op_state_model, self.obs_state_model, logger=self.logger
+            logger=self.logger,
+            communication_state_callback=None,
+            component_state_callback=None,
         )
         return cm
 

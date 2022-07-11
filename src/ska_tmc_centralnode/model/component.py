@@ -154,6 +154,7 @@ class CentralComponent(TmcComponent):
         for dev_info in self.devices:
             if dev_info.dev_name == dev_name:
                 return dev_info
+        print("Inside get_device method for CnComponent")
         return None
 
     def remove_device(self, dev_name):
