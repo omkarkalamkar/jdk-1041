@@ -12,6 +12,7 @@ from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
 from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.liveliness_probe import LivelinessProbe
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
@@ -22,9 +23,6 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorLow,
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
-)
-from ska_tmc_centralnode.manager.monitoring_loop import (
-    CentralNodeMonitoringLoop,
 )
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
@@ -55,6 +53,8 @@ class CNComponentManager(TmcComponentManager):
         _input_parameter,
         logger=None,
         _component=None,
+        _liveliness_probe=True,
+        _event_receiver=True,
         _update_device_callback=None,
         _update_telescope_state_callback=None,
         _update_telescope_health_state_callback=None,
@@ -63,8 +63,6 @@ class CNComponentManager(TmcComponentManager):
         _update_command_in_progress_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
-        _monitoring_loop=True,
-        _event_receiver=True,
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
@@ -83,9 +81,9 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
         self._input_parameter = _input_parameter
 
-        self._monitoring_loop = None
-        if _monitoring_loop:
-            self._monitoring_loop = CentralNodeMonitoringLoop(
+        self._liveliness_probe = None
+        if _liveliness_probe:
+            self._monitoring_loop = LivelinessProbe(
                 self,
                 logger,
                 max_workers=max_workers,
@@ -114,7 +112,7 @@ class CNComponentManager(TmcComponentManager):
             logger=self.logger,
             _component=self._component,
             _event_receiver=True,
-            _monitoring_loop=True,
+            _liveliness_probe=True,
             communication_state_callback=None,
             component_state_callback=None,
             max_workers=5,
@@ -124,8 +122,8 @@ class CNComponentManager(TmcComponentManager):
             **kwargs,
         )
 
-        if _monitoring_loop:
-            self._monitoring_loop.start()
+        if _liveliness_probe:
+            self._liveliness_probe.start()
 
         if _event_receiver:
             self._event_receiver.start()
@@ -144,7 +142,7 @@ class CNComponentManager(TmcComponentManager):
         pass
 
     def stop(self):
-        self._monitoring_loop.stop()
+        self._liveliness_probe.stop()
         self._event_receiver.stop()
         self._command_executor.stop()
 
