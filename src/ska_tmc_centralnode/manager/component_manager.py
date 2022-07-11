@@ -12,7 +12,6 @@ from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
