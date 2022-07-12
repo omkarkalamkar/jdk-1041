@@ -3,29 +3,12 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
-# from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from tango import AttrWriteType
 from tango.server import attribute, command, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
-
-# from ska_tmc_centralnode.commands.telescope_standby_command import (
-#     TelescopeStandby,
-# )
 from ska_tmc_centralnode.model.enum import ModesAvailability
-
-# from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
-# from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
-
-
-# from ska_tmc_centralnode.commands.assign_resources_command import (
-#     AssignResources,
-# )
-# from ska_tmc_centralnode.commands.release_resources_command import (
-#     ReleaseResources,
-# )
-
 
 __all__ = ["CentralNodeMid", "main"]
 

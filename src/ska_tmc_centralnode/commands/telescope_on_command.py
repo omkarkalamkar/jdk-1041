@@ -38,7 +38,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self._step_sleep = step_sleep
         self.init_adapters()
 
-    def telescope_on_slow_command(
+    def telescope_on(
         self,
         logger: logger,
         task_callback: Callable = None,

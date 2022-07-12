@@ -212,10 +212,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        # self.get_command_object("TelescopeOn")
-        return (
-            self.component_manager.is_command_allowed()
-        )  # here instead of this, do we want to call check_allowed() from command class
+        return self.component_manager.is_command_allowed()
 
     @command(dtype_out="DevVarLongStringArray")
     @DebugIt()

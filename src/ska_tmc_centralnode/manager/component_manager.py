@@ -548,7 +548,7 @@ class CNComponentManager(TmcComponentManager):
         """
         on_command = TelescopeOn
         task_status, response = self.submit_task(
-            on_command.telescope_on_slow_command, task_callback=task_callback
+            on_command.telescope_on, task_callback=task_callback
         )
         return task_status, response
 
