@@ -1,4 +1,3 @@
-import logging
 import threading
 from asyncio.log import logger
 from typing import Callable, Optional
@@ -10,6 +9,7 @@ from tango import DevState
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
+from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class TelescopeOn(AbstractTelescopeOnOff):
@@ -57,7 +57,12 @@ class TelescopeOn(AbstractTelescopeOnOff):
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
 
-        ret_code, message = self.do_mid(argin=None)  # Fire and forget
+        if isinstance(
+            self.component_manager.input_parameter, InputParameterMid
+        ):
+            ret_code, message = self.do_mid(argin=None)  # Fire and forget
+        else:
+            ret_code, message = self.do_low(argin=None)
         self.logger.info(message)
 
         if ret_code == ResultCode.FAILED:
