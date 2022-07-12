@@ -2,7 +2,6 @@
 import logging
 from typing import Callable
 
-import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
 from ska_tango_base.subarray import SKASubarray, SubarrayComponentManager
@@ -149,12 +148,8 @@ class HelperSubArrayDevice(SKASubarray):
         """
         # import debugpy; debugpy.debug_this_thread()
 
-        print("argin is:::::::::", argin)
-
         if self.dev_state() != argin:
-            print("dev_state() value is", self.dev_state())
             val = self.set_state(argin)
-            print("set_state() value is", val)
             self.push_change_event("State", self.dev_state())
         return val
 
