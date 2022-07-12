@@ -1,5 +1,6 @@
 import logging
 import threading
+from asyncio.log import logger
 from typing import Callable, Optional
 
 from ska_tango_base.commands import ResultCode
@@ -39,7 +40,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def telescope_on_slow_command(
         self,
-        logger: logging.Logger,
+        logger: logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
@@ -54,8 +55,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
-        if task_callback:
-            task_callback(status=TaskStatus.IN_PROGRESS)
+        task_callback(status=TaskStatus.IN_PROGRESS)
 
         ret_code, message = self.do_mid(argin=None)  # Fire and forget
         self.logger.info(message)
@@ -78,6 +78,8 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 status=TaskStatus.ABORTED,
                 result="TelescopeOn() command task is aborted",
             )
+        else:
+            logger.info("Task_abort_event is not set")
             return
 
     def do_mid(self, argin=None):
@@ -88,9 +90,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             None.
 
         """
-        component_manager = self.component_manager
-
-        component_manager.component.desired_telescope_state = DevState.ON
+        self.component_manager.component.desired_telescope_state = DevState.ON
 
         for ret_code, message in [
             self.turn_on_csp(),
@@ -147,8 +147,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             None.
 
         """
-        component_manager = self.component_manager
-        component_manager.component.desired_telescope_state = DevState.ON
+        self.component_manager.component.desired_telescope_state = DevState.ON
 
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
