@@ -6,7 +6,7 @@ of state and mode attributes defined by the SKA Control Model.
 import json
 
 import pandas as pd
-from ska_tango_base.commands import ResultCode
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
 from tango import AttrWriteType, DebugIt
@@ -211,10 +211,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        # self.get_command_object("TelescopeOn")
-        return (
-            self.component_manager.is_command_allowed()
-        )  # here instead of this, do we want to call check_allowed() from command class
+        return self.component_manager.is_command_allowed()
 
     @command(dtype_out="DevVarLongStringArray")
     @DebugIt()
@@ -586,3 +583,14 @@ class AbstractCentralNode(TMCBaseDevice):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
+        for (command_name, method_name) in [("TelescopeOn", "telescope_on")]:
+            self.register_command_object(
+                command_name,
+                SubmittedSlowCommand(
+                    command_name,
+                    self._command_tracker,
+                    self.component_manager,
+                    method_name,
+                    logger=None,
+                ),
+            )

@@ -11,7 +11,7 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
-        super().__init__(component_manager, *args, logger=logger, **kwargs)
+        super().__init__(component_manager, logger=logger, *args, **kwargs)
 
     def check_allowed(self):
         if isinstance(
@@ -78,7 +78,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         logger=None,
         **kwargs,
     ):
-        super().__init__(component_manager, *args, logger=logger, **kwargs)
+        super().__init__(component_manager, logger=logger, *args, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None

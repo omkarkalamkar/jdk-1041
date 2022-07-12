@@ -1,5 +1,5 @@
-import logging
 import threading
+from asyncio.log import logger
 from typing import Callable, Optional
 
 from ska_tango_base.commands import ResultCode
@@ -9,6 +9,7 @@ from tango import DevState
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
+from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class TelescopeOn(AbstractTelescopeOnOff):
@@ -37,9 +38,9 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self._step_sleep = step_sleep
         self.init_adapters()
 
-    def telescope_on_slow_command(
+    def telescope_on(
         self,
-        logger: logging.Logger,
+        logger: logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
@@ -54,10 +55,14 @@ class TelescopeOn(AbstractTelescopeOnOff):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
-        if task_callback:
-            task_callback(status=TaskStatus.IN_PROGRESS)
+        task_callback(status=TaskStatus.IN_PROGRESS)
 
-        ret_code, message = self.do_mid(argin=None)  # Fire and forget
+        if isinstance(
+            self.component_manager.input_parameter, InputParameterMid
+        ):
+            ret_code, message = self.do_mid(argin=None)  # Fire and forget
+        else:
+            ret_code, message = self.do_low(argin=None)
         self.logger.info(message)
 
         if ret_code == ResultCode.FAILED:
@@ -78,6 +83,8 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 status=TaskStatus.ABORTED,
                 result="TelescopeOn() command task is aborted",
             )
+        else:
+            logger.info("Task_abort_event is not set")
             return
 
     def do_mid(self, argin=None):
@@ -88,9 +95,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             None.
 
         """
-        component_manager = self.component_manager
-
-        component_manager.component.desired_telescope_state = DevState.ON
+        self.component_manager.component.desired_telescope_state = DevState.ON
 
         for ret_code, message in [
             self.turn_on_csp(),
@@ -147,8 +152,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             None.
 
         """
-        component_manager = self.component_manager
-        component_manager.component.desired_telescope_state = DevState.ON
+        self.component_manager.component.desired_telescope_state = DevState.ON
 
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
