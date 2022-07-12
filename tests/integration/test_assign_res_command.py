@@ -97,7 +97,10 @@ def assign_resouces(tango_context, central_node_name, assign_input_str):
                 pytest.fail("Timeout occurred while executing the test")
         assert resources_len > 0
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -115,7 +118,10 @@ def test_assign_res_command_mid(tango_context, central_node_name):
         ),
     )
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(

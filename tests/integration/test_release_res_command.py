@@ -100,7 +100,10 @@ def release_resources(
 
         assert resources_len == 0
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(tango_context):
@@ -122,7 +125,10 @@ def test_release_res_command_mid(tango_context):
         ),
     )
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(tango_context):

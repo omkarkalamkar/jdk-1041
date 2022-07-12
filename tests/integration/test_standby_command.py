@@ -49,13 +49,19 @@ def standby_command(tango_context, central_node_name):
 
     assert central_node.telescopeState == DevState.STANDBY
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_standby_command_mid(tango_context):
     standby_command(tango_context, "ska_mid/tm_central/central_node")
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_standby_command_low(tango_context):

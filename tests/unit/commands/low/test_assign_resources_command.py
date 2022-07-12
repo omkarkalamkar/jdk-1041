@@ -71,7 +71,10 @@ def get_assign_resources_command_obj():
     )
     return assign_res_command, my_adapter_factory
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_command(tango_context):
     logger.info("%s", tango_context)
     assign_res_command, my_adapter_factory = get_assign_resources_command_obj()
@@ -83,7 +86,10 @@ def test_telescope_low_assign_resources_command(tango_context):
         if isinstance(adapter, SubArrayAdapter):
             adapter.proxy.AssignResources.assert_called()
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -112,7 +118,10 @@ def test_telescope_low_assign_resources_command_fail_subarray(tango_context):
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_command_missing_subarray_beam_ids_key(
     tango_context,
 ):
@@ -129,7 +138,10 @@ def test_telescope_low_assign_resources_command_missing_subarray_beam_ids_key(
         if isinstance(adapter, SubArrayAdapter):
             adapter.proxy.AssignResources.assert_called()
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_command_empty_input_json(
     tango_context,
 ):
@@ -140,7 +152,10 @@ def test_telescope_low_assign_resources_command_empty_input_json(
     (result_code, _) = assign_res_command.do("")
     assert result_code == ResultCode.FAILED
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_command_missing_subarray_id(
     tango_context,
 ):
@@ -156,7 +171,10 @@ def test_telescope_low_assign_resources_command_missing_subarray_id(
     assert result_code == ResultCode.FAILED
     assert "subarray_id" in message
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_command_missing_mccs(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -170,7 +188,10 @@ def test_telescope_low_assign_resources_command_missing_mccs(tango_context):
     assert result_code == ResultCode.FAILED
     assert "mccs" in message
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_command_missing_channel_blocks(
     tango_context,
 ):
@@ -186,7 +207,10 @@ def test_telescope_low_assign_resources_command_missing_channel_blocks(
     assert result_code == ResultCode.FAILED
     assert "channel_blocks" in message
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_command_missing_station_ids(
     tango_context,
 ):
@@ -202,7 +226,10 @@ def test_telescope_low_assign_resources_command_missing_station_ids(
     assert result_code == ResultCode.FAILED
     assert "station_ids" in message
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)

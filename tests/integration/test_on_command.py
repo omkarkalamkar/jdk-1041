@@ -32,13 +32,19 @@ def on_command(tango_context, centralnode_name):
         if command[0] == unique_id[0]:
             assert command[2] == "ResultCode.OK"
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_on_command_mid(tango_context):
     on_command(tango_context, "ska_mid/tm_central/central_node")
 
-@pytest.mark.xfail(reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring.")
+
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_on_command_low(tango_context):
