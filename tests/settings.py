@@ -2,6 +2,7 @@ import logging
 import time
 
 import pytest
+from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import (
@@ -50,7 +51,11 @@ def create_cm(
     p_event_receiver=True,
     input_parameter=InputParameterMid(None),
 ):
+    # op_state_model = TMCOpStateModel(
+    #         logger=logger
+    #     )
     cm = CNComponentManager(
+        # op_state_model,
         logger=logger,
         _input_parameter=input_parameter,
         _event_receiver=p_event_receiver,
@@ -135,6 +140,12 @@ def set_devices_state(devices, state, devFactory, cm, expected_elapsed_time):
 
 
 def set_device_state(device, state, devFactory):
+    print("::::::::::state value is::::::::::", state)
     proxy = devFactory.get_device(device)
-    proxy.SetDirectState(state)
+    print("::::::::::proxy value is::::::::::", proxy)
+    res = proxy.SetDirectState(state)
+    # proxy.set_state(state)
+    # print("::::::::::    proxy.set_state(state) value is::::::::::",proxy.set_state(state))
+    print("::::::::::proxy.SetDirectState(state) value is::::::::::", res)
+    print("::::::::::proxy.State() value is::::::::::", proxy.State())
     assert proxy.State() == state
