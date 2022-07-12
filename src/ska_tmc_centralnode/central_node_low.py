@@ -3,7 +3,7 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
-from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
+from ska_tango_base.commands import ResultCode
 from tango import AttrWriteType
 from tango.server import attribute, device_property, run
 
@@ -99,23 +99,6 @@ class CentralNodeLow(AbstractCentralNode):
         self.component_manager.input_parameter.mccs_master_dev_name = value
         self.component_manager.update_input_parameter()
 
-    def init_command_objects(self):
-        """
-        Initialises the command handlers for commands supported by this device.
-        """
-        super().init_command_objects()
-        for (command_name, method_name) in [("TelescopeOn", "telescope_on")]:
-            self.register_command_object(
-                command_name,
-                SubmittedSlowCommand(
-                    command_name,
-                    self._command_tracker,
-                    self.component_manager,
-                    method_name,
-                    logger=None,
-                ),
-            )
-
     def create_component_manager(self):
         cm = CNComponentManager(
             logger=self.logger,
@@ -142,6 +125,9 @@ class CentralNodeLow(AbstractCentralNode):
         cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""
         cm.update_input_parameter()
         return cm
+
+    def init_command_objects(self):
+        return super().init_command_objects()
 
 
 # ----------
