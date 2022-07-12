@@ -1,7 +1,9 @@
+import logging
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.aggregators import Aggregator
 from tango import DevState
 
+logger = logging.getLogger(__name__)
 
 class TelescopeStateAggregatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
@@ -37,16 +39,16 @@ class TelescopeStateAggregatorMid(Aggregator):
 
         telescopeSetStateList = set(telescopeStateList)
         if not sdp_master and not csp_master:
-            # self._logger.info(
-            #     "missing devices: %s=%s %s=%s",
-            #     self._component_manager.input_parameter.sdp_master_dev_name,
-            #     sdp_master,
-            #     self._component_manager.input_parameter.csp_master_dev_name,
-            #     csp_master,
-            # )
+            logger.info(
+                "missing devices: %s=%s %s=%s",
+                self._component_manager.input_parameter.sdp_master_dev_name,
+                sdp_master,
+                self._component_manager.input_parameter.csp_master_dev_name,
+                csp_master,
+            )
             return DevState.UNKNOWN
         elif dish_count == 0:
-            # self._logger.info("dish_count == 0")
+            logger.info("dish_count == 0")
             return DevState.UNKNOWN
         elif telescopeSetStateList == set([DevState.ON]):
             return DevState.ON
