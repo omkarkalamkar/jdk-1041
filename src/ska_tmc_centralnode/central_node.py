@@ -330,36 +330,36 @@ class AbstractCentralNode(TMCBaseDevice):
     #     self.log_state("Device states after executing Telescope Off command")
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    def is_On_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state.
+    # def is_On_allowed(self):
+    #     """
+    #     Checks whether this command is allowed to be run in current device state.
 
-        :return: True if this command is allowed to be run in current device state.
+    #     :return: True if this command is allowed to be run in current device state.
 
-        :rtype: boolean
+    #     :rtype: boolean
 
-        """
-        handler = self.get_command_object("On")
-        return handler.check_allowed()
+    #     """
+    #     handler = self.get_command_object("On")
+    #     return handler.check_allowed()
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-    )
-    @DebugIt()
-    def On(self):
-        """
-        This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
-        SdpMasterLeafNode.
-        """
-        self.log_state("Device states before executing On command")
-        handler = self.get_command_object("On")
-        if self.component_manager.command_executor.queue_full:
-            return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(
-            handler
-        )
-        self.log_state("Device states after executing On command")
-        return [[ResultCode.QUEUED], [str(unique_id)]]
+    # @command(
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    # @DebugIt()
+    # def On(self):
+    #     """
+    #     This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
+    #     SdpMasterLeafNode.
+    #     """
+    #     self.log_state("Device states before executing On command")
+    #     handler = self.get_command_object("On")
+    #     if self.component_manager.command_executor.queue_full:
+    #         return [[ResultCode.FAILED], ["Queue is full!"]]
+    #     unique_id = self.component_manager.command_executor.enqueue_command(
+    #         handler
+    #     )
+    #     self.log_state("Device states after executing On command")
+    #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring
     # def is_AssignResources_allowed(self):
