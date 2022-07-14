@@ -16,6 +16,7 @@ from ska_tmc_common.liveliness_probe import LivelinessProbe
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
@@ -549,6 +550,18 @@ class CNComponentManager(TmcComponentManager):
         on_command = TelescopeOn
         task_status, response = self.submit_task(
             on_command.telescope_on, task_callback=task_callback
+        )
+        return task_status, response
+
+    def telescope_off(self, task_callback=None):
+        """
+        Turn the Telescope Off.
+
+        :return: a result code and message
+        """
+        off_command = TelescopeOff
+        task_status, response = self.submit_task(
+            off_command.telescope_off, task_callback=task_callback
         )
         return task_status, response
 
