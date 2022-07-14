@@ -2,7 +2,6 @@ import logging
 import time
 
 import pytest
-from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import (
@@ -51,15 +50,11 @@ def create_cm(
     p_event_receiver=True,
     input_parameter=InputParameterMid(None),
 ):
-    op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model,
         logger=logger,
         _input_parameter=input_parameter,
-        _monitoring_loop=p_monitoring_loop,
         _event_receiver=p_event_receiver,
     )
-
     if isinstance(input_parameter, InputParameterMid):
         DEVICE_LIST = DEVICE_LIST_MID
     else:
@@ -82,7 +77,6 @@ def create_cm(
 
 def create_cm_no_faulty_devices(
     tango_context,
-    p_monitoring_loop,
     p_event_receiver,
     input_parameter=InputParameterMid(None),
 ):
@@ -92,9 +86,7 @@ def create_cm_no_faulty_devices(
     else:
         input_parameter = InputParameterLow(None)
 
-    cm, start_time = create_cm(
-        p_monitoring_loop, p_event_receiver, input_parameter
-    )
+    cm, start_time = create_cm(p_event_receiver, input_parameter)
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time
@@ -143,6 +135,12 @@ def set_devices_state(devices, state, devFactory, cm, expected_elapsed_time):
 
 
 def set_device_state(device, state, devFactory):
+    print("::::::::::state value is::::::::::", state)
     proxy = devFactory.get_device(device)
-    proxy.SetDirectState(state)
+    print("::::::::::proxy value is::::::::::", proxy)
+    res = proxy.SetDirectState(state)
+    # proxy.set_state(state)
+    # print("::::::::::    proxy.set_state(state) value is::::::::::",proxy.set_state(state))
+    print("::::::::::proxy.SetDirectState(state) value is::::::::::", res)
+    print("::::::::::proxy.State() value is::::::::::", proxy.State())
     assert proxy.State() == state

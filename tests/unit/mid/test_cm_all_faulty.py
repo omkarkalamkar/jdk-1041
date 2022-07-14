@@ -1,7 +1,6 @@
 import time
 
 import pytest
-from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
@@ -16,10 +15,10 @@ from tests.settings import (
 )
 
 
+@pytest.mark.refactor_telescopeon
 def test_all_devices_faulty():
-    op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
+        logger=logger, _input_parameter=InputParameterMid(None)
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     cm.add_multiple_devices(DEVICE_LIST_MID)

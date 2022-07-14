@@ -36,6 +36,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.refactor_telescopeon
 def test_low_telescope_on_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -45,15 +46,16 @@ def test_low_telescope_on_command(tango_context):
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
 
-    my_adapter_factory = HelperAdapterFactory()
-    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
+    adapter_factory = HelperAdapterFactory()
+    on_command = TelescopeOn(cm, adapter_factory)
     assert on_command.check_allowed()
     (result_code, _) = on_command.do()
     assert result_code == ResultCode.OK
-    for adapter in my_adapter_factory.adapters:
+    for adapter in adapter_factory.adapters:
         adapter.proxy.On.assert_called()
 
 
+@pytest.mark.refactor_telescopeon
 def test_low_telescope_on_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -61,22 +63,23 @@ def test_low_telescope_on_command_fail_subarray(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
+    adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeOn command
     failing_dev = "ska_low/tm_subarray_node/1"
 
-    my_adapter_factory.get_or_create_adapter(
+    adapter_factory.get_or_create_adapter(
         failing_dev, attrs={"TelescopeOn.side_effect": Exception}
     )
 
-    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
+    on_command = TelescopeOn(cm, adapter_factory)
     assert on_command.check_allowed()
     (result_code, message) = on_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
 
 
+@pytest.mark.refactor_telescopeon
 def test_low_telescope_on_command_fail_mccs(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -84,21 +87,22 @@ def test_low_telescope_on_command_fail_mccs(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
+    adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeOn command
     failing_dev = "ska_low/tm_leaf_node/mccs_master"
-    my_adapter_factory.get_or_create_adapter(
+    adapter_factory.get_or_create_adapter(
         failing_dev, attrs={"TelescopeOn.side_effect": Exception}
     )
 
-    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
+    on_command = TelescopeOn(cm, adapter_factory)
     assert on_command.check_allowed()
     (result_code, message) = on_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
 
 
+@pytest.mark.refactor_telescopeon
 def test_low_telescope_on_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)
@@ -107,8 +111,8 @@ def test_low_telescope_on_fail_check_allowed(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
+    adapter_factory = HelperAdapterFactory()
     cm.input_parameter.tm_subarray_dev_names = []
-    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
+    on_command = TelescopeOn(cm, adapter_factory)
     with pytest.raises(CommandNotAllowed):
         on_command.check_allowed()
