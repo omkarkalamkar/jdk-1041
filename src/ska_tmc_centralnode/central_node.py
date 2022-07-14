@@ -511,7 +511,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
 
         handler = self.get_command_object("Off")
-        return handler.check_allowed()
+        return handler.is_command_allowed()
 
     @command(
         dtype_out="DevVarLongStringArray",
