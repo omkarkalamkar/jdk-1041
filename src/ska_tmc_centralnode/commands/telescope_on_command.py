@@ -1,5 +1,4 @@
 import threading
-from asyncio.log import logger
 from typing import Callable, Optional
 
 from ska_tango_base.commands import ResultCode
@@ -9,7 +8,6 @@ from tango import DevState
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
-from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class TelescopeOn(AbstractTelescopeOnOff):
@@ -40,7 +38,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def telescope_on(
         self,
-        logger: logger,
+        logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
@@ -55,15 +53,11 @@ class TelescopeOn(AbstractTelescopeOnOff):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
-        task_callback(status=TaskStatus.IN_PROGRESS)
-
-        if isinstance(
-            self.component_manager.input_parameter, InputParameterMid
-        ):
-            ret_code, message = self.do_mid(argin=None)  # Fire and forget
-        else:
-            ret_code, message = self.do_low(argin=None)
-        self.logger.info(message)
+        if task_callback:
+            task_callback(status=TaskStatus.IN_PROGRESS)
+    
+        ret_code, message = self.do(argin=None)
+        logger.info(message)
 
         if ret_code == ResultCode.FAILED:
             task_callback(
@@ -76,17 +70,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 result="TelesopeOn() command has completed",
             )
 
-        # Periodically check that tasks have not been ABORTED
-        if task_abort_event.is_set():
-            # Indicate that the task has been aborted
-            task_callback(
-                status=TaskStatus.ABORTED,
-                result="TelescopeOn() command task is aborted",
-            )
-        else:
-            logger.info("Task_abort_event is not set")
-            return
-
     def do_mid(self, argin=None):
         """
         Method to invoke Telescope On command on Lower level devices.
@@ -96,7 +79,11 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
-
+        print(
+            "Component.desired telescope state is::::::",
+            self.component_manager.component.desired_telescope_state,
+        )
+        print("Invoking TelescopeOn command on the lower level devices")
         for ret_code, message in [
             self.turn_on_csp(),
             self.turn_on_sdp(),
@@ -106,10 +93,13 @@ class TelescopeOn(AbstractTelescopeOnOff):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
-
+        print(
+            "do_mid for TelescopeOn command on the lower level devices is successful"
+        )
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
+        print("TelescopeOn for Sdp devices")
         return self.send_command(
             [self.tm_leaf_sdp_master_adapter],
             f"Error in calling On() command for {self.tm_leaf_sdp_master_adapter}",
@@ -117,6 +107,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def turn_on_csp(self):
+        print("TelescopeOn for Csp devices")
         return self.send_command(
             [self.tm_leaf_csp_master_adapter],
             f"Error in calling On() command for {self.tm_leaf_csp_master_adapter}",
@@ -124,6 +115,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def turn_on_subarrays(self):
+        print("TelescopeOn for tm subarrays devices")
         return self.send_command(
             self.tm_subarray_adapters,
             f"Error in calling On() command for {self.tm_subarray_adapters}",
@@ -131,6 +123,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def set_standby_fp_mode_dishes(self):
+        print("TelescopeOn for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
             f"Error in calling SetStandbyFPMode() command for {self.tm_dish_adapters}",
@@ -138,6 +131,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def set_operate_mode_dishes(self):
+        print("TelescopeOn for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
             f"Error in calling SetOperateMode() command for {self.tm_dish_adapters}",
