@@ -168,7 +168,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 component_manager.input_parameter.tm_leaf_csp_master_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
+                f"Adapter is created for CSP Master Leaf Node {component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_csp_master_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
