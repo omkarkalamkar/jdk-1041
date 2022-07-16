@@ -6,6 +6,7 @@ package.
 """
 import threading
 import time
+from typing import Callable
 
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.command_executor import CommandExecutor
@@ -83,7 +84,7 @@ class CNComponentManager(TmcComponentManager):
 
         self._liveliness_probe = None
         if _liveliness_probe:
-            self._monitoring_loop = LivelinessProbe(
+            self._liveliness_probe = LivelinessProbe(
                 self,
                 logger,
                 max_workers=max_workers,
@@ -540,17 +541,19 @@ class CNComponentManager(TmcComponentManager):
             else:
                 self.component.imaging = ModesAvailability.not_available
 
-    def telescope_on(self, task_callback=None):
+    def telescope_on(self, task_callback: Callable = None):
         """
         Turn the Telescope On.
 
         :return: a result code and message
         """
-        on_command = TelescopeOn
-        task_status, response = self.submit_task(
-            on_command.telescope_on, task_callback=task_callback
+        telescopon_command = TelescopeOn(
+            self, self.op_state_model, adapter_factory=None, logger=self.logger
         )
-        return task_status, response
+        telescopon_command.telescope_on(
+            logger=self.logger, task_callback=task_callback
+        )
+        return task_callback.status, task_callback.result
 
     def is_command_allowed(self, command_name=None):
         if command_name in ["TelescopeOn", "TelescopeOff"]:
@@ -563,4 +566,4 @@ class CNComponentManager(TmcComponentManager):
                     "Command is not allowed in current state %s",
                     self.op_state_model.op_state,
                 )
-        return True
+            return True
