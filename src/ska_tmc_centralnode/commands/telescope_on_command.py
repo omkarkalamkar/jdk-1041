@@ -31,7 +31,8 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
         self._timeout_mccs = timeout_mccs
         self._step_sleep = step_sleep
-        self.init_adapters()
+        # TODO: Moved to do method for testing
+        # self.init_adapters()
 
     def do_mid(self, argin=None):
         """
@@ -44,6 +45,10 @@ class TelescopeOn(AbstractTelescopeOnOff):
         component_manager = self.target
 
         component_manager.component.desired_telescope_state = DevState.ON
+
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         for ret_code, message in [
             self.turn_on_csp(),
@@ -102,6 +107,10 @@ class TelescopeOn(AbstractTelescopeOnOff):
         """
         component_manager = self.target
         component_manager.component.desired_telescope_state = DevState.ON
+
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()

@@ -41,7 +41,8 @@ class AssignResources(AbstractAssignReleaseResources):
         self.tm_subarray_adapters = []
         self._skuid = skuid
         self.my_subarray_adapter = None
-        self.init_adapters()
+        # TODO: Moved to do method for testing
+        # self.init_adapters()
 
     def do_mid(self, argin=None):
         """
@@ -195,6 +196,10 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "subarray_id key is not present in the input json argument.",
             )
+
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         subarrayID = int(json_argument["subarray_id"])
 
@@ -355,6 +360,10 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "mccs.channel_blocks key is not present in the input json argument.",
             )
+
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         subarrayID = int(json_argument["subarray_id"])
 

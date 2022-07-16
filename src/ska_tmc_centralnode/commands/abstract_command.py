@@ -48,10 +48,14 @@ class CentralNodeCommand(TMCCommand):
         adapters: list,
         command_caller,
         err_msg: str,
+        command_name: str,
     ):
         try:
             for adapter in adapters:
                 command_caller(adapter)
+                self.logger.debug(
+                    f"Invoked {command_name} on device {adapter.dev_name}"
+                )
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -62,10 +66,13 @@ class CentralNodeCommand(TMCCommand):
     def send_command(self, adapters, description, command, argin=None):
         if argin:
             return self.invoke_command(
-                adapters, operator.methodcaller(command, argin), description
+                adapters,
+                operator.methodcaller(command, argin),
+                description,
+                command,
             )
         return self.invoke_command(
-            adapters, operator.methodcaller(command), description
+            adapters, operator.methodcaller(command), description, command
         )
 
 
@@ -160,6 +167,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
             self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
                 component_manager.input_parameter.tm_leaf_csp_master_dev_name
             )
+            self.logger.debug(
+                f"Adapter is created for CSP Master Leaf Node {component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_csp_master_adapter}"
+            )
         except Exception as e:
             return self.adapter_error_message_result(
                 component_manager.input_parameter.tm_leaf_csp_master_dev_name,
@@ -169,6 +179,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         try:
             self.tm_leaf_sdp_master_adapter = self._adapter_factory.get_or_create_adapter(
                 component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+            )
+            self.logger.debug(
+                f"Adapter is created for SDP Master Leaf Node {component_manager.input_parameter.tm_leaf_sdp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
@@ -191,6 +204,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for SubarrayNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e
@@ -214,6 +230,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for DishLeafNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e
@@ -366,6 +385,9 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for SubarrayNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e
@@ -390,6 +412,9 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for DishLeafNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e
