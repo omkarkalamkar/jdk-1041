@@ -160,6 +160,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
             self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
                 component_manager.input_parameter.tm_leaf_csp_master_dev_name
             )
+            self.logger.debug(
+                f"Adapter is created for CSP Master Leaf Node {component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
+            )
         except Exception as e:
             return self.adapter_error_message_result(
                 component_manager.input_parameter.tm_leaf_csp_master_dev_name,
@@ -169,6 +172,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         try:
             self.tm_leaf_sdp_master_adapter = self._adapter_factory.get_or_create_adapter(
                 component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+            )
+            self.logger.debug(
+                f"Adapter is created for SDP Master Leaf Node {component_manager.input_parameter.tm_leaf_sdp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
@@ -191,6 +197,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for SubarrayNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e
@@ -214,6 +223,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for DishLeafNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e
@@ -366,6 +378,9 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for SubarrayNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e
@@ -390,6 +405,9 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for DishLeafNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e

@@ -39,7 +39,8 @@ class ReleaseResources(AbstractAssignReleaseResources):
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         self.my_subarray_adapter = None
-        self.init_adapters()
+        # TODO: Moved to do method for testing
+        # self.init_adapters()
 
     def do_mid(self, argin):
         """
@@ -71,6 +72,9 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         :return: None
         """
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         ret_code, message = self.validate_input_json(argin)
         if ret_code == ResultCode.FAILED:
@@ -119,6 +123,9 @@ class ReleaseResources(AbstractAssignReleaseResources):
             DevFailed if the command execution or command invocation on SubarrayNode is not successful
 
         """
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         ret_code, message = self.validate_input_json(argin)
         if ret_code == ResultCode.FAILED:

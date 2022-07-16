@@ -30,7 +30,8 @@ class TelescopeOff(AbstractTelescopeOnOff):
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
-        self.init_adapters()
+        # TODO: Moved to do method for testing
+        # self.init_adapters()
 
     def do_mid(self, argin=None):
         """
@@ -47,6 +48,10 @@ class TelescopeOff(AbstractTelescopeOnOff):
         """
         component_manager = self.target
         component_manager.component.desired_telescope_state = DevState.OFF
+
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         ret_code, message = self.turn_off_subarrays()
         if ret_code == ResultCode.FAILED:
@@ -139,6 +144,10 @@ class TelescopeOff(AbstractTelescopeOnOff):
         """
         component_manager = self.target
         component_manager.component.desired_telescope_state = DevState.OFF
+
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
 
         ret_code, message = self.turn_off_subarrays()
         if ret_code == ResultCode.FAILED:
