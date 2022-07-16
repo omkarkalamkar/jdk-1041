@@ -100,7 +100,6 @@ class CNComponentManager(TmcComponentManager):
                 proxy_timeout=proxy_timeout,
                 sleep_time=sleep_time,
             )
-            self._liveliness_probe.start()
 
         self._event_receiver = None
         if _event_receiver:
@@ -119,6 +118,10 @@ class CNComponentManager(TmcComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
         )
+
+        if _liveliness_probe:
+            self._liveliness_probe.start()
+
         super().__init__(
             logger=self.logger,
             _component=self._component,
