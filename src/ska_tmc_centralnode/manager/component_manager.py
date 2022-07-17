@@ -498,8 +498,8 @@ class CNComponentManager(TmcComponentManager):
         :param subarray_dev_name: name of the subarray device
         :type subarray_dev_name: str
         """
-        if self._monitoring_loop is not None:
-            self._monitoring_loop.add_priority_devices(
+        if self._liveliness_probe is not None:
+            self._liveliness_probe.add_priority_devices(
                 subarray_dev_info.dev_name
             )
         else:
@@ -548,12 +548,15 @@ class CNComponentManager(TmcComponentManager):
         :return: a result code and message
         """
         telescopon_command = TelescopeOn(
-            self, self.op_state_model, adapter_factory=None, logger=self.logger
+            self, adapter_factory=None, logger=self.logger
         )
-        telescopon_command.telescope_on(
-            logger=self.logger, task_callback=task_callback
+
+        task_status, responce = self.submit_task(
+            telescopon_command.telescope_on,
+            args=[self.logger],
+            task_callback=task_callback,
         )
-        return task_callback.status, task_callback.result
+        return task_status, responce
 
     def is_command_allowed(self, command_name=None):
         if command_name in ["TelescopeOn", "TelescopeOff"]:

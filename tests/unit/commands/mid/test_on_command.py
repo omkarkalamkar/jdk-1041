@@ -3,7 +3,7 @@ import time
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import DishAdapter, SubArrayAdapter
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -13,6 +13,7 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
 )
 
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
+from tests.mock_callable import MockCallable
 from tests.settings import create_cm, logger
 
 
@@ -34,7 +35,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.refactor_telescopeon
+@pytest.mark.shraddha_bajare
 def test_telescope_on_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -43,22 +44,13 @@ def test_telescope_on_command(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-
-    adapter_factory = HelperAdapterFactory()
-    on_command = TelescopeOn(cm, adapter_factory)
-    assert on_command.check_allowed()
-    (result_code, _) = on_command.do()
-    assert result_code == ResultCode.OK
-    for adapter in adapter_factory.adapters:
-        if isinstance(adapter, DishAdapter):
-            adapter.proxy.SetStandbyFPMode.assert_called()
-            adapter.proxy.SetOperateMode.assert_called_once_with()
-            continue
-        if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.On.assert_called_once_with()
-            continue
-
-        adapter.proxy.On.assert_called_once_with()
+    unique_id = f"{time.time()}_TelescopeOn"
+    task_callback = MockCallable(unique_id)
+    cm.is_command_allowed("TelescopeOn")
+    cm.telescope_on(task_callback=task_callback)
+    assert task_callback.status == TaskStatus.QUEUED
+    # time.sleep(0.1)
+    # assert task_callback.status == TaskStatus.COMPLETED
 
 
 @pytest.mark.refactor_telescopeon

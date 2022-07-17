@@ -53,21 +53,21 @@ class TelescopeOn(AbstractTelescopeOnOff):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
-        if task_callback:
-            task_callback(status=TaskStatus.IN_PROGRESS)
-    
-        ret_code, message = self.do(argin=None)
-        logger.info(message)
+        # if task_callback:
+        task_callback(status=TaskStatus.IN_PROGRESS)
 
+        ret_code, message = self.do(argin=None)
+        self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.FAILED,
-                result="TelescopeOn() command has failed",
+                result=ResultCode.FAILED,
+                exception=message,
             )
         else:
             task_callback(
                 status=TaskStatus.COMPLETED,
-                result="TelesopeOn() command has completed",
+                result=ResultCode.OK,
             )
 
     def do_mid(self, argin=None):
