@@ -34,7 +34,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.test1
 def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     start_time = time.time()
@@ -48,21 +47,6 @@ def test_set_health_state_ok(tango_context):
     assert cm.component.telescope_health_state == HealthState.OK
 
 
-# @pytest.mark.test1
-# def test_set_health_state_ok_only_monitoring_loop(tango_context):
-#     cm = create_cm_no_faulty_devices(tango_context, True, False)
-#     start_time = time.time()
-#     elapsed_time = 0
-#     # need to wait for the first event to come just after the subscription
-#     while cm.component.telescope_health_state != HealthState.OK:
-#         elapsed_time = time.time() - start_time
-#         time.sleep(0.1)
-#         if elapsed_time > TIMEOUT:
-#             pytest.fail("Timeout occurred while executing the test")
-#     assert cm.component.telescope_health_state == HealthState.OK
-
-
-@pytest.mark.test1
 def test_set_health_state_ok_only_events(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, False, True)
     start_time = time.time()
@@ -90,26 +74,17 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
     assert elapsed_time < expected_elapsed_time
 
 
-@pytest.mark.test1
-@pytest.mark.failing
 def test_set_health_state_degraded(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_degraded(
-        devFactory, cm, 12
-    )  # Expected elapsed time set to 12 because elapsed time increased due to time taking to set the state
+        devFactory,
+        cm,
+        12,  # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
+    )
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
 
-# @pytest.mark.test3
-# def test_set_health_state_degraded_only_monitoring_loop(tango_context):
-#     devFactory = DevFactory()
-#     cm = create_cm_no_faulty_devices(tango_context, True, False)
-#     set_device_degraded(devFactory, cm, 1.5)
-#     assert cm.component.telescope_health_state == HealthState.DEGRADED
-
-
-@pytest.mark.test1
 def test_set_health_state_degraded_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
@@ -134,7 +109,6 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
     assert elapsed_time < expected_elapsed_time
 
 
-@pytest.mark.test1
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
@@ -142,15 +116,6 @@ def test_set_health_state_failed(tango_context):
     assert cm.component.telescope_health_state == HealthState.FAILED
 
 
-# @pytest.mark.test3
-# def test_set_health_state_failed_only_monitoring_loop(tango_context):
-#     devFactory = DevFactory()
-#     cm = create_cm_no_faulty_devices(tango_context, True, False)
-#     set_failed(devFactory, cm)
-#     assert cm.component.telescope_health_state == HealthState.FAILED
-
-
-@pytest.mark.test1
 def test_set_health_state_failed_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
@@ -172,7 +137,6 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=1.5):
     assert elapsed_time < expected_elapsed_time
 
 
-@pytest.mark.test1
 def test_set_health_state_unknown(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
@@ -180,15 +144,6 @@ def test_set_health_state_unknown(tango_context):
     assert cm.component.telescope_health_state == HealthState.UNKNOWN
 
 
-# @pytest.mark.test3
-# def test_set_health_state_unknown_only_monitoring_loop(tango_context):
-#     devFactory = DevFactory()
-#     cm = create_cm_no_faulty_devices(tango_context, True, False)
-#     set_device_unknown(devFactory, cm)
-#     assert cm.component.telescope_health_state == HealthState.UNKNOWN
-
-
-@pytest.mark.test1
 def test_set_health_state_unknown_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)

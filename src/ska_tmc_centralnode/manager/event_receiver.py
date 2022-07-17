@@ -1,5 +1,3 @@
-# import time
-
 import tango
 from ska_tmc_common.event_receiver import EventReceiver
 
@@ -32,12 +30,15 @@ class CentralNodeEventReceiver(EventReceiver):
     def subscribe_event(self, dev_info):
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
-            proxy.subscribe_event(
-                "assignedResources",
-                tango.EventType.CHANGE_EVENT,
-                self.handle_assigned_resource_event,
-                stateless=True,
-            )
+            if ("subarray" in dev_info.dev_name) and (
+                "leaf" not in dev_info.dev_name
+            ):
+                proxy.subscribe_event(
+                    "assignedResources",
+                    tango.EventType.CHANGE_EVENT,
+                    self.handle_assigned_resource_event,
+                    stateless=True,
+                )
 
         except Exception as e:
             self._logger.debug(

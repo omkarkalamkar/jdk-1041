@@ -9,12 +9,6 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 
-# from ska_tmc_common.liveliness_probe import LivelinessProbe
-
-
-# from ska_tmc_common.op_state_model import TMCOpStateModel
-
-
 logger = logging.getLogger(__name__)
 
 SLEEP_TIME = 0.5
@@ -112,7 +106,6 @@ def ensure_telescope_state(cm, state, expected_elapsed_time):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
-    print("Elapsed time:", elapsed_time)
     assert elapsed_time < expected_elapsed_time
 
 
@@ -124,7 +117,6 @@ def ensure_tmc_op_state(cm, state, expected_elapsed_time):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
-    print("Elapsed time:", elapsed_time)
     assert elapsed_time < expected_elapsed_time
 
 

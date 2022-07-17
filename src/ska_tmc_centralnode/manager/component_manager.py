@@ -10,11 +10,8 @@ import time
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
-
-# from ska_tmc_common.event_receiver import EventReceiver
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.liveliness_probe import MultiDeviceLivelinessProbe
-from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
@@ -27,18 +24,12 @@ from ska_tmc_centralnode.manager.aggregators import (
     TMCOpStateAggregator,
 )
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
-
-# from ska_tmc_centralnode.manager.monitoring_loop import (
-#     CentralNodeMonitoringLoop,
-# )
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
-
-# from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 
 
 class CNComponentManager(TmcComponentManager):
@@ -59,6 +50,7 @@ class CNComponentManager(TmcComponentManager):
 
     def __init__(
         self,
+        _input_parameter,
         logger=None,
         _component=None,
         _liveliness_probe=True,
@@ -86,10 +78,8 @@ class CNComponentManager(TmcComponentManager):
         """
         self.logger = logger
         self.lock = threading.Lock()
-        self.op_state_model = TMCOpStateModel(
-            logger=self.logger, callback=None
-        )
         self._component = _component or CentralComponent(logger)
+        self._input_parameter = _input_parameter
 
         self._liveliness_probe = None
         if _liveliness_probe:
@@ -100,6 +90,9 @@ class CNComponentManager(TmcComponentManager):
                 proxy_timeout=proxy_timeout,
                 sleep_time=sleep_time,
             )
+            self._liveliness_probe.start()
+        else:
+            self.logger.warning("Liveliness Probe is not running")
 
         self._event_receiver = None
         if _event_receiver:
@@ -110,6 +103,8 @@ class CNComponentManager(TmcComponentManager):
                 sleep_time=sleep_time,
             )
             self._event_receiver.start()
+        else:
+            self.logger.warning("Event Receiver is not running")
 
         self._component.set_op_callbacks(
             _update_device_callback,
@@ -119,10 +114,8 @@ class CNComponentManager(TmcComponentManager):
             _update_imaging_callback,
         )
 
-        if _liveliness_probe:
-            self._liveliness_probe.start()
-
         super().__init__(
+            _input_parameter=self._input_parameter,
             logger=self.logger,
             _component=self._component,
             _event_receiver=True,
@@ -191,7 +184,7 @@ class CNComponentManager(TmcComponentManager):
 
         :return: list of the monitored devices
         """
-        return self._component._devices
+        return self._component.devices
 
     @property
     def checked_devices(self):
@@ -496,7 +489,6 @@ class CNComponentManager(TmcComponentManager):
     def get_tmc_op_state(self):
         return self.component.tmc_op_state
 
-    # TODO: Modify below method as a part of EventReceiver refactoring
     def _update_resources(self, subarray_dev_info):
         """
         Updates resources for a subarray
