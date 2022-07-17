@@ -6,10 +6,6 @@ from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
 )
 
 from ska_tmc_centralnode.model.input import InputParameterLow
-
-# from ska_tmc_common.test_helpers.helper_subarray_device import (
-#     HelperSubArrayDevice,
-# )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     create_cm_no_faulty_devices,
@@ -55,15 +51,6 @@ def test_tmc_state_init(tango_context):
     assert cm.component.tmc_op_state == tango.DevState.INIT
 
 
-def test_tmc_state_init_only_monitoring_loop(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(
-        tango_context, True, False, InputParameterLow(None)
-    )
-    set_device_init(devFactory, cm, 1.5)
-    assert cm.component.tmc_op_state == tango.DevState.INIT
-
-
 def test_tmc_state_init_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -90,15 +77,6 @@ def test_tmc_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
-    )
-    set_one_device_fault(devFactory, cm, 2)
-    assert cm.component.tmc_op_state == tango.DevState.FAULT
-
-
-def test_tmc_state_fault_over_standby_only_monitoring_loop(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(
-        tango_context, True, False, InputParameterLow(None)
     )
     set_one_device_fault(devFactory, cm, 2)
     assert cm.component.tmc_op_state == tango.DevState.FAULT
