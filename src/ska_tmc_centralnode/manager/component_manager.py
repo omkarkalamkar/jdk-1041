@@ -569,4 +569,4 @@ class CNComponentManager(TmcComponentManager):
                     "Command is not allowed in current state %s",
                     self.op_state_model.op_state,
                 )
-            return True
+        return True
