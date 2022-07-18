@@ -21,8 +21,8 @@ class TelescopeOff(AbstractTelescopeOnOff):
         adapter_factory=None,
         timeout_subarrays=3,
         step_sleep=0.1,
-        *args,
         logger=None,
+        *args,
         **kwargs,
     ):
         super().__init__(
