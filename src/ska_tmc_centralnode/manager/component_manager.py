@@ -6,6 +6,7 @@ package.
 """
 import threading
 import time
+from typing import Callable
 
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.command_executor import CommandExecutor
@@ -541,29 +542,36 @@ class CNComponentManager(TmcComponentManager):
             else:
                 self.component.imaging = ModesAvailability.not_available
 
-    def telescope_on(self, task_callback=None):
+    def telescope_on(self, task_callback: Callable = None):
         """
         Turn the Telescope On.
 
         :return: a result code and message
         """
-        on_command = TelescopeOn
-        task_status, response = self.submit_task(
-            on_command.telescope_on, task_callback=task_callback
+        telescopon_command = TelescopeOn(
+            self, adapter_factory=None, logger=self.logger
         )
-        return task_status, response
 
-    def telescope_off(self, task_callback=None):
+        task_status, responce = self.submit_task(
+            telescopon_command.telescope_on,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, responce
+
+    def telescope_off(self, task_callback: Callable = None):
         """
         Turn the Telescope Off.
 
         :return: a result code and message
         """
-        off_command = TelescopeOff
-        task_status, response = self.submit_task(
-            off_command.telescope_off, task_callback=task_callback
+        telescopoff_command = TelescopeOff(
+            self, self.op_state_model, adapter_factory=None, logger=self.logger
         )
-        return task_status, response
+        telescopoff_command.telescope_off(
+            logger=self.logger, task_callback=task_callback
+        )
+        return task_callback.status, task_callback.result
 
     def is_command_allowed(self, command_name=None):
         if command_name in ["TelescopeOn", "TelescopeOff"]:

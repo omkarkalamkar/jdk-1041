@@ -36,9 +36,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.xfail(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.refactor_telescopeoff()
 def test_low_telescope_off_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -48,16 +46,16 @@ def test_low_telescope_off_command(tango_context):
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
 
-    my_adapter_factory = HelperAdapterFactory()
-    off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+    adapter_factory = HelperAdapterFactory()
+    off_command = TelescopeOff(cm, adapter_factory)
     assert off_command.check_allowed()
     (result_code, _) = off_command.do()
     assert result_code == ResultCode.OK
-    for adapter in my_adapter_factory.adapters:
+    for adapter in adapter_factory.adapters:
         adapter.proxy.Off.assert_called_once_with()
 
 
-@pytest.mark.xfail(
+@pytest.mark.refactor_telescopeoff(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_low_telescope_off_command_fail_subarray(tango_context):
@@ -67,23 +65,23 @@ def test_low_telescope_off_command_fail_subarray(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
+    adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeOff command
     failing_dev = "ska_low/tm_subarray_node/1"
 
-    my_adapter_factory.get_or_create_adapter(
+    adapter_factory.get_or_create_adapter(
         failing_dev, attrs={"TelescopeOff.side_effect": Exception}
     )
 
-    off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+    off_command = TelescopeOff(cm, adapter_factory)
     assert off_command.check_allowed()
     (result_code, message) = off_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.refactor_telescopeoff(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_low_telescope_off_command_fail_mccs(tango_context):
@@ -93,22 +91,22 @@ def test_low_telescope_off_command_fail_mccs(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
+    adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeOff command
     failing_dev = "ska_low/tm_leaf_node/mccs_master"
-    my_adapter_factory.get_or_create_adapter(
+    adapter_factory.get_or_create_adapter(
         failing_dev, attrs={"TelescopeOff.side_effect": Exception}
     )
 
-    off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+    off_command = TelescopeOff(cm, adapter_factory)
     assert off_command.check_allowed()
     (result_code, message) = off_command.do()
     assert result_code == ResultCode.FAILED
     assert failing_dev in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.refactor_telescopeoff(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_low_telescope_off_fail_check_allowed(tango_context):

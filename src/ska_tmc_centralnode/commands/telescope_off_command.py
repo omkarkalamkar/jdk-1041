@@ -45,8 +45,8 @@ class TelescopeOff(AbstractTelescopeOnOff):
             (ResultCode, str)
 
         """
-        component_manager = self.target
-        component_manager.component.desired_telescope_state = DevState.OFF
+        # component_manager = self.target
+        self.component_manager.component.desired_telescope_state = DevState.OFF
 
         ret_code, message = self.turn_off_subarrays()
         if ret_code == ResultCode.FAILED:
@@ -61,7 +61,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(
+                    not self.component_manager.get_device(
                         adapter.dev_name
                     ).obs_state
                     == ObsState.EMPTY
@@ -81,6 +81,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
         for ret_code, message in [
             self.turn_off_csp(),
             self.turn_off_sdp(),
+            self.turn_off_subarrays(),
             self.set_standby_fp_mode_dishes(),
             self.set_standby_lp_mode_dishes(),
         ]:
@@ -137,8 +138,8 @@ class TelescopeOff(AbstractTelescopeOnOff):
             (ResultCode, str)
 
         """
-        component_manager = self.target
-        component_manager.component.desired_telescope_state = DevState.OFF
+        # component_manager = self.target
+        self.component_manager.component.desired_telescope_state = DevState.OFF
 
         ret_code, message = self.turn_off_subarrays()
         if ret_code == ResultCode.FAILED:
@@ -153,7 +154,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(
+                    not self.component_manager.get_device(
                         adapter.dev_name
                     ).obs_state
                     == ObsState.EMPTY
