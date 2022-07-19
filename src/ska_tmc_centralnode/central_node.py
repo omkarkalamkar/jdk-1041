@@ -224,6 +224,7 @@ class AbstractCentralNode(TMCBaseDevice):
         self.log_state("Device states before executing Telescope On command")
         handler = self.get_command_object("TelescopeOn")
         result_code, unique_id = handler()
+        self.log_state("Device states after  executing Telescope On command")
         return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring

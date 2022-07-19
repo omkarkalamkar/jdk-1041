@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-tmc-centralnode"
-version = "0.3.12"
+version = "0.3.14"
 description = "Central Node is a coordinator of the complete M&C system"
 authors = ["Team NCRA <telmgt-internal@googlegroups.com>"]
 license = "BSD-3-Clause"
@@ -29,7 +29,7 @@ pytango = "^9.3.3"
 ska-ser-logging = "^0.4.1"
 ska-tango-base = "0.13.0"
 ska-tmc-cdm = "*"
-ska-tmc-common = "0.1.32"
+ska-tmc-common = "0.1.33"
 ska-ser-log-transactions = "*"
 ska-ser-skuid = "*"
 mock = "^4.0.3"

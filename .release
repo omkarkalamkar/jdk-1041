@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.3.12"
+version="0.3.14"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team NCRA"
@@ -10,7 +10,7 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.3.12
-tag=0.3.12
-tag_description=Optimise CentralNode code based on review comments received on SubarrayNode.
-release_notes=This release contains:<br/><ul><li>Optimise CentralNode code based on review comments received on SubarrayNode.</li></ul><br/>
+release=0.3.14
+tag=0.3.14
+tag_description=Updated logger statements.
+release_notes=This release contains:<br/><ul><li>Updated logger statements.</li></ul><br/>

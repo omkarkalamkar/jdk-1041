@@ -12,7 +12,7 @@ from ska_tmc_centralnode.model.input import (
 logger = logging.getLogger(__name__)
 
 SLEEP_TIME = 0.5
-TIMEOUT = 10
+TIMEOUT = 15
 
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
@@ -46,7 +46,7 @@ def count_faulty_devices(cm):
 
 
 def create_cm(
-    p_monitoring_loop=True,
+    p_liveliness_probe=True,
     p_event_receiver=True,
     input_parameter=InputParameterMid(None),
 ):
@@ -64,19 +64,19 @@ def create_cm(
         cm.add_device(dev)
     start_time = time.time()
     num_devices = len(DEVICE_LIST)
-    if not p_monitoring_loop:
+    if not p_liveliness_probe:
         return cm, start_time
     while num_devices != len(cm.checked_devices):
-        time.sleep(SLEEP_TIME)
+        time.sleep(0.2)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
 
     return cm, start_time
 
-
 def create_cm_no_faulty_devices(
     tango_context,
+    p_liveliness_probe,
     p_event_receiver,
     input_parameter=InputParameterMid(None),
 ):
@@ -85,14 +85,14 @@ def create_cm_no_faulty_devices(
         input_parameter = InputParameterMid(None)
     else:
         input_parameter = InputParameterLow(None)
-
-    cm, start_time = create_cm(p_event_receiver, input_parameter)
+    cm, start_time = create_cm(
+        p_liveliness_probe, p_event_receiver, input_parameter
+    )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
     return cm
-
 
 def ensure_telescope_state(cm, state, expected_elapsed_time):
     start_time = time.time()
@@ -104,7 +104,6 @@ def ensure_telescope_state(cm, state, expected_elapsed_time):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
-
 def ensure_tmc_op_state(cm, state, expected_elapsed_time):
     start_time = time.time()
     elapsed_time = 0
@@ -114,7 +113,6 @@ def ensure_tmc_op_state(cm, state, expected_elapsed_time):
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
-
 
 def ensure_imaging(cm, value, expected_elapsed_time):
     start_time = time.time()
@@ -126,21 +124,15 @@ def ensure_imaging(cm, value, expected_elapsed_time):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
-
 def set_devices_state(devices, state, devFactory, cm, expected_elapsed_time):
     for device in devices:
         proxy = devFactory.get_device(device)
         proxy.SetDirectState(state)
+        time.sleep(0.1)
         assert proxy.State() == state
 
-
 def set_device_state(device, state, devFactory):
-    print("::::::::::state value is::::::::::", state)
     proxy = devFactory.get_device(device)
-    print("::::::::::proxy value is::::::::::", proxy)
-    res = proxy.SetDirectState(state)
-    # proxy.set_state(state)
-    # print("::::::::::    proxy.set_state(state) value is::::::::::",proxy.set_state(state))
-    print("::::::::::proxy.SetDirectState(state) value is::::::::::", res)
-    print("::::::::::proxy.State() value is::::::::::", proxy.State())
+    proxy.SetDirectState(state)
+    time.sleep(0.1)
     assert proxy.State() == state

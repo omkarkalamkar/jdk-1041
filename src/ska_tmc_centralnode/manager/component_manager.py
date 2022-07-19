@@ -11,9 +11,8 @@ from typing import Callable
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
-from ska_tmc_common.event_receiver import EventReceiver
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.liveliness_probe import LivelinessProbe
+from ska_tmc_common.liveliness_probe import MultiDeviceLivelinessProbe
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
@@ -25,6 +24,7 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
+from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
@@ -84,22 +84,28 @@ class CNComponentManager(TmcComponentManager):
 
         self._liveliness_probe = None
         if _liveliness_probe:
-            self._liveliness_probe = LivelinessProbe(
+            self._liveliness_probe = MultiDeviceLivelinessProbe(
                 self,
                 logger,
                 max_workers=max_workers,
                 proxy_timeout=proxy_timeout,
                 sleep_time=sleep_time,
             )
+            self._liveliness_probe.start()
+        else:
+            self.logger.warning("Liveliness Probe is not running")
 
         self._event_receiver = None
         if _event_receiver:
-            self._event_receiver = EventReceiver(
+            self._event_receiver = CentralNodeEventReceiver(
                 self,
                 logger,
                 proxy_timeout=proxy_timeout,
                 sleep_time=sleep_time,
             )
+            self._event_receiver.start()
+        else:
+            self.logger.warning("Event Receiver is not running")
 
         self._component.set_op_callbacks(
             _update_device_callback,
@@ -122,12 +128,6 @@ class CNComponentManager(TmcComponentManager):
             *args,
             **kwargs,
         )
-
-        if _liveliness_probe:
-            self._liveliness_probe.start()
-
-        if _event_receiver:
-            self._event_receiver.start()
 
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
@@ -329,22 +329,6 @@ class CNComponentManager(TmcComponentManager):
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
 
-    def update_device_info(self, device_info):
-        """
-        Update a device with correct monitoring information
-        and call the relative callback if available
-
-        :param device_info: a device info
-        :type device_info: DeviceInfo
-        """
-        with self.lock:
-            self.component.update_device(device_info)
-
-        self._aggregate_health_state()
-        self._aggregate_state()
-        if isinstance(self.input_parameter, InputParameterMid):
-            self._update_imaging()
-
     def update_device_health_state(self, dev_name, health_state):
         """
         Update a monitored device health state
@@ -499,9 +483,7 @@ class CNComponentManager(TmcComponentManager):
         :type subarray_dev_name: str
         """
         if self._liveliness_probe is not None:
-            self._liveliness_probe.add_priority_devices(
-                subarray_dev_info.dev_name
-            )
+            self._liveliness_probe.add_device(subarray_dev_info.dev_name)
         else:
             # If the monitoring loop is not active
             # I must assume that the subarray is reporting the correct value
