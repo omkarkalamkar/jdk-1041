@@ -355,9 +355,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         error_dev_names = []
         num_working = 0
-        for (
-            dev_name
-        ) in component_manager.input_parameter.tm_dish_dev_names:
+        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
             devInfo = component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
@@ -388,9 +386,11 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         component_manager = self.target
 
         try:
-            self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
-                component_manager.input_parameter.mccs_master_leaf_node,
-                AdapterType.MCCS,
+            self.tm_leaf_mccs_master_adapter = (
+                self._adapter_factory.get_or_create_adapter(
+                    component_manager.input_parameter.mccs_master_leaf_node,
+                    AdapterType.MCCS,
+                )
             )
         except Exception as e:
             return self.adapter_error_message_result(
