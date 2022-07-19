@@ -329,22 +329,6 @@ class CNComponentManager(TmcComponentManager):
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
 
-    def update_device_info(self, device_info):
-        """
-        Update a device with correct monitoring information
-        and call the relative callback if available
-
-        :param device_info: a device info
-        :type device_info: DeviceInfo
-        """
-        with self.lock:
-            self.component.update_device(device_info)
-
-        self._aggregate_health_state()
-        self._aggregate_state()
-        if isinstance(self.input_parameter, InputParameterMid):
-            self._update_imaging()
-
     def update_device_health_state(self, dev_name, health_state):
         """
         Update a monitored device health state
