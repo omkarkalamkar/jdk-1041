@@ -45,7 +45,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
             (ResultCode, str)
 
         """
-        # component_manager = self.target
         self.component_manager.component.desired_telescope_state = DevState.OFF
 
         ret_code, message = self.turn_off_subarrays()
@@ -138,7 +137,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
             (ResultCode, str)
 
         """
-        # component_manager = self.target
         self.component_manager.component.desired_telescope_state = DevState.OFF
 
         ret_code, message = self.turn_off_subarrays()
