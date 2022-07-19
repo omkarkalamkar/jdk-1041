@@ -84,6 +84,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
+        self.component_manager = component_manager
 
     def check_allowed_mid(self):
         """
