@@ -112,35 +112,35 @@ class TelescopeOn(AbstractTelescopeOnOff):
     def turn_on_sdp(self):
         return self.send_command(
             [self.tm_leaf_sdp_master_adapter],
-            f"Error in calling On() command for {self.tm_leaf_sdp_master_adapter}",
+            f"Error in calling On() command on {self.tm_leaf_sdp_master_adapter}",
             "On",
         )
 
     def turn_on_csp(self):
         return self.send_command(
             [self.tm_leaf_csp_master_adapter],
-            f"Error in calling On() command for {self.tm_leaf_csp_master_adapter}",
+            f"Error in calling On() command on {self.tm_leaf_csp_master_adapter}",
             "On",
         )
 
     def turn_on_subarrays(self):
         return self.send_command(
             self.tm_subarray_adapters,
-            f"Error in calling On() command for {self.tm_subarray_adapters}",
+            f"Error in calling On() command on {self.tm_subarray_adapters}",
             "On",
         )
 
     def set_standby_fp_mode_dishes(self):
         return self.send_command(
             self.tm_dish_adapters,
-            f"Error in calling SetStandbyFPMode() command for {self.tm_dish_adapters}",
+            f"Error in calling SetStandbyFPMode() command on {self.tm_dish_adapters}",
             "SetStandbyFPMode",
         )
 
     def set_operate_mode_dishes(self):
         return self.send_command(
             self.tm_dish_adapters,
-            f"Error in calling SetOperateMode() command for {self.tm_dish_adapters}",
+            f"Error in calling SetOperateMode() command on {self.tm_dish_adapters}",
             "SetOperateMode",
         )
 
