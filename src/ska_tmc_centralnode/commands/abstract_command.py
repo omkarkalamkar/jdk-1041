@@ -11,7 +11,9 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
-        super().__init__(component_manager, logger=logger, *args, **kwargs)
+        super().__init__(
+            self.component_manager, logger=logger, *args, **kwargs
+        )
 
     def check_allowed(self):
         if isinstance(
