@@ -11,9 +11,7 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
-        super().__init__(
-            self.component_manager, logger=logger, *args, **kwargs
-        )
+        super().__init__(component_manager, logger=logger, *args, **kwargs)
 
     def check_allowed(self):
         if isinstance(
@@ -278,7 +276,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         :raises: DevFailed if this command is not allowed to be run in current device state
 
         """
-        component_manager = self.target
+        # component_manager = self.target
 
         if self.op_state_model.op_state in [
             DevState.FAULT,
@@ -289,8 +287,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                 "AssignReleaseResources() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
-        component_manager.check_if_subarrays_are_responsive()
-        component_manager.check_if_dishes_are_responsive()
+        self.component_manager.check_if_subarrays_are_responsive()
+        self.component_manager.check_if_dishes_are_responsive()
 
         return True
 
@@ -305,7 +303,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         :raises: DevFailed if this command is not allowed to be run in current device state
 
         """
-        component_manager = self.target
+        # component_manager = self.target
 
         if self.op_state_model.op_state in [
             DevState.FAULT,
@@ -317,8 +315,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                 self.op_state_model.op_state,
             )
 
-        component_manager.check_if_mccs_mln_is_responsive()
-        component_manager.check_if_subarrays_are_responsive()
+        self.component_manager.check_if_mccs_mln_is_responsive()
+        self.component_manager.check_if_subarrays_are_responsive()
 
         return True
 
@@ -326,15 +324,15 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
-        component_manager = self.target
+        # component_manager = self.target
 
         error_dev_names = []
         num_working = 0
 
         for (
             dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
@@ -357,8 +355,10 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         error_dev_names = []
         num_working = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.tm_dish_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     self.tm_dish_adapters.append(
@@ -385,18 +385,16 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
-        component_manager = self.target
+        # component_manager = self.target
 
         try:
-            self.tm_leaf_mccs_master_adapter = (
-                self._adapter_factory.get_or_create_adapter(
-                    component_manager.input_parameter.mccs_master_leaf_node,
-                    AdapterType.MCCS,
-                )
+            self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.mccs_master_leaf_node,
+                AdapterType.MCCS,
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                component_manager.input_parameter.mccs_master_leaf_node,
+                self.component_manager.input_parameter.mccs_master_leaf_node,
                 e,
             )
 
@@ -405,8 +403,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         for (
             dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
