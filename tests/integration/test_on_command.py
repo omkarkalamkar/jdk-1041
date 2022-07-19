@@ -1,14 +1,9 @@
-import time
-
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
-from tests.integration.common import (  # noqa F401
-    devices_to_load,
-    ensure_checked_devices,
-)
-from tests.settings import SLEEP_TIME, TIMEOUT, logger
+from tests.integration.common import ensure_checked_devices  # noqa F401
+from tests.settings import logger
 
 
 def on_command(tango_context, centralnode_name):
@@ -41,8 +36,6 @@ def on_command(tango_context, centralnode_name):
     )
 
     sdp_master = dev_factory.get_device("mid_sdp/elt/master")
-    csp_master = dev_factory.get_device("mid-csp/elt/master")
-    dish_master1 = dev_factory.get_device("mid_d0001/elt/master")
 
     logger.info(f"After TelescopeOn sdp_master.State:::::::{sdp_master.State}")
 

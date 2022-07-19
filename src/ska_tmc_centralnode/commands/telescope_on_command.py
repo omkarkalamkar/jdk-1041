@@ -9,6 +9,7 @@ from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
 
+
 class TelescopeOn(AbstractTelescopeOnOff):
     """
     A class for CentralNode's TelescopeOn() command.

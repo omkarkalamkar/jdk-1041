@@ -74,6 +74,7 @@ def create_cm(
 
     return cm, start_time
 
+
 def create_cm_no_faulty_devices(
     tango_context,
     p_liveliness_probe,
@@ -94,6 +95,7 @@ def create_cm_no_faulty_devices(
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
     return cm
 
+
 def ensure_telescope_state(cm, state, expected_elapsed_time):
     start_time = time.time()
     elapsed_time = 0
@@ -103,6 +105,7 @@ def ensure_telescope_state(cm, state, expected_elapsed_time):
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
+
 
 def ensure_tmc_op_state(cm, state, expected_elapsed_time):
     start_time = time.time()
@@ -114,6 +117,7 @@ def ensure_tmc_op_state(cm, state, expected_elapsed_time):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+
 def ensure_imaging(cm, value, expected_elapsed_time):
     start_time = time.time()
     elapsed_time = 0
@@ -124,12 +128,14 @@ def ensure_imaging(cm, value, expected_elapsed_time):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+
 def set_devices_state(devices, state, devFactory, cm, expected_elapsed_time):
     for device in devices:
         proxy = devFactory.get_device(device)
         proxy.SetDirectState(state)
         time.sleep(0.1)
         assert proxy.State() == state
+
 
 def set_device_state(device, state, devFactory):
     proxy = devFactory.get_device(device)

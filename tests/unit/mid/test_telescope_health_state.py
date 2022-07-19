@@ -33,6 +33,7 @@ def devices_to_load():
         },
     )
 
+
 def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     start_time = time.time()
@@ -45,6 +46,7 @@ def test_set_health_state_ok(tango_context):
             pytest.fail("Timeout occurred while executing the test")
     assert cm.component.telescope_health_state == HealthState.OK
 
+
 def test_set_health_state_ok_only_events(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, False, True)
     start_time = time.time()
@@ -56,6 +58,7 @@ def test_set_health_state_ok_only_events(tango_context):
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
     assert cm.component.telescope_health_state == HealthState.OK
+
 
 def set_device_degraded(devFactory, cm, expected_elapsed_time):
     proxy = devFactory.get_device("mid_csp/elt/master")
@@ -70,6 +73,7 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+
 def test_set_health_state_degraded(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
@@ -80,11 +84,13 @@ def test_set_health_state_degraded(tango_context):
     )
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
+
 def test_set_health_state_degraded_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
     set_device_degraded(devFactory, cm, 2)
     assert cm.component.telescope_health_state == HealthState.DEGRADED
+
 
 def set_failed(devFactory, cm, expected_elapsed_time=1.5):
     proxy = devFactory.get_device("mid_csp/elt/master")
@@ -102,17 +108,20 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_failed(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
+
 def test_set_health_state_failed_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)
     set_failed(devFactory, cm, expected_elapsed_time=2)
     assert cm.component.telescope_health_state == HealthState.FAILED
+
 
 def set_device_unknown(devFactory, cm, expected_elapsed_time=1.5):
     proxy = devFactory.get_device("mid_csp/elt/master")
@@ -127,11 +136,13 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=1.5):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+
 def test_set_health_state_unknown(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_unknown(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.UNKNOWN
+
 
 def test_set_health_state_unknown_only_events(tango_context):
     devFactory = DevFactory()
