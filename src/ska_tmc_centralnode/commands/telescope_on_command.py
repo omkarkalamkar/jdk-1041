@@ -8,7 +8,6 @@ from tango import DevState
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
-from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class TelescopeOn(AbstractTelescopeOnOff):
@@ -54,37 +53,22 @@ class TelescopeOn(AbstractTelescopeOnOff):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
+        # if task_callback:
         task_callback(status=TaskStatus.IN_PROGRESS)
 
-        if isinstance(
-            self.component_manager.input_parameter, InputParameterMid
-        ):
-            ret_code, message = self.do_mid(argin=None)  # Fire and forget
-        else:
-            ret_code, message = self.do_low(argin=None)
-        logger.info(message)
-
+        ret_code, message = self.do(argin=None)
+        self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.FAILED,
-                result="TelescopeOn() command has failed",
+                result=ResultCode.FAILED,
+                exception=message,
             )
         else:
             task_callback(
                 status=TaskStatus.COMPLETED,
-                result="TelesopeOn() command has completed",
+                result=ResultCode.OK,
             )
-
-        # Periodically check that tasks have not been ABORTED
-        if task_abort_event.is_set():
-            # Indicate that the task has been aborted
-            task_callback(
-                status=TaskStatus.ABORTED,
-                result="TelescopeOn() command task is aborted",
-            )
-        else:
-            logger.info("Task_abort_event is not set")
-            return
 
     def do_mid(self, argin=None):
         """
@@ -95,7 +79,11 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
-
+        print(
+            "Component.desired telescope state is::::::",
+            self.component_manager.component.desired_telescope_state,
+        )
+        print("Invoking TelescopeOn command on the lower level devices")
         for ret_code, message in [
             self.turn_on_csp(),
             self.turn_on_sdp(),
@@ -105,10 +93,13 @@ class TelescopeOn(AbstractTelescopeOnOff):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
-
+        print(
+            "do_mid for TelescopeOn command on the lower level devices is successful"
+        )
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
+        print("TelescopeOn for Sdp devices")
         return self.send_command(
             [self.tm_leaf_sdp_master_adapter],
             f"Error in calling On() command on {self.tm_leaf_sdp_master_adapter}",
@@ -116,6 +107,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def turn_on_csp(self):
+        print("TelescopeOn for Csp devices")
         return self.send_command(
             [self.tm_leaf_csp_master_adapter],
             f"Error in calling On() command on {self.tm_leaf_csp_master_adapter}",
@@ -123,6 +115,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def turn_on_subarrays(self):
+        print("TelescopeOn for tm subarrays devices")
         return self.send_command(
             self.tm_subarray_adapters,
             f"Error in calling On() command on {self.tm_subarray_adapters}",
@@ -130,6 +123,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def set_standby_fp_mode_dishes(self):
+        print("TelescopeOn for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
             f"Error in calling SetStandbyFPMode() command on {self.tm_dish_adapters}",
@@ -137,6 +131,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def set_operate_mode_dishes(self):
+        print("TelescopeOn for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
             f"Error in calling SetOperateMode() command on {self.tm_dish_adapters}",

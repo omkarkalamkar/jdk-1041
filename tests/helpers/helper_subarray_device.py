@@ -1,5 +1,6 @@
 # Note: This helper class module is explicitly required for CentralNode. Hence kept it here and not in ska-tmc-common repo.
 import logging
+import time
 from typing import Callable
 
 from ska_tango_base.commands import ResultCode
@@ -149,9 +150,10 @@ class HelperSubArrayDevice(SKASubarray):
         # import debugpy; debugpy.debug_this_thread()
 
         if self.dev_state() != argin:
-            val = self.set_state(argin)
+            self.set_state(argin)
+            time.sleep(0.1)
             self.push_change_event("State", self.dev_state())
-        return val
+            time.sleep(0.1)
 
     @command(
         dtype_in=int,

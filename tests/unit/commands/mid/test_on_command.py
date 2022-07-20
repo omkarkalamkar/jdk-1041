@@ -2,17 +2,14 @@ import time
 
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
-from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import DishAdapter, SubArrayAdapter
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.test_helpers.helper_adapter_factory import (
-    HelperAdapterFactory,
-)
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
+from tango import DevState
 
-from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
+from tests.mock_callable import MockCallable
 from tests.settings import create_cm, logger
 
 
@@ -34,7 +31,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.refactor_telescopeon
+@pytest.mark.telescope_on
 def test_telescope_on_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -43,25 +40,16 @@ def test_telescope_on_command(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-
-    adapter_factory = HelperAdapterFactory()
-    on_command = TelescopeOn(cm, adapter_factory)
-    assert on_command.check_allowed()
-    (result_code, _) = on_command.do()
-    assert result_code == ResultCode.OK
-    for adapter in adapter_factory.adapters:
-        if isinstance(adapter, DishAdapter):
-            adapter.proxy.SetStandbyFPMode.assert_called()
-            adapter.proxy.SetOperateMode.assert_called_once_with()
-            continue
-        if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.On.assert_called_once_with()
-            continue
-
-        adapter.proxy.On.assert_called_once_with()
+    unique_id = f"{time.time()}_TelescopeOn"
+    task_callback = MockCallable(unique_id)
+    cm.is_command_allowed("TelescopeOn")
+    cm.telescope_on(task_callback=task_callback)
+    assert task_callback.status == TaskStatus.QUEUED
+    # time.sleep(0.1)
+    # assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.refactor_telescopeon
+@pytest.mark.telescope_on
 def test_telescope_on_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -69,46 +57,19 @@ def test_telescope_on_command_fail_subarray(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    adapter_factory = HelperAdapterFactory()
+    cm.timeout = 0
+    assert cm.is_command_allowed("TelescopeOn")
 
-    # include exception in TelescopeOn command
-    failing_dev = "ska_mid/tm_subarray_node/1"
-
-    adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"TelescopeOn.side_effect": Exception}
-    )
-
-    on_command = TelescopeOn(cm, adapter_factory)
-    assert on_command.check_allowed()
-    (result_code, message) = on_command.do()
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
+    unique_id = f"{time.time()}_TelescopeOn"
+    task_callback = MockCallable(unique_id)
+    cm.telescope_on(task_callback=task_callback)
+    assert task_callback.status == TaskStatus.QUEUED
+    time.sleep(0.1)
+    assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.refactor_telescopeon
-def test_telescope_on_command_fail_sdp(tango_context):
-    logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
-    adapter_factory = HelperAdapterFactory()
-
-    # include exception in TelescopeOn command
-    failing_dev = "ska_mid/tm_leaf_node/sdp_master"
-    adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"TelescopeOn.side_effect": Exception}
-    )
-
-    on_command = TelescopeOn(cm, adapter_factory)
-    assert on_command.check_allowed()
-    (result_code, message) = on_command.do()
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
-
-
-@pytest.mark.refactor_telescopeon
+@pytest.mark.xfail(reason="Not able to set/mock op_state attribute")
+@pytest.mark.telescope_on
 def test_telescope_on_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)
@@ -117,8 +78,6 @@ def test_telescope_on_fail_check_allowed(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    adapter_factory = HelperAdapterFactory()
-    cm.input_parameter.tm_dish_dev_names = []
-    on_command = TelescopeOn(cm, adapter_factory)
+    cm.op_state_model.op_state = DevState.DISABLE
     with pytest.raises(CommandNotAllowed):
-        on_command.check_allowed()
+        cm.is_command_allowed("TelescopeOn")

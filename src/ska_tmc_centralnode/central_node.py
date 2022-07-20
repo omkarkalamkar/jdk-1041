@@ -135,9 +135,9 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("commandInProgress", True, False)
 
             self._device.op_state_model.perform_action("component_on")
-            self._device.component_manager.command_executor.add_command_execution(
-                "0", "Init", ResultCode.OK, ""
-            )
+            # self._device.component_manager.command_executor.add_command_execution(
+            #     "0", "Init", ResultCode.OK, ""
+            # )
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
@@ -150,13 +150,14 @@ class AbstractCentralNode(TMCBaseDevice):
             self.component_manager.stop()
 
     def log_state(self, msg="Device States"):
-        device_names = []
-        dev_states = []
-
-        for device in self.component_manager.devices:
-            device_names.append(device.dev_name)
-            dev_states.append(device.state)
-
+        device_names = [
+            device.to_dict()["dev_name"]
+            for device in self.component_manager.devices
+        ]
+        dev_states = [
+            device.to_dict()["state"]
+            for device in self.component_manager.devices
+        ]
         device_states = pd.DataFrame(
             {"Devices": device_names, "STATE": dev_states}
         )
@@ -222,13 +223,9 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         self.log_state("Device states before executing Telescope On command")
         handler = self.get_command_object("TelescopeOn")
-        if self.component_manager.command_executor.queue_full:
-            return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(
-            handler
-        )
-        self.log_state("Device states after executing Telescope On command")
-        return [[ResultCode.QUEUED], [str(unique_id)]]
+        result_code, unique_id = handler()
+        self.log_state("Device states after  executing Telescope On command")
+        return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring
     # def is_StartUpTelescope_allowed(self):
@@ -329,36 +326,31 @@ class AbstractCentralNode(TMCBaseDevice):
     #     self.log_state("Device states after executing Telescope Off command")
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    # def is_On_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    def is_On_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device state.
 
-    #     :rtype: boolean
+        :rtype: boolean
 
-    #     """
-    #     handler = self.get_command_object("On")
-    #     return handler.check_allowed()
+        """
+        return self.component_manager.is_command_allowed()
 
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
-    # @DebugIt()
-    # def On(self):
-    #     """
-    #     This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
-    #     SdpMasterLeafNode.
-    #     """
-    #     self.log_state("Device states before executing On command")
-    #     handler = self.get_command_object("On")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing On command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    @DebugIt()
+    def On(self):
+        """
+        This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
+        SdpMasterLeafNode.
+        """
+        self.log_state("Device states before executing On command")
+        handler = self.get_command_object("On")
+        result_code, unique_id = handler()
+        self.log_state("Device states before executing On command")
+        return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring
     # def is_AssignResources_allowed(self):
