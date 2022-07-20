@@ -83,7 +83,9 @@ class TelescopeOn(AbstractTelescopeOnOff):
             "Component.desired telescope state is::::::",
             self.component_manager.component.desired_telescope_state,
         )
-        self.logger.info("Invoking TelescopeOn command on the lower level devices")
+        self.logger.info(
+            "Invoking TelescopeOn command on the lower level devices"
+        )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:

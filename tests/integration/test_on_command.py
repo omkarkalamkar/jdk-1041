@@ -1,5 +1,6 @@
-import pytest
 import time
+
+import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
@@ -35,6 +36,7 @@ def on_command(tango_context, centralnode_name):
     if command_id == unique_id[0]:
         logger.info(f"command:::::::{command_id}")
         assert result == "0"
+
 
 @pytest.mark.ncra
 # @pytest.mark.xfail(
