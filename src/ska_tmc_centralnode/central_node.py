@@ -8,8 +8,8 @@ import json
 import pandas as pd
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tango_base.control_model import HealthState
-from ska_tmc_common.tmc_base_device import TMCBaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
+from ska_tmc_common.tmc_base_device import TMCBaseDevice
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
 
