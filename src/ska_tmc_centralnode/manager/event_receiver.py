@@ -26,6 +26,7 @@ class CentralNodeEventReceiver(EventReceiver):
         super().__init__(
             component_manager, logger, max_workers, proxy_timeout, sleep_time
         )
+        self._component_manager = component_manager
 
     def subscribe_event(self, dev_info):
         try:

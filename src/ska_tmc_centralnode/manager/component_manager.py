@@ -385,7 +385,6 @@ class CNComponentManager(TmcComponentManager):
             devInfo.obs_state = obs_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
-            self._update_resources(devInfo)
 
     def is_already_assigned(self, dishId):
         """
@@ -475,7 +474,7 @@ class CNComponentManager(TmcComponentManager):
     def get_tmc_op_state(self):
         return self.component.tmc_op_state
 
-    # TODO: Modify below method as a part of EventReceiver refactoring
+    # TODO: Kept it for reference
     def _update_resources(self, subarray_dev_info):
         """
         Updates resources for a subarray
