@@ -566,12 +566,15 @@ class CNComponentManager(TmcComponentManager):
         :return: a result code and message
         """
         telescopoff_command = TelescopeOff(
-            self, self.op_state_model, adapter_factory=None, logger=self.logger
+            self, adapter_factory=None, logger=self.logger
         )
-        telescopoff_command.telescope_off(
-            logger=self.logger, task_callback=task_callback
+
+        task_status, responce = self.submit_task(
+            telescopoff_command.telescope_off,
+            args=[self.logger],
+            task_callback=task_callback,
         )
-        return task_callback.status, task_callback.result
+        return task_status, responce
 
     def is_command_allowed(self, command_name=None):
         if command_name in ["TelescopeOn", "TelescopeOff"]:

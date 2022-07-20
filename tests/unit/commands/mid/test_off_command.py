@@ -1,18 +1,141 @@
+# import time
+
+# import pytest
+# from ska_tango_base.base.base_device import SKABaseDevice
+# from ska_tango_base.commands import ResultCode
+# from ska_tmc_common.adapters import DishAdapter, SubArrayAdapter
+# from ska_tmc_common.exceptions import CommandNotAllowed
+# from ska_tmc_common.test_helpers.helper_adapter_factory import (
+#     HelperAdapterFactory,
+# )
+# from ska_tmc_common.test_helpers.helper_subarray_device import (
+#     HelperSubArrayDevice,
+# )
+
+# from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
+# from tests.settings import create_cm, logger
+
+
+# @pytest.fixture()
+# def devices_to_load():
+#     return (
+#         {
+#             "class": HelperSubArrayDevice,
+#             "devices": [{"name": "ska_mid/tm_subarray_node/1"}],
+#         },
+#         {
+#             "class": SKABaseDevice,
+#             "devices": [
+#                 {"name": "ska_mid/tm_leaf_node/csp_master"},
+#                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
+#                 {"name": "ska_mid/tm_leaf_node/d0001"},
+#             ],
+#         },
+#     )
+
+
+# @pytest.mark.refactor_telescopeoff()
+# def test_telescope_off_command(tango_context):
+#     logger.info("%s", tango_context)
+#     # import debugpy; debugpy.debug_this_thread()
+#     cm, start_time = create_cm()
+#     # num_faulty = count_faulty_devices(cm)
+#     # assert num_faulty == 0
+#     elapsed_time = time.time() - start_time
+#     logger.info(
+#         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+#     )
+
+#     adapter_factory = HelperAdapterFactory()
+#     off_command = TelescopeOff(cm, adapter_factory)
+#     assert off_command.check_allowed()
+#     (result_code, _) = off_command.do()
+#     assert result_code == ResultCode.OK
+#     for adapter in adapter_factory.adapters:
+#         if isinstance(adapter, DishAdapter):
+#             adapter.proxy.SetStandbyFPMode.assert_called()
+#             adapter.proxy.SetStandbyLPMode.assert_called()
+#             continue
+#         if isinstance(adapter, SubArrayAdapter):
+#             adapter.proxy.Off.assert_called()
+#             continue
+
+#         adapter.proxy.Off.assert_called()
+
+
+# @pytest.mark.refactor_telescopeoff()
+# def test_telescope_off_command_fail_subarray(tango_context):
+#     logger.info("%s", tango_context)
+#     cm, start_time = create_cm()
+#     elapsed_time = time.time() - start_time
+#     logger.info(
+#         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+#     )
+#     adapter_factory = HelperAdapterFactory()
+
+#     # include exception in TelescopeOff command
+#     failing_dev = "ska_mid/tm_subarray_node/1"
+#     adapter_factory.get_or_create_adapter(
+#         failing_dev, attrs={"TelescopeOff.side_effect": Exception}
+#     )
+
+#     off_command = TelescopeOff(cm, adapter_factory)
+#     assert off_command.check_allowed()
+#     (result_code, message) = off_command.do()
+#     assert result_code == ResultCode.FAILED
+#     assert failing_dev in message
+
+
+# @pytest.mark.refactor_telescopeoff()
+# def test_telescope_off_command_fail_csp(tango_context):
+#     logger.info("%s", tango_context)
+#     cm, start_time = create_cm()
+#     elapsed_time = time.time() - start_time
+#     logger.info(
+#         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+#     )
+#     adapter_factory = HelperAdapterFactory()
+
+#     # include exception in TelescopeOff command
+#     failing_dev = "ska_mid/tm_leaf_node/csp_master"
+#     adapter_factory.get_or_create_adapter(
+#         failing_dev, attrs={"TelescopeOff.side_effect": Exception}
+#     )
+
+#     off_command = TelescopeOff(cm, adapter_factory)
+#     assert off_command.check_allowed()
+#     (result_code, message) = off_command.do()
+#     assert result_code == ResultCode.FAILED
+#     assert failing_dev in message
+
+
+# @pytest.mark.refactor_telescopeoff()
+# def test_telescope_off_fail_check_allowed(tango_context):
+
+#     logger.info("%s", tango_context)
+#     cm, start_time = create_cm()
+#     elapsed_time = time.time() - start_time
+#     logger.info(
+#         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+#     )
+#     my_adapter_factory = HelperAdapterFactory()
+#     cm.input_parameter.tm_dish_dev_names = []
+#     off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+#     with pytest.raises(CommandNotAllowed):
+#         off_command.check_allowed()
+
 import time
 
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
-from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import DishAdapter, SubArrayAdapter
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.test_helpers.helper_adapter_factory import (
-    HelperAdapterFactory,
-)
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
+from tango import DevState
 
-from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
+from tests.mock_callable import MockCallable
 from tests.settings import create_cm, logger
 
 
@@ -34,83 +157,46 @@ def devices_to_load():
     )
 
 
-@pytest.mark.refactor_telescopeoff()
+@pytest.mark.telescope_off
 def test_telescope_off_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
-    # num_faulty = count_faulty_devices(cm)
-    # assert num_faulty == 0
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-
-    adapter_factory = HelperAdapterFactory()
-    off_command = TelescopeOff(cm, adapter_factory)
-    assert off_command.check_allowed()
-    (result_code, _) = off_command.do()
-    assert result_code == ResultCode.OK
-    for adapter in adapter_factory.adapters:
-        if isinstance(adapter, DishAdapter):
-            adapter.proxy.SetStandbyFPMode.assert_called()
-            adapter.proxy.SetStandbyLPMode.assert_called()
-            continue
-        if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.Off.assert_called()
-            continue
-
-        adapter.proxy.Off.assert_called()
+    unique_id = f"{time.time()}_TelescopeOff"
+    task_callback = MockCallable(unique_id)
+    cm.is_command_allowed("TelescopeOff")
+    cm.telescope_off(task_callback=task_callback)
+    assert task_callback.status == TaskStatus.QUEUED
+    # time.sleep(0.1)
+    # assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.refactor_telescopeoff()
-def test_telescope_off_command_fail_subarray(tango_context):
+@pytest.mark.telescope_on
+def test_telescope_on_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    adapter_factory = HelperAdapterFactory()
+    cm.timeout = 0
+    assert cm.is_command_allowed("TelescopeOn")
 
-    # include exception in TelescopeOff command
-    failing_dev = "ska_mid/tm_subarray_node/1"
-    adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"TelescopeOff.side_effect": Exception}
-    )
-
-    off_command = TelescopeOff(cm, adapter_factory)
-    assert off_command.check_allowed()
-    (result_code, message) = off_command.do()
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
+    unique_id = f"{time.time()}_TelescopeOn"
+    task_callback = MockCallable(unique_id)
+    cm.telescope_on(task_callback=task_callback)
+    assert task_callback.status == TaskStatus.QUEUED
+    time.sleep(0.1)
+    assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.refactor_telescopeoff()
-def test_telescope_off_command_fail_csp(tango_context):
-    logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
-    adapter_factory = HelperAdapterFactory()
-
-    # include exception in TelescopeOff command
-    failing_dev = "ska_mid/tm_leaf_node/csp_master"
-    adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"TelescopeOff.side_effect": Exception}
-    )
-
-    off_command = TelescopeOff(cm, adapter_factory)
-    assert off_command.check_allowed()
-    (result_code, message) = off_command.do()
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
-
-
-@pytest.mark.refactor_telescopeoff()
-def test_telescope_off_fail_check_allowed(tango_context):
+@pytest.mark.xfail(reason="Not able to set/mock op_state attribute")
+@pytest.mark.telescope_on
+def test_telescope_on_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -118,8 +204,6 @@ def test_telescope_off_fail_check_allowed(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
-    cm.input_parameter.tm_dish_dev_names = []
-    off_command = TelescopeOff(cm, cm.op_state_model, my_adapter_factory)
+    cm.op_state_model.op_state = DevState.DISABLE
     with pytest.raises(CommandNotAllowed):
-        off_command.check_allowed()
+        cm.is_command_allowed("TelescopeOn")

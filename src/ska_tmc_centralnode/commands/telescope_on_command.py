@@ -1,5 +1,4 @@
 import threading
-from asyncio.log import logger
 from typing import Callable, Optional
 
 from ska_tango_base.commands import ResultCode
@@ -40,7 +39,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def telescope_on(
         self,
-        logger: logger,
+        logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
@@ -63,7 +62,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             ret_code, message = self.do_mid(argin=None)  # Fire and forget
         else:
             ret_code, message = self.do_low(argin=None)
-        self.logger.info(message)
+        logger.info(message)
 
         if ret_code == ResultCode.FAILED:
             task_callback(
