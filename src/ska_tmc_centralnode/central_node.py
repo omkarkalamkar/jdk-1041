@@ -9,6 +9,7 @@ import pandas as pd
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
+from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
 
@@ -135,9 +136,6 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("commandInProgress", True, False)
 
             self._device.op_state_model.perform_action("component_on")
-            # self._device.component_manager.command_executor.add_command_execution(
-            #     "0", "Init", ResultCode.OK, ""
-            # )
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
@@ -527,7 +525,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     # default ska mid
     def create_component_manager(self):
+        self.op_state_model = TMCOpStateModel(
+            logger=self.logger, callback=super()._update_state
+        )
         cm = CNComponentManager(
+            self.op_state_model,
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=self.update_telescope_state_callback,

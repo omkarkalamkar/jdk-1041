@@ -51,6 +51,7 @@ class CNComponentManager(TmcComponentManager):
 
     def __init__(
         self,
+        op_state_model,
         _input_parameter,
         logger=None,
         _component=None,
@@ -81,6 +82,7 @@ class CNComponentManager(TmcComponentManager):
         self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
         self._input_parameter = _input_parameter
+        self.op_state_model = op_state_model
 
         self._liveliness_probe = None
         if _liveliness_probe:
