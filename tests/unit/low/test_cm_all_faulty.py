@@ -1,6 +1,16 @@
 import time
 
 import pytest
+from ska_tmc_common.op_state_model import TMCOpStateModel
+from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
+    HelperMCCSStateDevice,
+)
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
+from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
+    HelperSubarrayLeafDevice,
+)
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterLow
@@ -13,10 +23,36 @@ from tests.settings import (
 )
 
 
-@pytest.mark.refactor_telescopeon
+@pytest.fixture()
+def devices_to_load():
+    return (
+        {
+            "class": HelperMCCSStateDevice,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/mccs_master"},
+                {"name": "low-mccs/control/control"},
+            ],
+        },
+        {
+            "class": HelperSubArrayDevice,
+            "devices": [
+                {"name": "ska_low/tm_subarray_node/1"},
+            ],
+        },
+        {
+            "class": HelperSubarrayLeafDevice,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
+            ],
+        },
+    )
+
+
+@pytest.mark.letsmakeitpass
 def test_all_low_devices_faulty():
+    op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        _input_parameter=InputParameterLow(None), logger=logger
+        op_state_model, _input_parameter=InputParameterLow(None), logger=logger
     )
     cm.add_multiple_devices(DEVICE_LIST_LOW)
     start_time = time.time()
