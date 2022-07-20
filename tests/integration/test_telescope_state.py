@@ -11,7 +11,7 @@ from tests.integration.common import (
     assert_event_arrived,
     ensure_checked_devices,
 )
-from tests.settings import SLEEP_TIME, TIMEOUT, logger
+from tests.settings import logger
 
 
 def telescope_state(tango_context, central_node_name):
@@ -36,7 +36,7 @@ def telescope_state(tango_context, central_node_name):
     )
 
     ensure_checked_devices(central_node)
-    (result, unique_id) = central_node.On()
+    (result, unique_id) = central_node.TelescopeOn()
     assert result[0] == ResultCode.QUEUED
     time.sleep(30)
     command_id, result = central_node.longRunningCommandResult
