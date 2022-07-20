@@ -13,16 +13,6 @@ class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
         super().__init__(component_manager, logger=logger, *args, **kwargs)
 
-    def check_allowed(self):
-        if isinstance(
-            self.component_manager.input_parameter, InputParameterMid
-        ):
-            result = self.check_allowed_mid()
-        else:
-            result = self.check_allowed_low()
-
-        return result
-
     def init_adapters(self):
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
@@ -91,48 +81,6 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
-
-    def check_allowed_mid(self):
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :return: True if this command is allowed
-
-        :rtype: boolean
-
-        """
-        self.component_manager.is_command_allowed()
-
-        # for this command I need a number of sub-devices
-        # import debugpy; debugpy.debug_this_thread()
-        self.component_manager.check_if_csp_mln_is_responsive()
-        self.component_manager.check_if_sdp_mln_is_responsive()
-        self.component_manager.check_if_subarrays_are_responsive()
-        self.component_manager.check_if_dishes_are_responsive()
-
-        return True
-
-    def check_allowed_low(self):
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :return: True if this command is allowed
-
-        :rtype: boolean
-
-        """
-        self.component_manager.is_command_allowed()
-
-        self.component_manager.check_if_mccs_mln_is_responsive()
-        self.component_manager.check_if_subarrays_are_responsive()
-
-        return True
 
     def init_adapters_mid(self):
         self.tm_leaf_csp_master_adapter = None

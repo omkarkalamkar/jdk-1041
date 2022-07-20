@@ -557,6 +557,18 @@ class CNComponentManager(TmcComponentManager):
         return task_status, responce
 
     def is_command_allowed(self, command_name=None):
+        """
+        Checks whether this command is allowed
+        It checks that the device is in a state
+        to perform this command and that all the
+        component needed for the operation are not unresponsive
+
+        :param command_name: name of the command
+        :type command_name: str
+        :return: True if this command is allowed
+
+        :rtype: boolean
+        """
         if command_name in ["TelescopeOn", "TelescopeOff"]:
             if self.op_state_model.op_state in [
                 DevState.FAULT,
@@ -567,4 +579,17 @@ class CNComponentManager(TmcComponentManager):
                     "Command is not allowed in current state %s",
                     self.op_state_model.op_state,
                 )
+            if isinstance(self._input_parameter, InputParameterMid):
+                self.logger.debug("Checking mid devices, as responsive or not")
+                self.check_if_csp_mln_is_responsive()
+                self.check_if_sdp_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
+                self.check_if_dishes_are_responsive()
+            else:
+                self.logger.debug("Checking low devices, as responsive or not")
+                self.check_if_mccs_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
+        else:
+            self.logger.info("Condition other than TelescopeOn/Off")
+
         return True
