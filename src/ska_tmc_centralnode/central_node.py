@@ -298,33 +298,30 @@ class AbstractCentralNode(TMCBaseDevice):
     #     )
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    # def is_TelescopeOff_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    def is_TelescopeOff_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device state.
 
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("TelescopeOff")
-    #     return handler.check_allowed()
+        :rtype: boolean
+        """
+        # handler = self.get_command_object("TelescopeOff")
+        # return handler.check_allowed()
+        return self.component_manager.is_command_allowed("TelescopeOff")
 
-    # @command(dtype_out="DevVarLongStringArray")
-    # def TelescopeOff(self):
-    #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
-    #     on CspMasterLeafNode and SdpMasterLeafNode.
+    @command(dtype_out="DevVarLongStringArray")
+    def TelescopeOff(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
+        on CspMasterLeafNode and SdpMasterLeafNode.
 
-    #     """
-    #     self.log_state("Device states before executing Telescope Off command")
-    #     handler = self.get_command_object("TelescopeOff")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing Telescope Off command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
+        """
+        self.log_state("Device states before executing Telescope Off command")
+        handler = self.get_command_object("TelescopeOff")
+        result_code, unique_id = handler()
+        self.log_state("Device states after  executing Telescope Off command")
+        return [[result_code], [str(unique_id)]]
 
     def is_On_allowed(self):
         """
@@ -502,8 +499,9 @@ class AbstractCentralNode(TMCBaseDevice):
         :rtype: boolean
         """
 
-        handler = self.get_command_object("Off")
-        return handler.is_command_allowed()
+        # handler = self.get_command_object("Off")
+        # return handler.is_command_allowed()
+        return self.component_manager.is_command_allowed()
 
     @command(
         dtype_out="DevVarLongStringArray",
@@ -517,13 +515,16 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         self.log_state("Device states before executing Off command")
         handler = self.get_command_object("Off")
-        if self.component_manager.command_executor.queue_full:
-            return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(
-            handler
-        )
-        self.log_state("Device states after executing Off command")
-        return [[ResultCode.QUEUED], [str(unique_id)]]
+        # if self.component_manager.command_executor.queue_full:
+        #     return [[ResultCode.FAILED], ["Queue is full!"]]
+        # unique_id = self.component_manager.command_executor.enqueue_command(
+        #     handler
+        # )
+        # self.log_state("Device states after executing Off command")
+        # return [[ResultCode.QUEUED], [str(unique_id)]]
+        result_code, unique_id = handler()
+        self.log_state("Device states before executing Off command")
+        return [[result_code], [str(unique_id)]]
 
     # default ska mid
     def create_component_manager(self):
@@ -577,7 +578,7 @@ class AbstractCentralNode(TMCBaseDevice):
         super().init_command_objects()
         for (command_name, method_name) in [
             ("TelescopeOn", "telescope_on"),
-            ("TelescopeOff", "telescope_Off"),
+            ("TelescopeOff", "telescope_off"),
         ]:
             self.register_command_object(
                 command_name,
