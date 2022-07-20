@@ -333,7 +333,7 @@ class AbstractCentralNode(TMCBaseDevice):
         :rtype: boolean
 
         """
-        return self.component_manager.is_command_allowed()
+        return self.component_manager.is_command_allowed("On")
 
     @command(
         dtype_out="DevVarLongStringArray",

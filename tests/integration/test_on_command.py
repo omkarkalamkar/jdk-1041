@@ -1,4 +1,5 @@
 import pytest
+import time
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
@@ -26,6 +27,7 @@ def on_command(tango_context, centralnode_name):
     logger.info(
         f"After TelescopeOn longRunningCommandsInQueue attribute value is:::{central_node.longRunningCommandsInQueue}"
     )
+    time.sleep(30)
     command_id, result = central_node.longRunningCommandResult
     logger.info(
         f"After TelescopeOn central_node.longRunningCommandResult:::::::{central_node.longRunningCommandResult}"
@@ -33,15 +35,6 @@ def on_command(tango_context, centralnode_name):
     if command_id == unique_id[0]:
         logger.info(f"command:::::::{command_id}")
         assert result == "0"
-
-    logger.info(
-        f"After TelescopeOn central_node.telescopeState:::::::{central_node.telescopeState}"
-    )
-
-    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
-
-    logger.info(f"After TelescopeOn sdp_master.State:::::::{sdp_master.State}")
-
 
 @pytest.mark.ncra
 # @pytest.mark.xfail(
