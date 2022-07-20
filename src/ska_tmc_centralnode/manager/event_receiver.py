@@ -10,9 +10,6 @@ class CentralNodeEventReceiver(EventReceiver):
     # The ComponentManager uses the handle events methods
     # for the attribute of interest.
     # For each of them a callback is defined.
-
-    TBD: what about scalability? what if we have 1000 devices?
-
     """
 
     def __init__(

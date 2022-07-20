@@ -386,6 +386,21 @@ class CNComponentManager(TmcComponentManager):
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
 
+    def update_device_assigned_resource(self, dev_name, assign_resources):
+        """
+        Update assign_resources for a monitored device
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param assign_resources: assign_resources
+        :type assign_resources: str
+        """
+        with self.lock:
+            dev_info = self.component.get_device(dev_name)
+            dev_info.resources = assign_resources
+            dev_info.last_event_arrived = time.time()
+            dev_info.update_unresponsive(False)
+
     def is_already_assigned(self, dishId):
         """
         Check if a Dish is already assigned to a subarray
@@ -474,7 +489,7 @@ class CNComponentManager(TmcComponentManager):
     def get_tmc_op_state(self):
         return self.component.tmc_op_state
 
-    # TODO: Kept it for reference
+    # TODO: Kept it for reference. Not getting called anywhere.
     def _update_resources(self, subarray_dev_info):
         """
         Updates resources for a subarray
