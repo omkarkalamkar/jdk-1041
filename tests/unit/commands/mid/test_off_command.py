@@ -175,8 +175,8 @@ def test_telescope_off_command(tango_context):
     # assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.telescope_on
-def test_telescope_on_command_fail_subarray(tango_context):
+@pytest.mark.telescope_off
+def test_telescope_off_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -184,9 +184,9 @@ def test_telescope_on_command_fail_subarray(tango_context):
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     cm.timeout = 0
-    assert cm.is_command_allowed("TelescopeOn")
+    assert cm.is_command_allowed("TelescopeOff")
 
-    unique_id = f"{time.time()}_TelescopeOn"
+    unique_id = f"{time.time()}_TelescopeOff"
     task_callback = MockCallable(unique_id)
     cm.telescope_on(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
