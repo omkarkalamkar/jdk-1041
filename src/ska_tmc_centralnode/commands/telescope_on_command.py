@@ -34,7 +34,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
         self._timeout_mccs = timeout_mccs
         self._step_sleep = step_sleep
-        self.init_adapters()
+        # self.init_adapters()
 
     def telescope_on(
         self,
@@ -79,11 +79,18 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
-        print(
+        self.logger.info(
             "Component.desired telescope state is::::::",
             self.component_manager.component.desired_telescope_state,
         )
-        print("Invoking TelescopeOn command on the lower level devices")
+        self.logger.info(
+            "Invoking TelescopeOn command on the lower level devices"
+        )
+
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
         for ret_code, message in [
             self.turn_on_csp(),
             self.turn_on_sdp(),
@@ -93,13 +100,13 @@ class TelescopeOn(AbstractTelescopeOnOff):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
-        print(
+        self.logger.info(
             "do_mid for TelescopeOn command on the lower level devices is successful"
         )
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
-        print("TelescopeOn for Sdp devices")
+        self.logger.info("TelescopeOn for Sdp devices")
         return self.send_command(
             [self.tm_leaf_sdp_master_adapter],
             f"Error in calling On() command on {self.tm_leaf_sdp_master_adapter}",
@@ -107,7 +114,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def turn_on_csp(self):
-        print("TelescopeOn for Csp devices")
+        self.logger.info("TelescopeOn for Csp devices")
         return self.send_command(
             [self.tm_leaf_csp_master_adapter],
             f"Error in calling On() command on {self.tm_leaf_csp_master_adapter}",
@@ -115,7 +122,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def turn_on_subarrays(self):
-        print("TelescopeOn for tm subarrays devices")
+        self.logger.info("TelescopeOn for tm subarrays devices")
         return self.send_command(
             self.tm_subarray_adapters,
             f"Error in calling On() command on {self.tm_subarray_adapters}",
@@ -123,7 +130,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def set_standby_fp_mode_dishes(self):
-        print("TelescopeOn for dish devices")
+        self.logger.info("TelescopeOn for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
             f"Error in calling SetStandbyFPMode() command on {self.tm_dish_adapters}",
@@ -131,7 +138,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
     def set_operate_mode_dishes(self):
-        print("TelescopeOn for dish devices")
+        self.logger.info("TelescopeOn for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
             f"Error in calling SetOperateMode() command on {self.tm_dish_adapters}",

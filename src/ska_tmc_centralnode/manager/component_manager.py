@@ -52,6 +52,7 @@ class CNComponentManager(TmcComponentManager):
 
     def __init__(
         self,
+        op_state_model,
         _input_parameter,
         logger=None,
         _component=None,
@@ -82,6 +83,7 @@ class CNComponentManager(TmcComponentManager):
         self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
         self._input_parameter = _input_parameter
+        self.op_state_model = op_state_model
 
         self._liveliness_probe = None
         if _liveliness_probe:
@@ -384,7 +386,21 @@ class CNComponentManager(TmcComponentManager):
             devInfo.obs_state = obs_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
-            self._update_resources(devInfo)
+
+    def update_device_assigned_resource(self, dev_name, assign_resources):
+        """
+        Update assign_resources for a monitored device
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param assign_resources: assign_resources
+        :type assign_resources: str
+        """
+        with self.lock:
+            dev_info = self.component.get_device(dev_name)
+            dev_info.resources = assign_resources
+            dev_info.last_event_arrived = time.time()
+            dev_info.update_unresponsive(False)
 
     def is_already_assigned(self, dishId):
         """
@@ -474,7 +490,7 @@ class CNComponentManager(TmcComponentManager):
     def get_tmc_op_state(self):
         return self.component.tmc_op_state
 
-    # TODO: Modify below method as a part of EventReceiver refactoring
+    # TODO: Kept it for reference. Not getting called anywhere.
     def _update_resources(self, subarray_dev_info):
         """
         Updates resources for a subarray
@@ -559,6 +575,18 @@ class CNComponentManager(TmcComponentManager):
         return task_status, responce
 
     def is_command_allowed(self, command_name=None):
+        """
+        Checks whether this command is allowed
+        It checks that the device is in a state
+        to perform this command and that all the
+        component needed for the operation are not unresponsive
+
+        :param command_name: name of the command
+        :type command_name: str
+        :return: True if this command is allowed
+
+        :rtype: boolean
+        """
         if command_name in ["TelescopeOn", "TelescopeOff"]:
             if self.op_state_model.op_state in [
                 DevState.FAULT,
@@ -569,4 +597,17 @@ class CNComponentManager(TmcComponentManager):
                     "Command is not allowed in current state %s",
                     self.op_state_model.op_state,
                 )
+            if isinstance(self._input_parameter, InputParameterMid):
+                self.logger.debug("Checking mid devices, as responsive or not")
+                self.check_if_csp_mln_is_responsive()
+                self.check_if_sdp_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
+                self.check_if_dishes_are_responsive()
+            else:
+                self.logger.debug("Checking low devices, as responsive or not")
+                self.check_if_mccs_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
+        else:
+            self.logger.info("Condition other than TelescopeOn/Off")
+
         return True

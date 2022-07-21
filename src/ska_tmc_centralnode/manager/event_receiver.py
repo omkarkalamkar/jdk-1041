@@ -10,9 +10,6 @@ class CentralNodeEventReceiver(EventReceiver):
     # The ComponentManager uses the handle events methods
     # for the attribute of interest.
     # For each of them a callback is defined.
-
-    TBD: what about scalability? what if we have 1000 devices?
-
     """
 
     def __init__(
@@ -26,6 +23,7 @@ class CentralNodeEventReceiver(EventReceiver):
         super().__init__(
             component_manager, logger, max_workers, proxy_timeout, sleep_time
         )
+        self._component_manager = component_manager
 
     def subscribe_event(self, dev_info):
         try:

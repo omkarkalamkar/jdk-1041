@@ -31,7 +31,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.telescope_on
 def test_telescope_on_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -45,11 +44,8 @@ def test_telescope_on_command(tango_context):
     cm.is_command_allowed("TelescopeOn")
     cm.telescope_on(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
-    # time.sleep(0.1)
-    # assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.telescope_on
 def test_telescope_on_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -68,8 +64,6 @@ def test_telescope_on_command_fail_subarray(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.xfail(reason="Not able to set/mock op_state attribute")
-@pytest.mark.telescope_on
 def test_telescope_on_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)
@@ -78,6 +72,6 @@ def test_telescope_on_fail_check_allowed(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model.op_state = DevState.DISABLE
+    cm.op_state_model._op_state = DevState.DISABLE
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("TelescopeOn")

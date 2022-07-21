@@ -13,16 +13,6 @@ class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
         super().__init__(component_manager, logger=logger, *args, **kwargs)
 
-    def check_allowed(self):
-        if isinstance(
-            self.component_manager.input_parameter, InputParameterMid
-        ):
-            result = self.check_allowed_mid()
-        else:
-            result = self.check_allowed_low()
-
-        return result
-
     def init_adapters(self):
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
@@ -48,10 +38,14 @@ class CentralNodeCommand(TMCCommand):
         adapters: list,
         command_caller,
         err_msg: str,
+        command_name: str,
     ):
         try:
             for adapter in adapters:
                 command_caller(adapter)
+                self.logger.debug(
+                    f"Invoked {command_name} on device {adapter.dev_name}"
+                )
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -62,10 +56,13 @@ class CentralNodeCommand(TMCCommand):
     def send_command(self, adapters, description, command, argin=None):
         if argin:
             return self.invoke_command(
-                adapters, operator.methodcaller(command, argin), description
+                adapters,
+                operator.methodcaller(command, argin),
+                description,
+                command,
             )
         return self.invoke_command(
-            adapters, operator.methodcaller(command), description
+            adapters, operator.methodcaller(command), description, command
         )
 
 
@@ -85,48 +82,6 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
 
-    def check_allowed_mid(self):
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :return: True if this command is allowed
-
-        :rtype: boolean
-
-        """
-        self.component_manager.is_command_allowed()
-
-        # for this command I need a number of sub-devices
-        # import debugpy; debugpy.debug_this_thread()
-        self.component_manager.check_if_csp_mln_is_responsive()
-        self.component_manager.check_if_sdp_mln_is_responsive()
-        self.component_manager.check_if_subarrays_are_responsive()
-        self.component_manager.check_if_dishes_are_responsive()
-
-        return True
-
-    def check_allowed_low(self):
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :return: True if this command is allowed
-
-        :rtype: boolean
-
-        """
-        self.component_manager.is_command_allowed()
-
-        self.component_manager.check_if_mccs_mln_is_responsive()
-        self.component_manager.check_if_subarrays_are_responsive()
-
-        return True
-
     def init_adapters_mid(self):
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
@@ -135,6 +90,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         try:
             self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
                 self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
+            )
+            self.logger.debug(
+                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_csp_master_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
@@ -145,6 +103,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         try:
             self.tm_leaf_sdp_master_adapter = self._adapter_factory.get_or_create_adapter(
                 self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+            )
+            self.logger.debug(
+                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
@@ -167,6 +128,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for SubarrayNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e
@@ -192,6 +156,9 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                         )
                     )
                     num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for DishLeafNode {dev_name}"
+                    )
                 except Exception as e:
                     self.logger.warning(
                         "Error in creating adapter for %s: %s", dev_name, e

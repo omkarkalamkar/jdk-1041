@@ -4,6 +4,7 @@ Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType
 from tango.server import attribute, device_property, run
 
@@ -100,7 +101,11 @@ class CentralNodeLow(AbstractCentralNode):
         self.component_manager.update_input_parameter()
 
     def create_component_manager(self):
+        self.op_state_model = TMCOpStateModel(
+            logger=self.logger, callback=super()._update_state
+        )
         cm = CNComponentManager(
+            self.op_state_model,
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=self.update_telescope_state_callback,
