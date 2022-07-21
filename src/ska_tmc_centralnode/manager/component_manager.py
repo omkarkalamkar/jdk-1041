@@ -9,10 +9,10 @@ import time
 from typing import Callable
 
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.liveliness_probe import MultiDeviceLivelinessProbe
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
@@ -25,12 +25,17 @@ from ska_tmc_centralnode.manager.aggregators import (
     TMCOpStateAggregator,
 )
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
+from ska_tmc_centralnode.manager.liveliness_probe import (
+    MultiDeviceLivelinessProbe,
+)
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
+
+# from ska_tmc_common.liveliness_probe import MultiDeviceLivelinessProbe
 
 
 class CNComponentManager(TmcComponentManager):
@@ -83,6 +88,22 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
         self._input_parameter = _input_parameter
         self.op_state_model = op_state_model
+        self.adapter_factory = AdapterFactory()
+
+        super().__init__(
+            _input_parameter=self._input_parameter,
+            logger=self.logger,
+            _component=self._component,
+            _event_receiver=True,
+            _liveliness_probe=True,
+            communication_state_callback=None,
+            component_state_callback=None,
+            max_workers=5,
+            proxy_timeout=500,
+            sleep_time=1,
+            *args,
+            **kwargs,
+        )
 
         self._liveliness_probe = None
         if _liveliness_probe:
@@ -115,20 +136,6 @@ class CNComponentManager(TmcComponentManager):
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_imaging_callback,
-        )
-        super().__init__(
-            _input_parameter=self._input_parameter,
-            logger=self.logger,
-            _component=self._component,
-            _event_receiver=True,
-            _liveliness_probe=True,
-            communication_state_callback=None,
-            component_state_callback=None,
-            max_workers=5,
-            proxy_timeout=500,
-            sleep_time=1,
-            *args,
-            **kwargs,
         )
 
         self._telescope_state_aggregator = None
@@ -546,7 +553,7 @@ class CNComponentManager(TmcComponentManager):
         :return: a result code and message
         """
         telescopon_command = TelescopeOn(
-            self, adapter_factory=None, logger=self.logger
+            self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
         task_status, responce = self.submit_task(
