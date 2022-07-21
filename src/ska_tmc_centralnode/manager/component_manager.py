@@ -556,7 +556,7 @@ class CNComponentManager(TmcComponentManager):
             args=[self.logger],
             task_callback=task_callback,
         )
-        
+        return task_status, responce
 
     def is_command_allowed(self, command_name=None):
         if command_name in ["TelescopeOn", "TelescopeOff"]:
