@@ -157,7 +157,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.telescope_off
+@pytest.mark.k
 def test_telescope_off_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -175,7 +175,7 @@ def test_telescope_off_command(tango_context):
     # assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.telescope_off
+@pytest.mark.k
 def test_telescope_off_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -188,15 +188,15 @@ def test_telescope_off_command_fail_subarray(tango_context):
 
     unique_id = f"{time.time()}_TelescopeOff"
     task_callback = MockCallable(unique_id)
-    cm.telescope_on(task_callback=task_callback)
+    cm.telescope_off(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
     time.sleep(0.1)
     assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.xfail(reason="Not able to set/mock op_state attribute")
-@pytest.mark.telescope_on
-def test_telescope_on_fail_check_allowed(tango_context):
+
+@pytest.mark.k
+def test_telescope_off_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -206,4 +206,24 @@ def test_telescope_on_fail_check_allowed(tango_context):
     )
     cm.op_state_model.op_state = DevState.DISABLE
     with pytest.raises(CommandNotAllowed):
-        cm.is_command_allowed("TelescopeOn")
+        cm.is_command_allowed("TelescopeOff")
+
+
+@pytest.mark.k
+def test_telescope_off_command_fail_csp(tango_context):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    cm.timeout = 0
+    assert cm.is_command_allowed("TelescopeOff")
+
+    unique_id = f"{time.time()}_TelescopeOff"
+    task_callback = MockCallable(unique_id)
+    cm.telescope_off(task_callback=task_callback)
+    assert task_callback.status == TaskStatus.QUEUED
+    time.sleep(0.1)
+    assert task_callback.status == TaskStatus.FAILED
+    
