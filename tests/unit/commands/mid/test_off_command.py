@@ -194,7 +194,6 @@ def test_telescope_off_command_fail_subarray(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
-
 @pytest.mark.k
 def test_telescope_off_fail_check_allowed(tango_context):
 
@@ -204,7 +203,7 @@ def test_telescope_off_fail_check_allowed(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model.op_state = DevState.DISABLE
+    cm.op_state_model._op_state = DevState.DISABLE
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("TelescopeOff")
 
@@ -226,4 +225,3 @@ def test_telescope_off_command_fail_csp(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
     time.sleep(0.1)
     assert task_callback.status == TaskStatus.FAILED
-    

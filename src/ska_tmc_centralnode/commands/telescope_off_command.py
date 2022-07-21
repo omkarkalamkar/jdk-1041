@@ -288,6 +288,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
     def turn_off_mccs_mln(self):
         return self.send_command(
             [self.tm_leaf_mccs_master_adapter],
-            f"Error in calling TelescopeOff() in TM MCCS Master Leaf",
+            f"Error in calling TelescopeOff() for {self.tm_leaf_mccs_master_adapter}",
             "Off",
         )
