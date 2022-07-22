@@ -25,7 +25,8 @@ class CentralNodeEventReceiver(EventReceiver):
         )
         self._component_manager = component_manager
 
-    def subscribe_event(self, dev_info):
+    def subscribe_events(self, dev_info):
+        super().subscribe_events(dev_info)
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
             if ("subarray" in dev_info.dev_name) and (

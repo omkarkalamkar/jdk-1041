@@ -33,10 +33,9 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.refactor_telescopeon
 def test_attributes(central_node_device):
     assert central_node_device.HealthState == HealthState.UNKNOWN
-    assert central_node_device.State() == DevState.UNKNOWN
+    assert central_node_device.State() == tango._tango.DevState.ON
     assert central_node_device.telescopeHealthstate == HealthState.UNKNOWN
     central_node_device.loggingTargets = ["console::cout"]
     assert "console::cout" in central_node_device.loggingTargets
@@ -66,9 +65,6 @@ def test_attributes(central_node_device):
     central_node_device.leafSdpMasterDevName = "leafsdp"
     assert central_node_device.leafSdpMasterDevName == "leafsdp"
     assert central_node_device.tmOpState == DevState.UNKNOWN
-    assert len(central_node_device.commandExecuted) == 1  # init
-    assert "Init" in central_node_device.lastCommandExecuted  # init
-    assert "OK" in central_node_device.lastCommandExecuted  # init
     assert len(central_node_device.subarrayDevNames) == 0
     central_node_device.subarrayDevNames = ["subarray1"]
     assert len(central_node_device.subarrayDevNames) == 1

@@ -31,7 +31,7 @@ def devices_to_load():
     )
 
 
-def test_telescope_on_command(tango_context):
+def test_telescope_on_command(tango_context, adapters_proxies):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
@@ -43,6 +43,17 @@ def test_telescope_on_command(tango_context):
     task_callback = MockCallable(unique_id)
     cm.is_command_allowed("TelescopeOn")
     cm.telescope_on(task_callback=task_callback)
+    my_adapter_factory = adapters_proxies
+    for adapter in my_adapter_factory.adapters:
+        if isinstance(adapter, DishAdapter):
+            adapter.proxy.SetStandbyFPMode.assert_called()
+            adapter.proxy.SetOperateMode.assert_called_once_with()
+            continue
+        if isinstance(adapter, SubArrayAdapter):
+            adapter.proxy.On.assert_called_once_with()
+            continue
+        adapter.proxy.On.assert_called_once_with()
+
     assert task_callback.status == TaskStatus.QUEUED
 
 
@@ -65,13 +76,12 @@ def test_telescope_on_command_fail_subarray(tango_context):
 
 
 def test_telescope_on_fail_check_allowed(tango_context):
-
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model._op_state = DevState.DISABLE
+    cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("TelescopeOn")

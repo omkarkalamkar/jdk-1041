@@ -48,11 +48,12 @@ def devices_to_load():
     )
 
 
-@pytest.mark.letsmakeitpass
 def test_all_low_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterLow(None), logger=logger
+        op_state_model,
+        _input_parameter=InputParameterLow(None),
+        logger=logger,
     )
     cm.add_multiple_devices(DEVICE_LIST_LOW)
     start_time = time.time()

@@ -16,7 +16,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     TelescopeOn command on Central node enables the telescope to perform further operations
     and observations. It Invokes On command on lower level devices.
-
     """
 
     def __init__(
@@ -109,7 +108,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info("TelescopeOn for Sdp devices")
         return self.send_command(
             [self.tm_leaf_sdp_master_adapter],
-            f"Error in calling On() command for {self.tm_leaf_sdp_master_adapter}",
+            f"Error in calling On() command on {self.tm_leaf_sdp_master_adapter}",
             "On",
         )
 
@@ -117,7 +116,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info("TelescopeOn for Csp devices")
         return self.send_command(
             [self.tm_leaf_csp_master_adapter],
-            f"Error in calling On() command for {self.tm_leaf_csp_master_adapter}",
+            f"Error in calling On() command on {self.tm_leaf_csp_master_adapter}",
             "On",
         )
 
@@ -125,7 +124,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info("TelescopeOn for tm subarrays devices")
         return self.send_command(
             self.tm_subarray_adapters,
-            f"Error in calling On() command for {self.tm_subarray_adapters}",
+            f"Error in calling On() command on {self.tm_subarray_adapters}",
             "On",
         )
 
@@ -133,7 +132,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info("TelescopeOn for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
-            f"Error in calling SetStandbyFPMode() command for {self.tm_dish_adapters}",
+            f"Error in calling SetStandbyFPMode() command on {self.tm_dish_adapters}",
             "SetStandbyFPMode",
         )
 
@@ -141,7 +140,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info("TelescopeOn for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
-            f"Error in calling SetOperateMode() command for {self.tm_dish_adapters}",
+            f"Error in calling SetOperateMode() command on {self.tm_dish_adapters}",
             "SetOperateMode",
         )
 

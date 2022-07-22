@@ -32,7 +32,6 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.refactor_telescopeon
 def test_attributes(central_node_device):
     assert central_node_device.HealthState == HealthState.UNKNOWN
     assert central_node_device.State() == DevState.UNKNOWN

@@ -7,10 +7,6 @@ from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
 )
 
 from ska_tmc_centralnode.model.input import InputParameterLow
-
-# from ska_tmc_common.test_helpers.helper_subarray_device import (
-#     HelperSubArrayDevice,
-# )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import count_faulty_devices, create_cm, logger
 
@@ -35,7 +31,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.refactor_telescopeon
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))

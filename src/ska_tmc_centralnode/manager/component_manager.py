@@ -11,6 +11,7 @@ from typing import Callable
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
+from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
@@ -24,17 +25,12 @@ from ska_tmc_centralnode.manager.aggregators import (
     TMCOpStateAggregator,
 )
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
-from ska_tmc_centralnode.manager.liveliness_probe import (
-    MultiDeviceLivelinessProbe,
-)
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
-
-# from ska_tmc_common.liveliness_probe import MultiDeviceLivelinessProbe
 
 
 class CNComponentManager(TmcComponentManager):
@@ -59,7 +55,7 @@ class CNComponentManager(TmcComponentManager):
         _input_parameter,
         logger=None,
         _component=None,
-        _liveliness_probe=True,
+        _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
         _update_device_callback=None,
         _update_telescope_state_callback=None,
@@ -82,52 +78,24 @@ class CNComponentManager(TmcComponentManager):
         :param _component: allows setting of the component to be
             managed; for testing purposes only
         """
-        self.logger = logger
-        self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
-        self._input_parameter = _input_parameter
-        self.op_state_model = op_state_model
-        self.adapter_factory = AdapterFactory()
 
         super().__init__(
-            _input_parameter=self._input_parameter,
-            logger=self.logger,
+            _input_parameter,
+            logger,
             _component=self._component,
+            _liveliness_probe=_liveliness_probe,
             _event_receiver=True,
-            _liveliness_probe=True,
             communication_state_callback=None,
             component_state_callback=None,
             max_workers=5,
             proxy_timeout=500,
-            sleep_time=1,
+            sleep_time=sleep_time,
             *args,
             **kwargs,
         )
-
-        self._liveliness_probe = None
-        if _liveliness_probe:
-            self._liveliness_probe = MultiDeviceLivelinessProbe(
-                self,
-                logger,
-                max_workers=max_workers,
-                proxy_timeout=proxy_timeout,
-                sleep_time=sleep_time,
-            )
-            self._liveliness_probe.start()
-        else:
-            self.logger.warning("Liveliness Probe is not running")
-
-        self._event_receiver = None
-        if _event_receiver:
-            self._event_receiver = CentralNodeEventReceiver(
-                self,
-                logger,
-                proxy_timeout=proxy_timeout,
-                sleep_time=sleep_time,
-            )
-            self._event_receiver.start()
-        else:
-            self.logger.warning("Event Receiver is not running")
+        self.op_state_model = op_state_model
+        self.adapter_factory = AdapterFactory()
 
         self._component.set_op_callbacks(
             _update_device_callback,
@@ -136,17 +104,27 @@ class CNComponentManager(TmcComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
         )
-
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
+    def start_event_receiver(self):
+        """Starts the Event Receiver for given device"""
+        if self.event_receiver:
+            self.event_receiver_object = CentralNodeEventReceiver(
+                self,
+                logger=self.logger,
+                proxy_timeout=self.proxy_timeout,
+                sleep_time=self.sleep_time,
+            )
+            self.event_receiver_object.start()
+
+    def stop_event_receiver(self):
+        """Stops the Event Receiver"""
+        self.event_receiver_object.stop()
+
     def reset(self):
         pass
-
-    def stop(self):
-        self._liveliness_probe.stop()
-        self._event_receiver.stop()
 
     def set_aggregators(
         self,

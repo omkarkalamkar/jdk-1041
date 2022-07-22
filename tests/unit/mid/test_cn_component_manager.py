@@ -1,4 +1,3 @@
-import pytest
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
@@ -7,7 +6,6 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.settings import logger
 
 
-@pytest.mark.letsmakeitpass
 def test_telescope_on():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(

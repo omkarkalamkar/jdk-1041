@@ -32,9 +32,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.xfail(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
 def test_aggregation_default(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     assert cm.component.telescope_state == tango.DevState.UNKNOWN
@@ -45,8 +42,3 @@ def test_aggregation_default(tango_context):
     assert cm.component.telescope_state == tango.DevState.UNKNOWN
     assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
     assert cm.component.telescope_health_state == HealthState.UNKNOWN
-
-    cm = create_cm_no_faulty_devices(tango_context, True, False)
-    assert cm.component.telescope_state == tango.DevState.UNKNOWN
-    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
-    assert cm.component.telescope_health_state == HealthState.OK

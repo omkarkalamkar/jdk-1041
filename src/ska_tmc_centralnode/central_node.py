@@ -530,6 +530,7 @@ class AbstractCentralNode(TMCBaseDevice):
         )
         cm = CNComponentManager(
             self.op_state_model,
+            _input_parameter=InputParameterMid(None),
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=self.update_telescope_state_callback,
@@ -541,7 +542,6 @@ class AbstractCentralNode(TMCBaseDevice):
             component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
-            _input_parameter=InputParameterMid(None),
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.tm_dish_dev_names = []
