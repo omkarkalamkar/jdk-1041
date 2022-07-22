@@ -30,7 +30,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
         )
         self._timeout_mccs = timeout_mccs
         self._step_sleep = step_sleep
-        self.init_adapters()
 
     def telescope_off(
         self,
