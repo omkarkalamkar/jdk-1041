@@ -9,10 +9,10 @@ import time
 from typing import Callable
 
 from ska_tango_base.control_model import ObsState
-from ska_tmc_common.command_executor import CommandExecutor
+from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
+from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.liveliness_probe import MultiDeviceLivelinessProbe
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
@@ -56,7 +56,7 @@ class CNComponentManager(TmcComponentManager):
         _input_parameter,
         logger=None,
         _component=None,
-        _liveliness_probe=True,
+        _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
         _update_device_callback=None,
         _update_telescope_state_callback=None,
@@ -85,18 +85,35 @@ class CNComponentManager(TmcComponentManager):
         self._input_parameter = _input_parameter
         self.op_state_model = op_state_model
 
-        self._liveliness_probe = None
-        if _liveliness_probe:
-            self._liveliness_probe = MultiDeviceLivelinessProbe(
-                self,
-                logger,
-                max_workers=max_workers,
-                proxy_timeout=proxy_timeout,
-                sleep_time=sleep_time,
-            )
-            self._liveliness_probe.start()
-        else:
-            self.logger.warning("Liveliness Probe is not running")
+        self.adapter_factory = AdapterFactory()
+
+        super().__init__(
+            _input_parameter=self._input_parameter,
+            logger=self.logger,
+            _component=self._component,
+            _event_receiver=True,
+            _liveliness_probe=_liveliness_probe,
+            communication_state_callback=None,
+            component_state_callback=None,
+            max_workers=5,
+            proxy_timeout=500,
+            sleep_time=1,
+            *args,
+            **kwargs,
+        )
+
+        # self._liveliness_probe = None
+        # if _liveliness_probe:
+        #     self._liveliness_probe = MultiDeviceLivelinessProbe(
+        #         self,
+        #         logger,
+        #         max_workers=max_workers,
+        #         proxy_timeout=proxy_timeout,
+        #         sleep_time=sleep_time,
+        #     )
+        #     self._liveliness_probe.start()
+        # else:
+        #     self.logger.warning("Liveliness Probe is not running")
 
         self._event_receiver = None
         if _event_receiver:
@@ -117,30 +134,12 @@ class CNComponentManager(TmcComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
         )
-        super().__init__(
-            _input_parameter=self._input_parameter,
-            logger=self.logger,
-            _component=self._component,
-            _event_receiver=True,
-            _liveliness_probe=True,
-            communication_state_callback=None,
-            component_state_callback=None,
-            max_workers=5,
-            proxy_timeout=500,
-            sleep_time=1,
-            *args,
-            **kwargs,
-        )
 
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
         # TODO: This can be done as a part of CommandExecutor refactor separate story
-        self._command_executor = CommandExecutor(
-            logger,
-            _update_command_in_progress_callback=_update_command_in_progress_callback,
-        )
 
     def reset(self):
         pass
@@ -227,7 +226,7 @@ class CNComponentManager(TmcComponentManager):
 
         :param dev_name: name of the device
         :type dev_name: str
-        :return: a device info
+        :return: a device info1 failed
         :rtype: DeviceInfo
         """
         return self.component.get_device(dev_name)
@@ -547,7 +546,7 @@ class CNComponentManager(TmcComponentManager):
         :return: a result code and message
         """
         telescopon_command = TelescopeOn(
-            self, adapter_factory=None, logger=self.logger
+            self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
         task_status, responce = self.submit_task(

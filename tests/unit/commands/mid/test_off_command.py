@@ -157,7 +157,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.k
+@pytest.mark.off
 def test_telescope_off_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -175,7 +175,7 @@ def test_telescope_off_command(tango_context):
     # assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.k
+@pytest.mark.off
 def test_telescope_off_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -194,7 +194,7 @@ def test_telescope_off_command_fail_subarray(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.k
+@pytest.mark.off
 def test_telescope_off_fail_check_allowed(tango_context):
 
     logger.info("%s", tango_context)
@@ -208,7 +208,7 @@ def test_telescope_off_fail_check_allowed(tango_context):
         cm.is_command_allowed("TelescopeOff")
 
 
-@pytest.mark.k
+@pytest.mark.off
 def test_telescope_off_command_fail_csp(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()

@@ -148,14 +148,13 @@ class AbstractCentralNode(TMCBaseDevice):
             self.component_manager.stop()
 
     def log_state(self, msg="Device States"):
-        device_names = [
-            device.to_dict()["dev_name"]
-            for device in self.component_manager.devices
-        ]
-        dev_states = [
-            device.to_dict()["state"]
-            for device in self.component_manager.devices
-        ]
+        device_names = []
+        dev_states = []
+
+        for device in self.component_manager.devices:
+            device_names.append(device.dev_name)
+            dev_states.append(device.state)
+
         device_states = pd.DataFrame(
             {"Devices": device_names, "STATE": dev_states}
         )

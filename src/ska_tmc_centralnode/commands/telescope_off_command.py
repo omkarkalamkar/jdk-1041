@@ -91,11 +91,11 @@ class TelescopeOff(AbstractTelescopeOnOff):
             "Invoking TelescopeOff command on the lower level devices"
         )
         for ret_code, message in [
-            self.turn_on_csp(),
-            self.turn_on_sdp(),
-            self.turn_on_subarrays(),
+            self.turn_off_csp(),
+            self.turn_off_sdp(),
+            self.turn_off_subarrays(),
             self.set_standby_fp_mode_dishes(),
-            self.set_operate_mode_dishes(),
+            self.set_standby_lp_mode_dishes(),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
@@ -207,14 +207,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
             self.tm_subarray_adapters,
             f"Error in calling Off() for {self.tm_subarray_adapters}",
             "Off",
-        )
-
-    def set_standby_fp_mode_dishes(self):
-        self.logger.info("TelescopeOff for dish devices")
-        return self.send_command(
-            self.tm_dish_adapters,
-            f"Error in calling SetStandbyFPMode() command on {self.tm_dish_adapters}",
-            "SetStandbyFPMode",
         )
 
     def set_standby_lp_mode_dishes(self):
