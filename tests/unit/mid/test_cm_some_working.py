@@ -3,8 +3,6 @@ import time
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
-from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
-from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid

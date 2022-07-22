@@ -1,5 +1,3 @@
-import pytest
-
 from ska_tmc_centralnode.model.input import InputParameterLow
 
 

@@ -1,5 +1,3 @@
-import time
-
 import pytest
 import tango
 from ska_tango_base.control_model import HealthState
