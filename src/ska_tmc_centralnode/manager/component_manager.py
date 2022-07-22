@@ -10,7 +10,6 @@ from typing import Callable
 
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
-from ska_tmc_common.command_executor import CommandExecutor
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
@@ -142,19 +141,12 @@ class CNComponentManager(TmcComponentManager):
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
-        # TODO: This can be done as a part of CommandExecutor refactor separate story
-        self._command_executor = CommandExecutor(
-            logger,
-            _update_command_in_progress_callback=_update_command_in_progress_callback,
-        )
-
     def reset(self):
         pass
 
     def stop(self):
         self._liveliness_probe.stop()
         self._event_receiver.stop()
-        self._command_executor.stop()
 
     def set_aggregators(
         self,
@@ -214,18 +206,6 @@ class CNComponentManager(TmcComponentManager):
                 result.append(dev)
                 continue
         return result
-
-    @property
-    def command_in_progress(self):
-        return self._command_executor.command_in_progress
-
-    @property
-    def command_executor(self):
-        return self._command_executor
-
-    @property
-    def command_executed(self):
-        return self._command_executor._command_executed
 
     def get_device(self, dev_name):
         """
