@@ -23,7 +23,7 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.xfail
+@pytest.mark.off
 def test_commands(central_node_device):
     try:
         central_node_device.TelescopeOn()

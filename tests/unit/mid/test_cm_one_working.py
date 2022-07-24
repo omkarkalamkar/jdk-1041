@@ -35,6 +35,7 @@ def devices_to_load():
 
 
 @pytest.mark.refactor_telescopeon
+@pytest.mark.skip
 def test_one_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)

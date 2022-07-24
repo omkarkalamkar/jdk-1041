@@ -96,8 +96,8 @@ class AbstractCentralNode(TMCBaseDevice):
         self.logger.info("telescopeState %s", telescope_state)
         self.push_change_event("telescopeState", telescope_state)
 
-    def update_command_in_progress_callback(self, command_in_progress):
-        self.push_change_event("commandInProgress", command_in_progress)
+    # def update_command_in_progress_callback(self, command_in_progress):
+    #     self.push_change_event("commandInProgress", command_in_progress)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         self.push_change_event("telescopeHealthState", telescope_health_state)
@@ -133,7 +133,7 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("telescopeState", True, False)
             self._device.set_change_event("LastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
-            self._device.set_change_event("commandInProgress", True, False)
+            # self._device.set_change_event("commandInProgress", True, False)
 
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
@@ -536,7 +536,7 @@ class AbstractCentralNode(TMCBaseDevice):
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=self.update_imaging_callback,
-            _update_command_in_progress_callback=self.update_command_in_progress_callback,
+            # _update_command_in_progress_callback=self.update_command_in_progress_callback,
             communication_state_changed_callback=None,
             component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,

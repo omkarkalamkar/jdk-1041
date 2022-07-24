@@ -34,7 +34,7 @@ def devices_to_load():
         },
     )
 
-
+@pytest.mark.skip("Needs update in helper devices")
 @pytest.mark.refactor_telescopeon
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
