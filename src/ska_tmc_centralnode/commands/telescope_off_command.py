@@ -94,7 +94,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
             self.turn_off_csp(),
             self.turn_off_sdp(),
             self.turn_off_subarrays(),
-            self.set_standby_fp_mode_dishes(),
             self.set_standby_lp_mode_dishes(),
         ]:
             if ret_code == ResultCode.FAILED:
@@ -233,7 +232,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
         self.component_manager.component.desired_telescope_state = DevState.OFF
 
         for ret_code, message in [
-            self.turn_off_mccs_master(),
+            self.turn_off_mccs_mln(),
             self.turn_off_subarrays(),
         ]:
             if ret_code == ResultCode.FAILED:
