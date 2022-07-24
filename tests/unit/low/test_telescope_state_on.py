@@ -46,6 +46,10 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
     )
     ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=1.5)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_on(tango_context):
     devFactory = DevFactory()
@@ -55,6 +59,10 @@ def test_telescope_state_on(tango_context):
     set_devices_on(cm, devFactory, 1.5)
     assert cm.component.telescope_state == tango.DevState.ON
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_on_only_events(tango_context):
     devFactory = DevFactory()

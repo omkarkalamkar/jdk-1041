@@ -49,6 +49,10 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
     )
     ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_telescope_state_on(tango_context):
     devFactory = DevFactory()
@@ -58,6 +62,10 @@ def test_telescope_state_on(tango_context):
     )  # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     assert cm.component.telescope_state == tango.DevState.ON
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_telescope_state_on_only_events(tango_context):
     devFactory = DevFactory()

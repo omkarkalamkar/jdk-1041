@@ -40,6 +40,10 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     )
     ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_init(tango_context):
     devFactory = DevFactory()
@@ -49,6 +53,10 @@ def test_telescope_state_init(tango_context):
     set_device_init(devFactory, cm, 2)
     assert cm.component.telescope_state == tango.DevState.INIT
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_init_only_events(tango_context):
     devFactory = DevFactory()
@@ -65,6 +73,10 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     )
     ensure_telescope_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
@@ -74,6 +86,10 @@ def test_telescope_state_fault_over_standby(tango_context):
     set_one_device_fault(devFactory, cm, 5)
     assert cm.component.telescope_state == tango.DevState.FAULT
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_fault_over_standby_only_events(tango_context):
     devFactory = DevFactory()
@@ -90,6 +106,10 @@ def set_device_standby(devFactory, cm, expected_elapsed_time):
     )
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_standby(tango_context):
     devFactory = DevFactory()
@@ -99,6 +119,10 @@ def test_telescope_state_standby(tango_context):
     set_device_standby(devFactory, cm, 1.5)
     assert cm.component.telescope_state == tango.DevState.STANDBY
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_standby_only_events(tango_context):
     devFactory = DevFactory()

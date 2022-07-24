@@ -47,6 +47,10 @@ def test_set_health_state_ok(tango_context):
             pytest.fail("Timeout occurred while executing the test")
     assert cm.component.telescope_health_state == HealthState.OK
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_set_health_state_ok_only_events(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, False, True)
@@ -74,6 +78,10 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_set_health_state_degraded(tango_context):
     devFactory = DevFactory()
@@ -85,6 +93,10 @@ def test_set_health_state_degraded(tango_context):
     )
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_set_health_state_degraded_only_events(tango_context):
     devFactory = DevFactory()
@@ -109,6 +121,10 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
@@ -116,6 +132,10 @@ def test_set_health_state_failed(tango_context):
     set_failed(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_set_health_state_failed_only_events(tango_context):
     devFactory = DevFactory()
@@ -136,6 +156,10 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=1.5):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_set_health_state_unknown(tango_context):
     devFactory = DevFactory()
@@ -143,6 +167,10 @@ def test_set_health_state_unknown(tango_context):
     set_device_unknown(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.UNKNOWN
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip
 def test_set_health_state_unknown_only_events(tango_context):
     devFactory = DevFactory()

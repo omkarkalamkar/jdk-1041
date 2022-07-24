@@ -209,8 +209,11 @@ class CNComponentManager(TmcComponentManager):
                 continue
         return result
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
     def get_device(self, dev_name):
         """
         Return the device info our of the monitoring loop with name dev_name

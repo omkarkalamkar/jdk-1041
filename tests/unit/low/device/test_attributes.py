@@ -35,8 +35,15 @@ def central_node_device(request):
 @pytest.mark.off
 def test_attributes(central_node_device):
     assert central_node_device.HealthState == HealthState.UNKNOWN
+<<<<<<< HEAD
     assert (central_node_device.State() == DevState.UNKNOWN or 
     central_node_device.State()==DevState.ON)
+=======
+    assert (
+        central_node_device.State() == DevState.UNKNOWN
+        or central_node_device.State() == DevState.ON
+    )
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
     assert central_node_device.telescopeHealthState == HealthState.UNKNOWN
     central_node_device.loggingTargets = ["console::cout"]
     assert "console::cout" in central_node_device.loggingTargets

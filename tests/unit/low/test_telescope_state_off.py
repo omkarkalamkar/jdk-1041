@@ -53,6 +53,10 @@ def test_telescope_state_off(tango_context):
     ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=1.5)
     assert cm.component.telescope_state == tango.DevState.OFF
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_off_only_events(tango_context):
     cm = create_cm_no_faulty_devices(

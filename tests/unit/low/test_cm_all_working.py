@@ -34,6 +34,10 @@ def devices_to_load():
         },
     )
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
 @pytest.mark.skip("Needs update in helper devices")
 @pytest.mark.refactor_telescopeon
 def test_all_working(tango_context):
