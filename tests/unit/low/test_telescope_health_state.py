@@ -31,7 +31,13 @@ def devices_to_load():
         },
     )
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.skip("Needs update in helper devices")
 def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(
@@ -47,7 +53,13 @@ def test_set_health_state_ok(tango_context):
             pytest.fail("Timeout occurred while executing the test")
     assert cm.component.telescope_health_state == HealthState.OK
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.skip("Needs update in helper devices")
 def test_set_health_state_ok_only_events(tango_context):
     cm = create_cm_no_faulty_devices(
@@ -63,7 +75,13 @@ def test_set_health_state_ok_only_events(tango_context):
             pytest.fail("Timeout occurred while executing the test")
     assert cm.component.telescope_health_state == HealthState.OK
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.skip("Needs update in helper devices")
 def set_device_degraded(devFactory, cm, expected_elapsed_time):
     proxy = devFactory.get_device("low-mccs/control/control")
@@ -78,7 +96,13 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.skip("Needs update in helper devices")
 def test_set_health_state_degraded(tango_context):
     devFactory = DevFactory()
@@ -88,7 +112,13 @@ def test_set_health_state_degraded(tango_context):
     set_device_degraded(devFactory, cm, 1.5)
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.skip("Needs update in helper devices")
 def test_set_health_state_degraded_only_events(tango_context):
     devFactory = DevFactory()
@@ -115,7 +145,13 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.skip("Needs update in helper devices")
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
@@ -125,7 +161,13 @@ def test_set_health_state_failed(tango_context):
     set_failed(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.skip("Needs update in helper devices")
 def test_set_health_state_failed_only_events(tango_context):
     devFactory = DevFactory()
@@ -149,7 +191,13 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=1.5):
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.skip("Needs update in helper devices")
 def test_set_health_state_unknown(tango_context):
     devFactory = DevFactory()

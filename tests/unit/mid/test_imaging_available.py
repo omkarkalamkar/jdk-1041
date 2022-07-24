@@ -56,7 +56,13 @@ def test_imaging_available(tango_context):
     # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     assert cm.component.imaging == ModesAvailability.available
 
+<<<<<<< HEAD
+=======
 
+<<<<<<< HEAD
+=======
+>>>>>>> f8a4331ef6c7de1fc583f8fd5f5aa61da763b343
+>>>>>>> 08d5dc2f51d583de799db703063d80f9e3a6306a
 @pytest.mark.xfail(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
