@@ -13,7 +13,6 @@ from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
@@ -26,6 +25,9 @@ from ska_tmc_centralnode.manager.aggregators import (
     TMCOpStateAggregator,
 )
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
+from ska_tmc_common.tmc_component_manager import (
+    TmcComponentManager,
+)
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
@@ -91,7 +93,7 @@ class CNComponentManager(TmcComponentManager):
             _input_parameter=self._input_parameter,
             logger=self.logger,
             _component=self._component,
-            _event_receiver=True,
+            _event_receiver=False,
             _liveliness_probe=_liveliness_probe,
             communication_state_callback=None,
             component_state_callback=None,
@@ -145,9 +147,8 @@ class CNComponentManager(TmcComponentManager):
         pass
 
     def stop(self):
-        self._liveliness_probe.stop()
+        self.stop_liveliness_probe()
         self._event_receiver.stop()
-        self._command_executor.stop()
 
     def set_aggregators(
         self,
@@ -208,17 +209,7 @@ class CNComponentManager(TmcComponentManager):
                 continue
         return result
 
-    @property
-    def command_in_progress(self):
-        return self._command_executor.command_in_progress
 
-    @property
-    def command_executor(self):
-        return self._command_executor
-
-    @property
-    def command_executed(self):
-        return self._command_executor._command_executed
 
     def get_device(self, dev_name):
         """
@@ -563,7 +554,7 @@ class CNComponentManager(TmcComponentManager):
         :return: a result code and message
         """
         telescopoff_command = TelescopeOff(
-            self, adapter_factory=None, logger=self.logger
+            self, adapter_factory=AdapterFactory(), logger=self.logger
         )
 
         task_status, responce = self.submit_task(
@@ -594,7 +585,7 @@ class CNComponentManager(TmcComponentManager):
             ]:
                 raise CommandNotAllowed(
                     "Command is not allowed in current state %s",
-                    self.op_state_model.op_state,
+                    str(self.op_state_model.op_state),
                 )
             if isinstance(self._input_parameter, InputParameterMid):
                 self.logger.debug("Checking mid devices, as responsive or not")

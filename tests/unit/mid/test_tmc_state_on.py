@@ -53,7 +53,7 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
     )
     ensure_tmc_op_state(cm, tango.DevState.ON, expected_elapsed_time)
 
-
+@pytest.mark.skip
 def test_tmc_state_on(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
@@ -62,7 +62,7 @@ def test_tmc_state_on(tango_context):
     )  # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     assert cm.component.tmc_op_state == tango.DevState.ON
 
-
+@pytest.mark.skip
 def test_tmc_state_on_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, False, True)

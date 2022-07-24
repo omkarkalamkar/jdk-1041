@@ -5,7 +5,7 @@ from tango.test_utils import DeviceTestContext
 from ska_tmc_centralnode.central_node_mid import CentralNodeMid
 
 
-# @pytest.fixture
+@pytest.fixture
 def central_node_device(request):
     """Create DeviceProxy for tests"""
     true_context = request.config.getoption("--true-context")
@@ -22,7 +22,7 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.xfail
+@pytest.mark.off
 def test_commands(central_node_device):
     try:
         central_node_device.TelescopeOn()
