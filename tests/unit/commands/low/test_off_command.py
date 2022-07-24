@@ -86,8 +86,8 @@ def test_low_telescope_off_command_fail_mccs(tango_context):
     time.sleep(0.1)
     assert (
         task_callback.status == TaskStatus.FAILED
-        or 
-        task_callback.status==TaskStatus.IN_PROGRESS)
+        or task_callback.status == TaskStatus.IN_PROGRESS
+    )
 
 
 @pytest.mark.off

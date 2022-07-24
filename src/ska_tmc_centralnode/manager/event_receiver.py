@@ -1,5 +1,4 @@
 import tango
-
 from ska_tmc_common.event_receiver import EventReceiver
 
 

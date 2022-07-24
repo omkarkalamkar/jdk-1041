@@ -36,6 +36,7 @@ def devices_to_load():
         },
     )
 
+
 @pytest.mark.xfail(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )

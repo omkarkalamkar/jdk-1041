@@ -40,6 +40,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     )
     ensure_tmc_op_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
+
 @pytest.mark.skip("Needs update in helper devices")
 def test_tmc_state_init(tango_context):
     # import debugpy; debugpy.debug_this_thread()
@@ -49,6 +50,7 @@ def test_tmc_state_init(tango_context):
     )
     set_device_init(devFactory, cm, 1.5)
     assert cm.component.tmc_op_state == tango.DevState.INIT
+
 
 @pytest.mark.skip("Needs update in helper devices")
 def test_tmc_state_init_only_events(tango_context):
@@ -72,6 +74,7 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     )
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
+
 @pytest.mark.skip("Needs update in helper devices")
 def test_tmc_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
@@ -80,6 +83,7 @@ def test_tmc_state_fault_over_standby(tango_context):
     )
     set_one_device_fault(devFactory, cm, 2)
     assert cm.component.tmc_op_state == tango.DevState.FAULT
+
 
 @pytest.mark.skip("Needs update in helper devices")
 def test_tmc_state_fault_over_standby_only_events(tango_context):
