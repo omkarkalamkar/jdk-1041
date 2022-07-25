@@ -36,7 +36,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_low_telescope_off_command(tango_context):
@@ -57,7 +57,7 @@ def test_low_telescope_off_command(tango_context):
         adapter.proxy.Off.assert_called_once_with()
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_low_telescope_off_command_fail_subarray(tango_context):
@@ -83,7 +83,7 @@ def test_low_telescope_off_command_fail_subarray(tango_context):
     assert failing_dev in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_low_telescope_off_command_fail_mccs(tango_context):
@@ -108,7 +108,7 @@ def test_low_telescope_off_command_fail_mccs(tango_context):
     assert failing_dev in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_low_telescope_off_fail_check_allowed(tango_context):
