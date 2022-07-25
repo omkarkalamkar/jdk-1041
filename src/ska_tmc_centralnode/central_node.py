@@ -133,7 +133,6 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("commandInProgress", True, False)
 
             self._device.op_state_model.perform_action("component_on")
-            self.component_manager = self.create_component_manager()
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
@@ -531,7 +530,6 @@ class AbstractCentralNode(TMCBaseDevice):
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=self.update_imaging_callback,
-            _update_command_in_progress_callback=self.update_command_in_progress_callback,
             communication_state_changed_callback=None,
             component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,

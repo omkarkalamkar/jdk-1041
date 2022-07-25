@@ -112,7 +112,6 @@ class CentralNodeLow(AbstractCentralNode):
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=None,
-            _update_command_in_progress_callback=self.update_command_in_progress_callback,
             communication_state_changed_callback=None,
             component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,
