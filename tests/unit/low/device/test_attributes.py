@@ -37,8 +37,9 @@ def test_attributes(central_node_device):
     assert central_node_device.HealthState == HealthState.UNKNOWN
 
     assert (
-        central_node_device.State() == DevState.UNKNOWN
-        or central_node_device.State() == DevState.ON
+        central_node_device.State()
+        == DevState.UNKNOWN
+        #  central_node_device.State() == DevState.ON
     )
 
     assert central_node_device.telescopeHealthState == HealthState.UNKNOWN
