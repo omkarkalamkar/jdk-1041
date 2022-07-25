@@ -130,7 +130,6 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("telescopeState", True, False)
             self._device.set_change_event("LastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
-            self._device.set_change_event("commandInProgress", True, False)
 
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
@@ -569,14 +568,3 @@ class AbstractCentralNode(TMCBaseDevice):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        for (command_name, method_name) in [("TelescopeOn", "telescope_on")]:
-            self.register_command_object(
-                command_name,
-                SubmittedSlowCommand(
-                    command_name,
-                    self._command_tracker,
-                    self.component_manager,
-                    method_name,
-                    logger=None,
-                ),
-            )
