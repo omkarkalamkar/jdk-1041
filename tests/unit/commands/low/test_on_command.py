@@ -30,6 +30,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.long_running
 def test_low_telescope_on_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -45,6 +46,7 @@ def test_low_telescope_on_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
+@pytest.mark.long_running
 def test_low_telescope_on_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -63,6 +65,7 @@ def test_low_telescope_on_command_fail_subarray(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
+@pytest.mark.long_running
 def test_low_telescope_on_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))

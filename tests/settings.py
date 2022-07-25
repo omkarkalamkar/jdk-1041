@@ -56,7 +56,6 @@ def create_cm(
         op_state_model,
         logger=logger,
         _input_parameter=input_parameter,
-        _event_receiver=p_event_receiver,
     )
     if isinstance(input_parameter, InputParameterMid):
         DEVICE_LIST = DEVICE_LIST_MID

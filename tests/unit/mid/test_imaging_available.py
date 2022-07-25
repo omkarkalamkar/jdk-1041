@@ -52,19 +52,3 @@ def test_imaging_available(tango_context):
     ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=12)
     # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     assert cm.component.imaging == ModesAvailability.available
-
-
-def test_imaging_available_only_events(tango_context):
-    cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_devices_state(
-        devices=[
-            "mid_csp/elt/master",
-            "mid_d0001/elt/master",
-        ],
-        devFactory=DevFactory(),
-        state=tango.DevState.ON,
-        cm=cm,
-        expected_elapsed_time=2,
-    )
-    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=2)
-    assert cm.component.imaging == ModesAvailability.available

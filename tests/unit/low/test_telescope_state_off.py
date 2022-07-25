@@ -34,6 +34,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.long_running
 def test_telescope_state_off(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
@@ -43,18 +44,5 @@ def test_telescope_state_off(tango_context):
         devFactory=DevFactory(),
         state=tango.DevState.OFF,
     )
-    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=1.5)
-    assert cm.component.telescope_state == tango.DevState.OFF
-
-
-def test_telescope_state_off_only_events(tango_context):
-    cm = create_cm_no_faulty_devices(
-        tango_context, False, True, InputParameterLow(None)
-    )
-    set_device_state(
-        "low-mccs/control/control",
-        devFactory=DevFactory(),
-        state=tango.DevState.OFF,
-    )
-    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=2)
+    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=12)
     assert cm.component.telescope_state == tango.DevState.OFF

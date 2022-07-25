@@ -30,6 +30,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.long_running
 def test_aggregation_default(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)

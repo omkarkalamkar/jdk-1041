@@ -52,13 +52,6 @@ def test_telescope_state_init(tango_context):
     assert cm.component.telescope_state == tango.DevState.INIT
 
 
-def test_telescope_state_init_only_events(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_device_init(devFactory, cm, 2)
-    assert cm.component.telescope_state == tango.DevState.INIT
-
-
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     set_device_state("mid_csp/elt/master", tango.DevState.FAULT, devFactory)
     set_device_state("mid_sdp/elt/master", tango.DevState.STANDBY, devFactory)
@@ -70,13 +63,6 @@ def test_telescope_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_one_device_fault(devFactory, cm, 1.5)
-    assert cm.component.telescope_state == tango.DevState.FAULT
-
-
-def test_telescope_state_fault_over_standby_only_events(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_one_device_fault(devFactory, cm, 2)
     assert cm.component.telescope_state == tango.DevState.FAULT
 
 
@@ -93,11 +79,4 @@ def test_telescope_state_standby(tango_context):
     set_device_standby(
         devFactory, cm, 12
     )  # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
-    assert cm.component.telescope_state == tango.DevState.STANDBY
-
-
-def test_telescope_state_standby_only_events(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_device_standby(devFactory, cm, 2)
     assert cm.component.telescope_state == tango.DevState.STANDBY

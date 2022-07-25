@@ -53,21 +53,3 @@ def test_imaging_not_available(tango_context):
         cm, ModesAvailability.not_available, expected_elapsed_time=1.5
     )
     assert cm.component.imaging == ModesAvailability.not_available
-
-
-def test_imaging_not_available_only_events(tango_context):
-    cm = create_cm_no_faulty_devices(tango_context, False, True)
-    set_devices_state(
-        devices=[
-            "mid_csp/elt/master",
-            "mid_d0001/elt/master",
-        ],
-        devFactory=DevFactory(),
-        state=tango.DevState.OFF,
-        cm=cm,
-        expected_elapsed_time=2,
-    )
-    ensure_imaging(
-        cm, ModesAvailability.not_available, expected_elapsed_time=2
-    )
-    assert cm.component.imaging == ModesAvailability.not_available
