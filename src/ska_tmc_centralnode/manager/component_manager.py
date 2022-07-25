@@ -83,7 +83,7 @@ class CNComponentManager(TmcComponentManager):
             logger,
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
-            _event_receiver=False,
+            _event_receiver=True,
             communication_state_callback=None,
             component_state_callback=None,
             max_workers=5,
