@@ -61,7 +61,6 @@ class CNComponentManager(TmcComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
-        _update_command_in_progress_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
         max_workers=5,
@@ -84,7 +83,7 @@ class CNComponentManager(TmcComponentManager):
             logger,
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
-            _event_receiver=True,
+            _event_receiver=False,
             communication_state_callback=None,
             component_state_callback=None,
             max_workers=5,
@@ -104,6 +103,7 @@ class CNComponentManager(TmcComponentManager):
                 sleep_time=self.sleep_time,
             )
         self.start_event_receiver()
+
         self._component.set_op_callbacks(
             _update_device_callback,
             _update_telescope_state_callback,
@@ -114,6 +114,10 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
+
+    def stop_event_receiver(self):
+        if self.event_receiver:
+            self.event_receiver_object.stop()
 
     def reset(self):
         pass
@@ -127,6 +131,9 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_state_aggregator = _telescope_state_aggregator
         self._health_state_aggregator = _health_state_aggregator
         self._tm_op_state_aggregator = _tm_op_state_aggregator
+
+    def stop(self):
+        self.stop_liveliness_probe()
 
     @property
     def input_parameter(self):
@@ -534,7 +541,7 @@ class CNComponentManager(TmcComponentManager):
             ]:
                 raise CommandNotAllowed(
                     "Command is not allowed in current state %s",
-                    self.op_state_model.op_state,
+                    str(self.op_state_model.op_state),
                 )
             if isinstance(self._input_parameter, InputParameterMid):
                 self.logger.debug("Checking mid devices, as responsive or not")
