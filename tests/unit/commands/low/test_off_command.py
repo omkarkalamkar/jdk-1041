@@ -49,7 +49,7 @@ def test_low_telescope_off_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
-@pytest.mark.skip("--")
+@pytest.mark.off
 def test_low_telescope_off_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -84,10 +84,7 @@ def test_low_telescope_off_command_fail_mccs(tango_context):
     cm.telescope_off(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
     time.sleep(0.1)
-    assert (
-        task_callback.status == TaskStatus.FAILED
-        or task_callback.status == TaskStatus.IN_PROGRESS
-    )
+    assert task_callback.status == TaskStatus.FAILED
 
 
 @pytest.mark.off

@@ -34,7 +34,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.xfail(
+@pytest.mark.off(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_state_off(tango_context):
@@ -50,23 +50,23 @@ def test_telescope_state_off(tango_context):
         cm=cm,
         expected_elapsed_time=1.5,
     )
-    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=1.5)
+    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=12)
     assert cm.component.telescope_state == tango.DevState.OFF
 
 
-@pytest.mark.skip("Needs update in helper devices")
-def test_telescope_state_off_only_events(tango_context):
-    cm = create_cm_no_faulty_devices(
-        tango_context, False, True, InputParameterLow(None)
-    )
-    set_devices_state(
-        devices=[
-            "low-mccs/control/control",
-        ],
-        devFactory=DevFactory(),
-        state=tango.DevState.OFF,
-        cm=cm,
-        expected_elapsed_time=2,
-    )
-    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=2)
-    assert cm.component.telescope_state == tango.DevState.OFF
+# @pytest.mark.offt("Needs update in helper devices")
+# def test_telescope_state_off_only_events(tango_context):
+#     cm = create_cm_no_faulty_devices(
+#         tango_context, False, True, InputParameterLow(None)
+#     )
+#     set_devices_state(
+#         devices=[
+#             "low-mccs/control/control",
+#         ],
+#         devFactory=DevFactory(),
+#         state=tango.DevState.OFF,
+#         cm=cm,
+#         expected_elapsed_time=2,
+#     )
+#     ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=2)
+#     assert cm.component.telescope_state == tango.DevState.OFF

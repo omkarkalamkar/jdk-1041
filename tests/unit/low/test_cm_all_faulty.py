@@ -48,8 +48,8 @@ def devices_to_load():
     )
 
 
-@pytest.mark.letsmakeitpass
-@pytest.mark.skip("Needs update in helper devices")
+@pytest.mark.off
+# @pytest.mark.skip("Needs update in helper devices")
 def test_all_low_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(

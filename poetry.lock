@@ -232,7 +232,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 
 [[package]]
 name = "importlib-resources"
-version = "5.8.0"
+version = "5.9.0"
 description = "Read resources from Python packages"
 category = "main"
 optional = false
@@ -242,8 +242,8 @@ python-versions = ">=3.7"
 zipp = {version = ">=3.1.0", markers = "python_version < \"3.10\""}
 
 [package.extras]
-docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)"]
-testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
+docs = ["sphinx", "jaraco.packaging (>=9)", "rst.linker (>=1.9)", "jaraco.tidelift (>=1.4)"]
+testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-black (>=0.3.7)", "pytest-mypy (>=0.9.1)"]
 
 [[package]]
 name = "iniconfig"
@@ -882,7 +882,7 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.1.35"
+version = "0.1.36"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
@@ -994,7 +994,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.1,<4.0"
-content-hash = "68636c1bc6d472007a3af858d3b4e820e2a37018a15c5fda3269b4ce281f5ab8"
+content-hash = "928bac4374710a262d83faa7464c61025a511ef0958891e36ec1679171aa959e"
 
 [metadata.files]
 astroid = []
@@ -1378,8 +1378,8 @@ ska-tmc-cdm = [
     {file = "ska_tmc_cdm-6.0.4-py3-none-any.whl", hash = "md5:c9a0f2146842bad30ed1ff2ff957c102"},
 ]
 ska-tmc-common = [
-    {file = "ska-tmc-common-0.1.35.tar.gz", hash = "md5:65d0c9407436a002626eda792bd3d15b"},
-    {file = "ska_tmc_common-0.1.35-py3-none-any.whl", hash = "md5:2e0633c36d459cdd25e6e0eaf3c1442a"},
+    {file = "ska-tmc-common-0.1.36.tar.gz", hash = "md5:068ea5e22788c3d6fed06a12c596fde4"},
+    {file = "ska_tmc_common-0.1.36-py3-none-any.whl", hash = "md5:a38b3929b5998abb065dd9b8c1e2ac08"},
 ]
 termcolor = [
     {file = "termcolor-1.1.0.tar.gz", hash = "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"},

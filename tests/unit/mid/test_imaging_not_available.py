@@ -37,7 +37,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.xfail(
+@pytest.mark.off(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_imaging_not_available(tango_context):
@@ -58,6 +58,7 @@ def test_imaging_not_available(tango_context):
     assert cm.component.imaging == ModesAvailability.not_available
 
 
+@pytest.mark.off
 def test_imaging_not_available_only_events(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, False, True)
     set_devices_state(

@@ -16,8 +16,8 @@ from tests.settings import (
 )
 
 
-@pytest.mark.refactor_telescopeon
-@pytest.mark.skip
+@pytest.mark.off
+# @pytest.mark.skip
 def test_all_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
