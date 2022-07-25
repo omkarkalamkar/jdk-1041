@@ -100,7 +100,7 @@ def test_set_health_state_failed(tango_context):
     assert cm.component.telescope_health_state == HealthState.FAILED
 
 
-def set_device_unknown(devFactory, cm, expected_elapsed_time=1.5):
+def set_device_unknown(devFactory, cm, expected_elapsed_time=12):
     proxy = devFactory.get_device("low-mccs/control/control")
     proxy.SetDirectHealthState(HealthState.UNKNOWN)
     assert proxy.HealthState == HealthState.UNKNOWN

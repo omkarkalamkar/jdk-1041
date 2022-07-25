@@ -48,7 +48,7 @@ def test_tmc_state_init(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_init(devFactory, cm, 1.5)
+    set_device_init(devFactory, cm, 12)
     assert cm.component.tmc_op_state == tango.DevState.INIT
 
 
