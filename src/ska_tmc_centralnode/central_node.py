@@ -96,9 +96,6 @@ class AbstractCentralNode(TMCBaseDevice):
         self.logger.info("telescopeState %s", telescope_state)
         self.push_change_event("telescopeState", telescope_state)
 
-    def update_command_in_progress_callback(self, command_in_progress):
-        self.push_change_event("commandInProgress", command_in_progress)
-
     def update_telescope_health_state_callback(self, telescope_health_state):
         self.push_change_event("telescopeHealthState", telescope_health_state)
 
@@ -136,6 +133,7 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("commandInProgress", True, False)
 
             self._device.op_state_model.perform_action("component_on")
+            self.component_manager = self.create_component_manager()
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
@@ -219,10 +217,8 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes TelescopeOn() command on DishLeadNode, CspMasterLeafNode,
         SdpMasterLeafNode.
         """
-        self.log_state("Device states before executing Telescope On command")
         handler = self.get_command_object("TelescopeOn")
         result_code, unique_id = handler()
-        self.log_state("Device states after  executing Telescope On command")
         return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring
@@ -344,10 +340,8 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
         SdpMasterLeafNode.
         """
-        self.log_state("Device states before executing On command")
         handler = self.get_command_object("On")
         result_code, unique_id = handler()
-        self.log_state("Device states before executing On command")
         return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring

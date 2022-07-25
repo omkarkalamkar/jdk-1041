@@ -96,6 +96,14 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
 
+        if self.event_receiver:
+            self.event_receiver_object = CentralNodeEventReceiver(
+                self,
+                logger=self.logger,
+                proxy_timeout=self.proxy_timeout,
+                sleep_time=self.sleep_time,
+            )
+        self.start_event_receiver()
         self._component.set_op_callbacks(
             _update_device_callback,
             _update_telescope_state_callback,
@@ -106,21 +114,6 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
-
-    def start_event_receiver(self):
-        """Starts the Event Receiver for given device"""
-        if self.event_receiver:
-            self.event_receiver_object = CentralNodeEventReceiver(
-                self,
-                logger=self.logger,
-                proxy_timeout=self.proxy_timeout,
-                sleep_time=self.sleep_time,
-            )
-            self.event_receiver_object.start()
-
-    def stop_event_receiver(self):
-        """Stops the Event Receiver"""
-        self.event_receiver_object.stop()
 
     def reset(self):
         pass
