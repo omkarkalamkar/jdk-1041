@@ -39,9 +39,10 @@ def devices_to_load():
     )
 
 
+@pytest.mark.off
+# @pytest.mark.skip("Needs update in helper devices")
 def test_low_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
-
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
         op_state_model, _input_parameter=InputParameterLow(None), logger=logger

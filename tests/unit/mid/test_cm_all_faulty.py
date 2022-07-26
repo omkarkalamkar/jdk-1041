@@ -16,10 +16,12 @@ from tests.settings import (
 )
 
 
+@pytest.mark.off
+# @pytest.mark.skip
 def test_all_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
+        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     cm.add_multiple_devices(DEVICE_LIST_MID)

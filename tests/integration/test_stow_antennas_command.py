@@ -11,7 +11,9 @@ from tests.integration.common import (  # noqa F401
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-# @pytest.mark.xfail(reason="Need to debug")
+@pytest.mark.xfail(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_stow_antennas_command(tango_context):

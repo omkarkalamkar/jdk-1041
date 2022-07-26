@@ -38,6 +38,8 @@ def devices_to_load():
     )
 
 
+@pytest.mark.off
+# @pytest.mark.skip
 def test_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
 

@@ -34,11 +34,13 @@ def devices_to_load():
     )
 
 
+@pytest.mark.off
+# @pytest.mark.skip
 def test_one_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
+        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     for dev in DEVICE_LIST_MID:

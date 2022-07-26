@@ -13,7 +13,7 @@ from ska_tmc_centralnode.model.input import (
 logger = logging.getLogger(__name__)
 
 SLEEP_TIME = 0.5
-TIMEOUT = 10
+TIMEOUT = 15
 
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
@@ -47,7 +47,7 @@ def count_faulty_devices(cm):
 
 
 def create_cm(
-    p_monitoring_loop=True,
+    p_liveliness_probe=False,
     p_event_receiver=True,
     input_parameter=InputParameterMid(None),
 ):
@@ -56,10 +56,8 @@ def create_cm(
         op_state_model,
         logger=logger,
         _input_parameter=input_parameter,
-        _monitoring_loop=p_monitoring_loop,
         _event_receiver=p_event_receiver,
     )
-
     if isinstance(input_parameter, InputParameterMid):
         DEVICE_LIST = DEVICE_LIST_MID
     else:
@@ -69,10 +67,10 @@ def create_cm(
         cm.add_device(dev)
     start_time = time.time()
     num_devices = len(DEVICE_LIST)
-    if not p_monitoring_loop:
+    if not p_liveliness_probe:
         return cm, start_time
     while num_devices != len(cm.checked_devices):
-        time.sleep(SLEEP_TIME)
+        time.sleep(0.2)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
@@ -82,7 +80,7 @@ def create_cm(
 
 def create_cm_no_faulty_devices(
     tango_context,
-    p_monitoring_loop,
+    p_liveliness_probe,
     p_event_receiver,
     input_parameter=InputParameterMid(None),
 ):
@@ -91,9 +89,8 @@ def create_cm_no_faulty_devices(
         input_parameter = InputParameterMid(None)
     else:
         input_parameter = InputParameterLow(None)
-
     cm, start_time = create_cm(
-        p_monitoring_loop, p_event_receiver, input_parameter
+        p_liveliness_probe, p_event_receiver, input_parameter
     )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
@@ -139,10 +136,12 @@ def set_devices_state(devices, state, devFactory, cm, expected_elapsed_time):
     for device in devices:
         proxy = devFactory.get_device(device)
         proxy.SetDirectState(state)
+        time.sleep(0.1)
         assert proxy.State() == state
 
 
 def set_device_state(device, state, devFactory):
     proxy = devFactory.get_device(device)
     proxy.SetDirectState(state)
+    time.sleep(0.1)
     assert proxy.State() == state

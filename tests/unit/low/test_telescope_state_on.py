@@ -6,10 +6,6 @@ from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
 )
 
 from ska_tmc_centralnode.model.input import InputParameterLow
-
-# from ska_tmc_common.test_helpers.helper_subarray_device import (
-#     HelperSubArrayDevice,
-# )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     create_cm_no_faulty_devices,
@@ -51,6 +47,7 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
     ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=1.5)
 
 
+@pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_on(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -60,15 +57,7 @@ def test_telescope_state_on(tango_context):
     assert cm.component.telescope_state == tango.DevState.ON
 
 
-def test_telescope_state_on_only_monitoring_loop(tango_context):
-    devFactory = DevFactory()
-    cm = create_cm_no_faulty_devices(
-        tango_context, True, False, InputParameterLow(None)
-    )
-    set_devices_on(cm, devFactory, 1.5)
-    assert cm.component.telescope_state == tango.DevState.ON
-
-
+@pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_on_only_events(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(

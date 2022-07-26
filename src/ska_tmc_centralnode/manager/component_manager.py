@@ -6,15 +6,18 @@ package.
 """
 import threading
 import time
+from typing import Callable
 
-from ska_tango_base.base import BaseComponentManager
 from ska_tango_base.control_model import ObsState
-from ska_tmc_common.command_executor import CommandExecutor
+from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
-from ska_tmc_common.event_receiver import EventReceiver
+from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
+from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     HealthStateAggregatorMid,
@@ -22,9 +25,7 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
-from ska_tmc_centralnode.manager.monitoring_loop import (
-    CentralNodeMonitoringLoop,
-)
+from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
@@ -33,7 +34,7 @@ from ska_tmc_centralnode.model.input import (
 )
 
 
-class CNComponentManager(BaseComponentManager):
+class CNComponentManager(TmcComponentManager):
     """
     A component manager for The Central Node component.
 
@@ -55,14 +56,16 @@ class CNComponentManager(BaseComponentManager):
         _input_parameter,
         logger=None,
         _component=None,
+        _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
+        _event_receiver=True,
         _update_device_callback=None,
         _update_telescope_state_callback=None,
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
         _update_command_in_progress_callback=None,
-        _monitoring_loop=True,
-        _event_receiver=True,
+        communication_state_callback=None,
+        component_state_callback=None,
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
@@ -72,8 +75,6 @@ class CNComponentManager(BaseComponentManager):
         """
         Initialise a new ComponentManager instance.
 
-        :param op_state_model: the op state model used by this component
-            manager
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
@@ -81,25 +82,50 @@ class CNComponentManager(BaseComponentManager):
         self.logger = logger
         self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
+        self._input_parameter = _input_parameter
+        self.op_state_model = op_state_model
 
-        self._monitoring_loop = None
-        if _monitoring_loop:
-            self._monitoring_loop = CentralNodeMonitoringLoop(
-                self,
-                logger,
-                max_workers=max_workers,
-                proxy_timeout=proxy_timeout,
-                sleep_time=sleep_time,
-            )
+        self.adapter_factory = AdapterFactory()
+
+        super().__init__(
+            _input_parameter=self._input_parameter,
+            logger=self.logger,
+            _component=self._component,
+            _event_receiver=False,
+            _liveliness_probe=_liveliness_probe,
+            communication_state_callback=None,
+            component_state_callback=None,
+            max_workers=5,
+            proxy_timeout=500,
+            sleep_time=1,
+            *args,
+            **kwargs,
+        )
+
+        # self._liveliness_probe = None
+        # if _liveliness_probe:
+        #     self._liveliness_probe = MultiDeviceLivelinessProbe(
+        #         self,
+        #         logger,
+        #         max_workers=max_workers,
+        #         proxy_timeout=proxy_timeout,
+        #         sleep_time=sleep_time,
+        #     )
+        #     self._liveliness_probe.start()
+        # else:
+        #     self.logger.warning("Liveliness Probe is not running")
 
         self._event_receiver = None
         if _event_receiver:
-            self._event_receiver = EventReceiver(
+            self._event_receiver = CentralNodeEventReceiver(
                 self,
                 logger,
                 proxy_timeout=proxy_timeout,
                 sleep_time=sleep_time,
             )
+            self._event_receiver.start()
+        else:
+            self.logger.warning("Event Receiver is not running")
 
         self._component.set_op_callbacks(
             _update_device_callback,
@@ -109,32 +135,18 @@ class CNComponentManager(BaseComponentManager):
             _update_imaging_callback,
         )
 
-        super().__init__(op_state_model, *args, **kwargs)
-
-        if _monitoring_loop:
-            self._monitoring_loop.start()
-
-        if _event_receiver:
-            self._event_receiver.start()
-
-        self._input_parameter = _input_parameter
-
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
-        self._command_executor = CommandExecutor(
-            logger,
-            _update_command_in_progress_callback=_update_command_in_progress_callback,
-        )
+        # TODO: This can be done as a part of CommandExecutor refactor separate story
 
     def reset(self):
         pass
 
     def stop(self):
-        self._monitoring_loop.stop()
+        self.stop_liveliness_probe()
         self._event_receiver.stop()
-        self._command_executor.stop()
 
     def set_aggregators(
         self,
@@ -173,7 +185,7 @@ class CNComponentManager(BaseComponentManager):
 
         :return: list of the monitored devices
         """
-        return self._component.devices
+        return self._component._devices
 
     @property
     def checked_devices(self):
@@ -183,7 +195,7 @@ class CNComponentManager(BaseComponentManager):
         :return: list of the checked monitored devices
         """
         result = []
-        for dev in self.component.devices:
+        for dev in self.component._devices:
             if dev.unresponsive:
                 result.append(dev)
                 continue
@@ -195,25 +207,13 @@ class CNComponentManager(BaseComponentManager):
                 continue
         return result
 
-    @property
-    def command_in_progress(self):
-        return self._command_executor.command_in_progress
-
-    @property
-    def command_executor(self):
-        return self._command_executor
-
-    @property
-    def command_executed(self):
-        return self._command_executor._command_executed
-
     def get_device(self, dev_name):
         """
         Return the device info our of the monitoring loop with name dev_name
 
         :param dev_name: name of the device
         :type dev_name: str
-        :return: a device info
+        :return: a device info1 failed
         :rtype: DeviceInfo
         """
         return self.component.get_device(dev_name)
@@ -294,7 +294,6 @@ class CNComponentManager(BaseComponentManager):
             devInfo = SubArrayDeviceInfo(dev_name, False)
         else:
             devInfo = DeviceInfo(dev_name, False)
-
         self.component.update_device(devInfo)
 
     def update_input_parameter(self):
@@ -318,22 +317,6 @@ class CNComponentManager(BaseComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
-
-    def update_device_info(self, device_info):
-        """
-        Update a device with correct monitoring information
-        and call the relative callback if available
-
-        :param device_info: a device info
-        :type device_info: DeviceInfo
-        """
-        with self.lock:
-            self.component.update_device(device_info)
-
-        self._aggregate_health_state()
-        self._aggregate_state()
-        if isinstance(self.input_parameter, InputParameterMid):
-            self._update_imaging()
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -389,7 +372,21 @@ class CNComponentManager(BaseComponentManager):
             devInfo.obs_state = obs_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
-            self._update_resources(devInfo)
+
+    def update_device_assigned_resource(self, dev_name, assign_resources):
+        """
+        Update assign_resources for a monitored device
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param assign_resources: assign_resources
+        :type assign_resources: str
+        """
+        with self.lock:
+            dev_info = self.component.get_device(dev_name)
+            dev_info.resources = assign_resources
+            dev_info.last_event_arrived = time.time()
+            dev_info.update_unresponsive(False)
 
     def is_already_assigned(self, dishId):
         """
@@ -479,6 +476,7 @@ class CNComponentManager(BaseComponentManager):
     def get_tmc_op_state(self):
         return self.component.tmc_op_state
 
+    # TODO: Kept it for reference. Not getting called anywhere.
     def _update_resources(self, subarray_dev_info):
         """
         Updates resources for a subarray
@@ -487,10 +485,8 @@ class CNComponentManager(BaseComponentManager):
         :param subarray_dev_name: name of the subarray device
         :type subarray_dev_name: str
         """
-        if self._monitoring_loop is not None:
-            self._monitoring_loop.add_priority_devices(
-                subarray_dev_info.dev_name
-            )
+        if self._liveliness_probe is not None:
+            self._liveliness_probe.add_device(subarray_dev_info.dev_name)
         else:
             # If the monitoring loop is not active
             # I must assume that the subarray is reporting the correct value
@@ -529,3 +525,75 @@ class CNComponentManager(BaseComponentManager):
                 self.component.imaging = ModesAvailability.available
             else:
                 self.component.imaging = ModesAvailability.not_available
+
+    def telescope_on(self, task_callback: Callable = None):
+        """
+        Turn the Telescope On.
+
+        :return: a result code and message
+        """
+        telescopon_command = TelescopeOn(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, responce = self.submit_task(
+            telescopon_command.telescope_on,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, responce
+
+    def telescope_off(self, task_callback: Callable = None):
+        """
+        Turn the Telescope Off.
+
+        :return: a result code and message
+        """
+        telescopoff_command = TelescopeOff(
+            self, adapter_factory=AdapterFactory(), logger=self.logger
+        )
+
+        task_status, responce = self.submit_task(
+            telescopoff_command.telescope_off,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, responce
+
+    def is_command_allowed(self, command_name=None):
+        """
+        Checks whether this command is allowed
+        It checks that the device is in a state
+        to perform this command and that all the
+        component needed for the operation are not unresponsive
+
+        :param command_name: name of the command
+        :type command_name: str
+        :return: True if this command is allowed
+
+        :rtype: boolean
+        """
+        if command_name in ["TelescopeOn", "TelescopeOff"]:
+            if self.op_state_model.op_state in [
+                DevState.FAULT,
+                DevState.UNKNOWN,
+                DevState.DISABLE,
+            ]:
+                raise CommandNotAllowed(
+                    "Command is not allowed in current state %s",
+                    str(self.op_state_model.op_state),
+                )
+            if isinstance(self._input_parameter, InputParameterMid):
+                self.logger.debug("Checking mid devices, as responsive or not")
+                self.check_if_csp_mln_is_responsive()
+                self.check_if_sdp_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
+                self.check_if_dishes_are_responsive()
+            else:
+                self.logger.debug("Checking low devices, as responsive or not")
+                self.check_if_mccs_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
+        else:
+            self.logger.info("Condition other than TelescopeOn/Off")
+
+        return True

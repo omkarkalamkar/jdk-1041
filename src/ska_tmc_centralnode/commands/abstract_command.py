@@ -10,23 +10,13 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class CentralNodeCommand(TMCCommand):
-    def __init__(self, target, *args, logger=None, **kwargs):
-        super().__init__(target, args, logger, kwargs)
-
-    def check_allowed(self):
-        component_manager = self.target
-
-        if isinstance(component_manager.input_parameter, InputParameterMid):
-            result = self.check_allowed_mid()
-        else:
-            result = self.check_allowed_low()
-
-        return result
+    def __init__(self, component_manager, *args, logger=None, **kwargs):
+        super().__init__(component_manager, logger=logger, *args, **kwargs)
 
     def init_adapters(self):
-        component_manager = self.target
-
-        if isinstance(component_manager.input_parameter, InputParameterMid):
+        if isinstance(
+            self.component_manager.input_parameter, InputParameterMid
+        ):
             result, message = self.init_adapters_mid()
         else:
             result, message = self.init_adapters_low()
@@ -34,9 +24,9 @@ class CentralNodeCommand(TMCCommand):
         return result, message
 
     def do(self, argin=None):
-        component_manager = self.target
-
-        if isinstance(component_manager.input_parameter, InputParameterMid):
+        if isinstance(
+            self.component_manager.input_parameter, InputParameterMid
+        ):
             result = self.do_mid(argin)
         else:
             result = self.do_low(argin)
@@ -79,113 +69,47 @@ class CentralNodeCommand(TMCCommand):
 class AbstractTelescopeOnOff(CentralNodeCommand):
     def __init__(
         self,
-        target,
-        pop_state_model,
+        component_manager,
         adapter_factory=None,
         *args,
         logger=None,
         **kwargs,
     ):
-        super().__init__(target, args, logger, kwargs)
-        self.op_state_model = pop_state_model
+        super().__init__(component_manager, logger=logger, *args, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
 
-    def check_allowed_mid(self):
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :return: True if this command is allowed
-
-        :rtype: boolean
-
-        """
-        component_manager = self.target
-
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "TelescopeOnOff() is not allowed in current state %s",
-                self.op_state_model.op_state,
-            )
-
-        # for this command I need a number of sub-devices
-        # import debugpy; debugpy.debug_this_thread()
-        component_manager.check_if_csp_mln_is_responsive()
-        component_manager.check_if_sdp_mln_is_responsive()
-        component_manager.check_if_subarrays_are_responsive()
-        component_manager.check_if_dishes_are_responsive()
-
-        return True
-
-    def check_allowed_low(self):
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :return: True if this command is allowed
-
-        :rtype: boolean
-
-        """
-        component_manager = self.target
-
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "TelescopeOnOff() is not allowed in current state %s",
-                self.op_state_model.op_state,
-            )
-
-        component_manager.check_if_mccs_mln_is_responsive()
-        component_manager.check_if_subarrays_are_responsive()
-
-        return True
-
     def init_adapters_mid(self):
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
         self.tm_subarray_adapters = []
         self.tm_dish_adapters = []
-        component_manager = self.target
-
         try:
             self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
-                component_manager.input_parameter.tm_leaf_csp_master_dev_name
+                self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_csp_master_adapter}"
+                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_csp_master_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                component_manager.input_parameter.tm_leaf_csp_master_dev_name,
+                self.component_manager.input_parameter.tm_leaf_csp_master_dev_name,
                 e,
             )
 
         try:
             self.tm_leaf_sdp_master_adapter = self._adapter_factory.get_or_create_adapter(
-                component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+                self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for SDP Master Leaf Node {component_manager.input_parameter.tm_leaf_sdp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
+                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                component_manager.input_parameter.tm_leaf_sdp_master_dev_name,
+                self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name,
                 e,
             )
 
@@ -194,8 +118,8 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         for (
             dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
@@ -219,8 +143,10 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         error_dev_names = []
         num_working = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.tm_dish_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     # import debugpy; debugpy.debug_this_thread()
@@ -250,18 +176,14 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
     def init_adapters_low(self):
         self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
-        component_manager = self.target
-
         try:
-            self.tm_leaf_mccs_master_adapter = (
-                self._adapter_factory.get_or_create_adapter(
-                    component_manager.input_parameter.mccs_master_leaf_node,
-                    AdapterType.MCCS,
-                )
+            self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.mccs_master_leaf_node,
+                AdapterType.MCCS,
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                component_manager.input_parameter.mccs_master_leaf_node,
+                self.component_manager.input_parameter.mccs_master_leaf_node,
                 e,
             )
 
@@ -270,8 +192,8 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         for (
             dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
@@ -293,6 +215,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
 
+# TODO: Refactor below class as a part of Assign-Release Resources command story
 class AbstractAssignReleaseResources(CentralNodeCommand):
     def __init__(
         self,
@@ -320,7 +243,6 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         :raises: DevFailed if this command is not allowed to be run in current device state
 
         """
-        component_manager = self.target
 
         if self.op_state_model.op_state in [
             DevState.FAULT,
@@ -331,8 +253,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                 "AssignReleaseResources() is not allowed in current state %s",
                 self.op_state_model.op_state,
             )
-        component_manager.check_if_subarrays_are_responsive()
-        component_manager.check_if_dishes_are_responsive()
+        self.component_manager.check_if_subarrays_are_responsive()
+        self.component_manager.check_if_dishes_are_responsive()
 
         return True
 
@@ -347,7 +269,6 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         :raises: DevFailed if this command is not allowed to be run in current device state
 
         """
-        component_manager = self.target
 
         if self.op_state_model.op_state in [
             DevState.FAULT,
@@ -359,8 +280,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                 self.op_state_model.op_state,
             )
 
-        component_manager.check_if_mccs_mln_is_responsive()
-        component_manager.check_if_subarrays_are_responsive()
+        self.component_manager.check_if_mccs_mln_is_responsive()
+        self.component_manager.check_if_subarrays_are_responsive()
 
         return True
 
@@ -368,15 +289,14 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
-        component_manager = self.target
 
         error_dev_names = []
         num_working = 0
 
         for (
             dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
@@ -402,8 +322,10 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         error_dev_names = []
         num_working = 0
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.tm_dish_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     self.tm_dish_adapters.append(
@@ -433,18 +355,15 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
-        component_manager = self.target
 
         try:
-            self.tm_leaf_mccs_master_adapter = (
-                self._adapter_factory.get_or_create_adapter(
-                    component_manager.input_parameter.mccs_master_leaf_node,
-                    AdapterType.MCCS,
-                )
+            self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.mccs_master_leaf_node,
+                AdapterType.MCCS,
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                component_manager.input_parameter.mccs_master_leaf_node,
+                self.component_manager.input_parameter.mccs_master_leaf_node,
                 e,
             )
 
@@ -453,8 +372,8 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         for (
             dev_name
-        ) in component_manager.input_parameter.tm_subarray_dev_names:
-            devInfo = component_manager.get_device(dev_name)
+        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     self.tm_subarray_adapters.append(
