@@ -36,14 +36,7 @@ def test_aggregation_default(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     assert cm.component.telescope_state == tango.DevState.UNKNOWN
     assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
-    assert cm.component.telescope_health_state == HealthState.OK
-
-    cm = create_cm_no_faulty_devices(tango_context, False, True)
-    assert cm.component.telescope_state == tango.DevState.UNKNOWN
-    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
-    assert cm.component.telescope_health_state == HealthState.UNKNOWN
-
-    cm = create_cm_no_faulty_devices(tango_context, True, False)
-    assert cm.component.telescope_state == tango.DevState.UNKNOWN
-    assert cm.component.tmc_op_state == tango.DevState.UNKNOWN
-    assert cm.component.telescope_health_state == HealthState.OK
+    assert cm.component.telescope_health_state in [
+        HealthState.UNKNOWN,
+        HealthState.OK,
+    ]

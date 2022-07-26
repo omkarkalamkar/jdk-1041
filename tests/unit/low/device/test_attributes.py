@@ -32,9 +32,13 @@ def central_node_device(request):
             break
 
 
+@pytest.mark.long_running
 def test_attributes(central_node_device):
-    assert central_node_device.HealthState == HealthState.OK
-    assert central_node_device.State() == DevState.ON
+    assert central_node_device.HealthState in [
+        HealthState.UNKNOWN,
+        HealthState.OK,
+    ]
+    assert central_node_device.State() in [DevState.UNKNOWN, DevState.ON]
     assert central_node_device.telescopeHealthState == HealthState.UNKNOWN
     central_node_device.loggingTargets = ["console::cout"]
     assert "console::cout" in central_node_device.loggingTargets
@@ -46,7 +50,6 @@ def test_attributes(central_node_device):
     central_node_device.controlMode = ControlMode.REMOTE
     assert central_node_device.controlMode == ControlMode.REMOTE
     assert central_node_device.desiredTelescopeState == DevState.ON
-    assert central_node_device.commandInProgress == "None"
     assert central_node_device.mccsMasterLeafNodeName == ""
     central_node_device.mccsMasterLeafNodeName = "mccs_master_leaf"
     assert central_node_device.mccsMasterLeafNodeName == "mccs_master_leaf"
@@ -58,9 +61,6 @@ def test_attributes(central_node_device):
     assert central_node_device.mccsMasterNodeName == "mccs"
 
     assert central_node_device.tmOpstate == DevState.UNKNOWN
-    assert len(central_node_device.commandExecuted) == 1  # init
-    assert "Init" in central_node_device.lastCommandExecuted  # init
-    assert "OK" in central_node_device.lastCommandExecuted  # init
     assert len(central_node_device.subarrayDevNames) == 0
     central_node_device.subarrayDevNames = ["subarray1"]
     assert len(central_node_device.subarrayDevNames) == 1

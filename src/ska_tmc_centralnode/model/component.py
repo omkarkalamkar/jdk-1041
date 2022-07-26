@@ -177,7 +177,6 @@ class CentralComponent(TmcComponent):
         else:
             index = self._devices.index(dev_info)
             self._devices[index] = dev_info
-
         self._invoke_device_callback(dev_info)
 
     def update_device_exception(self, dev_info, exception):

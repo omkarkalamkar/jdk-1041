@@ -63,7 +63,8 @@ confidence=
 disable=C,
         R,
         W,
-        I, no-member
+        I, no-member, 
+        redundant-keyword-arg # this will get remove once SAH-1149 is merged
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

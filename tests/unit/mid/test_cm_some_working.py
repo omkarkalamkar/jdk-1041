@@ -43,7 +43,9 @@ def test_some_working_other_faulty(tango_context):
 
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
+        op_state_model,
+        _input_parameter=InputParameterMid(None),
+        logger=logger,
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     for dev in DEVICE_LIST_MID:

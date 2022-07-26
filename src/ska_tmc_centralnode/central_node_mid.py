@@ -3,24 +3,11 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
-from ska_ser_skuid.client import SkuidClient
-from ska_tango_base.commands import ResultCode
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from tango import AttrWriteType
-from tango.server import attribute, command, device_property, run
+from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
-from ska_tmc_centralnode.commands.assign_resources_command import (
-    AssignResources,
-)
-from ska_tmc_centralnode.commands.release_resources_command import (
-    ReleaseResources,
-)
-from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
-from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
-from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
-from ska_tmc_centralnode.commands.telescope_standby_command import (
-    TelescopeStandby,
-)
 from ska_tmc_centralnode.model.enum import ModesAvailability
 
 __all__ = ["CentralNodeMid", "main"]
@@ -161,9 +148,8 @@ class CentralNodeMid(AbstractCentralNode):
             :rtype: (ReturnCode, str)
             """
             super().do()
-            device = self.target
 
-            device.set_change_event("imaging", True, False)
+            self._device.set_change_event("imaging", True, False)
 
             return (ResultCode.OK, "")
 
@@ -263,72 +249,56 @@ class CentralNodeMid(AbstractCentralNode):
         self.component_manager.input_parameter.tm_dish_dev_names = value
         self.component_manager.update_input_parameter()
 
+    # TODO: Not in the scope of PI15
     # --------
     # Commands
     # --------
-    def is_StowAntennas_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state.
+    # def is_StowAntennas_allowed(self):
+    #     """
+    #     Checks whether this command is allowed to be run in current device state.
 
-        :return: True if this command is allowed to be run in current device state.
+    #     :return: True if this command is allowed to be run in current device state.
 
-        :rtype: boolean
-        """
-        handler = self.get_command_object("StowAntennas")
-        return handler.check_allowed()
+    #     :rtype: boolean
+    #     """
+    #     handler = self.get_command_object("StowAntennas")
+    #     return handler.check_allowed()
 
-    @command(
-        dtype_in=("str",),
-        doc_in="List of Receptors to be stowed",
-        dtype_out="DevVarLongStringArray",
-    )
-    def StowAntennas(self, argin):
-        """
-        This command stows the specified receptors.
-        """
-        self.log_state("Device states before executing StowAntennas command")
-        handler = self.get_command_object("StowAntennas")
-        if self.component_manager.command_executor.queue_full:
-            return [[ResultCode.FAILED], ["Queue is full!"]]
-        unique_id = self.component_manager.command_executor.enqueue_command(
-            handler, argin
-        )
-        self.log_state("Device states after executing StowAntennas command")
-        return [[ResultCode.QUEUED], [str(unique_id)]]
+    # @command(
+    #     dtype_in=("str",),
+    #     doc_in="List of Receptors to be stowed",
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    # def StowAntennas(self, argin):
+    #     """
+    #     This command stows the specified receptors.
+    #     """
+    #     self.log_state("Device states before executing StowAntennas command")
+    #     handler = self.get_command_object("StowAntennas")
+    #     if self.component_manager.command_executor.queue_full:
+    #         return [[ResultCode.FAILED], ["Queue is full!"]]
+    #     unique_id = self.component_manager.command_executor.enqueue_command(
+    #         handler, argin
+    #     )
+    #     self.log_state("Device states after executing StowAntennas command")
+    #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
     def init_command_objects(self):
         """
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        args = ()
-        for (command_name, command_class) in [
-            ("On", TelescopeOn),
-            ("TelescopeOn", TelescopeOn),
-            ("Off", TelescopeOff),
-            ("TelescopeOff", TelescopeOff),
-            ("StartUpTelescope", TelescopeOn),
-            ("StandByTelescope", TelescopeOff),
-            ("ReleaseResources", ReleaseResources),
-            ("StowAntennas", StowAntennas),
-            ("Standby", TelescopeStandby),
-            ("TelescopeStandby", TelescopeStandby),
-        ]:
-            command_obj = command_class(
-                self.component_manager,
-                self.op_state_model,
-                *args,
-                logger=self.logger,
+        for (command_name, method_name) in [("TelescopeOn", "telescope_on")]:
+            self.register_command_object(
+                command_name,
+                SubmittedSlowCommand(
+                    command_name,
+                    self._command_tracker,
+                    self.component_manager,
+                    method_name,
+                    logger=None,
+                ),
             )
-            self.register_command_object(command_name, command_obj)
-        assign_resources_obj = AssignResources(
-            self.component_manager,
-            self.op_state_model,
-            skuid=SkuidClient(skuid_url=self.SkuidServiceNamePort),
-            *args,
-            logger=self.logger,
-        )
-        self.register_command_object("AssignResources", assign_resources_obj)
 
 
 # ----------
