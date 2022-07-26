@@ -23,7 +23,6 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
-
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
