@@ -65,13 +65,13 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
-@pytest.mark.long_running
+@pytest.mark.ncra1
 def test_tmc_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_one_device_fault(devFactory, cm, 2)
+    set_one_device_fault(devFactory, cm, 12)
     assert cm.component.tmc_op_state == tango.DevState.FAULT
 
 

@@ -92,7 +92,7 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_failed(devFactory, cm)
+    set_failed(devFactory, cm, 12)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
 

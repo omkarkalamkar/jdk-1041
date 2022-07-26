@@ -130,7 +130,6 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("telescopeState", True, False)
             self._device.set_change_event("LastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
-
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
 

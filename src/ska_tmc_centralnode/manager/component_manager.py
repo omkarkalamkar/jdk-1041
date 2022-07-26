@@ -23,7 +23,7 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
-from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
+# from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
@@ -95,14 +95,15 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
 
-        if self.event_receiver:
-            self.event_receiver_object = CentralNodeEventReceiver(
-                self,
-                logger=self.logger,
-                proxy_timeout=self.proxy_timeout,
-                sleep_time=self.sleep_time,
-            )
-        self.start_event_receiver()
+        # if self.event_receiver:
+        #     self.event_receiver_object = CentralNodeEventReceiver(
+        #         self,
+        #         logger=self.logger,
+        #         proxy_timeout=self.proxy_timeout,
+        #         sleep_time=self.sleep_time,
+        #     )
+        
+        # self.start_event_receiver()
 
         self._component.set_op_callbacks(
             _update_device_callback,

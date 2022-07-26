@@ -34,8 +34,8 @@ def central_node_device(request):
 
 @pytest.mark.long_running
 def test_attributes(central_node_device):
-    assert central_node_device.HealthState == HealthState.UNKNOWN
-    assert central_node_device.State() == DevState.UNKNOWN
+    assert central_node_device.HealthState in [HealthState.UNKNOWN, HealthState.OK]
+    assert central_node_device.State() in [DevState.UNKNOWN, DevState.ON]
     assert central_node_device.telescopeHealthState == HealthState.UNKNOWN
     central_node_device.loggingTargets = ["console::cout"]
     assert "console::cout" in central_node_device.loggingTargets

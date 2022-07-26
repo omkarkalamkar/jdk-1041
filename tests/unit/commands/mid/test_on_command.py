@@ -47,7 +47,7 @@ def test_telescope_on_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
-@pytest.mark.long_running
+@pytest.mark.ncra1
 def test_telescope_on_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
