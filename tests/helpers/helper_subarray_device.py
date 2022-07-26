@@ -126,7 +126,7 @@ class HelperSubArrayDevice(SKASubarray):
             self._device.set_change_event("State", True, False)
             self._device.set_change_event("healthState", True, False)
             self._device.set_change_event("obsState", True, False)
-            self._device.set_change_event("assignedResources", True, False)
+            # self._device.set_change_event("assignedResources", True, False)
             return (ResultCode.OK, "")
 
     def create_component_manager(self):

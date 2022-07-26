@@ -36,7 +36,7 @@ def central_node_device(request):
 @pytest.mark.long_running
 def test_attributes(central_node_device):
     assert central_node_device.HealthState == HealthState.UNKNOWN
-    assert central_node_device.State() == tango._tango.DevState.ON
+    assert central_node_device.State() == tango._tango.DevState.UNKNOWN
     assert central_node_device.telescopeHealthstate == HealthState.UNKNOWN
     central_node_device.loggingTargets = ["console::cout"]
     assert "console::cout" in central_node_device.loggingTargets
