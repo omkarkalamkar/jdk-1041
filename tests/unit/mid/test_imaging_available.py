@@ -37,6 +37,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.skip()
 def test_imaging_available(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(

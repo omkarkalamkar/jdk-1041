@@ -49,7 +49,6 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
     ensure_tmc_op_state(cm, tango.DevState.ON, expected_elapsed_time)
 
 
-@pytest.mark.long_running
 def test_tmc_state_on(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(

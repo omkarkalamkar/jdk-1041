@@ -23,6 +23,7 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
+
 # from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
@@ -102,7 +103,7 @@ class CNComponentManager(TmcComponentManager):
         #         proxy_timeout=self.proxy_timeout,
         #         sleep_time=self.sleep_time,
         #     )
-        
+
         # self.start_event_receiver()
 
         self._component.set_op_callbacks(
@@ -135,6 +136,7 @@ class CNComponentManager(TmcComponentManager):
 
     def stop(self):
         self.stop_liveliness_probe()
+        self.stop_event_receiver()
 
     @property
     def input_parameter(self):
