@@ -134,6 +134,7 @@ class CNComponentManager(TmcComponentManager):
 
     def stop(self):
         self.stop_liveliness_probe()
+        self.stop_event_receiver()
 
     @property
     def input_parameter(self):
