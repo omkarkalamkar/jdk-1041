@@ -882,7 +882,7 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.1.36"
+version = "0.1.37"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
@@ -960,7 +960,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "urllib3"
-version = "1.26.10"
+version = "1.26.11"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 category = "main"
 optional = false
@@ -994,7 +994,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.1,<4.0"
-content-hash = "928bac4374710a262d83faa7464c61025a511ef0958891e36ec1679171aa959e"
+content-hash = "2bc54f8158ec36c8affa1ad17fffa29e0240a0721f50448840fa052db24d6964"
 
 [metadata.files]
 astroid = []
@@ -1443,8 +1443,8 @@ ska-tmc-cdm = [
     {file = "ska_tmc_cdm-6.0.4-py3-none-any.whl", hash = "md5:c9a0f2146842bad30ed1ff2ff957c102"},
 ]
 ska-tmc-common = [
-    {file = "ska-tmc-common-0.1.36.tar.gz", hash = "md5:068ea5e22788c3d6fed06a12c596fde4"},
-    {file = "ska_tmc_common-0.1.36-py3-none-any.whl", hash = "md5:a38b3929b5998abb065dd9b8c1e2ac08"},
+    {file = "ska-tmc-common-0.1.37.tar.gz", hash = "md5:e891908d8bb8a4cf1db15c080bad8bec"},
+    {file = "ska_tmc_common-0.1.37-py3-none-any.whl", hash = "md5:baae62d67456f2a4f834ea4ac81ab9d1"},
 ]
 termcolor = [
     {file = "termcolor-1.1.0.tar.gz", hash = "sha256:1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b"},
