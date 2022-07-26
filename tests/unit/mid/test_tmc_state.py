@@ -46,7 +46,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
 def test_tmc_state_init(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_device_init(devFactory, cm, 12)
+    set_device_init(devFactory, cm, 15)
     assert cm.component.tmc_op_state == tango.DevState.INIT
 
 
@@ -72,7 +72,7 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
 def test_tmc_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_one_device_fault(devFactory, cm, 12)
+    set_one_device_fault(devFactory, cm, 15)
     assert cm.component.tmc_op_state == tango.DevState.FAULT
 
 

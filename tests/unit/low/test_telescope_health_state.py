@@ -66,7 +66,7 @@ def test_set_health_state_degraded(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_degraded(devFactory, cm, 12)
+    set_device_degraded(devFactory, cm, 15)
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
 
@@ -92,7 +92,7 @@ def test_set_health_state_failed(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_failed(devFactory, cm, 12)
+    set_failed(devFactory, cm, 15)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
 

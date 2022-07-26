@@ -13,7 +13,7 @@ from ska_tmc_centralnode.model.input import (
 logger = logging.getLogger(__name__)
 
 SLEEP_TIME = 0.5
-TIMEOUT = 15
+TIMEOUT = 20
 
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10

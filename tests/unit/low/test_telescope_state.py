@@ -46,7 +46,7 @@ def test_telescope_state_init(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_init(devFactory, cm, 12)
+    set_device_init(devFactory, cm, 15)
     assert cm.component.telescope_state == tango.DevState.INIT
 
 
@@ -62,7 +62,7 @@ def test_telescope_state_fault_over_standby(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_one_device_fault(devFactory, cm, 12)
+    set_one_device_fault(devFactory, cm, 15)
     assert cm.component.telescope_state == tango.DevState.FAULT
 
 
@@ -78,5 +78,5 @@ def test_telescope_state_standby(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_standby(devFactory, cm, 12)
+    set_device_standby(devFactory, cm, 15)
     assert cm.component.telescope_state == tango.DevState.STANDBY
