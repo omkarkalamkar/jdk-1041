@@ -6,7 +6,7 @@ of state and mode attributes defined by the SKA Control Model.
 import json
 
 import pandas as pd
-from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
+from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
@@ -96,9 +96,6 @@ class AbstractCentralNode(TMCBaseDevice):
         self.logger.info("telescopeState %s", telescope_state)
         self.push_change_event("telescopeState", telescope_state)
 
-    # def update_command_in_progress_callback(self, command_in_progress):
-    #     self.push_change_event("commandInProgress", command_in_progress)
-
     def update_telescope_health_state_callback(self, telescope_health_state):
         self.push_change_event("telescopeHealthState", telescope_health_state)
 
@@ -133,8 +130,6 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("telescopeState", True, False)
             self._device.set_change_event("LastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
-            # self._device.set_change_event("commandInProgress", True, False)
-
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
 
@@ -218,10 +213,8 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes TelescopeOn() command on DishLeadNode, CspMasterLeafNode,
         SdpMasterLeafNode.
         """
-        self.log_state("Device states before executing Telescope On command")
         handler = self.get_command_object("TelescopeOn")
         result_code, unique_id = handler()
-        self.log_state("Device states after  executing Telescope On command")
         return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring
@@ -303,8 +296,6 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        # handler = self.get_command_object("TelescopeOff")
-        # return handler.check_allowed()
         return self.component_manager.is_command_allowed("TelescopeOff")
 
     @command(dtype_out="DevVarLongStringArray")
@@ -340,10 +331,8 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
         SdpMasterLeafNode.
         """
-        self.log_state("Device states before executing On command")
         handler = self.get_command_object("On")
         result_code, unique_id = handler()
-        self.log_state("Device states before executing On command")
         return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring
@@ -495,10 +484,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-
-        # handler = self.get_command_object("Off")
-        # return handler.is_command_allowed()
-        return self.component_manager.is_command_allowed()
+        return self.component_manager.is_command_allowed("Off")
 
     @command(
         dtype_out="DevVarLongStringArray",
@@ -512,13 +498,6 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         self.log_state("Device states before executing Off command")
         handler = self.get_command_object("Off")
-        # if self.component_manager.command_executor.queue_full:
-        #     return [[ResultCode.FAILED], ["Queue is full!"]]
-        # unique_id = self.component_manager.command_executor.enqueue_command(
-        #     handler
-        # )
-        # self.log_state("Device states after executing Off command")
-        # return [[ResultCode.QUEUED], [str(unique_id)]]
         result_code, unique_id = handler()
         self.log_state("Device states before executing Off command")
         return [[result_code], [str(unique_id)]]
@@ -530,18 +509,17 @@ class AbstractCentralNode(TMCBaseDevice):
         )
         cm = CNComponentManager(
             self.op_state_model,
+            _input_parameter=InputParameterMid(None),
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=self.update_telescope_state_callback,
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=self.update_imaging_callback,
-            # _update_command_in_progress_callback=self.update_command_in_progress_callback,
             communication_state_changed_callback=None,
             component_state_changed_callback=None,
             max_workers=self.MaxWorkerMonitoringLoop,
             proxy_timeout=self.ProxyTimeoutMonitoringLoop,
-            _input_parameter=InputParameterMid(None),
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.tm_dish_dev_names = []
@@ -577,17 +555,3 @@ class AbstractCentralNode(TMCBaseDevice):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        for (command_name, method_name) in [
-            ("TelescopeOn", "telescope_on"),
-            ("TelescopeOff", "telescope_off"),
-        ]:
-            self.register_command_object(
-                command_name,
-                SubmittedSlowCommand(
-                    command_name,
-                    self._command_tracker,
-                    self.component_manager,
-                    method_name,
-                    logger=None,
-                ),
-            )

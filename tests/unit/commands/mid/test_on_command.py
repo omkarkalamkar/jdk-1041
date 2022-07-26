@@ -65,13 +65,12 @@ def test_telescope_on_command_fail_subarray(tango_context):
 
 
 def test_telescope_on_fail_check_allowed(tango_context):
-
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model._op_state = DevState.DISABLE
+    cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("TelescopeOn")

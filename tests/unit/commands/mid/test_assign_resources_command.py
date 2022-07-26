@@ -63,7 +63,7 @@ def get_assign_resources_command_obj():
     return assign_res_command, my_adapter_factory
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command(tango_context):
@@ -79,7 +79,7 @@ def test_telescope_assign_resources_command(tango_context):
             adapter.proxy.AssignResources.assert_called()
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command_missing_eb_id_key(tango_context):
@@ -97,7 +97,7 @@ def test_telescope_assign_resources_command_missing_eb_id_key(tango_context):
             adapter.proxy.AssignResources.assert_called()
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command_fail_subarray(tango_context):
@@ -129,7 +129,7 @@ def test_telescope_assign_resources_command_fail_subarray(tango_context):
     assert failing_dev in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command_empty_input_json(tango_context):
@@ -141,7 +141,7 @@ def test_telescope_assign_resources_command_empty_input_json(tango_context):
     assert result_code == ResultCode.FAILED
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command_missing_sdp_key(tango_context):
@@ -158,7 +158,7 @@ def test_telescope_assign_resources_command_missing_sdp_key(tango_context):
     assert "sdp" in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command_missing_subarray_id(tango_context):
@@ -175,7 +175,7 @@ def test_telescope_assign_resources_command_missing_subarray_id(tango_context):
     assert "subarray_id" in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command_missing_dish(tango_context):
@@ -192,7 +192,7 @@ def test_telescope_assign_resources_command_missing_dish(tango_context):
     assert "dish" in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command_missing_receptor_ids(
@@ -211,7 +211,7 @@ def test_telescope_assign_resources_command_missing_receptor_ids(
     assert "receptor_ids" in message
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_fail_check_allowed(tango_context):
@@ -231,7 +231,7 @@ def test_telescope_assign_resources_fail_check_allowed(tango_context):
         assign_res_command.check_allowed()
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_assign_resources_command_already_assigned(tango_context):

@@ -4,7 +4,6 @@ This module provided a reference implementation of a BaseComponentManager.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
-import threading
 import time
 from typing import Callable
 
@@ -63,7 +62,6 @@ class CNComponentManager(TmcComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
-        _update_command_in_progress_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
         max_workers=5,
@@ -79,53 +77,34 @@ class CNComponentManager(TmcComponentManager):
         :param _component: allows setting of the component to be
             managed; for testing purposes only
         """
-        self.logger = logger
-        self.lock = threading.Lock()
         self._component = _component or CentralComponent(logger)
-        self._input_parameter = _input_parameter
-        self.op_state_model = op_state_model
-
-        self.adapter_factory = AdapterFactory()
 
         super().__init__(
-            _input_parameter=self._input_parameter,
-            logger=self.logger,
+            _input_parameter,
+            logger,
             _component=self._component,
-            _event_receiver=False,
             _liveliness_probe=_liveliness_probe,
+            _event_receiver=True,
             communication_state_callback=None,
             component_state_callback=None,
             max_workers=5,
             proxy_timeout=500,
-            sleep_time=1,
+            sleep_time=sleep_time,
             *args,
             **kwargs,
         )
+        self.op_state_model = op_state_model
+        self.adapter_factory = AdapterFactory()
 
-        # self._liveliness_probe = None
-        # if _liveliness_probe:
-        #     self._liveliness_probe = MultiDeviceLivelinessProbe(
-        #         self,
-        #         logger,
-        #         max_workers=max_workers,
-        #         proxy_timeout=proxy_timeout,
-        #         sleep_time=sleep_time,
-        #     )
-        #     self._liveliness_probe.start()
-        # else:
-        #     self.logger.warning("Liveliness Probe is not running")
-
-        self._event_receiver = None
-        if _event_receiver:
-            self._event_receiver = CentralNodeEventReceiver(
+        if self.event_receiver:
+            self.event_receiver_object = CentralNodeEventReceiver(
                 self,
-                logger,
-                proxy_timeout=proxy_timeout,
-                sleep_time=sleep_time,
+                logger=self.logger,
+                proxy_timeout=self.proxy_timeout,
+                sleep_time=self.sleep_time,
             )
-            self._event_receiver.start()
-        else:
-            self.logger.warning("Event Receiver is not running")
+
+        self.start_event_receiver()
 
         self._component.set_op_callbacks(
             _update_device_callback,
@@ -134,19 +113,16 @@ class CNComponentManager(TmcComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
         )
-
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
 
-        # TODO: This can be done as a part of CommandExecutor refactor separate story
+    def stop_event_receiver(self):
+        if self.event_receiver:
+            self.event_receiver_object.stop()
 
     def reset(self):
         pass
-
-    def stop(self):
-        self.stop_liveliness_probe()
-        self._event_receiver.stop()
 
     def set_aggregators(
         self,
@@ -157,6 +133,10 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_state_aggregator = _telescope_state_aggregator
         self._health_state_aggregator = _health_state_aggregator
         self._tm_op_state_aggregator = _tm_op_state_aggregator
+
+    def stop(self):
+        self.stop_liveliness_probe()
+        self.stop_event_receiver()
 
     @property
     def input_parameter(self):
@@ -550,7 +530,7 @@ class CNComponentManager(TmcComponentManager):
         :return: a result code and message
         """
         telescopoff_command = TelescopeOff(
-            self, adapter_factory=AdapterFactory(), logger=self.logger
+            self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
         task_status, responce = self.submit_task(
