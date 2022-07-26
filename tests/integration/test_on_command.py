@@ -17,28 +17,27 @@ def on_command(tango_context, centralnode_name):
     central_node = dev_factory.get_device(centralnode_name)
     ensure_checked_devices(central_node)
     logger.info(
-        f"Before TelescopeOn longRunningCommandsInQueue attribute value is:::{central_node.longRunningCommandsInQueue}"
+        f"Before TelescopeOn longRunningCommandsInQueue attribute value is:{central_node.longRunningCommandsInQueue}"
     )
     result, unique_id = central_node.TelescopeOn()
     logger.info(f"Command ID: {unique_id} Returned result: {result}")
     logger.info(
-        f"After TelescopeOn longRunningCommandIDsInQueue attribute value is:::{central_node.longRunningCommandIDsInQueue}"
+        f"After TelescopeOn longRunningCommandIDsInQueue attribute value is:{central_node.longRunningCommandIDsInQueue}"
     )
     assert result[0] == ResultCode.QUEUED
     logger.info(
-        f"After TelescopeOn longRunningCommandsInQueue attribute value is:::{central_node.longRunningCommandsInQueue}"
+        f"After TelescopeOn longRunningCommandsInQueue attribute value is:{central_node.longRunningCommandsInQueue}"
     )
     time.sleep(30)
     command_id, result = central_node.longRunningCommandResult
     logger.info(
-        f"After TelescopeOn central_node.longRunningCommandResult:::::::{central_node.longRunningCommandResult}"
+        f"After TelescopeOn central_node.longRunningCommandResult:{central_node.longRunningCommandResult}"
     )
     if command_id == unique_id[0]:
-        logger.info(f"command:::::::{command_id}")
-        assert result == "0"
+        logger.info(f"Command_if for longRunningCommandResult is:{command_id}")
+        assert result == "0"  # asserting ResultCode.OK
 
 
-@pytest.mark.ncra
 # @pytest.mark.xfail(
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 # )
