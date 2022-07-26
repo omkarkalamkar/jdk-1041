@@ -62,7 +62,7 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
 def test_telescope_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_one_device_fault(devFactory, cm, 1.5)
+    set_one_device_fault(devFactory, cm, 12)
     assert cm.component.telescope_state == tango.DevState.FAULT
 
 
