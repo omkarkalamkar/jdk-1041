@@ -41,7 +41,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         task_abort_event: Optional[threading.Event] = None,
     ):
 
-        """This is a long running method for TelecopeOn command, it executes do hook,
+        """This is a long running method for TelescopeOn command, it executes do hook,
         invokes TelescopeOn command on lowe level devices.
 
         :param logger: logger
