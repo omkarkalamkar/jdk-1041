@@ -47,6 +47,24 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     return assign_input_str
 
 
+def get_assign_resources_command_obj():
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+
+    adapter_factory = HelperAdapterFactory()
+
+    attrs = {"fetch_skuid.return_value": 123}
+    skuid = mock.Mock(**attrs)
+
+    assign_res_command = AssignResources(
+        cm, adapter_factory, skuid, logger=logger
+    )
+    return assign_res_command, adapter_factory, cm
+
+
 def test_telescope_assign_resources_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -55,53 +73,37 @@ def test_telescope_assign_resources_command(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    unique_id = f"{time.time()}_TelescopeOn"
+    unique_id = f"{time.time()}_AssignResources"
     task_callback = MockCallable(unique_id)
     cm.is_command_allowed("AssignResources")
     cm.assign_resources(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
 
 
-def test_telescope_assign_resources_command_missing_eb_id_key(tango_context):
+def test_telescope_assign_resources_command_missing_eb_id_key_and_processing_blocks(
+    tango_context,
+):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
+    assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-    adapter_factory = HelperAdapterFactory()
-
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["eb_id"] = ""
-
-    assign_rescources_command = AssignResources(
-        cm, adapter_factory, logger=logger
-    )
-    (result_code, _) = assign_rescources_command.do(json.dumps(json_argument))
+    del json_argument["sdp"]["processing_blocks"]
+    (result_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
+    with pytest.raises(Exception) as e:
+        assert "processing_blocks" in e
 
 
 def test_telescope_assign_resources_command_missing_sdp_key(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
+    assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-    adapter_factory = HelperAdapterFactory()
-
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
-    assign_rescources_command = AssignResources(
-        cm, adapter_factory, logger=logger
-    )
-    (result_code, message) = assign_rescources_command.do(
-        json.dumps(json_argument)
-    )
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "sdp" in message
 
@@ -139,65 +141,32 @@ def test_telescope_assign_resources_command_fail_subarray(tango_context):
 
 def test_telescope_assign_resources_command_empty_input_json(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
+    assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-    adapter_factory = HelperAdapterFactory()
-
-    assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    del json_argument["sdp"]
-    assign_rescources_command = AssignResources(
-        cm, adapter_factory, logger=logger
-    )
-    (result_code, _) = assign_rescources_command.do(" ")
+    (result_code, _) = assign_res_command.do(" ")
     assert result_code == ResultCode.FAILED
 
 
 def test_telescope_assign_resources_command_missing_subarray_id(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
+    assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-    adapter_factory = HelperAdapterFactory()
-
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
-    assign_rescources_command = AssignResources(
-        cm, adapter_factory, logger=logger
-    )
-    (result_code, message) = assign_rescources_command.do(
-        json.dumps(json_argument)
-    )
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "subarray_id" in message
 
 
 def test_telescope_assign_resources_command_missing_dish(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
+    assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-    adapter_factory = HelperAdapterFactory()
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]
-    assign_rescources_command = AssignResources(
-        cm, adapter_factory, logger=logger
-    )
-    (result_code, message) = assign_rescources_command.do(
-        json.dumps(json_argument)
-    )
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "dish" in message
 
@@ -206,22 +175,12 @@ def test_telescope_assign_resources_command_missing_receptor_ids(
     tango_context,
 ):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
+    assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-    adapter_factory = HelperAdapterFactory()
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]["receptor_ids"]
-    assign_rescources_command = AssignResources(
-        cm, adapter_factory, logger=logger
-    )
-    (result_code, message) = assign_rescources_command.do(
-        json.dumps(json_argument)
-    )
+    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert result_code == ResultCode.FAILED
     assert "receptor_ids" in message
 
@@ -235,7 +194,7 @@ def test_telescope_assign_resources_fail_check_allowed(tango_context):
     )
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
-        cm.is_command_allowed("TelescopeOn")
+        cm.is_command_allowed("AssignResources")
 
 
 def test_telescope_assign_resources_command_already_assigned(tango_context):
