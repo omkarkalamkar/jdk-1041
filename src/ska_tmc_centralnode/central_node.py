@@ -341,44 +341,39 @@ class AbstractCentralNode(TMCBaseDevice):
         result_code, unique_id = handler()
         return [[result_code], [str(unique_id)]]
 
+    def is_AssignResources_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("AssignResources")
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
+        "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
+        "The individual string should contain dish numbers in string format with "
+        "preceding zeroes upto 3 digits. E.g. 0001, 0002",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def AssignResources(self, argin):
+        """
+        AssignResources command invokes the AssignResources command on lower level devices.
+        """
+        self.log_state(
+            "Device states before executing AssignResources command"
+        )
+        handler = self.get_command_object("AssignResources")
+        result_code, unique_id = handler()
+        self.log_state("Device states after executing AssignResources command")
+        return [[result_code], [str(unique_id)]]
+
     # TODO: Refactor below commands as a part of separate command refactoring
-    # def is_AssignResources_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
-
-    #     :return: True if this command is allowed to be run in current device state
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("AssignResources")
-    #     return handler.check_allowed()
-
-    # @command(
-    #     dtype_in="str",
-    #     doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
-    #     "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
-    #     "The individual string should contain dish numbers in string format with "
-    #     "preceding zeroes upto 3 digits. E.g. 0001, 0002",
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="information-only string",
-    # )
-    # @DebugIt()
-    # def AssignResources(self, argin):
-    #     """
-    #     AssignResources command invokes the AssignResources command on lower level devices.
-    #     """
-    #     self.log_state(
-    #         "Device states before executing AssignResources command"
-    #     )
-    #     handler = self.get_command_object("AssignResources")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler, argin
-    #     )
-    #     self.log_state("Device states after executing AssignResources command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
     # def is_ReleaseResources_allowed(self):
     #     """
     #     Checks whether this command is allowed to be run in current device state.

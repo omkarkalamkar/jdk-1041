@@ -2,11 +2,14 @@
 AssignResources class for CentralNode.
 """
 import json
+import threading
+from typing import Callable, Optional
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import AdapterFactory
+from ska_tango_base.executor import TaskStatus
 
+# from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
@@ -24,8 +27,7 @@ class AssignResources(AbstractAssignReleaseResources):
 
     def __init__(
         self,
-        target,
-        pop_state_model,
+        component_manager,
         adapter_factory=None,
         skuid=SkuidClient(
             "ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870"
@@ -34,15 +36,47 @@ class AssignResources(AbstractAssignReleaseResources):
         logger=None,
         **kwargs,
     ):
-        super().__init__(target, args, logger, kwargs)
-        self.op_state_model = pop_state_model
-        self._adapter_factory = adapter_factory or AdapterFactory()
+        super().__init__(
+            component_manager, adapter_factory, logger=logger, *args, **kwargs
+        )
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         self._skuid = skuid
         self.my_subarray_adapter = None
-        # TODO: Moved to do method for testing
-        # self.init_adapters()
+
+    def assign_resources(
+        self,
+        logger,
+        task_callback: Callable = None,
+        task_abort_event: Optional[threading.Event] = None,
+    ):
+
+        """This is a long running method for TelescopeOn command, it executes do hook,
+        invokes TelescopeOn command on lowe level devices.
+
+        :param logger: logger
+        :type logger: logging.Logger
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :param task_abort_event: Check for abort, defaults to None
+        :type task_abort_event: Event, optional
+        """
+        # Indicate that the task has started
+        task_callback(status=TaskStatus.IN_PROGRESS)
+
+        ret_code, message = self.do(argin=None)
+        self.logger.info(message)
+        if ret_code == ResultCode.FAILED:
+            task_callback(
+                status=TaskStatus.FAILED,
+                result=ResultCode.FAILED,
+                exception=message,
+            )
+        else:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=ResultCode.OK,
+            )
 
     def do_mid(self, argin=None):
         """
@@ -151,8 +185,6 @@ class AssignResources(AbstractAssignReleaseResources):
             None
 
         """
-        component_manager = self.target
-
         # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
         # self.logger.info("Validating input string.")
         # input_validator = AssignResourceValidator(
@@ -223,7 +255,7 @@ class AssignResources(AbstractAssignReleaseResources):
         receptor_ids = json_argument["dish"]["receptor_ids"]
         for receptor_id in receptor_ids:
             dish_ID = "dish" + receptor_id
-            if component_manager.is_already_assigned(dish_ID):
+            if self.component_manager.is_already_assigned(dish_ID):
                 return self.generate_command_result(
                     ResultCode.FAILED,
                     ("Dish %s is already allocated", dish_ID),

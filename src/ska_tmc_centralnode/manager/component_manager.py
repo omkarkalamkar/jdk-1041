@@ -15,6 +15,9 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.assign_resources_command import (
+    AssignResources,
+)
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
@@ -522,6 +525,23 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, responce
 
+    def assign_resources(self, task_callback: Callable = None):
+        """
+        Turn the Telescope On.
+
+        :return: a result code and message
+        """
+        assignresources_command = AssignResources(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, responce = self.submit_task(
+            assignresources_command.assign_resources,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, responce
+
     def is_command_allowed(self, command_name=None):
         """
         Checks whether this command is allowed
@@ -555,7 +575,28 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.debug("Checking low devices, as responsive or not")
                 self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
+        elif command_name in ["AssignResources", "ReleaseResources"]:
+            if self.op_state_model.op_state in [
+                DevState.FAULT,
+                DevState.UNKNOWN,
+                DevState.DISABLE,
+            ]:
+                raise CommandNotAllowed(
+                    "Command is not allowed in current state %s",
+                    str(self.op_state_model.op_state),
+                )
+            if isinstance(self._input_parameter, InputParameterMid):
+                self.logger.debug(
+                    "For AssignResources/ReleaseResources Checking mid devices, as responsive or not"
+                )
+                self.check_if_subarrays_are_responsive()
+                self.check_if_dishes_are_responsive()
+            else:
+                self.logger.debug(
+                    "For AssignResources/ReleaseResources, Checking low devices, as responsive or not"
+                )
+                self.check_if_mccs_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
         else:
-            self.logger.info("Condition other than TelescopeOn/Off")
-
+            self.logger.info("Condition other than expected commands")
         return True
