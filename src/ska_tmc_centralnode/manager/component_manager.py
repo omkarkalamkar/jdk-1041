@@ -75,10 +75,16 @@ class CNComponentManager(TmcComponentManager):
         """
         Initialise a new ComponentManager instance.
 
+        :param op_state_model: the operational state model used by this component
+            manager
+        :param _input_parameter: allows to specify InputParameter class for TMC Mid or Low
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
+        :param _liveliness_probe: allows to enable/disable LivelinessProbe usage
+        :param _event_receiver: allows to enable/disable EventReceiver usage
         """
+
         self._component = _component or CentralComponent(logger)
 
         super().__init__(
@@ -236,7 +242,7 @@ class CNComponentManager(TmcComponentManager):
 
     def add_dishes(self, dln_prefix, num_dishes):
         """
-        Add dishes to the monitoring loop
+        Add dishes to the liveliness probe function
 
         :param dln_prefix: prefix of the dish
         :type dln_prefix: str
@@ -251,7 +257,7 @@ class CNComponentManager(TmcComponentManager):
 
     def add_multiple_devices(self, device_list):
         """
-        Add multiple devices to the monitoring loop
+        Add multiple devices to the liveliness probe function
 
         :param device_list: list of device names
         :type list: list[str]
@@ -264,7 +270,7 @@ class CNComponentManager(TmcComponentManager):
 
     def add_device(self, dev_name):
         """
-        Add device to the monitoring loop
+        Add device to the the liveliness probe function
 
         :param dev_name: device name
         :type dev_name: str
@@ -527,7 +533,7 @@ class CNComponentManager(TmcComponentManager):
 
     def assign_resources(self, task_callback: Callable = None):
         """
-        Turn the Telescope On.
+        Submit the AssignResources command in queue.
 
         :return: a result code and message
         """
