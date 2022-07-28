@@ -42,6 +42,7 @@ def off_command(tango_context, centralnode_name):
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 # )
 @pytest.mark.post_deployment
+@pytest.mark.SKA_mid
 def test_off_command_mid(tango_context):
     off_command(tango_context, "ska_mid/tm_central/central_node")
 
@@ -50,5 +51,6 @@ def test_off_command_mid(tango_context):
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 # )
 @pytest.mark.post_deployment
+@pytest.mark.SKA_low
 def test_off_command_low(tango_context):
     off_command(tango_context, "ska_low/tm_central/central_node")
