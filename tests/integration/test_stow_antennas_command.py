@@ -11,7 +11,7 @@ from tests.integration.common import (  # noqa F401
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 @pytest.mark.post_deployment

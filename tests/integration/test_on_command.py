@@ -38,7 +38,7 @@ def on_command(tango_context, centralnode_name):
         assert result == "0"  # asserting ResultCode.OK
 
 
-# @pytest.mark.xfail(
+# @pytest.mark.skip(
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 # )
 @pytest.mark.post_deployment
@@ -47,7 +47,7 @@ def test_on_command_mid(tango_context):
     on_command(tango_context, "ska_mid/tm_central/central_node")
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 @pytest.mark.post_deployment

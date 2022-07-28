@@ -36,7 +36,7 @@ def init_command(tango_context, central_node_name):
     ensure_checked_devices(central_node)
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 @pytest.mark.post_deployment
@@ -49,7 +49,7 @@ def test_init_command_low(tango_context, central_node_name):
     init_command(tango_context, central_node_name)
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 @pytest.mark.post_deployment

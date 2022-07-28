@@ -114,8 +114,8 @@ class CentralNodeLow(AbstractCentralNode):
             _update_imaging_callback=None,
             communication_state_changed_callback=None,
             component_state_changed_callback=None,
-            max_workers=self.MaxWorkerMonitoringLoop,
-            proxy_timeout=self.ProxyTimeoutMonitoringLoop,
+            max_workers=self.MaxWorker,
+            proxy_timeout=self.ProxyTime,
             _input_parameter=InputParameterLow(None),
             sleep_time=self.SleepTime,
         )

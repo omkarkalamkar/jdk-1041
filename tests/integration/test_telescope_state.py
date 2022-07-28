@@ -70,7 +70,7 @@ def telescope_state(tango_context, central_node_name):
     central_node.unsubscribe_event(event_id)
 
 
-# @pytest.mark.xfail(
+# @pytest.mark.skip(
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 # )
 @pytest.mark.post_deployment
@@ -79,7 +79,7 @@ def test_telescope_state_mid(tango_context):
     telescope_state(tango_context, "ska_mid/tm_central/central_node")
 
 
-@pytest.mark.xfail(
+@pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 @pytest.mark.post_deployment

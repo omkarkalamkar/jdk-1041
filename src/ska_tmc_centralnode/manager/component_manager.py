@@ -72,9 +72,14 @@ class CNComponentManager(TmcComponentManager):
         """
         Initialise a new ComponentManager instance.
 
+        :param op_state_model: the operational state model used by this component
+            manager
+        :param _input_parameter: allows to specify InputParameter class for TMC Mid or Low
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
+        :param _liveliness_probe: allows to enable/disable LivelinessProbe usage
+        :param _event_receiver: allows to enable/disable EventReceiver usage
         """
         self._component = _component or CentralComponent(logger)
 
@@ -83,11 +88,11 @@ class CNComponentManager(TmcComponentManager):
             logger,
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
-            _event_receiver=True,
-            communication_state_callback=None,
-            component_state_callback=None,
-            max_workers=5,
-            proxy_timeout=500,
+            _event_receiver=_event_receiver,
+            communication_state_callback=communication_state_callback,
+            component_state_callback=component_state_callback,
+            max_workers=max_workers,
+            proxy_timeout=proxy_timeout,
             sleep_time=sleep_time,
             *args,
             **kwargs,
@@ -188,7 +193,7 @@ class CNComponentManager(TmcComponentManager):
 
     def get_device(self, dev_name):
         """
-        Return the device info our of the monitoring loop with name dev_name
+        Return the device info with device name dev_name
 
         :param dev_name: name of the device
         :type dev_name: str
@@ -233,7 +238,7 @@ class CNComponentManager(TmcComponentManager):
 
     def add_dishes(self, dln_prefix, num_dishes):
         """
-        Add dishes to the monitoring loop
+        Add dishes to the liveliness probe function
 
         :param dln_prefix: prefix of the dish
         :type dln_prefix: str
@@ -248,7 +253,7 @@ class CNComponentManager(TmcComponentManager):
 
     def add_multiple_devices(self, device_list):
         """
-        Add multiple devices to the monitoring loop
+        Add multiple devices to the liveliness probe function
 
         :param device_list: list of device names
         :type list: list[str]
@@ -261,7 +266,7 @@ class CNComponentManager(TmcComponentManager):
 
     def add_device(self, dev_name):
         """
-        Add device to the monitoring loop
+        Add device to the liveliness probe function
 
         :param dev_name: device name
         :type dev_name: str
@@ -367,18 +372,18 @@ class CNComponentManager(TmcComponentManager):
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
 
-    def is_already_assigned(self, dishId):
+    def is_already_assigned(self, dish_id):
         """
         Check if a Dish is already assigned to a subarray
 
-        :param dishId: id of the dish
-        :type dishId: str
+        :param dish_id: id of the dish
+        :type dish_id: str
 
         :return True is already assigned, False otherwise
         """
         for devInfo in self.devices:
             if isinstance(devInfo, SubArrayDeviceInfo):
-                if dishId in devInfo.resources:
+                if dish_id in devInfo.resources:
                     return True
 
         return False
@@ -410,7 +415,7 @@ class CNComponentManager(TmcComponentManager):
 
     def _aggregate_state(self):
         """
-        Aggregates both telescope state and tm op state
+        Aggregates both telescope state and tmc op state
         """
         self._aggregate_telescope_state()
         self._aggregate_tm_op_state()
@@ -440,7 +445,7 @@ class CNComponentManager(TmcComponentManager):
 
     def _aggregate_tm_op_state(self):
         """
-        Aggregates tm devices states
+        Aggregates TMC devices states
         """
         if self._tm_op_state_aggregator is None:
             self._tm_op_state_aggregator = TMCOpStateAggregator(
@@ -515,12 +520,12 @@ class CNComponentManager(TmcComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, responce = self.submit_task(
+        task_status, response = self.submit_task(
             telescopon_command.telescope_on,
             args=[self.logger],
             task_callback=task_callback,
         )
-        return task_status, responce
+        return task_status, response
 
     def is_command_allowed(self, command_name=None):
         """
@@ -556,6 +561,8 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
         else:
-            self.logger.info("Condition other than TelescopeOn/Off")
+            self.logger.info(
+                f"is_allowed check is disabled for the commands other than TelescopeOn/Off/Standby for the time being. The command invoked is: {command_name}"
+            )
 
         return True
