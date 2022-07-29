@@ -29,6 +29,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         timeout=30.0,
     )
 
+
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_off_command_mid(tango_context, change_event_callbacks):
@@ -36,10 +37,10 @@ def test_off_command_mid(tango_context, change_event_callbacks):
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
     ensure_checked_devices(central_node)
 
-    result_on, unique_id_on = central_node.TelescopeOn()
+    result_on, _ = central_node.TelescopeOn()
     result_off, unique_id_off = central_node.TelescopeOff()
 
-    assert result_on[0]== ResultCode.QUEUED
+    assert result_on[0] == ResultCode.QUEUED
     assert result_off[0] == ResultCode.QUEUED
 
     central_node.subscribe_event(
@@ -73,16 +74,17 @@ def test_off_command_mid(tango_context, change_event_callbacks):
         "telescopeState", tango._tango.DevState.OFF, lookahead=4
     )
 
+
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_off_command_low(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")
     ensure_checked_devices(central_node)
-    result_on, unique_id_on = central_node.TelescopeOn()
+    result_on, _ = central_node.TelescopeOn()
     result_off, unique_id_off = central_node.TelescopeOff()
 
-    assert result_on[0]== ResultCode.QUEUED
+    assert result_on[0] == ResultCode.QUEUED
     assert result_off[0] == ResultCode.QUEUED
 
     central_node.subscribe_event(
@@ -106,4 +108,4 @@ def test_off_command_low(tango_context, change_event_callbacks):
 
     change_event_callbacks.assert_change_event(
         "telescopeState", tango._tango.DevState.OFF, lookahead=3
-    )   
+    )
