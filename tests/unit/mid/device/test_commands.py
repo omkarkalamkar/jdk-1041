@@ -22,7 +22,6 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.shraddha
 def test_commands(central_node_device):
     try:
         central_node_device.TelescopeOn()

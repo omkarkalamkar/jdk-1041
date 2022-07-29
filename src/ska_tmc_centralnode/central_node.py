@@ -50,13 +50,9 @@ class AbstractCentralNode(TMCBaseDevice):
         default_value="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
     )
 
-    MaxWorkerMonitoringLoop = device_property(
-        dtype="DevUShort", default_value=5
-    )
+    MaxWorker = device_property(dtype="DevUShort", default_value=5)
 
-    ProxyTimeoutMonitoringLoop = device_property(
-        dtype="DevUShort", default_value=500
-    )
+    ProxyTimeout = device_property(dtype="DevUShort", default_value=500)
     # ----------
     # Attributes
     # ----------
@@ -521,8 +517,8 @@ class AbstractCentralNode(TMCBaseDevice):
             _update_imaging_callback=self.update_imaging_callback,
             communication_state_changed_callback=None,
             component_state_changed_callback=None,
-            max_workers=self.MaxWorkerMonitoringLoop,
-            proxy_timeout=self.ProxyTimeoutMonitoringLoop,
+            max_workers=self.MaxWorker,
+            proxy_timeout=self.ProxyTimeout,
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.tm_dish_dev_names = []
