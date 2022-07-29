@@ -46,6 +46,7 @@ class AssignResources(AbstractAssignReleaseResources):
 
     def assign_resources(
         self,
+        argin,
         logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
@@ -64,7 +65,7 @@ class AssignResources(AbstractAssignReleaseResources):
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
 
-        ret_code, message = self.do(argin=None)
+        ret_code, message = self.do(json.loads(argin))
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
@@ -78,7 +79,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 result=ResultCode.OK,
             )
 
-    def do_mid(self, argin=None):
+    def do_mid(self, argin):
         """
         Method to invoke AssignResources command on Subarray.
 

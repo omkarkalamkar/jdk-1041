@@ -531,7 +531,7 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, responce
 
-    def assign_resources(self, task_callback: Callable = None):
+    def assign_resources(self, argin, task_callback: Callable = None):
         """
         Submit the AssignResources command in queue.
 
@@ -543,7 +543,7 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, responce = self.submit_task(
             assignresources_command.assign_resources,
-            args=[self.logger],
+            args=[argin, self.logger],
             task_callback=task_callback,
         )
         return task_status, responce
