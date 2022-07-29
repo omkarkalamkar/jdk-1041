@@ -34,6 +34,7 @@ ska-ser-log-transactions = "*"
 ska-ser-skuid = "*"
 mock = "^4.0.3"
 pandas="1.2.3"
+ska-tango-testing = "0.2.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
