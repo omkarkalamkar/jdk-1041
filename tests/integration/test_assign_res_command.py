@@ -20,7 +20,9 @@ def get_assign_input_str(path):
     return assign_input_str
 
 
-def assign_resouces(tango_context, central_node_name, assign_input_str, change_event_callbacks):
+def assign_resouces(
+    tango_context, central_node_name, assign_input_str, change_event_callbacks
+):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -43,7 +45,11 @@ def assign_resouces(tango_context, central_node_name, assign_input_str, change_e
     )
 
     change_event_callbacks.assert_change_event(
-        "longRunningCommandsInQueue", ("TelescopeOn", "AssignResources",)
+        "longRunningCommandsInQueue",
+        (
+            "TelescopeOn",
+            "AssignResources",
+        ),
     )
 
     central_node.subscribe_event(
@@ -113,6 +119,7 @@ def assign_resouces(tango_context, central_node_name, assign_input_str, change_e
                 pytest.fail("Timeout occurred while executing the test")
         assert resources_len > 0
 
+
 @pytest.mark.lily
 # @pytest.mark.xfail(
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
@@ -123,7 +130,9 @@ def assign_resouces(tango_context, central_node_name, assign_input_str, change_e
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
 )
-def test_assign_res_command_mid(tango_context, central_node_name, change_event_callbacks):
+def test_assign_res_command_mid(
+    tango_context, central_node_name, change_event_callbacks
+):
     return assign_resouces(
         tango_context,
         central_node_name,
@@ -132,7 +141,7 @@ def test_assign_res_command_mid(tango_context, central_node_name, change_event_c
                 dirname(__file__), "..", "data", "command_AssignResources.json"
             )
         ),
-        change_event_callbacks
+        change_event_callbacks,
     )
 
 
@@ -145,7 +154,9 @@ def test_assign_res_command_mid(tango_context, central_node_name, change_event_c
     "central_node_name",
     [("ska_low/tm_central/central_node")],
 )
-def test_assign_res_command_low(tango_context, central_node_name):
+def test_assign_res_command_low(
+    tango_context, central_node_name, change_event_callbacks
+):
     return assign_resouces(
         tango_context,
         central_node_name,
@@ -157,4 +168,5 @@ def test_assign_res_command_low(tango_context, central_node_name):
                 "command_mccs_AssignResources.json",
             )
         ),
+        change_event_callbacks,
     )

@@ -3,10 +3,10 @@ import logging
 
 import pytest
 import tango
+from ska_tango_testing.mock import MockCallable
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
-from ska_tango_testing.mock import MockCallable
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
 
