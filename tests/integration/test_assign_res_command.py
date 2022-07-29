@@ -35,7 +35,7 @@ def assign_resouces(
     logger.info(f"result is:{result}")
     logger.info(f"unique_id is:{unique_id}")
 
-    assert unique_id[0].endswith("TelescopeOn")
+    assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
     logger.info("Asserted resultcode as queued")
     central_node.subscribe_event(
