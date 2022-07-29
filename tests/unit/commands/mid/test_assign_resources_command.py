@@ -64,6 +64,7 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
+@pytest.mark.assign
 def test_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -81,7 +82,8 @@ def test_assign_resources_command_queued(tango_context, task_callback):
     )
 
 
-def test_telescope_assign_resources_command_missing_eb_id_key_and_processing_blocks(
+@pytest.mark.assign
+def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
@@ -92,12 +94,13 @@ def test_telescope_assign_resources_command_missing_eb_id_key_and_processing_blo
     json_argument["sdp"]["eb_id"] = ""
     del json_argument["sdp"]["processing_blocks"]
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (result_code, _) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     with pytest.raises(Exception) as e:
         assert "processing_blocks" in e
 
 
+@pytest.mark.assign
 def test_assign_resources_command_with_ok(tango_context, task_callback):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
@@ -105,11 +108,12 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (result_code, _) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.OK
+    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.OK
 
 
-def test_telescope_assign_resources_command_missing_sdp_key(
+@pytest.mark.assign
+def test_assign_resources_command_missing_sdp_key(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
@@ -119,14 +123,13 @@ def test_telescope_assign_resources_command_missing_sdp_key(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "sdp" in message
 
 
-def test_telescope_assign_resources_command_fail_subarray(
-    tango_context, task_callback
-):
+@pytest.mark.assign
+def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -157,6 +160,7 @@ def test_telescope_assign_resources_command_fail_subarray(
     assert res_code == ResultCode.FAILED
 
 
+@pytest.mark.assign
 def test_telescope_assign_resources_command_empty_input_json(
     tango_context, task_callback
 ):
@@ -164,11 +168,12 @@ def test_telescope_assign_resources_command_empty_input_json(
     assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
     cm.assign_resources("", task_callback=task_callback)
-    (result_code, _) = assign_res_command.do(" ")
-    assert result_code == ResultCode.FAILED
+    (res_code, _) = assign_res_command.do(" ")
+    assert res_code == ResultCode.FAILED
 
 
-def test_telescope_assign_resources_command_missing_subarray_id(
+@pytest.mark.assign
+def test_assign_resources_command_missing_subarray_id(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
@@ -178,14 +183,13 @@ def test_telescope_assign_resources_command_missing_subarray_id(
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
 
 
-def test_telescope_assign_resources_command_missing_dish(
-    tango_context, task_callback
-):
+@pytest.mark.assign
+def test_assign_resources_command_missing_dish(tango_context, task_callback):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
@@ -193,12 +197,13 @@ def test_telescope_assign_resources_command_missing_dish(
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "dish" in message
 
 
-def test_telescope_assign_resources_command_missing_receptor_ids(
+@pytest.mark.assign
+def test_assign_resources_command_missing_receptor_ids(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
@@ -208,12 +213,13 @@ def test_telescope_assign_resources_command_missing_receptor_ids(
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]["receptor_ids"]
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "receptor_ids" in message
 
 
-def test_telescope_assign_resources_fail_check_allowed(tango_context):
+@pytest.mark.assign
+def test_assign_resources_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -225,7 +231,8 @@ def test_telescope_assign_resources_fail_check_allowed(tango_context):
         cm.is_command_allowed("AssignResources")
 
 
-def test_telescope_assign_resources_command_already_assigned(
+@pytest.mark.assign
+def test_assign_resources_command_already_assigned(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
@@ -254,6 +261,6 @@ def test_telescope_assign_resources_command_already_assigned(
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
     cm.assign_resources(assign_input_str, task_callback=task_callback)
-    (result_code, message) = assign_res_command.do(assign_input_str)
-    assert result_code == ResultCode.FAILED
+    (res_code, message) = assign_res_command.do(assign_input_str)
+    assert res_code == ResultCode.FAILED
     assert "dish0001" in message
