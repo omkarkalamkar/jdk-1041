@@ -15,6 +15,9 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.release_resources_command import (
+    ReleaseResources,
+)
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
@@ -527,6 +530,23 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
+    def release_resources(self, argin, task_callback: Callable = None):
+        """
+        Submit the ReleaseResources command in queue.
+
+        :return: a result code and message
+        """
+        releaseresources_command = ReleaseResources(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, response = self.submit_task(
+            releaseresources_command.release_resources,
+            args=[argin, self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
     def is_command_allowed(self, command_name=None):
         """
         Checks whether this command is allowed
@@ -560,9 +580,33 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.debug("Checking low devices, as responsive or not")
                 self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
+
+        elif command_name in ["AssignResources", "ReleaseResources"]:
+            if self.op_state_model.op_state in [
+                DevState.FAULT,
+                DevState.UNKNOWN,
+                DevState.DISABLE,
+            ]:
+                raise CommandNotAllowed(
+                    "Command is not allowed in current state %s",
+                    str(self.op_state_model.op_state),
+                )
+            if isinstance(self._input_parameter, InputParameterMid):
+                self.logger.debug(
+                    "For AssignResources/ReleaseResources Checking mid devices, as responsive or not"
+                )
+                self.check_if_subarrays_are_responsive()
+                self.check_if_dishes_are_responsive()
+            else:
+                self.logger.debug(
+                    "For AssignResources/ReleaseResources, Checking low devices, as responsive or not"
+                )
+                self.check_if_mccs_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
+
         else:
             self.logger.info(
-                f"is_allowed check is disabled for the commands other than TelescopeOn/Off/Standby for the time being. The command invoked is: {command_name}"
+                f"is_allowed check is not available for {command_name}"
             )
 
         return True

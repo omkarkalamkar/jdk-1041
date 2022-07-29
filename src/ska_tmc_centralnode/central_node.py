@@ -374,42 +374,37 @@ class AbstractCentralNode(TMCBaseDevice):
     #     self.log_state("Device states after executing AssignResources command")
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    # def is_ReleaseResources_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    def is_ReleaseResources_allowed(self):
+        """
+        Checks whether ReleaseResources command is allowed to be run in current device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+        :return: True if ReleaseResources command is allowed to be run in current device state.
 
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("ReleaseResources")
-    #     return handler.check_allowed()
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("ReleaseResources")
 
-    # @command(
-    #     dtype_in="str",
-    #     doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
-    #     "releaseALL boolean as true and receptor_ids.",
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="information-only string",
-    # )
-    # @DebugIt()
-    # def ReleaseResources(self, argin):
-    #     """
-    #     Release all the resources assigned to the given Subarray.
-    #     """
-    #     self.log_state(
-    #         "Device states before executing ReleaseResources command"
-    #     )
-    #     handler = self.get_command_object("ReleaseResources")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler, argin
-    #     )
-    #     self.log_state(
-    #         "Device states after executing ReleaseResources command"
-    #     )
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
+        "releaseALL boolean as true and receptor_ids.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def ReleaseResources(self, argin):
+        """
+        Releases all the resources assigned to the given Subarray.
+        """
+        self.log_state(
+            "Device states before executing ReleaseResources command on CentralNode"
+        )
+        handler = self.get_command_object("On")
+        result_code, unique_id = handler()
+        self.log_state(
+            "Device states after executing ReleaseResources command on CentralNode"
+        )
+        return [[result_code], [str(unique_id)]]
 
     # def is_Standby_allowed(self):
     #     """
