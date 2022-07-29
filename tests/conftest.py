@@ -3,6 +3,9 @@ import logging
 
 import pytest
 import tango
+from ska_tango_testing.mock.tango.event_callback import (
+    MockTangoEventCallbackGroup,
+)
 from ska_tango_testing.mock import MockCallable
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
@@ -57,3 +60,19 @@ def task_callback() -> MockCallable:
     """
     task_callback = MockCallable(5)
     return task_callback
+
+
+@pytest.fixture()
+def change_event_callbacks() -> MockTangoEventCallbackGroup:
+    """
+    Return a dictionary of Tango device change event callbacks with asynchrony support.
+
+    :return: a collections.defaultdict that returns change event
+        callbacks by name.
+    """
+    return MockTangoEventCallbackGroup(
+        "longRunningCommandsInQueue",
+        "longRunningCommandResult",
+        "telescopeState",
+        timeout=30.0,
+    )

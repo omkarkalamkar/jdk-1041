@@ -3,6 +3,7 @@ import time
 from os.path import dirname, join
 
 import pytest
+import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
@@ -19,27 +20,42 @@ def get_assign_input_str(path):
     return assign_input_str
 
 
-def assign_resouces(tango_context, central_node_name, assign_input_str):
+def assign_resouces(tango_context, central_node_name, assign_input_str, change_event_callbacks):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
 
     ensure_checked_devices(central_node)
-    initial_len = len(central_node.commandExecuted)
-    (result, unique_id) = central_node.On()
-    (result, unique_id) = central_node.AssignResources(assign_input_str)
-    assert result[0] == ResultCode.QUEUED
-    start_time = time.time()
-    while len(central_node.commandExecuted) != initial_len + 2:
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
 
-    for command in central_node.commandExecuted:
-        if command[0] == unique_id[0]:
-            logger.info("command result: %s", command)
-            assert command[2] == "ResultCode.OK"
+    result, unique_id = central_node.TelescopeOn()
+    result, unique_id = central_node.AssignResources(assign_input_str)
+
+    logger.info(f"result is:{result}")
+    logger.info(f"unique_id is:{unique_id}")
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+    logger.info("Asserted resultcode as queued")
+    central_node.subscribe_event(
+        "longRunningCommandsInQueue",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandsInQueue"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandsInQueue", ("TelescopeOn", "AssignResources",)
+    )
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=2,
+    )
 
     def get_subarray_device(json_model):
         for device in json_model["devices"]:
@@ -97,17 +113,17 @@ def assign_resouces(tango_context, central_node_name, assign_input_str):
                 pytest.fail("Timeout occurred while executing the test")
         assert resources_len > 0
 
-
-@pytest.mark.xfail(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.lily
+# @pytest.mark.xfail(
+#     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+# )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
 )
-def test_assign_res_command_mid(tango_context, central_node_name):
+def test_assign_res_command_mid(tango_context, central_node_name, change_event_callbacks):
     return assign_resouces(
         tango_context,
         central_node_name,
@@ -116,6 +132,7 @@ def test_assign_res_command_mid(tango_context, central_node_name):
                 dirname(__file__), "..", "data", "command_AssignResources.json"
             )
         ),
+        change_event_callbacks
     )
 
 
