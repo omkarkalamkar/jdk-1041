@@ -66,6 +66,7 @@ class CentralNodeCommand(TMCCommand):
         )
 
 
+# Modified adapter creation. Review is expected for below class.
 class AbstractTelescopeOnOff(CentralNodeCommand):
     def __init__(
         self,

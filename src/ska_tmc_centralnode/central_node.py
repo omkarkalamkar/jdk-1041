@@ -18,6 +18,8 @@ from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
+# Modified the tango device class to have Submitted slow command functionality.
+# Review is expected for is_TelescopeOff_allowed and TelescopeOff methods.
 class AbstractCentralNode(TMCBaseDevice):
     """
     Central Node is a coordinator of the complete Telescope system.

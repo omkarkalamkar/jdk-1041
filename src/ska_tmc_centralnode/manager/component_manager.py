@@ -523,22 +523,26 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, responce
 
+    # Modified the component manager to have the submit task functionality in
+    # methods for different commands. Made a command check allowed method for
+    # all commands.
+    # Review is expected for telescope_off and is_command_allowed method.
     def telescope_off(self, task_callback: Callable = None):
         """
         Turn the Telescope Off.
 
         :return: a result code and message
         """
-        telescopoff_command = TelescopeOff(
+        telescope_off_command = TelescopeOff(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, responce = self.submit_task(
-            telescopoff_command.telescope_off,
+        task_status, response = self.submit_task(
+            telescope_off_command.telescope_off,
             args=[self.logger],
             task_callback=task_callback,
         )
-        return task_status, responce
+        return task_status, response
 
     def is_command_allowed(self, command_name=None):
         """

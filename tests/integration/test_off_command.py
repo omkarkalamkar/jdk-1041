@@ -12,7 +12,7 @@ from tests.integration.common import (  # noqa F401
     ensure_checked_devices,
 )
 
-# from tests.settings import logger
+# Modification in test case to use ska-tango-testing's MockTangoEventCallbackGroup class.
 
 
 @pytest.fixture()
