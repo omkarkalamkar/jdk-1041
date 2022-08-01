@@ -30,7 +30,9 @@ def assign_resouces(
     ensure_checked_devices(central_node)
 
     result, unique_id = central_node.TelescopeOn()
-    logger.info(f"For TelescopeOn:::Command ID: {unique_id} Returned result: {result}")
+    logger.info(
+        f"For TelescopeOn:::Command ID: {unique_id} Returned result: {result}"
+    )
 
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
@@ -50,7 +52,9 @@ def assign_resouces(
     )
 
     result, unique_id = central_node.AssignResources(assign_input_str)
-    logger.info(f"For AssignResources:::Command ID: {unique_id} Returned result: {result}")
+    logger.info(
+        f"For AssignResources:::Command ID: {unique_id} Returned result: {result}"
+    )
 
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
@@ -67,8 +71,9 @@ def assign_resouces(
         lookahead=4,
     )
 
-    # time.sleep(100)
-    logger.info(f"For AssignResources:::Command ID: {unique_id} longRunningCommandResult result::: {central_node.longRunningCommandResult}")
+    logger.info(
+        f"For AssignResources:::Command ID: {unique_id} longRunningCommandResult result::: {central_node.longRunningCommandResult}"
+    )
 
     def get_subarray_device(json_model):
         for device in json_model["devices"]:
@@ -131,7 +136,6 @@ def assign_resouces(
     #     assert resources_len > 0
 
 
-@pytest.mark.lily
 # @pytest.mark.xfail(
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 # )
@@ -165,7 +169,8 @@ def test_assign_res_command_mid(
     "central_node_name",
     [("ska_low/tm_central/central_node")],
 )
-def test_assign_res_command_low(tango_context, central_node_name, change_event_callbacks
+def test_assign_res_command_low(
+    tango_context, central_node_name, change_event_callbacks
 ):
     return assign_resouces(
         tango_context,
@@ -178,6 +183,5 @@ def test_assign_res_command_low(tango_context, central_node_name, change_event_c
                 "command_mccs_AssignResources.json",
             )
         ),
-        change_event_callbacks
-
+        change_event_callbacks,
     )
