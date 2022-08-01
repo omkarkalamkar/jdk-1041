@@ -251,7 +251,7 @@ class HelperSubArrayDevice(SKASubarray):
         :rtype: boolean
         """
         return True
-    
+
     @command(
         dtype_in=("str"),
         doc_in="The input string in JSON format consists of receptorIDList.",

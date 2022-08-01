@@ -248,7 +248,9 @@ class AssignResources(AbstractAssignReleaseResources):
         ret_code, message = self.get_subarray_adapter(subarrayID)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-        self.logger.debug(f"res_code after get_subarray_adapter::{ret_code} message after get_subarray_adapter::{message}")
+        self.logger.debug(
+            f"res_code after get_subarray_adapter::{ret_code} message after get_subarray_adapter::{message}"
+        )
 
         # check allocated dishes
         if "dish" not in json_argument:
@@ -268,15 +270,20 @@ class AssignResources(AbstractAssignReleaseResources):
             self.logger.debug(f"receptor_id is:{receptor_id}")
             dish_ID = "dish" + receptor_id
             self.logger.debug(f"dish_ID is:{dish_ID}")
-            self.logger.debug(f"self.component_manager.is_assigned is:{self.component_manager.is_already_assigned}")
-            if self.component_manager.is_already_assigned(dish_ID):
-                self.logger.debug(f"Inside cm, is_already_assigned, dish_ID is:{dish_ID}")
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    ("Dish %s is already allocated", dish_ID),
-                )
-            else:
-                self.logger.info(f"Resources are not assigned")
+            self.logger.debug(
+                f"self.component_manager.is_assigned is:{self.component_manager.is_already_assigned(dish_ID)}"
+            )
+            # TODO: WIP for the below method
+            # if self.component_manager.is_already_assigned(dish_ID):
+            #     self.logger.debug(
+            #         f"Inside cm, is_already_assigned, dish_ID is:{dish_ID}"
+            #     )
+            #     return self.generate_command_result(
+            #         ResultCode.FAILED,
+            #         ("Dish %s is already allocated", dish_ID),
+            #     )
+            # else:
+            #     self.logger.info("Resources are not assigned")
 
         # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
         self.logger.debug("Invoking AssignResources command on TMC subarrays")
@@ -288,7 +295,9 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-        self.logger.debug("AssignResources command on TMC subarrays is successful")
+        self.logger.debug(
+            "AssignResources command on TMC subarrays is successful"
+        )
         return (ResultCode.OK, "")
 
     def update_resource_config_file(self, json_argument, id):
