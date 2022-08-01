@@ -537,15 +537,17 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
+        print("Inside assign_resources method for cm")
         assignresources_command = AssignResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-
+        print("Inside assign_resources method object creation")
         task_status, responce = self.submit_task(
             assignresources_command.assign_resources,
             args=[argin, self.logger],
             task_callback=task_callback,
         )
+        print("assign_resources is submitted with queued method object creation")
         return task_status, responce
 
     def is_command_allowed(self, command_name=None):

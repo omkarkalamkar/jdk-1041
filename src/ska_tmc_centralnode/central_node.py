@@ -369,7 +369,8 @@ class AbstractCentralNode(TMCBaseDevice):
             "Device states before executing AssignResources command"
         )
         handler = self.get_command_object("AssignResources")
-        result_code, unique_id = handler()
+        args = json.loads(argin)
+        result_code, unique_id = handler(args)
         self.log_state("Device states after executing AssignResources command")
         return [[result_code], [str(unique_id)]]
 

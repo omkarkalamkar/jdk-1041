@@ -4,7 +4,7 @@ import time
 from typing import Callable
 
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import HealthState
+from ska_tango_base.control_model import HealthState, ObsState
 from ska_tango_base.subarray import SKASubarray, SubarrayComponentManager
 from tango import DevState
 from tango.server import command
@@ -27,7 +27,7 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         )
         self._assigned_resources = []
 
-    def assign(self, resources):
+    def assign(self, resources, task_callback):
         self.logger.info("Resources: %s", resources)
         self._assigned_resources = ["0001"]
         return (ResultCode.OK, "")
@@ -251,6 +251,18 @@ class HelperSubArrayDevice(SKASubarray):
         :rtype: boolean
         """
         return True
+    
+    @command(
+        dtype_in=("str"),
+        doc_in="The input string in JSON format consists of receptorIDList.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def AssignResources(self, argin):
+        if self._obs_state != ObsState.IDLE:
+            self._obs_state = ObsState.IDLE
+            self.push_change_event("obsState", self._obs_state)
+        return [[ResultCode.OK], [""]]
 
     def is_ReleaseAllResources_allowed(self):
         """

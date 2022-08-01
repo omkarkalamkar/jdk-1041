@@ -9,7 +9,6 @@ from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 
-# from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
@@ -62,10 +61,16 @@ class AssignResources(AbstractAssignReleaseResources):
         :param task_abort_event: Check for abort, defaults to None
         :type task_abort_event: Event, optional
         """
+        # self.logger.debug(f"Assign_resources sign argin is:{argin}")
+        self.logger.debug("Executing submitted assign_resources task")
         # Indicate that the task has started
+        self.logger.debug(f"task_callback value is: {task_callback}")
+        # if task_callback:
         task_callback(status=TaskStatus.IN_PROGRESS)
-
-        ret_code, message = self.do(json.loads(argin))
+        self.logger.debug(f"task_callback value is: {task_callback}")
+        self.logger.debug("Executing do hook for centralnode mid")
+        ret_code, message = self.do(argin=json.dumps(argin))
+        self.logger.debug(f"json dumps for argin is: {argin}")
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
@@ -195,9 +200,12 @@ class AssignResources(AbstractAssignReleaseResources):
         #     self.logger,
         # )
         # json_argument = input_validator.loads(argin)
-
+        self.logger.debug("Actual do_mid hook")
         try:
+            self.logger.debug(f"argin is:{argin}")
+            self.logger.debug("loading json input string")
             json_argument = json.loads(argin)
+            self.logger.debug(f"Input json_argument is::{json_argument}")
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -230,6 +238,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 "subarray_id key is not present in the input json argument.",
             )
 
+        self.logger.debug("Calling Init_adapters for do_mid")
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -239,6 +248,7 @@ class AssignResources(AbstractAssignReleaseResources):
         ret_code, message = self.get_subarray_adapter(subarrayID)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
+        self.logger.debug(f"res_code after get_subarray_adapter::{ret_code} message after get_subarray_adapter::{message}")
 
         # check allocated dishes
         if "dish" not in json_argument:
@@ -255,14 +265,21 @@ class AssignResources(AbstractAssignReleaseResources):
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         for receptor_id in receptor_ids:
+            self.logger.debug(f"receptor_id is:{receptor_id}")
             dish_ID = "dish" + receptor_id
+            self.logger.debug(f"dish_ID is:{dish_ID}")
+            self.logger.debug(f"self.component_manager.is_assigned is:{self.component_manager.is_already_assigned}")
             if self.component_manager.is_already_assigned(dish_ID):
+                self.logger.debug(f"Inside cm, is_already_assigned, dish_ID is:{dish_ID}")
                 return self.generate_command_result(
                     ResultCode.FAILED,
                     ("Dish %s is already allocated", dish_ID),
                 )
+            else:
+                self.logger.info(f"Resources are not assigned")
 
         # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
+        self.logger.debug("Invoking AssignResources command on TMC subarrays")
         ret_code, message = self.send_command(
             [self.my_subarray_adapter],
             "Error in calling AssignResources on subarray",
@@ -271,12 +288,13 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-
+        self.logger.debug("AssignResources command on TMC subarrays is successful")
         return (ResultCode.OK, "")
 
     def update_resource_config_file(self, json_argument, id):
         """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
+        self.logger.debug("Checked for update_resource_configue_file")
         unique_id = self._skuid.fetch_skuid("eb")
         json_argument["sdp"][id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
