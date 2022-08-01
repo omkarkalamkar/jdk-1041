@@ -1,16 +1,15 @@
 import json
 import time
-import tango
 
 import numpy as np
 import pytest
+import tango
 from pytest_bdd import given, parsers, scenarios, then, when
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.dev_factory import DevFactory
 from ska_tango_base.control_model import HealthState, ObsState
 from tango import Database, DeviceProxy
 
-from tests.settings import SLEEP_TIME, logger
+from tests.settings import logger
 
 
 @given(
@@ -89,7 +88,7 @@ def check_internal_model(device_list):
         "the command is queued and executed in less than {seconds} ss"
     )
 )
-def check_command(central_node, command_name ,seconds ,change_event_callbacks):
+def check_command(central_node, command_name, seconds, change_event_callbacks):
     if pytest.command_result == "CommandNotAllowed":
         return
 
@@ -133,7 +132,7 @@ def check_command(central_node, command_name ,seconds ,change_event_callbacks):
         if elapsed_time > float(seconds):
             pytest.fail("Timeout occurred while executing the test")
         else:
-            executed=True
+            executed = True
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandsInQueue",
