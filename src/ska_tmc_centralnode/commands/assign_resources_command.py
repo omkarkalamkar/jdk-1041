@@ -65,7 +65,6 @@ class AssignResources(AbstractAssignReleaseResources):
         self.logger.debug("Executing submitted assign_resources task")
         # Indicate that the task has started
         self.logger.debug(f"task_callback value is: {task_callback}")
-        # if task_callback:
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.logger.debug(f"task_callback value is: {task_callback}")
         self.logger.debug("Executing do hook for centralnode mid")

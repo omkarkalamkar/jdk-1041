@@ -122,7 +122,7 @@ def test_low_assign_resources_command_fail_subarray(
         cm, adapter_factory, skuid, logger=logger
     )
     assign_res_command.assign_resources(
-        json.dumps(json_argument), logger=logger, task_callback=task_callback
+        json_argument, logger=logger, task_callback=task_callback
     )
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
