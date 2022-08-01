@@ -2,21 +2,22 @@ import json
 import time
 from os.path import dirname, join
 
+import mock
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import SubArrayAdapter
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
+from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
+from ska_tmc_centralnode.model.input import InputParameterMid
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
 
@@ -48,113 +49,91 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
 
 
 def get_release_resources_command_obj():
-    cm, start_time = create_cm()
+    cm, start_time = create_cm(input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
 
     my_adapter_factory = HelperAdapterFactory()
-
-    release_command = ReleaseResources(
-        cm, cm.op_state_model, my_adapter_factory
-    )
-    return release_command, my_adapter_factory
+    release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
+    return release_command, my_adapter_factory, cm
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_release_resources_command(tango_context):
-    logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
-    release_command, my_adapter_factory = get_release_resources_command_obj()
-
+def test_mid_release_resources_command(tango_context, task_callback):
+    _, _, cm = get_release_resources_command_obj()
+    cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
-    assert release_command.check_allowed()
-    (result_code, _) = release_command.do(release_input_str)
-    assert result_code == ResultCode.OK
-    for adapter in my_adapter_factory.adapters:
-        if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.ReleaseAllResources.assert_called()
-
-
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_release_resources_command_fail_subarray(tango_context):
-    logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    json_argument = json.loads(release_input_str)
+    cm.release_resources(json_argument, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
     )
 
-    my_adapter_factory = HelperAdapterFactory()
 
-    # include exception in ReleaseResources command
-    failing_dev = "ska_mid/tm_subarray_node/1"
-    my_adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"ReleaseAllResources.side_effect": Exception}
-    )
-
-    release_command = ReleaseResources(
-        cm, cm.op_state_model, my_adapter_factory
-    )
+def test_mid_release_resources_command_with_ok(tango_context, task_callback):
+    release_res_command, _, cm = get_release_resources_command_obj()
+    cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
-    assert release_command.check_allowed()
-    (result_code, message) = release_command.do(release_input_str)
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
+    json_argument = json.loads(release_input_str)
+    cm.release_resources(json_argument, task_callback=task_callback)
+    (res_code, _) = release_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.OK
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_release_resources_command_empty_input_json(tango_context):
-    logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
-    release_command, _ = get_release_resources_command_obj()
-    assert release_command.check_allowed()
-    (result_code, _) = release_command.do("")
-
-    assert result_code == ResultCode.FAILED
-
-
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_release_resources_command_missing_subarray_id(
-    tango_context,
+def test_mid_release_resources_command_fail_subarray(
+    tango_context, task_callback
 ):
-    logger.info("%s", tango_context)
-    release_command, _ = get_release_resources_command_obj()
+    cm, start_time = create_cm(input_parameter=InputParameterMid(None))
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    adapter_factory = HelperAdapterFactory()
+    failing_dev = "ska_mid/tm_subarray_node/1"
+    attrs = {"ReleaseResources.side_effect": Exception}
+    subarrayMock = mock.Mock(**attrs)
+    adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+    release_input_str = get_release_input_str()
+    json_argument = json.loads(release_input_str)
+    release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
+    release_res_command.release_resources(
+        json.dumps(json_argument), logger=logger, task_callback=task_callback
+    )
+    (res_code, _) = release_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
 
+
+def test_mid_release_resources_command_empty_input_json(
+    tango_context, task_callback
+):
+    release_res_command, _, cm = get_release_resources_command_obj()
+    cm.is_command_allowed("ReleaseResources")
+    cm.release_resources("", task_callback=task_callback)
+    (res_code, _) = release_res_command.do("")
+    assert res_code == ResultCode.FAILED
+
+
+def test_mid_release_resources_command_missing_subarray_id(
+    tango_context, task_callback
+):
+    release_res_command, _, cm = get_release_resources_command_obj()
+    cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
-    assert release_command.check_allowed()
-    (result_code, message) = release_command.do(json.dumps(json_argument))
-
-    assert result_code == ResultCode.FAILED
+    cm.release_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = release_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
 def test_telescope_release_resources_fail_check_allowed(tango_context):
-
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
-    cm.input_parameter.tm_dish_dev_names = []
-    release_command = ReleaseResources(
-        cm, cm.op_state_model, my_adapter_factory
-    )
+    cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
-        release_command.check_allowed()
+        cm.is_command_allowed("ReleaseResources")
