@@ -36,6 +36,10 @@ def devices_to_load():
     )
 
 
+# Modified the TelescopeStandby integration test as per latest base classes.
+# Review is expected for below tests.
+
+
 @pytest.mark.standby
 def test_low_telescope_standby_command(tango_context):
     logger.info("%s", tango_context)

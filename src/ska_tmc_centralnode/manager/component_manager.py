@@ -527,6 +527,9 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
+    # Modified the component manager to have the submit task functionality and
+    # is_command_allowed method for TelescopeStandby.
+    # Review is expected for telescope_standby and is_command_allowed method.
     def telescope_standby(self, task_callback: Callable = None):
         """
         Standby the Telescope.

@@ -12,6 +12,8 @@ from ska_tmc_centralnode.commands.abstract_command import (
 )
 
 
+# Added a method for setting the task status and firing the actual command.
+# Review is expected for the below command class.
 class TelescopeStandby(AbstractTelescopeOnOff):
     """
     A class for CentralNode's TelescopeStandby() command.
