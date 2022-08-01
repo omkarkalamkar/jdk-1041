@@ -193,7 +193,7 @@ class CNComponentManager(TmcComponentManager):
 
         :param dev_name: name of the device
         :type dev_name: str
-        :return: a device info1 failed
+        :return: a device info
         :rtype: DeviceInfo
         """
         return self.component.get_device(dev_name)
