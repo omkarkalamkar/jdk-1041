@@ -29,10 +29,8 @@ class TelescopeOn(AbstractTelescopeOnOff):
         **kwargs,
     ):
         super().__init__(
-            component_manager, adapter_factory, logger=logger, *args, **kwargs
+            component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
-        self._timeout_mccs = timeout_mccs
-        self._step_sleep = step_sleep
 
     def telescope_on(
         self,
