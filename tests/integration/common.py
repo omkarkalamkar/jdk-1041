@@ -98,6 +98,7 @@ def ensure_checked_devices(central_node):
             logger.debug(central_node.internalModel)
             pytest.fail("Timeout occurred while executing the test")
         json_model = json.loads(central_node.internalModel)
+    logger.debug("central_node.internalModel: %s", central_node.internalModel)
 
 
 def assert_event_arrived():

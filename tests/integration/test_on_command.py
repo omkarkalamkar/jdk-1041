@@ -66,6 +66,7 @@ def on_command(tango_context, centralnode_name, change_event_callbacks):
     assert central_node.telescopeState == tango.DevState.ON
 
 
+@pytest.mark.skip()
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_on_command_mid(tango_context, change_event_callbacks):

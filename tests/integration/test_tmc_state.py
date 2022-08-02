@@ -4,36 +4,27 @@ from ska_tmc_common.dev_factory import DevFactory
 from tango import DevState
 
 from tests.integration.common import devices_to_load  # noqa F401
-from tests.integration.common import (
-    assert_event_arrived,
-    ensure_checked_devices,
-)
+from tests.integration.common import ensure_checked_devices
 from tests.settings import logger
 
 
-def tmc_state(tango_context, central_node_name):
-    # import debugpy; debugpy.debug_this_thread()
-    pytest.event_arrived = False
-
-    def event_callback(evt):
-        assert not evt.err
-        logger.info(evt.attr_value.value)
-        if evt.attr_value.value == DevState.FAULT:
-            pytest.event_arrived = True
+# @pytest.mark.skip(
+#     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+# )
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_tmc_state_mid(tango_context, change_event_callbacks):
 
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device(central_node_name)
-
-    event_id = central_node.subscribe_event(
-        "tmOpState",
-        tango.EventType.CHANGE_EVENT,
-        event_callback,
-        stateless=True,
-    )
+    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
 
     ensure_checked_devices(central_node)
-
+    central_node.subscribe_event(
+        "tmOpState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["tmOpState"],
+    )
     csp_master_ln = dev_factory.get_device("ska_mid/tm_leaf_node/csp_master")
     sdp_master_ln = dev_factory.get_device("ska_mid/tm_leaf_node/sdp_master")
     csp_subarray_ln = dev_factory.get_device(
@@ -43,29 +34,17 @@ def tmc_state(tango_context, central_node_name):
         "ska_mid/tm_leaf_node/sdp_subarray01"
     )
     dish_ln = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
-    mccs_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/mccs_master")
-    # set state not handled directly by central node
+
     csp_master_ln.SetDirectState(DevState.FAULT)
     sdp_master_ln.SetDirectState(DevState.ON)
     csp_subarray_ln.SetDirectState(DevState.ON)
     sdp_subarray_ln.SetDirectState(DevState.ON)
     dish_ln.SetDirectState(DevState.ON)
-    mccs_master_ln.SetDirectState(DevState.FAULT)
-
-    assert_event_arrived()
-
+    change_event_callbacks.assert_change_event(
+        "tmOpState", DevState.FAULT, lookahead=5
+    )
     assert central_node.tmOpState == DevState.FAULT
-
-    central_node.unsubscribe_event(event_id)
-
-
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_tmc_state_mid(tango_context):
-    tmc_state(tango_context, "ska_mid/tm_central/central_node")
+    # change_event_callbacks.assert_not_called()
 
 
 @pytest.mark.skip(
@@ -73,5 +52,24 @@ def test_tmc_state_mid(tango_context):
 )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_tmc_state_low(tango_context):
-    tmc_state(tango_context, "ska_low/tm_central/central_node")
+def test_tmc_state_low(tango_context, change_event_callbacks):
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+
+    ensure_checked_devices(central_node)
+    central_node.subscribe_event(
+        "tmOpState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["tmOpState"],
+    )
+
+    mccs_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/mccs_master")
+    mccs_master_ln.SetDirectState(DevState.FAULT)
+
+    change_event_callbacks.assert_change_event(
+        "tmOpState", DevState.FAULT, lookahead=5
+    )
+
+    assert central_node.tmOpState == DevState.FAULT
+    # change_event_callbacks.assert_not_called()
