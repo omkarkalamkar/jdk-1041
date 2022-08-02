@@ -137,9 +137,6 @@ class HelperSubArrayDevice(SKASubarray):
         )
         return cm
 
-    def set_state(self, state):
-        return super().set_state(state)
-
     @command(
         dtype_in="DevState",
         doc_in="state to assign",
