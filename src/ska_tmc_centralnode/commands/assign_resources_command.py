@@ -61,7 +61,6 @@ class AssignResources(AbstractAssignReleaseResources):
         :param task_abort_event: Check for abort, defaults to None
         :type task_abort_event: Event, optional
         """
-        # self.logger.debug(f"Assign_resources sign argin is:{argin}")
         self.logger.debug("Executing submitted assign_resources task")
         # Indicate that the task has started
         self.logger.debug(f"task_callback value is: {task_callback}")

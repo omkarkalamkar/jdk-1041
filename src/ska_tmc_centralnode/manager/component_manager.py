@@ -537,15 +537,15 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
-        assignresources_command = AssignResources(
+        assign_resources_command = AssignResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        task_status, responce = self.submit_task(
-            assignresources_command.assign_resources,
+        task_status, response = self.submit_task(
+            assign_resources_command.assign_resources,
             args=[argin, self.logger],
             task_callback=task_callback,
         )
-        return task_status, responce
+        return task_status, response
 
     def is_command_allowed(self, command_name=None):
         """
@@ -560,16 +560,16 @@ class CNComponentManager(TmcComponentManager):
 
         :rtype: boolean
         """
+        if self.op_state_model.op_state in [
+            DevState.FAULT,
+            DevState.UNKNOWN,
+            DevState.DISABLE,
+        ]:
+            raise CommandNotAllowed(
+                "Command is not allowed in current state %s",
+                str(self.op_state_model.op_state),
+            )
         if command_name in ["TelescopeOn", "TelescopeOff"]:
-            if self.op_state_model.op_state in [
-                DevState.FAULT,
-                DevState.UNKNOWN,
-                DevState.DISABLE,
-            ]:
-                raise CommandNotAllowed(
-                    "Command is not allowed in current state %s",
-                    str(self.op_state_model.op_state),
-                )
             if isinstance(self._input_parameter, InputParameterMid):
                 self.logger.debug("Checking mid devices, as responsive or not")
                 self.check_if_csp_mln_is_responsive()
@@ -581,15 +581,6 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
-            if self.op_state_model.op_state in [
-                DevState.FAULT,
-                DevState.UNKNOWN,
-                DevState.DISABLE,
-            ]:
-                raise CommandNotAllowed(
-                    "Command is not allowed in current state %s",
-                    str(self.op_state_model.op_state),
-                )
             if isinstance(self._input_parameter, InputParameterMid):
                 self.logger.debug(
                     "For AssignResources/ReleaseResources Checking mid devices, as responsive or not"
@@ -604,4 +595,5 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_subarrays_are_responsive()
         else:
             self.logger.info("Condition other than expected commands")
+
         return True
