@@ -4,7 +4,6 @@ This module provided a reference implementation of a BaseComponentManager.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
-import json
 import time
 from typing import Callable, Optional
 
