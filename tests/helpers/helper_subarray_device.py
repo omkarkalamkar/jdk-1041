@@ -149,9 +149,7 @@ class HelperSubArrayDevice(SKASubarray):
 
         if self.dev_state() != argin:
             self.set_state(argin)
-            time.sleep(0.1)
             self.push_change_event("State", self.dev_state())
-            time.sleep(0.1)
 
     @command(
         dtype_in=int,
