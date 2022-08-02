@@ -8,7 +8,6 @@ from tests.integration.common import (  # noqa F401
     devices_to_load,
     ensure_checked_devices,
 )
-from tests.settings import logger
 
 
 @pytest.mark.post_deployment
@@ -23,36 +22,15 @@ def test_on_command_mid(tango_context, change_event_callbacks):
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    command_status_dict = {}
-    command_status = central_node.longRunningCommandStatus
-    logger.info(f"command_status: {command_status}, {len(command_status)}")
-    for index in range(0, len(command_status)):
-        logger.info(f"index: {index}")
-        if index % 2 == 0:
-            command_status_dict[command_status[index]] = command_status[
-                index + 1
-            ]
-
-    logger.info(f"command_status_dict: {command_status_dict}")
-
-    # Check whether the command status is IN_PROGRESS
-    command_executed = False
-    for command, status in reversed(list(command_status_dict.items())):
-        logger.info(f"command: {command}, {status}")
-        if unique_id[0] in command:
-            command_executed = True
-            assert status == "IN_PROGRESS"
-            break
-    assert command_executed is True, f"{command[0]} is not executed."
-
-    # Check whether the command ResultCode is OK
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=10,
-    )
-    logger.info(
-        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+        lookahead=2,
     )
 
     csp_master = dev_factory.get_device("mid_csp/elt/master")
@@ -90,35 +68,15 @@ def test_on_command_low(tango_context, change_event_callbacks):
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    command_status_dict = {}
-    command_status = central_node.longRunningCommandStatus
-    logger.info(f"command_status: {command_status}, {len(command_status)}")
-    for index in range(0, len(command_status)):
-        logger.info(f"index: {index}")
-        if index % 2 == 0:
-            command_status_dict[command_status[index]] = command_status[
-                index + 1
-            ]
-    logger.info(f"command_status_dict: {command_status_dict}")
-
-    # Check whether the command status is IN_PROGRESS
-    command_executed = False
-    for command, status in reversed(list(command_status_dict.items())):
-        logger.info(f"command: {command}, {status}")
-        if unique_id[0] in command:
-            command_executed = True
-            assert status == "IN_PROGRESS"
-            break
-    assert command_executed is True, f"{command[0]} is not executed."
-
-    # Check whether the command ResultCode is OK
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=3,
-    )
-    logger.info(
-        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+        lookahead=2,
     )
 
     mccs_master = dev_factory.get_device("low-mccs/control/control")
