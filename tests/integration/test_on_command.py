@@ -49,7 +49,7 @@ def test_on_command_mid(tango_context, change_event_callbacks):
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=5,
+        lookahead=10,
     )
     logger.info(
         f"longRunningCommandResult: {central_node.longRunningCommandResult}"
