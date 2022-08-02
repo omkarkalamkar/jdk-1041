@@ -39,8 +39,11 @@ class CentralNodeCommand(TMCCommand):
         command_name: str,
     ):
         try:
+            self.logger.debug("Inside try for invoke_command")
             for adapter in adapters:
+                self.logger.debug(f"for loop, adapter is:::{adapter}")
                 command_caller(adapter)
+                self.logger.debug(f"Command caller is::: {command_caller(adapter)}")
                 self.logger.debug(
                     f"Invoked {command_name} on device {adapter.dev_name}"
                 )
@@ -52,13 +55,17 @@ class CentralNodeCommand(TMCCommand):
         return (ResultCode.OK, "")
 
     def send_command(self, adapters, description, command, argin=None):
+        self.logger.debug(f"Inside send_command::argin is::{argin}")
+        self.logger.debug(f"Inside send_command::argin is::{argin} adapters are {adapters} description is{description} command is::{command}")
         if argin:
+            self.logger.debug(f"Inside send_command, if condition::argin is::{argin}")
             return self.invoke_command(
                 adapters,
                 operator.methodcaller(command, argin),
                 description,
                 command,
             )
+        self.logger.debug("Outside if condition::")
         return self.invoke_command(
             adapters, operator.methodcaller(command), description, command
         )

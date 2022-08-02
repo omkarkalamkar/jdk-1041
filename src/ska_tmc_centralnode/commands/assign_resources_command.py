@@ -264,24 +264,27 @@ class AssignResources(AbstractAssignReleaseResources):
                 )
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
+        self.logger.debug(f"receptor_ids are:{receptor_ids}")
         for receptor_id in receptor_ids:
             self.logger.debug(f"receptor_id is:{receptor_id}")
             dish_ID = "dish" + receptor_id
             self.logger.debug(f"dish_ID is:{dish_ID}")
+            self.logger.debug(f"Type for dish_ID is:{type(dish_ID)}")
+            self.logger.debug(f"Type str dish_ID is:{str(dish_ID)}")
             self.logger.debug(
                 f"self.component_manager.is_assigned is:{self.component_manager.is_already_assigned(dish_ID)}"
             )
             # TODO: WIP for the below method
-            # if self.component_manager.is_already_assigned(dish_ID):
-            #     self.logger.debug(
-            #         f"Inside cm, is_already_assigned, dish_ID is:{dish_ID}"
-            #     )
-            #     return self.generate_command_result(
-            #         ResultCode.FAILED,
-            #         ("Dish %s is already allocated", dish_ID),
-            #     )
-            # else:
-            #     self.logger.info("Resources are not assigned")
+            if self.component_manager.is_already_assigned(dish_ID):
+                self.logger.debug(
+                    f"Inside cm, is_already_assigned, dish_ID is:{str(dish_ID)}"
+                )
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    ("Dish %s is already allocated", dish_ID),
+                )
+            else:
+                self.logger.info("Resources are not assigned")
 
         # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
         self.logger.debug("Invoking AssignResources command on TMC subarrays")

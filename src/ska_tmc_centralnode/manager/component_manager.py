@@ -5,7 +5,8 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 import time
-from typing import Callable
+from typing import Callable, Optional
+import json
 
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
@@ -173,7 +174,7 @@ class CNComponentManager(TmcComponentManager):
 
         :return: list of the monitored devices
         """
-        return self._component._devices
+        return self._component.devices
 
     @property
     def checked_devices(self):
@@ -389,7 +390,6 @@ class CNComponentManager(TmcComponentManager):
             if isinstance(devInfo, SubArrayDeviceInfo):
                 if dishId in devInfo.resources:
                     return True
-
         return False
 
     def _aggregate_health_state(self):
@@ -531,12 +531,13 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, responce
 
-    def assign_resources(self, argin, task_callback: Callable = None):
+    def assign_resources(self, argin, task_callback: Optional[Callable] = None):
         """
         Submit the AssignResources command in queue.
 
         :return: a result code and message
         """
+        self.logger.debug(f"Assign_resources sign argin is:{argin}")
         assign_resources_command = AssignResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
