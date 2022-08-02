@@ -28,7 +28,7 @@ def release_resources(
     central_node = dev_factory.get_device(central_node_name)
     ensure_checked_devices(central_node)
 
-    result_on, unique_id_on = central_node.TelescopeOn()
+    _, unique_id_on = central_node.TelescopeOn()
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
