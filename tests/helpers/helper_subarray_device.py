@@ -1,6 +1,5 @@
 # Note: This helper class module is explicitly required for CentralNode. Hence kept it here and not in ska-tmc-common repo.
 import logging
-import time
 from typing import Callable
 
 from ska_tango_base.commands import ResultCode
