@@ -4,9 +4,9 @@ This module provided a reference implementation of a BaseComponentManager.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+import json
 import time
 from typing import Callable, Optional
-import json
 
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
@@ -531,7 +531,9 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, responce
 
-    def assign_resources(self, argin, task_callback: Optional[Callable] = None):
+    def assign_resources(
+        self, argin, task_callback: Optional[Callable] = None
+    ):
         """
         Submit the AssignResources command in queue.
 
