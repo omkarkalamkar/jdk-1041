@@ -53,7 +53,6 @@ def test_on_command_mid(tango_context, change_event_callbacks):
         "telescopeState", tango._tango.DevState.ON, lookahead=2
     )
     assert central_node.telescopeState == tango.DevState.ON
-    change_event_callbacks.assert_not_called()
 
 
 @pytest.mark.post_deployment
@@ -92,4 +91,3 @@ def test_on_command_low(tango_context, change_event_callbacks):
         "telescopeState", tango._tango.DevState.ON, lookahead=2
     )
     assert central_node.telescopeState == tango.DevState.ON
-    change_event_callbacks.assert_not_called()
