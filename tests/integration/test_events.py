@@ -132,8 +132,9 @@ def commands_in_queue_events(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=8,
+        lookahead=5,
     )
+    change_event_callbacks.assert_not_called()
 
 
 # @pytest.mark.skip(

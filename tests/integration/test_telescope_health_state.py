@@ -34,6 +34,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     )
 
     assert central_node.telescopeHealthState == HealthState.DEGRADED
+    change_event_callbacks.assert_not_called()
 
 
 # @pytest.mark.skip(
@@ -61,3 +62,4 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     )
 
     assert central_node.telescopeHealthState == HealthState.DEGRADED
+    change_event_callbacks.assert_not_called()

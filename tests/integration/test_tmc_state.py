@@ -44,7 +44,7 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
         "tmOpState", DevState.FAULT, lookahead=5
     )
     assert central_node.tmOpState == DevState.FAULT
-    # change_event_callbacks.assert_not_called()
+    change_event_callbacks.assert_not_called()
 
 
 @pytest.mark.skip(
@@ -72,4 +72,4 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
     )
 
     assert central_node.tmOpState == DevState.FAULT
-    # change_event_callbacks.assert_not_called()
+    change_event_callbacks.assert_not_called()
