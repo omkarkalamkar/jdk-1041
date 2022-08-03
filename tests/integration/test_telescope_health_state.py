@@ -30,11 +30,21 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     sdp_master.SetDirectHealthState(HealthState.DEGRADED)
 
     change_event_callbacks.assert_change_event(
-        "telescopeHealthState", HealthState.DEGRADED, lookahead=5
+        "telescopeHealthState", HealthState.DEGRADED, lookahead=2
     )
 
     assert central_node.telescopeHealthState == HealthState.DEGRADED
-    change_event_callbacks.assert_not_called()
+
+    # tear down
+    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master.SetDirectHealthState(HealthState.OK)
+
+    change_event_callbacks.assert_change_event(
+        "telescopeHealthState", HealthState.OK, lookahead=2
+    )
+
+    assert central_node.telescopeHealthState == HealthState.OK
+    # change_event_callbacks.assert_not_called()
 
 
 # @pytest.mark.skip(
@@ -62,4 +72,4 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     )
 
     assert central_node.telescopeHealthState == HealthState.DEGRADED
-    change_event_callbacks.assert_not_called()
+    # change_event_callbacks.assert_not_called()
