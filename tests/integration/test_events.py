@@ -125,7 +125,7 @@ def commands_in_queue_events(
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    result, unique_id = central_node.TelescopeOn()
+    _, unique_id = central_node.TelescopeOn()
     logger.info(
         f"longRunningCommandResult: {central_node.longRunningCommandResult}"
     )
