@@ -30,7 +30,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         **kwargs,
     ):
         super().__init__(
-            component_manager, adapter_factory, logger=logger, *args, **kwargs
+            component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
