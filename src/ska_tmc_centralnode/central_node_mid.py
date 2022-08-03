@@ -283,12 +283,17 @@ class CentralNodeMid(AbstractCentralNode):
     #     self.log_state("Device states after executing StowAntennas command")
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
+    # Modified the tango device class to have Submitted slow command functionality.
+    # Review is expected for below method.
     def init_command_objects(self):
         """
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        for (command_name, method_name) in [("TelescopeOn", "telescope_on")]:
+        for (command_name, method_name) in [
+            ("TelescopeOn", "telescope_on"),
+            ("TelescopeOff", "telescope_off"),
+        ]:
             self.register_command_object(
                 command_name,
                 SubmittedSlowCommand(

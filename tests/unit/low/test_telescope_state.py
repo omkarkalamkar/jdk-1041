@@ -41,6 +41,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
+@pytest.mark.skip("Needs update in helper devices")
 def test_telescope_state_init(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(

@@ -18,6 +18,8 @@ from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
+# Modified the tango device class to have Submitted slow command functionality.
+# Review is expected for is_TelescopeOff_allowed and TelescopeOff methods.
 class AbstractCentralNode(TMCBaseDevice):
     """
     Central Node is a coordinator of the complete Telescope system.
@@ -284,33 +286,28 @@ class AbstractCentralNode(TMCBaseDevice):
     #     )
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    # def is_TelescopeOff_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    def is_TelescopeOff_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device state.
 
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("TelescopeOff")
-    #     return handler.check_allowed()
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("TelescopeOff")
 
-    # @command(dtype_out="DevVarLongStringArray")
-    # def TelescopeOff(self):
-    #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
-    #     on CspMasterLeafNode and SdpMasterLeafNode.
+    @command(dtype_out="DevVarLongStringArray")
+    def TelescopeOff(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
+        on CspMasterLeafNode and SdpMasterLeafNode.
 
-    #     """
-    #     self.log_state("Device states before executing Telescope Off command")
-    #     handler = self.get_command_object("TelescopeOff")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing Telescope Off command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
+        """
+        self.log_state("Device states before executing Telescope Off command")
+        handler = self.get_command_object("TelescopeOff")
+        result_code, unique_id = handler()
+        self.log_state("Device states after  executing Telescope Off command")
+        return [[result_code], [str(unique_id)]]
 
     def is_On_allowed(self):
         """
@@ -477,37 +474,31 @@ class AbstractCentralNode(TMCBaseDevice):
     #     )
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    # def is_Off_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    def is_Off_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device state.
 
-    #     :rtype: boolean
-    #     """
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("Off")
 
-    #     handler = self.get_command_object("Off")
-    #     return handler.check_allowed()
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    def Off(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode,
+        TelescopeOff() command on CspMasterLeafNode and
+        SdpMasterLeafNode.
 
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
-    # def Off(self):
-    #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode,
-    #     TelescopeOff() command on CspMasterLeafNode and
-    #     SdpMasterLeafNode.
-
-    #     """
-    #     self.log_state("Device states before executing Off command")
-    #     handler = self.get_command_object("Off")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing Off command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
+        """
+        self.log_state("Device states before executing Off command")
+        handler = self.get_command_object("Off")
+        result_code, unique_id = handler()
+        self.log_state("Device states before executing Off command")
+        return [[result_code], [str(unique_id)]]
 
     # default ska mid
     def create_component_manager(self):

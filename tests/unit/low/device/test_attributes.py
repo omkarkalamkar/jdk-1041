@@ -59,7 +59,6 @@ def test_attributes(central_node_device):
     assert central_node_device.mccsMasterNodeName == ""
     central_node_device.mccsMasterNodeName = "mccs"
     assert central_node_device.mccsMasterNodeName == "mccs"
-
     assert central_node_device.tmOpstate == DevState.UNKNOWN
     assert len(central_node_device.subarrayDevNames) == 0
     central_node_device.subarrayDevNames = ["subarray1"]
