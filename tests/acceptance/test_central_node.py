@@ -52,7 +52,7 @@ def call_command(central_node, command_name):
 @then("it correctly reports the failed and working devices")
 def check_internal_model(device_list):
     json_model = json.loads(pytest.internal_model)
-    print("Json model is", json_model)
+    logger.info(f"Json model is{json_model}")
     for dev in json_model["devices"]:
         running_dev = None
         for exported_dev in device_list.value_string:
@@ -63,7 +63,6 @@ def check_internal_model(device_list):
             assert dev["unresponsive"] == "True"
             assert dev["exception"] != "None"
             continue
-
         assert "DevState." + str(running_dev.State()) == dev["state"]
         assert str(HealthState(running_dev.healthState)) == dev["healthState"]
 
@@ -76,11 +75,6 @@ def check_internal_model(device_list):
                     np.asarray(running_dev.assignedResources)
                     == dev["resources"]
                 )
-            id = -1
-            for s in running_dev.dev_name():
-                if s.isdigit():
-                    id = int(s)
-            assert id == int(dev["id"])
 
 
 @then(
@@ -116,7 +110,6 @@ def check_command(central_node, command_name, seconds, change_event_callbacks):
         next_result = change_event_callbacks.assert_against_call(
             "longRunningCommandResult",
         )
-        logger.info(f"longRunningCommandResult is {next_result}")
         command_id, result = next_result["attribute_value"]
 
         if command_id != unique_id:
