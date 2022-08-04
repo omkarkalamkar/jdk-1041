@@ -16,7 +16,6 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         logger: logging.Logger,
         communication_state_callback: Callable,
         component_state_callback: Callable,
-        _update_assigned_resources_callback=None,
         **state
     ):
         self.logger = logger
@@ -27,10 +26,10 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
             **state
         )
         self._assigned_resources = []
-        # self._update_assigned_resources_callback = _update_assigned_resources_callback
 
     def assign(self, resources, task_callback):
-        # self.logger.info("Resources: %s", resources
+        self.logger.info("Resources: %s", resources)
+        self.logger.info("task_callback: %s", task_callback)
         self._assigned_resources = ["0001"]
         return (ResultCode.OK, "")
 
@@ -152,7 +151,6 @@ class HelperSubArrayDevice(SKASubarray):
             logger=self.logger,
             communication_state_callback=None,
             component_state_callback=None,
-            # _update_assigned_resources_callback = self.update_assigned_resources_callback,
         )
         return cm
 
@@ -308,20 +306,3 @@ class HelperSubArrayDevice(SKASubarray):
         :rtype: boolean
         """
         return True
-
-    # def init_command_objects(self):
-    #     super().init_command_objects()
-
-    #     for (command_name, method_name) in [
-    #         ("AssignResources", "assign")
-    #     ]:
-    #         self.register_command_object(
-    #             command_name,
-    #             SubmittedSlowCommand(
-    #                 command_name,
-    #                 self._command_tracker,
-    #                 self.component_manager,
-    #                 method_name,
-    #                 logger=None,
-    #             ),
-    #         )
