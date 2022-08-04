@@ -2,13 +2,12 @@
 import logging
 import time
 from typing import Callable
-from tango.server import attribute
-from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
+
+from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
 from ska_tango_base.subarray import SKASubarray, SubarrayComponentManager
-from ska_tango_base.base import SKABaseDevice
 from tango import DevState
-from tango.server import command
+from tango.server import attribute, command
 
 
 class EmptySubArrayComponentManager(SubarrayComponentManager):
@@ -147,7 +146,7 @@ class HelperSubArrayDevice(SKASubarray):
         :return: Resources assigned to the device.
         """
         return self._resources_assigned
-    
+
     def create_component_manager(self):
         cm = EmptySubArrayComponentManager(
             logger=self.logger,
