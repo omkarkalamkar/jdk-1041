@@ -103,10 +103,11 @@ def assign_resouces(
     #     return len_subarray_beam_ids + len_station_ids + len_channel_blocks
 
     subarray_node = dev_factory.get_device("ska_mid/tm_subarray_node/1")
-    logger.info(f"subarray_node.assignedResources::::{subarray_node.assignedResources}")
+    logger.info(
+        f"subarray_node.assignedResources::::{subarray_node.assignedResources}"
+    )
     logger.info(f"subarray_node.ObsState::::{subarray_node.obsState}")
     logger.info(f"subarray_node.State::::{subarray_node.State()}")
-
 
     if "ska_mid" in central_node_name:
         device = get_subarray_device(json.loads(central_node.internalModel))
