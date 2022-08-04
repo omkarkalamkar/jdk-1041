@@ -218,7 +218,7 @@ class AbstractCentralNode(TMCBaseDevice):
         result_code, unique_id = handler()
         return [[result_code], [str(unique_id)]]
 
-    # TODO: Refactor below commands as a part of separate command refactoring
+    # TODO: check with OET if these commands are required else it can be removed.
     # def is_StartUpTelescope_allowed(self):
     #     """
     #     Checks whether this command is allowed to be run in current device state.

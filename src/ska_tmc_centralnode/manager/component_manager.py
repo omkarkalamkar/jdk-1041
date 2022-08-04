@@ -538,7 +538,6 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
-        self.logger.debug(f"Assign_resources sign argin is:{argin}")
         assign_resources_command = AssignResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )

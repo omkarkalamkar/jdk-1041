@@ -61,14 +61,10 @@ class AssignResources(AbstractAssignReleaseResources):
         :param task_abort_event: Check for abort, defaults to None
         :type task_abort_event: Event, optional
         """
-        self.logger.debug("Executing submitted assign_resources task")
         # Indicate that the task has started
-        self.logger.debug(f"task_callback value is: {task_callback}")
         task_callback(status=TaskStatus.IN_PROGRESS)
-        self.logger.debug(f"task_callback value is: {task_callback}")
         self.logger.debug("Executing do hook for centralnode mid")
         ret_code, message = self.do(argin=json.dumps(argin))
-        self.logger.debug(f"json dumps for argin is: {argin}")
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
@@ -203,7 +199,6 @@ class AssignResources(AbstractAssignReleaseResources):
             self.logger.debug(f"argin is:{argin}")
             self.logger.debug("loading json input string")
             json_argument = json.loads(argin)
-            self.logger.debug(f"Input json_argument is::{json_argument}")
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -272,16 +267,16 @@ class AssignResources(AbstractAssignReleaseResources):
             self.logger.debug(f"Type for dish_ID is:{type(dish_ID)}")
             self.logger.debug(f"Type str dish_ID is:{str(dish_ID)}")
             # TODO: WIP for the below method
-            if self.component_manager.is_already_assigned(dish_ID):
-                self.logger.debug(
-                    f"Inside cm, is_already_assigned, dish_ID is:{str(dish_ID)}"
-                )
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    ("Dish %s is already allocated", dish_ID),
-                )
-            else:
-                self.logger.info("Resources are not assigned")
+            # if self.component_manager.is_already_assigned(dish_ID):
+            #     self.logger.debug(
+            #         f"Inside cm, is_already_assigned, dish_ID is:{str(dish_ID)}"
+            #     )
+            #     return self.generate_command_result(
+            #         ResultCode.FAILED,
+            #         ("Dish %s is already allocated", dish_ID),
+            #     )
+            # else:
+            #     self.logger.info("Resources are not assigned")
 
         # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
         self.logger.debug("Invoking AssignResources command on TMC subarrays")
@@ -294,14 +289,13 @@ class AssignResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
         self.logger.debug(
-            "AssignResources command on TMC subarrays is successful"
+            "AssignResources command on TMC Subarrays is Successful."
         )
         return (ResultCode.OK, "")
 
     def update_resource_config_file(self, json_argument, id):
         """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
-        self.logger.debug("Checked for update_resource_configue_file")
         unique_id = self._skuid.fetch_skuid("eb")
         json_argument["sdp"][id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
