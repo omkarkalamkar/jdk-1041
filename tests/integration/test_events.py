@@ -111,7 +111,7 @@ def test_internal_model_events_low(tango_context):
     central_node.unsubscribe_event(event_id)
 
 
-def commands_in_queue_events(
+def commands_result_events(
     tango_context, change_event_callbacks, central_node_name
 ):
     logger.info("%s", tango_context)
@@ -132,8 +132,7 @@ def commands_in_queue_events(
     logger.info(
         f"longRunningCommandResult: {central_node.longRunningCommandResult}"
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
@@ -145,8 +144,8 @@ def commands_in_queue_events(
 # )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_command_in_queue_events_mid(tango_context, change_event_callbacks):
-    commands_in_queue_events(
+def test_command_result_events_mid(tango_context, change_event_callbacks):
+    commands_result_events(
         tango_context,
         change_event_callbacks,
         "ska_mid/tm_central/central_node",
@@ -158,8 +157,8 @@ def test_command_in_queue_events_mid(tango_context, change_event_callbacks):
 )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_command_in_queue_events_low(tango_context, change_event_callbacks):
-    commands_in_queue_events(
+def test_command_result_events_low(tango_context, change_event_callbacks):
+    commands_result_events(
         tango_context,
         change_event_callbacks,
         "ska_low/tm_central/central_node",

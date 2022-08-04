@@ -43,8 +43,8 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
     csp_subarray_ln.SetDirectState(DevState.ON)
     sdp_subarray_ln.SetDirectState(DevState.ON)
     dish_ln.SetDirectState(DevState.ON)
-    change_event_callbacks.assert_change_event(
-        "tmOpState", DevState.FAULT, lookahead=2
+    change_event_callbacks["tmOpState"].assert_change_event(
+        DevState.FAULT, lookahead=2
     )
     assert central_node.tmOpState == DevState.FAULT
     # change_event_callbacks.assert_not_called()
@@ -70,8 +70,8 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
     mccs_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/mccs_master")
     mccs_master_ln.SetDirectState(DevState.FAULT)
 
-    change_event_callbacks.assert_change_event(
-        "tmOpState", DevState.FAULT, lookahead=2
+    change_event_callbacks["tmOpState"].assert_change_event(
+        DevState.FAULT, lookahead=2
     )
 
     assert central_node.tmOpState == DevState.FAULT
