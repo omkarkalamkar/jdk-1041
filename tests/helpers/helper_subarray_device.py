@@ -2,10 +2,11 @@
 import logging
 import time
 from typing import Callable
-
-from ska_tango_base.commands import ResultCode
+from tango.server import attribute
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tango_base.control_model import HealthState, ObsState
 from ska_tango_base.subarray import SKASubarray, SubarrayComponentManager
+from ska_tango_base.base import SKABaseDevice
 from tango import DevState
 from tango.server import command
 
@@ -16,6 +17,7 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         logger: logging.Logger,
         communication_state_callback: Callable,
         component_state_callback: Callable,
+        _update_assigned_resources_callback=None,
         **state
     ):
         self.logger = logger
@@ -26,9 +28,10 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
             **state
         )
         self._assigned_resources = []
+        # self._update_assigned_resources_callback = _update_assigned_resources_callback
 
     def assign(self, resources, task_callback):
-        self.logger.info("Resources: %s", resources)
+        # self.logger.info("Resources: %s", resources
         self._assigned_resources = ["0001"]
         return (ResultCode.OK, "")
 
@@ -119,6 +122,7 @@ class HelperSubArrayDevice(SKASubarray):
     def init_device(self):
         super().init_device()
         self._health_state = HealthState.OK
+        self._resources_assigned = []
 
     class InitCommand(SKASubarray.InitCommand):
         def do(self):
@@ -129,11 +133,27 @@ class HelperSubArrayDevice(SKASubarray):
             self._device.set_change_event("assignedResources", True, False)
             return (ResultCode.OK, "")
 
+    """Device attribute."""
+    assignedResources = attribute(
+        dtype=("str",),
+        max_dim_x=100,
+        doc="The list of resources assigned to the subarray.",
+    )
+
+    def read_assignedResources(self):
+        """
+        Read the resources assigned to the device.
+
+        :return: Resources assigned to the device.
+        """
+        return self._resources_assigned
+    
     def create_component_manager(self):
         cm = EmptySubArrayComponentManager(
             logger=self.logger,
             communication_state_callback=None,
             component_state_callback=None,
+            # _update_assigned_resources_callback = self.update_assigned_resources_callback,
         )
         return cm
 
@@ -181,6 +201,7 @@ class HelperSubArrayDevice(SKASubarray):
     def On(self):
         if self.dev_state() != DevState.ON:
             self.set_state(DevState.ON)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_Off_allowed(self):
@@ -193,6 +214,7 @@ class HelperSubArrayDevice(SKASubarray):
     def Off(self):
         if self.dev_state() != DevState.OFF:
             self.set_state(DevState.OFF)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_Standby_allowed(self):
@@ -205,6 +227,7 @@ class HelperSubArrayDevice(SKASubarray):
     def Standby(self):
         if self.dev_state() != DevState.STANDBY:
             self.set_state(DevState.STANDBY)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_TelescopeOn_allowed(self):
@@ -217,6 +240,7 @@ class HelperSubArrayDevice(SKASubarray):
     def TelescopeOn(self):
         if self.dev_state() != DevState.ON:
             self.set_state(DevState.ON)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_TelescopeOff_allowed(self):
@@ -229,6 +253,7 @@ class HelperSubArrayDevice(SKASubarray):
     def TelescopeOff(self):
         if self.dev_state() != DevState.OFF:
             self.set_state(DevState.OFF)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_TelescopeStandBy_allowed(self):
@@ -241,6 +266,7 @@ class HelperSubArrayDevice(SKASubarray):
     def TelescopeStandBy(self):
         if self.dev_state() != DevState.STANDBY:
             self.set_state(DevState.STANDBY)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_AssignResources_allowed(self):
@@ -262,6 +288,8 @@ class HelperSubArrayDevice(SKASubarray):
         if self._obs_state != ObsState.IDLE:
             self._obs_state = ObsState.IDLE
             self.push_change_event("obsState", self._obs_state)
+        self._resources_assigned = ["0001"]
+        self.push_change_event("assignedResources", self._resources_assigned)
         return [[ResultCode.OK], [""]]
 
     def is_ReleaseAllResources_allowed(self):
@@ -281,3 +309,20 @@ class HelperSubArrayDevice(SKASubarray):
         :rtype: boolean
         """
         return True
+
+    # def init_command_objects(self):
+    #     super().init_command_objects()
+
+    #     for (command_name, method_name) in [
+    #         ("AssignResources", "assign")
+    #     ]:
+    #         self.register_command_object(
+    #             command_name,
+    #             SubmittedSlowCommand(
+    #                 command_name,
+    #                 self._command_tracker,
+    #                 self.component_manager,
+    #                 method_name,
+    #                 logger=None,
+    #             ),
+    #         )

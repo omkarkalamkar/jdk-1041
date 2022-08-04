@@ -102,6 +102,12 @@ def assign_resouces(
     #         )
     #     return len_subarray_beam_ids + len_station_ids + len_channel_blocks
 
+    subarray_node = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+    logger.info(f"subarray_node.assignedResources::::{subarray_node.assignedResources}")
+    logger.info(f"subarray_node.ObsState::::{subarray_node.obsState}")
+    logger.info(f"subarray_node.State::::{subarray_node.State()}")
+
+
     if "ska_mid" in central_node_name:
         device = get_subarray_device(json.loads(central_node.internalModel))
         logger.debug(f"obtained device is:{device}")
@@ -139,6 +145,7 @@ def assign_resouces(
 # @pytest.mark.xfail(
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 # )
+@pytest.mark.lily
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
