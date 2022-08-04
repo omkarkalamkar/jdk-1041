@@ -47,16 +47,12 @@ def test_standby_command_mid(tango_context, change_event_callbacks):
     assert unique_id[0].endswith("TelescopeStandby")
     assert result[0] == ResultCode.QUEUED
 
-    command_status_dict = {}
     command_status = central_node.longRunningCommandStatus
+    command_status_dict = {
+        command_status[i]: command_status[i + 1]
+        for i in range(0, len(command_status), 2)
+    }
     logger.info(f"command_status: {command_status}, {len(command_status)}")
-    for index in range(0, len(command_status)):
-        logger.info(f"index: {index}")
-        if index % 2 == 0:
-            command_status_dict[command_status[index]] = command_status[
-                index + 1
-            ]
-
     logger.info(f"command_status_dict: {command_status_dict}")
 
     # Check whether the command status is IN_PROGRESS
