@@ -1,13 +1,15 @@
+import threading
 import time
+from typing import Callable, Optional
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
-
 
 class TelescopeOff(AbstractTelescopeOnOff):
     """
@@ -16,22 +18,52 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
     def __init__(
         self,
-        target,
-        pop_state_model,
+        component_manager,
         adapter_factory=None,
         timeout_subarrays=3,
         step_sleep=0.1,
-        *args,
         logger=None,
+        *args,
         **kwargs,
     ):
         super().__init__(
-            target, pop_state_model, adapter_factory, args, logger, kwargs
+            component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
-        # TODO: Moved to do method for testing
-        # self.init_adapters()
+
+    def telescope_off(
+        self,
+        logger,
+        task_callback: Callable = None,
+        task_abort_event: Optional[threading.Event] = None,
+    ):
+
+        """This is a long running method
+
+        :param logger: logger
+        :type logger: logging.Logger
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :param task_abort_event: Check for abort, defaults to None
+        :type task_abort_event: Event, optional
+        """
+
+        task_callback(status=TaskStatus.IN_PROGRESS)
+
+        ret_code, message = self.do(argin=None)
+        self.logger.info(message)
+        if ret_code == ResultCode.FAILED:
+            task_callback(
+                status=TaskStatus.FAILED,
+                result=ResultCode.FAILED,
+                exception=message,
+            )
+        else:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=ResultCode.OK,
+            )
 
     def do_mid(self, argin=None):
         """
@@ -46,8 +78,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
             (ResultCode, str)
 
         """
-        component_manager = self.target
-        component_manager.component.desired_telescope_state = DevState.OFF
+        self.component_manager.component.desired_telescope_state = DevState.OFF
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -66,7 +97,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(
+                    not self.component_manager.get_device(
                         adapter.dev_name
                     ).obs_state
                     == ObsState.EMPTY
@@ -95,23 +126,26 @@ class TelescopeOff(AbstractTelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_off_csp(self):
+        self.logger.info("TelescopeOff for Csp devices")
         return self.send_command(
             [self.tm_leaf_csp_master_adapter],
-            "Error in calling TelescopeOff() on TMC CSP Subarray leaf",
+            f"Error in calling Off() command for {self.tm_leaf_csp_master_adapter}",
             "Off",
         )
 
     def turn_off_sdp(self):
+        self.logger.info("TelescopeOff for Sdp devices")
         return self.send_command(
             [self.tm_leaf_sdp_master_adapter],
-            "Error in calling TelescopeOff() on TMC SDP Subarray leaf",
+            f"Error in calling Off() command for {self.tm_leaf_sdp_master_adapter}",
             "Off",
         )
 
     def turn_off_subarrays(self):
+        self.logger.info("TelescopeOff for tm subarrays  devices")
         return self.send_command(
             self.tm_subarray_adapters,
-            "Error in calling TelescopeOff() in TM Subarray",
+            f"Error in calling Off() for {self.tm_subarray_adapters}",
             "Off",
         )
 
@@ -123,9 +157,10 @@ class TelescopeOff(AbstractTelescopeOnOff):
         )
 
     def set_standby_lp_mode_dishes(self):
+        self.logger.info("TelescopeOff for dish devices")
         return self.send_command(
             self.tm_dish_adapters,
-            "Error in calling TelescopeOff() on TMC Dish leaf node",
+            f"Error in calling SetStandbyLPMode()command on {self.tm_dish_adapters}",
             "SetStandbyLPMode",
         )
 
@@ -142,8 +177,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
             (ResultCode, str)
 
         """
-        component_manager = self.target
-        component_manager.component.desired_telescope_state = DevState.OFF
+        self.component_manager.component.desired_telescope_state = DevState.OFF
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -162,7 +196,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
             all_empty = True
             for adapter in self.tm_subarray_adapters:
                 if (
-                    not component_manager.get_device(
+                    not self.component_manager.get_device(
                         adapter.dev_name
                     ).obs_state
                     == ObsState.EMPTY
@@ -188,6 +222,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
     def turn_off_mccs_mln(self):
         return self.send_command(
             [self.tm_leaf_mccs_master_adapter],
-            "Error in calling TelescopeOff() in TM MCCS Master Leaf",
+            f"Error in calling TelescopeOff() for {self.tm_leaf_mccs_master_adapter}",
             "Off",
         )

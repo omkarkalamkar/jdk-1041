@@ -26,12 +26,13 @@ def central_node_device(request):
 def test_commands(central_node_device):
     try:
         central_node_device.TelescopeOn()
+        central_node_device.TelescopeOff()
+        central_node_device.off()
+
     except Exception as ex:
         assert "CommandNotAllowed" in str(ex)
 
     with pytest.raises(Exception):
-        central_node_device.Off()
-        central_node_device.TelescopeOff()
         central_node_device.StartUpTelescope()
         central_node_device.StandByTelescope()
         central_node_device.Standby()

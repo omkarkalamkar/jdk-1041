@@ -14,3 +14,13 @@ def test_telescope_on():
     res_code, message = cm.telescope_on()
     assert res_code == TaskStatus.QUEUED
     assert message == "Task queued"
+
+
+def test_telescope_off():
+    op_state_model = TMCOpStateModel(logger)
+    cm = CNComponentManager(
+        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
+    )
+    res_code, message = cm.telescope_off()
+    assert res_code == TaskStatus.QUEUED
+    assert message == "Task queued"
