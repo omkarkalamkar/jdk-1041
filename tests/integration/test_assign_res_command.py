@@ -37,8 +37,6 @@ def assign_resouces(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    logger.info("Asserted resultcode as queued")
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
@@ -71,10 +69,6 @@ def assign_resouces(
         lookahead=4,
     )
 
-    logger.info(
-        f"For AssignResources:::Command ID: {unique_id} longRunningCommandResult result::: {central_node.longRunningCommandResult}"
-    )
-
     def get_subarray_device(json_model):
         for device in json_model["devices"]:
             if device["dev_name"] == "ska_mid/tm_subarray_node/1":
@@ -101,13 +95,6 @@ def assign_resouces(
                 mccs_device["resources"]["channel_blocks"]
             )
         return len_subarray_beam_ids + len_station_ids + len_channel_blocks
-
-    subarray_node = dev_factory.get_device("ska_mid/tm_subarray_node/1")
-    logger.info(
-        f"subarray_node.assignedResources::::{subarray_node.assignedResources}"
-    )
-    logger.info(f"subarray_node.ObsState::::{subarray_node.obsState}")
-    logger.info(f"subarray_node.State::::{subarray_node.State()}")
 
     if "ska_mid" in central_node_name:
         device = get_subarray_device(json.loads(central_node.internalModel))
@@ -143,9 +130,6 @@ def assign_resouces(
         assert resources_len > 0
 
 
-# @pytest.mark.xfail(
-#     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-# )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
