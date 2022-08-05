@@ -386,7 +386,9 @@ class CNComponentManager(TmcComponentManager):
         """
         for devInfo in self.devices:
             if isinstance(devInfo, SubArrayDeviceInfo):
-                if dish_id in devInfo.resources:
+                if devInfo.resources is None:
+                    return False
+                elif dish_id in devInfo.resources:
                     return True
         return False
 
