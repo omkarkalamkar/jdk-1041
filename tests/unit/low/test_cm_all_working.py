@@ -7,10 +7,6 @@ from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
 )
 
 from ska_tmc_centralnode.model.input import InputParameterLow
-
-# from ska_tmc_common.test_helpers.helper_subarray_device import (
-#     HelperSubArrayDevice,
-# )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import count_faulty_devices, create_cm, logger
 

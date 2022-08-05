@@ -6,10 +6,6 @@ from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterLow
-
-# from ska_tmc_common.test_helpers.helper_subarray_device import (
-#     HelperSubArrayDevice,
-# )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
@@ -41,7 +37,6 @@ def devices_to_load():
 
 def test_low_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
-
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
         op_state_model, _input_parameter=InputParameterLow(None), logger=logger

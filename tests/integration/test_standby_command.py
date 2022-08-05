@@ -40,11 +40,6 @@ def standby_command(tango_context, central_node_name):
     csp_master.SetDirectState(DevState.STANDBY)
     mccs_master = dev_factory.get_device("low-mccs/control/control")
     mccs_master.SetDirectState(DevState.STANDBY)
-    # sdp_master = dev_factory.get_device("mid_sdp/elt/master")
-    # sdp_master.SetDirectState(DevState.STANDBY)
-    # dish_master.SetDirectState(DevState.STANDBY)
-    # dish_master = dev_factory.get_device("mid_d0001/elt/master")
-
     start_time = time.time()
     while central_node.telescopeState != DevState.STANDBY:
         time.sleep(SLEEP_TIME)
@@ -55,12 +50,18 @@ def standby_command(tango_context, central_node_name):
     assert central_node.telescopeState == DevState.STANDBY
 
 
+@pytest.mark.skip(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_standby_command_mid(tango_context):
     standby_command(tango_context, "ska_mid/tm_central/central_node")
 
 
+@pytest.mark.skip(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_standby_command_low(tango_context):

@@ -2,8 +2,7 @@ import time
 
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
-from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import DishAdapter, SubArrayAdapter
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -11,8 +10,10 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
+from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
+from tests.mock_callable import MockCallable
 from tests.settings import create_cm, logger
 
 
@@ -38,28 +39,15 @@ def test_telescope_on_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
-    # num_faulty = count_faulty_devices(cm)
-    # assert num_faulty == 0
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-
-    my_adapter_factory = HelperAdapterFactory()
-    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
-    assert on_command.check_allowed()
-    (result_code, _) = on_command.do()
-    assert result_code == ResultCode.OK
-    for adapter in my_adapter_factory.adapters:
-        if isinstance(adapter, DishAdapter):
-            adapter.proxy.SetStandbyFPMode.assert_called()
-            adapter.proxy.SetOperateMode.assert_called_once_with()
-            continue
-        if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.On.assert_called_once_with()
-            continue
-
-        adapter.proxy.On.assert_called_once_with()
+    unique_id = f"{time.time()}_TelescopeOn"
+    task_callback = MockCallable(unique_id)
+    cm.is_command_allowed("TelescopeOn")
+    cm.telescope_on(task_callback=task_callback)
+    assert task_callback.status == TaskStatus.QUEUED
 
 
 def test_telescope_on_command_fail_subarray(tango_context):
@@ -69,6 +57,7 @@ def test_telescope_on_command_fail_subarray(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_command_allowed("TelescopeOn")
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeOn command
@@ -77,46 +66,41 @@ def test_telescope_on_command_fail_subarray(tango_context):
     my_adapter_factory.get_or_create_adapter(
         failing_dev, attrs={"TelescopeOn.side_effect": Exception}
     )
+    unique_id = f"{time.time()}_TelescopeOn"
+    task_callback = MockCallable(unique_id)
 
-    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
-    assert on_command.check_allowed()
-    (result_code, message) = on_command.do()
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
+    on_command = TelescopeOn(cm, my_adapter_factory, logger=logger)
+    cm.adapter_factory = my_adapter_factory
+    on_command.telescope_on(logger=logger, task_callback=task_callback)
+    assert task_callback.status == TaskStatus.FAILED
 
 
-def test_telescope_on_command_fail_sdp(tango_context):
+def test_telescope_on_command_task_completed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_command_allowed("TelescopeOn")
     my_adapter_factory = HelperAdapterFactory()
 
-    # include exception in TelescopeOn command
-    failing_dev = "ska_mid/tm_leaf_node/sdp_master"
-    my_adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"TelescopeOn.side_effect": Exception}
-    )
+    unique_id = f"{time.time()}_TelescopeOn"
+    task_callback = MockCallable(unique_id)
 
-    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
-    assert on_command.check_allowed()
-    (result_code, message) = on_command.do()
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
+    on_command = TelescopeOn(cm, my_adapter_factory, logger=logger)
+    on_command.telescope_on(logger=logger, task_callback=task_callback)
+    time.sleep(0.1)
+    assert task_callback.status == TaskStatus.COMPLETED
 
 
 def test_telescope_on_fail_check_allowed(tango_context):
-
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
-    cm.input_parameter.tm_dish_dev_names = []
-    on_command = TelescopeOn(cm, cm.op_state_model, my_adapter_factory)
+    cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
-        on_command.check_allowed()
+        cm.is_command_allowed("TelescopeOn")

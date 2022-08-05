@@ -19,7 +19,9 @@ from tests.settings import (
 def test_all_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(
-        op_state_model, _input_parameter=InputParameterMid(None), logger=logger
+        op_state_model,
+        _input_parameter=InputParameterMid(None),
+        logger=logger,
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
     cm.add_multiple_devices(DEVICE_LIST_MID)
