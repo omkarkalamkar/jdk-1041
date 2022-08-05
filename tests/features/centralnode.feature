@@ -20,6 +20,5 @@ Feature: Central Node acceptance
 		Examples:
 		| command_name		 |
         | TelescopeOn        |
-		| TelescopeOff       |
-		| AssignResources   |
+		| AssignResources    |
 
