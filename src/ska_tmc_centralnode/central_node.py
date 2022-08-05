@@ -18,6 +18,8 @@ from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
+# Modified the tango device class to have Submitted slow command functionality.
+# Review is expected for is_TelescopeStandby_allowed and TelescopeStandby methods.
 class AbstractCentralNode(TMCBaseDevice):
     """
     Central Node is a coordinator of the complete Telescope system.
@@ -210,6 +212,33 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode.
         """
         handler = self.get_command_object("TelescopeOn")
+        result_code, unique_id = handler()
+        return [[result_code], [str(unique_id)]]
+
+    def is_TelescopeStandby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("TelescopeStandby")
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    @DebugIt()
+    def TelescopeStandby(self):
+        """
+        This command invokes TelescopeStandby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
+
+        """
+        self.log_state(
+            "Device states before executing Telescope Standby command"
+        )
+        handler = self.get_command_object("TelescopeStandby")
         result_code, unique_id = handler()
         return [[result_code], [str(unique_id)]]
 
@@ -440,41 +469,6 @@ class AbstractCentralNode(TMCBaseDevice):
     #         handler
     #     )
     #     self.log_state("Device states after executing Standby command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
-    # def is_TelescopeStandby_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
-
-    #     :return: True if this command is allowed to be run in current device state.
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("TelescopeStandby")
-    #     return handler.check_allowed()
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
-    # @DebugIt()
-    # def TelescopeStandby(self):
-    #     """
-    #     This command invokes TelescopeStandby() command on CspMasterLeafNode,
-    #     SdpMasterLeafNode and DishLeafNode.
-
-    #     """
-    #     self.log_state(
-    #         "Device states before executing Telescope Standby command"
-    #     )
-    #     handler = self.get_command_object("TelescopeStandby")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state(
-    #         "Device states after executing Telescope Standby command"
-    #     )
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
     # def is_Off_allowed(self):
