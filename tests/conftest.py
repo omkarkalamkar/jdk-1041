@@ -61,6 +61,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
     """
     return MockTangoEventCallbackGroup(
         "longRunningCommandResult",
+        "longRunningCommandsInQueue"
         "telescopeState",
         timeout=30.0,
     )
