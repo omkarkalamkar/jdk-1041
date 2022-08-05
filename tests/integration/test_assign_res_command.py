@@ -81,26 +81,26 @@ def assign_resouces(
                 return device
         return None
 
-    # def get_mccs_device_resources(json_model):
-    #     for device in json_model["devices"]:
-    #         if device["dev_name"] == "ska_low/tm_leaf_node/mccs_master":
-    #             mccs_device = device
-    #     len_subarray_beam_ids = 0
-    #     if "subarray_beam_ids" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["subarray_beam_ids"]
-    #         )
-    #     len_station_ids = 0
-    #     if "station_ids" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["station_ids"]
-    #         )
-    #     len_channel_blocks = 0
-    #     if "channel_blocks" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["channel_blocks"]
-    #         )
-    #     return len_subarray_beam_ids + len_station_ids + len_channel_blocks
+    def get_mccs_device_resources(json_model):
+        for device in json_model["devices"]:
+            if device["dev_name"] == "ska_low/tm_leaf_node/mccs_master":
+                mccs_device = device
+        len_subarray_beam_ids = 0
+        if "subarray_beam_ids" in mccs_device["resources"]:
+            len_subarray_beam_ids = len(
+                mccs_device["resources"]["subarray_beam_ids"]
+            )
+        len_station_ids = 0
+        if "station_ids" in mccs_device["resources"]:
+            len_subarray_beam_ids = len(
+                mccs_device["resources"]["station_ids"]
+            )
+        len_channel_blocks = 0
+        if "channel_blocks" in mccs_device["resources"]:
+            len_subarray_beam_ids = len(
+                mccs_device["resources"]["channel_blocks"]
+            )
+        return len_subarray_beam_ids + len_station_ids + len_channel_blocks
 
     subarray_node = dev_factory.get_device("ska_mid/tm_subarray_node/1")
     logger.info(
@@ -127,26 +127,25 @@ def assign_resouces(
         logger.debug(f"Outside while length of device[resources] is:{a}")
         assert len(device["resources"]) > 0
 
-    # if "ska_low" in central_node_name:
-    #     resources_len = get_mccs_device_resources(
-    #         json.loads(central_node.internalModel)
-    #     )
-    #     start_time = time.time()
-    #     while resources_len == 0:
-    #         time.sleep(SLEEP_TIME)
-    #         resources_len = get_mccs_device_resources(
-    #             json.loads(central_node.internalModel)
-    #         )
-    #         elapsed_time = time.time() - start_time
-    #         if elapsed_time > TIMEOUT:
-    #             pytest.fail("Timeout occurred while executing the test")
-    #     assert resources_len > 0
+    if "ska_low" in central_node_name:
+        resources_len = get_mccs_device_resources(
+            json.loads(central_node.internalModel)
+        )
+        start_time = time.time()
+        while resources_len == 0:
+            time.sleep(SLEEP_TIME)
+            resources_len = get_mccs_device_resources(
+                json.loads(central_node.internalModel)
+            )
+            elapsed_time = time.time() - start_time
+            if elapsed_time > TIMEOUT:
+                pytest.fail("Timeout occurred while executing the test")
+        assert resources_len > 0
 
 
 # @pytest.mark.xfail(
 #     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 # )
-@pytest.mark.lily
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(

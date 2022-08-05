@@ -3,7 +3,6 @@ import logging
 
 import pytest
 import tango
-from ska_tango_testing.mock import MockCallable
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
@@ -52,16 +51,6 @@ def tango_context(devices_to_load, request):
         yield None
 
 
-@pytest.fixture
-def task_callback() -> MockCallable:
-    """Creates a mock callable for asynchronous testing
-
-    :rtype: MockCallable
-    """
-    task_callback = MockCallable(5)
-    return task_callback
-
-
 @pytest.fixture()
 def change_event_callbacks() -> MockTangoEventCallbackGroup:
     """
@@ -71,7 +60,6 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         callbacks by name.
     """
     return MockTangoEventCallbackGroup(
-        "longRunningCommandsInQueue",
         "longRunningCommandResult",
         "telescopeState",
         timeout=30.0,

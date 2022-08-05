@@ -78,5 +78,5 @@ def test_telescope_state_standby(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_standby(
         devFactory, cm, 15
-    )  # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
+    )  # Here expected elapsed time is set to 15 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     assert cm.component.telescope_state == tango.DevState.STANDBY

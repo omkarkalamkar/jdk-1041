@@ -9,7 +9,7 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
-        super().__init__(component_manager, logger=logger, *args, **kwargs)
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
 
     def init_adapters(self):
         if isinstance(
@@ -39,13 +39,8 @@ class CentralNodeCommand(TMCCommand):
         command_name: str,
     ):
         try:
-            self.logger.debug("Inside try for invoke_command")
             for adapter in adapters:
-                self.logger.debug(f"for loop, adapter is:::{adapter}")
                 command_caller(adapter)
-                self.logger.debug(
-                    f"Command caller is::: {command_caller(adapter)}"
-                )
                 self.logger.debug(
                     f"Invoked {command_name} on device {adapter.dev_name}"
                 )
@@ -57,21 +52,13 @@ class CentralNodeCommand(TMCCommand):
         return (ResultCode.OK, "")
 
     def send_command(self, adapters, description, command, argin=None):
-        self.logger.debug(f"Inside send_command::argin is::{argin}")
-        self.logger.debug(
-            f"Inside send_command::argin is::{argin} adapters are {adapters} description is{description} command is::{command}"
-        )
         if argin:
-            self.logger.debug(
-                f"Inside send_command, if condition::argin is::{argin}"
-            )
             return self.invoke_command(
                 adapters,
                 operator.methodcaller(command, argin),
                 description,
                 command,
             )
-        self.logger.debug("Outside if condition::")
         return self.invoke_command(
             adapters, operator.methodcaller(command), description, command
         )
@@ -86,7 +73,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         logger=None,
         **kwargs,
     ):
-        super().__init__(component_manager, logger=logger, *args, **kwargs)
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None

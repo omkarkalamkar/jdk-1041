@@ -50,13 +50,9 @@ class AbstractCentralNode(TMCBaseDevice):
         default_value="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
     )
 
-    MaxWorkerMonitoringLoop = device_property(
-        dtype="DevUShort", default_value=5
-    )
+    MaxWorker = device_property(dtype="DevUShort", default_value=5)
 
-    ProxyTimeoutMonitoringLoop = device_property(
-        dtype="DevUShort", default_value=500
-    )
+    ProxyTimeout = device_property(dtype="DevUShort", default_value=500)
     # ----------
     # Attributes
     # ----------
@@ -143,14 +139,13 @@ class AbstractCentralNode(TMCBaseDevice):
             self.component_manager.stop()
 
     def log_state(self, msg="Device States"):
-        device_names = [
-            device.to_dict()["dev_name"]
-            for device in self.component_manager.devices
-        ]
-        dev_states = [
-            device.to_dict()["state"]
-            for device in self.component_manager.devices
-        ]
+        device_names = []
+        dev_states = []
+
+        for device in self.component_manager.devices:
+            device_names.append(device.dev_name)
+            dev_states.append(device.state)
+
         device_states = pd.DataFrame(
             {"Devices": device_names, "STATE": dev_states}
         )
@@ -526,8 +521,8 @@ class AbstractCentralNode(TMCBaseDevice):
             _update_imaging_callback=self.update_imaging_callback,
             communication_state_changed_callback=None,
             component_state_changed_callback=None,
-            max_workers=self.MaxWorkerMonitoringLoop,
-            proxy_timeout=self.ProxyTimeoutMonitoringLoop,
+            max_workers=self.MaxWorker,
+            proxy_timeout=self.ProxyTimeout,
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.tm_dish_dev_names = []
