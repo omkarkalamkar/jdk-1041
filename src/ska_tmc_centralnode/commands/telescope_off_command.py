@@ -11,6 +11,7 @@ from ska_tmc_centralnode.commands.abstract_command import (
     AbstractTelescopeOnOff,
 )
 
+
 class TelescopeOff(AbstractTelescopeOnOff):
     """
     A class for CentralNode's TelescopeOff() command. Sets the CentralNode into telescopestate to OFF.

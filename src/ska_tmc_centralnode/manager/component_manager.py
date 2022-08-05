@@ -528,7 +528,6 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
-
     def telescope_off(self, task_callback: Callable = None):
         """
         Turn the Telescope Off.
