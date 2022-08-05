@@ -4,10 +4,10 @@ import time
 from typing import Callable
 
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import HealthState
+from ska_tango_base.control_model import HealthState, ObsState
 from ska_tango_base.subarray import SKASubarray, SubarrayComponentManager
 from tango import DevState
-from tango.server import command
+from tango.server import attribute, command
 
 
 class EmptySubArrayComponentManager(SubarrayComponentManager):
@@ -27,8 +27,9 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         )
         self._assigned_resources = []
 
-    def assign(self, resources):
+    def assign(self, resources, task_callback):
         self.logger.info("Resources: %s", resources)
+        self.logger.info("task_callback: %s", task_callback)
         self._assigned_resources = ["0001"]
         return (ResultCode.OK, "")
 
@@ -119,6 +120,7 @@ class HelperSubArrayDevice(SKASubarray):
     def init_device(self):
         super().init_device()
         self._health_state = HealthState.OK
+        self._resources_assigned = []
 
     class InitCommand(SKASubarray.InitCommand):
         def do(self):
@@ -128,6 +130,21 @@ class HelperSubArrayDevice(SKASubarray):
             self._device.set_change_event("obsState", True, False)
             self._device.set_change_event("assignedResources", True, False)
             return (ResultCode.OK, "")
+
+    """Device attribute."""
+    assignedResources = attribute(
+        dtype=("str",),
+        max_dim_x=100,
+        doc="The list of resources assigned to the subarray.",
+    )
+
+    def read_assignedResources(self):
+        """
+        Read the resources assigned to the device.
+
+        :return: Resources assigned to the device.
+        """
+        return self._resources_assigned
 
     def create_component_manager(self):
         cm = EmptySubArrayComponentManager(
@@ -181,6 +198,7 @@ class HelperSubArrayDevice(SKASubarray):
     def On(self):
         if self.dev_state() != DevState.ON:
             self.set_state(DevState.ON)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_Off_allowed(self):
@@ -193,6 +211,7 @@ class HelperSubArrayDevice(SKASubarray):
     def Off(self):
         if self.dev_state() != DevState.OFF:
             self.set_state(DevState.OFF)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_Standby_allowed(self):
@@ -205,6 +224,7 @@ class HelperSubArrayDevice(SKASubarray):
     def Standby(self):
         if self.dev_state() != DevState.STANDBY:
             self.set_state(DevState.STANDBY)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_TelescopeOn_allowed(self):
@@ -217,6 +237,7 @@ class HelperSubArrayDevice(SKASubarray):
     def TelescopeOn(self):
         if self.dev_state() != DevState.ON:
             self.set_state(DevState.ON)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_TelescopeOff_allowed(self):
@@ -229,6 +250,7 @@ class HelperSubArrayDevice(SKASubarray):
     def TelescopeOff(self):
         if self.dev_state() != DevState.OFF:
             self.set_state(DevState.OFF)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_TelescopeStandBy_allowed(self):
@@ -241,6 +263,7 @@ class HelperSubArrayDevice(SKASubarray):
     def TelescopeStandBy(self):
         if self.dev_state() != DevState.STANDBY:
             self.set_state(DevState.STANDBY)
+            self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
     def is_AssignResources_allowed(self):
@@ -251,6 +274,20 @@ class HelperSubArrayDevice(SKASubarray):
         :rtype: boolean
         """
         return True
+
+    @command(
+        dtype_in=("str"),
+        doc_in="The input string in JSON format consists of receptorIDList.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def AssignResources(self, argin):
+        if self._obs_state != ObsState.IDLE:
+            self._obs_state = ObsState.IDLE
+            self.push_change_event("obsState", self._obs_state)
+        self._resources_assigned = ["0001"]
+        self.push_change_event("assignedResources", self._resources_assigned)
+        return [[ResultCode.OK], [""]]
 
     def is_ReleaseAllResources_allowed(self):
         """

@@ -249,7 +249,7 @@ class CentralNodeMid(AbstractCentralNode):
         self.component_manager.input_parameter.tm_dish_dev_names = value
         self.component_manager.update_input_parameter()
 
-    # TODO: Not in the scope of PI15
+    # TODO: Not in the scope for PI15
     # --------
     # Commands
     # --------
@@ -290,7 +290,7 @@ class CentralNodeMid(AbstractCentralNode):
         super().init_command_objects()
         for (command_name, method_name) in [
             ("TelescopeOn", "telescope_on"),
-            ("ReleaseResources", "release_resources"),
+            ("AssignResources", "assign_resources"),
         ]:
             self.register_command_object(
                 command_name,

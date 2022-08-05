@@ -5,7 +5,7 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 import time
-from typing import Callable
+from typing import Callable, Optional
 
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
@@ -15,6 +15,9 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.assign_resources_command import (
+    AssignResources,
+)
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
@@ -84,6 +87,7 @@ class CNComponentManager(TmcComponentManager):
         :param _liveliness_probe: allows to enable/disable LivelinessProbe usage
         :param _event_receiver: allows to enable/disable EventReceiver usage
         """
+
         self._component = _component or CentralComponent(logger)
 
         super().__init__(
@@ -172,7 +176,7 @@ class CNComponentManager(TmcComponentManager):
 
         :return: list of the monitored devices
         """
-        return self._component._devices
+        return self._component.devices
 
     @property
     def checked_devices(self):
@@ -269,10 +273,14 @@ class CNComponentManager(TmcComponentManager):
 
     def add_device(self, dev_name):
         """
-        Add device to the liveliness probe function
+        <<<<<<< HEAD
+                Add device to the liveliness probe function
+        =======
+                Add device to the the liveliness probe function
+        >>>>>>> 2420f41202992a050e1de57a60066809beabd89a
 
-        :param dev_name: device name
-        :type dev_name: str
+                :param dev_name: device name
+                :type dev_name: str
         """
         if dev_name is None:
             return
@@ -388,7 +396,6 @@ class CNComponentManager(TmcComponentManager):
             if isinstance(devInfo, SubArrayDeviceInfo):
                 if dish_id in devInfo.resources:
                     return True
-
         return False
 
     def _aggregate_health_state(self):
@@ -547,6 +554,24 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
+    def assign_resources(
+        self, argin, task_callback: Optional[Callable] = None
+    ):
+        """
+        Submit the AssignResources command in queue.
+
+        :return: a result code and message
+        """
+        assign_resources_command = AssignResources(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+        task_status, response = self.submit_task(
+            assign_resources_command.assign_resources,
+            args=[argin, self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
     def is_command_allowed(self, command_name=None):
         """
         Checks whether this command is allowed
@@ -560,16 +585,16 @@ class CNComponentManager(TmcComponentManager):
 
         :rtype: boolean
         """
+        if self.op_state_model.op_state in [
+            DevState.FAULT,
+            DevState.UNKNOWN,
+            DevState.DISABLE,
+        ]:
+            raise CommandNotAllowed(
+                "Command is not allowed in current state %s",
+                str(self.op_state_model.op_state),
+            )
         if command_name in ["TelescopeOn", "TelescopeOff"]:
-            if self.op_state_model.op_state in [
-                DevState.FAULT,
-                DevState.UNKNOWN,
-                DevState.DISABLE,
-            ]:
-                raise CommandNotAllowed(
-                    "Command is not allowed in current state %s",
-                    str(self.op_state_model.op_state),
-                )
             if isinstance(self._input_parameter, InputParameterMid):
                 self.logger.debug("Checking mid devices, as responsive or not")
                 self.check_if_csp_mln_is_responsive()
@@ -603,10 +628,8 @@ class CNComponentManager(TmcComponentManager):
                 )
                 self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
-
         else:
             self.logger.info(
                 f"is_allowed check is not available for {command_name}"
             )
-
         return True

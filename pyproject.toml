@@ -11,7 +11,6 @@ include = [
     { path = 'tests'}
 ]
 
-
 [tool.poetry.scripts]
 CentralNodeDS = 'ska_tmc_centralnode.central_node_mid:main'
 
@@ -27,11 +26,11 @@ fire = "^0.4.0"
 numpy = "1.17.2"
 pytango = "^9.3.3"
 ska-ser-logging = "^0.4.1"
-ska-tango-base = "0.13.0"
+ska-tango-base = "0.13.3"
 ska-tmc-cdm = "*"
-ska-tmc-common = "0.1.37"
-ska-tango-testing = "0.2.0"
+ska-tmc-common = "0.1.39"
 ska-ser-log-transactions = "*"
+ska-tango-testing = "0.2.0"
 ska-ser-skuid = "*"
 mock = "^4.0.3"
 pandas="1.2.3"

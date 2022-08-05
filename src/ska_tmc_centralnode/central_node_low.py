@@ -134,7 +134,7 @@ class CentralNodeLow(AbstractCentralNode):
         super().init_command_objects()
         for (command_name, method_name) in [
             ("TelescopeOn", "telescope_on"),
-            ("ReleaseResources", "release_resources"),
+            ("AssignResources", "assign_resources"),
         ]:
             self.register_command_object(
                 command_name,

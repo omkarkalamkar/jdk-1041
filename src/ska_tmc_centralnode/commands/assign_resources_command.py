@@ -2,10 +2,12 @@
 AssignResources class for CentralNode.
 """
 import json
+import threading
+from typing import Callable, Optional
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import AdapterFactory
+from ska_tango_base.executor import TaskStatus
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -24,8 +26,7 @@ class AssignResources(AbstractAssignReleaseResources):
 
     def __init__(
         self,
-        target,
-        pop_state_model,
+        component_manager,
         adapter_factory=None,
         skuid=SkuidClient(
             "ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870"
@@ -34,17 +35,50 @@ class AssignResources(AbstractAssignReleaseResources):
         logger=None,
         **kwargs,
     ):
-        super().__init__(target, args, logger, kwargs)
-        self.op_state_model = pop_state_model
-        self._adapter_factory = adapter_factory or AdapterFactory()
+        super().__init__(
+            component_manager, adapter_factory, logger=logger, *args, **kwargs
+        )
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         self._skuid = skuid
         self.my_subarray_adapter = None
-        # TODO: Moved to do method for testing
-        # self.init_adapters()
 
-    def do_mid(self, argin=None):
+    def assign_resources(
+        self,
+        argin,
+        logger,
+        task_callback: Callable = None,
+        task_abort_event: Optional[threading.Event] = None,
+    ):
+
+        """This is a long running method for TelescopeOn command, it executes do hook,
+        invokes TelescopeOn command on lowe level devices.
+
+        :param logger: logger
+        :type logger: logging.Logger
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :param task_abort_event: Check for abort, defaults to None
+        :type task_abort_event: Event, optional
+        """
+        # Indicate that the task has started
+        task_callback(status=TaskStatus.IN_PROGRESS)
+        self.logger.debug("Executing do hook for centralnode mid")
+        ret_code, message = self.do(argin=json.dumps(argin))
+        self.logger.info(message)
+        if ret_code == ResultCode.FAILED:
+            task_callback(
+                status=TaskStatus.FAILED,
+                result=ResultCode.FAILED,
+                exception=message,
+            )
+        else:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=ResultCode.OK,
+            )
+
+    def do_mid(self, argin):
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -151,8 +185,6 @@ class AssignResources(AbstractAssignReleaseResources):
             None
 
         """
-        component_manager = self.target
-
         # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
         # self.logger.info("Validating input string.")
         # input_validator = AssignResourceValidator(
@@ -162,8 +194,10 @@ class AssignResources(AbstractAssignReleaseResources):
         #     self.logger,
         # )
         # json_argument = input_validator.loads(argin)
-
+        self.logger.debug("Actual do_mid hook")
         try:
+            self.logger.debug(f"argin is:{argin}")
+            self.logger.debug("loading json input string")
             json_argument = json.loads(argin)
         except Exception as e:
             return self.generate_command_result(
@@ -197,6 +231,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 "subarray_id key is not present in the input json argument.",
             )
 
+        self.logger.debug("Calling Init_adapters for do_mid")
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -206,6 +241,9 @@ class AssignResources(AbstractAssignReleaseResources):
         ret_code, message = self.get_subarray_adapter(subarrayID)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
+        self.logger.debug(
+            f"res_code after get_subarray_adapter::{ret_code} message after get_subarray_adapter::{message}"
+        )
 
         # check allocated dishes
         if "dish" not in json_argument:
@@ -221,15 +259,27 @@ class AssignResources(AbstractAssignReleaseResources):
                 )
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
+        self.logger.debug(f"receptor_ids are:{receptor_ids}")
         for receptor_id in receptor_ids:
+            self.logger.debug(f"receptor_id is:{receptor_id}")
             dish_ID = "dish" + receptor_id
-            if component_manager.is_already_assigned(dish_ID):
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    ("Dish %s is already allocated", dish_ID),
-                )
+            self.logger.debug(f"dish_ID is:{dish_ID}")
+            self.logger.debug(f"Type for dish_ID is:{type(dish_ID)}")
+            self.logger.debug(f"Type str dish_ID is:{str(dish_ID)}")
+            # TODO: WIP for the below method
+            # if self.component_manager.is_already_assigned(dish_ID):
+            #     self.logger.debug(
+            #         f"Inside cm, is_already_assigned, dish_ID is:{str(dish_ID)}"
+            #     )
+            #     return self.generate_command_result(
+            #         ResultCode.FAILED,
+            #         ("Dish %s is already allocated", dish_ID),
+            #     )
+            # else:
+            #     self.logger.info("Resources are not assigned")
 
         # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
+        self.logger.debug("Invoking AssignResources command on TMC subarrays")
         ret_code, message = self.send_command(
             [self.my_subarray_adapter],
             "Error in calling AssignResources on subarray",
@@ -238,7 +288,9 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-
+        self.logger.debug(
+            "AssignResources command on TMC Subarrays is Successful."
+        )
         return (ResultCode.OK, "")
 
     def update_resource_config_file(self, json_argument, id):
