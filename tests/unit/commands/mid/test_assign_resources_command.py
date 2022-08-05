@@ -253,8 +253,6 @@ def test_assign_resources_command_already_assigned(
     # dish0001 is assigned to Subarray1
     subarray = "ska_mid/tm_subarray_node/1"
     for devInfo in cm.devices:
-        print("dev_info is", devInfo)
-        print("Devices list is", cm.devices)
         if isinstance(devInfo, SubArrayDeviceInfo):
             if devInfo.dev_name == subarray:
                 devInfo.resources.append("dish0001")
