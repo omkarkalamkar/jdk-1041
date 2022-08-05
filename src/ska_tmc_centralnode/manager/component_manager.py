@@ -15,6 +15,7 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
@@ -522,6 +523,23 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, response = self.submit_task(
             telescopon_command.telescope_on,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
+    def telescope_off(self, task_callback: Callable = None):
+        """
+        Turn the Telescope Off.
+
+        :return: a result code and message
+        """
+        telescope_off_command = TelescopeOff(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, response = self.submit_task(
+            telescope_off_command.telescope_off,
             args=[self.logger],
             task_callback=task_callback,
         )
