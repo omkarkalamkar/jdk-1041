@@ -60,7 +60,6 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         callbacks by name.
     """
     return MockTangoEventCallbackGroup(
-        "longRunningCommandsInQueue",
         "longRunningCommandResult",
         "telescopeState",
         "telescopeHealthState",

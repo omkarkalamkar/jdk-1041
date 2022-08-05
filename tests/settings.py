@@ -135,12 +135,10 @@ def set_devices_state(devices, state, devFactory, cm, expected_elapsed_time):
     for device in devices:
         proxy = devFactory.get_device(device)
         proxy.SetDirectState(state)
-        time.sleep(0.1)
         assert proxy.State() == state
 
 
 def set_device_state(device, state, devFactory):
     proxy = devFactory.get_device(device)
     proxy.SetDirectState(state)
-    time.sleep(0.1)
     assert proxy.State() == state
