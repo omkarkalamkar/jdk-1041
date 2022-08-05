@@ -16,7 +16,6 @@ from tests.settings import logger
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_telescope_health_state_mid(tango_context, change_event_callbacks):
-
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -38,7 +37,6 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     assert central_node.telescopeHealthState == HealthState.DEGRADED
 
     # tear down
-    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
     sdp_master.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
@@ -48,12 +46,11 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     time.sleep(0.1)
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
-    # change_event_callbacks.assert_not_called()
 
 
-# @pytest.mark.skip(
-#     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-# )
+@pytest.mark.skip(
+    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_telescope_health_state_low(tango_context, change_event_callbacks):
@@ -74,6 +71,15 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.DEGRADED, lookahead=2
     )
-
     assert central_node.telescopeHealthState == HealthState.DEGRADED
-    # change_event_callbacks.assert_not_called()
+
+    # tear down
+    mccs_master.SetDirectHealthState(HealthState.OK)
+
+    change_event_callbacks["telescopeHealthState"].assert_change_event(
+        HealthState.OK, lookahead=2
+    )
+    logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
+    time.sleep(0.1)
+    logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
+    assert central_node.telescopeHealthState == HealthState.OK

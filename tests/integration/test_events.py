@@ -124,9 +124,6 @@ def commands_result_events(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    # change_event_callbacks["longRunningCommandResult"].assert_change_event(
-    #         ("", ""), lookahead=2,
-    #     )
 
     _, unique_id = central_node.TelescopeOn()
     logger.info(
@@ -136,7 +133,6 @@ def commands_result_events(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
-    # change_event_callbacks.assert_not_called()
 
 
 # @pytest.mark.skip(
