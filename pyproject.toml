@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-tmc-centralnode"
-version = "0.3.15"
+version = "0.3.16"
 description = "Central Node is a coordinator of the complete M&C system"
 authors = ["Team NCRA <telmgt-internal@googlegroups.com>"]
 license = "BSD-3-Clause"
