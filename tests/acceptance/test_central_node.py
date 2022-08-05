@@ -51,7 +51,7 @@ def internal_model(central_node):
 @when(parsers.parse("I call the command {command_name}"))
 def call_command(central_node, command_name):
     try:
-        if command_name == "AssignResources": 
+        if command_name == "AssignResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
                 assign_res_string = get_json_input_str(
