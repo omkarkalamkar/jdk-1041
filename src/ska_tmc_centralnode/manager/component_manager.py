@@ -17,6 +17,9 @@ from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode.commands.telescope_standby_command import (
+    TelescopeStandby,
+)
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     HealthStateAggregatorMid,
@@ -42,10 +45,7 @@ class CNComponentManager(TmcComponentManager):
     * Monitoring its component, e.g. detect that it has been turned off
       or on
 
-    * Fetching the latest SCM indicator values of the components periodically
-      and trigger the TMC and telescope state aggregation
-
-    * Receiving the change events from the component and trigger
+    * Receiving the change events from lower level devices and trigger
       the TMC and telescope state aggregation
     """
 
@@ -553,7 +553,24 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
-    def is_command_allowed(self, command_name=None):
+    def telescope_standby(self, task_callback: Callable = None):
+        """
+        Standby the Telescope.
+
+        :return: a result code and message
+        """
+        telescopestandby_command = TelescopeStandby(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, response = self.submit_task(
+            telescopestandby_command.telescope_standby,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
+    def is_command_allowed(self, command_name: str):
         """
         Checks whether this command is allowed
         It checks that the device is in a state
@@ -566,7 +583,7 @@ class CNComponentManager(TmcComponentManager):
 
         :rtype: boolean
         """
-        if command_name in ["TelescopeOn", "TelescopeOff"]:
+        if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
             if self.op_state_model.op_state in [
                 DevState.FAULT,
                 DevState.UNKNOWN,
