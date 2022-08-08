@@ -179,7 +179,9 @@ class TestAssignResourceValidator:
         with pytest.raises(SubarrayNotPresentError) as excinfo:
             input_validator.loads(json.dumps(input_json))
 
-    # @pytest.mark.skip(reason="Behavior of this test case has changed in tox env.")
+    # @pytest.mark.skip(
+    #     reason="Behavior of this test case has changed in tox env."
+    # )
     def test_validate_incorrect_receptor_id(self):
         """
         Tests that ResourceNotPresentError is raised when a receptor id is given incorrect
