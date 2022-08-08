@@ -20,5 +20,6 @@ Feature: Central Node acceptance
 		Examples:
 		| command_name		 |
         | TelescopeOn        |
-		| TelescopeStandby       |
+		| TelescopeOff       |
+		| TelescopeStandby   |
 

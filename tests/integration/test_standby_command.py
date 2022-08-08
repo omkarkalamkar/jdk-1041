@@ -10,10 +10,6 @@ from tests.integration.common import (  # noqa F401
 )
 from tests.settings import logger
 
-# Modified the TelescopeStandby Mid and Low integration tests to utilize
-# TANGO attributes from latest base classes. Review is expected for
-# below tests.
-
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid

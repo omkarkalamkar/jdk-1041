@@ -41,6 +41,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     ensure_tmc_op_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
+@pytest.mark.skip("Needs update in helper devices")
 def test_tmc_state_init(tango_context):
     # import debugpy; debugpy.debug_this_thread()
     devFactory = DevFactory()

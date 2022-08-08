@@ -291,6 +291,7 @@ class CentralNodeMid(AbstractCentralNode):
         for (command_name, method_name) in [
             ("TelescopeOn", "telescope_on"),
             ("TelescopeStandby", "telescope_standby"),
+            ("TelescopeOff", "telescope_off"),
         ]:
             self.register_command_object(
                 command_name,

@@ -15,6 +15,7 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
@@ -527,9 +528,23 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
-    # Modified the component manager to have the submit task functionality and
-    # is_command_allowed method for TelescopeStandby.
-    # Review is expected for telescope_standby and is_command_allowed method.
+    def telescope_off(self, task_callback: Callable = None):
+        """
+        Turn the Telescope Off.
+
+        :return: a result code and message
+        """
+        telescope_off_command = TelescopeOff(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, response = self.submit_task(
+            telescope_off_command.telescope_off,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
     def telescope_standby(self, task_callback: Callable = None):
         """
         Standby the Telescope.
@@ -547,7 +562,7 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
-    def is_command_allowed(self, command_name=None):
+    def is_command_allowed(self, command_name: str):
         """
         Checks whether this command is allowed
         It checks that the device is in a state
