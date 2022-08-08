@@ -573,31 +573,23 @@ class CNComponentManager(TmcComponentManager):
             )
         if command_name in ["TelescopeOn", "TelescopeOff"]:
             if isinstance(self._input_parameter, InputParameterMid):
-                self.logger.debug("Checking mid devices, as responsive or not")
+                self.logger.debug(f"Checking mid devices for {command_name}")
                 self.check_if_csp_mln_is_responsive()
                 self.check_if_sdp_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
                 self.check_if_dishes_are_responsive()
             else:
-                self.logger.debug("Checking low devices, as responsive or not")
+                self.logger.debug(f"Checking low devices for {command_name}")
                 self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
             if isinstance(self._input_parameter, InputParameterMid):
-                self.logger.debug(
-                    "For AssignResources/ReleaseResources Checking mid devices, as responsive or not"
-                )
+                self.logger.debug(f"Checking mid devices for {command_name}")
                 self.check_if_subarrays_are_responsive()
                 self.check_if_dishes_are_responsive()
             else:
-                self.logger.debug(
-                    "For AssignResources/ReleaseResources, Checking low devices, as responsive or not"
-                )
+                self.logger.debug(f"Checking low devices for {command_name}")
                 self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
-        else:
-            self.logger.info(
-                f"is_allowed check is disabled for the commands other than TelescopeOn/Off/Standby for the time being. The command invoked is: {command_name}"
-            )
 
         return True

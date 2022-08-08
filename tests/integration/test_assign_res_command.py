@@ -31,7 +31,7 @@ def assign_resouces(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"For TelescopeOn:::Command ID: {unique_id} Returned result: {result}"
+        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -51,7 +51,7 @@ def assign_resouces(
 
     result, unique_id = central_node.AssignResources(assign_input_str)
     logger.info(
-        f"For AssignResources:::Command ID: {unique_id} Returned result: {result}"
+        f"AssignResources Command ID: {unique_id} Returned result: {result}"
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -98,11 +98,9 @@ def assign_resouces(
 
     if "ska_mid" in central_node_name:
         device = get_subarray_device(json.loads(central_node.internalModel))
-        logger.debug(f"obtained device is:{device}")
+        logger.debug(f"InternalModel attribute value is:{device}")
         start_time = time.time()
-        a = len(device["resources"])
         while len(device["resources"]) == 0:
-            logger.debug(f"length of device[resources] is:{a}")
             time.sleep(SLEEP_TIME)
             device = get_subarray_device(
                 json.loads(central_node.internalModel)
@@ -111,7 +109,6 @@ def assign_resouces(
             if elapsed_time > TIMEOUT:
                 pytest.fail("Timeout occurred while executing the test")
 
-        logger.debug(f"Outside while length of device[resources] is:{a}")
         assert len(device["resources"]) > 0
 
     if "ska_low" in central_node_name:
