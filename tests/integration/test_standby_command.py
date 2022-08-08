@@ -1,6 +1,5 @@
-import time
-
 import pytest
+import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DevState
@@ -9,60 +8,164 @@ from tests.integration.common import (  # noqa F401
     devices_to_load,
     ensure_checked_devices,
 )
-from tests.settings import SLEEP_TIME, TIMEOUT, logger
+from tests.settings import logger
 
 
-def standby_command(tango_context, central_node_name):
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_standby_command_mid(tango_context, change_event_callbacks):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device(central_node_name)
+    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
     ensure_checked_devices(central_node)
-    initial_len = len(central_node.commandExecuted)
-    (result, unique_id) = central_node.On()
-    (result, unique_id) = central_node.Standby()
+
+    result, unique_id = central_node.TelescopeOn()
+    # Check whether the command ResultCode is OK
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=8,
+    )
+    logger.info(
+        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+    )
+
+    result, unique_id = central_node.TelescopeStandby()
     logger.info("Result is: %s", result)
     logger.info("Unique id: %s", unique_id)
-    assert result[0] == ResultCode.QUEUED
-    start_time = time.time()
-    while len(central_node.commandExecuted) != initial_len + 2:
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
 
-    for command in central_node.commandExecuted:
-        if command[0] == unique_id[0]:
-            if command[2] != "ResultCode.OK":
-                logger.error("Message: %s", command[3])
-            assert command[2] == "ResultCode.OK"
+    # Check whether the command is QUEUED
+    assert unique_id[0].endswith("TelescopeStandby")
+    assert result[0] == ResultCode.QUEUED
+
+    command_status = central_node.longRunningCommandStatus
+    command_status_dict = {
+        command_status[i]: command_status[i + 1]
+        for i in range(0, len(command_status), 2)
+    }
+    logger.info(f"command_status: {command_status}, {len(command_status)}")
+    logger.info(f"command_status_dict: {command_status_dict}")
+
+    # Check whether the command status is IN_PROGRESS
+    command_executed = False
+    for command, status in reversed(list(command_status_dict.items())):
+        logger.info(f"command: {command}, {status}")
+        if unique_id[0] in command:
+            command_executed = True
+            assert status == "IN_PROGRESS"
+            break
+    assert command_executed is True, f"{command[0]} is not executed."
+
+    # Check whether the command ResultCode is OK
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=3,
+    )
+    logger.info(
+        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+    )
 
     csp_master = dev_factory.get_device("mid_csp/elt/master")
     csp_master.SetDirectState(DevState.STANDBY)
-    mccs_master = dev_factory.get_device("low-mccs/control/control")
-    mccs_master.SetDirectState(DevState.STANDBY)
-    start_time = time.time()
-    while central_node.telescopeState != DevState.STANDBY:
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
+
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    # Check whether the telescopeState is STANDBY
+    change_event_callbacks.assert_change_event(
+        "telescopeState", DevState.STANDBY, lookahead=2
+    )
+    logger.info(f"telescopeState: {central_node.telescopeState}")
 
     assert central_node.telescopeState == DevState.STANDBY
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_standby_command_mid(tango_context):
-    standby_command(tango_context, "ska_mid/tm_central/central_node")
-
-
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_standby_command_low(tango_context):
-    standby_command(tango_context, "ska_low/tm_central/central_node")
+def test_standby_command_low(tango_context, change_event_callbacks):
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    ensure_checked_devices(central_node)
+
+    result, unique_id = central_node.TelescopeOn()
+    # Check whether the command ResultCode is OK
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=8,
+    )
+    logger.info(
+        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+    )
+
+    result, unique_id = central_node.TelescopeStandby()
+    logger.info("Result is: %s", result)
+    logger.info("Unique id: %s", unique_id)
+
+    # Check whether the command is QUEUED
+    assert unique_id[0].endswith("TelescopeStandby")
+    assert result[0] == ResultCode.QUEUED
+
+    command_status_dict = {}
+    command_status = central_node.longRunningCommandStatus
+    logger.info(f"command_status: {command_status}, {len(command_status)}")
+    for index in range(0, len(command_status)):
+        logger.info(f"index: {index}")
+        if index % 2 == 0:
+            command_status_dict[command_status[index]] = command_status[
+                index + 1
+            ]
+
+    logger.info(f"command_status_dict: {command_status_dict}")
+
+    # Check whether the command status is IN_PROGRESS
+    command_executed = False
+    for command, status in reversed(list(command_status_dict.items())):
+        logger.info(f"command: {command}, {status}")
+        if unique_id[0] in command:
+            command_executed = True
+            assert status == "IN_PROGRESS"
+            break
+    assert command_executed is True, f"{command[0]} is not executed."
+
+    # Check whether the command ResultCode is OK
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=3,
+    )
+    logger.info(
+        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+    )
+
+    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master.SetDirectState(DevState.STANDBY)
+
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    # Check whether the telescopeState is STANDBY
+    change_event_callbacks.assert_change_event(
+        "telescopeState", DevState.STANDBY, lookahead=2
+    )
+    logger.info(f"telescopeState: {central_node.telescopeState}")
+
+    assert central_node.telescopeState == DevState.STANDBY
