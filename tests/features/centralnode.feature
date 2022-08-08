@@ -15,7 +15,7 @@ Feature: Central Node acceptance
 	Scenario: Ability to run commands on central node
 		Given a CentralNode device
 		When I call the command <command_name>
-		Then the <command_name> command is executed successfully and Lower level devices
+		Then the <command_name> command is executed successfully on lower level devices
 
 		Examples:
 		| command_name      | 

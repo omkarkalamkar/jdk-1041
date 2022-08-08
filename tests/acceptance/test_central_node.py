@@ -78,7 +78,7 @@ def check_internal_model(device_list):
 
 @then(
     parsers.parse(
-        "the {command_name} command is executed successfully and Lower level devices"
+        "the {command_name} command is executed successfully on lower level devices"
     )
 )
 def check_command(central_node, command_name, change_event_callbacks):
