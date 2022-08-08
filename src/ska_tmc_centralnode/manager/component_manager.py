@@ -302,6 +302,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -318,6 +319,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo.health_state = health_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
 
         self._aggregate_health_state()
 
@@ -333,10 +335,14 @@ class CNComponentManager(TmcComponentManager):
         :type state: DevState
         """
         with self.lock:
+            self.logger.debug(
+                f"State event callback for device {dev_name}: {state}"
+            )
             devInfo = self.component.get_device(dev_name)
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
         if isinstance(self.input_parameter, InputParameterMid):
@@ -357,6 +363,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo.obs_state = obs_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
 
     def update_device_assigned_resource(self, dev_name, assign_resources):
         """
@@ -372,6 +379,7 @@ class CNComponentManager(TmcComponentManager):
             dev_info.resources = assign_resources
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
+            self.component._invoke_device_callback(dev_info)
 
     def is_already_assigned(self, dish_id):
         """

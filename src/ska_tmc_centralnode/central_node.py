@@ -87,7 +87,7 @@ class AbstractCentralNode(TMCBaseDevice):
     )
 
     def update_device_callback(self, devInfo):
-        self._LastDeviceInfoChanged = devInfo.to_json()
+        self.last_device_info_changed = devInfo.to_json()
         self.push_change_event("lastDeviceInfoChanged", devInfo.to_json())
 
     def update_telescope_state_callback(self, telescope_state):
@@ -123,10 +123,10 @@ class AbstractCentralNode(TMCBaseDevice):
                 release.name, release.version, release.description
             )
             self._device._version_id = release.version
-            self._device._LastDeviceInfoChanged = ""
+            self._device.last_device_info_changed = ""
             self._device.set_change_event("telescopeHealthState", True, False)
             self._device.set_change_event("telescopeState", True, False)
-            self._device.set_change_event("LastDeviceInfoChanged", True, False)
+            self._device.set_change_event("lastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
