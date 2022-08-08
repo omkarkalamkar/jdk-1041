@@ -12,9 +12,6 @@ from tests.integration.common import (  # noqa F401
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-# @pytest.mark.skip(
-#     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-# )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_internal_model_events_mid(tango_context, change_event_callbacks):
@@ -61,9 +58,7 @@ def test_internal_model_events_mid(tango_context, change_event_callbacks):
     central_node.unsubscribe_event(event_id)
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.skip(reason="Needs to be tested.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_internal_model_events_low(tango_context):
@@ -135,9 +130,6 @@ def commands_result_events(
     )
 
 
-# @pytest.mark.skip(
-#     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-# )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_command_result_events_mid(tango_context, change_event_callbacks):
@@ -148,9 +140,7 @@ def test_command_result_events_mid(tango_context, change_event_callbacks):
     )
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.skip(reason="Needs to be tested.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_command_result_events_low(tango_context, change_event_callbacks):

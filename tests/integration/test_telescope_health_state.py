@@ -10,9 +10,6 @@ from tests.integration.common import ensure_checked_devices
 from tests.settings import logger
 
 
-# @pytest.mark.skip(
-#     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-# )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_telescope_health_state_mid(tango_context, change_event_callbacks):
@@ -48,9 +45,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     assert central_node.telescopeHealthState == HealthState.OK
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.skip(reason="Needs to be tested.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_telescope_health_state_low(tango_context, change_event_callbacks):
