@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.3.16"
+version="0.3.17"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team NCRA"
@@ -10,7 +10,7 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.3.16
-tag=0.3.16
-tag_description=Refactored TelescopeOn and TelescopeOff commands as a long running commands.
-release_notes=This release contains:<br/><ul><li>CentralNode upgrade to ska-tango-base v0.13.2. Refactored TelescopeOn and TelescopeOff commands as a long running commands.</li></ul><br/>
+release=0.3.17
+tag=0.3.17
+tag_description=Refactored TelescopeStandby command as a long running commands.
+release_notes=This release contains:<br/><ul><li>CentralNode upgrade to ska-tango-base v0.13.2. Refactored TelescopeStandby command as a long running commands.</li></ul><br/>
