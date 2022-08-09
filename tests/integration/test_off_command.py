@@ -1,9 +1,6 @@
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
-from ska_tango_testing.mock.tango.event_callback import (
-    MockTangoEventCallbackGroup,
-)
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import PointingState
 
