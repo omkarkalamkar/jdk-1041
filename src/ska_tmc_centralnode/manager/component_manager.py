@@ -642,7 +642,7 @@ class CNComponentManager(TmcComponentManager):
         device_names = []
         dev_states = []
 
-        for device in self.component_manager.devices:
+        for device in self.devices:
             device_names.append(device.dev_name)
             dev_states.append(device.state)
 
