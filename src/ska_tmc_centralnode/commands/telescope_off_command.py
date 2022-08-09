@@ -85,6 +85,10 @@ class TelescopeOff(AbstractTelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
+        self.component_manager.log_state(
+            "Device states before executing TelescopeOff command"
+        )
+
         ret_code, message = self.turn_off_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -123,6 +127,10 @@ class TelescopeOff(AbstractTelescopeOnOff):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
+
+        self.component_manager.log_state(
+            "Device states after executing TelescopeOff command"
+        )
 
         return (ResultCode.OK, "")
 
@@ -184,6 +192,10 @@ class TelescopeOff(AbstractTelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
+        self.component_manager.log_state(
+            "Device states before executing TelescopeOff command"
+        )
+
         ret_code, message = self.turn_off_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -218,6 +230,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
+        self.component_manager.log_state(
+            "Device states after executing TelescopeOff command"
+        )
         return (ResultCode.OK, "")
 
     def turn_off_mccs_mln(self):

@@ -7,6 +7,7 @@ package.
 import time
 from typing import Callable, Optional
 
+import pandas as pd
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
@@ -636,3 +637,16 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_subarrays_are_responsive()
 
         return True
+
+    def log_state(self, msg="Device States"):
+        device_names = []
+        dev_states = []
+
+        for device in self.component_manager.devices:
+            device_names.append(device.dev_name)
+            dev_states.append(device.state)
+
+        device_states = pd.DataFrame(
+            {"Devices": device_names, "STATE": dev_states}
+        )
+        self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")

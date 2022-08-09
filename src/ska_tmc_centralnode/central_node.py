@@ -5,7 +5,6 @@ of state and mode attributes defined by the SKA Control Model.
 """
 import json
 
-import pandas as pd
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.op_state_model import TMCOpStateModel
@@ -137,19 +136,6 @@ class AbstractCentralNode(TMCBaseDevice):
         # I need to stop all threads
         if hasattr(self, "component_manager"):
             self.component_manager.stop()
-
-    def log_state(self, msg="Device States"):
-        device_names = []
-        dev_states = []
-
-        for device in self.component_manager.devices:
-            device_names.append(device.dev_name)
-            dev_states.append(device.state)
-
-        device_states = pd.DataFrame(
-            {"Devices": device_names, "STATE": dev_states}
-        )
-        self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
 
     # ------------------
     # Attributes methods

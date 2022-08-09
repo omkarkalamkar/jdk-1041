@@ -269,17 +269,26 @@ class AssignResources(AbstractAssignReleaseResources):
         self.logger.debug(
             f"Invoking AssignResources command on:{self.my_subarray_adapter}"
         )
+        self.component_manager.log_state(
+            "Device states before executing AssignResources command"
+        )
+
         ret_code, message = self.send_command(
             [self.my_subarray_adapter],
             "Error in calling AssignResources on subarray",
             "AssignResources",
             json.dumps(json_argument.copy()),
         )
+
         if ret_code == ResultCode.FAILED:
             return ret_code, message
         self.logger.debug(
             f"Resources assigned successfully to:{self.my_subarray_adapter}"
         )
+        self.component_manager.log_state(
+            "Device states after executing AssignResources command"
+        )
+
         return (ResultCode.OK, "")
 
     def update_resource_config_file(self, json_argument, id):
@@ -432,10 +441,13 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED, ("Errors in input json argument: %s", e)
             )
 
+        self.component_manager.log_state(
+            "Device states before executing AssignResources command"
+        )
         for ret_code, message in [
             self.send_command(
                 [self.my_subarray_adapter],
-                "Error in calling AssignResources on subarray",
+                f"Error in calling AssignResources on subarray: {self.my_subarray_adapter.dev_name}",
                 "AssignResources",
                 subarray_cmd_data,
             ),
@@ -449,6 +461,9 @@ class AssignResources(AbstractAssignReleaseResources):
             if ret_code == ResultCode.FAILED:
                 return ResultCode.FAILED, message
 
+        self.component_manager.log_state(
+            "Device states after executing AssignResources command"
+        )
         return (ResultCode.OK, "")
 
     def create_mccs_cmd_data(self, json_argument):
