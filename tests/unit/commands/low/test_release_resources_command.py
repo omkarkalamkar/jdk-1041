@@ -105,7 +105,7 @@ def test_low_release_resources_command_fail_subarray(
     json_argument = json.loads(release_input_str)
     release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
     release_res_command.release_resources(
-        json.dumps(json_argument), logger=logger, task_callback=task_callback
+        json_argument, logger=logger, task_callback=task_callback
     )
     (res_code, _) = release_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
