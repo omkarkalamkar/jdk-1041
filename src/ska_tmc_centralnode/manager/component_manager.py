@@ -273,14 +273,10 @@ class CNComponentManager(TmcComponentManager):
 
     def add_device(self, dev_name):
         """
-        <<<<<<< HEAD
-                Add device to the liveliness probe function
-        =======
-                Add device to the the liveliness probe function
-        >>>>>>> 2420f41202992a050e1de57a60066809beabd89a
+        Add device to the the liveliness probe function
 
-                :param dev_name: device name
-                :type dev_name: str
+        :param dev_name: device name
+        :type dev_name: str
         """
         if dev_name is None:
             return
