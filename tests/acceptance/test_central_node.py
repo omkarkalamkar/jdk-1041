@@ -74,6 +74,29 @@ def call_command(central_node, command_name):
             pytest.command_result = central_node.command_inout(
                 command_name, assign_res_string
             )
+        elif command_name == "ReleaseResources":
+            logger.info(f"central_node: {central_node.dev_name()}")
+            if "ska_mid" in central_node.dev_name():
+                assign_res_string = get_json_input_str(
+                    join(
+                        dirname(__file__),
+                        "..",
+                        "data",
+                        "command_ReleaseResources.json",
+                    )
+                )
+            else:
+                assign_res_string = get_json_input_str(
+                    join(
+                        dirname(__file__),
+                        "..",
+                        "data",
+                        "command_mccs_ReleaseResources.json",
+                    )
+                )
+            pytest.command_result = central_node.command_inout(
+                command_name, assign_res_string
+            )
         else:
             pytest.command_result = central_node.command_inout(command_name)
     except Exception as ex:

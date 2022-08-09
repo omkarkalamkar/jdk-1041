@@ -21,4 +21,5 @@ Feature: Central Node acceptance
 		| command_name		 |
         | TelescopeOn        |
 		| AssignResources    |
+		| ReleaseResources   |
 
