@@ -6,7 +6,7 @@ of state and mode attributes defined by the SKA Control Model.
 import json
 
 import pandas as pd
-from ska_tango_base.commands import ResultCode
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
@@ -209,10 +209,8 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes TelescopeOn() command on DishLeadNode, CspMasterLeafNode,
         SdpMasterLeafNode.
         """
-        self.log_state("Device states before executing Telescope On command")
         handler = self.get_command_object("TelescopeOn")
         result_code, unique_id = handler()
-        self.log_state("Device states after executing Telescope On command")
         return [[result_code], [str(unique_id)]]
 
     def is_TelescopeStandby_allowed(self):
@@ -235,14 +233,8 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode and DishLeafNode.
 
         """
-        self.log_state(
-            "Device states before executing Telescope Standby command"
-        )
         handler = self.get_command_object("TelescopeStandby")
         result_code, unique_id = handler()
-        self.log_state(
-            "Device states after executing Telescope Standby command"
-        )
         return [[result_code], [str(unique_id)]]
 
     def is_TelescopeOff_allowed(self):
@@ -262,10 +254,8 @@ class AbstractCentralNode(TMCBaseDevice):
         on CspMasterLeafNode and SdpMasterLeafNode.
 
         """
-        self.log_state("Device states before executing Telescope Off command")
         handler = self.get_command_object("TelescopeOff")
         result_code, unique_id = handler()
-        self.log_state("Device states after  executing Telescope Off command")
         return [[result_code], [str(unique_id)]]
 
     def is_On_allowed(self):
@@ -312,10 +302,8 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode.
 
         """
-        self.log_state("Device states before executing Off command")
         handler = self.get_command_object("Off")
         result_code, unique_id = handler()
-        self.log_state("Device states before executing Off command")
         return [[result_code], [str(unique_id)]]
 
     def is_Standby_allowed(self):
@@ -338,10 +326,8 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode and DishLeafNode.
 
         """
-        self.log_state("Device states before executing Standby command")
         handler = self.get_command_object("Standby")
         result_code, unique_id = handler()
-        self.log_state("Device states after executing Standby command")
         return [[result_code], [str(unique_id)]]
 
     def is_AssignResources_allowed(self):
@@ -368,13 +354,9 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         AssignResources command invokes the AssignResources command on lower level devices.
         """
-        self.log_state(
-            "Device states before executing AssignResources command"
-        )
         handler = self.get_command_object("AssignResources")
         args = json.loads(argin)
         result_code, unique_id = handler(args)
-        self.log_state("Device states after executing AssignResources command")
         return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring
@@ -539,3 +521,19 @@ class AbstractCentralNode(TMCBaseDevice):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
+        for (command_name, method_name) in [
+            ("TelescopeOn", "telescope_on"),
+            ("TelescopeStandby", "telescope_standby"),
+            ("TelescopeOff", "telescope_off"),
+            ("AssignResources", "assign_resources"),
+        ]:
+            self.register_command_object(
+                command_name,
+                SubmittedSlowCommand(
+                    command_name,
+                    self._command_tracker,
+                    self.component_manager,
+                    method_name,
+                    logger=None,
+                ),
+            )

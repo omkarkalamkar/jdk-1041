@@ -7,6 +7,7 @@ import tango
 from pytest_bdd import given, parsers, scenarios, then, when
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
+from ska_tmc_common.dev_factory import DevFactory
 from tango import Database, DeviceProxy
 
 from tests.settings import logger
@@ -155,6 +156,12 @@ def check_command(central_node, command_name, change_event_callbacks):
         None,
         lookahead=3,
     )
+
+    if command_name == "AssignResources":
+        # teardown subarray, setting ObsState = Empty
+        dev_factory = DevFactory()
+        tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+        tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
 scenarios("../features/centralnode.feature")
