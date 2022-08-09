@@ -34,9 +34,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         logger=None,
         **kwargs,
     ):
-        super().__init__(
-            component_manager, adapter_factory, logger=logger, *args, **kwargs
-        )
+        super().__init__(component_manager, adapter_factory, logger=logger)
         self.tm_subarray_adapters = []
         self.my_subarray_adapter = None
 
@@ -61,7 +59,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
 
-        ret_code, message = self.do(json.loads(argin))
+        ret_code, message = self.do(argin=json.dumps(argin))
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
@@ -189,7 +187,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
     def release_all_resources(self, adapter):
         return self.send_command(
             [adapter],
-            "Error in calling ReleaseResources() on TMC Device",
+            "Error in calling ReleaseAllResources() on TMC Device",
             "ReleaseAllResources",
         )
 

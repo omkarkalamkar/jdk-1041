@@ -13,8 +13,8 @@ from tests.integration.common import (  # noqa F401
 
 def get_input_str(path):
     with open(path, "r") as f:
-        assign_input_str = f.read()
-    return assign_input_str
+        input_str = f.read()
+    return input_str
 
 
 def release_resources(
@@ -28,15 +28,17 @@ def release_resources(
     central_node = dev_factory.get_device(central_node_name)
     ensure_checked_devices(central_node)
 
-    _, unique_id_on = central_node.TelescopeOn()
+    result, unique_id_on = central_node.TelescopeOn()
+    assert unique_id_on[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id_on[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
@@ -47,8 +49,8 @@ def release_resources(
         (unique_id_assign[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
-
     result, unique_id = central_node.ReleaseResources(release_input_string)
+
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
 

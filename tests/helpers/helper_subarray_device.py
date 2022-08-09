@@ -41,8 +41,9 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         """
         return (ResultCode.OK, "")
 
-    def release_all(self):
+    def release_all(self, task_callback):
         """Release all resources."""
+        self.logger.info("task_callback: %s", task_callback)
         self._assigned_resources = []
 
         return (ResultCode.OK, "")
@@ -306,3 +307,15 @@ class HelperSubArrayDevice(SKASubarray):
         :rtype: boolean
         """
         return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def ReleaseAllResources(self):
+        if self._obs_state != ObsState.EMPTY:
+            self._obs_state = ObsState.EMPTY
+            self.push_change_event("obsState", self._obs_state)
+        self._resources_assigned = []
+        self.push_change_event("assignedResources", self._resources_assigned)
+        return [[ResultCode.OK], [""]]

@@ -394,8 +394,9 @@ class AbstractCentralNode(TMCBaseDevice):
         self.log_state(
             "Device states before executing ReleaseResources command on CentralNode"
         )
-        handler = self.get_command_object("On")
-        result_code, unique_id = handler()
+        handler = self.get_command_object("ReleaseResources")
+        args = json.loads(argin)
+        result_code, unique_id = handler(args)
         self.log_state(
             "Device states after executing ReleaseResources command on CentralNode"
         )

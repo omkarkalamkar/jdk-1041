@@ -39,13 +39,8 @@ class CentralNodeCommand(TMCCommand):
         command_name: str,
     ):
         try:
-            self.logger.debug("Inside try for invoke_command")
             for adapter in adapters:
-                self.logger.debug(f"for loop, adapter is:::{adapter}")
                 command_caller(adapter)
-                self.logger.debug(
-                    f"Command caller is::: {command_caller(adapter)}"
-                )
                 self.logger.debug(
                     f"Invoked {command_name} on device {adapter.dev_name}"
                 )
@@ -57,23 +52,15 @@ class CentralNodeCommand(TMCCommand):
         return (ResultCode.OK, "")
 
     def send_command(self, adapters, description, command, argin=None):
-        self.logger.debug(f"Inside send_command::argin is::{argin}")
-        self.logger.debug(
-            f"Inside send_command::argin is::{argin} adapters are {adapters} description is{description} command is::{command}"
-        )
-        if argin:
-            self.logger.debug(
-                f"Inside send_command, if condition::argin is::{argin}"
-            )
+        if argin is None:
             return self.invoke_command(
-                adapters,
-                operator.methodcaller(command, argin),
-                description,
-                command,
+                adapters, operator.methodcaller(command), description, command
             )
-        self.logger.debug("Outside if condition::")
         return self.invoke_command(
-            adapters, operator.methodcaller(command), description, command
+            adapters,
+            operator.methodcaller(command, argin),
+            description,
+            command,
         )
 
 
@@ -235,7 +222,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         logger=None,
         **kwargs,
     ):
-        super().__init__(component_manager, logger=logger, *args, **kwargs)
+        super().__init__(component_manager, logger=logger)
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
