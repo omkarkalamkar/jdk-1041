@@ -85,7 +85,7 @@ class AbstractCentralNode(TMCBaseDevice):
     )
 
     def update_device_callback(self, devInfo):
-        self._LastDeviceInfoChanged = devInfo.to_json()
+        self.last_device_info_changed = devInfo.to_json()
         self.push_change_event("lastDeviceInfoChanged", devInfo.to_json())
 
     def update_telescope_state_callback(self, telescope_state):
@@ -121,10 +121,10 @@ class AbstractCentralNode(TMCBaseDevice):
                 release.name, release.version, release.description
             )
             self._device._version_id = release.version
-            self._device._LastDeviceInfoChanged = ""
+            self._device.last_device_info_changed = ""
             self._device.set_change_event("telescopeHealthState", True, False)
             self._device.set_change_event("telescopeState", True, False)
-            self._device.set_change_event("LastDeviceInfoChanged", True, False)
+            self._device.set_change_event("lastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
@@ -209,108 +209,64 @@ class AbstractCentralNode(TMCBaseDevice):
         This command invokes TelescopeOn() command on DishLeadNode, CspMasterLeafNode,
         SdpMasterLeafNode.
         """
+        self.log_state("Device states before executing Telescope On command")
         handler = self.get_command_object("TelescopeOn")
         result_code, unique_id = handler()
+        self.log_state("Device states after executing Telescope On command")
         return [[result_code], [str(unique_id)]]
 
-    # TODO: check with OET if these commands are required else it can be removed.
-    # def is_StartUpTelescope_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    def is_TelescopeStandby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device state.
 
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("StartUpTelescope")
-    #     return handler.check_allowed()
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("TelescopeStandby")
 
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="[ResultCode, information-only string]",
-    # )
-    # @DebugIt()
-    # def StartUpTelescope(self):
-    #     """
-    #     This command invokes SetOperateMode() command on DishLeadNode,
-    #     TelescopeOn() command on CspMasterLeafNode, SdpMasterLeafNode and SubarrayNode
-    #     """
-    #     self.log_state(
-    #         "Device states before executing Telescope StartUp command"
-    #     )
-    #     handler = self.get_command_object("StartUpTelescope")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state(
-    #         "Device states after executing Telescope StartUp command"
-    #     )
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    @DebugIt()
+    def TelescopeStandby(self):
+        """
+        This command invokes TelescopeStandby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
 
-    # def is_StandByTelescope_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
+        """
+        self.log_state(
+            "Device states before executing Telescope Standby command"
+        )
+        handler = self.get_command_object("TelescopeStandby")
+        result_code, unique_id = handler()
+        self.log_state(
+            "Device states after executing Telescope Standby command"
+        )
+        return [[result_code], [str(unique_id)]]
 
-    #     :return: True if this command is allowed to be run in current device state.
+    def is_TelescopeOff_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
 
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("StandByTelescope")
-    #     return handler.check_allowed()
+        :return: True if this command is allowed to be run in current device state.
 
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="[ResultCode, information-only string]",
-    # )
-    # def StandByTelescope(self):
-    #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode, TelescopeStandBy() command
-    #     on CspMasterLeafNode and SdpMasterLeafNode and TelescopeOff() command
-    #     on SubarrayNode.
-    #     """
-    #     self.log_state(
-    #         "Device states before executing Telescope StandBy command"
-    #     )
-    #     handler = self.get_command_object("StandByTelescope")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state(
-    #         "Device states after executing Telescope StandBy command"
-    #     )
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("TelescopeOff")
 
-    # def is_TelescopeOff_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    @command(dtype_out="DevVarLongStringArray")
+    def TelescopeOff(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
+        on CspMasterLeafNode and SdpMasterLeafNode.
 
-    #     :return: True if this command is allowed to be run in current device state.
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("TelescopeOff")
-    #     return handler.check_allowed()
-
-    # @command(dtype_out="DevVarLongStringArray")
-    # def TelescopeOff(self):
-    #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
-    #     on CspMasterLeafNode and SdpMasterLeafNode.
-
-    #     """
-    #     self.log_state("Device states before executing Telescope Off command")
-    #     handler = self.get_command_object("TelescopeOff")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing Telescope Off command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
+        """
+        self.log_state("Device states before executing Telescope Off command")
+        handler = self.get_command_object("TelescopeOff")
+        result_code, unique_id = handler()
+        self.log_state("Device states after  executing Telescope Off command")
+        return [[result_code], [str(unique_id)]]
 
     def is_On_allowed(self):
         """
@@ -334,6 +290,58 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         handler = self.get_command_object("On")
         result_code, unique_id = handler()
+        return [[result_code], [str(unique_id)]]
+
+    def is_Off_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("Off")
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    def Off(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode,
+        TelescopeOff() command on CspMasterLeafNode and
+        SdpMasterLeafNode.
+
+        """
+        self.log_state("Device states before executing Off command")
+        handler = self.get_command_object("Off")
+        result_code, unique_id = handler()
+        self.log_state("Device states before executing Off command")
+        return [[result_code], [str(unique_id)]]
+
+    def is_Standby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("Standby")
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    @DebugIt()
+    def Standby(self):
+        """
+        This command invokes Standby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
+
+        """
+        self.log_state("Device states before executing Standby command")
+        handler = self.get_command_object("Standby")
+        result_code, unique_id = handler()
+        self.log_state("Device states after executing Standby command")
         return [[result_code], [str(unique_id)]]
 
     def is_AssignResources_allowed(self):
@@ -407,7 +415,8 @@ class AbstractCentralNode(TMCBaseDevice):
     #     )
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    # def is_Standby_allowed(self):
+    # TODO: Check with OET if these commands are required, else can be removed
+    # def is_StartUpTelescope_allowed(self):
     #     """
     #     Checks whether this command is allowed to be run in current device state.
 
@@ -415,65 +424,34 @@ class AbstractCentralNode(TMCBaseDevice):
 
     #     :rtype: boolean
     #     """
-    #     handler = self.get_command_object("Standby")
+    #     handler = self.get_command_object("StartUpTelescope")
     #     return handler.check_allowed()
 
     # @command(
     #     dtype_out="DevVarLongStringArray",
+    #     doc_out="[ResultCode, information-only string]",
     # )
     # @DebugIt()
-    # def Standby(self):
+    # def StartUpTelescope(self):
     #     """
-    #     This command invokes Standby() command on CspMasterLeafNode,
-    #     SdpMasterLeafNode and DishLeafNode.
-
-    #     """
-    #     self.log_state("Device states before executing Standby command")
-    #     handler = self.get_command_object("Standby")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing Standby command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
-    # def is_TelescopeStandby_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
-
-    #     :return: True if this command is allowed to be run in current device state.
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("TelescopeStandby")
-    #     return handler.check_allowed()
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
-    # @DebugIt()
-    # def TelescopeStandby(self):
-    #     """
-    #     This command invokes TelescopeStandby() command on CspMasterLeafNode,
-    #     SdpMasterLeafNode and DishLeafNode.
-
+    #     This command invokes SetOperateMode() command on DishLeadNode,
+    #     TelescopeOn() command on CspMasterLeafNode, SdpMasterLeafNode and SubarrayNode
     #     """
     #     self.log_state(
-    #         "Device states before executing Telescope Standby command"
+    #         "Device states before executing Telescope StartUp command"
     #     )
-    #     handler = self.get_command_object("TelescopeStandby")
+    #     handler = self.get_command_object("StartUpTelescope")
     #     if self.component_manager.command_executor.queue_full:
     #         return [[ResultCode.FAILED], ["Queue is full!"]]
     #     unique_id = self.component_manager.command_executor.enqueue_command(
     #         handler
     #     )
     #     self.log_state(
-    #         "Device states after executing Telescope Standby command"
+    #         "Device states after executing Telescope StartUp command"
     #     )
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    # def is_Off_allowed(self):
+    # def is_StandByTelescope_allowed(self):
     #     """
     #     Checks whether this command is allowed to be run in current device state.
 
@@ -481,28 +459,31 @@ class AbstractCentralNode(TMCBaseDevice):
 
     #     :rtype: boolean
     #     """
-
-    #     handler = self.get_command_object("Off")
+    #     handler = self.get_command_object("StandByTelescope")
     #     return handler.check_allowed()
 
     # @command(
     #     dtype_out="DevVarLongStringArray",
+    #     doc_out="[ResultCode, information-only string]",
     # )
-    # def Off(self):
+    # def StandByTelescope(self):
     #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode,
-    #     TelescopeOff() command on CspMasterLeafNode and
-    #     SdpMasterLeafNode.
-
+    #     This command invokes SetStandbyLPMode() command on DishLeafNode, TelescopeStandBy() command
+    #     on CspMasterLeafNode and SdpMasterLeafNode and TelescopeOff() command
+    #     on SubarrayNode.
     #     """
-    #     self.log_state("Device states before executing Off command")
-    #     handler = self.get_command_object("Off")
+    #     self.log_state(
+    #         "Device states before executing Telescope StandBy command"
+    #     )
+    #     handler = self.get_command_object("StandByTelescope")
     #     if self.component_manager.command_executor.queue_full:
     #         return [[ResultCode.FAILED], ["Queue is full!"]]
     #     unique_id = self.component_manager.command_executor.enqueue_command(
     #         handler
     #     )
-    #     self.log_state("Device states after executing Off command")
+    #     self.log_state(
+    #         "Device states after executing Telescope StandBy command"
+    #     )
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
     # default ska mid

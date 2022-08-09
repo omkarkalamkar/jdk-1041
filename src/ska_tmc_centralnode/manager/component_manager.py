@@ -18,7 +18,11 @@ from tango import DevState
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
+from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode.commands.telescope_standby_command import (
+    TelescopeStandby,
+)
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     HealthStateAggregatorMid,
@@ -44,10 +48,7 @@ class CNComponentManager(TmcComponentManager):
     * Monitoring its component, e.g. detect that it has been turned off
       or on
 
-    * Fetching the latest SCM indicator values of the components periodically
-      and trigger the TMC and telescope state aggregation
-
-    * Receiving the change events from the component and trigger
+    * Receiving the change events from lower level devices and trigger
       the TMC and telescope state aggregation
     """
 
@@ -304,6 +305,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo = self.component.get_device(dev_name)
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
 
     def update_device_health_state(self, dev_name, health_state):
         """
@@ -320,6 +322,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo.health_state = health_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
 
         self._aggregate_health_state()
 
@@ -335,10 +338,14 @@ class CNComponentManager(TmcComponentManager):
         :type state: DevState
         """
         with self.lock:
+            self.logger.debug(
+                f"State event callback for device {dev_name}: {state}"
+            )
             devInfo = self.component.get_device(dev_name)
             devInfo.state = state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
         if isinstance(self.input_parameter, InputParameterMid):
@@ -359,6 +366,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo.obs_state = obs_state
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
 
     def update_device_assigned_resource(self, dev_name, assign_resources):
         """
@@ -374,6 +382,7 @@ class CNComponentManager(TmcComponentManager):
             dev_info.resources = assign_resources
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
+            self.component._invoke_device_callback(dev_info)
 
     def is_already_assigned(self, dish_id):
         """
@@ -526,6 +535,40 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, response = self.submit_task(
             telescopon_command.telescope_on,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
+    def telescope_off(self, task_callback: Callable = None):
+        """
+        Turn the Telescope Off.
+
+        :return: a result code and message
+        """
+        telescope_off_command = TelescopeOff(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, response = self.submit_task(
+            telescope_off_command.telescope_off,
+            args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
+    def telescope_standby(self, task_callback: Callable = None):
+        """
+        Standby the Telescope.
+
+        :return: a result code and message
+        """
+        telescopestandby_command = TelescopeStandby(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, response = self.submit_task(
+            telescopestandby_command.telescope_standby,
             args=[self.logger],
             task_callback=task_callback,
         )

@@ -1,7 +1,7 @@
 import time
 
 import pytest
-from ska_tango_base.commands import ResultCode
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -9,12 +9,14 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
     HelperMCCSStateDevice,
 )
+from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from tests.mock_callable import MockCallable
 from tests.settings import create_cm, logger
 
 
@@ -34,9 +36,11 @@ def devices_to_load():
     )
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+# Modified the TelescopeStandby integration test as per latest base classes.
+# Review is expected for below tests.
+
+
+@pytest.mark.standby
 def test_low_telescope_standby_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -45,21 +49,36 @@ def test_low_telescope_standby_command(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    unique_id = f"{time.time()}_TelescopeStandby"
+    task_callback = MockCallable(unique_id)
+    cm.is_command_allowed("TelescopeStandby")
+    cm.telescope_standby(task_callback=task_callback)
+    assert task_callback.status == TaskStatus.QUEUED
 
-    my_adapter_factory = HelperAdapterFactory()
-    standby_command = TelescopeStandby(
-        cm, cm.op_state_model, my_adapter_factory
+
+@pytest.mark.standby
+def test_telescope_standby_command_task_completed(tango_context):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    assert standby_command.check_allowed()
-    (result_code, _) = standby_command.do()
-    assert result_code == ResultCode.OK
-    for adapter in my_adapter_factory.adapters:
-        adapter.proxy.Standby.assert_called()
+    cm.is_command_allowed("TelescopeStandby")
+    my_adapter_factory = HelperAdapterFactory()
+
+    unique_id = f"{time.time()}_TelescopeStandby"
+    task_callback = MockCallable(unique_id)
+
+    standby_command = TelescopeStandby(cm, my_adapter_factory, logger=logger)
+    standby_command.telescope_standby(
+        logger=logger, task_callback=task_callback
+    )
+    time.sleep(0.1)
+    assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.standby
 def test_low_telescope_standby_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -67,27 +86,27 @@ def test_low_telescope_standby_command_fail_subarray(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_command_allowed("TelescopeStandby")
     my_adapter_factory = HelperAdapterFactory()
 
-    # include exception in TelescopeStandby command
+    # include exception in Standby command
     failing_dev = "ska_low/tm_subarray_node/1"
 
     my_adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"TelescopeStandBy.side_effect": Exception}
+        failing_dev, attrs={"Standby.side_effect": Exception}
     )
 
-    standby_command = TelescopeStandby(
-        cm, cm.op_state_model, my_adapter_factory
+    unique_id = f"{time.time()}_TelescopeStandby"
+    task_callback = MockCallable(unique_id)
+
+    standby_command = TelescopeStandby(cm, my_adapter_factory, logger=logger)
+    standby_command.telescope_standby(
+        logger=logger, task_callback=task_callback
     )
-    assert standby_command.check_allowed()
-    (result_code, message) = standby_command.do()
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
+    assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.standby
 def test_low_telescope_standby_command_fail_mccs(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -95,38 +114,33 @@ def test_low_telescope_standby_command_fail_mccs(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_command_allowed("TelescopeStandby")
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeStandby command
     failing_dev = "ska_low/tm_leaf_node/mccs_master"
     my_adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"TelescopeStandBy.side_effect": Exception}
+        failing_dev, attrs={"Standby.side_effect": Exception}
     )
 
-    standby_command = TelescopeStandby(
-        cm, cm.op_state_model, my_adapter_factory
+    unique_id = f"{time.time()}_TelescopeStandby"
+    task_callback = MockCallable(unique_id)
+
+    standby_command = TelescopeStandby(cm, my_adapter_factory, logger=logger)
+    standby_command.telescope_standby(
+        logger=logger, task_callback=task_callback
     )
-    assert standby_command.check_allowed()
-    (result_code, message) = standby_command.do()
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
+    assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.standby
 def test_low_telescope_standby_fail_check_allowed(tango_context):
-
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
-    cm.input_parameter.tm_subarray_dev_names = []
-    standby_command = TelescopeStandby(
-        cm, cm.op_state_model, my_adapter_factory
-    )
+    cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
-        standby_command.check_allowed()
+        cm.is_command_allowed("TelescopeStandby")

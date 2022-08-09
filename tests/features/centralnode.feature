@@ -10,15 +10,17 @@ Feature: Central Node acceptance
 		Then it correctly reports the failed and working devices
 
 
-	#Test the ability to generically run a a set of commands and that the execution is completed withing 5 seconds.
+	#Test the ability to generically run a a set of commands and that the execution is completed.
 	@XTP-3612 @XTP-3614 @post_deployment @acceptance @SKA_mid @SKA_low
 	Scenario: Ability to run commands on central node
 		Given a CentralNode device
 		When I call the command <command_name>
-		Then the command is queued and executed in less than 5 ss
+		Then the <command_name> command is executed successfully on lower level devices
 
 		Examples:
-		| command_name		 |
-        | TelescopeOn        |
-		| AssignResources    |
+		| command_name      | 
+		| TelescopeOn       |
+		| TelescopeOff      |
+		| TelescopeStandby  |
+		| AssignResources   |
 
