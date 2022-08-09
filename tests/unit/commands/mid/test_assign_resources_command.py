@@ -63,6 +63,7 @@ def get_assign_resources_command_obj():
     )
     return assign_res_command, adapter_factory, cm
 
+
 def test_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -78,6 +79,7 @@ def test_assign_resources_command_queued(tango_context, task_callback):
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
+
 
 def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
@@ -95,6 +97,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     with pytest.raises(Exception) as e:
         assert "processing_blocks" in e
 
+
 def test_assign_resources_command_with_ok(tango_context, task_callback):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
@@ -104,6 +107,7 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.OK
+
 
 def test_assign_resources_command_missing_sdp_key(
     tango_context, task_callback
@@ -118,6 +122,7 @@ def test_assign_resources_command_missing_sdp_key(
     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
     assert "sdp" in message
+
 
 def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     logger.info("%s", tango_context)
