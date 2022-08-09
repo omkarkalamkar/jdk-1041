@@ -35,10 +35,21 @@ def test_off_command_mid(tango_context, change_event_callbacks):
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
     ensure_checked_devices(central_node)
 
-    result_on, _ = central_node.TelescopeOn()
-    result_off, unique_id_off = central_node.TelescopeOff()
-
+    result_on, unique_id_on = central_node.TelescopeOn()
     assert result_on[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_on[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
+    result_off, unique_id_off = central_node.TelescopeOff()
     assert result_off[0] == ResultCode.QUEUED
 
     central_node.subscribe_event(
