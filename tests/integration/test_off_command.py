@@ -13,21 +13,6 @@ from tests.integration.common import (  # noqa F401
 )
 
 
-@pytest.fixture()
-def change_event_callbacks() -> MockTangoEventCallbackGroup:
-    """
-    Return a dictionary of Tango device change event callbacks with asynchrony support.
-
-    :return: a collections.defaultdict that returns change event
-        callbacks by name.
-    """
-    return MockTangoEventCallbackGroup(
-        "longRunningCommandResult",
-        "telescopeState",
-        timeout=30.0,
-    )
-
-
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_off_command_mid(tango_context, change_event_callbacks):
