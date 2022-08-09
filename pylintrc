@@ -63,8 +63,7 @@ confidence=
 disable=C,
         R,
         W,
-        I, no-member, 
-        redundant-keyword-arg # this will get remove once SAH-1149 is merged
+        I, no-member
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -78,7 +77,7 @@ enable=unreachable,
        binary-op-exception,
        bad-format-string,
        anomalous-backslash-in-string,
-       bad-open-mode
+       bad-open-mode,
 
 
 [REPORTS]

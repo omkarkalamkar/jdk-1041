@@ -2,9 +2,7 @@ import operator
 
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
-from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_command import TMCCommand
-from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 
@@ -215,81 +213,23 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
 
-# TODO: Refactor below class as a part of Assign-Release Resources command story
 class AbstractAssignReleaseResources(CentralNodeCommand):
     def __init__(
         self,
-        target,
-        pop_state_model,
+        component_manager,
         adapter_factory=None,
         *args,
         logger=None,
         **kwargs,
     ):
-        super().__init__(target, args, logger, kwargs)
-        self.op_state_model = pop_state_model
+        super().__init__(component_manager, logger=logger, *args, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
 
-    def check_allowed_mid(self):
-        """
-        Checks whether this command is allowed to be run in current device state
-
-        :return: True if this command is allowed to be run in current device state
-
-        :rtype: boolean
-
-        :raises: DevFailed if this command is not allowed to be run in current device state
-
-        """
-
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "AssignReleaseResources() is not allowed in current state %s",
-                self.op_state_model.op_state,
-            )
-        self.component_manager.check_if_subarrays_are_responsive()
-        self.component_manager.check_if_dishes_are_responsive()
-
-        return True
-
-    def check_allowed_low(self):
-        """
-        Checks whether this command is allowed to be run in current device state
-
-        :return: True if this command is allowed to be run in current device state
-
-        :rtype: boolean
-
-        :raises: DevFailed if this command is not allowed to be run in current device state
-
-        """
-
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "AssignReleaseResources() is not allowed in current state %s",
-                self.op_state_model.op_state,
-            )
-
-        self.component_manager.check_if_mccs_mln_is_responsive()
-        self.component_manager.check_if_subarrays_are_responsive()
-
-        return True
-
     def init_adapters_mid(self):
-
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
-
         error_dev_names = []
         num_working = 0
 

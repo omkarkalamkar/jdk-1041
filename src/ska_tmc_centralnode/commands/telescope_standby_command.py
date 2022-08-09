@@ -12,8 +12,6 @@ from ska_tmc_centralnode.commands.abstract_command import (
 )
 
 
-# Added a method for setting the task status and firing the actual command.
-# Review is expected for the below command class.
 class TelescopeStandby(AbstractTelescopeOnOff):
     """
     A class for CentralNode's TelescopeStandby() command.
@@ -93,6 +91,10 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
+        self.component_manager.log_state(
+            "Device states before executing TelescopeStandby command"
+        )
+
         ret_code, message = self.turn_standby_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -135,6 +137,10 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.logger.info(
             "TelescopeStandby command is completed successfully on the CentralNode"
         )
+        self.component_manager.log_state(
+            "Device states after executing TelescopeStandby command"
+        )
+
         return (ResultCode.OK, "")
 
     def do_low(self, argin=None):
@@ -161,6 +167,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
+        self.component_manager.log_state(
+            "Device states before executing TelescopeStandby command"
+        )
         ret_code, message = self.turn_standby_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -196,6 +205,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         self.logger.info(
             "TelescopeStandby command is completed successfully on the CentralNode"
+        )
+        self.component_manager.log_state(
+            "Device states after executing TelescopeStandby command"
         )
         return (ResultCode.OK, "")
 

@@ -3,7 +3,7 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
-from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
+from ska_tango_base.commands import ResultCode
 from tango import AttrWriteType
 from tango.server import attribute, device_property, run
 
@@ -249,7 +249,7 @@ class CentralNodeMid(AbstractCentralNode):
         self.component_manager.input_parameter.tm_dish_dev_names = value
         self.component_manager.update_input_parameter()
 
-    # TODO: Not in the scope of PI15
+    # TODO: Not in the scope for PI15
     # --------
     # Commands
     # --------
@@ -288,21 +288,6 @@ class CentralNodeMid(AbstractCentralNode):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        for (command_name, method_name) in [
-            ("TelescopeOn", "telescope_on"),
-            ("TelescopeStandby", "telescope_standby"),
-            ("TelescopeOff", "telescope_off"),
-        ]:
-            self.register_command_object(
-                command_name,
-                SubmittedSlowCommand(
-                    command_name,
-                    self._command_tracker,
-                    self.component_manager,
-                    method_name,
-                    logger=None,
-                ),
-            )
 
 
 # ----------

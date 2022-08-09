@@ -1,9 +1,6 @@
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
-from ska_tango_testing.mock.tango.event_callback import (
-    MockTangoEventCallbackGroup,
-)
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import PointingState
 
@@ -13,21 +10,6 @@ from tests.integration.common import (  # noqa F401
 )
 
 
-@pytest.fixture()
-def change_event_callbacks() -> MockTangoEventCallbackGroup:
-    """
-    Return a dictionary of Tango device change event callbacks with asynchrony support.
-
-    :return: a collections.defaultdict that returns change event
-        callbacks by name.
-    """
-    return MockTangoEventCallbackGroup(
-        "longRunningCommandResult",
-        "telescopeState",
-        timeout=30.0,
-    )
-
-
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_off_command_mid(tango_context, change_event_callbacks):
@@ -35,10 +17,21 @@ def test_off_command_mid(tango_context, change_event_callbacks):
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
     ensure_checked_devices(central_node)
 
-    result_on, _ = central_node.TelescopeOn()
-    result_off, unique_id_off = central_node.TelescopeOff()
-
+    result_on, unique_id_on = central_node.TelescopeOn()
     assert result_on[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_on[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
+    result_off, unique_id_off = central_node.TelescopeOff()
     assert result_off[0] == ResultCode.QUEUED
 
     central_node.subscribe_event(

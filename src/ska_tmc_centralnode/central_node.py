@@ -5,8 +5,7 @@ of state and mode attributes defined by the SKA Control Model.
 """
 import json
 
-import pandas as pd
-from ska_tango_base.commands import ResultCode
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
@@ -18,8 +17,6 @@ from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
-# Modified the tango device class to have Submitted slow command functionality.
-# Review is expected for is_TelescopeStandby_allowed and TelescopeStandby methods.
 class AbstractCentralNode(TMCBaseDevice):
     """
     Central Node is a coordinator of the complete Telescope system.
@@ -140,19 +137,6 @@ class AbstractCentralNode(TMCBaseDevice):
         if hasattr(self, "component_manager"):
             self.component_manager.stop()
 
-    def log_state(self, msg="Device States"):
-        device_names = []
-        dev_states = []
-
-        for device in self.component_manager.devices:
-            device_names.append(device.dev_name)
-            dev_states.append(device.state)
-
-        device_states = pd.DataFrame(
-            {"Devices": device_names, "STATE": dev_states}
-        )
-        self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
-
     # ------------------
     # Attributes methods
     # ------------------
@@ -235,14 +219,8 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode and DishLeafNode.
 
         """
-        self.log_state(
-            "Device states before executing Telescope Standby command"
-        )
         handler = self.get_command_object("TelescopeStandby")
         result_code, unique_id = handler()
-        self.log_state(
-            "Device states after executing Telescope Standby command"
-        )
         return [[result_code], [str(unique_id)]]
 
     def is_TelescopeOff_allowed(self):
@@ -262,10 +240,8 @@ class AbstractCentralNode(TMCBaseDevice):
         on CspMasterLeafNode and SdpMasterLeafNode.
 
         """
-        self.log_state("Device states before executing Telescope Off command")
         handler = self.get_command_object("TelescopeOff")
         result_code, unique_id = handler()
-        self.log_state("Device states after  executing Telescope Off command")
         return [[result_code], [str(unique_id)]]
 
     def is_On_allowed(self):
@@ -312,10 +288,8 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode.
 
         """
-        self.log_state("Device states before executing Off command")
         handler = self.get_command_object("Off")
         result_code, unique_id = handler()
-        self.log_state("Device states before executing Off command")
         return [[result_code], [str(unique_id)]]
 
     def is_Standby_allowed(self):
@@ -338,50 +312,40 @@ class AbstractCentralNode(TMCBaseDevice):
         SdpMasterLeafNode and DishLeafNode.
 
         """
-        self.log_state("Device states before executing Standby command")
         handler = self.get_command_object("Standby")
         result_code, unique_id = handler()
-        self.log_state("Device states after executing Standby command")
+        return [[result_code], [str(unique_id)]]
+
+    def is_AssignResources_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("AssignResources")
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
+        "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
+        "The individual string should contain dish numbers in string format with "
+        "preceding zeroes upto 3 digits. E.g. 0001, 0002",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def AssignResources(self, argin):
+        """
+        AssignResources command invokes the AssignResources command on lower level devices.
+        """
+        handler = self.get_command_object("AssignResources")
+        args = json.loads(argin)
+        result_code, unique_id = handler(args)
         return [[result_code], [str(unique_id)]]
 
     # TODO: Refactor below commands as a part of separate command refactoring
-    # def is_AssignResources_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
-
-    #     :return: True if this command is allowed to be run in current device state
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("AssignResources")
-    #     return handler.check_allowed()
-
-    # @command(
-    #     dtype_in="str",
-    #     doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
-    #     "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
-    #     "The individual string should contain dish numbers in string format with "
-    #     "preceding zeroes upto 3 digits. E.g. 0001, 0002",
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="information-only string",
-    # )
-    # @DebugIt()
-    # def AssignResources(self, argin):
-    #     """
-    #     AssignResources command invokes the AssignResources command on lower level devices.
-    #     """
-    #     self.log_state(
-    #         "Device states before executing AssignResources command"
-    #     )
-    #     handler = self.get_command_object("AssignResources")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler, argin
-    #     )
-    #     self.log_state("Device states after executing AssignResources command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
     # def is_ReleaseResources_allowed(self):
     #     """
     #     Checks whether this command is allowed to be run in current device state.
@@ -543,3 +507,19 @@ class AbstractCentralNode(TMCBaseDevice):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
+        for (command_name, method_name) in [
+            ("TelescopeOn", "telescope_on"),
+            ("TelescopeStandby", "telescope_standby"),
+            ("TelescopeOff", "telescope_off"),
+            ("AssignResources", "assign_resources"),
+        ]:
+            self.register_command_object(
+                command_name,
+                SubmittedSlowCommand(
+                    command_name,
+                    self._command_tracker,
+                    self.component_manager,
+                    method_name,
+                    logger=None,
+                ),
+            )

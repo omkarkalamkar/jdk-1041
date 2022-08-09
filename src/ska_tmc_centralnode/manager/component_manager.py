@@ -5,8 +5,9 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 import time
-from typing import Callable
+from typing import Callable, Optional
 
+import pandas as pd
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
@@ -15,6 +16,9 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
+from ska_tmc_centralnode.commands.assign_resources_command import (
+    AssignResources,
+)
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
@@ -82,6 +86,7 @@ class CNComponentManager(TmcComponentManager):
         :param _liveliness_probe: allows to enable/disable LivelinessProbe usage
         :param _event_receiver: allows to enable/disable EventReceiver usage
         """
+
         self._component = _component or CentralComponent(logger)
 
         super().__init__(
@@ -170,7 +175,7 @@ class CNComponentManager(TmcComponentManager):
 
         :return: list of the monitored devices
         """
-        return self._component._devices
+        return self._component.devices
 
     @property
     def checked_devices(self):
@@ -268,7 +273,6 @@ class CNComponentManager(TmcComponentManager):
     def add_device(self, dev_name):
         """
         Add device to the liveliness probe function
-
         :param dev_name: device name
         :type dev_name: str
         """
@@ -392,9 +396,10 @@ class CNComponentManager(TmcComponentManager):
         """
         for devInfo in self.devices:
             if isinstance(devInfo, SubArrayDeviceInfo):
-                if dish_id in devInfo.resources:
+                if devInfo.resources is None:
+                    return False
+                elif dish_id in devInfo.resources:
                     return True
-
         return False
 
     def _aggregate_health_state(self):
@@ -570,7 +575,25 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
-    def is_command_allowed(self, command_name: str):
+    def assign_resources(
+        self, argin, task_callback: Optional[Callable] = None
+    ):
+        """
+        Submit the AssignResources command in queue.
+
+        :return: a result code and message
+        """
+        assign_resources_command = AssignResources(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+        task_status, response = self.submit_task(
+            assign_resources_command.assign_resources,
+            args=[argin, self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
+    def is_command_allowed(self, command_name=None):
         """
         Checks whether this command is allowed
         It checks that the device is in a state
@@ -583,29 +606,47 @@ class CNComponentManager(TmcComponentManager):
 
         :rtype: boolean
         """
-        if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
-            if self.op_state_model.op_state in [
-                DevState.FAULT,
-                DevState.UNKNOWN,
-                DevState.DISABLE,
-            ]:
-                raise CommandNotAllowed(
-                    "Command is not allowed in current state %s",
-                    str(self.op_state_model.op_state),
-                )
+        if self.op_state_model.op_state in [
+            DevState.FAULT,
+            DevState.UNKNOWN,
+            DevState.DISABLE,
+        ]:
+            raise CommandNotAllowed(
+                "Command is not allowed in current state %s",
+                str(self.op_state_model.op_state),
+            )
+        if command_name in ["TelescopeOn", "TelescopeOff"]:
             if isinstance(self._input_parameter, InputParameterMid):
-                self.logger.debug("Checking mid devices, as responsive or not")
+                self.logger.debug(f"Checking mid devices for {command_name}")
                 self.check_if_csp_mln_is_responsive()
                 self.check_if_sdp_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
                 self.check_if_dishes_are_responsive()
             else:
-                self.logger.debug("Checking low devices, as responsive or not")
+                self.logger.debug(f"Checking low devices for {command_name}")
                 self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
-        else:
-            self.logger.info(
-                f"is_allowed check is disabled for the commands other than TelescopeOn/Off/Standby for the time being. The command invoked is: {command_name}"
-            )
+        elif command_name in ["AssignResources", "ReleaseResources"]:
+            if isinstance(self._input_parameter, InputParameterMid):
+                self.logger.debug(f"Checking mid devices for {command_name}")
+                self.check_if_subarrays_are_responsive()
+                self.check_if_dishes_are_responsive()
+            else:
+                self.logger.debug(f"Checking low devices for {command_name}")
+                self.check_if_mccs_mln_is_responsive()
+                self.check_if_subarrays_are_responsive()
 
         return True
+
+    def log_state(self, msg="Device States"):
+        device_names = []
+        dev_states = []
+
+        for device in self.devices:
+            device_names.append(device.dev_name)
+            dev_states.append(device.state)
+
+        device_states = pd.DataFrame(
+            {"Devices": device_names, "STATE": dev_states}
+        )
+        self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")

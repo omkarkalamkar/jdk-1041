@@ -5,7 +5,7 @@ from os.path import dirname, join
 import mock
 import pytest
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import SubArrayAdapter
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -13,15 +13,12 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
     HelperMCCSStateDevice,
 )
+from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
-
-# from ska_tmc_common.test_helpers.helper_subarray_device import (
-#     HelperSubArrayDevice,
-# )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import create_cm, logger
 
@@ -61,36 +58,43 @@ def get_assign_resources_command_obj():
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
 
-    my_adapter_factory = HelperAdapterFactory()
+    adapter_factory = HelperAdapterFactory()
 
     attrs = {"fetch_skuid.return_value": 123}
     skuid = mock.Mock(**attrs)
 
     assign_res_command = AssignResources(
-        cm, cm.op_state_model, my_adapter_factory, skuid
+        cm, adapter_factory, skuid, logger=logger
     )
-    return assign_res_command, my_adapter_factory
+    return assign_res_command, adapter_factory, cm
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_low_assign_resources_command(tango_context):
+def test_low_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
-    assign_res_command, my_adapter_factory = get_assign_resources_command_obj()
+    _, _, cm = get_assign_resources_command_obj()
+    cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
-    assert assign_res_command.check_allowed()
-    (result_code, _) = assign_res_command.do(assign_input_str)
-    assert result_code == ResultCode.OK
-    for adapter in my_adapter_factory.adapters:
-        if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.AssignResources.assert_called()
+    json_argument = json.loads(assign_input_str)
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_low_assign_resources_command_fail_subarray(tango_context):
+def test_low_assign_resources_command_with_ok(tango_context, task_callback):
+    logger.info("%s", tango_context)
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.OK
+
+
+def test_low_assign_resources_command_fail_subarray(
+    tango_context, task_callback
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -98,7 +102,7 @@ def test_telescope_low_assign_resources_command_fail_subarray(tango_context):
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
 
-    my_adapter_factory = HelperAdapterFactory()
+    adapter_factory = HelperAdapterFactory()
 
     attrs = {"fetch_skuid.return_value": 123}
     skuid = mock.Mock(**attrs)
@@ -107,141 +111,119 @@ def test_telescope_low_assign_resources_command_fail_subarray(tango_context):
     failing_dev = "ska_low/tm_subarray_node/1"
     attrs = {"AssignResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
-    my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
-
-    assign_res_command = AssignResources(
-        cm, cm.op_state_model, my_adapter_factory, skuid
-    )
-    assign_input_str = get_assign_input_str()
-    assert assign_res_command.check_allowed()
-    (result_code, message) = assign_res_command.do(assign_input_str)
-    assert result_code == ResultCode.FAILED
-    assert failing_dev in message
-
-
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_low_assign_resources_command_missing_subarray_beam_ids_key(
-    tango_context,
-):
-    logger.info("%s", tango_context)
-    assign_res_command, my_adapter_factory = get_assign_resources_command_obj()
+    adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
 
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    json_argument["mccs"]["subarray_beam_ids"] = ""
-    assert assign_res_command.check_allowed()
-    (result_code, _) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.OK
-    for adapter in my_adapter_factory.adapters:
-        if isinstance(adapter, SubArrayAdapter):
-            adapter.proxy.AssignResources.assert_called()
+    assign_res_command = AssignResources(
+        cm, adapter_factory, skuid, logger=logger
+    )
+    assign_res_command.assign_resources(
+        json_argument, logger=logger, task_callback=task_callback
+    )
+    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_low_assign_resources_command_empty_input_json(
-    tango_context,
+def test_low_assign_resources_command_missing_subarray_beam_ids_key(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assert cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["mccs"]["subarray_beam_ids"]
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
+    assert "subarray_beam_ids" in message
+
+
+def test_low_assign_resources_command_empty_input_json(
+    tango_context, task_callback
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _ = get_assign_resources_command_obj()
-    assert assign_res_command.check_allowed()
-    (result_code, _) = assign_res_command.do("")
-    assert result_code == ResultCode.FAILED
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    cm.is_command_allowed("AssignResources")
+    cm.assign_resources("", task_callback=task_callback)
+    (res_code, _) = assign_res_command.do(" ")
+    assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_low_assign_resources_command_missing_subarray_id(
-    tango_context,
+def test_low_assign_resources_command_missing_subarray_id(
+    tango_context, task_callback
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _ = get_assign_resources_command_obj()
-
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
-    assert assign_res_command.check_allowed()
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_low_assign_resources_command_missing_mccs(tango_context):
+def test_low_assign_resources_command_missing_mccs(
+    tango_context, task_callback
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _ = get_assign_resources_command_obj()
-
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assert cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]
-    assert assign_res_command.check_allowed()
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "mccs" in message
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_low_assign_resources_command_missing_channel_blocks(
-    tango_context,
+def test_low_assign_resources_command_missing_channel_blocks(
+    tango_context, task_callback
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _ = get_assign_resources_command_obj()
-
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assert cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["channel_blocks"]
-    assert assign_res_command.check_allowed()
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "channel_blocks" in message
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
-def test_telescope_low_assign_resources_command_missing_station_ids(
-    tango_context,
+def test_low_assign_resources_command_missing_station_ids(
+    tango_context, task_callback
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _ = get_assign_resources_command_obj()
+    assign_res_command, _, cm = get_assign_resources_command_obj()
 
+    assert cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["station_ids"]
-    assert assign_res_command.check_allowed()
-    (result_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert result_code == ResultCode.FAILED
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
     assert "station_ids" in message
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
 def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
-
     logger.info("%s", tango_context)
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
-    cm.input_parameter.mccs_master_leaf_node = []
-    assign_res_command = AssignResources(
-        cm, cm.op_state_model, my_adapter_factory
-    )
+    cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
-        assign_res_command.check_allowed()
+        cm.is_command_allowed("AssignResources")

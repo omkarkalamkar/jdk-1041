@@ -1,4 +1,5 @@
 import json
+from os.path import dirname, join
 
 import numpy as np
 import pytest
@@ -6,9 +7,17 @@ import tango
 from pytest_bdd import given, parsers, scenarios, then, when
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
+from ska_tmc_common.dev_factory import DevFactory
 from tango import Database, DeviceProxy
 
 from tests.settings import logger
+
+
+def get_json_input_str(path):
+    with open(path, "r") as f:
+        input_json_str = f.read()
+        input_arg = json.loads(input_json_str)
+    return json.dumps(input_arg)
 
 
 @given(
@@ -42,7 +51,31 @@ def internal_model(central_node):
 @when(parsers.parse("I call the command {command_name}"))
 def call_command(central_node, command_name):
     try:
-        pytest.command_result = central_node.command_inout(command_name)
+        if command_name == "AssignResources":
+            logger.info(f"central_node: {central_node.dev_name()}")
+            if "ska_mid" in central_node.dev_name():
+                assign_res_string = get_json_input_str(
+                    join(
+                        dirname(__file__),
+                        "..",
+                        "data",
+                        "command_AssignResources.json",
+                    )
+                )
+            else:
+                assign_res_string = get_json_input_str(
+                    join(
+                        dirname(__file__),
+                        "..",
+                        "data",
+                        "command_mccs_AssignResources.json",
+                    )
+                )
+            pytest.command_result = central_node.command_inout(
+                command_name, assign_res_string
+            )
+        else:
+            pytest.command_result = central_node.command_inout(command_name)
     except Exception as ex:
         assert "CommandNotAllowed" in str(ex)
         pytest.command_result = "CommandNotAllowed"
@@ -123,6 +156,12 @@ def check_command(central_node, command_name, change_event_callbacks):
         None,
         lookahead=3,
     )
+
+    if command_name == "AssignResources":
+        # teardown subarray, setting ObsState = Empty
+        dev_factory = DevFactory()
+        tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+        tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
 scenarios("../features/centralnode.feature")
