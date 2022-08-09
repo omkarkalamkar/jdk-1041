@@ -188,6 +188,20 @@ class HelperSubArrayDevice(SKASubarray):
             self._health_state = HealthState(argin)
             self.push_change_event("healthState", self._health_state)
 
+    @command(
+        dtype_in=int,
+        doc_in="Set ObsState",
+    )
+    def SetDirectObsState(self, argin):
+        """
+        Trigger a ObsState change
+        """
+        # import debugpy; debugpy.debug_this_thread()
+        value = ObsState(argin)
+        if self._obs_state != value:
+            self._obs_state = value
+            self.push_change_event("obsState", self._obs_state)
+
     def is_On_allowed(self):
         return True
 
