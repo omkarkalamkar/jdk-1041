@@ -228,7 +228,6 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         self.tm_subarray_adapters = []
 
     def init_adapters_mid(self):
-
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         error_dev_names = []

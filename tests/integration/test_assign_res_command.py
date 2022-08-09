@@ -5,6 +5,7 @@ from os.path import dirname, join
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.common import (  # noqa F401
@@ -125,6 +126,10 @@ def assign_resouces(
             if elapsed_time > TIMEOUT:
                 pytest.fail("Timeout occurred while executing the test")
         assert resources_len > 0
+
+    # teardown subarray, setting ObsState = Empty
+    tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
 @pytest.mark.post_deployment
