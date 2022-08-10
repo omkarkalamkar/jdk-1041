@@ -19,6 +19,7 @@ from ska_tmc_centralnode.model.enum import ModesAvailability
 @pytest.fixture
 def central_node_device(request):
     """Create DeviceProxy for tests"""
+
     true_context = request.config.getoption("--true-context")
     if not true_context:
         with DeviceTestContext(CentralNodeMid) as proxy:
@@ -33,7 +34,6 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.long_running
 def test_attributes(central_node_device):
     assert central_node_device.HealthState in [
         HealthState.UNKNOWN,

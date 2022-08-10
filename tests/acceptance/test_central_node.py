@@ -1,5 +1,4 @@
 import json
-import time
 from os.path import dirname, join
 
 import numpy as np
@@ -8,6 +7,7 @@ import tango
 from pytest_bdd import given, parsers, scenarios, then, when
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
+from ska_tmc_common.dev_factory import DevFactory
 from tango import Database, DeviceProxy
 
 from tests.settings import logger
@@ -134,10 +134,11 @@ def check_internal_model(device_list):
 
 @then(
     parsers.parse(
-        "the command is queued and executed in less than {seconds} ss"
+        "the {command_name} command is executed successfully on lower level devices"
     )
 )
-def check_command(central_node, command_name, seconds, change_event_callbacks):
+def check_command(central_node, command_name, change_event_callbacks):
+
     if pytest.command_result == "CommandNotAllowed":
         return
 
@@ -159,34 +160,31 @@ def check_command(central_node, command_name, seconds, change_event_callbacks):
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    start_time = time.time()
-    executed = False
-    while not executed:
+    next_result = change_event_callbacks.assert_against_call(
+        "longRunningCommandResult",
+    )
+    command_id, result = next_result["attribute_value"]
+
+    if command_id != unique_id:
         next_result = change_event_callbacks.assert_against_call(
             "longRunningCommandResult",
+            lookahead=2,
         )
         command_id, result = next_result["attribute_value"]
-
-        if command_id != unique_id:
-            next_result = change_event_callbacks.assert_against_call(
-                "longRunningCommandResult",
-                lookahead=2,
-            )
-            command_id, result = next_result["attribute_value"]
-        assert command_id == unique_id
-        assert int(result) == ResultCode.OK or int(result) == ResultCode.FAILED
-
-        elapsed_time = time.time() - start_time
-        if elapsed_time > float(seconds):
-            pytest.fail("Timeout occurred while executing the test")
-        else:
-            executed = True
+    assert command_id == unique_id
+    assert int(result) == ResultCode.OK or int(result) == ResultCode.FAILED
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandsInQueue",
         None,
         lookahead=3,
     )
+
+    if command_name == "AssignResources":
+        # teardown subarray, setting ObsState = Empty
+        dev_factory = DevFactory()
+        tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+        tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
 scenarios("../features/centralnode.feature")

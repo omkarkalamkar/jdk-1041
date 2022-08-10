@@ -9,7 +9,7 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
-        super().__init__(component_manager, logger=logger, *args, **kwargs)
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
 
     def init_adapters(self):
         if isinstance(
@@ -52,6 +52,7 @@ class CentralNodeCommand(TMCCommand):
         return (ResultCode.OK, "")
 
     def send_command(self, adapters, description, command, argin=None):
+
         if argin is None:
             return self.invoke_command(
                 adapters, operator.methodcaller(command), description, command
@@ -73,7 +74,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         logger=None,
         **kwargs,
     ):
-        super().__init__(component_manager, logger=logger, *args, **kwargs)
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
@@ -228,7 +229,6 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         self.tm_subarray_adapters = []
 
     def init_adapters_mid(self):
-
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
         error_dev_names = []

@@ -29,10 +29,8 @@ class TelescopeOn(AbstractTelescopeOnOff):
         **kwargs,
     ):
         super().__init__(
-            component_manager, adapter_factory, logger=logger, *args, **kwargs
+            component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
-        self._timeout_mccs = timeout_mccs
-        self._step_sleep = step_sleep
 
     def telescope_on(
         self,
@@ -85,6 +83,10 @@ class TelescopeOn(AbstractTelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
+        self.component_manager.log_state(
+            "Device states before executing TelescopeOn command"
+        )
+
         for ret_code, message in [
             self.turn_on_csp(),
             self.turn_on_sdp(),
@@ -96,6 +98,9 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 return ret_code, message
         self.logger.info(
             "TelescopeOn command is invoked successfully on the lower level devices"
+        )
+        self.component_manager.log_state(
+            "Device states after executing TelescopeOn command"
         )
         return (ResultCode.OK, "")
 
@@ -148,6 +153,9 @@ class TelescopeOn(AbstractTelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
+        self.component_manager.log_state(
+            "Device states before executing TelescopeOn command"
+        )
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
         for ret_code, message in [
@@ -157,6 +165,9 @@ class TelescopeOn(AbstractTelescopeOnOff):
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
 
+        self.component_manager.log_state(
+            "Device states after executing TelescopeOn command"
+        )
         return (ResultCode.OK, "")
 
     def turn_on_mccs_master(self):

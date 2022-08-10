@@ -5,8 +5,7 @@ of state and mode attributes defined by the SKA Control Model.
 """
 import json
 
-import pandas as pd
-from ska_tango_base.commands import ResultCode
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
@@ -85,7 +84,7 @@ class AbstractCentralNode(TMCBaseDevice):
     )
 
     def update_device_callback(self, devInfo):
-        self._LastDeviceInfoChanged = devInfo.to_json()
+        self.last_device_info_changed = devInfo.to_json()
         self.push_change_event("lastDeviceInfoChanged", devInfo.to_json())
 
     def update_telescope_state_callback(self, telescope_state):
@@ -121,10 +120,10 @@ class AbstractCentralNode(TMCBaseDevice):
                 release.name, release.version, release.description
             )
             self._device._version_id = release.version
-            self._device._LastDeviceInfoChanged = ""
+            self._device.last_device_info_changed = ""
             self._device.set_change_event("telescopeHealthState", True, False)
             self._device.set_change_event("telescopeState", True, False)
-            self._device.set_change_event("LastDeviceInfoChanged", True, False)
+            self._device.set_change_event("lastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
@@ -137,19 +136,6 @@ class AbstractCentralNode(TMCBaseDevice):
         # I need to stop all threads
         if hasattr(self, "component_manager"):
             self.component_manager.stop()
-
-    def log_state(self, msg="Device States"):
-        device_names = []
-        dev_states = []
-
-        for device in self.component_manager.devices:
-            device_names.append(device.dev_name)
-            dev_states.append(device.state)
-
-        device_states = pd.DataFrame(
-            {"Devices": device_names, "STATE": dev_states}
-        )
-        self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
 
     # ------------------
     # Attributes methods
@@ -213,7 +199,186 @@ class AbstractCentralNode(TMCBaseDevice):
         result_code, unique_id = handler()
         return [[result_code], [str(unique_id)]]
 
-    # TODO: check with OET if these commands are required else it can be removed.
+    def is_TelescopeStandby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("TelescopeStandby")
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    @DebugIt()
+    def TelescopeStandby(self):
+        """
+        This command invokes TelescopeStandby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
+
+        """
+        handler = self.get_command_object("TelescopeStandby")
+        result_code, unique_id = handler()
+        return [[result_code], [str(unique_id)]]
+
+    def is_TelescopeOff_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("TelescopeOff")
+
+    @command(dtype_out="DevVarLongStringArray")
+    def TelescopeOff(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
+        on CspMasterLeafNode and SdpMasterLeafNode.
+
+        """
+        handler = self.get_command_object("TelescopeOff")
+        result_code, unique_id = handler()
+        return [[result_code], [str(unique_id)]]
+
+    def is_On_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+
+        """
+        return self.component_manager.is_command_allowed("On")
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    @DebugIt()
+    def On(self):
+        """
+        This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
+        SdpMasterLeafNode.
+        """
+        handler = self.get_command_object("On")
+        result_code, unique_id = handler()
+        return [[result_code], [str(unique_id)]]
+
+    def is_Off_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("Off")
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    def Off(self):
+        """
+        This command invokes SetStandbyLPMode() command on DishLeafNode,
+        TelescopeOff() command on CspMasterLeafNode and
+        SdpMasterLeafNode.
+
+        """
+        handler = self.get_command_object("Off")
+        result_code, unique_id = handler()
+        return [[result_code], [str(unique_id)]]
+
+    def is_Standby_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("Standby")
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
+    @DebugIt()
+    def Standby(self):
+        """
+        This command invokes Standby() command on CspMasterLeafNode,
+        SdpMasterLeafNode and DishLeafNode.
+
+        """
+        handler = self.get_command_object("Standby")
+        result_code, unique_id = handler()
+        return [[result_code], [str(unique_id)]]
+
+    def is_AssignResources_allowed(self):
+        """
+        Checks whether this command is allowed to be run in current device state.
+
+        :return: True if this command is allowed to be run in current device state
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("AssignResources")
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
+        "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
+        "The individual string should contain dish numbers in string format with "
+        "preceding zeroes upto 3 digits. E.g. 0001, 0002",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def AssignResources(self, argin):
+        """
+        AssignResources command invokes the AssignResources command on lower level devices.
+        """
+        handler = self.get_command_object("AssignResources")
+        args = json.loads(argin)
+        result_code, unique_id = handler(args)
+        return [[result_code], [str(unique_id)]]
+
+    def is_ReleaseResources_allowed(self):
+        """
+        Checks whether ReleaseResources command is allowed to be run in current device state.
+
+        :return: True if ReleaseResources command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return self.component_manager.is_command_allowed("ReleaseResources")
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
+        "releaseALL boolean as true and receptor_ids.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def ReleaseResources(self, argin):
+        """
+        Releases all the resources assigned to the given Subarray.
+        """
+        self.log_state(
+            "Device states before executing ReleaseResources command on CentralNode"
+        )
+        handler = self.get_command_object("ReleaseResources")
+        args = json.loads(argin)
+        result_code, unique_id = handler(args)
+        self.log_state(
+            "Device states after executing ReleaseResources command on CentralNode"
+        )
+        return [[result_code], [str(unique_id)]]
+
+    # TODO: Check with OET if these commands are required, else can be removed
     # def is_StartUpTelescope_allowed(self):
     #     """
     #     Checks whether this command is allowed to be run in current device state.
@@ -284,222 +449,6 @@ class AbstractCentralNode(TMCBaseDevice):
     #     )
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
 
-    # def is_TelescopeOff_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
-
-    #     :return: True if this command is allowed to be run in current device state.
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("TelescopeOff")
-    #     return handler.check_allowed()
-
-    # @command(dtype_out="DevVarLongStringArray")
-    # def TelescopeOff(self):
-    #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
-    #     on CspMasterLeafNode and SdpMasterLeafNode.
-
-    #     """
-    #     self.log_state("Device states before executing Telescope Off command")
-    #     handler = self.get_command_object("TelescopeOff")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing Telescope Off command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
-    def is_On_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state.
-
-        :return: True if this command is allowed to be run in current device state.
-
-        :rtype: boolean
-
-        """
-        return self.component_manager.is_command_allowed("On")
-
-    @command(
-        dtype_out="DevVarLongStringArray",
-    )
-    @DebugIt()
-    def On(self):
-        """
-        This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
-        SdpMasterLeafNode.
-        """
-        handler = self.get_command_object("On")
-        result_code, unique_id = handler()
-        return [[result_code], [str(unique_id)]]
-
-    def is_AssignResources_allowed(self):
-        """
-        Checks whether this command is allowed to be run in current device state.
-
-        :return: True if this command is allowed to be run in current device state
-
-        :rtype: boolean
-        """
-        return self.component_manager.is_command_allowed("AssignResources")
-
-    @command(
-        dtype_in="str",
-        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
-        "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
-        "The individual string should contain dish numbers in string format with "
-        "preceding zeroes upto 3 digits. E.g. 0001, 0002",
-        dtype_out="DevVarLongStringArray",
-        doc_out="information-only string",
-    )
-    @DebugIt()
-    def AssignResources(self, argin):
-        """
-        AssignResources command invokes the AssignResources command on lower level devices.
-        """
-        self.log_state(
-            "Device states before executing AssignResources command"
-        )
-        handler = self.get_command_object("AssignResources")
-        args = json.loads(argin)
-        result_code, unique_id = handler(args)
-        self.log_state("Device states after executing AssignResources command")
-        return [[result_code], [str(unique_id)]]
-
-    def is_ReleaseResources_allowed(self):
-        """
-        Checks whether ReleaseResources command is allowed to be run in current device state.
-
-        :return: True if ReleaseResources command is allowed to be run in current device state.
-
-        :rtype: boolean
-        """
-        return self.component_manager.is_command_allowed("ReleaseResources")
-
-    @command(
-        dtype_in="str",
-        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
-        "releaseALL boolean as true and receptor_ids.",
-        dtype_out="DevVarLongStringArray",
-        doc_out="information-only string",
-    )
-    @DebugIt()
-    def ReleaseResources(self, argin):
-        """
-        Releases all the resources assigned to the given Subarray.
-        """
-        self.log_state(
-            "Device states before executing ReleaseResources command on CentralNode"
-        )
-        handler = self.get_command_object("ReleaseResources")
-        args = json.loads(argin)
-        result_code, unique_id = handler(args)
-        self.log_state(
-            "Device states after executing ReleaseResources command on CentralNode"
-        )
-        return [[result_code], [str(unique_id)]]
-
-    # def is_Standby_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
-
-    #     :return: True if this command is allowed to be run in current device state.
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("Standby")
-    #     return handler.check_allowed()
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
-    # @DebugIt()
-    # def Standby(self):
-    #     """
-    #     This command invokes Standby() command on CspMasterLeafNode,
-    #     SdpMasterLeafNode and DishLeafNode.
-
-    #     """
-    #     self.log_state("Device states before executing Standby command")
-    #     handler = self.get_command_object("Standby")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing Standby command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
-    # def is_TelescopeStandby_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
-
-    #     :return: True if this command is allowed to be run in current device state.
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("TelescopeStandby")
-    #     return handler.check_allowed()
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
-    # @DebugIt()
-    # def TelescopeStandby(self):
-    #     """
-    #     This command invokes TelescopeStandby() command on CspMasterLeafNode,
-    #     SdpMasterLeafNode and DishLeafNode.
-
-    #     """
-    #     self.log_state(
-    #         "Device states before executing Telescope Standby command"
-    #     )
-    #     handler = self.get_command_object("TelescopeStandby")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state(
-    #         "Device states after executing Telescope Standby command"
-    #     )
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
-    # def is_Off_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in current device state.
-
-    #     :return: True if this command is allowed to be run in current device state.
-
-    #     :rtype: boolean
-    #     """
-
-    #     handler = self.get_command_object("Off")
-    #     return handler.check_allowed()
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
-    # def Off(self):
-    #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode,
-    #     TelescopeOff() command on CspMasterLeafNode and
-    #     SdpMasterLeafNode.
-
-    #     """
-    #     self.log_state("Device states before executing Off command")
-    #     handler = self.get_command_object("Off")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler
-    #     )
-    #     self.log_state("Device states after executing Off command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
     # default ska mid
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
@@ -553,3 +502,20 @@ class AbstractCentralNode(TMCBaseDevice):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
+        for (command_name, method_name) in [
+            ("TelescopeOn", "telescope_on"),
+            ("TelescopeStandby", "telescope_standby"),
+            ("TelescopeOff", "telescope_off"),
+            ("AssignResources", "assign_resources"),
+            ("ReleaseResources", "release_resources"),
+        ]:
+            self.register_command_object(
+                command_name,
+                SubmittedSlowCommand(
+                    command_name,
+                    self._command_tracker,
+                    self.component_manager,
+                    method_name,
+                    logger=None,
+                ),
+            )

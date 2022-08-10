@@ -1,52 +1,102 @@
-import time
-
 import pytest
+import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_common.enum import PointingState
 
 from tests.integration.common import (  # noqa F401
     devices_to_load,
     ensure_checked_devices,
 )
-from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-def off_command(tango_context, centralnode_name):
-    logger.info("%s", tango_context)
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(centralnode_name)
-    ensure_checked_devices(central_node)
-    initial_len = len(central_node.commandExecuted)
-    (result, unique_id) = central_node.On()
-    (result, unique_id) = central_node.Off()
-    logger.info(result)
-    logger.info(unique_id)
-    assert result[0] == ResultCode.QUEUED
-    start_time = time.time()
-    while len(central_node.commandExecuted) != initial_len + 2:
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-
-    for command in central_node.commandExecuted:
-        if command[0] == unique_id[0]:
-            assert command[2] == "ResultCode.OK"
-
-
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_off_command_mid(tango_context):
-    off_command(tango_context, "ska_mid/tm_central/central_node")
+def test_off_command_mid(tango_context, change_event_callbacks):
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    ensure_checked_devices(central_node)
+
+    result_on, unique_id_on = central_node.TelescopeOn()
+    assert result_on[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_on[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
+    result_off, unique_id_off = central_node.TelescopeOff()
+    assert result_off[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_off[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
+    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master.SetDirectState(tango.DevState.OFF)
+
+    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master.SetDirectState(tango.DevState.OFF)
+
+    dish_master = dev_factory.get_device("mid_d0001/elt/master")
+    dish_master.SetDirectState(tango.DevState.OFF)
+    dish_master.SetDirectPointingState(PointingState.READY)
+
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "telescopeState", tango._tango.DevState.OFF, lookahead=4
+    )
 
 
-@pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_off_command_low(tango_context):
-    off_command(tango_context, "ska_low/tm_central/central_node")
+def test_off_command_low(tango_context, change_event_callbacks):
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    ensure_checked_devices(central_node)
+    result_on, _ = central_node.TelescopeOn()
+    result_off, unique_id_off = central_node.TelescopeOff()
+
+    assert result_on[0] == ResultCode.QUEUED
+    assert result_off[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_off[0], str(int(ResultCode.OK))),
+        lookahead=3,
+    )
+
+    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master.SetDirectState(tango.DevState.OFF)
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "telescopeState", tango._tango.DevState.OFF, lookahead=3
+    )
