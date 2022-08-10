@@ -367,15 +367,9 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         Releases all the resources assigned to the given Subarray.
         """
-        self.log_state(
-            "Device states before executing ReleaseResources command on CentralNode"
-        )
         handler = self.get_command_object("ReleaseResources")
         args = json.loads(argin)
         result_code, unique_id = handler(args)
-        self.log_state(
-            "Device states after executing ReleaseResources command on CentralNode"
-        )
         return [[result_code], [str(unique_id)]]
 
     # TODO: Check with OET if these commands are required, else can be removed
