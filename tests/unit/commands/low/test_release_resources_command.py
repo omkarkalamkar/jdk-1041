@@ -97,7 +97,7 @@ def test_low_release_resources_command_fail_subarray(
 
     # include exception in ReleaseResources command
     failing_dev = "ska_low/tm_subarray_node/1"
-    attrs = {"ReleasAlleResources.side_effect": Exception}
+    attrs = {"ReleaseAllResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
     release_input_str = get_release_input_str()
