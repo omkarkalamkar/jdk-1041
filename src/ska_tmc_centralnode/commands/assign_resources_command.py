@@ -264,15 +264,15 @@ class AssignResources(AbstractAssignReleaseResources):
                 )
             else:
                 self.logger.info("Resources are already assigned")
-
-        # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
-        self.logger.debug(
-            f"Invoking AssignResources command on:{self.my_subarray_adapter}"
-        )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
 
+        self.logger.debug(
+            f"Invoking AssignResources command on:{self.my_subarray_adapter}"
+        )
+
+        # is it necessary to make a copy? leave it as it was. MDC 29 Sept 2021
         ret_code, message = self.send_command(
             [self.my_subarray_adapter],
             "Error in calling AssignResources on subarray",
@@ -284,9 +284,6 @@ class AssignResources(AbstractAssignReleaseResources):
             return ret_code, message
         self.logger.debug(
             f"Resources assigned successfully to:{self.my_subarray_adapter}"
-        )
-        self.component_manager.log_state(
-            "Device states after executing AssignResources command"
         )
 
         return (ResultCode.OK, "")
@@ -461,9 +458,6 @@ class AssignResources(AbstractAssignReleaseResources):
             if ret_code == ResultCode.FAILED:
                 return ResultCode.FAILED, message
 
-        self.component_manager.log_state(
-            "Device states after executing AssignResources command"
-        )
         return (ResultCode.OK, "")
 
     def create_mccs_cmd_data(self, json_argument):

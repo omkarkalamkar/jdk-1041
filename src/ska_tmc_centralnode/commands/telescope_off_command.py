@@ -120,17 +120,13 @@ class TelescopeOff(AbstractTelescopeOnOff):
             time.sleep(self._step_sleep)
 
         for ret_code, message in [
+            self.set_standby_fp_mode_dishes(),
             self.turn_off_csp(),
             self.turn_off_sdp(),
-            self.set_standby_fp_mode_dishes(),
             self.set_standby_lp_mode_dishes(),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
-
-        self.component_manager.log_state(
-            "Device states after executing TelescopeOff command"
-        )
 
         return (ResultCode.OK, "")
 
@@ -230,9 +226,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
-        self.component_manager.log_state(
-            "Device states after executing TelescopeOff command"
-        )
         return (ResultCode.OK, "")
 
     def turn_off_mccs_mln(self):

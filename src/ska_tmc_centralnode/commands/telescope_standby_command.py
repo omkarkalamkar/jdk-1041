@@ -83,9 +83,6 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.component_manager.component.desired_telescope_state = (
             DevState.STANDBY
         )
-        self.logger.info(
-            "Invoking TelescopeStandby command on the lower level devices"
-        )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -94,7 +91,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-
+        self.logger.info(
+            "Invoking TelescopeStandby command on the lower level devices"
+        )
         ret_code, message = self.turn_standby_subarrays()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -126,9 +125,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             time.sleep(self._step_sleep)
 
         for ret_code, message in [
+            self.set_standby_fp_mode_dishes(),
             self.turn_standby_csp(),
             self.turn_standby_sdp(),
-            self.set_standby_fp_mode_dishes(),
             self.set_standby_lp_mode_dishes(),
         ]:
             if ret_code == ResultCode.FAILED:
@@ -136,9 +135,6 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         self.logger.info(
             "TelescopeStandby command is completed successfully on the CentralNode"
-        )
-        self.component_manager.log_state(
-            "Device states after executing TelescopeStandby command"
         )
 
         return (ResultCode.OK, "")
@@ -159,16 +155,15 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             DevState.STANDBY
         )
 
-        self.logger.info(
-            "Invoking TelescopeStandby command on the lower level devices"
-        )
-
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
+        )
+        self.logger.info(
+            "Invoking TelescopeStandby command on the lower level devices"
         )
         ret_code, message = self.turn_standby_subarrays()
         if ret_code == ResultCode.FAILED:
@@ -206,9 +201,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.logger.info(
             "TelescopeStandby command is completed successfully on the CentralNode"
         )
-        self.component_manager.log_state(
-            "Device states after executing TelescopeStandby command"
-        )
+
         return (ResultCode.OK, "")
 
     def turn_standby_subarrays(self):
