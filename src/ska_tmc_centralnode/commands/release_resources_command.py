@@ -34,7 +34,9 @@ class ReleaseResources(AbstractAssignReleaseResources):
         logger=None,
         **kwargs,
     ):
-        super().__init__(component_manager, adapter_factory, logger=logger)
+        super().__init__(
+            component_manager, adapter_factory, logger=logger, *args, **kwargs
+        )
         self.tm_subarray_adapters = []
         self.my_subarray_adapter = None
 
@@ -97,9 +99,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
                     "receptor_ids": [
                     ]
                 }
-
-            Note: From WebJive, enter input as: {"interface":"https://schema.skao.int/ska-tmc-releaseresources/1.0",
-            "subarray_id":1,"release_all":true,"receptor_ids":[]}
 
         :return: None
         """

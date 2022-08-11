@@ -64,7 +64,6 @@ def get_release_resources_command_obj():
     return release_command, my_adapter_factory, cm
 
 
-@pytest.mark.release
 def test_low_release_resources_command_queued(tango_context, task_callback):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
@@ -98,7 +97,7 @@ def test_low_release_resources_command_fail_subarray(
 
     # include exception in ReleaseResources command
     failing_dev = "ska_low/tm_subarray_node/1"
-    attrs = {"ReleaseResources.side_effect": Exception}
+    attrs = {"ReleasAlleResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
     release_input_str = get_release_input_str()

@@ -223,7 +223,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         logger=None,
         **kwargs,
     ):
-        super().__init__(component_manager, logger=logger)
+        super().__init__(component_manager, logger=logger, *args, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []

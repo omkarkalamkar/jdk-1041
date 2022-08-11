@@ -40,7 +40,6 @@ def devices_to_load():
 # Review is expected for below tests.
 
 
-@pytest.mark.standby
 def test_low_telescope_standby_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -56,7 +55,6 @@ def test_low_telescope_standby_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
-@pytest.mark.standby
 def test_telescope_standby_command_task_completed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -78,7 +76,6 @@ def test_telescope_standby_command_task_completed(tango_context):
     assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.standby
 def test_low_telescope_standby_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -106,7 +103,6 @@ def test_low_telescope_standby_command_fail_subarray(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.standby
 def test_low_telescope_standby_command_fail_mccs(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -133,7 +129,6 @@ def test_low_telescope_standby_command_fail_mccs(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.standby
 def test_low_telescope_standby_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))

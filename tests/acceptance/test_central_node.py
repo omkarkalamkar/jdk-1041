@@ -77,7 +77,7 @@ def call_command(central_node, command_name):
         elif command_name == "ReleaseResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
-                assign_res_string = get_json_input_str(
+                release_res_string = get_json_input_str(
                     join(
                         dirname(__file__),
                         "..",
@@ -86,7 +86,7 @@ def call_command(central_node, command_name):
                     )
                 )
             else:
-                assign_res_string = get_json_input_str(
+                release_res_string = get_json_input_str(
                     join(
                         dirname(__file__),
                         "..",
@@ -95,7 +95,7 @@ def call_command(central_node, command_name):
                     )
                 )
             pytest.command_result = central_node.command_inout(
-                command_name, assign_res_string
+                command_name, release_res_string
             )
         else:
             pytest.command_result = central_node.command_inout(command_name)

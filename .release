@@ -1,16 +1,16 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.3.18"
+version="0.3.19"
 version_info=version.split(".")
 description="""Central Node"""
-author="Team NCRA"
+author="Team SAHYADRI & HIMALAYA"
 author_email="telmgt-internal@googlegroups.com"
 license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.3.18
-tag=0.3.18
+release=0.3.19
+tag=0.3.19
 tag_description=Refactored AssignResources and ReleaseResources commands as a long running commands.
-release_notes=This intermediate release contains:<br/><ul><li>CentralNode upgrade to ska-tango-base v0.13.2. Refactored AssignResources and ReleaseResources commands as a long running commands.</li></ul><br/>
+release_notes=This release contains:<br/><ul><li>CentralNode upgrade to ska-tango-base v0.13.2. Refactored AssignResources and ReleaseResources commands as a long running commands.</li></ul><br/>

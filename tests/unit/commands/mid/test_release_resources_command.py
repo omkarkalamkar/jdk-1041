@@ -91,7 +91,7 @@ def test_mid_release_resources_command_fail_subarray(
     )
     adapter_factory = HelperAdapterFactory()
     failing_dev = "ska_mid/tm_subarray_node/1"
-    attrs = {"ReleaseResources.side_effect": Exception}
+    attrs = {"ReleaseAllResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
     release_input_str = get_release_input_str()
