@@ -2,9 +2,11 @@
 ReleaseResources class for CentralNode.
 """
 import json
+import threading
+from typing import Callable, Optional
 
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.adapters import AdapterFactory
+from ska_tango_base.executor import TaskStatus
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -26,21 +28,52 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
     def __init__(
         self,
-        target,
-        pop_state_model,
+        component_manager,
         adapter_factory=None,
         *args,
         logger=None,
         **kwargs,
     ):
-        super().__init__(target, args, logger, kwargs)
-        self.op_state_model = pop_state_model
-        self._adapter_factory = adapter_factory or AdapterFactory()
-        self.tm_dish_adapters = []
+        super().__init__(
+            component_manager, adapter_factory, logger=logger, *args, **kwargs
+        )
         self.tm_subarray_adapters = []
         self.my_subarray_adapter = None
-        # TODO: Moved to do method for testing
-        # self.init_adapters()
+
+    def release_resources(
+        self,
+        argin,
+        logger,
+        task_callback: Callable = None,
+        task_abort_event: Optional[threading.Event] = None,
+    ):
+
+        """This is a long running method for ReleaseResources command, it executes do hook,
+        invokes ReleaseResources command on lower level devices.
+
+        :param logger: logger
+        :type logger: logging.Logger
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :param task_abort_event: Check for abort, defaults to None
+        :type task_abort_event: Event, optional
+        """
+        # Indicate that the task has started
+        task_callback(status=TaskStatus.IN_PROGRESS)
+
+        ret_code, message = self.do(argin=json.dumps(argin))
+        self.logger.info(message)
+        if ret_code == ResultCode.FAILED:
+            task_callback(
+                status=TaskStatus.FAILED,
+                result=ResultCode.FAILED,
+                exception=message,
+            )
+        else:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=ResultCode.OK,
+            )
 
     def do_mid(self, argin):
         """
@@ -66,9 +99,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
                     "receptor_ids": [
                     ]
                 }
-
-            Note: From Jive, enter input as: {"interface":"https://schema.skao.int/ska-tmc-releaseresources/1.0",
-            "subarray_id":1,"release_all":true,"receptor_ids":[]}
 
         :return: None
         """
@@ -156,7 +186,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
     def release_all_resources(self, adapter):
         return self.send_command(
             [adapter],
-            "Error in calling ReleaseResources() on TMC Device",
+            "Error in calling ReleaseAllResources() on TMC Device",
             "ReleaseAllResources",
         )
 

@@ -19,6 +19,9 @@ from tango import DevState
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
+from ska_tmc_centralnode.commands.release_resources_command import (
+    ReleaseResources,
+)
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
@@ -588,6 +591,24 @@ class CNComponentManager(TmcComponentManager):
         )
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
+            args=[argin, self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
+    def release_resources(
+        self, argin, task_callback: Optional[Callable] = None
+    ):
+        """
+        Submit the ReleaseResources command in queue.
+
+        :return: a result code and message
+        """
+        release_resources_command = ReleaseResources(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+        task_status, response = self.submit_task(
+            release_resources_command.release_resources,
             args=[argin, self.logger],
             task_callback=task_callback,
         )

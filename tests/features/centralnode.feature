@@ -23,4 +23,6 @@ Feature: Central Node acceptance
 		| TelescopeOff      |
 		| TelescopeStandby  |
 		| AssignResources   |
+		| ReleaseResources  |
+
 

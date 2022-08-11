@@ -52,15 +52,16 @@ class CentralNodeCommand(TMCCommand):
         return (ResultCode.OK, "")
 
     def send_command(self, adapters, description, command, argin=None):
-        if argin:
+
+        if argin is None:
             return self.invoke_command(
-                adapters,
-                operator.methodcaller(command, argin),
-                description,
-                command,
+                adapters, operator.methodcaller(command), description, command
             )
         return self.invoke_command(
-            adapters, operator.methodcaller(command), description, command
+            adapters,
+            operator.methodcaller(command, argin),
+            description,
+            command,
         )
 
 

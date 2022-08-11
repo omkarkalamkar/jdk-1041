@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "ska-tmc-centralnode"
-version = "0.3.17"
+version = "0.3.19"
 description = "Central Node is a coordinator of the complete M&C system"
-authors = ["Team NCRA <telmgt-internal@googlegroups.com>"]
+authors = ["Team SAHYADRI & Team HIMALAYA <telmgt-internal@googlegroups.com>"]
 license = "BSD-3-Clause"
 packages = [
     { include = "ska_tmc_centralnode", from = "src" }
@@ -10,7 +10,6 @@ packages = [
 include = [
     { path = 'tests'}
 ]
-
 
 [tool.poetry.scripts]
 CentralNodeDS = 'ska_tmc_centralnode.central_node_mid:main'
