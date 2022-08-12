@@ -75,9 +75,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
-        self.logger.info(
-            "Invoking TelescopeOn command on the lower level devices"
-        )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -87,11 +84,15 @@ class TelescopeOn(AbstractTelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
 
+        self.logger.info(
+            "Invoking TelescopeOn command on the lower level devices"
+        )
+
         for ret_code, message in [
+            self.set_standby_fp_mode_dishes(),
             self.turn_on_csp(),
             self.turn_on_sdp(),
             self.turn_on_subarrays(),
-            self.set_standby_fp_mode_dishes(),
             self.set_operate_mode_dishes(),
         ]:
             if ret_code == ResultCode.FAILED:
@@ -99,9 +100,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info(
             "TelescopeOn command is invoked successfully on the lower level devices"
         )
-        self.component_manager.log_state(
-            "Device states after executing TelescopeOn command"
-        )
+
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
@@ -165,9 +164,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
 
-        self.component_manager.log_state(
-            "Device states after executing TelescopeOn command"
-        )
         return (ResultCode.OK, "")
 
     def turn_on_mccs_master(self):
