@@ -33,7 +33,8 @@ ska-tango-testing = "0.2.0"
 ska-ser-log-transactions = "*"
 ska-ser-skuid = "*"
 mock = "^4.0.3"
-pandas="1.2.3"
+pandas="1.4.2"
+ipython = "8.5.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"
