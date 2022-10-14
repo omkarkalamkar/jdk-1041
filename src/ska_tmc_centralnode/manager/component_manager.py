@@ -74,7 +74,7 @@ class CNComponentManager(TmcComponentManager):
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
-        skuid_port="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
+        skuid_port="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
         *args,
         **kwargs,
     ):

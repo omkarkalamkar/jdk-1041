@@ -30,7 +30,7 @@ server:
         - name: "NumDishes"
           values:
           - "{{.Values.deviceServers.centralnode.mid.NumDishes}}"
-        - name:"SkuidServiceNamePort"
+        - name: "SkuidServiceNamePort"
           values:
           - "{{.Values.deviceServers.centralnode.mid.SkuidServiceNamePort}}"
         - name: "TMSubarrayNodes"

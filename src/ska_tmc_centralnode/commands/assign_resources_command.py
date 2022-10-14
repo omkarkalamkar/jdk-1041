@@ -28,7 +28,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self,
         component_manager,
         adapter_factory=None,
-        skuid_port="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
+        skuid_port="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
         *args,
         logger=None,
         **kwargs,
