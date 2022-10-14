@@ -218,7 +218,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "processing_blocks key not present in the input json argument",
             )
-            
+
         if "execution_block" in json_argument["sdp"]:
             if json_argument["sdp"]["eb_id"] == "":
                 sdp_keys = list(json_argument["sdp"].keys())
@@ -228,9 +228,9 @@ class AssignResources(AbstractAssignReleaseResources):
                     self.update_resource_config_file(json_argument, id)
                 except Exception as e:
                     return self.generate_command_result(
-                        ResultCode.FAILED, ("Errors in input json argument: %s", e)
+                        ResultCode.FAILED,
+                        ("Errors in input json argument: %s", e),
                     )
-
 
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
