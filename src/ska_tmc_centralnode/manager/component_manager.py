@@ -74,6 +74,7 @@ class CNComponentManager(TmcComponentManager):
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
+        skuid_port="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
         *args,
         **kwargs,
     ):
@@ -129,6 +130,7 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
+        self.skuid_port = skuid_port
 
     def stop_event_receiver(self):
         if self.event_receiver:
@@ -587,7 +589,10 @@ class CNComponentManager(TmcComponentManager):
         :return: a result code and message
         """
         assign_resources_command = AssignResources(
-            self, adapter_factory=self.adapter_factory, logger=self.logger
+            self,
+            adapter_factory=self.adapter_factory,
+            skuid_port=self.skuid_port,
+            logger=self.logger,
         )
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
