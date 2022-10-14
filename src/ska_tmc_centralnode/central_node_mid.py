@@ -54,10 +54,6 @@ class CentralNodeMid(AbstractCentralNode):
 
     SdpMasterFQDN = device_property(dtype="str")
 
-    SkuidServiceNamePort = device_property(
-        dtype="DevString",
-        default_value="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
-    )
     # ----------
     # Attributes
     # ----------

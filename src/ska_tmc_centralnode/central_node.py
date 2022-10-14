@@ -462,7 +462,7 @@ class AbstractCentralNode(TMCBaseDevice):
             max_workers=self.MaxWorker,
             proxy_timeout=self.ProxyTimeout,
             sleep_time=self.SleepTime,
-            skuid_port=self.SkuidServiceNamePort,
+            skuid_service=self.SkuidServiceNamePort,
         )
         cm.input_parameter.tm_dish_dev_names = []
         for dish in range(1, (self.NumDishes + 1)):
