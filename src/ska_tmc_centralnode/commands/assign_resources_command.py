@@ -208,17 +208,35 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "sdp key is not present in the input json argument.",
             )
+        elif "resources" not in json_argument["sdp"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "resources key not present inside sdp key.",
+            )
+        elif "processing_blocks" not in json_argument["sdp"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "processing_blocks key not present in the input json argument",
+            )
+        else:
+            self.update_pb_id_config_file(json_argument)
 
-        if json_argument["sdp"]["eb_id"] == "":
-            sdp_keys = list(json_argument["sdp"].keys())
-            sdp_values = list(json_argument["sdp"].values())
-            id = sdp_keys[sdp_values.index("")]
-            try:
-                self.update_resource_config_file(json_argument, id)
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED, ("Errors in input json argument: %s", e)
+        if "execution_block" in json_argument["sdp"]:
+            if json_argument["sdp"]["execution_block"]["eb_id"] == "":
+                sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
+                sdp_values = list(
+                    json_argument["sdp"]["execution_block"].values()
                 )
+                id = sdp_keys[sdp_values.index("")]
+                try:
+                    # New type of id "eb_id" is used to distinguish between real SB and id used during testing
+                    unique_id = self._skuid.fetch_skuid("eb")
+                    json_argument["sdp"][id] = unique_id
+                except Exception as e:
+                    return self.generate_command_result(
+                        ResultCode.FAILED,
+                        e,
+                    )
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
@@ -288,43 +306,43 @@ class AssignResources(AbstractAssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def update_resource_config_file(self, json_argument, id):
-        """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
-        # New type of id "eb_id" is used to distinguish between real SB and id used during testing
-        unique_id = self._skuid.fetch_skuid("eb")
-        json_argument["sdp"][id] = unique_id
-        if "processing_blocks" in json_argument["sdp"]:
-            for i in range(len(json_argument["sdp"]["processing_blocks"])):
-                pb_id = self._skuid.fetch_skuid("pb")
-                json_argument["sdp"]["processing_blocks"][i]["pb_id"] = pb_id
-                if (
+    def update_pb_id_config_file(self, json_argument):
+        """This method utilizes SKUID service to generate unique pb_id"""
+        for i in range(len(json_argument["sdp"]["processing_blocks"])):
+            pb_id = self._skuid.fetch_skuid("pb")
+            json_argument["sdp"]["processing_blocks"][i]["pb_id"] = pb_id
+            if (
+                (
                     "dependencies"
                     in json_argument["sdp"]["processing_blocks"][i]
-                ):
-                    if i == 0:
-                        json_argument["sdp"]["processing_blocks"][i][
-                            "dependencies"
-                        ][0]["pb_id"] = json_argument["sdp"][
-                            "processing_blocks"
-                        ][
-                            i
-                        ][
-                            "pb_id"
-                        ]
-                    else:
-                        json_argument["sdp"]["processing_blocks"][i][
-                            "dependencies"
-                        ][0]["pb_id"] = json_argument["sdp"][
-                            "processing_blocks"
-                        ][
-                            i - 1
-                        ][
-                            "pb_id"
-                        ]
-        else:
-            raise Exception(
-                "processing_blocks key not present in the input json argument"
-            )
+                )
+                and (
+                    json_argument["sdp"]["processing_blocks"][i][
+                        "dependencies"
+                    ]
+                    != {}
+                )
+                and "pb_id"
+                in json_argument["sdp"]["processing_blocks"][i][
+                    "dependencies"
+                ][0]
+            ):
+                if i == 0:
+                    json_argument["sdp"]["processing_blocks"][i][
+                        "dependencies"
+                    ][0]["pb_id"] = json_argument["sdp"]["processing_blocks"][
+                        i
+                    ][
+                        "pb_id"
+                    ]
+                else:
+                    json_argument["sdp"]["processing_blocks"][i][
+                        "dependencies"
+                    ][0]["pb_id"] = json_argument["sdp"]["processing_blocks"][
+                        i - 1
+                    ][
+                        "pb_id"
+                    ]
 
     def do_low(self, argin=None):
         """
