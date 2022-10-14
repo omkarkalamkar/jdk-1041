@@ -76,7 +76,7 @@ ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
 	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA) \
-	--set deviceServers.centralnode.mid.SkuidServiceNamePort= ska-ser-skuid-test-svc.$(KUBE_NAMESPACE).svc.cluster.local:9870\
+	--set central_node.deviceServers.centralnode.mid.SkuidServiceNamePort= ska-ser-skuid-test-svc.$(KUBE_NAMESPACE).svc.cluster.local:9870\
 K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT)/$(PROJECT):$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
 endif
 
