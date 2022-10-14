@@ -8,6 +8,7 @@ import time
 from typing import Callable, Optional
 
 import pandas as pd
+from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
@@ -74,7 +75,7 @@ class CNComponentManager(TmcComponentManager):
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
-        skuid_port="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
+        skuid_port="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
         *args,
         **kwargs,
     ):
@@ -591,7 +592,7 @@ class CNComponentManager(TmcComponentManager):
         assign_resources_command = AssignResources(
             self,
             adapter_factory=self.adapter_factory,
-            skuid_port=self.skuid_port,
+            skuid=SkuidClient(self.skuid_port),
             logger=self.logger,
         )
         task_status, response = self.submit_task(

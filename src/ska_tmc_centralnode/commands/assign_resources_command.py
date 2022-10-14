@@ -28,7 +28,9 @@ class AssignResources(AbstractAssignReleaseResources):
         self,
         component_manager,
         adapter_factory=None,
-        skuid_port="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
+        skuid=SkuidClient(
+            "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
+        ),
         *args,
         logger=None,
         **kwargs,
@@ -38,8 +40,8 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
-        self._skuid = SkuidClient(skuid_port)
         self.my_subarray_adapter = None
+        self._skuid = skuid
 
     def assign_resources(
         self,

@@ -56,7 +56,7 @@ class CentralNodeMid(AbstractCentralNode):
 
     SkuidServiceNamePort = device_property(
         dtype="DevString",
-        default_value="ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870",
+        default_value="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
     )
     # ----------
     # Attributes
