@@ -220,9 +220,11 @@ class AssignResources(AbstractAssignReleaseResources):
             )
 
         if "execution_block" in json_argument["sdp"]:
-            if json_argument["sdp"]["eb_id"] == "":
-                sdp_keys = list(json_argument["sdp"].keys())
-                sdp_values = list(json_argument["sdp"].values())
+            if json_argument["sdp"]["execution_block"]["eb_id"] == "":
+                sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
+                sdp_values = list(
+                    json_argument["sdp"]["execution_block"].values()
+                )
                 id = sdp_keys[sdp_values.index("")]
                 try:
                     self.update_resource_config_file(json_argument, id)
@@ -305,7 +307,7 @@ class AssignResources(AbstractAssignReleaseResources):
         """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
         unique_id = self._skuid.fetch_skuid("eb")
-        json_argument["sdp"][id] = unique_id
+        json_argument["sdp"]["execution_block"][id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
             for i in range(len(json_argument["sdp"]["processing_blocks"])):
                 pb_id = self._skuid.fetch_skuid("pb")
