@@ -187,11 +187,6 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "sdp key is not present in the input json argument.",
             )
-        elif "resources" not in json_argument["sdp"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "resources key not present inside sdp key.",
-            )
 
         if "execution_block" in json_argument["sdp"]:
             if json_argument["sdp"]["execution_block"]["eb_id"] == "":
