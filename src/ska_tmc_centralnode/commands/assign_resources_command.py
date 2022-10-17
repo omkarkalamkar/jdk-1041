@@ -213,7 +213,6 @@ class AssignResources(AbstractAssignReleaseResources):
                 "resources key not present inside sdp key.",
             )
 
-
         if "execution_block" in json_argument["sdp"]:
             if json_argument["sdp"]["execution_block"]["eb_id"] == "":
                 sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
