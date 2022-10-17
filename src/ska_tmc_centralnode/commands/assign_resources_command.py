@@ -159,29 +159,9 @@ class AssignResources(AbstractAssignReleaseResources):
             Note: From Jive, enter above input string without any space.
 
             return:
-                A tuple containing a return code and a string in JSON format on successful assignment
-                of given resources. The JSON string contains following values:
-
-                dish:
-                    Mandatory JSON object consisting of
-
-                    receptor_ids_allocated:
-                        DevVarStringArray
-                        Contains ids of the receptors which are successfully allocated. Empty on unsuccessful
-                        allocation.
-
-
-                Example:
-                    {
-                    "dish": {
-                    "receptor_ids_allocated": ["0001"]
-                    }
-                    }
-
-            Note: Enter input without spaces as:{"dish":{"receptor_ids_allocated":["0001"]}}
-
-            return:
-                None
+                A tuple containing a return code and a string msg.
+                For Example:
+                    (ResultCode.OK, "")
 
         """
         # TODO: Uncomment this code when CDM library will be aligned as per ADR-35

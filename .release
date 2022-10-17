@@ -13,4 +13,4 @@ copyright=""""""
 release=0.3.22
 tag=0.3.22
 tag_description=Resolve issues in On/Off BDD tests
-release_notes=This release contains:<br/><ul><li>Updated CentralNode AssignResources command to accept updated SDP json string</li></ul><br/>
+release_notes=This release contains:<br/><ul><li>Updated CentralNode AssignResources command to accept updated SDP json string according to ADR-54</li></ul><br/>
