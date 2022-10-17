@@ -44,7 +44,7 @@ class AbstractCentralNode(TMCBaseDevice):
         default_value=tuple(),
     )
 
-    SkuidServiceNamePort = device_property(
+    SkuidService = device_property(
         dtype="DevString",
         default_value="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
     )
@@ -462,7 +462,7 @@ class AbstractCentralNode(TMCBaseDevice):
             max_workers=self.MaxWorker,
             proxy_timeout=self.ProxyTimeout,
             sleep_time=self.SleepTime,
-            skuid_service=self.SkuidServiceNamePort,
+            skuid_service=self.SkuidService,
         )
         cm.input_parameter.tm_dish_dev_names = []
         for dish in range(1, (self.NumDishes + 1)):

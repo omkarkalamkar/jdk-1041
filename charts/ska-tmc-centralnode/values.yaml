@@ -69,7 +69,7 @@ deviceServers:
       SdpMasterFQDN: "mid_sdp/elt/master"
       DishLeafNodePrefix: "ska_mid/tm_leaf_node/d"
       NumDishes: 1
-      SkuidServiceNamePort: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
+      SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
     low:
       file: "data/centralnode_low.yaml"
       MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
