@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.3.21"
+version="0.3.22"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team SAHYADRI & HIMALAYA"
@@ -10,7 +10,7 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.3.21
-tag=0.3.21
+release=0.3.22
+tag=0.3.22
 tag_description=Resolve issues in On/Off BDD tests
-release_notes=This release contains:<br/><ul><li>Resolve issues in On/Off BDD tests</li></ul><br/>
+release_notes=This release contains:<br/><ul><li>Updated CentralNode AssignResources command to accept updated SDP json string according to ADR-54</li></ul><br/>

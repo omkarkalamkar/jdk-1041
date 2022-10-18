@@ -30,6 +30,9 @@ server:
         - name: "NumDishes"
           values:
           - "{{.Values.deviceServers.centralnode.mid.NumDishes}}"
+        - name: "SkuidService"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.SkuidService}}"
         - name: "TMSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}

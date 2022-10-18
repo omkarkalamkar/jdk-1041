@@ -45,7 +45,7 @@ TARANTA ?= false
 MINIKUBE ?= true ## Minikube or not
 FAKE_DEVICES ?= true ## Install fake devices or not
 TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
-
+SKUID ?= ska-ser-skuid-$(HELM_RELEASE)-svc.$(KUBE_NAMESPACE).svc.cluster.local:9870 
 CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode
 CI_ENVIRONMENT_SLUG ?= ska-tmc-centralnode
 $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH_SLUG)\n    app.gitlab.com/env: $(CI_ENVIRONMENT_SLUG)' > gilab_values.yaml)
@@ -75,7 +75,8 @@ K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/$(PROJECT):$(VERSION)
 ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
 	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
-	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
+	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA) 
+
 K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT)/$(PROJECT):$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
 endif
 
@@ -126,6 +127,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set central_node.telescope=$(TELESCOPE) \
 	--set central_node.deviceServers.mocks.enabled=$(FAKE_DEVICES) \
 	--set ska-taranta.enabled=$(TARANTA) \
+	--set central_node.deviceServers.centralnode.mid.SkuidService=$(SKUID) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 

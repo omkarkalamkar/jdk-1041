@@ -29,7 +29,7 @@ class AssignResources(AbstractAssignReleaseResources):
         component_manager,
         adapter_factory=None,
         skuid=SkuidClient(
-            "ska-ser-skuid-test-svc.tmcmid.svc.cluster.local:9870"
+            "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
         ),
         *args,
         logger=None,
@@ -40,8 +40,8 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         self.tm_dish_adapters = []
         self.tm_subarray_adapters = []
-        self._skuid = skuid
         self.my_subarray_adapter = None
+        self._skuid = skuid
 
     def assign_resources(
         self,
@@ -80,109 +80,88 @@ class AssignResources(AbstractAssignReleaseResources):
 
     def do_mid(self, argin):
         """
-        Method to invoke AssignResources command on Subarray.
+            Method to invoke AssignResources command on Subarray.
 
-        :param argin: The string in JSON format. The JSON contains following values:
+            :param argin: The string in JSON format. The JSON contains following values:
 
-            subarray_id:
-                DevShort. Mandatory.
+                subarray_id:
+                    DevShort. Mandatory.
 
-            dish:
-                Mandatory JSON object consisting of
+                dish:
+                    Mandatory JSON object consisting of
 
-                receptor_ids:
-                    DevVarStringArray
-                    The individual string should contain dish numbers in string format
-                    with preceding zeroes upto 3 digits. E.g. 0001, 0002.
+                    receptor_ids:
+                        DevVarStringArray
+                        The individual string should contain dish numbers in string format
+                        with preceding zeroes upto 3 digits. E.g. 0001, 0002.
 
-            sdp:
-                Mandatory JSON object consisting of
-
-                eb_id:
-                    DevString
-                    The SBI id.
-                max_length:
-                    DevDouble
-                    Maximum length of the SBI in seconds.
-                scan_types:
-                    array of the blocks each consisting following parameters
-                    scan_type_id:
-                       DevString
-                       The scan id.
-                    coordinate_system:
-                       DevString
-                    ra:
-                       DevString
-                    Dec:
-                       DevString
-
-                processing_blocks:
-                    array of the blocks each consisting following parameters
+                sdp:
+                    Mandatory JSON object consisting of
 
                     eb_id:
                         DevString
-                        The Processing Block id.
-                    workflow:
-                        kind:
+                        The SBI id.
+                    max_length:
+                        DevDouble
+                        Maximum length of the SBI in seconds.
+                    scan_types:
+                        array of the blocks each consisting following parameters
+                        scan_type_id:
                            DevString
-                        name:
+                           The scan id.
+                        coordinate_system:
                            DevString
-                        version:
+                        ra:
                            DevString
-                    parameters:
-                        {}
+                        Dec:
+                           DevString
 
-        Example:
-            {"interface":"https://schema.skao.int/ska-tmc-assignresources/2.0",
-            "transaction_id":"txn-....-00001","subarray_id":1,"dish":
-            {"receptor_ids":["0001","0002"]},"sdp":{"interface":
-            "https://schema.skao.int/ska-sdp-assignres/0.3","eb_id":
-            "eb-mvp01-20200325-00001","max_length":100.0,"scan_types":
-            [{"scan_type_id":"science_A","reference_frame":"ICRS","ra":"02:42:40.771"
-            ,"dec":"-00:00:47.84","channels":[{"count":744,"start":0,"stride":2,"freq_min"
-            :0.35e9,"freq_max":0.368e9,"link_map":[[0,0],[200,1],[744,2],[944,3]]},
-            {"count":744,"start":2000,"stride":1,"freq_min":0.36e9,"freq_max":0.368e9,
-            "link_map":[[2000,4],[2200,5]]}]},{"scan_type_id":"calibration_B","reference_frame"
-            :"ICRS","ra":"12:29:06.699","dec":"02:03:08.598","channels":[{"count":744,
-            "start":0,"stride":2,"freq_min":0.35e9,"freq_max":0.368e9,"link_map":
-            [[0,0],[200,1],[744,2],[944,3]]},{"count":744,"start":2000,"stride":1,
-            "freq_min":0.36e9,"freq_max":0.368e9,"link_map":[[2000,4],
-            [2200,5]]}]}],"processing_blocks":[{"pb_id":"pb-mvp01-20200325-00001"
-            ,"workflow":{"kind":"realtime","name":"vis_receive","version":"0.1.0"},
-            "parameters":{}},{"pb_id":"pb-mvp01-20200325-00002","workflow":{"kind":"realtime",
-            "name":"test_realtime","version":"0.1.0"},"parameters":{}},{"pb_id":"pb-mvp01-20200325-00003",
-            "workflow":{"kind":"batch","name":"ical","version":"0.1.0"},"parameters":{},
-            "dependencies":[{"pb_id":"pb-mvp01-20200325-00001","kind":["visibilities"]}]},
-            {"pb_id":"pb-mvp01-20200325-00004","workflow":{"kind":"batch","name":"dpreb","version":
-            "0.1.0"},"parameters":{},"dependencies":[{"pb_id":"pb-mvp01-20200325-00003","kind":["calibration"]}]}]}}
+                    processing_blocks:
+                        array of the blocks each consisting following parameters
 
-
-        Note: From Jive, enter above input string without any space.
-
-        return:
-            A tuple containing a return code and a string in JSON format on successful assignment
-            of given resources. The JSON string contains following values:
-
-            dish:
-                Mandatory JSON object consisting of
-
-                receptor_ids_allocated:
-                    DevVarStringArray
-                    Contains ids of the receptors which are successfully allocated. Empty on unsuccessful
-                    allocation.
-
+                        eb_id:
+                            DevString
+                            The Processing Block id.
+                        workflow:
+                            kind:
+                               DevString
+                            name:
+                               DevString
+                            version:
+                               DevString
+                        parameters:
+                            {}
 
             Example:
-                {
-                "dish": {
-                "receptor_ids_allocated": ["0001"]
-                }
-                }
+        {"interface":"https://schema.skao.int/ska-tmc-assignresources/2.1",
+        "transaction_id":"txn-....-00001","subarray_id":1,"dish":{"receptor_ids":
+        ["0001"]},"sdp":{"interface":"https://schema.skao.int/ska-sdp-assignres/0.4",
+        "execution_block":{"eb_id":"eb-mvp01-20200325-00001","max_length": 100,"context":
+        {},"beams":[{"beam_id":"vis0","function":"visibilities"}],"scan_types":[{
+        "scan_type_id":".default","beams":{"vis0":{"channels_id":"vis_channels",
+        "polarisations_id":"all"}}},{"scan_type_id":"target:a","derive_from":
+        ".default","beams":{"vis0":{"field_id": "field_a"}}}],"channels":[{
+        "channels_id":"vis_channels","spectral_windows":[{"spectral_window_id":
+        "fsp_1_channels","count": 744,"start": 0,"stride": 2,"freq_min": 350000000,
+        "freq_max": 368000000,"link_map":[[0,0],[200,1],[744,2],[944,3]]},
+        {"spectral_window_id":"fsp_2_channels","count":744,"start":2000,"stride":1,
+        "freq_min": 360000000,"freq_max": 368000000,"link_map":[[2000,4],[2200,5]]},
+        {"spectral_window_id":"zoom_window_1","count": 744,"start":4000,"stride": 1,
+        "freq_min":360000000,"freq_max":361000000,"link_map":[[4000,6],[4200,7]]}]}],
+        "polarisations":[{"polarisations_id":"all","corr_type":["XX","XY","YY","YX"]}],
+        "fields":[{"field_id":"field_a","phase_dir":{"ra":[123,0.1],"dec":[123,0.1],
+        "reference_time": "...","reference_frame":"ICRF3"},"pointing_fqdn":"low-tmc/telstate/0/pointing"}]},
+        "processing_blocks": [{"pb_id":"pb-mvp01-20200325-00003","sbi_ids":["sbi-mvp01-20200325-00001", "sbi-mvp01-20200325-00002" ],
+        "script":{},"parameters":{},"dependencies":{}}],"resources":{"csp_links":[1,2,3,4],"receptors":
+        ["FS4","FS8"],"receive_nodes":10}}}
 
-        Note: Enter input without spaces as:{"dish":{"receptor_ids_allocated":["0001"]}}
 
-        return:
-            None
+            Note: From Jive, enter above input string without any space.
+
+            return:
+                A tuple containing a return code and a string msg.
+                For Example:
+                    (ResultCode.OK, "")
 
         """
         # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
@@ -209,16 +188,21 @@ class AssignResources(AbstractAssignReleaseResources):
                 "sdp key is not present in the input json argument.",
             )
 
-        if json_argument["sdp"]["eb_id"] == "":
-            sdp_keys = list(json_argument["sdp"].keys())
-            sdp_values = list(json_argument["sdp"].values())
-            id = sdp_keys[sdp_values.index("")]
-            try:
-                self.update_resource_config_file(json_argument, id)
-            except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED, ("Errors in input json argument: %s", e)
+        if "execution_block" in json_argument["sdp"]:
+            if json_argument["sdp"]["execution_block"]["eb_id"] == "":
+                sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
+                sdp_values = list(
+                    json_argument["sdp"]["execution_block"].values()
                 )
+                id = sdp_keys[sdp_values.index("")]
+                try:
+                    self.update_resource_config_file(json_argument, id)
+                except Exception as e:
+                    return self.generate_command_result(
+                        ResultCode.FAILED,
+                        ("Errors in input json argument: %s", e),
+                    )
+
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
@@ -292,7 +276,7 @@ class AssignResources(AbstractAssignReleaseResources):
         """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
         # New type of id "eb_id" is used to distinguish between real SB and id used during testing
         unique_id = self._skuid.fetch_skuid("eb")
-        json_argument["sdp"][id] = unique_id
+        json_argument["sdp"]["execution_block"][id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
             for i in range(len(json_argument["sdp"]["processing_blocks"])):
                 pb_id = self._skuid.fetch_skuid("pb")

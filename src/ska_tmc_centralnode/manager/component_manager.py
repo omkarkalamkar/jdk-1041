@@ -8,6 +8,7 @@ import time
 from typing import Callable, Optional
 
 import pandas as pd
+from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
@@ -74,6 +75,7 @@ class CNComponentManager(TmcComponentManager):
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
+        skuid_service="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
         *args,
         **kwargs,
     ):
@@ -129,6 +131,7 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._tm_op_state_aggregator = None
+        self.skuid_service = skuid_service
 
     def stop_event_receiver(self):
         if self.event_receiver:
@@ -587,7 +590,10 @@ class CNComponentManager(TmcComponentManager):
         :return: a result code and message
         """
         assign_resources_command = AssignResources(
-            self, adapter_factory=self.adapter_factory, logger=self.logger
+            self,
+            adapter_factory=self.adapter_factory,
+            skuid=SkuidClient(self.skuid_service),
+            logger=self.logger,
         )
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,

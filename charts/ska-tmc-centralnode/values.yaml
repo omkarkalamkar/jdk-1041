@@ -40,7 +40,7 @@ centralnodemid:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.3.21
+    tag: 0.3.22
     pullPolicy: IfNotPresent
 
 resources:
@@ -69,6 +69,7 @@ deviceServers:
       SdpMasterFQDN: "mid_sdp/elt/master"
       DishLeafNodePrefix: "ska_mid/tm_leaf_node/d"
       NumDishes: 1
+      SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
     low:
       file: "data/centralnode_low.yaml"
       MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
