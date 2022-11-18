@@ -239,7 +239,7 @@ class AssignResources(AbstractAssignReleaseResources):
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(f"receptor_ids are:{receptor_ids}")
         for receptor_id in receptor_ids:
-            dish_ID = "dish" + receptor_id
+            dish_ID = "dish0" + receptor_id[3:]
             self.logger.debug(f"dish_ID is:{dish_ID}")
             if self.component_manager.is_already_assigned(dish_ID):
                 return self.generate_command_result(

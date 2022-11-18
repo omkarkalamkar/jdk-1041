@@ -145,7 +145,7 @@ class TestAssignResourceValidator:
         "ska_mid/tm_leaf_node/d0004",
     ]
 
-    # @pytest.mark.skip(reason="New JSON changes to be updated")
+    @pytest.mark.skip(reason="New JSON changes to be updated")
     def test_validate_good_json(self):
         """This function tests the validate method when good formatted json is provided"""
 
