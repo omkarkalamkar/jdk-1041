@@ -50,6 +50,7 @@ class AssignResourceValidator:
         # in AssignReources request JSON.
         for receptor in receptor_list:
             self._receptor_list.append(receptor.replace(dish_prefix, ""))
+
         self.logger.debug(self._receptor_list)
 
         self.logger.debug("Available dish ids: %s", self._receptor_list)

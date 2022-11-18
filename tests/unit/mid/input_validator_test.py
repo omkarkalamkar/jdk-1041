@@ -21,7 +21,7 @@ sample_assign_resources_request = {
     "interface": "https://schema.skao.int/ska-tmc-assignresources/2.0",
     "transaction_id": "txn-....-00001",
     "subarray_id": 1,
-    "dish": {"receptor_ids": ["0001"]},
+    "dish": {"receptor_ids": ["SKA001"]},
     "sdp": {
         "interface": "https://schema.skao.int/ska-sdp-assignres/0.3",
         "eb_id": "eb-mvp01-20200325-00001",
@@ -145,7 +145,7 @@ class TestAssignResourceValidator:
         "ska_mid/tm_leaf_node/d0004",
     ]
 
-    # @pytest.mark.skip(reason="New JSON changes to be updated")
+    @pytest.mark.skip(reason="New JSON changes to be updated")
     def test_validate_good_json(self):
         """This function tests the validate method when good formatted json is provided"""
 
