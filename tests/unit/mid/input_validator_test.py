@@ -21,7 +21,7 @@ sample_assign_resources_request = {
     "interface": "https://schema.skao.int/ska-tmc-assignresources/2.0",
     "transaction_id": "txn-....-00001",
     "subarray_id": 1,
-    "dish": {"receptor_ids": ["0001"]},
+    "dish": {"receptor_ids": ["SKA001"]},
     "sdp": {
         "interface": "https://schema.skao.int/ska-sdp-assignres/0.3",
         "eb_id": "eb-mvp01-20200325-00001",
