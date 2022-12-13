@@ -93,7 +93,7 @@ class AssignResources(AbstractAssignReleaseResources):
                     receptor_ids:
                         DevVarStringArray
                         The individual string should contain dish numbers in string format
-                        with preceding zeroes upto 3 digits. E.g. SKA001, SKA002.
+                        with preceding zeroes upto 3 digits. E.g. 0001, 0002.
 
                 sdp:
                     Mandatory JSON object consisting of
@@ -135,7 +135,7 @@ class AssignResources(AbstractAssignReleaseResources):
             Example:
         {"interface":"https://schema.skao.int/ska-tmc-assignresources/2.1",
         "transaction_id":"txn-....-00001","subarray_id":1,"dish":{"receptor_ids":
-        ["SKA001"]},"sdp":{"interface":"https://schema.skao.int/ska-sdp-assignres/0.4",
+        ["0001"]},"sdp":{"interface":"https://schema.skao.int/ska-sdp-assignres/0.4",
         "execution_block":{"eb_id":"eb-mvp01-20200325-00001","max_length": 100,"context":
         {},"beams":[{"beam_id":"vis0","function":"visibilities"}],"scan_types":[{
         "scan_type_id":".default","beams":{"vis0":{"channels_id":"vis_channels",
@@ -239,7 +239,7 @@ class AssignResources(AbstractAssignReleaseResources):
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(f"receptor_ids are:{receptor_ids}")
         for receptor_id in receptor_ids:
-            dish_ID = "dish0" + receptor_id[3:]
+            dish_ID = "dish" + receptor_id
             self.logger.debug(f"dish_ID is:{dish_ID}")
             if self.component_manager.is_already_assigned(dish_ID):
                 return self.generate_command_result(
