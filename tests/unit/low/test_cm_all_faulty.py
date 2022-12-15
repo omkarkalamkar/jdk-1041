@@ -1,6 +1,7 @@
 import time
 
 import pytest
+from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
     HelperMCCSStateDevice,
@@ -8,7 +9,6 @@ from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
-from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
 )

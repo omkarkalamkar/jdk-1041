@@ -1,10 +1,10 @@
 import pytest
 import tango
+from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
     HelperMCCSStateDevice,
 )
-from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
 )
