@@ -35,6 +35,12 @@ DEVICE_LIST_LOW = [
     "low-mccs/control/control",
     "ska_low/tm_subarray_node/1",
     "ska_low/tm_leaf_node/mccs_subarray01",
+    "ska_low/tm_leaf_node/csp_subarray01",
+    "ska_low/tm_leaf_node/sdp_subarray01",
+    "ska_low/tm_leaf_node/csp_master",
+    "low_csp/elt/master",
+    "ska_low/tm_leaf_node/sdp_master",
+    "low_sdp/elt/master",
 ]
 
 

@@ -173,8 +173,37 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
     def init_adapters_low(self):
+        self.tm_leaf_csp_master_adapter = None
+        self.tm_leaf_sdp_master_adapter = None
         self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
+
+        try:
+            self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
+            )
+            self.logger.debug(
+                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_csp_master_adapter}"
+            )
+        except Exception as e:
+            return self.adapter_error_message_result(
+                self.component_manager.input_parameter.tm_leaf_csp_master_dev_name,
+                e,
+            )
+
+        try:
+            self.tm_leaf_sdp_master_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+            )
+            self.logger.debug(
+                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
+            )
+        except Exception as e:
+            return self.adapter_error_message_result(
+                self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name,
+                e,
+            )
+
         try:
             self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
                 self.component_manager.input_parameter.mccs_master_leaf_node,

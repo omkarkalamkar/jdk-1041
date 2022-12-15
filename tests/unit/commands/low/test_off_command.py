@@ -2,6 +2,7 @@ import time
 
 import pytest
 from ska_tango_base.executor import TaskStatus
+from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -29,6 +30,13 @@ def devices_to_load():
             "class": HelperMCCSStateDevice,
             "devices": [
                 {"name": "ska_low/tm_leaf_node/mccs_master"},
+            ],
+        },
+        {
+            "class": SKABaseDevice,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/csp_master"},
+                {"name": "ska_low/tm_leaf_node/sdp_master"},
             ],
         },
     )

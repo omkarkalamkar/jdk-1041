@@ -8,6 +8,7 @@ from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
+from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
 )
@@ -40,9 +41,20 @@ def devices_to_load():
             ],
         },
         {
+            "class": SKABaseDevice,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/csp_master"},
+                {"name": "low_csp/elt/master"},
+                {"name": "ska_low/tm_leaf_node/sdp_master"},
+                {"name": "low_sdp/elt/master"},
+            ],
+        },
+        {
             "class": HelperSubarrayLeafDevice,
             "devices": [
                 {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
+                {"name": "ska_low/tm_leaf_node/csp_subarray01"},
+                {"name": "ska_low/tm_leaf_node/sdp_subarray01"},
             ],
         },
     )
