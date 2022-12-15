@@ -89,14 +89,14 @@ class TelescopeStateAggregatorLow(Aggregator):
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-              telescopeStateList.append(dev.state)
-              csp_master = True
+                telescopeStateList.append(dev.state)
+                csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-              telescopeStateList.append(dev.state)
-              sdp_master = True
+                telescopeStateList.append(dev.state)
+                sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
 
