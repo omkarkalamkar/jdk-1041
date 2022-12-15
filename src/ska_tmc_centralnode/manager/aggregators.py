@@ -85,31 +85,30 @@ class TelescopeStateAggregatorLow(Aggregator):
             ):
                 telescopeStateList.append(dev.state)
                 mccs_master = True
-            # TODO: Enable this block when CSP and SDP are integrated
-            # elif (
-            #     name
-            #     == self._component_manager.input_parameter.csp_master_dev_name
-            # ):
-            #   telescopeStateList.append(dev.state)
-            #   csp_master = True
-            # elif (
-            #     name
-            #     == self._component_manager.input_parameter.sdp_master_dev_name
-            # ):
-            #   telescopeStateList.append(dev.state)
-            #   sdp_master = True
+            elif (
+                name
+                == self._component_manager.input_parameter.csp_master_dev_name
+            ):
+              telescopeStateList.append(dev.state)
+              csp_master = True
+            elif (
+                name
+                == self._component_manager.input_parameter.sdp_master_dev_name
+            ):
+              telescopeStateList.append(dev.state)
+              sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
-        # TODO: Enable this block when CSP and SDP are integrated
-        # if not sdp_master and not csp_master:
-        #     self._logger.info(
-        #         "missing devices: %s=%s %s=%s",
-        #         self._component_manager.input_parameter.sdp_master_dev_name,
-        #         sdp_master,
-        #         self._component_manager.input_parameter.csp_master_dev_name,
-        #         csp_master,
-        #     )
-        #     return DevState.UNKNOWN
+
+        if not sdp_master and not csp_master:
+            self._logger.info(
+                "missing devices: %s=%s %s=%s",
+                self._component_manager.input_parameter.sdp_master_dev_name,
+                sdp_master,
+                self._component_manager.input_parameter.csp_master_dev_name,
+                csp_master,
+            )
+            return DevState.UNKNOWN
         if not mccs_master:
             return DevState.UNKNOWN
         elif telescopeSetStateList == set([DevState.ON]):
@@ -199,18 +198,18 @@ class HealthStateAggregatorLow(Aggregator):
             name = dev.dev_name.lower()
             if dev.unresponsive:
                 continue
-            # elif (
-            #     name
-            #     == self._component_manager.input_parameter.csp_master_dev_name
-            # ):
-            #     healthStateList.append(dev.healthState)
-            #     csp_master = True
-            # elif (
-            #     name
-            #     == self._component_manager.input_parameter.sdp_master_dev_name
-            # ):
-            #     healthStateList.append(dev.healthState)
-            #     sdp_master = True
+            elif (
+                name
+                == self._component_manager.input_parameter.csp_master_dev_name
+            ):
+                healthStateList.append(dev.healthState)
+                csp_master = True
+            elif (
+                name
+                == self._component_manager.input_parameter.sdp_master_dev_name
+            ):
+                healthStateList.append(dev.healthState)
+                sdp_master = True
             elif (
                 name
                 in self._component_manager.input_parameter.tm_subarray_dev_names
@@ -229,8 +228,8 @@ class HealthStateAggregatorLow(Aggregator):
             return HealthState.UNKNOWN
         elif subarray_count == 0:
             return HealthState.UNKNOWN
-        # elif not sdp_master and not csp_master == 0:
-        #     return HealthState.UNKNOWN
+        elif not sdp_master and not csp_master == 0:
+            return HealthState.UNKNOWN
         elif healthStateSetList == set([HealthState.OK]):
             return HealthState.OK
         elif HealthState.FAILED in healthStateSetList:

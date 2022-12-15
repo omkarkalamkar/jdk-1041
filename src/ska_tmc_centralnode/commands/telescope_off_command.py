@@ -222,9 +222,13 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
-        ret_code, message = self.turn_off_mccs_mln()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        for ret_code, message in [
+            self.turn_off_mccs_mln(),
+            self.turn_off_csp(),
+            self.turn_off_sdp(),
+        ]:
+            if ret_code == ResultCode.FAILED:
+                return ret_code, message
 
         return (ResultCode.OK, "")
 

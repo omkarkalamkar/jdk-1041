@@ -160,6 +160,8 @@ class TelescopeOn(AbstractTelescopeOnOff):
         for ret_code, message in [
             self.turn_on_mccs_master(),
             self.turn_on_subarrays(),
+            self.turn_on_csp(),
+            self.turn_on_sdp(),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message

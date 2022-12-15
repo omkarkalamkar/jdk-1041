@@ -194,9 +194,13 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
-        ret_code, message = self.turn_standby_mccs()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        for ret_code, message in [
+            self.turn_standby_mccs(),
+            self.turn_standby_csp(),
+            self.turn_standby_sdp(),
+        ]:
+            if ret_code == ResultCode.FAILED:
+                return ret_code, message
 
         self.logger.info(
             "TelescopeStandby command is completed successfully on the CentralNode"

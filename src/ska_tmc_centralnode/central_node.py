@@ -56,6 +56,38 @@ class AbstractCentralNode(TMCBaseDevice):
     # Attributes
     # ----------
 
+    cspMasterDevName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    sdpMasterDevName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    leafCspMasterDevName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    leafSdpMasterDevName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    cspSubarrayDevNames = attribute(
+        dtype=("DevString",),
+        access=AttrWriteType.READ_WRITE,
+        max_dim_x=16,
+    )
+
+    sdpSubarrayDevNames = attribute(
+        dtype=("DevString",),
+        access=AttrWriteType.READ_WRITE,
+        max_dim_x=16,
+    )
+
     telescopeHealthState = attribute(
         dtype=HealthState,
         doc="Health state of Telescope",
@@ -164,6 +196,68 @@ class AbstractCentralNode(TMCBaseDevice):
     def read_tmOpState(self):
         """Return the tmOpState attribute."""
         return self.component_manager.component.tmc_op_state
+
+    def read_cspMasterDevName(self):
+        """Return the cspMasterDevName attribute."""
+        return self.component_manager.input_parameter.csp_master_dev_name
+
+    def write_cspMasterDevName(self, value):
+        """Set the cspMasterDevName attribute."""
+        self.component_manager.input_parameter.csp_master_dev_name = value
+        self.component_manager.update_input_parameter()
+
+    def read_sdpMasterDevName(self):
+        """Return the sdpMasterDevName attribute."""
+        return self.component_manager.input_parameter.sdp_master_dev_name
+
+    def write_sdpMasterDevName(self, value):
+        """Set the sdpMasterDevName attribute."""
+        self.component_manager.input_parameter.sdp_master_dev_name = value
+        self.component_manager.update_input_parameter()
+
+    def read_leafCspMasterDevName(self):
+        """Return the leafcspMasterDevName attribute."""
+        return (
+            self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
+        )
+
+    def write_leafCspMasterDevName(self, value):
+        """Set the leafcspMasterDevName attribute."""
+        self.component_manager.input_parameter.tm_leaf_csp_master_dev_name = (
+            value
+        )
+        self.component_manager.update_input_parameter()
+
+    def read_leafSdpMasterDevName(self):
+        """Return the leafsdpMasterDevName attribute."""
+        return (
+            self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+        )
+
+    def write_leafSdpMasterDevName(self, value):
+        """Set the leafsdpMasterDevName attribute."""
+        self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name = (
+            value
+        )
+        self.component_manager.update_input_parameter()
+
+    def read_cspSubarrayDevNames(self):
+        """Return the cspsubarraydevnames attribute."""
+        return self.component_manager.input_parameter.csp_subarray_dev_names
+
+    def write_cspSubarrayDevNames(self, value):
+        """Set the cspsubarraydevnames attribute."""
+        self.component_manager.input_parameter.csp_subarray_dev_names = value
+        self.component_manager.update_input_parameter()
+
+    def read_sdpSubarrayDevNames(self):
+        """Return the sdpsubarraydevnames attribute."""
+        return self.component_manager.input_parameter.sdp_subarray_dev_names
+
+    def write_sdpSubarrayDevNames(self, value):
+        """Set the sdpsubarraydevnames attribute."""
+        self.component_manager.input_parameter.sdp_subarray_dev_names = value
+        self.component_manager.update_input_parameter()
 
     def read_subarrayDevNames(self):
         """Return the subarrayDevNames attribute."""
