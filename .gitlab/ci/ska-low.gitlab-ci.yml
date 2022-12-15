@@ -5,7 +5,8 @@ k8s-test:
   tags:
     - k8srunner
   variables:
-    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA'
+    CSPACE: low
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CSPACE'
     TELESCOPE: SKA-low
   before_script:
     - '[ -f .make/k8s.mk ] || (echo "File k8s.mk not included in Makefile; exit 1")'
