@@ -66,8 +66,8 @@ def test_off_command_mid(tango_context, change_event_callbacks):
     )
 
 
-@pytest.mark.post_deployment
-@pytest.mark.SKA_low
+##@pytest.mark.post_deployment
+##@pytest.mark.SKA_low
 def test_off_command_low(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")
