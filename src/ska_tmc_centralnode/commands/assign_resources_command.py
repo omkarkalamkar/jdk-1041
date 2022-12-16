@@ -367,13 +367,13 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "subarray_id key is not present in the input json argument.",
             )
-        
+
         if "sdp" not in json_argument:
             return self.generate_command_result(
                 ResultCode.FAILED,
                 "sdp key is not present in the input json argument.",
             )
-            
+
         if "csp" not in json_argument:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -383,7 +383,7 @@ class AssignResources(AbstractAssignReleaseResources):
         error = self._validate_and_update_resource_config(json_argument)
         if error:
             return error
-        
+
         # TODO Uncomment below code during integrating of MCCS
         # if "mccs" not in json_argument:
         #     return self.generate_command_result(
@@ -424,7 +424,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 ("SubArray Id %s is not existing!", subarrayID),
             )
-        
+
         # TODO Uncomment below code during integrating of MCCS
         # try:
         #     input_mccs_master = self.create_mccs_cmd_data(json_argument)
@@ -454,18 +454,19 @@ class AssignResources(AbstractAssignReleaseResources):
                 return ResultCode.FAILED, message
 
         return (ResultCode.OK, "")
-    
+
     def _validate_and_update_resource_config(self, json_argument):
         """
 
         Returns:
             _type_: _description_
         """
-        if json_argument["sdp"].get("execution_block") and not json_argument["sdp"]["execution_block"]["eb_id"]:
+        if (
+            json_argument["sdp"].get("execution_block")
+            and not json_argument["sdp"]["execution_block"]["eb_id"]
+        ):
             sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
-            sdp_values = list(
-                json_argument["sdp"]["execution_block"].values()
-            )
+            sdp_values = list(json_argument["sdp"]["execution_block"].values())
             id = sdp_keys[sdp_values.index("")]
             try:
                 self.update_resource_config_file(json_argument, id)
