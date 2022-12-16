@@ -367,30 +367,47 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "subarray_id key is not present in the input json argument.",
             )
-
-        if "mccs" not in json_argument:
+        
+        if "sdp" not in json_argument:
             return self.generate_command_result(
                 ResultCode.FAILED,
-                "mccs key is not present in the input json argument.",
+                "sdp key is not present in the input json argument.",
             )
-
-        if "subarray_beam_ids" not in json_argument["mccs"]:
+            
+        if "csp" not in json_argument:
             return self.generate_command_result(
                 ResultCode.FAILED,
-                "mccs.subarray_beam_ids key is not present in the input json argument.",
+                "csp key is not present in the input json argument.",
             )
 
-        if "station_ids" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.station_ids key is not present in the input json argument.",
-            )
+        error = self._validate_and_update_resource_config(json_argument)
+        if error:
+            return error
+        
+        # TODO Uncomment below code during integrating of MCCS
+        # if "mccs" not in json_argument:
+        #     return self.generate_command_result(
+        #         ResultCode.FAILED,
+        #         "mccs key is not present in the input json argument.",
+        #     )
 
-        if "channel_blocks" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.channel_blocks key is not present in the input json argument.",
-            )
+        # if "subarray_beam_ids" not in json_argument["mccs"]:
+        #     return self.generate_command_result(
+        #         ResultCode.FAILED,
+        #         "mccs.subarray_beam_ids key is not present in the input json argument.",
+        #     )
+
+        # if "station_ids" not in json_argument["mccs"]:
+        #     return self.generate_command_result(
+        #         ResultCode.FAILED,
+        #         "mccs.station_ids key is not present in the input json argument.",
+        #     )
+
+        # if "channel_blocks" not in json_argument["mccs"]:
+        #     return self.generate_command_result(
+        #         ResultCode.FAILED,
+        #         "mccs.channel_blocks key is not present in the input json argument.",
+        #     )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -407,20 +424,14 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 ("SubArray Id %s is not existing!", subarrayID),
             )
-
-        try:
-            subarray_cmd_data = self.create_subarray_cmd_data(json_argument)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED, ("Errors in input json argument: %s", e)
-            )
-
-        try:
-            input_mccs_master = self.create_mccs_cmd_data(json_argument)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED, ("Errors in input json argument: %s", e)
-            )
+        
+        # TODO Uncomment below code during integrating of MCCS
+        # try:
+        #     input_mccs_master = self.create_mccs_cmd_data(json_argument)
+        # except Exception as e:
+        #     return self.generate_command_result(
+        #         ResultCode.FAILED, ("Errors in input json argument: %s", e)
+        #     )
 
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
@@ -430,57 +441,62 @@ class AssignResources(AbstractAssignReleaseResources):
                 [self.my_subarray_adapter],
                 f"Error in calling AssignResources on subarray: {self.my_subarray_adapter.dev_name}",
                 "AssignResources",
-                subarray_cmd_data,
+                json.dumps(json_argument.copy()),
             ),
-            self.send_command(
-                [self.tm_leaf_mccs_master_adapter],
-                "Error in calling AssignResource command on TM MCCS Master Leaf",
-                "AssignResources",
-                input_mccs_master,
-            ),
+            # self.send_command(
+            #     [self.tm_leaf_mccs_master_adapter],
+            #     "Error in calling AssignResource command on TM MCCS Master Leaf",
+            #     "AssignResources",
+            #     input_mccs_master,
+            # ),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ResultCode.FAILED, message
 
         return (ResultCode.OK, "")
-
-    def create_mccs_cmd_data(self, json_argument):
+    
+    def _validate_and_update_resource_config(self, json_argument):
         """
-        Remove 'sdp' and 'mccs' key from input JSON argument and forward the updated JSON to mccs master leaf node.
 
-        :param json_argument: The string in JSON format.
-
-        :return: The string in JSON format.
+        Returns:
+            _type_: _description_
         """
-        mccs_value = json_argument["mccs"]
-        json_argument[
-            "interface"
-        ] = "https://schema.skao.int/ska-low-mccs-assignresources/1.0"
-        if "transaction_id" in json_argument:
-            del json_argument["transaction_id"]
-        if "sdp" in json_argument:
-            del json_argument["sdp"]
-        if "mccs" in json_argument:
-            del json_argument["mccs"]
-        json_argument.update(mccs_value)
-        input_to_mccs = json.dumps(json_argument)
-        return input_to_mccs
+        if json_argument["sdp"].get("execution_block") and not json_argument["sdp"]["execution_block"]["eb_id"]:
+            sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
+            sdp_values = list(
+                json_argument["sdp"]["execution_block"].values()
+            )
+            id = sdp_keys[sdp_values.index("")]
+            try:
+                self.update_resource_config_file(json_argument, id)
+            except Exception as e:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    ("Errors in input json argument: %s", e),
+                )
 
-    def create_subarray_cmd_data(self, json_argument):
-        """
-        Remove 'subarray id', 'sdp' from json argument and forward the updated JSON to Subarray node.
+    # TODO Uncomment below code during integrating of MCCS
+    # def create_mccs_cmd_data(self, json_argument):
+    #     """
+    #     Remove 'sdp' and 'mccs' key from input JSON argument and forward the updated JSON to mccs master leaf node.
 
-        :param json_argument: The string in JSON format.
+    #     :param json_argument: The string in JSON format.
 
-        :return: The string in JSON format.
-        """
-        # Remove subarray_id key from input json argument and send the json to subarray node
-        if "subarray_id" in json_argument:
-            del json_argument["subarray_id"]
-        if "sdp" in json_argument:
-            del json_argument["sdp"]
-        input_to_subarray = json.dumps(json_argument)
-        return input_to_subarray
+    #     :return: The string in JSON format.
+    #     """
+    #     mccs_value = json_argument["mccs"]
+    #     json_argument[
+    #         "interface"
+    #     ] = "https://schema.skao.int/ska-low-mccs-assignresources/1.0"
+    #     if "transaction_id" in json_argument:
+    #         del json_argument["transaction_id"]
+    #     if "sdp" in json_argument:
+    #         del json_argument["sdp"]
+    #     if "mccs" in json_argument:
+    #         del json_argument["mccs"]
+    #     json_argument.update(mccs_value)
+    #     input_to_mccs = json.dumps(json_argument)
+    #     return input_to_mccs
 
     def get_subarray_adapter(self, subarray_id):
         for adapter in self.subarray_adapters:
