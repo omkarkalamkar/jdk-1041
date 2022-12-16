@@ -15,7 +15,7 @@ from tests.settings import (
     logger,
 )
 
-WORKING_DEVICES = 2
+WORKING_DEVICES = 1
 
 
 @pytest.fixture()
