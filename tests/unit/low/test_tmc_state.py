@@ -1,8 +1,8 @@
 import pytest
 import tango
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
-    HelperMCCSStateDevice,
+from ska_tmc_common.test_helpers.helper_state_device import (
+    HelperStateDevice,
 )
 
 from ska_tmc_centralnode.model.input import InputParameterLow
@@ -21,14 +21,17 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": "ska_low/tm_subarray_node/1"},
-                {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
+                {"name": "ska_low/tm_leaf_node/sdp_subarray01"},
+                {"name": "ska_low/tm_leaf_node/csp_subarray01"},
             ],
         },
         {
-            "class": HelperMCCSStateDevice,
+            "class": HelperStateDevice,
             "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_master"},
-                {"name": "low-mccs/control/control"},
+                {"name": "ska_low/tm_leaf_node/csp_master"},
+                {"name": "low-csp/control/0"},
+                {"name": "ska_low/tm_leaf_node/sdp_master"},
+                {"name": "low-sdp/control/0"},
             ],
         },
     )
@@ -41,7 +44,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     ensure_tmc_op_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
-@pytest.mark.skip("Needs update in helper devices")
+@pytest.mark.devesh
 def test_tmc_state_init(tango_context):
     # import debugpy; debugpy.debug_this_thread()
     devFactory = DevFactory()
@@ -51,20 +54,20 @@ def test_tmc_state_init(tango_context):
     set_device_init(devFactory, cm, 15)
     assert cm.component.tmc_op_state == tango.DevState.INIT
 
-
+@pytest.mark.devesh
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     set_device_state(
         "ska_low/tm_subarray_node/1", tango.DevState.FAULT, devFactory
     )
     set_device_state(
-        "ska_low/tm_leaf_node/mccs_subarray01", tango.DevState.OFF, devFactory
+        "low-sdp/control/0", tango.DevState.OFF, devFactory
     )
     set_device_state(
-        "ska_low/tm_leaf_node/mccs_master", tango.DevState.STANDBY, devFactory
+        "low-csp/control/0", tango.DevState.STANDBY, devFactory
     )
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
-
+@pytest.mark.devesh
 def test_tmc_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -73,15 +76,15 @@ def test_tmc_state_fault_over_standby(tango_context):
     set_one_device_fault(devFactory, cm, 15)
     assert cm.component.tmc_op_state == tango.DevState.FAULT
 
-
+@pytest.mark.devesh
 def set_device_standby(devFactory, cm, expected_elapsed_time):
     set_device_state(
         "ska_low/tm_subarray_node/1", tango.DevState.STANDBY, devFactory
     )
     set_device_state(
-        "ska_low/tm_leaf_node/mccs_subarray01", tango.DevState.OFF, devFactory
+        "low-csp/control/0", tango.DevState.OFF, devFactory
     )
     set_device_state(
-        "ska_low/tm_leaf_node/mccs_master", tango.DevState.ON, devFactory
+        "low-sdp/control/0", tango.DevState.ON, devFactory
     )
     ensure_tmc_op_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
