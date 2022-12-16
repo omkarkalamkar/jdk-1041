@@ -68,7 +68,6 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
         "ska_low/tm_leaf_node/sdp_subarray01"
     )
 
-
     csp_master_ln.SetDirectState(DevState.FAULT)
     sdp_master_ln.SetDirectState(DevState.ON)
     csp_subarray_ln.SetDirectState(DevState.ON)
