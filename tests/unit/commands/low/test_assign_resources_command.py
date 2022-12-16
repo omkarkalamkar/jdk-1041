@@ -10,7 +10,6 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
