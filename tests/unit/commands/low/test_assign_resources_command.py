@@ -32,18 +32,18 @@ def devices_to_load():
                 {"name": "ska_low/tm_subarray_node/1"},
             ],
         },
-        {
-            "class": HelperMCCSStateDevice,
-            "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_master"},
-                {"name": "low-mccs/control/control"},
-            ],
-        },
+        # {
+        #     "class": HelperMCCSStateDevice,
+        #     "devices": [
+        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
+        #         {"name": "low-mccs/control/control"},
+        #     ],
+        # },
     )
 
 
 def get_assign_input_str(
-    assign_input_file="command_mccs_AssignResources.json",
+    assign_input_file="command_assign_resource_low.json",
 ):
     path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
     with open(path, "r") as f:
@@ -131,21 +131,19 @@ def test_low_assign_resources_command_fail_subarray(
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
-@pytest.mark.SKA_low
-def test_low_assign_resources_command_missing_subarray_beam_ids_key(
-    tango_context, task_callback
-):
-    logger.info("%s", tango_context)
-    assign_res_command, _, cm = get_assign_resources_command_obj()
-    assert cm.is_command_allowed("AssignResources")
-    assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    del json_argument["mccs"]["subarray_beam_ids"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
-    assert "subarray_beam_ids" in message
+# def test_low_assign_resources_command_missing_subarray_beam_ids_key(
+#     tango_context, task_callback
+# ):
+#     logger.info("%s", tango_context)
+#     assign_res_command, _, cm = get_assign_resources_command_obj()
+#     assert cm.is_command_allowed("AssignResources")
+#     assign_input_str = get_assign_input_str()
+#     json_argument = json.loads(assign_input_str)
+#     del json_argument["mccs"]["subarray_beam_ids"]
+#     cm.assign_resources(json_argument, task_callback=task_callback)
+#     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+#     assert res_code == ResultCode.FAILED
+#     assert "subarray_beam_ids" in message
 
 
 @pytest.mark.skip("Functionality will be completed and tested with HM-111")
@@ -180,59 +178,53 @@ def test_low_assign_resources_command_missing_subarray_id(
     assert "subarray_id" in message
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
-@pytest.mark.SKA_low
-def test_low_assign_resources_command_missing_mccs(
-    tango_context, task_callback
-):
-    logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _, cm = get_assign_resources_command_obj()
-    assert cm.is_command_allowed("AssignResources")
-    assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    del json_argument["mccs"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
-    assert "mccs" in message
+# def test_low_assign_resources_command_missing_mccs(
+#     tango_context, task_callback
+# ):
+#     logger.info("%s", tango_context)
+#     # import debugpy; debugpy.debug_this_thread()
+#     assign_res_command, _, cm = get_assign_resources_command_obj()
+#     assert cm.is_command_allowed("AssignResources")
+#     assign_input_str = get_assign_input_str()
+#     json_argument = json.loads(assign_input_str)
+#     del json_argument["mccs"]
+#     cm.assign_resources(json_argument, task_callback=task_callback)
+#     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+#     assert res_code == ResultCode.FAILED
+#     assert "mccs" in message
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
-@pytest.mark.SKA_low
-def test_low_assign_resources_command_missing_channel_blocks(
-    tango_context, task_callback
-):
-    logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _, cm = get_assign_resources_command_obj()
-    assert cm.is_command_allowed("AssignResources")
-    assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    del json_argument["mccs"]["channel_blocks"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
-    assert "channel_blocks" in message
+# def test_low_assign_resources_command_missing_channel_blocks(
+#     tango_context, task_callback
+# ):
+#     logger.info("%s", tango_context)
+#     # import debugpy; debugpy.debug_this_thread()
+#     assign_res_command, _, cm = get_assign_resources_command_obj()
+#     assert cm.is_command_allowed("AssignResources")
+#     assign_input_str = get_assign_input_str()
+#     json_argument = json.loads(assign_input_str)
+#     del json_argument["mccs"]["channel_blocks"]
+#     cm.assign_resources(json_argument, task_callback=task_callback)
+#     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+#     assert res_code == ResultCode.FAILED
+#     assert "channel_blocks" in message
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
-@pytest.mark.SKA_low
-def test_low_assign_resources_command_missing_station_ids(
-    tango_context, task_callback
-):
-    logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+# def test_low_assign_resources_command_missing_station_ids(
+#     tango_context, task_callback
+# ):
+#     logger.info("%s", tango_context)
+#     # import debugpy; debugpy.debug_this_thread()
+#     assign_res_command, _, cm = get_assign_resources_command_obj()
 
-    assert cm.is_command_allowed("AssignResources")
-    assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    del json_argument["mccs"]["station_ids"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
-    assert "station_ids" in message
+#     assert cm.is_command_allowed("AssignResources")
+#     assign_input_str = get_assign_input_str()
+#     json_argument = json.loads(assign_input_str)
+#     del json_argument["mccs"]["station_ids"]
+#     cm.assign_resources(json_argument, task_callback=task_callback)
+#     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+#     assert res_code == ResultCode.FAILED
+#     assert "station_ids" in message
 
 
 @pytest.mark.skip("Functionality will be completed and tested with HM-111")
