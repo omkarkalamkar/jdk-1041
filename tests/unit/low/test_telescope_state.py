@@ -37,6 +37,7 @@ def devices_to_load():
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
     set_device_state("low-sdp/control/0", tango.DevState.INIT, devFactory)
+    set_device_state("low-csp/control/0", tango.DevState.INIT, devFactory)
     ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
@@ -65,6 +66,7 @@ def test_telescope_state_fault_over_standby(tango_context):
 
 def set_device_standby(devFactory, cm, expected_elapsed_time):
     set_device_state("low-sdp/control/0", tango.DevState.STANDBY, devFactory)
+    set_device_state("low-csp/control/0", tango.DevState.STANDBY, devFactory)
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
 
