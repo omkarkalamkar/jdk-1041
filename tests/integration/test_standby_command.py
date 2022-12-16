@@ -89,6 +89,7 @@ def test_standby_command_mid(tango_context, change_event_callbacks):
 
     assert central_node.telescopeState == DevState.STANDBY
 
+
 @pytest.mark.skip(reason="Test case is failing")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
