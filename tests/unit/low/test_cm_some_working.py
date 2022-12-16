@@ -27,10 +27,7 @@ def devices_to_load():
         },
         {
             "class": HelperSubArrayDevice,
-            "devices": [
-                {"name": "ska_low/tm_subarray_node/1"},
-                {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
-            ],
+            "devices": [{"name": "ska_low/tm_subarray_node/1"}],
         },
     )
 

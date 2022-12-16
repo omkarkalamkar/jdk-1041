@@ -45,9 +45,8 @@ def test_telescope_state_off(tango_context):
             "mid_d0001/elt/master",
         ],
         devFactory=DevFactory(),
-        state=tango.DevState.OFF,
-        cm=cm,
-        expected_elapsed_time=12,  # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
+        state=tango.DevState.OFF
+        # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     )
     ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=12)
     assert cm.component.telescope_state == tango.DevState.OFF
