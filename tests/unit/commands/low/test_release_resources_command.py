@@ -10,9 +10,6 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
-    HelperMCCSStateDevice,
-)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
@@ -32,13 +29,13 @@ def devices_to_load():
                 {"name": "ska_low/tm_subarray_node/1"},
             ],
         },
-        {
-            "class": HelperMCCSStateDevice,
-            "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_master"},
-                {"name": "low-mccs/control/control"},
-            ],
-        },
+        # {
+        #     "class": HelperMCCSStateDevice,
+        #     "devices": [
+        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
+        #         {"name": "low-mccs/control/control"},
+        #     ],
+        # },
     )
 
 

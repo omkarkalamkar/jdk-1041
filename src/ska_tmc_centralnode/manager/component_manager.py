@@ -656,6 +656,7 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_dishes_are_responsive()
             else:
                 self.logger.debug(f"Checking low devices for {command_name}")
+                # TODO Uncomment below code during integration of MCCS
                 # self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
 

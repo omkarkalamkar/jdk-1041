@@ -190,6 +190,19 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.csp_mln_dev_name,
                 e,
             )
+        
+        # self.tm_leaf_mccs_master_adapter = None
+        # TODO Uncomment below code during integration of MCCS
+        # try:
+        #     self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
+        #         self.component_manager.input_parameter.mccs_master_leaf_node,
+        #         AdapterType.MCCS,
+        #     )
+        # except Exception as e:
+        #     return self.adapter_error_message_result(
+        #         self.component_manager.input_parameter.mccs_master_leaf_node,
+        #         e,
+        #     )
 
         try:
             self.sdp_mln_adapter = self._adapter_factory.get_or_create_adapter(
@@ -336,6 +349,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         #         self.component_manager.input_parameter.mccs_master_leaf_node,
         #         e,
         #     )
+
 
         error_dev_names = []
         num_working = 0

@@ -168,19 +168,21 @@ class ReleaseResources(AbstractAssignReleaseResources):
             )
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
+
+            # TODO Uncomment below code during integration of MCCS
             # Invoke ReleaseAllResources on MCCS Master Leaf Node
             # Send updated input string with inteface key to MCCS Master for ReleaseResource Command
-            jsonArgument[
-                "interface"
-            ] = "https://schema.skao.int/ska-low-mccs-releaseresources/1.0"
-            if "transaction_id" in jsonArgument:
-                del jsonArgument["transaction_id"]
+            # jsonArgument[
+            #     "interface"
+            # ] = "https://schema.skao.int/ska-low-mccs-releaseresources/1.0"
+            # if "transaction_id" in jsonArgument:
+            #     del jsonArgument["transaction_id"]
 
-                ret_code, message = self.release_resources_mccs(
-                    json.dumps(jsonArgument)
-                )
-                if ret_code == ResultCode.FAILED:
-                    return ret_code, message
+            #     ret_code, message = self.release_resources_mccs(
+            #         json.dumps(jsonArgument)
+            #     )
+            #     if ret_code == ResultCode.FAILED:
+            #         return ret_code, message
             return (ResultCode.OK, "")
 
     def release_all_resources(self, adapter):

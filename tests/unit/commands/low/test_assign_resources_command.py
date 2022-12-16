@@ -79,9 +79,39 @@ def test_low_assign_resources_command_queued(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.QUEUED}
     )
 
-
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
+def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    json_argument["sdp"]["execution_block"]["eb_id"] = ""
+    del json_argument["sdp"]["processing_blocks"]
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
+    with pytest.raises(Exception) as e:
+        assert "processing_blocks" in e
+
+
+def test_assign_resources_command_missing_sdp_key(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["sdp"]
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
+    assert "sdp" in message
+
+
 def test_low_assign_resources_command_with_ok(tango_context, task_callback):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
@@ -90,6 +120,9 @@ def test_low_assign_resources_command_with_ok(tango_context, task_callback):
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    import pdb
+
+    pdb.set_trace()
     assert res_code == ResultCode.OK
 
 
