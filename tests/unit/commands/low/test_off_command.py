@@ -49,6 +49,7 @@ def test_low_telescope_off_command(tango_context):
     cm.telescope_off(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
 
+
 @pytest.mark.skip()
 def test_telescope_off_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
@@ -73,6 +74,7 @@ def test_telescope_off_command_fail_subarray(tango_context):
     off_command.telescope_off(logger=logger, task_callback=task_callback)
     assert task_callback.status == TaskStatus.FAILED
 
+
 @pytest.mark.skip()
 def test_telescope_off_command_task_completed(tango_context):
     logger.info("%s", tango_context)
@@ -91,6 +93,7 @@ def test_telescope_off_command_task_completed(tango_context):
     off_command.telescope_off(logger=logger, task_callback=task_callback)
     time.sleep(0.1)
     assert task_callback.status == TaskStatus.COMPLETED
+
 
 @pytest.mark.skip()
 def test_low_telescope_off_fail_check_allowed(tango_context):

@@ -39,6 +39,7 @@ def devices_to_load():
 # Modified the TelescopeStandby integration test as per latest base classes.
 # Review is expected for below tests.
 
+
 @pytest.mark.skip()
 def test_low_telescope_standby_command(tango_context):
     logger.info("%s", tango_context)
@@ -53,6 +54,7 @@ def test_low_telescope_standby_command(tango_context):
     cm.is_command_allowed("TelescopeStandby")
     cm.telescope_standby(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
+
 
 @pytest.mark.skip()
 def test_telescope_standby_command_task_completed(tango_context):
@@ -74,6 +76,7 @@ def test_telescope_standby_command_task_completed(tango_context):
     )
     time.sleep(0.1)
     assert task_callback.status == TaskStatus.COMPLETED
+
 
 @pytest.mark.skip()
 def test_low_telescope_standby_command_fail_subarray(tango_context):
@@ -102,6 +105,7 @@ def test_low_telescope_standby_command_fail_subarray(tango_context):
     )
     assert task_callback.status == TaskStatus.FAILED
 
+
 @pytest.mark.skip()
 def test_low_telescope_standby_command_fail_mccs(tango_context):
     logger.info("%s", tango_context)
@@ -127,6 +131,7 @@ def test_low_telescope_standby_command_fail_mccs(tango_context):
         logger=logger, task_callback=task_callback
     )
     assert task_callback.status == TaskStatus.FAILED
+
 
 @pytest.mark.skip()
 def test_low_telescope_standby_fail_check_allowed(tango_context):

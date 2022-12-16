@@ -63,6 +63,7 @@ def get_release_resources_command_obj():
     release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
     return release_command, my_adapter_factory, cm
 
+
 @pytest.mark.skip()
 def test_low_release_resources_command_queued(tango_context, task_callback):
     _, _, cm = get_release_resources_command_obj()
@@ -74,6 +75,7 @@ def test_low_release_resources_command_queued(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.QUEUED}
     )
 
+
 @pytest.mark.skip()
 def test_low_release_resources_command_with_ok(tango_context, task_callback):
     release_res_command, _, cm = get_release_resources_command_obj()
@@ -83,6 +85,7 @@ def test_low_release_resources_command_with_ok(tango_context, task_callback):
     cm.release_resources(json_argument, task_callback=task_callback)
     (res_code, _) = release_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.OK
+
 
 @pytest.mark.skip()
 def test_low_release_resources_command_fail_subarray(
@@ -109,6 +112,7 @@ def test_low_release_resources_command_fail_subarray(
     (res_code, _) = release_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
 
+
 @pytest.mark.skip()
 def test_low_release_resources_command_empty_input_json(
     tango_context, task_callback
@@ -118,6 +122,7 @@ def test_low_release_resources_command_empty_input_json(
     cm.release_resources("", task_callback=task_callback)
     (res_code, _) = release_res_command.do(" ")
     assert res_code == ResultCode.FAILED
+
 
 @pytest.mark.skip()
 def test_low_release_resources_command_missing_subarray_id(
@@ -132,6 +137,7 @@ def test_low_release_resources_command_missing_subarray_id(
     (res_code, message) = release_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
+
 
 @pytest.mark.skip()
 def test_low_release_resources_fail_check_allowed(tango_context):
