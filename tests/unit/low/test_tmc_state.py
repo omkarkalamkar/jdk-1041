@@ -1,9 +1,7 @@
 import pytest
 import tango
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_state_device import (
-    HelperStateDevice,
-)
+from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
@@ -44,7 +42,6 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     ensure_tmc_op_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
-
 def test_tmc_state_init(tango_context):
     # import debugpy; debugpy.debug_this_thread()
     devFactory = DevFactory()
@@ -59,12 +56,8 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     set_device_state(
         "ska_low/tm_subarray_node/1", tango.DevState.FAULT, devFactory
     )
-    set_device_state(
-        "low-sdp/control/0", tango.DevState.OFF, devFactory
-    )
-    set_device_state(
-        "low-csp/control/0", tango.DevState.STANDBY, devFactory
-    )
+    set_device_state("low-sdp/control/0", tango.DevState.OFF, devFactory)
+    set_device_state("low-csp/control/0", tango.DevState.STANDBY, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
@@ -81,10 +74,6 @@ def set_device_standby(devFactory, cm, expected_elapsed_time):
     set_device_state(
         "ska_low/tm_subarray_node/1", tango.DevState.STANDBY, devFactory
     )
-    set_device_state(
-        "low-csp/control/0", tango.DevState.OFF, devFactory
-    )
-    set_device_state(
-        "low-sdp/control/0", tango.DevState.ON, devFactory
-    )
+    set_device_state("low-csp/control/0", tango.DevState.OFF, devFactory)
+    set_device_state("low-sdp/control/0", tango.DevState.ON, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.STANDBY, expected_elapsed_time)

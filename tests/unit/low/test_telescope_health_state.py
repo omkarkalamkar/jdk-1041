@@ -44,10 +44,9 @@ def devices_to_load():
     )
 
 
-
 def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(
-        tango_context,True,True, input_parameter=InputParameterLow(None)
+        tango_context, True, True, input_parameter=InputParameterLow(None)
     )
     start_time = time.time()
     elapsed_time = 0
@@ -72,7 +71,6 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
-
 
 
 def test_set_health_state_degraded(tango_context):
@@ -101,7 +99,6 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
     assert elapsed_time < expected_elapsed_time
 
 
-
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -123,7 +120,6 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=12):
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
-
 
 
 def test_set_health_state_unknown(tango_context):

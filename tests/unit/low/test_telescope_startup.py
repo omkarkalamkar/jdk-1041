@@ -1,9 +1,7 @@
 import pytest
 import tango
 from ska_tango_base.control_model import HealthState
-from ska_tmc_common.test_helpers.helper_state_device import (
-    HelperStateDevice,
-)
+from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
@@ -31,6 +29,7 @@ def devices_to_load():
             ],
         },
     )
+
 
 def test_aggregation_default(tango_context):
     cm = create_cm_no_faulty_devices(
