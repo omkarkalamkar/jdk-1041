@@ -9,6 +9,7 @@ from tests.integration.common import devices_to_load  # noqa F401
 from tests.integration.common import ensure_checked_devices
 from tests.settings import logger
 
+
 @pytest.mark.skip(reason="Test case is failing")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
