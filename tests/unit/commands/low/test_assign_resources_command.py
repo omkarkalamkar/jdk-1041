@@ -120,9 +120,6 @@ def test_low_assign_resources_command_with_ok(tango_context, task_callback):
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
-    import pdb
-
-    pdb.set_trace()
     assert res_code == ResultCode.OK
 
 
