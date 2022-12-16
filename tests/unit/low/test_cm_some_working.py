@@ -35,6 +35,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.low
 def test_low_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
