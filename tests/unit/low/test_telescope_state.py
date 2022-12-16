@@ -33,7 +33,7 @@ def devices_to_load():
         },
     )
 
-@pytest.mark.devesh
+
 def set_device_init(devFactory, cm, expected_elapsed_time):
     set_device_state(
         "low-sdp/control/0", tango.DevState.INIT, devFactory
@@ -41,7 +41,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
     ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
-@pytest.mark.devesh
+
 def test_telescope_state_init(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -57,7 +57,7 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     )
     ensure_telescope_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
-@pytest.mark.devesh
+
 def test_telescope_state_fault_over_standby(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -66,14 +66,14 @@ def test_telescope_state_fault_over_standby(tango_context):
     set_one_device_fault(devFactory, cm, 15)
     assert cm.component.telescope_state == tango.DevState.FAULT
 
-@pytest.mark.devesh
+
 def set_device_standby(devFactory, cm, expected_elapsed_time):
     set_device_state(
         "low-sdp/control/0", tango.DevState.STANDBY, devFactory
     )
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
-@pytest.mark.devesh
+
 def test_telescope_state_standby(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(

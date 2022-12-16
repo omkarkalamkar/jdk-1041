@@ -44,7 +44,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.devesh
+
 def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context,True,True, input_parameter=InputParameterLow(None)
@@ -59,7 +59,7 @@ def test_set_health_state_ok(tango_context):
             pytest.fail("Timeout occurred while executing the test")
     assert cm.component.telescope_health_state == HealthState.OK
 
-@pytest.mark.devesh
+
 def set_device_degraded(devFactory, cm, expected_elapsed_time):
     proxy = devFactory.get_device("low-sdp/control/0")
     proxy.SetDirectHealthState(HealthState.DEGRADED)
@@ -74,7 +74,7 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
     assert elapsed_time < expected_elapsed_time
 
 
-@pytest.mark.devesh
+
 def test_set_health_state_degraded(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -101,7 +101,7 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
     assert elapsed_time < expected_elapsed_time
 
 
-@pytest.mark.devesh
+
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -110,7 +110,7 @@ def test_set_health_state_failed(tango_context):
     set_failed(devFactory, cm, 15)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
-@pytest.mark.devesh
+
 def set_device_unknown(devFactory, cm, expected_elapsed_time=12):
     proxy = devFactory.get_device("low-sdp/control/0")
     proxy.SetDirectHealthState(HealthState.UNKNOWN)
@@ -125,7 +125,7 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=12):
     assert elapsed_time < expected_elapsed_time
 
 
-@pytest.mark.devesh
+
 def test_set_health_state_unknown(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
