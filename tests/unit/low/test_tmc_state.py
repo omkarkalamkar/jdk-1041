@@ -56,8 +56,8 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     set_device_state(
         "ska_low/tm_subarray_node/1", tango.DevState.FAULT, devFactory
     )
-    set_device_state("low-sdp/control/0", tango.DevState.OFF, devFactory)
-    set_device_state("low-csp/control/0", tango.DevState.STANDBY, devFactory)
+    set_device_state("ska_low/tm_leaf_node/csp_master", tango.DevState.OFF, devFactory)
+    set_device_state("ska_low/tm_leaf_node/sdp_master", tango.DevState.STANDBY, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
@@ -74,6 +74,6 @@ def set_device_standby(devFactory, cm, expected_elapsed_time):
     set_device_state(
         "ska_low/tm_subarray_node/1", tango.DevState.STANDBY, devFactory
     )
-    set_device_state("low-csp/control/0", tango.DevState.OFF, devFactory)
-    set_device_state("low-sdp/control/0", tango.DevState.ON, devFactory)
+    set_device_state("ska_low/tm_leaf_node/csp_master", tango.DevState.OFF, devFactory)
+    set_device_state("ska_low/tm_leaf_node/sdp_master", tango.DevState.ON, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
