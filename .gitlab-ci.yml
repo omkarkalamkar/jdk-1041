@@ -47,16 +47,7 @@ include:
   # k8s-mid steps
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/k8s.gitlab-ci.yml'
-    CONFIG: mid
-    TELESCOPE: SKA-mid
-    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
-
-  # k8s-low steps
-  - project: 'ska-telescope/templates-repository'
-    file: 'gitlab-ci/includes/k8s.gitlab-ci.yml'
-    CONFIG: low
-    TELESCOPE: SKA-low
-    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
+    CI_JOB_NAME: k8s-test-mid
 
   # Release Automation
   - project: 'ska-telescope/templates-repository'
