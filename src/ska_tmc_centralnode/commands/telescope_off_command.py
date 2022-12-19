@@ -223,7 +223,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
             time.sleep(self._step_sleep)
 
         for ret_code, message in [
-            self.turn_off_mccs_mln(),
+            # self.turn_off_mccs_mln(),
             self.turn_off_csp(),
             self.turn_off_sdp(),
         ]:

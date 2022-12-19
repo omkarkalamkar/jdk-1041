@@ -158,7 +158,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
         for ret_code, message in [
-            self.turn_on_mccs_master(),
+            # self.turn_on_mccs_master(),
             self.turn_on_subarrays(),
             self.turn_on_csp(),
             self.turn_on_sdp(),

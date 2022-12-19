@@ -2,6 +2,10 @@ import time
 
 import pytest
 from ska_tmc_common.op_state_model import TMCOpStateModel
+from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.input import InputParameterLow
@@ -14,7 +18,27 @@ from tests.settings import (
 )
 
 
-@pytest.mark.SKA_low
+@pytest.fixture()
+def devices_to_load():
+    return (
+        {
+            "class": HelperStateDevice,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/csp_master"},
+                {"name": "low-csp/control/0"},
+                {"name": "ska_low/tm_leaf_node/sdp_master"},
+                {"name": "low-sdp/control/0"},
+            ],
+        },
+        {
+            "class": HelperSubArrayDevice,
+            "devices": [
+                {"name": "ska_low/tm_subarray_node/1"},
+            ],
+        },
+    )
+
+
 def test_all_low_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManager(

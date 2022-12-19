@@ -651,7 +651,7 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_dishes_are_responsive()
             else:
                 self.logger.debug(f"Checking low devices for {command_name}")
-                self.check_if_mccs_mln_is_responsive()
+                # self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
             if isinstance(self._input_parameter, InputParameterMid):
@@ -660,7 +660,7 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_dishes_are_responsive()
             else:
                 self.logger.debug(f"Checking low devices for {command_name}")
-                self.check_if_mccs_mln_is_responsive()
+                # self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
 
         return True

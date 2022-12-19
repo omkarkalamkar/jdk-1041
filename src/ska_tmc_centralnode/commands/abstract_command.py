@@ -175,7 +175,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
     def init_adapters_low(self):
         self.tm_leaf_csp_master_adapter = None
         self.tm_leaf_sdp_master_adapter = None
-        self.tm_leaf_mccs_master_adapter = None
+        # self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
 
         try:
@@ -204,16 +204,16 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 e,
             )
 
-        try:
-            self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.mccs_master_leaf_node,
-                AdapterType.MCCS,
-            )
-        except Exception as e:
-            return self.adapter_error_message_result(
-                self.component_manager.input_parameter.mccs_master_leaf_node,
-                e,
-            )
+        # try:
+        #     self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
+        #         self.component_manager.input_parameter.mccs_master_leaf_node,
+        #         AdapterType.MCCS,
+        #     )
+        # except Exception as e:
+        #     return self.adapter_error_message_result(
+        #         self.component_manager.input_parameter.mccs_master_leaf_node,
+        #         e,
+        #     )
 
         error_dev_names = []
         num_working = 0
@@ -323,19 +323,19 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
     def init_adapters_low(self):
 
-        self.tm_leaf_mccs_master_adapter = None
+        # self.tm_leaf_mccs_master_adapter = None
         self.tm_subarray_adapters = []
 
-        try:
-            self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.mccs_master_leaf_node,
-                AdapterType.MCCS,
-            )
-        except Exception as e:
-            return self.adapter_error_message_result(
-                self.component_manager.input_parameter.mccs_master_leaf_node,
-                e,
-            )
+        # try:
+        #     self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
+        #         self.component_manager.input_parameter.mccs_master_leaf_node,
+        #         AdapterType.MCCS,
+        #     )
+        # except Exception as e:
+        #     return self.adapter_error_message_result(
+        #         self.component_manager.input_parameter.mccs_master_leaf_node,
+        #         e,
+        #     )
 
         error_dev_names = []
         num_working = 0

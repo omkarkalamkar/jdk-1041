@@ -28,12 +28,12 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [{"name": "ska_low/tm_subarray_node/1"}],
         },
-        {
-            "class": HelperMCCSStateDevice,
-            "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_master"},
-            ],
-        },
+        # {
+        #     "class": HelperMCCSStateDevice,
+        #     "devices": [
+        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
+        #     ],
+        # },
         {
             "class": SKABaseDevice,
             "devices": [
@@ -48,7 +48,6 @@ def devices_to_load():
 # Review is expected for below tests.
 
 
-@pytest.mark.SKA_low
 def test_low_telescope_standby_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -64,7 +63,6 @@ def test_low_telescope_standby_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
-@pytest.mark.SKA_low
 def test_telescope_standby_command_task_completed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -86,7 +84,6 @@ def test_telescope_standby_command_task_completed(tango_context):
     assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.SKA_low
 def test_low_telescope_standby_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -114,7 +111,6 @@ def test_low_telescope_standby_command_fail_subarray(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.SKA_low
 def test_low_telescope_standby_command_fail_mccs(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -126,7 +122,7 @@ def test_low_telescope_standby_command_fail_mccs(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeStandby command
-    failing_dev = "ska_low/tm_leaf_node/mccs_master"
+    failing_dev = "ska_low/tm_leaf_node/csp_master"
     my_adapter_factory.get_or_create_adapter(
         failing_dev, attrs={"Standby.side_effect": Exception}
     )
@@ -141,7 +137,6 @@ def test_low_telescope_standby_command_fail_mccs(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.SKA_low
 def test_low_telescope_standby_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))

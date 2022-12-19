@@ -26,12 +26,12 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [{"name": "ska_low/tm_subarray_node/1"}],
         },
-        {
-            "class": HelperMCCSStateDevice,
-            "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_master"},
-            ],
-        },
+        # {
+        #     "class": HelperMCCSStateDevice,
+        #     "devices": [
+        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
+        #     ],
+        # },
         {
             "class": SKABaseDevice,
             "devices": [
@@ -42,7 +42,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.SKA_low
 def test_low_telescope_off_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -58,7 +57,6 @@ def test_low_telescope_off_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
-@pytest.mark.SKA_low
 def test_telescope_off_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -83,7 +81,6 @@ def test_telescope_off_command_fail_subarray(tango_context):
     assert task_callback.status == TaskStatus.FAILED
 
 
-@pytest.mark.SKA_low
 def test_telescope_off_command_task_completed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -103,7 +100,6 @@ def test_telescope_off_command_task_completed(tango_context):
     assert task_callback.status == TaskStatus.COMPLETED
 
 
-@pytest.mark.SKA_low
 def test_low_telescope_off_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))

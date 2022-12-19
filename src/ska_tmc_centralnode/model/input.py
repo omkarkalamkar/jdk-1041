@@ -226,9 +226,9 @@ class InputParameter:
 class InputParameterLow(InputParameter):
     def __init__(self, changed_callback) -> None:
         self._tm_subarray_dev_names = ["ska_low/tm_subarray_node/1"]
-        self._mccs_master_leaf_node = "ska_low/tm_leaf_node/mccs_master"
-        self._mccs_subarray_leaf_node = "ska_low/tm_leaf_node/mccs_subarray01"
-        self._mccs_master_dev_name = "low-mccs/control/control"
+        # self._mccs_master_leaf_node = "ska_low/tm_leaf_node/mccs_master"
+        # self._mccs_subarray_leaf_node = "ska_low/tm_leaf_node/mccs_subarray01"
+        # self._mccs_master_dev_name = "low-mccs/control/control"
         self._csp_subarray_dev_names = ["ska_low/tm_leaf_node/csp_subarray01"]
         self._sdp_subarray_dev_names = ["ska_low/tm_leaf_node/sdp_subarray01"]
         self._csp_master_dev_name = "low-csp/control/0"
@@ -237,80 +237,80 @@ class InputParameterLow(InputParameter):
         self._tm_leaf_csp_master_dev_name = "ska_low/tm_leaf_node/csp_master"
         self._changed_callback = changed_callback
 
-    @property
-    def mccs_master_leaf_node(self):
-        """
-        Input parameter
-        Return the TM Leaf MCCS Master device name
+    # @property
+    # def mccs_master_leaf_node(self):
+    #     """
+    #     Input parameter
+    #     Return the TM Leaf MCCS Master device name
 
-        :return: the TM Leaf MCCS Master device name
-        :rtype: str
-        """
-        return self._mccs_master_leaf_node
+    #     :return: the TM Leaf MCCS Master device name
+    #     :rtype: str
+    #     """
+    #     return self._mccs_master_leaf_node
 
-    @mccs_master_leaf_node.setter
-    def mccs_master_leaf_node(self, value):
-        """
-        Input parameter
-        Set the TM Leaf MCCS Master device name to be
-        managed by the CentralNode
+    # @mccs_master_leaf_node.setter
+    # def mccs_master_leaf_node(self, value):
+    #     """
+    #     Input parameter
+    #     Set the TM Leaf MCCS Master device name to be
+    #     managed by the CentralNode
 
-        :param value: the TM Leaf MCCS Master device name
-        :type value: str
-        """
-        self._mccs_master_leaf_node = value
-        if self._changed_callback is not None:
-            self._changed_callback()
+    #     :param value: the TM Leaf MCCS Master device name
+    #     :type value: str
+    #     """
+    #     self._mccs_master_leaf_node = value
+    #     if self._changed_callback is not None:
+    #         self._changed_callback()
 
-    @property
-    def mccs_subarray_leaf_node(self):
-        """
-        Input parameter
-        Return the TM Leaf MCCS Subarray device name
+    # @property
+    # def mccs_subarray_leaf_node(self):
+    #     """
+    #     Input parameter
+    #     Return the TM Leaf MCCS Subarray device name
 
-        :return: the TM Leaf MCCS Subarray device name
-        :rtype: str
-        """
-        return self._mccs_subarray_leaf_node
+    #     :return: the TM Leaf MCCS Subarray device name
+    #     :rtype: str
+    #     """
+    #     return self._mccs_subarray_leaf_node
 
-    @mccs_subarray_leaf_node.setter
-    def mccs_subarray_leaf_node(self, value):
-        """
-        Input parameter
-        Set the TM Leaf MCCS Subarray device name to be
-        managed by the CentralNode
+    # @mccs_subarray_leaf_node.setter
+    # def mccs_subarray_leaf_node(self, value):
+    #     """
+    #     Input parameter
+    #     Set the TM Leaf MCCS Subarray device name to be
+    #     managed by the CentralNode
 
-        :param value: the TM Leaf MCCS Subarray device name
-        :type value: str
-        """
-        self._mccs_subarray_leaf_node = value
-        if self._changed_callback is not None:
-            self._changed_callback()
+    #     :param value: the TM Leaf MCCS Subarray device name
+    #     :type value: str
+    #     """
+    #     self._mccs_subarray_leaf_node = value
+    #     if self._changed_callback is not None:
+    #         self._changed_callback()
 
-    @property
-    def mccs_master_dev_name(self):
-        """
-        Input parameter
-        Return the MCCS Master device name
+    # @property
+    # def mccs_master_dev_name(self):
+    #     """
+    #     Input parameter
+    #     Return the MCCS Master device name
 
-        :return: the MCCS Master device name
-        :rtype: str
-        """
-        return self._mccs_master_dev_name
+    #     :return: the MCCS Master device name
+    #     :rtype: str
+    #     """
+    #     return self._mccs_master_dev_name
 
-    @mccs_master_dev_name.setter
-    def mccs_master_dev_name(self, value):
-        """
-        Input parameter
-        Set the MCCS Master device name to be
-        managed by the CentralNode
+    # @mccs_master_dev_name.setter
+    # def mccs_master_dev_name(self, value):
+    #     """
+    #     Input parameter
+    #     Set the MCCS Master device name to be
+    #     managed by the CentralNode
 
-        :param value: the MCCS Master device name
-        :type value: str
-        """
-        self._mccs_master_dev_name = value
-        if self._changed_callback is not None:
-            self._changed_callback()
+    #     :param value: the MCCS Master device name
+    #     :type value: str
+    #     """
+    #     self._mccs_master_dev_name = value
+    #     if self._changed_callback is not None:
+    #         self._changed_callback()
 
     def update(self, component_manager):
         list_dev_names = super().update(component_manager)

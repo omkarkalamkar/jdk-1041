@@ -2,12 +2,32 @@ import time
 
 import pytest
 from ska_tmc_common.device_info import SubArrayDeviceInfo
+from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
+from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import count_faulty_devices, create_cm, logger
 
 
-@pytest.mark.SKA_low
+@pytest.fixture()
+def devices_to_load():
+    return (
+        {
+            "class": HelperSubArrayDevice,
+            "devices": [{"name": "ska_low/tm_subarray_node/1"}],
+        },
+        {
+            "class": HelperStateDevice,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/csp_master"},
+                {"name": "low-csp/control/0"},
+                {"name": "ska_low/tm_leaf_node/sdp_master"},
+                {"name": "low-sdp/control/0"},
+            ],
+        },
+    )
+
+
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
