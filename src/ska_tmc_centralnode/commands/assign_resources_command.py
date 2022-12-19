@@ -384,30 +384,29 @@ class AssignResources(AbstractAssignReleaseResources):
         if error:
             return error
 
-        # TODO Uncomment below code during integrating of MCCS
-        # if "mccs" not in json_argument:
-        #     return self.generate_command_result(
-        #         ResultCode.FAILED,
-        #         "mccs key is not present in the input json argument.",
-        #     )
+        if "mccs" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs key is not present in the input json argument.",
+            )
 
-        # if "subarray_beam_ids" not in json_argument["mccs"]:
-        #     return self.generate_command_result(
-        #         ResultCode.FAILED,
-        #         "mccs.subarray_beam_ids key is not present in the input json argument.",
-        #     )
+        if "subarray_beam_ids" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.subarray_beam_ids key is not present in the input json argument.",
+            )
 
-        # if "station_ids" not in json_argument["mccs"]:
-        #     return self.generate_command_result(
-        #         ResultCode.FAILED,
-        #         "mccs.station_ids key is not present in the input json argument.",
-        #     )
+        if "station_ids" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.station_ids key is not present in the input json argument.",
+            )
 
-        # if "channel_blocks" not in json_argument["mccs"]:
-        #     return self.generate_command_result(
-        #         ResultCode.FAILED,
-        #         "mccs.channel_blocks key is not present in the input json argument.",
-        #     )
+        if "channel_blocks" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.channel_blocks key is not present in the input json argument.",
+            )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
