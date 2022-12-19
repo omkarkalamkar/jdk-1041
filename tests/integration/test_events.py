@@ -12,7 +12,6 @@ from tests.integration.common import (  # noqa F401
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
-@pytest.mark.skip(reason="Test case is failing.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_internal_model_events_mid(tango_context, change_event_callbacks):
@@ -39,7 +38,7 @@ def test_internal_model_events_mid(tango_context, change_event_callbacks):
         central_node.lastDeviceInfoChanged,
     )
 
-    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(tango.DevState.STANDBY)
     time.sleep(0.1)
     logger.debug(

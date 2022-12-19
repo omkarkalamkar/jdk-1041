@@ -11,7 +11,6 @@ from tests.integration.common import (  # noqa F401
 from tests.settings import logger
 
 
-@pytest.mark.skip(reason="Test case is failing")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_standby_command_mid(tango_context, change_event_callbacks):
@@ -72,7 +71,7 @@ def test_standby_command_mid(tango_context, change_event_callbacks):
         f"longRunningCommandResult: {central_node.longRunningCommandResult}"
     )
 
-    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(DevState.STANDBY)
 
     central_node.subscribe_event(

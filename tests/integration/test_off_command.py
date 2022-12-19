@@ -10,7 +10,6 @@ from tests.integration.common import (  # noqa F401
 )
 
 
-@pytest.mark.skip(reason="Test case is failing.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_off_command_mid(tango_context, change_event_callbacks):
@@ -46,10 +45,10 @@ def test_off_command_mid(tango_context, change_event_callbacks):
         lookahead=4,
     )
 
-    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(tango.DevState.OFF)
 
-    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectState(tango.DevState.OFF)
 
     dish_master = dev_factory.get_device("mid_d0001/elt/master")

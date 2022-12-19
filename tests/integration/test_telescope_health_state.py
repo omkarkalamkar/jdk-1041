@@ -10,7 +10,6 @@ from tests.integration.common import ensure_checked_devices
 from tests.settings import logger
 
 
-@pytest.mark.skip(reason="Test case is failing")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_telescope_health_state_mid(tango_context, change_event_callbacks):
@@ -25,7 +24,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
         change_event_callbacks["telescopeHealthState"],
     )
 
-    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectHealthState(HealthState.DEGRADED)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
