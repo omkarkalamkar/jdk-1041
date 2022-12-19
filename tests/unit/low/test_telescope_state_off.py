@@ -6,7 +6,7 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import (
     create_cm_no_faulty_devices,
     ensure_telescope_state,
-    set_device_state,
+    set_devices_state,
 )
 
 
@@ -15,8 +15,11 @@ def test_telescope_state_off(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_state(
-        "low-mccs/control/control",
+    set_devices_state(
+        devices=[
+            "low-sdp/control/0",
+            "low-csp/control/0",
+        ],
         devFactory=DevFactory(),
         state=tango.DevState.OFF,
     )

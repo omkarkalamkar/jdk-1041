@@ -45,7 +45,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     assert central_node.telescopeHealthState == HealthState.OK
 
 
-@pytest.mark.skip(reason="Needs to be tested.")
+@pytest.mark.skip(reason="Waiting for chart updates")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_telescope_health_state_low(tango_context, change_event_callbacks):
@@ -60,8 +60,8 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
         change_event_callbacks["telescopeHealthState"],
     )
 
-    mccs_master = dev_factory.get_device("low-mccs/control/control")
-    mccs_master.SetDirectHealthState(HealthState.DEGRADED)
+    sdp_master = dev_factory.get_device("low-sdp/control/0")
+    sdp_master.SetDirectHealthState(HealthState.DEGRADED)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.DEGRADED, lookahead=2
@@ -69,7 +69,7 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     assert central_node.telescopeHealthState == HealthState.DEGRADED
 
     # tear down
-    mccs_master.SetDirectHealthState(HealthState.OK)
+    sdp_master.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.OK, lookahead=2

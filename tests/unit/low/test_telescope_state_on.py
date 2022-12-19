@@ -1,6 +1,10 @@
 import pytest
 import tango
 from ska_tmc_common.dev_factory import DevFactory
+<<<<<<< HEAD
+=======
+from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
+>>>>>>> 8dbab829655d2bfc85f3632bb1069d86f9688ad3
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import (
@@ -13,12 +17,11 @@ from tests.settings import (
 def set_devices_on(cm, devFactory, expected_elapsed_time):
     set_devices_state(
         devices=[
-            "low-mccs/control/control",
+            "low-sdp/control/0",
+            "low-csp/control/0",
         ],
         devFactory=devFactory,
         state=tango.DevState.ON,
-        cm=cm,
-        expected_elapsed_time=expected_elapsed_time,
     )
     ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=12)
 

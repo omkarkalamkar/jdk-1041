@@ -44,7 +44,7 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
     assert central_node.tmOpState == DevState.FAULT
 
 
-@pytest.mark.skip(reason="Needs to be tested.")
+@pytest.mark.skip(reason="waiting for chart updates")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_tmc_state_low(tango_context, change_event_callbacks):
@@ -59,11 +59,21 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
         change_event_callbacks["tmOpState"],
     )
 
-    mccs_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/mccs_master")
-    mccs_master_ln.SetDirectState(DevState.FAULT)
+    csp_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/csp_master")
+    sdp_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/sdp_master")
+    csp_subarray_ln = dev_factory.get_device(
+        "ska_low/tm_leaf_node/csp_subarray01"
+    )
+    sdp_subarray_ln = dev_factory.get_device(
+        "ska_low/tm_leaf_node/sdp_subarray01"
+    )
+
+    csp_master_ln.SetDirectState(DevState.FAULT)
+    sdp_master_ln.SetDirectState(DevState.ON)
+    csp_subarray_ln.SetDirectState(DevState.ON)
+    sdp_subarray_ln.SetDirectState(DevState.ON)
 
     change_event_callbacks["tmOpState"].assert_change_event(
         DevState.FAULT, lookahead=2
     )
-
     assert central_node.tmOpState == DevState.FAULT
