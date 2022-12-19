@@ -11,10 +11,10 @@ k8s-test-mid:
   before_script:
     - '[ -f .make/k8s.mk ] || (echo "File k8s.mk not included in Makefile; exit 1")'
     - 'make help | grep k8s-test'
-    - make k8s-install-chart TELESCOPE=$TELESCOPE
-    - make k8s-wait TELESCOPE=$TELESCOPE
+    - make k8s-install-chart TELESCOPE=SKA-mid
+    - make k8s-wait TELESCOPE=SKA-mid
   script:
-    - make k8s-test TELESCOPE=$TELESCOPE
+    - make k8s-test TELESCOPE=SKA-mid
   artifacts:
     name: "$CI_PROJECT_NAME-$CI_JOB_ID"
     paths:
@@ -41,9 +41,9 @@ stop-k8s-test-low:
     TELESCOPE: SKA-mid
     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
   script:
-    - make k8s-uninstall-chart
+    - make k8s-uninstall-chart TELESCOPE=SKA-mid
     - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
-    - make k8s-delete-namespace
+    - make k8s-delete-namespace TELESCOPE=SKA-mid
   environment:
     name: test/$CI_COMMIT_REF_SLUG
     action: stop

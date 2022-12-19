@@ -26,9 +26,9 @@ def devices_to_load():
             "class": HelperStateDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "mid_csp/elt/master"},
+                {"name": "mid-csp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid_sdp/elt/master"},
+                {"name": "mid-sdp/control/0"},
                 {"name": "mid_d0001/elt/master"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
             ],
@@ -37,8 +37,8 @@ def devices_to_load():
 
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
-    set_device_state("mid_csp/elt/master", tango.DevState.INIT, devFactory)
-    set_device_state("mid_sdp/elt/master", tango.DevState.DISABLE, devFactory)
+    set_device_state("mid-csp/control/0", tango.DevState.INIT, devFactory)
+    set_device_state("mid-sdp/control/0", tango.DevState.DISABLE, devFactory)
     set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
     ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
@@ -53,8 +53,8 @@ def test_telescope_state_init(tango_context):
 
 
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
-    set_device_state("mid_csp/elt/master", tango.DevState.FAULT, devFactory)
-    set_device_state("mid_sdp/elt/master", tango.DevState.STANDBY, devFactory)
+    set_device_state("mid-csp/control/0", tango.DevState.FAULT, devFactory)
+    set_device_state("mid-sdp/control/0", tango.DevState.STANDBY, devFactory)
     set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
     ensure_telescope_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
@@ -67,8 +67,8 @@ def test_telescope_state_fault_over_standby(tango_context):
 
 
 def set_device_standby(devFactory, cm, expected_elapsed_time):
-    set_device_state("mid_csp/elt/master", tango.DevState.STANDBY, devFactory)
-    set_device_state("mid_sdp/elt/master", tango.DevState.ON, devFactory)
+    set_device_state("mid-csp/control/0", tango.DevState.STANDBY, devFactory)
+    set_device_state("mid-sdp/control/0", tango.DevState.ON, devFactory)
     set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
