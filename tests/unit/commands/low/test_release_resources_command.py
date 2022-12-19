@@ -65,6 +65,7 @@ def get_release_resources_command_obj():
 
 
 @pytest.mark.skip()
+@pytest.mark.SKA_low
 def test_low_release_resources_command_queued(tango_context, task_callback):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
@@ -77,6 +78,7 @@ def test_low_release_resources_command_queued(tango_context, task_callback):
 
 
 @pytest.mark.skip()
+@pytest.mark.SKA_low
 def test_low_release_resources_command_with_ok(tango_context, task_callback):
     release_res_command, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
@@ -88,6 +90,7 @@ def test_low_release_resources_command_with_ok(tango_context, task_callback):
 
 
 @pytest.mark.skip()
+@pytest.mark.SKA_low
 def test_low_release_resources_command_fail_subarray(
     tango_context, task_callback
 ):
@@ -114,6 +117,7 @@ def test_low_release_resources_command_fail_subarray(
 
 
 @pytest.mark.skip()
+@pytest.mark.SKA_low
 def test_low_release_resources_command_empty_input_json(
     tango_context, task_callback
 ):
@@ -125,6 +129,7 @@ def test_low_release_resources_command_empty_input_json(
 
 
 @pytest.mark.skip()
+@pytest.mark.SKA_low
 def test_low_release_resources_command_missing_subarray_id(
     tango_context, task_callback
 ):
@@ -140,6 +145,7 @@ def test_low_release_resources_command_missing_subarray_id(
 
 
 @pytest.mark.skip()
+@pytest.mark.SKA_low
 def test_low_release_resources_fail_check_allowed(tango_context):
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time

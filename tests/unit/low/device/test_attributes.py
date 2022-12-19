@@ -32,7 +32,7 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.long_running
+@pytest.mark.SKA_low
 def test_attributes(central_node_device):
     assert central_node_device.HealthState in [
         HealthState.UNKNOWN,
