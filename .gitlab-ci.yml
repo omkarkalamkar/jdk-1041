@@ -31,8 +31,8 @@ include:
   # Note: Commenting this part to Disable helm chart linting and Publish job from the pipeline
   # - project: 'ska-telescope/templates-repository'
   #   file: 'gitlab-ci/includes/helm-chart.gitlab-ci.yml'
-  - local: '.gitlab/ci/ska-low.gitlab-ci.yml'
   - local: '.gitlab/ci/ska-mid.gitlab-ci.yml'
+  - local: '.gitlab/ci/ska-low.gitlab-ci.yml'
   # # Python packages build,lint, test and publish
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/python.gitlab-ci.yml'
