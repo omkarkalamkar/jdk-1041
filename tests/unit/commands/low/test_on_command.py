@@ -7,9 +7,6 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
-    HelperMCCSStateDevice,
-)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
