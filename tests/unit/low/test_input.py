@@ -4,7 +4,7 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 
 
 @pytest.mark.long_running
-@pytest.mark.low
+@pytest.mark.SKA_low
 def test_properties():
     input = InputParameterLow(None)
     input.tm_subarray_dev_names = ("1", "2")

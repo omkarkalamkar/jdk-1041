@@ -9,7 +9,7 @@ from tests.settings import TIMEOUT, create_cm_no_faulty_devices
 
 
 @pytest.mark.skip("Needs update in helper devices")
-@pytest.mark.low
+@pytest.mark.SKA_low
 def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
@@ -40,7 +40,7 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
 
 
 @pytest.mark.skip("Needs update in helper devices")
-@pytest.mark.low
+@pytest.mark.SKA_low
 def test_set_health_state_degraded(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -68,7 +68,7 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
 
 
 @pytest.mark.skip("Needs update in helper devices")
-@pytest.mark.low
+@pytest.mark.SKA_low
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -93,7 +93,7 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=12):
 
 
 @pytest.mark.skip("Needs update in helper devices")
-@pytest.mark.low
+@pytest.mark.SKA_low
 def test_set_health_state_unknown(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(

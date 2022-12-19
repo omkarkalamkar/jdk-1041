@@ -7,7 +7,7 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import count_faulty_devices, create_cm, logger
 
 
-@pytest.mark.low
+@pytest.mark.SKA_low
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))

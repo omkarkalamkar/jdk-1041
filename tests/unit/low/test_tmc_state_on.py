@@ -26,7 +26,7 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
 
 
 @pytest.mark.skip(reason="behaviour for this test case is not stable")
-@pytest.mark.low
+@pytest.mark.SKA_low
 def test_tmc_state_on(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
