@@ -10,7 +10,7 @@ k8s-test-mid:
     TELESCOPE: SKA-mid
   before_script:
     - '[ -f .make/k8s.mk ] || (echo "File k8s.mk not included in Makefile; exit 1")'
-    - 'make help | grep k8s-test-mid'
+    - 'make help | grep k8s-test'
     - make k8s-install-chart TELESCOPE=SKA-mid
     - make k8s-wait TELESCOPE=SKA-mid
   script:
