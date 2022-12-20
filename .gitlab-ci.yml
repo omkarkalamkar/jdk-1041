@@ -66,6 +66,7 @@ k8s-test-low:
     - make k8s-install-chart TELESCOPE=SKA-low
     - make k8s-wait TELESCOPE=SKA-low
     - make k8s-test TELESCOPE=SKA-low
+
   environment:
     name: test/$CI_COMMIT_REF_SLUG
     on_stop: stop-k8s-test-low
