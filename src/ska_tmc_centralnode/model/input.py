@@ -163,9 +163,9 @@ class InputParameter:
     def tm_subarray_dev_names(self):
         """
         Input parameter
-        Return the TM Subarray device names
+        Return the SubarrayNode device names
 
-        :return: the TM Subarray device names
+        :return: the SubarrayNode device names
         :rtype: tuple
         """
         return self._tm_subarray_dev_names
@@ -174,10 +174,10 @@ class InputParameter:
     def tm_subarray_dev_names(self, value):
         """
         Input parameter
-        Set the TM Subarray device names to be
+        Set the SubarrayNode device names to be
         managed by the CentralNode
 
-        :param value: the TM Subarray device names
+        :param value: the SubarrayNode device names
         :type value: tuple
         """
         self._tm_subarray_dev_names = value
