@@ -5,7 +5,7 @@ import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
-from tests.integration.common import (  # noqa F401
+from tests.integration.conftest import (  # noqa F401
     devices_to_load,
     ensure_checked_devices,
 )
@@ -38,7 +38,7 @@ def test_internal_model_events_mid(tango_context, change_event_callbacks):
         central_node.lastDeviceInfoChanged,
     )
 
-    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(tango.DevState.STANDBY)
     time.sleep(0.1)
     logger.debug(

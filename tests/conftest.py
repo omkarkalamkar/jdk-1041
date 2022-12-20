@@ -62,7 +62,7 @@ def task_callback() -> MockCallable:
     return task_callback
 
 
-@pytest.fixture()
+@pytest.fixture
 def change_event_callbacks() -> MockTangoEventCallbackGroup:
     """
     Return a dictionary of Tango device change event callbacks with asynchrony support.

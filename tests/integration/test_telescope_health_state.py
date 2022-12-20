@@ -5,8 +5,8 @@ import tango
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.dev_factory import DevFactory
 
-from tests.integration.common import devices_to_load  # noqa F401
-from tests.integration.common import ensure_checked_devices
+from tests.integration.conftest import devices_to_load  # noqa F401
+from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
 
@@ -24,7 +24,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
         change_event_callbacks["telescopeHealthState"],
     )
 
-    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectHealthState(HealthState.DEGRADED)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(

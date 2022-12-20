@@ -4,14 +4,14 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import PointingState
 
-from tests.integration.common import (  # noqa F401
-    devices_to_load,
+from tests.integration.conftest import (  # noqa F401
     ensure_checked_devices,
 )
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.temp_run
 def test_on_command_mid(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -33,10 +33,10 @@ def test_on_command_mid(tango_context, change_event_callbacks):
         lookahead=2,
     )
 
-    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(tango.DevState.ON)
 
-    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectState(tango.DevState.ON)
 
     dish_master = dev_factory.get_device("mid_d0001/elt/master")
@@ -55,8 +55,8 @@ def test_on_command_mid(tango_context, change_event_callbacks):
     assert central_node.telescopeState == tango.DevState.ON
 
 
-@pytest.mark.skip()
 @pytest.mark.post_deployment
+@pytest.mark.temp_run
 @pytest.mark.SKA_low
 def test_on_command_low(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
@@ -79,8 +79,14 @@ def test_on_command_low(tango_context, change_event_callbacks):
         lookahead=2,
     )
 
-    mccs_master = dev_factory.get_device("low-mccs/control/control")
-    mccs_master.SetDirectState(tango.DevState.ON)
+    # mccs_master = dev_factory.get_device("low-mccs/control/control")
+    # mccs_master.SetDirectState(tango.DevState.ON)
+
+    csp_master = dev_factory.get_device("low-csp/control/0")
+    csp_master.SetDirectState(tango.DevState.ON)
+
+    sdp_master = dev_factory.get_device("low-sdp/control/0")
+    sdp_master.SetDirectState(tango.DevState.ON)
 
     central_node.subscribe_event(
         "telescopeState",

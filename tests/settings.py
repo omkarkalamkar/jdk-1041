@@ -20,9 +20,9 @@ NumDishes = 10
 
 DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_master",
-    "mid_csp/elt/master",
+    "mid-csp/control/0",
     "ska_mid/tm_leaf_node/sdp_master",
-    "mid_sdp/elt/master",
+    "mid-sdp/control/0",
     "ska_mid/tm_subarray_node/1",
     "ska_mid/tm_leaf_node/csp_subarray01",
     "ska_mid/tm_leaf_node/sdp_subarray01",

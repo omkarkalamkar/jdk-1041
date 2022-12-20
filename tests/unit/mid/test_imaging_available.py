@@ -27,9 +27,9 @@ def devices_to_load():
             "class": HelperStateDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "mid_csp/elt/master"},
+                {"name": "mid-csp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid_sdp/elt/master"},
+                {"name": "mid-sdp/control/0"},
                 {"name": "mid_d0001/elt/master"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
             ],
@@ -41,7 +41,7 @@ def test_imaging_available(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
         devices=[
-            "mid_csp/elt/master",
+            "mid-csp/control/0",
             "mid_d0001/elt/master",
         ],
         devFactory=DevFactory(),

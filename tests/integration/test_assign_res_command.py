@@ -8,7 +8,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
 
-from tests.integration.common import (  # noqa F401
+from tests.integration.conftest import (  # noqa F401
     devices_to_load,
     ensure_checked_devices,
 )

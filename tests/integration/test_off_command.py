@@ -4,7 +4,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import PointingState
 
-from tests.integration.common import (  # noqa F401
+from tests.integration.conftest import (  # noqa F401
     devices_to_load,
     ensure_checked_devices,
 )
@@ -45,10 +45,10 @@ def test_off_command_mid(tango_context, change_event_callbacks):
         lookahead=4,
     )
 
-    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(tango.DevState.OFF)
 
-    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectState(tango.DevState.OFF)
 
     dish_master = dev_factory.get_device("mid_d0001/elt/master")
@@ -89,8 +89,14 @@ def test_off_command_low(tango_context, change_event_callbacks):
         lookahead=3,
     )
 
-    mccs_master = dev_factory.get_device("low-mccs/control/control")
-    mccs_master.SetDirectState(tango.DevState.OFF)
+    # mccs_master = dev_factory.get_device("low-mccs/control/control")
+    # mccs_master.SetDirectState(tango.DevState.OFF)
+    csp_master = dev_factory.get_device("low-csp/control/0")
+    csp_master.SetDirectState(tango.DevState.OFF)
+
+    sdp_master = dev_factory.get_device("low-sdp/control/0")
+    sdp_master.SetDirectState(tango.DevState.OFF)
+
     central_node.subscribe_event(
         "telescopeState",
         tango.EventType.CHANGE_EVENT,
