@@ -62,9 +62,7 @@ def test_low_telescope_on_command(tango_context, task_callback):
 
 
 @pytest.mark.SKA_low
-def test_telescope_on_command_fail_subarray(
-    tango_context, task_callback
-):
+def test_telescope_on_command_fail_subarray(tango_context, task_callback):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
