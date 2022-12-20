@@ -4,9 +4,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import PointingState
 
-from tests.integration.conftest import (  # noqa F401
-    ensure_checked_devices,
-)
+from tests.integration.conftest import ensure_checked_devices  # noqa F401
 
 
 @pytest.mark.post_deployment
