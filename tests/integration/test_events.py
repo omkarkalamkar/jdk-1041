@@ -58,7 +58,6 @@ def test_internal_model_events_mid(tango_context, change_event_callbacks):
     central_node.unsubscribe_event(event_id)
 
 
-@pytest.mark.skip(reason="Test case is failing")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_internal_model_events_low(tango_context):
@@ -85,7 +84,7 @@ def test_internal_model_events_low(tango_context):
         central_node.lastDeviceInfoChanged,
     )
 
-    mccs_master = dev_factory.get_device("low-sdp/control/0 ")
+    mccs_master = dev_factory.get_device("low-csp/control/0 ")
     mccs_master.SetDirectState(tango.DevState.STANDBY)
     time.sleep(0.1)
     logger.debug(
