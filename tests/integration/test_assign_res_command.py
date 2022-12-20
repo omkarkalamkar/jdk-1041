@@ -18,8 +18,12 @@ def get_assign_input_str(path):
     return assign_input_str
 
 
-def assign_resouces(
-    tango_context, central_node_name, assign_input_str, change_event_callbacks
+def assign_resources(
+    tango_context,
+    central_node_name,
+    assign_input_str,
+    change_event_callbacks,
+    subarray_device,
 ):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
@@ -69,63 +73,72 @@ def assign_resouces(
 
     def get_subarray_device(json_model):
         for device in json_model["devices"]:
-            if device["dev_name"] == "ska_mid/tm_subarray_node/1":
+            if device["dev_name"] == subarray_device:
                 return device
         return None
 
-    def get_mccs_device_resources(json_model):
-        for device in json_model["devices"]:
-            if device["dev_name"] == "ska_low/tm_leaf_node/mccs_master":
-                mccs_device = device
-        len_subarray_beam_ids = 0
-        if "subarray_beam_ids" in mccs_device["resources"]:
-            len_subarray_beam_ids = len(
-                mccs_device["resources"]["subarray_beam_ids"]
-            )
-        len_station_ids = 0
-        if "station_ids" in mccs_device["resources"]:
-            len_subarray_beam_ids = len(
-                mccs_device["resources"]["station_ids"]
-            )
-        len_channel_blocks = 0
-        if "channel_blocks" in mccs_device["resources"]:
-            len_subarray_beam_ids = len(
-                mccs_device["resources"]["channel_blocks"]
-            )
-        return len_subarray_beam_ids + len_station_ids + len_channel_blocks
+    # TODO Uncomment below code during integration of MCCS
+    # def get_mccs_device_resources(json_model):
+    #     for device in json_model["devices"]:
+    #         if device["dev_name"] == "ska_low/tm_leaf_node/mccs_master":
+    #             return device
+    #     len_subarray_beam_ids = 0
+    #     if "subarray_beam_ids" in mccs_device["resources"]:
+    #         len_subarray_beam_ids = len(
+    #             mccs_device["resources"]["subarray_beam_ids"]
+    #         )
+    #     len_station_ids = 0
+    #     if "station_ids" in mccs_device["resources"]:
+    #         len_subarray_beam_ids = len(
+    #             mccs_device["resources"]["station_ids"]
+    #         )
+    #     len_channel_blocks = 0
+    #     if "channel_blocks" in mccs_device["resources"]:
+    #         len_subarray_beam_ids = len(
+    #             mccs_device["resources"]["channel_blocks"]
+    #         )
+    #     return len_subarray_beam_ids + len_station_ids + len_channel_blocks
 
-    if "ska_mid" in central_node_name:
+    device = get_subarray_device(json.loads(central_node.internalModel))
+    logger.debug(f"InternalModel attribute value is:{device}")
+    start_time = time.time()
+    while len(device["resources"]) == 0:
+        time.sleep(SLEEP_TIME)
         device = get_subarray_device(json.loads(central_node.internalModel))
-        logger.debug(f"InternalModel attribute value is:{device}")
-        start_time = time.time()
-        while len(device["resources"]) == 0:
-            time.sleep(SLEEP_TIME)
-            device = get_subarray_device(
-                json.loads(central_node.internalModel)
-            )
-            elapsed_time = time.time() - start_time
-            if elapsed_time > TIMEOUT:
-                pytest.fail("Timeout occurred while executing the test")
+        elapsed_time = time.time() - start_time
+        if elapsed_time > TIMEOUT:
+            pytest.fail("Timeout occurred while executing the test")
 
-        assert len(device["resources"]) > 0
+    assert len(device["resources"]) > 0
 
-    if "ska_low" in central_node_name:
-        resources_len = get_mccs_device_resources(
-            json.loads(central_node.internalModel)
-        )
-        start_time = time.time()
-        while resources_len == 0:
-            time.sleep(SLEEP_TIME)
-            resources_len = get_mccs_device_resources(
-                json.loads(central_node.internalModel)
-            )
-            elapsed_time = time.time() - start_time
-            if elapsed_time > TIMEOUT:
-                pytest.fail("Timeout occurred while executing the test")
-        assert resources_len > 0
+    # TODO Uncomment below code during integration of MCCS
+    # if "ska_low" in central_node_name:
+    #     device = get_mccs_device_resources(
+    #         json.loads(central_node.internalModel)
+    #     )
+    #     start_time = time.time()
+    #     print("DEVICEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEe")
+    #     print(device)
+    #     while len(device["resources"]) == 0:
+    #         time.sleep(SLEEP_TIME)
+    #         device = get_mccs_device_resources(
+    #             json.loads(central_node.internalModel)
+    #         )
+    #         elapsed_time = time.time() - start_time
+    #         if elapsed_time > TIMEOUT:
+    #             pytest.fail("Timeout occurred while executing the test")
+    # while resources_len == 0:
+    #     time.sleep(SLEEP_TIME)
+    #     resources_len = get_mccs_device_resources(
+    #         json.loads(central_node.internalModel)
+    #     )
+    #     elapsed_time = time.time() - start_time
+    #     if elapsed_time > TIMEOUT:
+    #         pytest.fail("Timeout occurred while executing the test")
+    # assert len(device["resources"]) > 0
 
     # teardown subarray, setting ObsState = Empty
-    tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+    tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
@@ -138,7 +151,7 @@ def assign_resouces(
 def test_assign_res_command_mid(
     tango_context, central_node_name, change_event_callbacks
 ):
-    return assign_resouces(
+    return assign_resources(
         tango_context,
         central_node_name,
         get_assign_input_str(
@@ -147,10 +160,10 @@ def test_assign_res_command_mid(
             )
         ),
         change_event_callbacks,
+        "ska_mid/tm_subarray_node/1",
     )
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
@@ -160,7 +173,7 @@ def test_assign_res_command_mid(
 def test_assign_res_command_low(
     tango_context, central_node_name, change_event_callbacks
 ):
-    return assign_resouces(
+    return assign_resources(
         tango_context,
         central_node_name,
         get_assign_input_str(
@@ -168,8 +181,9 @@ def test_assign_res_command_low(
                 dirname(__file__),
                 "..",
                 "data",
-                "command_mccs_AssignResources.json",
+                "command_assign_resource_low.json",
             )
         ),
         change_event_callbacks,
+        "ska_low/tm_subarray_node/1",
     )

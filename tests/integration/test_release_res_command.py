@@ -93,7 +93,7 @@ def test_release_res_command_low(tango_context, change_event_callbacks):
                 dirname(__file__),
                 "..",
                 "data",
-                "command_mccs_AssignResources.json",
+                "command_assign_resource_low.json",
             )
         ),
         get_input_str(
@@ -101,7 +101,7 @@ def test_release_res_command_low(tango_context, change_event_callbacks):
                 dirname(__file__),
                 "..",
                 "data",
-                "command_mccs_ReleaseResources.json",
+                "command_release_resource_low.json",
             )
         ),
         change_event_callbacks,
