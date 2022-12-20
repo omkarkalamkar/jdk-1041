@@ -69,6 +69,7 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
@@ -81,6 +82,7 @@ def test_low_assign_resources_command_queued(tango_context, task_callback):
     )
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_with_ok(tango_context, task_callback):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
@@ -92,6 +94,7 @@ def test_low_assign_resources_command_with_ok(tango_context, task_callback):
     assert res_code == ResultCode.OK
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_fail_subarray(
     tango_context, task_callback
 ):
@@ -125,6 +128,7 @@ def test_low_assign_resources_command_fail_subarray(
     assert res_code == ResultCode.FAILED
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     tango_context, task_callback
 ):
@@ -140,6 +144,7 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     assert "subarray_beam_ids" in message
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_empty_input_json(
     tango_context, task_callback
 ):
@@ -152,6 +157,7 @@ def test_low_assign_resources_command_empty_input_json(
     assert res_code == ResultCode.FAILED
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_missing_subarray_id(
     tango_context, task_callback
 ):
@@ -168,6 +174,7 @@ def test_low_assign_resources_command_missing_subarray_id(
     assert "subarray_id" in message
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_missing_mccs(
     tango_context, task_callback
 ):
@@ -184,6 +191,7 @@ def test_low_assign_resources_command_missing_mccs(
     assert "mccs" in message
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_missing_channel_blocks(
     tango_context, task_callback
 ):
@@ -200,6 +208,7 @@ def test_low_assign_resources_command_missing_channel_blocks(
     assert "channel_blocks" in message
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_low_assign_resources_command_missing_station_ids(
     tango_context, task_callback
 ):
@@ -217,6 +226,7 @@ def test_low_assign_resources_command_missing_station_ids(
     assert "station_ids" in message
 
 
+@pytest.mark.skip(reason="functionality will be completed in HM-111")
 def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()

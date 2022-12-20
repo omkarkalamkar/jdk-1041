@@ -31,10 +31,16 @@ DEVICE_LIST_MID = [
 ]
 
 DEVICE_LIST_LOW = [
-    "ska_low/tm_leaf_node/mccs_master",
-    "low-mccs/control/control",
+    # "ska_low/tm_leaf_node/mccs_master",
+    # "low-mccs/control/control",
+    # "ska_low/tm_leaf_node/mccs_subarray01",
     "ska_low/tm_subarray_node/1",
-    "ska_low/tm_leaf_node/mccs_subarray01",
+    "low-sdp/control/0",
+    "low-csp/control/0",
+    "ska_low/tm_leaf_node/csp_master",
+    "ska_low/tm_leaf_node/sdp_master",
+    "ska_low/tm_leaf_node/csp_subarray01",
+    "ska_low/tm_leaf_node/sdp_subarray01",
 ]
 
 
@@ -131,7 +137,7 @@ def ensure_imaging(cm, value, expected_elapsed_time):
     assert elapsed_time < expected_elapsed_time
 
 
-def set_devices_state(devices, state, devFactory, cm, expected_elapsed_time):
+def set_devices_state(devices, state, devFactory):
     for device in devices:
         proxy = devFactory.get_device(device)
         proxy.SetDirectState(state)

@@ -46,8 +46,6 @@ def test_imaging_not_available(tango_context):
         ],
         devFactory=DevFactory(),
         state=tango.DevState.OFF,
-        cm=cm,
-        expected_elapsed_time=1.5,
     )
     ensure_imaging(
         cm, ModesAvailability.not_available, expected_elapsed_time=1.5

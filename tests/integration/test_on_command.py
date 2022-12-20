@@ -55,7 +55,7 @@ def test_on_command_mid(tango_context, change_event_callbacks):
     assert central_node.telescopeState == tango.DevState.ON
 
 
-@pytest.mark.skip()
+@pytest.mark.skip(reason="functionality will be completed in HM-110")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_on_command_low(tango_context, change_event_callbacks):

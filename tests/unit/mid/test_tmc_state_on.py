@@ -48,8 +48,6 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
         ],
         devFactory=devFactory,
         state=tango.DevState.ON,
-        cm=cm,
-        expected_elapsed_time=expected_elapsed_time,
     )
     ensure_tmc_op_state(cm, tango.DevState.ON, expected_elapsed_time)
 
