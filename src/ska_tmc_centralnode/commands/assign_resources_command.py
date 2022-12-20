@@ -188,20 +188,9 @@ class AssignResources(AbstractAssignReleaseResources):
                 "sdp key is not present in the input json argument.",
             )
 
-        if "execution_block" in json_argument["sdp"]:
-            if json_argument["sdp"]["execution_block"]["eb_id"] == "":
-                sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
-                sdp_values = list(
-                    json_argument["sdp"]["execution_block"].values()
-                )
-                id = sdp_keys[sdp_values.index("")]
-                try:
-                    self.update_resource_config_file(json_argument, id)
-                except Exception as e:
-                    return self.generate_command_result(
-                        ResultCode.FAILED,
-                        ("Errors in input json argument: %s", e),
-                    )
+        error = self._validate_and_update_resource_config(json_argument)
+        if error:
+            return error
 
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
@@ -261,7 +250,7 @@ class AssignResources(AbstractAssignReleaseResources):
             [self.my_subarray_adapter],
             "Error in calling AssignResources on subarray",
             "AssignResources",
-            json.dumps(json_argument.copy()),
+            json.dumps(json_argument),
         )
 
         if ret_code == ResultCode.FAILED:
@@ -362,51 +351,11 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        if "subarray_id" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
-        if "sdp" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "sdp key is not present in the input json argument.",
-            )
-
-        if "csp" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "csp key is not present in the input json argument.",
-            )
-
-        error = self._validate_and_update_resource_config(json_argument)
+        error = self._validate_low_json(
+            json_argument
+        ) or self._validate_and_update_resource_config(json_argument)
         if error:
             return error
-
-        if "mccs" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs key is not present in the input json argument.",
-            )
-
-        if "subarray_beam_ids" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.subarray_beam_ids key is not present in the input json argument.",
-            )
-
-        if "station_ids" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.station_ids key is not present in the input json argument.",
-            )
-
-        if "channel_blocks" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.channel_blocks key is not present in the input json argument.",
-            )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -440,7 +389,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 [self.my_subarray_adapter],
                 f"Error in calling AssignResources on subarray: {self.my_subarray_adapter.dev_name}",
                 "AssignResources",
-                json.dumps(json_argument.copy()),
+                json.dumps(json_argument),
             ),
             # self.send_command(
             #     [self.tm_leaf_mccs_master_adapter],
@@ -454,11 +403,57 @@ class AssignResources(AbstractAssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def _validate_and_update_resource_config(self, json_argument):
+    def _validate_low_json(self, json_argument):
+        """Validate Json for low
+        Args:
+            json_argument (dict): low json
         """
+        if "subarray_id" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
 
+        if "sdp" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "sdp key is not present in the input json argument.",
+            )
+
+        if "csp" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "csp key is not present in the input json argument.",
+            )
+
+        if "mccs" not in json_argument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs key is not present in the input json argument.",
+            )
+
+        if "subarray_beam_ids" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.subarray_beam_ids key is not present in the input json argument.",
+            )
+
+        if "station_ids" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.station_ids key is not present in the input json argument.",
+            )
+
+        if "channel_blocks" not in json_argument["mccs"]:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "mccs.channel_blocks key is not present in the input json argument.",
+            )
+
+    def _validate_and_update_resource_config(self, json_argument):
+        """Validate if eb_id present in sdp schema.
         Returns:
-            _type_: _description_
+            json_argument (dict): low json
         """
         if (
             json_argument["sdp"].get("execution_block")

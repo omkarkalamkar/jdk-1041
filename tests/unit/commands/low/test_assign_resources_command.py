@@ -66,12 +66,10 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
-    cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
@@ -80,50 +78,41 @@ def test_low_assign_resources_command_queued(tango_context, task_callback):
     )
 
 @pytest.mark.SKA_low
-def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
+def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
-    cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
     del json_argument["sdp"]["processing_blocks"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
     with pytest.raises(Exception) as e:
         assert "processing_blocks" in e
 
 
-def test_assign_resources_command_missing_sdp_key(
-    tango_context, task_callback
-):
+def test_assign_resources_missing_sdp_key(tango_context, task_callback):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
-    cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
     assert "sdp" in message
 
 
-def test_low_assign_resources_command_with_ok(tango_context, task_callback):
+def test_low_assign_resources_with_ok(tango_context, task_callback):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
-    cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.OK
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_assign_resources_command_fail_subarray(
     tango_context, task_callback
@@ -145,14 +134,10 @@ def test_low_assign_resources_command_fail_subarray(
     attrs = {"AssignResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
-
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
-    )
-    assign_res_command.assign_resources(
-        json_argument, logger=logger, task_callback=task_callback
     )
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
@@ -173,7 +158,6 @@ def test_low_assign_resources_command_fail_subarray(
 #     assert "subarray_beam_ids" in message
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_assign_resources_command_empty_input_json(
     tango_context, task_callback
@@ -181,25 +165,20 @@ def test_low_assign_resources_command_empty_input_json(
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _, cm = get_assign_resources_command_obj()
-    cm.is_command_allowed("AssignResources")
-    cm.assign_resources("", task_callback=task_callback)
     (res_code, _) = assign_res_command.do(" ")
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
-def test_low_assign_resources_command_missing_subarray_id(
+def test_low_assign_resources_missing_subarray_id(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _, cm = get_assign_resources_command_obj()
-    cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
@@ -254,7 +233,6 @@ def test_low_assign_resources_command_missing_subarray_id(
 #     assert "station_ids" in message
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
