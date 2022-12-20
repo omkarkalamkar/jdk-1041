@@ -1,4 +1,3 @@
-import logging
 import time
 
 import pytest
@@ -64,7 +63,7 @@ def test_low_telescope_on_command(tango_context, task_callback):
 
 @pytest.mark.SKA_low
 def test_telescope_on_command_fail_subarray(
-    tango_context, task_callback, caplog
+    tango_context, task_callback
 ):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -90,7 +89,6 @@ def test_telescope_on_command_fail_subarray(
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
     task_callback.assert_against_call(
         status=TaskStatus.FAILED, result=ResultCode.FAILED
     )
