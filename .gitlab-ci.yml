@@ -66,9 +66,10 @@ k8s-test-low:
     CONFIG: 'low'
     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
   script:
-    - make k8s-install-chart TELESCOPE=SKA-low
-    - make k8s-wait TELESCOPE=SKA-low
-    - make k8s-test TELESCOPE=SKA-low
+    - echo $TELESCOPE
+    - make k8s-install-chart TELESCOPE=$TELESCOPE
+    - make k8s-wait TELESCOPE=$TELESCOPE
+    - make k8s-test TELESCOPE=$TELESCOPE
   environment:
     name: test/$CI_COMMIT_REF_SLUG
     on_stop: stop-k8s-test-low
