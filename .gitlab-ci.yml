@@ -65,6 +65,10 @@ k8s-test-low:
     - make k8s-install-chart TELESCOPE=SKA-low
     - make k8s-wait TELESCOPE=SKA-low
     - make k8s-test TELESCOPE=SKA-low
+  environment:
+    name: test/$CI_COMMIT_REF_SLUG
+    on_stop: stop-k8s-test-low
+    auto_stop_in: 1 minute
 
 stop-k8s-test-low:
   extends:
@@ -76,5 +80,3 @@ stop-k8s-test-low:
     - make k8s-uninstall-chart TELESCOPE=SKA-low
     - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
     - make k8s-delete-namespace
-
-
