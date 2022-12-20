@@ -163,9 +163,9 @@ class InputParameter:
     def tm_subarray_dev_names(self):
         """
         Input parameter
-        Return the TM Subarray device names
+        Return the SubarrayNode device names
 
-        :return: the TM Subarray device names
+        :return: the SubarrayNode device names
         :rtype: tuple
         """
         return self._tm_subarray_dev_names
@@ -174,10 +174,10 @@ class InputParameter:
     def tm_subarray_dev_names(self, value):
         """
         Input parameter
-        Set the TM Subarray device names to be
+        Set the SubarrayNode device names to be
         managed by the CentralNode
 
-        :param value: the TM Subarray device names
+        :param value: the SubarrayNode device names
         :type value: tuple
         """
         self._tm_subarray_dev_names = value
@@ -241,9 +241,9 @@ class InputParameterLow(InputParameter):
     def mccs_master_leaf_node(self):
         """
         Input parameter
-        Return the TM Leaf MCCS Master device name
+        Return the MCCS Master Leaf Node device name
 
-        :return: the TM Leaf MCCS Master device name
+        :return: the MCCS Master Leaf Node device name
         :rtype: str
         """
         return self._mccs_master_leaf_node
@@ -252,10 +252,10 @@ class InputParameterLow(InputParameter):
     def mccs_master_leaf_node(self, value):
         """
         Input parameter
-        Set the TM Leaf MCCS Master device name to be
+        Set the MCCS Master Leaf Node device name to be
         managed by the CentralNode
 
-        :param value: the TM Leaf MCCS Master device name
+        :param value: the MCCS Master Leaf Node device name
         :type value: str
         """
         self._mccs_master_leaf_node = value
@@ -266,9 +266,9 @@ class InputParameterLow(InputParameter):
     def mccs_subarray_leaf_node(self):
         """
         Input parameter
-        Return the TM Leaf MCCS Subarray device name
+        Return the MCCS Subarray Leaf Node device name
 
-        :return: the TM Leaf MCCS Subarray device name
+        :return: the MCCS Subarray Leaf Node device name
         :rtype: str
         """
         return self._mccs_subarray_leaf_node
@@ -277,10 +277,10 @@ class InputParameterLow(InputParameter):
     def mccs_subarray_leaf_node(self, value):
         """
         Input parameter
-        Set the TM Leaf MCCS Subarray device name to be
+        Set the MCCS Subarray Leaf Node device name to be
         managed by the CentralNode
 
-        :param value: the TM Leaf MCCS Subarray device name
+        :param value: the MCCS Subarray Leaf Node device name
         :type value: str
         """
         self._mccs_subarray_leaf_node = value
