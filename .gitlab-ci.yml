@@ -67,9 +67,9 @@ k8s-test-low:
     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
   script:
     - echo $TELESCOPE
-    - make k8s-install-chart TELESCOPE=$TELESCOPE
-    - make k8s-wait TELESCOPE=$TELESCOPE
-    - make k8s-test TELESCOPE=$TELESCOPE
+    - make k8s-install-chart
+    - make k8s-wait 
+    - make k8s-test
   environment:
     name: test/$CI_COMMIT_REF_SLUG
     on_stop: stop-k8s-test-low
@@ -82,6 +82,6 @@ stop-k8s-test-low:
     CONFIG: 'low'
     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
   script:
-    - make k8s-uninstall-chart TELESCOPE=SKA-low
+    - make k8s-uninstall-chart
     - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
     - make k8s-delete-namespace
