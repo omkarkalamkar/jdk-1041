@@ -55,22 +55,21 @@ include:
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
 k8s-test-low:
-   extends:
-    - k8s-test
-   variables:
-     TELESCOPE: 'SKA-low'
-     CONFIG: 'low'
-     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
+  extends:
+   - k8s-test
+  variables:
+    TELESCOPE: 'SKA-low'
+    CONFIG: 'low'
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
 
-   script:
-     - make k8s-install-chart TELESCOPE=SKA-low
-     - make k8s-wait TELESCOPE=SKA-low
-     - make k8s-test TELESCOPE=SKA-low
-   environment:
+  script:
+    - make k8s-install-chart TELESCOPE=SKA-low
+    - make k8s-wait TELESCOPE=SKA-low
+    - make k8s-test TELESCOPE=SKA-low
+  environment:
     name: test/$CI_COMMIT_REF_SLUG
     on_stop: stop-k8s-test-low
     auto_stop_in: 1 minute
-
 
 
 stop-k8s-test-low:
