@@ -101,8 +101,9 @@ class TelescopeStateAggregatorLow(Aggregator):
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
+        self._logger.info(f"Telescope state list is : {telescopeStateList}")
         if not sdp_master and not csp_master:
-            print(
+            self._logger.info(
                 "missing devices: %s=%s %s=%s",
                 self._component_manager.input_parameter.sdp_master_dev_name,
                 sdp_master,
@@ -123,7 +124,6 @@ class TelescopeStateAggregatorLow(Aggregator):
         elif DevState.STANDBY in telescopeSetStateList:
             return DevState.STANDBY
         else:
-            print("The devstate is unknown")
             return DevState.UNKNOWN
 
 
