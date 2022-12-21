@@ -68,7 +68,7 @@ def call_command(central_node, command_name):
                         dirname(__file__),
                         "..",
                         "data",
-                        "command_mccs_AssignResources.json",
+                        "command_assign_resource_low.json",
                     )
                 )
             pytest.command_result = central_node.command_inout(
@@ -91,7 +91,7 @@ def call_command(central_node, command_name):
                         dirname(__file__),
                         "..",
                         "data",
-                        "command_mccs_ReleaseResources.json",
+                        "command_release_resource_low.json",
                     )
                 )
             pytest.command_result = central_node.command_inout(
@@ -183,7 +183,10 @@ def check_command(central_node, command_name, change_event_callbacks):
     if command_name == "AssignResources":
         # teardown subarray, setting ObsState = Empty
         dev_factory = DevFactory()
-        tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+        if "ska_mid" in central_node.dev_name():
+            tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+        else:
+            tmc_subarray = dev_factory.get_device("ska_low/tm_subarray_node/1")
         tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
