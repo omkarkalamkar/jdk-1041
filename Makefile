@@ -127,7 +127,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set central_node.telescope=$(TELESCOPE) \
 	--set central_node.deviceServers.mocks.enabled=$(FAKE_DEVICES) \
 	--set ska-taranta.enabled=$(TARANTA) \
-	--set central_node.deviceServers.centralnode.mid.SkuidService=$(SKUID) \
+	--set central_node.deviceServers.centralnode.SkuidService=$(SKUID) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 

@@ -20,6 +20,10 @@ server:
         - name: "mid-csp/control/0"
         - name: "ska_mid/tm_leaf_node/sdp_master"
         - name: "mid-sdp/control/0"
+        - name: "ska_low/tm_leaf_node/csp_master"
+        - name: "ska_low/tm_leaf_node/sdp_master"
+        - name: "low-csp/control/0"
+        - name: "low-sdp/control/0"
       - name: "HelperSubArrayDevice"
         devices:
         - name: "ska_mid/tm_subarray_node/1"
@@ -32,6 +36,8 @@ server:
         devices:
         - name: "ska_mid/tm_leaf_node/csp_subarray01"
         - name: "ska_mid/tm_leaf_node/sdp_subarray01"
+        - name: "ska_low/tm_leaf_node/csp_subarray01"
+        - name: "ska_low/tm_leaf_node/sdp_subarray01"
         - name: "ska_low/tm_leaf_node/mccs_subarray01"
       - name: "HelperDishDevice"
         devices:

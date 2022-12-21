@@ -31,7 +31,6 @@ include:
   # Note: Commenting this part to Disable helm chart linting and Publish job from the pipeline
   # - project: 'ska-telescope/templates-repository'
   #   file: 'gitlab-ci/includes/helm-chart.gitlab-ci.yml'
-
   # # Python packages build,lint, test and publish
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/python.gitlab-ci.yml'
@@ -43,11 +42,11 @@ include:
   # # Docs pages
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/docs.gitlab-ci.yml'
-
+  
   # k8s steps
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/k8s.gitlab-ci.yml'
-
+    
   # Release Automation
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/release.gitlab-ci.yml'
@@ -56,3 +55,31 @@ include:
   # https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
+
+k8s-test-low:
+  extends:
+    - k8s-test
+  variables:
+    TELESCOPE: 'SKA-low'
+    CONFIG: 'low'
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
+  script:
+    - echo $TELESCOPE
+    - make k8s-install-chart
+    - make k8s-wait 
+    - make k8s-test
+  environment:
+    name: test/$CI_COMMIT_REF_SLUG
+    on_stop: stop-k8s-test-low
+    auto_stop_in: 1 minute
+
+stop-k8s-test-low:
+  extends:
+    - stop-k8s-test
+  variables:
+    CONFIG: 'low'
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
+  script:
+    - make k8s-uninstall-chart
+    - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
+    - make k8s-delete-namespace
