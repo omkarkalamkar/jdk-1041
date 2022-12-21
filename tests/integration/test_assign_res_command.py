@@ -117,8 +117,6 @@ def assign_resources(
     #         json.loads(central_node.internalModel)
     #     )
     #     start_time = time.time()
-    #     print("DEVICEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEe")
-    #     print(device)
     #     while len(device["resources"]) == 0:
     #         time.sleep(SLEEP_TIME)
     #         device = get_mccs_device_resources(
