@@ -12,6 +12,10 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
+from ska_tmc_centralnode.utils.constants import (
+    MCCS_REQUIRED_KEYS,
+    REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
+)
 
 
 class AssignResources(AbstractAssignReleaseResources):
@@ -403,52 +407,44 @@ class AssignResources(AbstractAssignReleaseResources):
 
         return (ResultCode.OK, "")
 
+    def _validate_keys_in_json(self, json_argument, req_keys, error_message):
+        """_summary_
+        Args:
+            json_argument (dict): Json Argument
+            req_keys (list): Required key list to check in json argument
+            error_message (str): Error message when key not present
+        """
+        json_keys = json_argument.keys()
+        for key in req_keys:
+            if key not in json_keys:
+                return self.generate_command_result(
+                    ResultCode.FAILED,
+                    error_message.format(key=key),
+                )
+
     def _validate_low_json(self, json_argument):
         """Validate Json for low
         Args:
             json_argument (dict): low json
         """
-        if "subarray_id" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
+        # Validate assign resource json
+        error_msg = "{key} key is not present in the input json argument."
+        error = self._validate_keys_in_json(
+            json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS, error_msg
+        )
+        if error:
+            return error
 
-        if "sdp" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "sdp key is not present in the input json argument.",
-            )
-
-        if "csp" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "csp key is not present in the input json argument.",
-            )
-
-        if "mccs" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs key is not present in the input json argument.",
-            )
-
-        if "subarray_beam_ids" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.subarray_beam_ids key is not present in the input json argument.",
-            )
-
-        if "station_ids" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.station_ids key is not present in the input json argument.",
-            )
-
-        if "channel_blocks" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.channel_blocks key is not present in the input json argument.",
-            )
+        # Validate MCCS keys
+        mccs_json = json_argument.get("mccs", {})
+        mccs_error_msg = (
+            "mccs.{key} key is not present in the input json argument."
+        )
+        error = self._validate_keys_in_json(
+            mccs_json, MCCS_REQUIRED_KEYS, mccs_error_msg
+        )
+        if error:
+            return error
 
     def _validate_and_update_resource_config(self, json_argument):
         """Validate if eb_id present in sdp schema.
