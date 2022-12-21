@@ -64,9 +64,9 @@ deviceServers:
     mid:
       file: "data/centralnode_mid.yaml"
       CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
-      CspMasterFQDN: "mid_csp/elt/master"
+      CspMasterFQDN: "mid-csp/control/0"
       SdpMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/sdp_master"
-      SdpMasterFQDN: "mid_sdp/elt/master"
+      SdpMasterFQDN: "mid-sdp/control/0"
       DishLeafNodePrefix: "ska_mid/tm_leaf_node/d"
       NumDishes: 1
       SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
