@@ -192,9 +192,17 @@ class AssignResources(AbstractAssignReleaseResources):
                 "sdp key is not present in the input json argument.",
             )
 
-        error = self._validate_and_update_resource_config(json_argument)
-        if error:
-            return error
+        # validate processing block
+        (
+            is_processing_block_present,
+            processing_block_error_msg,
+        ) = self._validate_and_update_resource_config(json_argument)
+
+        if not is_processing_block_present:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                processing_block_error_msg,
+            )
 
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
@@ -355,11 +363,26 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        error = self._validate_low_json(
+        is_valid, invalid_json_error_msg = self._validate_low_json(
             json_argument
-        ) or self._validate_and_update_resource_config(json_argument)
-        if error:
-            return error
+        )
+        if not is_valid:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                invalid_json_error_msg,
+            )
+
+        # validate processing block
+        (
+            is_processing_block_present,
+            processing_block_error_msg,
+        ) = self._validate_and_update_resource_config(json_argument)
+
+        if not is_processing_block_present:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                processing_block_error_msg,
+            )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -417,10 +440,8 @@ class AssignResources(AbstractAssignReleaseResources):
         json_keys = json_argument.keys()
         for key in req_keys:
             if key not in json_keys:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    error_message.format(key=key),
-                )
+                return False, error_message.format(key=key)
+        return True, ""
 
     def _validate_low_json(self, json_argument):
         """Validate Json for low
@@ -429,26 +450,28 @@ class AssignResources(AbstractAssignReleaseResources):
         """
         # Validate assign resource json
         error_msg = "{key} key is not present in the input json argument."
-        error = self._validate_keys_in_json(
+        is_valid, return_error = self._validate_keys_in_json(
             json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS, error_msg
         )
-        if error:
-            return error
+        if not is_valid:
+            return is_valid, return_error
 
         # Validate MCCS keys
         mccs_json = json_argument.get("mccs", {})
         mccs_error_msg = (
             "mccs.{key} key is not present in the input json argument."
         )
-        error = self._validate_keys_in_json(
+        is_valid, return_error = self._validate_keys_in_json(
             mccs_json, MCCS_REQUIRED_KEYS, mccs_error_msg
         )
-        if error:
-            return error
+        if not is_valid:
+            return is_valid, return_error
+
+        return True, ""
 
     def _validate_and_update_resource_config(self, json_argument):
         """Validate if eb_id present in sdp schema.
-        Returns:
+        Args:
             json_argument (dict): low json
         """
         if (
@@ -461,10 +484,8 @@ class AssignResources(AbstractAssignReleaseResources):
             try:
                 self.update_resource_config_file(json_argument, id)
             except Exception as e:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    ("Errors in input json argument: %s", e),
-                )
+                return False, ("Errors in input json argument: %s", e)
+        return True, ""
 
     # TODO Uncomment below code during integrating of MCCS
     # def create_mccs_cmd_data(self, json_argument):
