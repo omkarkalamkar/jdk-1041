@@ -74,6 +74,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "longRunningCommandStatus",
         "longRunningCommandsInQueue",
         "longRunningCommandResult",
+        "State",
         "telescopeState",
         "telescopeHealthState",
         "tmOpState",

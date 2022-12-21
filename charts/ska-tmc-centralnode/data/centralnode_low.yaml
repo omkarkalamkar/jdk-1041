@@ -27,21 +27,31 @@ server:
         - name: "SkuidService"
           values:
           - "{{.Values.deviceServers.centralnode.SkuidService}}"
-        - name: "MCCSMasterLeafNodeFQDN"
-          values:
-          - "{{.Values.deviceServers.centralnode.low.MCCSMasterLeafNodeFQDN}}"
-        - name: "MCCSMasterNodeFQDN"
-          values:
-          - "{{.Values.deviceServers.centralnode.low.MCCSMasterNodeFQDN}}"
-        - name: "MCCSSubarrayLeafNodeFQDN"
-          values:
-          {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_low/tm_leaf_node/mccs_subarray{{ printf "%02s" . }}"
-          {{- end }}
+        # - name: "MCCSMasterLeafNodeFQDN"
+        #   values:
+        #   - "{{.Values.deviceServers.centralnode.low.MCCSMasterLeafNodeFQDN}}"
+        # - name: "MCCSMasterNodeFQDN"
+        #   values:
+        #   - "{{.Values.deviceServers.centralnode.low.MCCSMasterNodeFQDN}}"
+        # - name: "MCCSSubarrayLeafNodeFQDN"
+        #   values:
+        #   {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
+        #   - "ska_low/tm_leaf_node/mccs_subarray{{ printf "%02s" . }}"
+        #   {{- end }}
         - name: "TMSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
           - "ska_low/tm_subarray_node/{{ . }}"
+          {{- end }}
+        - name: "TMLowCspSubarrayLeafNodes"
+          values:
+          {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
+          - "ska_mid/tm_leaf_node/csp_subarray{{ printf "%02s" . }}"
+          {{- end }}
+        - name: "TMLowSdpSubarrayLeafNodes"
+          values:
+          {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
+          - "ska_mid/tm_leaf_node/sdp_subarray{{ printf "%02s" . }}"
           {{- end }}
         - name: "SkaLevel"
           values:

@@ -101,9 +101,8 @@ class TelescopeStateAggregatorLow(Aggregator):
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
-        # TODO: Enable this block when CSP and SDP are integrated
         if not sdp_master and not csp_master:
-            self._logger.info(
+            print(
                 "missing devices: %s=%s %s=%s",
                 self._component_manager.input_parameter.sdp_master_dev_name,
                 sdp_master,
@@ -124,6 +123,7 @@ class TelescopeStateAggregatorLow(Aggregator):
         elif DevState.STANDBY in telescopeSetStateList:
             return DevState.STANDBY
         else:
+            print("The devstate is unknown")
             return DevState.UNKNOWN
 
 

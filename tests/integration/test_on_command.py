@@ -9,7 +9,6 @@ from tests.integration.conftest import ensure_checked_devices  # noqa F401
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.temp_run
 def test_on_command_mid(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -54,7 +53,6 @@ def test_on_command_mid(tango_context, change_event_callbacks):
 
 
 @pytest.mark.post_deployment
-@pytest.mark.temp_run
 @pytest.mark.SKA_low
 def test_on_command_low(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
