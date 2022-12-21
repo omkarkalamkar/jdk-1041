@@ -153,9 +153,7 @@ def test_assign_res_command_mid(
     )
 
 
-@pytest.mark.xfail(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
-)
+@pytest.mark.skip()
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
