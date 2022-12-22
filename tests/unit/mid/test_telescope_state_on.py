@@ -26,9 +26,9 @@ def devices_to_load():
             "class": HelperStateDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "mid_csp/elt/master"},
+                {"name": "mid-csp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid_sdp/elt/master"},
+                {"name": "mid-sdp/control/0"},
                 {"name": "mid_d0001/elt/master"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
             ],
@@ -39,8 +39,8 @@ def devices_to_load():
 def set_devices_on(cm, devFactory, expected_elapsed_time):
     set_devices_state(
         devices=[
-            "mid_csp/elt/master",
-            "mid_sdp/elt/master",
+            "mid-csp/control/0",
+            "mid-sdp/control/0",
             "mid_d0001/elt/master",
         ],
         devFactory=devFactory,

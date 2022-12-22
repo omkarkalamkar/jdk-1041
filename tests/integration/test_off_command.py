@@ -45,10 +45,10 @@ def test_off_command_mid(tango_context, change_event_callbacks):
         lookahead=4,
     )
 
-    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(tango.DevState.OFF)
 
-    sdp_master = dev_factory.get_device("mid_sdp/elt/master")
+    sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectState(tango.DevState.OFF)
 
     dish_master = dev_factory.get_device("mid_d0001/elt/master")
@@ -66,6 +66,7 @@ def test_off_command_mid(tango_context, change_event_callbacks):
     )
 
 
+@pytest.mark.skip(reason="Work in progress")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_off_command_low(tango_context, change_event_callbacks):

@@ -44,7 +44,6 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
     assert central_node.tmOpState == DevState.FAULT
 
 
-@pytest.mark.skip(reason="waiting for chart updates")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_tmc_state_low(tango_context, change_event_callbacks):

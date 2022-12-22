@@ -38,7 +38,7 @@ def test_internal_model_events_mid(tango_context, change_event_callbacks):
         central_node.lastDeviceInfoChanged,
     )
 
-    csp_master = dev_factory.get_device("mid_csp/elt/master")
+    csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(tango.DevState.STANDBY)
     time.sleep(0.1)
     logger.debug(
@@ -58,7 +58,6 @@ def test_internal_model_events_mid(tango_context, change_event_callbacks):
     central_node.unsubscribe_event(event_id)
 
 
-@pytest.mark.skip(reason="Needs to be tested.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_internal_model_events_low(tango_context):
@@ -85,7 +84,7 @@ def test_internal_model_events_low(tango_context):
         central_node.lastDeviceInfoChanged,
     )
 
-    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master = dev_factory.get_device("low-csp/control/0 ")
     mccs_master.SetDirectState(tango.DevState.STANDBY)
     time.sleep(0.1)
     logger.debug(

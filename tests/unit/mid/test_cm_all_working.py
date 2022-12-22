@@ -25,9 +25,9 @@ def devices_to_load():
             "class": SKABaseDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "mid_csp/elt/master"},
+                {"name": "mid-csp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid_sdp/elt/master"},
+                {"name": "mid-sdp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
                 {"name": "mid_d0001/elt/master"},
             ],

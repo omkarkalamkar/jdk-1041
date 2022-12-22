@@ -29,9 +29,9 @@ def devices_to_load():
             "class": HelperStateDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "mid_csp/elt/master"},
+                {"name": "mid-csp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid_sdp/elt/master"},
+                {"name": "mid-sdp/control/0"},
                 {"name": "mid_d0001/elt/master"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
                 {"name": "ska_low/tm_subarray_node/1"},
@@ -54,11 +54,11 @@ def devices_to_load():
                         "CspMasterLeafNodeFQDN": [
                             "ska_mid/tm_leaf_node/csp_master"
                         ],
-                        "CspMasterFQDN": ["mid_csp/elt/master"],
+                        "CspMasterFQDN": ["mid-csp/control/0"],
                         "SdpMasterLeafNodeFQDN": [
                             "ska_mid/tm_leaf_node/sdp_master"
                         ],
-                        "SdpMasterFQDN": ["mid_sdp/elt/master"],
+                        "SdpMasterFQDN": ["mid-sdp/control/0"],
                         "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
                         "TMMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
                         "TMMidCspSubarrayLeafNodes": [

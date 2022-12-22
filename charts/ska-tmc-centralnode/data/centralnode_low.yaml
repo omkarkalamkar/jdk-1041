@@ -12,7 +12,21 @@ server:
       devices:
       - name: "ska_low/tm_central/central_node"
         properties:
-        properties:
+        - name: "CspMasterLeafNodeFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.low.CspMasterLeafNodeFQDN}}"
+        - name: "CspMasterFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.low.CspMasterFQDN}}"
+        - name: "SdpMasterLeafNodeFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.low.SdpMasterLeafNodeFQDN}}"
+        - name: "SdpMasterFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.low.SdpMasterFQDN}}"
+        - name: "SkuidService"
+          values:
+          - "{{.Values.deviceServers.centralnode.SkuidService}}"
         - name: "MCCSMasterLeafNodeFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.low.MCCSMasterLeafNodeFQDN}}"

@@ -342,8 +342,8 @@ class InputParameterMid(InputParameter):
         self._tm_dish_dev_names = ["ska_mid/tm_leaf_node/d0001"]
         self._dish_dev_names = ["mid_d0001/elt/master"]
         self._sdp_subarray_dev_names = ["ska_mid/tm_leaf_node/sdp_subarray01"]
-        self._csp_master_dev_name = "mid_csp/elt/master"
-        self._sdp_master_dev_name = "mid_sdp/elt/master"
+        self._csp_master_dev_name = "mid-csp/control/0"
+        self._sdp_master_dev_name = "mid-sdp/control/0"
         self._tm_leaf_sdp_master_dev_name = "ska_mid/tm_leaf_node/sdp_master"
         self._tm_leaf_csp_master_dev_name = "ska_mid/tm_leaf_node/csp_master"
         self._changed_callback = changed_callback

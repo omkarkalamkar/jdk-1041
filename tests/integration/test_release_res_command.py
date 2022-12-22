@@ -84,6 +84,7 @@ def test_release_res_command_mid(tango_context, change_event_callbacks):
     )
 
 
+@pytest.mark.skip(reason="Functionality will be completed in HM-111.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(tango_context, change_event_callbacks):
