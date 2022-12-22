@@ -197,7 +197,8 @@ class TelescopeOff(AbstractTelescopeOnOff):
             return ret_code, message
 
         self.logger.info(
-            "waiting for ALL Subarray devices obsState to be Empty"
+            """Waiting for all the Subarray devices to be in EMPTY
+            observation state"""
         )
         all_empty = False
         start_time = time.time()
@@ -218,7 +219,8 @@ class TelescopeOff(AbstractTelescopeOnOff):
             if elapsed_time > self._timeout_subarrays:
                 return self.generate_command_result(
                     ResultCode.FAILED,
-                    "Timeout in waiting for subarrays devices to be empty",
+                    """Timeout in waiting for the subarray devices to be in
+                    EMPTY observation state""",
                 )
             time.sleep(self._step_sleep)
 
