@@ -336,9 +336,6 @@ class AssignResources(AbstractAssignReleaseResources):
 
 
         Example:
-            {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"mccs":{"subarray_beam_ids":[1],"station_ids":[[1,2]],"channel_blocks":[3]},"sdp":{}}
-
-        Note: Enter input without spaces as:
         {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/3.0","transaction_id":"txn-....-00001","subarray_id":1,
         "mccs":{"subarray_beam_ids":[1],"station_ids":[[1,2]],"channel_blocks":[3]},
         "sdp":{"interface":"https://schema.skao.int/ska-sdp-assignres/0.4","execution_block":{"eb_id":"eb-mvp01-20200325-00001",
@@ -369,6 +366,9 @@ class AssignResources(AbstractAssignReleaseResources):
         "csp":{"interface":"https://schema.skao.int/ska-low-csp-assignresources/2.0","common":{"subarray_id":1},
         "lowcbf":{"resources":[{"device":"fsp_01","shared":true,"fw_image":"pst","fw_mode":"unused"},
         {"device":"p4_01","shared":true,"fw_image":"p4.bin","fw_mode":"p4"}]}}}
+
+
+        Note: From Jive, enter above input string without any space.
 
         return:
             None
