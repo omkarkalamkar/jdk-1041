@@ -60,8 +60,9 @@ def get_release_resources_command_obj():
     release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
     return release_command, my_adapter_factory, cm
 
+
 @pytest.mark.SKA_low
-def test_low_release_resources_command_queued(tango_context, task_callback):
+def test_low_release_resources_command(tango_context, task_callback):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
@@ -70,16 +71,12 @@ def test_low_release_resources_command_queued(tango_context, task_callback):
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
-
-@pytest.mark.SKA_low
-def test_low_release_resources_command_with_ok(tango_context, task_callback):
-    release_res_command, _, cm = get_release_resources_command_obj()
-    cm.is_command_allowed("ReleaseResources")
-    release_input_str = get_release_input_str()
-    json_argument = json.loads(release_input_str)
-    cm.release_resources(json_argument, task_callback=task_callback)
-    (res_code, _) = release_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.OK
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+    )
 
 
 @pytest.mark.SKA_low
@@ -109,22 +106,18 @@ def test_low_release_resources_command_fail_subarray(
 
 
 @pytest.mark.SKA_low
-def test_low_release_resources_command_empty_input_json(
-    tango_context, task_callback
-):
+def test_low_release_resources_empty_input_json(tango_context, task_callback):
     release_res_command, _, cm = get_release_resources_command_obj()
-    cm.is_command_allowed("ReleaseResources")
     cm.release_resources("", task_callback=task_callback)
     (res_code, _) = release_res_command.do(" ")
     assert res_code == ResultCode.FAILED
 
 
 @pytest.mark.SKA_low
-def test_low_release_resources_command_missing_subarray_id(
+def test_low_release_resources_missing_subarray_id(
     tango_context, task_callback
 ):
     release_res_command, _, cm = get_release_resources_command_obj()
-    cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
