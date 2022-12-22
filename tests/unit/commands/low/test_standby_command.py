@@ -90,7 +90,7 @@ def test_low_telescope_standby_command_fail_subarray(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        status=TaskStatus.FAILED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
     )
 
 

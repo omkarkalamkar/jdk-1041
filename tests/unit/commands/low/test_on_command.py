@@ -88,7 +88,7 @@ def test_telescope_on_command_fail_subarray(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        status=TaskStatus.FAILED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
     )
 
 

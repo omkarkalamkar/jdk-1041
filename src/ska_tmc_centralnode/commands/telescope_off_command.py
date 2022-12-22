@@ -56,7 +56,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
-                status=TaskStatus.FAILED,
+                status=TaskStatus.COMPLETED,
                 result=ResultCode.FAILED,
                 exception=message,
             )
