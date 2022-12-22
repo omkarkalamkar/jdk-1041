@@ -67,7 +67,7 @@ def get_assign_resources_command_obj():
 
 
 @pytest.mark.SKA_low
-def test_low_assign_resources_command_queued(tango_context, task_callback):
+def test_low_assign_resources_command(tango_context, task_callback):
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
     assign_input_str = get_assign_input_str()
@@ -75,6 +75,12 @@ def test_low_assign_resources_command_queued(tango_context, task_callback):
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
     )
 
 @pytest.mark.SKA_low
@@ -104,16 +110,6 @@ def test_assign_resources_missing_sdp_key(tango_context, task_callback):
     assert "sdp" in message
 
 
-def test_low_assign_resources_with_ok(tango_context, task_callback):
-    logger.info("%s", tango_context)
-    assign_res_command, _, cm = get_assign_resources_command_obj()
-    assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.OK
-
-
-@pytest.mark.SKA_low
 def test_low_assign_resources_command_fail_subarray(
     tango_context, task_callback
 ):
