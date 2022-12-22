@@ -1,6 +1,5 @@
 import json
 import time
-from os.path import dirname, join
 
 import pytest
 import tango
@@ -10,12 +9,6 @@ from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
-
-
-def get_assign_input_str(path):
-    with open(path, "r") as f:
-        assign_input_str = f.read()
-    return assign_input_str
 
 
 def assign_resources(
@@ -147,16 +140,12 @@ def assign_resources(
     [("ska_mid/tm_central/central_node")],
 )
 def test_assign_res_command_mid(
-    tango_context, central_node_name, change_event_callbacks
+    tango_context, central_node_name, change_event_callbacks, json_factory
 ):
     return assign_resources(
         tango_context,
         central_node_name,
-        get_assign_input_str(
-            join(
-                dirname(__file__), "..", "data", "command_AssignResources.json"
-            )
-        ),
+        json_factory("command_AssignResources"),
         change_event_callbacks,
         "ska_mid/tm_subarray_node/1",
     )
@@ -169,19 +158,12 @@ def test_assign_res_command_mid(
     [("ska_low/tm_central/central_node")],
 )
 def test_assign_res_command_low(
-    tango_context, central_node_name, change_event_callbacks
+    tango_context, central_node_name, change_event_callbacks, json_factory
 ):
     return assign_resources(
         tango_context,
         central_node_name,
-        get_assign_input_str(
-            join(
-                dirname(__file__),
-                "..",
-                "data",
-                "command_assign_resource_low.json",
-            )
-        ),
+        json_factory("command_assign_resource_low"),
         change_event_callbacks,
         "ska_low/tm_subarray_node/1",
     )

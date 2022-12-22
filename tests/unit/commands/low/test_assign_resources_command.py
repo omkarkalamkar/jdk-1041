@@ -1,6 +1,5 @@
 import json
 import time
-from os.path import dirname, join
 
 import mock
 import pytest
@@ -39,15 +38,6 @@ def devices_to_load():
     )
 
 
-def get_assign_input_str(
-    assign_input_file="command_assign_resource_low.json",
-):
-    path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
-    with open(path, "r") as f:
-        assign_input_str = f.read()
-    return assign_input_str
-
-
 def get_assign_resources_command_obj():
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -67,10 +57,12 @@ def get_assign_resources_command_obj():
 
 
 @pytest.mark.SKA_low
-def test_low_assign_resources_command(tango_context, task_callback):
+def test_low_assign_resources_command(
+    tango_context, task_callback, json_factory
+):
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
@@ -85,11 +77,11 @@ def test_low_assign_resources_command(tango_context, task_callback):
 
 @pytest.mark.SKA_low
 def test_assign_resources_missing_eb_id_key_and_processing_blocks(
-    tango_context, task_callback
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
     del json_argument["sdp"]["processing_blocks"]
@@ -99,10 +91,12 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
         assert "processing_blocks" in e
 
 
-def test_assign_resources_missing_sdp_key(tango_context, task_callback):
+def test_assign_resources_missing_sdp_key(
+    tango_context, task_callback, json_factory
+):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
@@ -111,7 +105,7 @@ def test_assign_resources_missing_sdp_key(tango_context, task_callback):
 
 
 def test_low_assign_resources_command_fail_subarray(
-    tango_context, task_callback
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
@@ -130,7 +124,7 @@ def test_low_assign_resources_command_fail_subarray(
     attrs = {"AssignResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
@@ -141,12 +135,12 @@ def test_low_assign_resources_command_fail_subarray(
 
 @pytest.mark.skip(reason="Need to run during integration of MCCS")
 def test_low_assign_resources_command_missing_subarray_beam_ids_key(
-    tango_context, task_callback
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
     assert cm.is_command_allowed("AssignResources")
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["subarray_beam_ids"]
     cm.assign_resources(json_argument, task_callback=task_callback)
@@ -168,12 +162,12 @@ def test_low_assign_resources_command_empty_input_json(
 
 @pytest.mark.SKA_low
 def test_low_assign_resources_missing_subarray_id(
-    tango_context, task_callback
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _, cm = get_assign_resources_command_obj()
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
@@ -183,13 +177,13 @@ def test_low_assign_resources_missing_subarray_id(
 
 @pytest.mark.skip(reason="Need to run during integration of MCCS")
 def test_low_assign_resources_command_missing_mccs(
-    tango_context, task_callback
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _, cm = get_assign_resources_command_obj()
     assert cm.is_command_allowed("AssignResources")
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]
     cm.assign_resources(json_argument, task_callback=task_callback)
@@ -200,13 +194,13 @@ def test_low_assign_resources_command_missing_mccs(
 
 @pytest.mark.skip(reason="Need to run during integration of MCCS")
 def test_low_assign_resources_command_missing_channel_blocks(
-    tango_context, task_callback
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _, cm = get_assign_resources_command_obj()
     assert cm.is_command_allowed("AssignResources")
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["channel_blocks"]
     cm.assign_resources(json_argument, task_callback=task_callback)
@@ -217,14 +211,14 @@ def test_low_assign_resources_command_missing_channel_blocks(
 
 @pytest.mark.skip(reason="Need to run during integration of MCCS")
 def test_low_assign_resources_command_missing_station_ids(
-    tango_context, task_callback
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     assign_res_command, _, cm = get_assign_resources_command_obj()
 
     assert cm.is_command_allowed("AssignResources")
-    assign_input_str = get_assign_input_str()
+    assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["station_ids"]
     cm.assign_resources(json_argument, task_callback=task_callback)

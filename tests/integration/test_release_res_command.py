@@ -1,17 +1,9 @@
-from os.path import dirname, join
-
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
-
-
-def get_input_str(path):
-    with open(path, "r") as f:
-        input_str = f.read()
-    return input_str
 
 
 def release_resources(
@@ -60,48 +52,27 @@ def release_resources(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_release_res_command_mid(tango_context, change_event_callbacks):
+def test_release_res_command_mid(
+    tango_context, change_event_callbacks, json_factory
+):
     return release_resources(
         tango_context,
         "ska_mid/tm_central/central_node",
-        get_input_str(
-            join(
-                dirname(__file__), "..", "data", "command_AssignResources.json"
-            )
-        ),
-        get_input_str(
-            join(
-                dirname(__file__),
-                "..",
-                "data",
-                "command_ReleaseResources.json",
-            )
-        ),
+        json_factory("command_AssignResources"),
+        json_factory("command_ReleaseResources"),
         change_event_callbacks,
     )
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_release_res_command_low(tango_context, change_event_callbacks):
+def test_release_res_command_low(
+    tango_context, change_event_callbacks, json_factory
+):
     return release_resources(
         tango_context,
         "ska_low/tm_central/central_node",
-        get_input_str(
-            join(
-                dirname(__file__),
-                "..",
-                "data",
-                "command_assign_resource_low.json",
-            )
-        ),
-        get_input_str(
-            join(
-                dirname(__file__),
-                "..",
-                "data",
-                "command_release_resource_low.json",
-            )
-        ),
+        json_factory("command_assign_resource_low"),
+        json_factory("command_release_resource_low"),
         change_event_callbacks,
     )
