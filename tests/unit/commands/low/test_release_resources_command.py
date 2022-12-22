@@ -40,7 +40,7 @@ def devices_to_load():
 
 
 def get_release_input_str(
-    release_input_file="command_mccs_ReleaseResources.json",
+    release_input_file="command_release_resource_low.json",
 ):
     path = join(
         dirname(__file__), "..", "..", "..", "data", release_input_file
@@ -60,8 +60,6 @@ def get_release_resources_command_obj():
     release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
     return release_command, my_adapter_factory, cm
 
-
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_release_resources_command_queued(tango_context, task_callback):
     _, _, cm = get_release_resources_command_obj()
@@ -73,8 +71,6 @@ def test_low_release_resources_command_queued(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.QUEUED}
     )
 
-
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_release_resources_command_with_ok(tango_context, task_callback):
     release_res_command, _, cm = get_release_resources_command_obj()
@@ -86,7 +82,6 @@ def test_low_release_resources_command_with_ok(tango_context, task_callback):
     assert res_code == ResultCode.OK
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_release_resources_command_fail_subarray(
     tango_context, task_callback
@@ -113,7 +108,6 @@ def test_low_release_resources_command_fail_subarray(
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_release_resources_command_empty_input_json(
     tango_context, task_callback
@@ -125,7 +119,6 @@ def test_low_release_resources_command_empty_input_json(
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_release_resources_command_missing_subarray_id(
     tango_context, task_callback
@@ -141,7 +134,6 @@ def test_low_release_resources_command_missing_subarray_id(
     assert "subarray_id" in message
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_release_resources_fail_check_allowed(tango_context):
     cm, start_time = create_cm()

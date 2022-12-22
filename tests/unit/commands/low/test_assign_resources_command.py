@@ -143,19 +143,20 @@ def test_low_assign_resources_command_fail_subarray(
     assert res_code == ResultCode.FAILED
 
 
-# def test_low_assign_resources_command_missing_subarray_beam_ids_key(
-#     tango_context, task_callback
-# ):
-#     logger.info("%s", tango_context)
-#     assign_res_command, _, cm = get_assign_resources_command_obj()
-#     assert cm.is_command_allowed("AssignResources")
-#     assign_input_str = get_assign_input_str()
-#     json_argument = json.loads(assign_input_str)
-#     del json_argument["mccs"]["subarray_beam_ids"]
-#     cm.assign_resources(json_argument, task_callback=task_callback)
-#     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
-#     assert res_code == ResultCode.FAILED
-#     assert "subarray_beam_ids" in message
+@pytest.mark.skip(reason="Need to run during integration of MCCS")
+def test_low_assign_resources_command_missing_subarray_beam_ids_key(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assert cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["mccs"]["subarray_beam_ids"]
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
+    assert "subarray_beam_ids" in message
 
 
 @pytest.mark.SKA_low
@@ -184,53 +185,56 @@ def test_low_assign_resources_missing_subarray_id(
     assert "subarray_id" in message
 
 
-# def test_low_assign_resources_command_missing_mccs(
-#     tango_context, task_callback
-# ):
-#     logger.info("%s", tango_context)
-#     # import debugpy; debugpy.debug_this_thread()
-#     assign_res_command, _, cm = get_assign_resources_command_obj()
-#     assert cm.is_command_allowed("AssignResources")
-#     assign_input_str = get_assign_input_str()
-#     json_argument = json.loads(assign_input_str)
-#     del json_argument["mccs"]
-#     cm.assign_resources(json_argument, task_callback=task_callback)
-#     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
-#     assert res_code == ResultCode.FAILED
-#     assert "mccs" in message
+@pytest.mark.skip(reason="Need to run during integration of MCCS")
+def test_low_assign_resources_command_missing_mccs(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assert cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["mccs"]
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
+    assert "mccs" in message
 
 
-# def test_low_assign_resources_command_missing_channel_blocks(
-#     tango_context, task_callback
-# ):
-#     logger.info("%s", tango_context)
-#     # import debugpy; debugpy.debug_this_thread()
-#     assign_res_command, _, cm = get_assign_resources_command_obj()
-#     assert cm.is_command_allowed("AssignResources")
-#     assign_input_str = get_assign_input_str()
-#     json_argument = json.loads(assign_input_str)
-#     del json_argument["mccs"]["channel_blocks"]
-#     cm.assign_resources(json_argument, task_callback=task_callback)
-#     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
-#     assert res_code == ResultCode.FAILED
-#     assert "channel_blocks" in message
+@pytest.mark.skip(reason="Need to run during integration of MCCS")
+def test_low_assign_resources_command_missing_channel_blocks(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assert cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["mccs"]["channel_blocks"]
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
+    assert "channel_blocks" in message
 
 
-# def test_low_assign_resources_command_missing_station_ids(
-#     tango_context, task_callback
-# ):
-#     logger.info("%s", tango_context)
-#     # import debugpy; debugpy.debug_this_thread()
-#     assign_res_command, _, cm = get_assign_resources_command_obj()
+@pytest.mark.skip(reason="Need to run during integration of MCCS")
+def test_low_assign_resources_command_missing_station_ids(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    assign_res_command, _, cm = get_assign_resources_command_obj()
 
-#     assert cm.is_command_allowed("AssignResources")
-#     assign_input_str = get_assign_input_str()
-#     json_argument = json.loads(assign_input_str)
-#     del json_argument["mccs"]["station_ids"]
-#     cm.assign_resources(json_argument, task_callback=task_callback)
-#     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
-#     assert res_code == ResultCode.FAILED
-#     assert "station_ids" in message
+    assert cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    del json_argument["mccs"]["station_ids"]
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
+    assert "station_ids" in message
 
 
 @pytest.mark.SKA_low
