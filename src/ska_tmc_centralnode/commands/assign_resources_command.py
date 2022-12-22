@@ -13,7 +13,6 @@ from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
 from ska_tmc_centralnode.utils.constants import (
-    MCCS_REQUIRED_KEYS,
     REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
 )
 
@@ -456,16 +455,17 @@ class AssignResources(AbstractAssignReleaseResources):
         if not is_valid:
             return is_valid, return_error
 
+        # TODO Uncomment below code during integration of MCCS
         # Validate MCCS keys
-        mccs_json = json_argument.get("mccs", {})
-        mccs_error_msg = (
-            "mccs.{key} key is not present in the input json argument."
-        )
-        is_valid, return_error = self._validate_keys_in_json(
-            mccs_json, MCCS_REQUIRED_KEYS, mccs_error_msg
-        )
-        if not is_valid:
-            return is_valid, return_error
+        # mccs_json = json_argument.get("mccs", {})
+        # mccs_error_msg = (
+        #     "mccs.{key} key is not present in the input json argument."
+        # )
+        # is_valid, return_error = self._validate_keys_in_json(
+        #     mccs_json, MCCS_REQUIRED_KEYS, mccs_error_msg
+        # )
+        # if not is_valid:
+        #     return is_valid, return_error
 
         return True, ""
 
