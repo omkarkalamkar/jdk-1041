@@ -7,7 +7,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
 
-from tests.integration.conftest import ensure_checked_devices
+from tests.integration.conftest import ensure_checked_devices, LOW_SUBARRAY_DEVICE, MID_SUBARRAY_DEVICE
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
@@ -147,7 +147,7 @@ def test_assign_res_command_mid(
         central_node_name,
         json_factory("command_AssignResources"),
         change_event_callbacks,
-        "ska_mid/tm_subarray_node/1",
+        MID_SUBARRAY_DEVICE,
     )
 
 
@@ -165,5 +165,5 @@ def test_assign_res_command_low(
         central_node_name,
         json_factory("command_assign_resource_low"),
         change_event_callbacks,
-        "ska_low/tm_subarray_node/1",
+        LOW_SUBARRAY_DEVICE,
     )
