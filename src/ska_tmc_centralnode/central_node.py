@@ -49,7 +49,7 @@ class AbstractCentralNode(TMCBaseDevice):
         default_value="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
     )
 
-    MaxWorker = device_property(dtype="DevUShort", default_value=5)
+    MaxWorker = device_property(dtype="DevUShort", default_value=1)
 
     ProxyTimeout = device_property(dtype="DevUShort", default_value=500)
     # ----------
