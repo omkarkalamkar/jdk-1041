@@ -9,7 +9,7 @@ from ska_tango_base.control_model import HealthState, ObsState
 from ska_tmc_common.dev_factory import DevFactory
 from tango import Database, DeviceProxy
 
-from tests.settings import logger
+from tests.settings import LOW_SUBARRAY_DEVICE, MID_SUBARRAY_DEVICE, logger
 
 
 @given(
@@ -150,9 +150,9 @@ def check_command(central_node, command_name, change_event_callbacks):
         # teardown subarray, setting ObsState = Empty
         dev_factory = DevFactory()
         if "ska_mid" in central_node.dev_name():
-            tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+            tmc_subarray = dev_factory.get_device(MID_SUBARRAY_DEVICE)
         else:
-            tmc_subarray = dev_factory.get_device("ska_low/tm_subarray_node/1")
+            tmc_subarray = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
         tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
