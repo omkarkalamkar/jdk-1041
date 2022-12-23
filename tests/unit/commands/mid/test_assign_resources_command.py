@@ -18,7 +18,7 @@ from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import create_cm, logger
+from tests.settings import MID_SUBARRAY_DEVICE, create_cm, logger
 
 
 @pytest.fixture()
@@ -26,7 +26,7 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": "ska_mid/tm_subarray_node/1"}],
+            "devices": [{"name": MID_SUBARRAY_DEVICE}],
         },
         {
             "class": SKABaseDevice,
@@ -138,10 +138,11 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     skuid = mock.Mock(**attrs)
 
     # include exception in AssignResources command
-    failing_dev = "ska_mid/tm_subarray_node/1"
     attrs = {"AssignResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+    adapter_factory.get_or_create_adapter(
+        MID_SUBARRAY_DEVICE, proxy=subarrayMock
+    )
 
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
@@ -240,10 +241,9 @@ def test_assign_resources_command_already_assigned(
         cm, adapter_factory, skuid, logger=logger
     )
     # dish0001 is assigned to Subarray1
-    subarray = "ska_mid/tm_subarray_node/1"
     for devInfo in cm.devices:
         if isinstance(devInfo, SubArrayDeviceInfo):
-            if devInfo.dev_name == subarray:
+            if devInfo.dev_name == MID_SUBARRAY_DEVICE:
                 devInfo.resources.append("dish0001")
                 logger.info("devInfo is: %s", devInfo.resources)
 

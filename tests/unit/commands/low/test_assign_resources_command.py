@@ -16,7 +16,7 @@ from ska_tmc_centralnode.commands.assign_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import create_cm, logger
+from tests.settings import LOW_SUBARRAY_DEVICE, create_cm, logger
 
 
 @pytest.fixture()
@@ -25,7 +25,7 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": LOW_SUBARRAY_DEVICE},
             ],
         },
         # {
@@ -120,10 +120,11 @@ def test_low_assign_resources_command_fail_subarray(
     skuid = mock.Mock(**attrs)
 
     # include exception in AssignResources command
-    failing_dev = "ska_low/tm_subarray_node/1"
     attrs = {"AssignResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+    adapter_factory.get_or_create_adapter(
+        LOW_SUBARRAY_DEVICE, proxy=subarrayMock
+    )
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     assign_res_command = AssignResources(
