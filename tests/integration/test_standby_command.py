@@ -4,10 +4,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DevState
 
-from tests.integration.conftest import (  # noqa F401
-    devices_to_load,
-    ensure_checked_devices,
-)
+from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
 
@@ -114,34 +111,11 @@ def test_standby_command_low(tango_context, change_event_callbacks):
     )
 
     result, unique_id = central_node.TelescopeStandby()
-    logger.info("Result is: %s", result)
-    logger.info("Unique id: %s", unique_id)
+    logger.info("Result is: %s. Unique ID is %s", result, unique_id)
 
     # Check whether the command is QUEUED
     assert unique_id[0].endswith("TelescopeStandby")
     assert result[0] == ResultCode.QUEUED
-
-    command_status_dict = {}
-    command_status = central_node.longRunningCommandStatus
-    logger.info(f"command_status: {command_status}, {len(command_status)}")
-    for index in range(0, len(command_status)):
-        logger.info(f"index: {index}")
-        if index % 2 == 0:
-            command_status_dict[command_status[index]] = command_status[
-                index + 1
-            ]
-
-    logger.info(f"command_status_dict: {command_status_dict}")
-
-    # Check whether the command status is IN_PROGRESS
-    command_executed = False
-    for command, status in reversed(list(command_status_dict.items())):
-        logger.info(f"command: {command}, {status}")
-        if unique_id[0] in command:
-            command_executed = True
-            assert status == "IN_PROGRESS"
-            break
-    assert command_executed is True, f"{command[0]} is not executed."
 
     # Check whether the command ResultCode is OK
     change_event_callbacks.assert_change_event(
