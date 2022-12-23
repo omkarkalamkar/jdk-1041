@@ -229,6 +229,7 @@ class HealthStateAggregatorLow(Aggregator):
             #     mccs_master = True
 
         healthStateSetList = set(healthStateList)
+        self._logger.info("Health state list : %s", healthStateList)
         # if not mccs_master:
         #     return HealthState.UNKNOWN
         if subarray_count == 0:
