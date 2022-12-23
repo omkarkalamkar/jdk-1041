@@ -18,6 +18,10 @@ TIMEOUT = 20
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
 
+MID_SUBARRAY_DEVICE = "ska_mid/tm_subarray_node/1"
+LOW_SUBARRAY_DEVICE = "ska_low/tm_subarray_node/1"
+
+
 DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_master",
     "mid-csp/control/0",

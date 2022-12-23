@@ -19,9 +19,6 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 pytest.event_arrived = False
 
-MID_SUBARRAY_DEVICE = "ska_mid/tm_subarray_node/1"
-LOW_SUBARRAY_DEVICE = "ska_low/tm_subarray_node/1"
-
 
 @pytest.fixture
 def devices_to_load():
