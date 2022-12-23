@@ -133,7 +133,7 @@ def test_low_assign_resources_command_fail_subarray(
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip(reason="Need to run during integration of MCCS")
+@pytest.mark.skip(reason="validate test during integration of MCCS")
 def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     tango_context, task_callback, json_factory
 ):
@@ -175,7 +175,7 @@ def test_low_assign_resources_missing_subarray_id(
     assert "subarray_id" in message
 
 
-@pytest.mark.skip(reason="Need to run during integration of MCCS")
+@pytest.mark.skip(reason="validate test during integration of MCCS")
 def test_low_assign_resources_command_missing_mccs(
     tango_context, task_callback, json_factory
 ):
@@ -192,7 +192,7 @@ def test_low_assign_resources_command_missing_mccs(
     assert "mccs" in message
 
 
-@pytest.mark.skip(reason="Need to run during integration of MCCS")
+@pytest.mark.skip(reason="validate test during integration of MCCS")
 def test_low_assign_resources_command_missing_channel_blocks(
     tango_context, task_callback, json_factory
 ):
@@ -209,7 +209,7 @@ def test_low_assign_resources_command_missing_channel_blocks(
     assert "channel_blocks" in message
 
 
-@pytest.mark.skip(reason="Need to run during integration of MCCS")
+@pytest.mark.skip(reason="validate test during integration of MCCS")
 def test_low_assign_resources_command_missing_station_ids(
     tango_context, task_callback, json_factory
 ):
