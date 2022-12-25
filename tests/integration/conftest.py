@@ -72,11 +72,11 @@ def devices_to_load():
                         ],
                         "SdpMasterFQDN": ["mid-sdp/control/0"],
                         "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
-                        "TMMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
-                        "TMMidCspSubarrayLeafNodes": [
+                        "TMCMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
+                        "TMCMidCspSubarrayLeafNodes": [
                             "ska_mid/tm_leaf_node/csp_subarray01"
                         ],
-                        "TMMidSdpSubarrayLeafNodes": [
+                        "TMCMidSdpSubarrayLeafNodes": [
                             "ska_mid/tm_leaf_node/sdp_subarray01"
                         ],
                         "NumDishes": [1],
@@ -98,11 +98,11 @@ def devices_to_load():
                             "ska_low/tm_leaf_node/sdp_master"
                         ],
                         "SdpMasterFQDN": ["low-sdp/control/0"],
-                        "TMLowSubarrayNodes": ["ska_low/tm_subarray_node/1"],
-                        "TMLowCspSubarrayLeafNodes": [
+                        "TMCLowSubarrayNodes": ["ska_low/tm_subarray_node/1"],
+                        "TMCLowCspSubarrayLeafNodes": [
                             "ska_low/tm_leaf_node/csp_subarray01"
                         ],
-                        "TMLowSdpSubarrayLeafNodes": [
+                        "TMCLowSdpSubarrayLeafNodes": [
                             "ska_low/tm_leaf_node/sdp_subarray01"
                         ],
                     },

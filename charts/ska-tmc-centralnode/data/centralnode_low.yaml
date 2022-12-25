@@ -38,7 +38,7 @@ server:
         #   {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
         #   - "ska_low/tm_leaf_node/mccs_subarray{{ printf "%02s" . }}"
         #   {{- end }}
-        - name: "TMSubarrayNodes"
+        - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
           - "ska_low/tm_subarray_node/{{ . }}"
