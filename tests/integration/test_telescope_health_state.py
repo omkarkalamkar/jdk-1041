@@ -5,8 +5,7 @@ import tango
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common.dev_factory import DevFactory
 
-from tests.integration.conftest import devices_to_load  # noqa F401
-from tests.integration.conftest import ensure_checked_devices
+from tests.integration.common import ensure_checked_devices
 from tests.settings import logger
 
 

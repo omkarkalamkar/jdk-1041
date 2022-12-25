@@ -1,13 +1,13 @@
 class InputParameter:
     def __init__(self, changed_callback) -> None:
         self._changed_callback = changed_callback
-        self._tm_subarray_dev_names = []
+        self._subarray_dev_names = []
         self._csp_subarray_dev_names = []
         self._sdp_subarray_dev_names = []
         self._csp_master_dev_name = ""
         self._sdp_master_dev_name = ""
-        self._tm_leaf_sdp_master_dev_name = ""
-        self._tm_leaf_csp_master_dev_name = ""
+        self._sdp_mln_dev_name = ""
+        self._csp_mln_dev_name = ""
 
     @property
     def csp_subarray_dev_names(self):
@@ -110,7 +110,7 @@ class InputParameter:
             self._changed_callback()
 
     @property
-    def tm_leaf_csp_master_dev_name(self):
+    def csp_mln_dev_name(self):
         """
         Input parameter
         Return the CSP Master device name
@@ -118,10 +118,10 @@ class InputParameter:
         :return: the CSP Master device name
         :rtype: str
         """
-        return self._tm_leaf_csp_master_dev_name
+        return self._csp_mln_dev_name
 
-    @tm_leaf_csp_master_dev_name.setter
-    def tm_leaf_csp_master_dev_name(self, value):
+    @csp_mln_dev_name.setter
+    def csp_mln_dev_name(self, value):
         """
         Input parameter
         Set the CSP Master device name to be
@@ -130,12 +130,12 @@ class InputParameter:
         :param value: the CSP Master device name
         :type value: str
         """
-        self._tm_leaf_csp_master_dev_name = value
+        self._csp_mln_dev_name = value
         if self._changed_callback is not None:
             self._changed_callback()
 
     @property
-    def tm_leaf_sdp_master_dev_name(self):
+    def sdp_mln_dev_name(self):
         """
         Input parameter
         Return the SDP Master device name
@@ -143,10 +143,10 @@ class InputParameter:
         :return: the SDP Master device name
         :rtype: str
         """
-        return self._tm_leaf_sdp_master_dev_name
+        return self._sdp_mln_dev_name
 
-    @tm_leaf_sdp_master_dev_name.setter
-    def tm_leaf_sdp_master_dev_name(self, value):
+    @sdp_mln_dev_name.setter
+    def sdp_mln_dev_name(self, value):
         """
         Input parameter
         Set the SDP Master device name to be
@@ -155,12 +155,12 @@ class InputParameter:
         :param value: the SDP Master device name
         :type value: str
         """
-        self._tm_leaf_sdp_master_dev_name = value
+        self._sdp_mln_dev_name = value
         if self._changed_callback is not None:
             self._changed_callback()
 
     @property
-    def tm_subarray_dev_names(self):
+    def subarray_dev_names(self):
         """
         Input parameter
         Return the SubarrayNode device names
@@ -168,10 +168,10 @@ class InputParameter:
         :return: the SubarrayNode device names
         :rtype: tuple
         """
-        return self._tm_subarray_dev_names
+        return self._subarray_dev_names
 
-    @tm_subarray_dev_names.setter
-    def tm_subarray_dev_names(self, value):
+    @subarray_dev_names.setter
+    def subarray_dev_names(self, value):
         """
         Input parameter
         Set the SubarrayNode device names to be
@@ -180,13 +180,13 @@ class InputParameter:
         :param value: the SubarrayNode device names
         :type value: tuple
         """
-        self._tm_subarray_dev_names = value
+        self._subarray_dev_names = value
         if self._changed_callback is not None:
             self._changed_callback()
 
     def update(self, component_manager):
         list_dev_names = []
-        for dev_name in self.tm_subarray_dev_names:
+        for dev_name in self.subarray_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
@@ -206,7 +206,7 @@ class InputParameter:
             component_manager.add_device(dev_name)
             list_dev_names.append(dev_name)
 
-        dev_name = self.tm_leaf_csp_master_dev_name
+        dev_name = self.csp_mln_dev_name
         if dev_name != "" and component_manager.get_device(dev_name) is None:
             component_manager.add_device(dev_name)
             list_dev_names.append(dev_name)
@@ -216,7 +216,7 @@ class InputParameter:
             component_manager.add_device(dev_name)
             list_dev_names.append(dev_name)
 
-        dev_name = self.tm_leaf_sdp_master_dev_name
+        dev_name = self.sdp_mln_dev_name
         if dev_name != "" and component_manager.get_device(dev_name) is None:
             component_manager.add_device(dev_name)
             list_dev_names.append(dev_name)
@@ -225,7 +225,7 @@ class InputParameter:
 
 class InputParameterLow(InputParameter):
     def __init__(self, changed_callback) -> None:
-        self._tm_subarray_dev_names = ["ska_low/tm_subarray_node/1"]
+        self._subarray_dev_names = ["ska_low/tm_subarray_node/1"]
         # self._mccs_master_leaf_node = "ska_low/tm_leaf_node/mccs_master"
         # self._mccs_subarray_leaf_node = "ska_low/tm_leaf_node/mccs_subarray01"
         # self._mccs_master_dev_name = "low-mccs/control/control"
@@ -233,8 +233,8 @@ class InputParameterLow(InputParameter):
         self._sdp_subarray_dev_names = ["ska_low/tm_leaf_node/sdp_subarray01"]
         self._csp_master_dev_name = "low-csp/control/0"
         self._sdp_master_dev_name = "low-sdp/control/0"
-        self._tm_leaf_sdp_master_dev_name = "ska_low/tm_leaf_node/sdp_master"
-        self._tm_leaf_csp_master_dev_name = "ska_low/tm_leaf_node/csp_master"
+        self._sdp_mln_dev_name = "ska_low/tm_leaf_node/sdp_master"
+        self._csp_mln_dev_name = "ska_low/tm_leaf_node/csp_master"
         self._changed_callback = changed_callback
 
     # @property
@@ -337,19 +337,19 @@ class InputParameterLow(InputParameter):
 
 class InputParameterMid(InputParameter):
     def __init__(self, changed_callback) -> None:
-        self._tm_subarray_dev_names = ["ska_mid/tm_subarray_node/1"]
+        self._subarray_dev_names = ["ska_mid/tm_subarray_node/1"]
         self._csp_subarray_dev_names = ["ska_mid/tm_leaf_node/csp_subarray01"]
-        self._tm_dish_dev_names = ["ska_mid/tm_leaf_node/d0001"]
+        self._dish_leaf_node_dev_names = ["ska_mid/tm_leaf_node/d0001"]
         self._dish_dev_names = ["mid_d0001/elt/master"]
         self._sdp_subarray_dev_names = ["ska_mid/tm_leaf_node/sdp_subarray01"]
         self._csp_master_dev_name = "mid-csp/control/0"
         self._sdp_master_dev_name = "mid-sdp/control/0"
-        self._tm_leaf_sdp_master_dev_name = "ska_mid/tm_leaf_node/sdp_master"
-        self._tm_leaf_csp_master_dev_name = "ska_mid/tm_leaf_node/csp_master"
+        self._sdp_mln_dev_name = "ska_mid/tm_leaf_node/sdp_master"
+        self._csp_mln_dev_name = "ska_mid/tm_leaf_node/csp_master"
         self._changed_callback = changed_callback
 
     @property
-    def tm_dish_dev_names(self):
+    def dish_leaf_node_dev_names(self):
         """
         Input parameter
         Return the TM dish device names
@@ -357,10 +357,10 @@ class InputParameterMid(InputParameter):
         :return: the TM dish device names
         :rtype: tuple
         """
-        return self._tm_dish_dev_names
+        return self._dish_leaf_node_dev_names
 
-    @tm_dish_dev_names.setter
-    def tm_dish_dev_names(self, value):
+    @dish_leaf_node_dev_names.setter
+    def dish_leaf_node_dev_names(self, value):
         """
         Input parameter
         Set the TM dish device names to be
@@ -369,7 +369,7 @@ class InputParameterMid(InputParameter):
         :param value: the TM dish device names
         :type value: tuple
         """
-        self._tm_dish_dev_names = value
+        self._dish_leaf_node_dev_names = value
         if self._changed_callback is not None:
             self._changed_callback()
 
@@ -400,7 +400,7 @@ class InputParameterMid(InputParameter):
 
     def update(self, component_manager):
         list_dev_names = super().update(component_manager)
-        for dev_name in self.tm_dish_dev_names:
+        for dev_name in self.dish_leaf_node_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)

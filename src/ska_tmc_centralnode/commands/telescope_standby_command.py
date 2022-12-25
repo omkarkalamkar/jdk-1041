@@ -105,7 +105,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         start_time = time.time()
         while not all_empty:
             all_empty = True
-            for adapter in self.tm_subarray_adapters:
+            for adapter in self.subarray_adapters:
                 if (
                     not self.component_manager.get_device(
                         adapter.dev_name
@@ -175,7 +175,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         start_time = time.time()
         while not all_empty:
             all_empty = True
-            for adapter in self.tm_subarray_adapters:
+            for adapter in self.subarray_adapters:
                 if (
                     not self.component_manager.get_device(
                         adapter.dev_name
@@ -210,60 +210,56 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
     def turn_standby_subarrays(self):
         self.logger.info(
-            f"Standby command on TMC SubarrayNode devices: {self.tm_subarray_adapters}"
+            f"Standby command on TMC SubarrayNode devices: {self.subarray_adapters}"
         )
         return self.send_command(
-            self.tm_subarray_adapters,
-            f"Error in calling Standby() on TMC SubarrayNode devices: {self.tm_subarray_adapters}",
+            self.subarray_adapters,
+            f"Error in calling Standby() on TMC SubarrayNode devices: {self.subarray_adapters}",
             "Standby",
         )
 
     def turn_standby_sdp(self):
-        self.logger.info(
-            f"Standby command on {self.tm_leaf_sdp_master_adapter.dev_name}"
-        )
+        self.logger.info(f"Standby command on {self.sdp_mln_adapter.dev_name}")
         return self.send_command(
-            [self.tm_leaf_sdp_master_adapter],
-            f"Error in calling Standby() on {self.tm_leaf_sdp_master_adapter.dev_name}",
+            [self.sdp_mln_adapter],
+            f"Error in calling Standby() on {self.sdp_mln_adapter.dev_name}",
             "Standby",
         )
 
     def turn_standby_csp(self):
-        self.logger.info(
-            f"Standby command on {self.tm_leaf_csp_master_adapter.dev_name}"
-        )
+        self.logger.info(f"Standby command on {self.csp_mln_adapter.dev_name}")
         return self.send_command(
-            [self.tm_leaf_csp_master_adapter],
-            f"Error in calling Standby() on {self.tm_leaf_csp_master_adapter.dev_name}",
+            [self.csp_mln_adapter],
+            f"Error in calling Standby() on {self.csp_mln_adapter.dev_name}",
             "Standby",
         )
 
-    def turn_standby_mccs(self):
-        self.logger.info(
-            f"Standby command on  {self.tm_leaf_mccs_master_adapter.dev_name}"
-        )
-        return self.send_command(
-            [self.tm_leaf_mccs_master_adapter],
-            f"Error in calling Standby() on {self.tm_leaf_mccs_master_adapter.dev_name}",
-            "Standby",
-        )
+    # def turn_standby_mccs(self):
+    #     self.logger.info(
+    #         f"Standby command on  {self.tm_leaf_mccs_master_adapter.dev_name}"
+    #     )
+    #     return self.send_command(
+    #         [self.tm_leaf_mccs_master_adapter],
+    #         f"Error in calling Standby() on {self.tm_leaf_mccs_master_adapter.dev_name}",
+    #         "Standby",
+    #     )
 
     def set_standby_fp_mode_dishes(self):
         self.logger.info(
-            f"SetStandbyFPMode command on Dish Leaf Nodes: {self.tm_dish_adapters}"
+            f"SetStandbyFPMode command on Dish Leaf Nodes: {self.dish_adapters}"
         )
         return self.send_command(
-            self.tm_dish_adapters,
-            f"Error in calling SetStandbyFPMode() on Dish Leaf Nodes: {self.tm_dish_adapters}",
+            self.dish_adapters,
+            f"Error in calling SetStandbyFPMode() on Dish Leaf Nodes: {self.dish_adapters}",
             "SetStandbyFPMode",
         )
 
     def set_standby_lp_mode_dishes(self):
         self.logger.info(
-            f"SetStandbyLPMode command on Dish Leaf Nodes: {self.tm_dish_adapters}"
+            f"SetStandbyLPMode command on Dish Leaf Nodes: {self.dish_adapters}"
         )
         return self.send_command(
-            self.tm_dish_adapters,
-            f"Error in calling SetStandbyLPMode() on Dish Leaf Nodes: {self.tm_dish_adapters}",
+            self.dish_adapters,
+            f"Error in calling SetStandbyLPMode() on Dish Leaf Nodes: {self.dish_adapters}",
             "SetStandbyLPMode",
         )

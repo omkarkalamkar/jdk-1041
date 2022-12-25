@@ -76,39 +76,39 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
     ):
         super().__init__(component_manager, *args, logger=logger, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
-        self.tm_leaf_csp_master_adapter = None
-        self.tm_leaf_sdp_master_adapter = None
-        self.tm_subarray_adapters = []
-        self.tm_dish_adapters = []
+        self.csp_mln_adapter = None
+        self.sdp_mln_adapter = None
+        self.subarray_adapters = []
+        self.dish_adapters = []
 
     def init_adapters_mid(self):
-        self.tm_leaf_csp_master_adapter = None
-        self.tm_leaf_sdp_master_adapter = None
-        self.tm_subarray_adapters = []
-        self.tm_dish_adapters = []
+        self.csp_mln_adapter = None
+        self.sdp_mln_adapter = None
+        self.subarray_adapters = []
+        self.dish_adapters = []
         try:
-            self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
+            self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.csp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_csp_master_adapter}"
+                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                self.component_manager.input_parameter.tm_leaf_csp_master_dev_name,
+                self.component_manager.input_parameter.csp_mln_dev_name,
                 e,
             )
 
         try:
-            self.tm_leaf_sdp_master_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+            self.sdp_mln_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
+                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name,
+                self.component_manager.input_parameter.sdp_mln_dev_name,
                 e,
             )
 
@@ -117,11 +117,11 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         for (
             dev_name
-        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+        ) in self.component_manager.input_parameter.subarray_dev_names:
             devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
-                    self.tm_subarray_adapters.append(
+                    self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.SUBARRAY
                         )
@@ -144,12 +144,12 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         num_working = 0
         for (
             dev_name
-        ) in self.component_manager.input_parameter.tm_dish_dev_names:
+        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
             devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
                     # import debugpy; debugpy.debug_this_thread()
-                    self.tm_dish_adapters.append(
+                    self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.DISH
                         )
@@ -173,39 +173,39 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
     def init_adapters_low(self):
-        self.tm_leaf_csp_master_adapter = None
-        self.tm_leaf_sdp_master_adapter = None
-        # self.tm_leaf_mccs_master_adapter = None
-        self.tm_subarray_adapters = []
+        self.csp_mln_adapter = None
+        self.sdp_mln_adapter = None
+        # self.tm_leaf_mccs_mln_adapter = None
+        self.subarray_adapters = []
 
         try:
-            self.tm_leaf_csp_master_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
+            self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.csp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_csp_master_dev_name}: {self.tm_leaf_csp_master_adapter}"
+                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                self.component_manager.input_parameter.tm_leaf_csp_master_dev_name,
+                self.component_manager.input_parameter.csp_mln_dev_name,
                 e,
             )
 
         try:
-            self.tm_leaf_sdp_master_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
+            self.sdp_mln_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name}: {self.tm_leaf_sdp_master_adapter}"
+                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
             )
         except Exception as e:
             return self.adapter_error_message_result(
-                self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name,
+                self.component_manager.input_parameter.sdp_mln_dev_name,
                 e,
             )
 
         # try:
-        #     self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
+        #     self.tm_leaf_mccs_mln_adapter = self._adapter_factory.get_or_create_adapter(
         #         self.component_manager.input_parameter.mccs_master_leaf_node,
         #         AdapterType.MCCS,
         #     )
@@ -220,11 +220,11 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         for (
             dev_name
-        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+        ) in self.component_manager.input_parameter.subarray_dev_names:
             devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
-                    self.tm_subarray_adapters.append(
+                    self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.SUBARRAY
                         )
@@ -254,22 +254,22 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
     ):
         super().__init__(component_manager, logger=logger, *args, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
-        self.tm_dish_adapters = []
-        self.tm_subarray_adapters = []
+        self.dish_adapters = []
+        self.subarray_adapters = []
 
     def init_adapters_mid(self):
-        self.tm_dish_adapters = []
-        self.tm_subarray_adapters = []
+        self.dish_adapters = []
+        self.subarray_adapters = []
         error_dev_names = []
         num_working = 0
 
         for (
             dev_name
-        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+        ) in self.component_manager.input_parameter.subarray_dev_names:
             devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
-                    self.tm_subarray_adapters.append(
+                    self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.SUBARRAY
                         )
@@ -294,11 +294,11 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         num_working = 0
         for (
             dev_name
-        ) in self.component_manager.input_parameter.tm_dish_dev_names:
+        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
             devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
-                    self.tm_dish_adapters.append(
+                    self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.DISH
                         )
@@ -323,11 +323,11 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
     def init_adapters_low(self):
 
-        # self.tm_leaf_mccs_master_adapter = None
-        self.tm_subarray_adapters = []
+        # self.tm_leaf_mccs_mln_adapter = None
+        self.subarray_adapters = []
 
         # try:
-        #     self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
+        #     self.tm_leaf_mccs_mln_adapter = self._adapter_factory.get_or_create_adapter(
         #         self.component_manager.input_parameter.mccs_master_leaf_node,
         #         AdapterType.MCCS,
         #     )
@@ -342,11 +342,11 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         for (
             dev_name
-        ) in self.component_manager.input_parameter.tm_subarray_dev_names:
+        ) in self.component_manager.input_parameter.subarray_dev_names:
             devInfo = self.component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
-                    self.tm_subarray_adapters.append(
+                    self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.SUBARRAY
                         )

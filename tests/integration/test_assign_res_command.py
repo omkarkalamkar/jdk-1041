@@ -8,10 +8,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
 
-from tests.integration.conftest import (  # noqa F401
-    devices_to_load,
-    ensure_checked_devices,
-)
+from tests.integration.common import ensure_checked_devices
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
@@ -153,7 +150,7 @@ def test_assign_res_command_mid(
     )
 
 
-@pytest.mark.skip()
+@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(

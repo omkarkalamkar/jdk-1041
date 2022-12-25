@@ -33,12 +33,12 @@ class AbstractCentralNode(TMCBaseDevice):
         doc="Device name of CentralAlarmHandler ",
     )
 
-    TMAlarmHandler = device_property(
+    TMCAlarmHandler = device_property(
         dtype="str",
-        doc="Device name of TMAlarmHandler ",
+        doc="Device name of TMCAlarmHandler ",
     )
 
-    TMSubarrayNodes = device_property(
+    TMCSubarrayNodes = device_property(
         dtype=("str",),
         doc="List of TM Mid Subarray Node devices",
         default_value=tuple(),
@@ -167,11 +167,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def read_subarrayDevNames(self):
         """Return the subarrayDevNames attribute."""
-        return self.component_manager.input_parameter.tm_subarray_dev_names
+        return self.component_manager.input_parameter.subarray_dev_names
 
     def write_subarrayDevNames(self, value):
         """Set the subarrayDevNames attribute."""
-        self.component_manager.input_parameter.tm_subarray_dev_names = value
+        self.component_manager.input_parameter.subarray_dev_names = value
         self.component_manager.update_input_parameter()
 
     # --------
@@ -464,9 +464,9 @@ class AbstractCentralNode(TMCBaseDevice):
             sleep_time=self.SleepTime,
             skuid_service=self.SkuidService,
         )
-        cm.input_parameter.tm_dish_dev_names = []
+        cm.input_parameter.dish_leaf_node_dev_names = []
         for dish in range(1, (self.NumDishes + 1)):
-            cm.input_parameter.tm_dish_dev_names.append(
+            cm.input_parameter.dish_leaf_node_dev_names.append(
                 self.DishLeafNodePrefix + f"000{dish}"
             )
         cm.input_parameter.dish_dev_names = []
@@ -474,20 +474,16 @@ class AbstractCentralNode(TMCBaseDevice):
             cm.input_parameter.dish_dev_names.append(
                 f"{'mid_d'}000{dish}{'/elt/master'}"
             )
-        cm.input_parameter.tm_subarray_dev_names = self.TMSubarrayNodes
+        cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
-        cm.input_parameter.tm_leaf_csp_master_dev_name = (
-            self.CspMasterLeafNodeFQDN or ""
-        )
+        cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
         cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
-        cm.input_parameter.tm_leaf_sdp_master_dev_name = (
-            self.SdpMasterLeafNodeFQDN or ""
-        )
+        cm.input_parameter.sdp_mln_dev_name = self.SdpMasterLeafNodeFQDN or ""
         cm.input_parameter.csp_subarray_dev_names = (
-            self.TMMidCspSubarrayLeafNodes
+            self.TMCMidCspSubarrayLeafNodes
         )
         cm.input_parameter.sdp_subarray_dev_names = (
-            self.TMMidSdpSubarrayLeafNodes
+            self.TMCMidSdpSubarrayLeafNodes
         )
         cm.update_input_parameter()
         return cm
