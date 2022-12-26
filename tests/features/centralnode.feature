@@ -18,11 +18,9 @@ Feature: Central Node acceptance
 		Then the <command_name> command is executed successfully on lower level devices
 
 		Examples:
-		| command_name      | 
+		| command_name      |
 		| TelescopeOn       |
 		| TelescopeOff      |
 		| TelescopeStandby  |
-		| AssignResources   |
-		| ReleaseResources  |
 
 

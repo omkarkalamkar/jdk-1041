@@ -56,7 +56,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
-                status=TaskStatus.FAILED,
+                status=TaskStatus.COMPLETED,
                 result=ResultCode.FAILED,
                 exception=message,
             )
@@ -105,36 +105,36 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def turn_on_sdp(self):
         return self.send_command(
-            [self.tm_leaf_sdp_master_adapter],
-            f"Error in calling On() command on {self.tm_leaf_sdp_master_adapter.dev_name}",
+            [self.sdp_mln_adapter],
+            f"Error in calling On() command on {self.sdp_mln_adapter.dev_name}",
             "On",
         )
 
     def turn_on_csp(self):
         return self.send_command(
-            [self.tm_leaf_csp_master_adapter],
-            f"Error in calling On() command on {self.tm_leaf_csp_master_adapter.dev_name}",
+            [self.csp_mln_adapter],
+            f"Error in calling On() command on {self.csp_mln_adapter.dev_name}",
             "On",
         )
 
     def turn_on_subarrays(self):
         return self.send_command(
-            self.tm_subarray_adapters,
-            f"Error in calling On() command on {self.tm_subarray_adapters}",
+            self.subarray_adapters,
+            f"Error in calling On() command on {self.subarray_adapters}",
             "On",
         )
 
     def set_standby_fp_mode_dishes(self):
         return self.send_command(
-            self.tm_dish_adapters,
-            f"Error in calling SetStandbyFPMode() command on {self.tm_dish_adapters}",
+            self.dish_adapters,
+            f"Error in calling SetStandbyFPMode() command on {self.dish_adapters}",
             "SetStandbyFPMode",
         )
 
     def set_operate_mode_dishes(self):
         return self.send_command(
-            self.tm_dish_adapters,
-            f"Error in calling SetOperateMode() command on {self.tm_dish_adapters}",
+            self.dish_adapters,
+            f"Error in calling SetOperateMode() command on {self.dish_adapters}",
             "SetOperateMode",
         )
 
@@ -158,17 +158,19 @@ class TelescopeOn(AbstractTelescopeOnOff):
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
         for ret_code, message in [
-            self.turn_on_mccs_master(),
+            # self.turn_on_mccs_master(),
             self.turn_on_subarrays(),
+            self.turn_on_csp(),
+            self.turn_on_sdp(),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
 
         return (ResultCode.OK, "")
 
-    def turn_on_mccs_master(self):
-        return self.send_command(
-            [self.tm_leaf_mccs_master_adapter],
-            f"Error in calling On() command on {self.tm_leaf_mccs_master_adapter.dev_name}",
-            "On",
-        )
+    # def turn_on_mccs_master(self):
+    #     return self.send_command(
+    #         [self.tm_leaf_mccs_master_adapter],
+    #         f"Error in calling On() command on {self.tm_leaf_mccs_master_adapter.dev_name}",
+    #         "On",
+    #     )

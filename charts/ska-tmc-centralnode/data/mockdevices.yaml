@@ -4,7 +4,7 @@ domain: mocks
 instances: ["01"]
 entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_state_device.HelperStateDevice"
-  - name: "ska_tmc_common.test_helpers.helper_state_mccsdevice.HelperMCCSStateDevice"
+  # - name: "ska_tmc_common.test_helpers.helper_state_mccsdevice.HelperMCCSStateDevice"
   - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
   - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
   - name: "helper_subarray_device.HelperSubArrayDevice"
@@ -28,10 +28,10 @@ server:
         devices:
         - name: "ska_mid/tm_subarray_node/1"
         - name: "ska_low/tm_subarray_node/1"
-      - name: "HelperMCCSStateDevice"
-        devices:
-        - name: "ska_low/tm_leaf_node/mccs_master"
-        - name: "low-mccs/control/control"
+      # - name: "HelperMCCSStateDevice"
+      #   devices:
+      #   - name: "ska_low/tm_leaf_node/mccs_master"
+      #   - name: "low-mccs/control/control"
       - name: "HelperSubarrayLeafDevice"
         devices:
         - name: "ska_mid/tm_leaf_node/csp_subarray01"

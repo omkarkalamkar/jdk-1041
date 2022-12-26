@@ -101,7 +101,7 @@ class TelescopeStateAggregatorLow(Aggregator):
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
-        # TODO: Enable this block when CSP and SDP are integrated
+        self._logger.info(f"Telescope state list is : {telescopeStateList}")
         if not sdp_master and not csp_master:
             self._logger.info(
                 "missing devices: %s=%s %s=%s",
@@ -159,7 +159,7 @@ class HealthStateAggregatorMid(Aggregator):
                 sdp_master = True
             elif (
                 name
-                in self._component_manager.input_parameter.tm_subarray_dev_names
+                in self._component_manager.input_parameter.subarray_dev_names
             ):
                 healthStateList.append(dev.health_state)
                 subarray_count += 1
@@ -217,7 +217,7 @@ class HealthStateAggregatorLow(Aggregator):
                 sdp_master = True
             elif (
                 name
-                in self._component_manager.input_parameter.tm_subarray_dev_names
+                in self._component_manager.input_parameter.subarray_dev_names
             ):
                 healthStateList.append(dev.health_state)
                 subarray_count += 1
@@ -229,6 +229,7 @@ class HealthStateAggregatorLow(Aggregator):
             #     mccs_master = True
 
         healthStateSetList = set(healthStateList)
+        self._logger.info("Health state list : %s", healthStateList)
         # if not mccs_master:
         #     return HealthState.UNKNOWN
         if subarray_count == 0:
@@ -250,7 +251,7 @@ class TMCOpStateAggregator(Aggregator):
         super().__init__(cm, logger)
 
     def aggregate(self):
-        tmStateList = []
+        tmcStateList = []
         # get states of all TM devices
         # what if one of them is not working? i.e. tm subarray
         # number of devices is also variable, how to handle that number
@@ -259,17 +260,17 @@ class TMCOpStateAggregator(Aggregator):
             if "tm" in name:
                 if dev.unresponsive:
                     continue
-                tmStateList.append(dev.state)
+                tmcStateList.append(dev.state)
 
-        tmSetStateList = set(tmStateList)
-        if tmSetStateList == set([DevState.ON]):
+        tmcSetStateList = set(tmcStateList)
+        if tmcSetStateList == set([DevState.ON]):
             return DevState.ON
-        elif tmSetStateList == set([DevState.OFF]):
+        elif tmcSetStateList == set([DevState.OFF]):
             #  Untill all TMC devices are refactored, devices report Off state.
             return DevState.OFF
-        elif DevState.INIT in tmSetStateList:
+        elif DevState.INIT in tmcSetStateList:
             return DevState.INIT
-        elif DevState.FAULT in tmSetStateList:
+        elif DevState.FAULT in tmcSetStateList:
             return DevState.FAULT
         else:
             return DevState.UNKNOWN

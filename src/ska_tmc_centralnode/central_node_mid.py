@@ -34,13 +34,13 @@ class CentralNodeMid(AbstractCentralNode):
         doc="Device name prefix for Dish Leaf Node",
     )
 
-    TMMidCspSubarrayLeafNodes = device_property(
+    TMCMidCspSubarrayLeafNodes = device_property(
         dtype=("str",),
         doc="List of TM Mid CspSubarrayLeafNode devices",
         default_value=tuple(),
     )
 
-    TMMidSdpSubarrayLeafNodes = device_property(
+    TMCMidSdpSubarrayLeafNodes = device_property(
         dtype=("str",),
         doc="List of TM Mid SdpSubarrayLeafNode devices",
         default_value=tuple(),
@@ -88,26 +88,14 @@ class CentralNodeMid(AbstractCentralNode):
         access=AttrWriteType.READ_WRITE,
     )
 
-    leafCspMasterDevName = attribute(
+    CspMasterLeafNodeDevName = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
 
-    leafSdpMasterDevName = attribute(
+    SdpMasterLeafNodeDevName = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
-    )
-
-    cspSubarrayDevNames = attribute(
-        dtype=("DevString",),
-        access=AttrWriteType.READ_WRITE,
-        max_dim_x=16,
-    )
-
-    sdpSubarrayDevNames = attribute(
-        dtype=("DevString",),
-        access=AttrWriteType.READ_WRITE,
-        max_dim_x=16,
     )
 
     dishDevNames = attribute(
@@ -116,7 +104,7 @@ class CentralNodeMid(AbstractCentralNode):
         max_dim_x=100,
     )
 
-    tmLeafDishDevNames = attribute(
+    DishLeafNodeDevNames = attribute(
         dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=100,
@@ -165,6 +153,24 @@ class CentralNodeMid(AbstractCentralNode):
     def read_vlbi(self):
         return self.component_manager.component.vlbi
 
+    def read_dishDevNames(self):
+        """Return the dishdevnames attribute."""
+        return self.component_manager.input_parameter.dish_dev_names
+
+    def write_dishDevNames(self, value):
+        """Set the dishdevnames attribute."""
+        self.component_manager.input_parameter.dish_dev_names = value
+        self.component_manager.update_input_parameter()
+
+    def read_DishLeafNodeDevNames(self):
+        """Return the dishLeafNodedevnames attribute."""
+        return self.component_manager.input_parameter.dish_leaf_node_dev_names
+
+    def write_DishLeafNodeDevNames(self, value):
+        """Set the dishLeafNodedevnames attribute."""
+        self.component_manager.input_parameter.dish_leaf_node_dev_names = value
+        self.component_manager.update_input_parameter()
+
     def read_cspMasterDevName(self):
         """Return the cspMasterDevName attribute."""
         return self.component_manager.input_parameter.csp_master_dev_name
@@ -183,66 +189,22 @@ class CentralNodeMid(AbstractCentralNode):
         self.component_manager.input_parameter.sdp_master_dev_name = value
         self.component_manager.update_input_parameter()
 
-    def read_leafCspMasterDevName(self):
-        """Return the leafcspMasterDevName attribute."""
-        return (
-            self.component_manager.input_parameter.tm_leaf_csp_master_dev_name
-        )
+    def read_CspMasterLeafNodeDevName(self):
+        """Return the cspMasterLeafNodeDevName attribute."""
+        return self.component_manager.input_parameter.csp_mln_dev_name
 
-    def write_leafCspMasterDevName(self, value):
-        """Set the leafcspMasterDevName attribute."""
-        self.component_manager.input_parameter.tm_leaf_csp_master_dev_name = (
-            value
-        )
+    def write_CspMasterLeafNodeDevName(self, value):
+        """Set the cspMasterLeafNodeDevName attribute."""
+        self.component_manager.input_parameter.csp_mln_dev_name = value
         self.component_manager.update_input_parameter()
 
-    def read_leafSdpMasterDevName(self):
-        """Return the leafsdpMasterDevName attribute."""
-        return (
-            self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name
-        )
+    def read_SdpMasterLeafNodeDevName(self):
+        """Return the sdpMasterLeafNodeDevName attribute."""
+        return self.component_manager.input_parameter.sdp_mln_dev_name
 
-    def write_leafSdpMasterDevName(self, value):
-        """Set the leafsdpMasterDevName attribute."""
-        self.component_manager.input_parameter.tm_leaf_sdp_master_dev_name = (
-            value
-        )
-        self.component_manager.update_input_parameter()
-
-    def read_cspSubarrayDevNames(self):
-        """Return the cspsubarraydevnames attribute."""
-        return self.component_manager.input_parameter.csp_subarray_dev_names
-
-    def write_cspSubarrayDevNames(self, value):
-        """Set the cspsubarraydevnames attribute."""
-        self.component_manager.input_parameter.csp_subarray_dev_names = value
-        self.component_manager.update_input_parameter()
-
-    def read_sdpSubarrayDevNames(self):
-        """Return the sdpsubarraydevnames attribute."""
-        return self.component_manager.input_parameter.sdp_subarray_dev_names
-
-    def write_sdpSubarrayDevNames(self, value):
-        """Set the sdpsubarraydevnames attribute."""
-        self.component_manager.input_parameter.sdp_subarray_dev_names = value
-        self.component_manager.update_input_parameter()
-
-    def read_dishDevNames(self):
-        """Return the dishdevnames attribute."""
-        return self.component_manager.input_parameter.dish_dev_names
-
-    def write_dishDevNames(self, value):
-        """Set the dishdevnames attribute."""
-        self.component_manager.input_parameter.dish_dev_names = value
-        self.component_manager.update_input_parameter()
-
-    def read_tmLeafDishDevNames(self):
-        """Return the tmleafdishdevnames attribute."""
-        return self.component_manager.input_parameter.tm_dish_dev_names
-
-    def write_tmLeafDishDevNames(self, value):
-        """Set the tmleafdishdevnames attribute."""
-        self.component_manager.input_parameter.tm_dish_dev_names = value
+    def write_SdpMasterLeafNodeDevName(self, value):
+        """Set the sdpMasterLeafNodeDevName attribute."""
+        self.component_manager.input_parameter.sdp_mln_dev_name = value
         self.component_manager.update_input_parameter()
 
     # TODO: Not in the scope for PI15

@@ -37,7 +37,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.tm_subarray_adapters = []
+        self.subarray_adapters = []
         self.my_subarray_adapter = None
 
     def release_resources(
@@ -217,7 +217,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         subarrayID = jsonArgument["subarray_id"]
 
-        for adapter in self.tm_subarray_adapters:
+        for adapter in self.subarray_adapters:
             if str(subarrayID) in adapter.dev_name:
                 self.my_subarray_adapter = adapter
 

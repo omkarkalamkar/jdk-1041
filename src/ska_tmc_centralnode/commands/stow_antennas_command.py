@@ -26,7 +26,7 @@ class StowAntennas(CentralNodeCommand):
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
         self._adapter_factory = adapter_factory or AdapterFactory()
-        self.tm_dish_adapters = []
+        self.dish_adapters = []
         self.init_adapters()
 
     def check_allowed(self):
@@ -59,18 +59,18 @@ class StowAntennas(CentralNodeCommand):
 
     def init_adapters(self):
 
-        self.tm_dish_adapters = []
+        self.dish_adapters = []
 
         error_dev_names = []
         num_working = 0
 
         component_manager = self.target
 
-        for dev_name in component_manager.input_parameter.tm_dish_dev_names:
+        for dev_name in component_manager.input_parameter.dish_dev_names:
             devInfo = component_manager.get_device(dev_name)
             if not devInfo.unresponsive:
                 try:
-                    self.tm_dish_adapters.append(
+                    self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.DISH
                         )
@@ -100,7 +100,7 @@ class StowAntennas(CentralNodeCommand):
         """
 
         for i in range(0, len(argin)):
-            for adapter in self.tm_dish_adapters:
+            for adapter in self.dish_adapters:
                 if argin[i] not in adapter.dev_name:
                     continue
 

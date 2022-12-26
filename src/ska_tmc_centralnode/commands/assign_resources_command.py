@@ -38,8 +38,8 @@ class AssignResources(AbstractAssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.tm_dish_adapters = []
-        self.tm_subarray_adapters = []
+        self.dish_adapters = []
+        self.subarray_adapters = []
         self.my_subarray_adapter = None
         self._skuid = skuid
 
@@ -483,7 +483,7 @@ class AssignResources(AbstractAssignReleaseResources):
         return input_to_subarray
 
     def get_subarray_adapter(self, subarray_id):
-        for adapter in self.tm_subarray_adapters:
+        for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.my_subarray_adapter = adapter
 

@@ -4,10 +4,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import PointingState
 
-from tests.integration.common import (  # noqa F401
-    devices_to_load,
-    ensure_checked_devices,
-)
+from tests.integration.conftest import ensure_checked_devices
 
 
 @pytest.mark.post_deployment
@@ -55,7 +52,6 @@ def test_on_command_mid(tango_context, change_event_callbacks):
     assert central_node.telescopeState == tango.DevState.ON
 
 
-@pytest.mark.skip(reason="functionality will be completed in HM-110")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_on_command_low(tango_context, change_event_callbacks):
@@ -79,8 +75,14 @@ def test_on_command_low(tango_context, change_event_callbacks):
         lookahead=2,
     )
 
-    mccs_master = dev_factory.get_device("low-mccs/control/control")
-    mccs_master.SetDirectState(tango.DevState.ON)
+    # mccs_master = dev_factory.get_device("low-mccs/control/control")
+    # mccs_master.SetDirectState(tango.DevState.ON)
+
+    csp_master = dev_factory.get_device("low-csp/control/0")
+    csp_master.SetDirectState(tango.DevState.ON)
+
+    sdp_master = dev_factory.get_device("low-sdp/control/0")
+    sdp_master.SetDirectState(tango.DevState.ON)
 
     central_node.subscribe_event(
         "telescopeState",

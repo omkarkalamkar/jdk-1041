@@ -1,20 +1,26 @@
 import json
+import logging
 import time
 
 import pytest
+from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
-from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
-    HelperMCCSStateDevice,
-)
+from tango.test_context import MultiDeviceTestContext
 
+from ska_tmc_centralnode.central_node_low import CentralNodeLow
 from ska_tmc_centralnode.central_node_mid import CentralNodeMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
+# from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
+#     HelperMCCSStateDevice,
+# )
+
+
 pytest.event_arrived = False
 
 
-@pytest.fixture()
+@pytest.fixture
 def devices_to_load():
     return (
         {
@@ -23,6 +29,8 @@ def devices_to_load():
                 {"name": "ska_mid/tm_subarray_node/1"},
                 {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
                 {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+                {"name": "ska_low/tm_leaf_node/csp_subarray01"},
+                {"name": "ska_low/tm_leaf_node/sdp_subarray01"},
             ],
         },
         {
@@ -35,16 +43,20 @@ def devices_to_load():
                 {"name": "mid_d0001/elt/master"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
                 {"name": "ska_low/tm_subarray_node/1"},
-                {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
+                # {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
+                {"name": "ska_low/tm_leaf_node/csp_master"},
+                {"name": "low-csp/control/0"},
+                {"name": "ska_low/tm_leaf_node/sdp_master"},
+                {"name": "low-sdp/control/0"},
             ],
         },
-        {
-            "class": HelperMCCSStateDevice,
-            "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_master"},
-                {"name": "low-mccs/control/control"},
-            ],
-        },
+        # {
+        #     "class": HelperMCCSStateDevice,
+        #     "devices": [
+        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
+        #         {"name": "low-mccs/control/control"},
+        #     ],
+        # },
         {
             "class": CentralNodeMid,
             "devices": [
@@ -60,11 +72,11 @@ def devices_to_load():
                         ],
                         "SdpMasterFQDN": ["mid-sdp/control/0"],
                         "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
-                        "TMMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
-                        "TMMidCspSubarrayLeafNodes": [
+                        "TMCMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
+                        "TMCMidCspSubarrayLeafNodes": [
                             "ska_mid/tm_leaf_node/csp_subarray01"
                         ],
-                        "TMMidSdpSubarrayLeafNodes": [
+                        "TMCMidSdpSubarrayLeafNodes": [
                             "ska_mid/tm_leaf_node/sdp_subarray01"
                         ],
                         "NumDishes": [1],
@@ -72,7 +84,45 @@ def devices_to_load():
                 }
             ],
         },
+        {
+            "class": CentralNodeLow,
+            "devices": [
+                {
+                    "name": "ska_low/tm_central/central_node",
+                    "properties": {
+                        "CspMasterLeafNodeFQDN": [
+                            "ska_low/tm_leaf_node/csp_master"
+                        ],
+                        "CspMasterFQDN": ["low-csp/control/0"],
+                        "SdpMasterLeafNodeFQDN": [
+                            "ska_low/tm_leaf_node/sdp_master"
+                        ],
+                        "SdpMasterFQDN": ["low-sdp/control/0"],
+                        "TMCLowSubarrayNodes": ["ska_low/tm_subarray_node/1"],
+                        "TMCLowCspSubarrayLeafNodes": [
+                            "ska_low/tm_leaf_node/csp_subarray01"
+                        ],
+                        "TMCLowSdpSubarrayLeafNodes": [
+                            "ska_low/tm_leaf_node/sdp_subarray01"
+                        ],
+                    },
+                }
+            ],
+        },
     )
+
+
+@pytest.fixture
+def tango_context(devices_to_load, request):
+    true_context = request.config.getoption("--true-context")
+    logging.info("true context: %s", true_context)
+    if not true_context:
+        with MultiDeviceTestContext(devices_to_load, process=False) as context:
+            DevFactory._test_context = context
+            logging.info("test context set")
+            yield context
+    else:
+        yield None
 
 
 def checked_devices(json_model):

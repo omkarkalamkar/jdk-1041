@@ -2,6 +2,7 @@ import time
 
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
+from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -72,7 +73,8 @@ def test_telescope_on_command_fail_subarray(tango_context):
     on_command = TelescopeOn(cm, my_adapter_factory, logger=logger)
     cm.adapter_factory = my_adapter_factory
     on_command.telescope_on(logger=logger, task_callback=task_callback)
-    assert task_callback.status == TaskStatus.FAILED
+    assert task_callback.status == TaskStatus.COMPLETED
+    assert task_callback.result == ResultCode.FAILED
 
 
 def test_telescope_on_command_task_completed(tango_context):

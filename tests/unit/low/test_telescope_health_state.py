@@ -44,6 +44,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.SKA_low
 def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, input_parameter=InputParameterLow(None)
@@ -73,6 +74,7 @@ def set_device_degraded(devFactory, cm, expected_elapsed_time):
     assert elapsed_time < expected_elapsed_time
 
 
+@pytest.mark.SKA_low
 def test_set_health_state_degraded(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -99,6 +101,7 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
     assert elapsed_time < expected_elapsed_time
 
 
+@pytest.mark.SKA_low
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
@@ -122,6 +125,7 @@ def set_device_unknown(devFactory, cm, expected_elapsed_time=12):
     assert elapsed_time < expected_elapsed_time
 
 
+@pytest.mark.SKA_low
 def test_set_health_state_unknown(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(

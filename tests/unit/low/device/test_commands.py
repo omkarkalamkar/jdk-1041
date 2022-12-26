@@ -22,7 +22,7 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.long_running
+@pytest.mark.SKA_low
 def test_commands(central_node_device):
     try:
         central_node_device.TelescopeOn()

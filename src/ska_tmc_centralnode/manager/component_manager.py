@@ -130,7 +130,7 @@ class CNComponentManager(TmcComponentManager):
         )
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
-        self._tm_op_state_aggregator = None
+        self._op_state_aggregator = None
         self.skuid_service = skuid_service
 
     def stop_event_receiver(self):
@@ -144,11 +144,11 @@ class CNComponentManager(TmcComponentManager):
         self,
         _telescope_state_aggregator,
         _health_state_aggregator,
-        _tm_op_state_aggregator,
+        _op_state_aggregator,
     ):
         self._telescope_state_aggregator = _telescope_state_aggregator
         self._health_state_aggregator = _health_state_aggregator
-        self._tm_op_state_aggregator = _tm_op_state_aggregator
+        self._op_state_aggregator = _op_state_aggregator
 
     def stop(self):
         self.stop_liveliness_probe()
@@ -216,28 +216,28 @@ class CNComponentManager(TmcComponentManager):
 
     def check_if_csp_mln_is_responsive(self):
         return self._check_if_device_is_responsive(
-            [self.input_parameter.tm_leaf_csp_master_dev_name]
+            [self.input_parameter.csp_mln_dev_name]
         )
 
     def check_if_sdp_mln_is_responsive(self):
         return self._check_if_device_is_responsive(
-            [self.input_parameter.tm_leaf_sdp_master_dev_name]
+            [self.input_parameter.sdp_mln_dev_name]
         )
 
     def check_if_subarrays_are_responsive(self):
         return self._check_if_device_is_responsive(
-            self.input_parameter.tm_subarray_dev_names
+            self.input_parameter.subarray_dev_names
         )
 
     def check_if_dishes_are_responsive(self):
         return self._check_if_device_is_responsive(
-            self.input_parameter.tm_dish_dev_names
+            self.input_parameter.dish_leaf_node_dev_names
         )
 
-    def check_if_mccs_mln_is_responsive(self):
-        return self._check_if_device_is_responsive(
-            [self.input_parameter.mccs_master_leaf_node]
-        )
+    # def check_if_mccs_mln_is_responsive(self):
+    #     return self._check_if_device_is_responsive(
+    #         [self.input_parameter.mccs_master_leaf_node]
+    #     )
 
     def _check_if_device_is_responsive(self, dev_names):
         count = 0
@@ -467,15 +467,11 @@ class CNComponentManager(TmcComponentManager):
         """
         Aggregates TMC devices states
         """
-        if self._tm_op_state_aggregator is None:
-            self._tm_op_state_aggregator = TMCOpStateAggregator(
-                self, self.logger
-            )
+        if self._op_state_aggregator is None:
+            self._op_state_aggregator = TMCOpStateAggregator(self, self.logger)
 
         with self.lock:
-            self.component.tmc_op_state = (
-                self._tm_op_state_aggregator.aggregate()
-            )
+            self.component.tmc_op_state = self._op_state_aggregator.aggregate()
 
     def get_tmc_op_state(self):
         return self.component.tmc_op_state
@@ -651,7 +647,7 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_dishes_are_responsive()
             else:
                 self.logger.debug(f"Checking low devices for {command_name}")
-                self.check_if_mccs_mln_is_responsive()
+                # self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
             if isinstance(self._input_parameter, InputParameterMid):
@@ -660,7 +656,7 @@ class CNComponentManager(TmcComponentManager):
                 self.check_if_dishes_are_responsive()
             else:
                 self.logger.debug(f"Checking low devices for {command_name}")
-                self.check_if_mccs_mln_is_responsive()
+                # self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
 
         return True

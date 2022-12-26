@@ -33,18 +33,18 @@ server:
         - name: "SkuidService"
           values:
           - "{{.Values.deviceServers.centralnode.SkuidService}}"
-        - name: "TMSubarrayNodes"
+        - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
           - "ska_mid/tm_subarray_node/{{ . }}"
           {{- end }}
-        - name: "TMMidCspSubarrayLeafNodes"
-          values: 
+        - name: "TMCMidCspSubarrayLeafNodes"
+          values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
           - "ska_mid/tm_leaf_node/csp_subarray{{ printf "%02s" . }}"
           {{- end }}
-        - name: "TMMidSdpSubarrayLeafNodes"
-          values: 
+        - name: "TMCMidSdpSubarrayLeafNodes"
+          values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
           - "ska_mid/tm_leaf_node/sdp_subarray{{ printf "%02s" . }}"
           {{- end }}
