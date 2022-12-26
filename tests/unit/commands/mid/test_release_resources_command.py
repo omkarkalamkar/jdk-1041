@@ -18,7 +18,7 @@ from ska_tmc_centralnode.commands.release_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import create_cm, logger
+from tests.settings import MID_SUBARRAY_DEVICE, create_cm, logger
 
 
 @pytest.fixture()
@@ -26,7 +26,7 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": "ska_mid/tm_subarray_node/1"}],
+            "devices": [{"name": MID_SUBARRAY_DEVICE}],
         },
         {
             "class": SKABaseDevice,
@@ -90,10 +90,11 @@ def test_mid_release_resources_command_fail_subarray(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     adapter_factory = HelperAdapterFactory()
-    failing_dev = "ska_mid/tm_subarray_node/1"
     attrs = {"ReleaseAllResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
+    adapter_factory.get_or_create_adapter(
+        MID_SUBARRAY_DEVICE, proxy=subarrayMock
+    )
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)

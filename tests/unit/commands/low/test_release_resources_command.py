@@ -1,6 +1,5 @@
 import json
 import time
-from os.path import dirname, join
 
 import mock
 import pytest
@@ -10,9 +9,6 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
-    HelperMCCSStateDevice,
-)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
@@ -20,7 +16,7 @@ from ska_tmc_centralnode.commands.release_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import create_cm, logger
+from tests.settings import LOW_SUBARRAY_DEVICE, create_cm, logger
 
 
 @pytest.fixture()
@@ -29,28 +25,17 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": LOW_SUBARRAY_DEVICE},
             ],
         },
-        {
-            "class": HelperMCCSStateDevice,
-            "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_master"},
-                {"name": "low-mccs/control/control"},
-            ],
-        },
+        # {
+        #     "class": HelperMCCSStateDevice,
+        #     "devices": [
+        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
+        #         {"name": "low-mccs/control/control"},
+        #     ],
+        # },
     )
-
-
-def get_release_input_str(
-    release_input_file="command_mccs_ReleaseResources.json",
-):
-    path = join(
-        dirname(__file__), "..", "..", "..", "data", release_input_file
-    )
-    with open(path, "r") as f:
-        release_input_str = f.read()
-    return release_input_str
 
 
 def get_release_resources_command_obj():
@@ -64,35 +49,29 @@ def get_release_resources_command_obj():
     return release_command, my_adapter_factory, cm
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
-def test_low_release_resources_command_queued(tango_context, task_callback):
+def test_low_release_resources_command(
+    tango_context, task_callback, json_factory
+):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
-    release_input_str = get_release_input_str()
+    release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     cm.release_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+    )
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
-@pytest.mark.SKA_low
-def test_low_release_resources_command_with_ok(tango_context, task_callback):
-    release_res_command, _, cm = get_release_resources_command_obj()
-    cm.is_command_allowed("ReleaseResources")
-    release_input_str = get_release_input_str()
-    json_argument = json.loads(release_input_str)
-    cm.release_resources(json_argument, task_callback=task_callback)
-    (res_code, _) = release_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.OK
-
-
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_release_resources_command_fail_subarray(
-    tango_context, task_callback
+    tango_context, task_callback, json_factory
 ):
     cm, start_time = create_cm(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -102,11 +81,12 @@ def test_low_release_resources_command_fail_subarray(
     adapter_factory = HelperAdapterFactory()
 
     # include exception in ReleaseResources command
-    failing_dev = "ska_low/tm_subarray_node/1"
     attrs = {"ReleaseAllResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
-    release_input_str = get_release_input_str()
+    adapter_factory.get_or_create_adapter(
+        LOW_SUBARRAY_DEVICE, proxy=subarrayMock
+    )
+    release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
     release_res_command.release_resources(
@@ -116,26 +96,20 @@ def test_low_release_resources_command_fail_subarray(
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
-def test_low_release_resources_command_empty_input_json(
-    tango_context, task_callback
-):
+def test_low_release_resources_empty_input_json(tango_context, task_callback):
     release_res_command, _, cm = get_release_resources_command_obj()
-    cm.is_command_allowed("ReleaseResources")
     cm.release_resources("", task_callback=task_callback)
     (res_code, _) = release_res_command.do(" ")
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
-def test_low_release_resources_command_missing_subarray_id(
-    tango_context, task_callback
+def test_low_release_resources_missing_subarray_id(
+    tango_context, task_callback, json_factory
 ):
     release_res_command, _, cm = get_release_resources_command_obj()
-    cm.is_command_allowed("ReleaseResources")
-    release_input_str = get_release_input_str()
+    release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
     cm.release_resources(json_argument, task_callback=task_callback)
@@ -144,7 +118,6 @@ def test_low_release_resources_command_missing_subarray_id(
     assert "subarray_id" in message
 
 
-@pytest.mark.skip("Functionality will be completed and tested with HM-111")
 @pytest.mark.SKA_low
 def test_low_release_resources_fail_check_allowed(tango_context):
     cm, start_time = create_cm()

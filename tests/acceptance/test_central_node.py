@@ -1,5 +1,4 @@
 import json
-from os.path import dirname, join
 
 import numpy as np
 import pytest
@@ -10,14 +9,7 @@ from ska_tango_base.control_model import HealthState, ObsState
 from ska_tmc_common.dev_factory import DevFactory
 from tango import Database, DeviceProxy
 
-from tests.settings import logger
-
-
-def get_json_input_str(path):
-    with open(path, "r") as f:
-        input_json_str = f.read()
-        input_arg = json.loads(input_json_str)
-    return json.dumps(input_arg)
+from tests.settings import LOW_SUBARRAY_DEVICE, MID_SUBARRAY_DEVICE, logger
 
 
 @given(
@@ -49,50 +41,24 @@ def internal_model(central_node):
 
 
 @when(parsers.parse("I call the command {command_name}"))
-def call_command(central_node, command_name):
+def call_command(central_node, command_name, json_factory):
     try:
         if command_name == "AssignResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
-                assign_res_string = get_json_input_str(
-                    join(
-                        dirname(__file__),
-                        "..",
-                        "data",
-                        "command_AssignResources.json",
-                    )
-                )
+                assign_res_string = json_factory("command_AssignResources")
             else:
-                assign_res_string = get_json_input_str(
-                    join(
-                        dirname(__file__),
-                        "..",
-                        "data",
-                        "command_mccs_AssignResources.json",
-                    )
-                )
+                assign_res_string = json_factory("command_assign_resource_low")
             pytest.command_result = central_node.command_inout(
                 command_name, assign_res_string
             )
         elif command_name == "ReleaseResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
-                release_res_string = get_json_input_str(
-                    join(
-                        dirname(__file__),
-                        "..",
-                        "data",
-                        "command_ReleaseResources.json",
-                    )
-                )
+                release_res_string = json_factory("command_ReleaseResources")
             else:
-                release_res_string = get_json_input_str(
-                    join(
-                        dirname(__file__),
-                        "..",
-                        "data",
-                        "command_mccs_ReleaseResources.json",
-                    )
+                release_res_string = json_factory(
+                    "command_release_resource_low"
                 )
             pytest.command_result = central_node.command_inout(
                 command_name, release_res_string
@@ -183,7 +149,10 @@ def check_command(central_node, command_name, change_event_callbacks):
     if command_name == "AssignResources":
         # teardown subarray, setting ObsState = Empty
         dev_factory = DevFactory()
-        tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+        if "ska_mid" in central_node.dev_name():
+            tmc_subarray = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+        else:
+            tmc_subarray = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
         tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 

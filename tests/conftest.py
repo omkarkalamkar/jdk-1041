@@ -1,5 +1,7 @@
 # pylint: disable=unused-argument
+import json
 import logging
+from os.path import dirname, join
 
 import pytest
 import tango
@@ -81,3 +83,25 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "lastDeviceInfoChanged",
         timeout=30.0,
     )
+
+
+def get_input_str(path):
+    """
+    Returns input json string
+    :rtype: String
+    """
+    with open(path, "r") as f:
+        input_arg = json.load(f)
+    return json.dumps(input_arg)
+
+
+@pytest.fixture()
+def json_factory():
+    """
+    Json factory for getting json files
+    """
+
+    def _get_json(slug):
+        return get_input_str(join(dirname(__file__), "data", f"{slug}.json"))
+
+    return _get_json

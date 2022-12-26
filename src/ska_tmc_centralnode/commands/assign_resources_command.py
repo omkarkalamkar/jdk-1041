@@ -12,6 +12,9 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
+from ska_tmc_centralnode.utils.constants import (
+    REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
+)
 
 
 class AssignResources(AbstractAssignReleaseResources):
@@ -68,7 +71,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
-                status=TaskStatus.FAILED,
+                status=TaskStatus.COMPLETED,
                 result=ResultCode.FAILED,
                 exception=message,
             )
@@ -188,20 +191,17 @@ class AssignResources(AbstractAssignReleaseResources):
                 "sdp key is not present in the input json argument.",
             )
 
-        if "execution_block" in json_argument["sdp"]:
-            if json_argument["sdp"]["execution_block"]["eb_id"] == "":
-                sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
-                sdp_values = list(
-                    json_argument["sdp"]["execution_block"].values()
-                )
-                id = sdp_keys[sdp_values.index("")]
-                try:
-                    self.update_resource_config_file(json_argument, id)
-                except Exception as e:
-                    return self.generate_command_result(
-                        ResultCode.FAILED,
-                        ("Errors in input json argument: %s", e),
-                    )
+        # validate processing block
+        (
+            is_processing_block_present,
+            processing_block_error_msg,
+        ) = self._validate_and_update_resource_config(json_argument)
+
+        if not is_processing_block_present:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                processing_block_error_msg,
+            )
 
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
@@ -261,7 +261,7 @@ class AssignResources(AbstractAssignReleaseResources):
             [self.my_subarray_adapter],
             "Error in calling AssignResources on subarray",
             "AssignResources",
-            json.dumps(json_argument.copy()),
+            json.dumps(json_argument),
         )
 
         if ret_code == ResultCode.FAILED:
@@ -336,13 +336,40 @@ class AssignResources(AbstractAssignReleaseResources):
 
 
         Example:
-            {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"mccs":{"subarray_beam_ids":[1],"station_ids":[[1,2]],"channel_blocks":[3]},"sdp":{}}
+        {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/3.0","transaction_id":"txn-....-00001","subarray_id":1,
+        "mccs":{"subarray_beam_ids":[1],"station_ids":[[1,2]],"channel_blocks":[3]},
+        "sdp":{"interface":"https://schema.skao.int/ska-sdp-assignres/0.4","execution_block":{"eb_id":"eb-mvp01-20200325-00001",
+        "max_length":100,"context":{},"beams":[{"beam_id":"vis0","function":"visibilities"},
+        {"beam_id":"pss1","search_beam_id":1,"function":"pulsar search"},{"beam_id":"pss2","search_beam_id":2,"function":"pulsar search"},
+        {"beam_id":"pst1","timing_beam_id":1,"function":"pulsar timing"},{"beam_id":"pst2","timing_beam_id":2,"function":"pulsar timing"},
+        {"beam_id":"vlbi1","vlbi_beam_id":1,"function":"vlbi"}],
+        "scan_types":[{"scan_type_id":".default","beams":{"vis0":{"channels_id":"vis_channels","polarisations_id":"all"},
+        "pss1":{"field_id":"pss_field_0","channels_id":"pulsar_channels","polarisations_id":"all"},
+        "pss2":{"field_id":"pss_field_1","channels_id":"pulsar_channels","polarisations_id":"all"},
+        "pst1":{"field_id":"pst_field_0","channels_id":"pulsar_channels","polarisations_id":"all"},
+        "pst2":{"field_id":"pst_field_1","channels_id":"pulsar_channels","polarisations_id":"all"},
+        "vlbi":{"field_id":"vlbi_field","channels_id":"vlbi_channels","polarisations_id":"all"}}},
+        {"scan_type_id":"target:a","derive_from":".default","beams":{"vis0":{"field_id":"field_a"}}}],
+        "channels":[{"channels_id":"vis_channels",
+        "spectral_windows":[{"spectral_window_id":
+        "fsp_1_channels","count":744,"start":0,"stride":2,"freq_min":350000000,"freq_max":368000000,
+        "link_map":[[0,0],[200,1],[744,2],[944,3]]},{"spectral_window_id":"fsp_2_channels",
+        "count":744,"start":2000,"stride":1,"freq_min":360000000,"freq_max":368000000,"link_map":[[2000,4],[2200,5]]},
+        {"spectral_window_id":"zoom_window_1","count":744,"start":4000,"stride":1,"freq_min":360000000,"freq_max":361000000,"link_map":[[4000,6],[4200,7]]}]},
+        {"channels_id":"pulsar_channels","spectral_windows":[{"spectral_window_id":"pulsar_fsp_channels","count":744,"start":0,"freq_min":350000000,"freq_max":368000000}]}],
+        "polarisations":[{"polarisations_id":"all","corr_type":["XX","XY","YY","YX"]}],"fields":[{"field_id":"field_a",
+        "phase_dir":{"ra":[123,0.1],"dec":[123,0.1],"reference_time":"...","reference_frame":"ICRF3"},"pointing_fqdn":"low-tmc/telstate/0/pointing"}]},
+        "processing_blocks":[{"pb_id":"pb-mvp01-20200325-00001","sbi_ids":["sbi-mvp01-20200325-00001"],"script":{},"parameters":{},
+        "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00002","sbi_ids":["sbi-mvp01-20200325-00002"],"script":{},"parameters":{},
+        "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00003","sbi_ids":["sbi-mvp01-20200325-00001","sbi-mvp01-20200325-00002"],"script":{},
+        "parameters":{},"dependencies":{}}],"resources":{"csp_links":[1,2,3,4],"receptors":["FS4","FS8"],"receive_nodes":10}},
+        "csp":{"interface":"https://schema.skao.int/ska-low-csp-assignresources/2.0","common":{"subarray_id":1},
+        "lowcbf":{"resources":[{"device":"fsp_01","shared":true,"fw_image":"pst","fw_mode":"unused"},
+        {"device":"p4_01","shared":true,"fw_image":"p4.bin","fw_mode":"p4"}]}}}
 
-        Note: Enter input without spaces as:
-        {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/2.0",
-        "transaction_id":"txn-....-00001","subarray_id":1,"mccs":{"subarray_beam_ids":[1],
-        "station_ids":[[1,2]],
-        "channel_blocks":[3]},"sdp":{}}
+
+        Note: From Jive, enter above input string without any space.
+
         return:
             None
 
@@ -362,34 +389,25 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        if "subarray_id" not in json_argument:
+        is_valid, invalid_json_error_msg = self._validate_low_json(
+            json_argument
+        )
+        if not is_valid:
             return self.generate_command_result(
                 ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
+                invalid_json_error_msg,
             )
 
-        if "mccs" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs key is not present in the input json argument.",
-            )
+        # validate processing block
+        (
+            is_processing_block_present,
+            processing_block_error_msg,
+        ) = self._validate_and_update_resource_config(json_argument)
 
-        if "subarray_beam_ids" not in json_argument["mccs"]:
+        if not is_processing_block_present:
             return self.generate_command_result(
                 ResultCode.FAILED,
-                "mccs.subarray_beam_ids key is not present in the input json argument.",
-            )
-
-        if "station_ids" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.station_ids key is not present in the input json argument.",
-            )
-
-        if "channel_blocks" not in json_argument["mccs"]:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "mccs.channel_blocks key is not present in the input json argument.",
+                processing_block_error_msg,
             )
 
         ret_code, message = self.init_adapters()
@@ -408,19 +426,13 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("SubArray Id %s is not existing!", subarrayID),
             )
 
-        try:
-            subarray_cmd_data = self.create_subarray_cmd_data(json_argument)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED, ("Errors in input json argument: %s", e)
-            )
-
-        try:
-            input_mccs_master = self.create_mccs_cmd_data(json_argument)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED, ("Errors in input json argument: %s", e)
-            )
+        # TODO Uncomment below code during integrating of MCCS
+        # try:
+        #     input_mccs_master = self.create_mccs_cmd_data(json_argument)
+        # except Exception as e:
+        #     return self.generate_command_result(
+        #         ResultCode.FAILED, ("Errors in input json argument: %s", e)
+        #     )
 
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
@@ -430,57 +442,100 @@ class AssignResources(AbstractAssignReleaseResources):
                 [self.my_subarray_adapter],
                 f"Error in calling AssignResources on subarray: {self.my_subarray_adapter.dev_name}",
                 "AssignResources",
-                subarray_cmd_data,
+                json.dumps(json_argument),
             ),
-            self.send_command(
-                [self.tm_leaf_mccs_master_adapter],
-                "Error in calling AssignResource command on TM MCCS Master Leaf",
-                "AssignResources",
-                input_mccs_master,
-            ),
+            # self.send_command(
+            #     [self.tm_leaf_mccs_master_adapter],
+            #     "Error in calling AssignResource command on TM MCCS Master Leaf",
+            #     "AssignResources",
+            #     input_mccs_master,
+            # ),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ResultCode.FAILED, message
 
         return (ResultCode.OK, "")
 
-    def create_mccs_cmd_data(self, json_argument):
+    def _validate_keys_in_json(self, json_argument, req_keys, error_message):
+        """_summary_
+        Args:
+            json_argument (dict): Json Argument
+            req_keys (list): Required key list to check in json argument
+            error_message (str): Error message when key not present
         """
-        Remove 'sdp' and 'mccs' key from input JSON argument and forward the updated JSON to mccs master leaf node.
+        json_keys = json_argument.keys()
+        for key in req_keys:
+            if key not in json_keys:
+                return False, error_message.format(key=key)
+        return True, ""
 
-        :param json_argument: The string in JSON format.
-
-        :return: The string in JSON format.
+    def _validate_low_json(self, json_argument):
+        """Validate Json for low
+        Args:
+            json_argument (dict): low json
         """
-        mccs_value = json_argument["mccs"]
-        json_argument[
-            "interface"
-        ] = "https://schema.skao.int/ska-low-mccs-assignresources/1.0"
-        if "transaction_id" in json_argument:
-            del json_argument["transaction_id"]
-        if "sdp" in json_argument:
-            del json_argument["sdp"]
-        if "mccs" in json_argument:
-            del json_argument["mccs"]
-        json_argument.update(mccs_value)
-        input_to_mccs = json.dumps(json_argument)
-        return input_to_mccs
+        # Validate assign resource json
+        error_msg = "{key} key is not present in the input json argument."
+        is_valid, return_error = self._validate_keys_in_json(
+            json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS, error_msg
+        )
+        if not is_valid:
+            return is_valid, return_error
 
-    def create_subarray_cmd_data(self, json_argument):
+        # TODO Uncomment below code during integration of MCCS
+        # Validate MCCS keys
+        # mccs_json = json_argument.get("mccs", {})
+        # mccs_error_msg = (
+        #     "mccs.{key} key is not present in the input json argument."
+        # )
+        # is_valid, return_error = self._validate_keys_in_json(
+        #     mccs_json, MCCS_REQUIRED_KEYS, mccs_error_msg
+        # )
+        # if not is_valid:
+        #     return is_valid, return_error
+
+        return True, ""
+
+    def _validate_and_update_resource_config(self, json_argument):
+        """Validate if eb_id present in sdp schema.
+        Args:
+            json_argument (dict): low json
         """
-        Remove 'subarray id', 'sdp' from json argument and forward the updated JSON to Subarray node.
+        if (
+            json_argument["sdp"].get("execution_block")
+            and not json_argument["sdp"]["execution_block"]["eb_id"]
+        ):
+            sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
+            sdp_values = list(json_argument["sdp"]["execution_block"].values())
+            id = sdp_keys[sdp_values.index("")]
+            try:
+                self.update_resource_config_file(json_argument, id)
+            except Exception as e:
+                return False, ("Errors in input json argument: %s", e)
+        return True, ""
 
-        :param json_argument: The string in JSON format.
+    # TODO Uncomment below code during integrating of MCCS
+    # def create_mccs_cmd_data(self, json_argument):
+    #     """
+    #     Remove 'sdp' and 'mccs' key from input JSON argument and forward the updated JSON to mccs master leaf node.
 
-        :return: The string in JSON format.
-        """
-        # Remove subarray_id key from input json argument and send the json to subarray node
-        if "subarray_id" in json_argument:
-            del json_argument["subarray_id"]
-        if "sdp" in json_argument:
-            del json_argument["sdp"]
-        input_to_subarray = json.dumps(json_argument)
-        return input_to_subarray
+    #     :param json_argument: The string in JSON format.
+
+    #     :return: The string in JSON format.
+    #     """
+    #     mccs_value = json_argument["mccs"]
+    #     json_argument[
+    #         "interface"
+    #     ] = "https://schema.skao.int/ska-low-mccs-assignresources/1.0"
+    #     if "transaction_id" in json_argument:
+    #         del json_argument["transaction_id"]
+    #     if "sdp" in json_argument:
+    #         del json_argument["sdp"]
+    #     if "mccs" in json_argument:
+    #         del json_argument["mccs"]
+    #     json_argument.update(mccs_value)
+    #     input_to_mccs = json.dumps(json_argument)
+    #     return input_to_mccs
 
     def get_subarray_adapter(self, subarray_id):
         for adapter in self.subarray_adapters:
