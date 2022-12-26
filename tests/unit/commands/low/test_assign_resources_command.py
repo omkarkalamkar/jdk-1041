@@ -75,6 +75,7 @@ def test_low_assign_resources_command(
         call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
     )
 
+
 @pytest.mark.SKA_low
 def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback, json_factory
