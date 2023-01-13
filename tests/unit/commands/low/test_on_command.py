@@ -12,7 +12,7 @@ from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import create_cm, logger
+from tests.settings import create_cm_low, logger
 
 
 @pytest.fixture()
@@ -42,7 +42,7 @@ def devices_to_load():
 def test_low_telescope_on_command(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm_low(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -64,7 +64,7 @@ def test_low_telescope_on_command(tango_context, task_callback):
 @pytest.mark.SKA_low
 def test_telescope_on_command_fail_subarray(tango_context, task_callback):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm_low(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -95,7 +95,7 @@ def test_telescope_on_command_fail_subarray(tango_context, task_callback):
 @pytest.mark.SKA_low
 def test_low_telescope_on_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm_low(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time

@@ -6,7 +6,7 @@ from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import count_faulty_devices, create_cm, logger
+from tests.settings import count_faulty_devices, create_cm_low, logger
 
 
 @pytest.fixture()
@@ -31,7 +31,7 @@ def devices_to_load():
 @pytest.mark.SKA_low
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm_low(input_parameter=InputParameterLow(None))
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
 

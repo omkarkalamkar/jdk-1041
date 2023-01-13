@@ -2,9 +2,15 @@ import logging
 import time
 
 import pytest
+#from ska_tango_base.base.base_device import _CommandTracker
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_low import (
+    CNComponentManagerLow,
+)
+from ska_tmc_centralnode.manager.component_manager_mid import (
+    CNComponentManagerMid,
+)
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
@@ -56,22 +62,55 @@ def count_faulty_devices(cm):
     return result
 
 
-def create_cm(
+def create_cm_mid(
     p_liveliness_probe=False,
-    p_event_receiver=True,
     input_parameter=InputParameterMid(None),
 ):
-    op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(
+    op_state_model = TMCOpStateModel(logger)(
+        queue_changed_callback=None,
+        status_changed_callback=None,
+        progress_changed_callback=None,
+        result_callback=None,
+    )
+    cm = CNComponentManagerMid(
         op_state_model,
         logger=logger,
         _input_parameter=input_parameter,
     )
-    if isinstance(input_parameter, InputParameterMid):
-        DEVICE_LIST = DEVICE_LIST_MID
-    else:
-        DEVICE_LIST = DEVICE_LIST_LOW
+    DEVICE_LIST = DEVICE_LIST_MID
+    for dev in DEVICE_LIST:
+        cm.add_device(dev)
+    start_time = time.time()
+    num_devices = len(DEVICE_LIST)
+    if not p_liveliness_probe:
+        return cm, start_time
+    while num_devices != len(cm.checked_devices):
+        time.sleep(0.2)
+        elapsed_time = time.time() - start_time
+        if elapsed_time > TIMEOUT:
+            pytest.fail("Timeout occurred while executing the test")
 
+    return cm, start_time
+
+
+def create_cm_low(
+    p_liveliness_probe=False,
+    event_receiver=True,
+    input_parameter=InputParameterLow(None),
+):
+    op_state_model = TMCOpStateModel(logger)(
+        queue_changed_callback=None,
+        status_changed_callback=None,
+        progress_changed_callback=None,
+        result_callback=None,
+    )
+    cm = CNComponentManagerLow(
+        op_state_model,
+        logger=logger,
+        _input_parameter=input_parameter,
+        _event_receiver=event_receiver,
+    )
+    DEVICE_LIST = DEVICE_LIST_LOW
     for dev in DEVICE_LIST:
         cm.add_device(dev)
     start_time = time.time()
@@ -96,11 +135,14 @@ def create_cm_no_faulty_devices(
     logger.info("%s", tango_context)
     if isinstance(input_parameter, InputParameterMid):
         input_parameter = InputParameterMid(None)
+        cm, start_time = create_cm_mid(
+            p_liveliness_probe, p_event_receiver, input_parameter
+        )
     else:
         input_parameter = InputParameterLow(None)
-    cm, start_time = create_cm(
-        p_liveliness_probe, p_event_receiver, input_parameter
-    )
+        cm, start_time = create_cm_low(
+            p_liveliness_probe, p_event_receiver, input_parameter
+        )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time

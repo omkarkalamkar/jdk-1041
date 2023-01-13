@@ -18,7 +18,7 @@ from ska_tmc_centralnode.commands.release_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import MID_SUBARRAY_DEVICE, create_cm, logger
+from tests.settings import MID_SUBARRAY_DEVICE, create_cm_mid, logger
 
 
 @pytest.fixture()
@@ -49,7 +49,7 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
 
 
 def get_release_resources_command_obj():
-    cm, start_time = create_cm(input_parameter=InputParameterMid(None))
+    cm, start_time = create_cm_mid(input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -84,7 +84,7 @@ def test_mid_release_resources_command_with_ok(tango_context, task_callback):
 def test_mid_release_resources_command_fail_subarray(
     tango_context, task_callback
 ):
-    cm, start_time = create_cm(input_parameter=InputParameterMid(None))
+    cm, start_time = create_cm_mid(input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -130,7 +130,7 @@ def test_mid_release_resources_command_missing_subarray_id(
 
 
 def test_telescope_release_resources_fail_check_allowed(tango_context):
-    cm, start_time = create_cm()
+    cm, start_time = create_cm_mid()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
