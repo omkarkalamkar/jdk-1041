@@ -120,7 +120,8 @@ def create_cm_no_faulty_devices(
     if isinstance(input_parameter, InputParameterMid):
         input_parameter = InputParameterMid(None)
         cm, start_time = create_cm_mid(
-            p_liveliness_probe, p_event_receiver,input_parameter)
+            p_liveliness_probe, p_event_receiver, input_parameter
+        )
     else:
         input_parameter = InputParameterLow(None)
         cm, start_time = create_cm_low(
