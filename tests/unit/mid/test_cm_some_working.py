@@ -4,7 +4,9 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_mid import (
+    CNComponentManagerMid,
+)
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
@@ -42,7 +44,7 @@ def test_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
 
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(
+    cm = CNComponentManagerMid(
         op_state_model,
         _input_parameter=InputParameterMid(None),
         logger=logger,

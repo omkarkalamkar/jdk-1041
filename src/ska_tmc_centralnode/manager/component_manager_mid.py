@@ -6,16 +6,13 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
-
-from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
+from ska_tmc_common.enum import LivelinessProbeType
 
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorMid,
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
-
-# from ska_tmc_centralnode.model.component import CentralComponent
 
 
 class CNComponentManagerMid(CNComponentManager):
@@ -25,7 +22,7 @@ class CNComponentManagerMid(CNComponentManager):
         _input_parameter,
         logger=None,
         _component=None,
-        _liveliness_probe=True,
+        _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
         component_state_changed_callback=None,
         max_workers=5,
@@ -84,21 +81,6 @@ class CNComponentManagerMid(CNComponentManager):
             self.add_device(dln_prefix + f"000{dish}")
             result.append(dln_prefix + f"000{dish}")
         return result
-
-    def add_device(self, dev_name):
-        """
-        Add device to the liveliness probe function
-        :param dev_name: device name
-        :type dev_name: str
-        """
-        if dev_name is None:
-            return
-
-        if "subarray" in dev_name.lower():
-            devInfo = SubArrayDeviceInfo(dev_name, False)
-        else:
-            devInfo = DeviceInfo(dev_name, False)
-        self.component.update_device(devInfo)
 
     def _aggregate_telescope_state(self):
         """

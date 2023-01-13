@@ -7,7 +7,8 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 
-# from ska_tmc_centralnode.model.component import CentralComponent
+from ska_tmc_common.enum import LivelinessProbeType
+
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     TelescopeStateAggregatorLow,
@@ -22,7 +23,7 @@ class CNComponentManagerLow(CNComponentManager):
         _input_parameter,
         logger=None,
         _component=None,
-        _liveliness_probe=True,
+        _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
         component_state_changed_callback=None,
         max_workers=5,

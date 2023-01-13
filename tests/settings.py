@@ -2,6 +2,8 @@ import logging
 import time
 
 import pytest
+
+# from ska_tango_base.base.base_device import _CommandTracker
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -16,17 +18,12 @@ from ska_tmc_centralnode.model.input import (
 )
 
 logger = logging.getLogger(__name__)
-
 SLEEP_TIME = 0.5
 TIMEOUT = 20
-
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
-
 MID_SUBARRAY_DEVICE = "ska_mid/tm_subarray_node/1"
 LOW_SUBARRAY_DEVICE = "ska_low/tm_subarray_node/1"
-
-
 DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_master",
     "mid-csp/control/0",
@@ -38,7 +35,6 @@ DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/d0001",
     "mid_d0001/elt/master",
 ]
-
 DEVICE_LIST_LOW = [
     # "ska_low/tm_leaf_node/mccs_master",
     # "low-mccs/control/control",
@@ -70,7 +66,6 @@ def create_cm_mid(
     cm = CNComponentManagerMid(
         op_state_model,
         logger=logger,
-        _event_receiver=event_receiver,
         _input_parameter=input_parameter,
     )
     DEVICE_LIST = DEVICE_LIST_MID
@@ -85,7 +80,6 @@ def create_cm_mid(
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
-
     return cm, start_time
 
 
@@ -113,7 +107,6 @@ def create_cm_low(
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
-
     return cm, start_time
 
 
@@ -127,8 +120,7 @@ def create_cm_no_faulty_devices(
     if isinstance(input_parameter, InputParameterMid):
         input_parameter = InputParameterMid(None)
         cm, start_time = create_cm_mid(
-            p_liveliness_probe, p_event_receiver, input_parameter
-        )
+            p_liveliness_probe, p_event_receiver,input_parameter)
     else:
         input_parameter = InputParameterLow(None)
         cm, start_time = create_cm_low(
