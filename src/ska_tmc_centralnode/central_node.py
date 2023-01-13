@@ -13,7 +13,9 @@ from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
 
 from ska_tmc_centralnode import release
-from ska_tmc_centralnode.manager.component_manager_mid import CNComponentManagerMid
+from ska_tmc_centralnode.manager.component_manager_mid import (
+    CNComponentManagerMid,
+)
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
