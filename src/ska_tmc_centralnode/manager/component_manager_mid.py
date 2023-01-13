@@ -24,13 +24,21 @@ class CNComponentManagerMid(CNComponentManager):
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
-        component_state_changed_callback=None,
+        _update_device_callback=None,
+        _update_telescope_state_callback=None,
+        _update_telescope_health_state_callback=None,
+        _update_tmc_op_state_callback=None,
+        _update_imaging_callback=None,
+        communication_state_callback=None,
+        component_state_callback=None,
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
+        skuid_service="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
         *args,
         **kwargs,
     ):
+
         """
         Initialise a new ComponentManager instance for mid.
 
@@ -52,14 +60,24 @@ class CNComponentManagerMid(CNComponentManager):
         """
         super().__init__(
             op_state_model,
-            _input_parameter=_input_parameter,
-            _event_receiver=_event_receiver,
-            _liveliness_probe=_liveliness_probe,
-            max_workers=max_workers,
-            proxy_timeout=proxy_timeout,
-            sleep_time=sleep_time,
-            logger=logger,
-            component_state_changed_callback=component_state_changed_callback,
+            _input_parameter,
+            logger,
+            _component,
+            _liveliness_probe,
+            _event_receiver,
+            _update_device_callback,
+            _update_telescope_state_callback,
+            _update_telescope_health_state_callback,
+            _update_tmc_op_state_callback,
+            _update_imaging_callback,
+            communication_state_callback,
+            component_state_callback,
+            max_workers,
+            proxy_timeout,
+            sleep_time,
+            skuid_service,
+            *args,
+            **kwargs,
         )
 
     def check_if_dishes_are_responsive(self):
