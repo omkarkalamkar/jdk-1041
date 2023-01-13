@@ -19,7 +19,6 @@ class CNComponentManagerLow(CNComponentManager):
     def __init__(
         self,
         op_state_model,
-        #_command_tracker,
         _input_parameter,
         logger=None,
         _component=None,
@@ -53,7 +52,6 @@ class CNComponentManagerLow(CNComponentManager):
         """
         super().__init__(
             op_state_model,
-           # _command_tracker=_command_tracker,
             _input_parameter=_input_parameter,
             _event_receiver=_event_receiver,
             _liveliness_probe=_liveliness_probe,

@@ -2,7 +2,6 @@ import logging
 import time
 
 import pytest
-#from ska_tango_base.base.base_device import _CommandTracker
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -64,17 +63,14 @@ def count_faulty_devices(cm):
 
 def create_cm_mid(
     p_liveliness_probe=False,
+    event_receiver=True,
     input_parameter=InputParameterMid(None),
 ):
-    op_state_model = TMCOpStateModel(logger)(
-        queue_changed_callback=None,
-        status_changed_callback=None,
-        progress_changed_callback=None,
-        result_callback=None,
-    )
+    op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
         logger=logger,
+        _event_receiver=event_receiver,
         _input_parameter=input_parameter,
     )
     DEVICE_LIST = DEVICE_LIST_MID
@@ -98,12 +94,7 @@ def create_cm_low(
     event_receiver=True,
     input_parameter=InputParameterLow(None),
 ):
-    op_state_model = TMCOpStateModel(logger)(
-        queue_changed_callback=None,
-        status_changed_callback=None,
-        progress_changed_callback=None,
-        result_callback=None,
-    )
+    op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerLow(
         op_state_model,
         logger=logger,
