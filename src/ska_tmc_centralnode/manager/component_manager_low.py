@@ -5,8 +5,9 @@ It is component Manager for Low Telecope.
 """
 
 from ska_tmc_common.enum import LivelinessProbeType
-from tango import DevState
 from ska_tmc_common.exceptions import CommandNotAllowed
+from tango import DevState
+
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     TelescopeStateAggregatorLow,
@@ -35,7 +36,7 @@ class CNComponentManagerLow(CNComponentManager):
         sleep_time=1,
         skuid_service="",
         *args,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialise a new ComponentManager instance for mid.

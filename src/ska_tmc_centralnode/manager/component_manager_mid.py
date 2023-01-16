@@ -4,8 +4,9 @@ This module is inherited from CNComponentManager.
 It is component Manager for Mid Telecope.
 """
 from ska_tmc_common.enum import LivelinessProbeType
-from tango import DevState
 from ska_tmc_common.exceptions import CommandNotAllowed
+from tango import DevState
+
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorMid,
     TelescopeStateAggregatorMid,
