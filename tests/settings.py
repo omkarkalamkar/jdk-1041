@@ -66,7 +66,7 @@ def create_cm(
     if isinstance(input_parameter, InputParameterMid):
         cm = CNComponentManagerMid(
             op_state_model,
-            _input_parameter=InputParameterMid(None),
+            input_parameter=InputParameterMid(None),
             logger=logger,
             p_event_receiver=p_event_receiver,
         )
@@ -74,7 +74,7 @@ def create_cm(
     else:
         cm = CNComponentManagerLow(
             op_state_model,
-            _input_parameter=InputParameterLow(None),
+            input_parameter=InputParameterLow(None),
             logger=logger,
             p_event_receiver=p_event_receiver,
         )
