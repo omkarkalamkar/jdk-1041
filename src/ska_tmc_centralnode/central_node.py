@@ -174,7 +174,7 @@ class AbstractCentralNode(TMCBaseDevice):
     def write_subarrayDevNames(self, value):
         """Set the subarrayDevNames attribute."""
         self.component_manager.input_parameter.subarray_dev_names = value
-        self.component_manager.update_input_parameter()
+        self.component_manager.updateinput_parameter()
 
     # --------
     # Commands
@@ -487,7 +487,7 @@ class AbstractCentralNode(TMCBaseDevice):
         cm.input_parameter.sdp_subarray_dev_names = (
             self.TMCMidSdpSubarrayLeafNodes
         )
-        cm.update_input_parameter()
+        cm.updateinput_parameter()
         return cm
 
     def init_command_objects(self):

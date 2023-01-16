@@ -46,7 +46,7 @@ def test_all_low_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerLow(
         op_state_model,
-        _input_parameter=InputParameterLow(None),
+        input_parameter=InputParameterLow(None),
         logger=logger,
     )
     cm.add_multiple_devices(DEVICE_LIST_LOW)

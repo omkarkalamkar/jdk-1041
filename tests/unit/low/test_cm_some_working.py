@@ -39,7 +39,7 @@ def test_low_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerLow(
-        op_state_model, _input_parameter=InputParameterLow(None), logger=logger
+        op_state_model, input_parameter=InputParameterLow(None), logger=logger
     )
     for dev in DEVICE_LIST_LOW:
         cm.add_device(dev)

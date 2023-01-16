@@ -11,7 +11,7 @@ from tests.settings import logger
 def test_telescope_on():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
-        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
+        op_state_model, logger=logger, input_parameter=InputParameterMid(None)
     )
     res_code, message = cm.telescope_on()
     assert res_code == TaskStatus.QUEUED
@@ -21,7 +21,7 @@ def test_telescope_on():
 def test_telescope_off():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
-        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
+        op_state_model, logger=logger, input_parameter=InputParameterMid(None)
     )
     res_code, message = cm.telescope_off()
     assert res_code == TaskStatus.QUEUED

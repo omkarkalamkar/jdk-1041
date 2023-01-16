@@ -22,7 +22,7 @@ def test_all_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
-        _input_parameter=InputParameterMid(None),
+        input_parameter=InputParameterMid(None),
         logger=logger,
     )
     cm.add_dishes(DishLeafNodePrefix, NumDishes)
