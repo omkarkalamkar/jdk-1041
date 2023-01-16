@@ -7,6 +7,7 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 
+
 from ska_tmc_common.enum import LivelinessProbeType
 
 from ska_tmc_centralnode.manager.aggregators import (
@@ -35,7 +36,7 @@ class CNComponentManagerLow(CNComponentManager):
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
-        skuid_service="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
+        skuid_service="",
         *args,
         **kwargs
     ):
@@ -75,7 +76,7 @@ class CNComponentManagerLow(CNComponentManager):
             max_workers,
             proxy_timeout,
             sleep_time,
-            skuid_service,
+            skuid_service="",
             *args,
             **kwargs,
         )
