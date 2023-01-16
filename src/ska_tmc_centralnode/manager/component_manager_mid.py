@@ -49,7 +49,7 @@ class CNComponentManagerMid(CNComponentManager):
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
-        :param _input_parameter : specify input parameter for low and mid.
+        :param _input_parameter : specify input parameter for mid.
         :param _liveliness_probe:allows to enable/disable LivelinessProbe usage
         :param _event_receiver : allows to enable/disable EventReceiver usage
         :param max_workers: Optional. Maximum worker threads for

@@ -46,7 +46,7 @@ class CNComponentManagerLow(CNComponentManager):
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
-        :param _input_parameter : specify input parameter for low and mid.
+        :param input_parameter : specify input parameter for low.
         :param _liveliness_probe:allows to enable/disable LivelinessProbe usage
         :param _event_receiver : allows to enable/disable EventReceiver usage
         :param max_workers: Optional. Maximum worker threads for
@@ -79,6 +79,7 @@ class CNComponentManagerLow(CNComponentManager):
             **kwargs,
         )
 
+# TODO: Mccs integration is not included in PI#17 scope, will be done in near future.
     # def check_if_mccs_mln_is_responsive(self):
     #     return self._check_if_device_is_responsive(
     #         [self.input_parameter.mccs_master_leaf_node] #low
