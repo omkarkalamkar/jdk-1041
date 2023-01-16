@@ -18,7 +18,7 @@ from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import MID_SUBARRAY_DEVICE, create_cm_mid, logger
+from tests.settings import MID_SUBARRAY_DEVICE, create_cm, logger
 
 
 @pytest.fixture()
@@ -47,7 +47,7 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
 
 
 def get_assign_resources_command_obj():
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -67,7 +67,7 @@ def get_assign_resources_command_obj():
 def test_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -126,7 +126,7 @@ def test_assign_resources_command_missing_sdp_key(
 
 def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -212,7 +212,7 @@ def test_assign_resources_command_missing_receptor_ids(
 
 def test_assign_resources_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -226,7 +226,7 @@ def test_assign_resources_command_already_assigned(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time

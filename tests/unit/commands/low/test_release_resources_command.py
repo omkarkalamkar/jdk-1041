@@ -16,7 +16,7 @@ from ska_tmc_centralnode.commands.release_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import LOW_SUBARRAY_DEVICE, create_cm_low, logger
+from tests.settings import LOW_SUBARRAY_DEVICE, create_cm, logger
 
 
 @pytest.fixture()
@@ -39,7 +39,7 @@ def devices_to_load():
 
 
 def get_release_resources_command_obj():
-    cm, start_time = create_cm_low(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -73,7 +73,7 @@ def test_low_release_resources_command(
 def test_low_release_resources_command_fail_subarray(
     tango_context, task_callback, json_factory
 ):
-    cm, start_time = create_cm_low(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -120,7 +120,7 @@ def test_low_release_resources_missing_subarray_id(
 
 @pytest.mark.SKA_low
 def test_low_release_resources_fail_check_allowed(tango_context):
-    cm, start_time = create_cm_low()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time

@@ -18,7 +18,7 @@ from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
 from tests.mock_callable import MockCallable
-from tests.settings import create_cm_mid, logger
+from tests.settings import create_cm, logger
 
 
 @pytest.fixture()
@@ -46,7 +46,7 @@ def devices_to_load():
 def test_telescope_standby_command(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     # num_faulty = count_faulty_devices(cm)
     # assert num_faulty == 0
     elapsed_time = time.time() - start_time
@@ -62,7 +62,7 @@ def test_telescope_standby_command(tango_context):
 
 def test_telescope_standby_command_task_completed(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -83,7 +83,7 @@ def test_telescope_standby_command_task_completed(tango_context):
 
 def test_telescope_standby_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -111,7 +111,7 @@ def test_telescope_standby_command_fail_subarray(tango_context):
 
 def test_telescope_standby_command_fail_dish(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -143,7 +143,7 @@ def test_telescope_standby_command_fail_dish(tango_context):
 
 def test_telescope_standby_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time

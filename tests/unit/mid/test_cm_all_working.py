@@ -7,7 +7,7 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
 
-from tests.settings import count_faulty_devices, create_cm_mid, logger
+from tests.settings import count_faulty_devices, create_cm, logger
 
 
 @pytest.fixture()
@@ -37,7 +37,7 @@ def devices_to_load():
 
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm_mid()
+    cm, start_time = create_cm()
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
 
