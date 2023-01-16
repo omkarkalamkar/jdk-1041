@@ -1,5 +1,5 @@
 """
-This module provided a reference implementation of a BaseComponentManager.
+This module provided an implementation of the Central Node ComponentManager.
 """
 import time
 from typing import Callable, Optional
