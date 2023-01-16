@@ -16,7 +16,7 @@ from ska_tmc_centralnode.commands.assign_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import LOW_SUBARRAY_DEVICE, create_cm, logger
+from tests.settings import LOW_SUBARRAY_DEVICE, create_cm_low, logger
 
 
 @pytest.fixture()
@@ -39,7 +39,7 @@ def devices_to_load():
 
 
 def get_assign_resources_command_obj():
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm_low(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -109,7 +109,7 @@ def test_low_assign_resources_command_fail_subarray(
     tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm_low(input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -232,7 +232,7 @@ def test_low_assign_resources_command_missing_station_ids(
 @pytest.mark.SKA_low
 def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm()
+    cm, start_time = create_cm_low()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time

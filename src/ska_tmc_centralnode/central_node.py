@@ -13,7 +13,9 @@ from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
 
 from ska_tmc_centralnode import release
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_mid import (
+    CNComponentManagerMid,
+)
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
@@ -448,7 +450,7 @@ class AbstractCentralNode(TMCBaseDevice):
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )
-        cm = CNComponentManager(
+        cm = CNComponentManagerMid(
             self.op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=self.logger,

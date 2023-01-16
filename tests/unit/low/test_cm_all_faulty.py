@@ -7,7 +7,9 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
 
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_low import (
+    CNComponentManagerLow,
+)
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import (
     DEVICE_LIST_LOW,
@@ -42,7 +44,7 @@ def devices_to_load():
 @pytest.mark.SKA_low
 def test_all_low_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(
+    cm = CNComponentManagerLow(
         op_state_model,
         _input_parameter=InputParameterLow(None),
         logger=logger,

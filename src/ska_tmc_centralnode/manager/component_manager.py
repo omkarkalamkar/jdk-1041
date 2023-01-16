@@ -229,11 +229,6 @@ class CNComponentManager(TmcComponentManager):
             self.input_parameter.subarray_dev_names
         )
 
-    def check_if_dishes_are_responsive(self):
-        return self._check_if_device_is_responsive(
-            self.input_parameter.dish_leaf_node_dev_names
-        )
-
     # def check_if_mccs_mln_is_responsive(self):
     #     return self._check_if_device_is_responsive(
     #         [self.input_parameter.mccs_master_leaf_node]
@@ -247,21 +242,6 @@ class CNComponentManager(TmcComponentManager):
                 count += 1
         if count == 0:
             raise CommandNotAllowed(f"{dev_names} not available")
-
-    def add_dishes(self, dln_prefix, num_dishes):
-        """
-        Add dishes to the liveliness probe function
-
-        :param dln_prefix: prefix of the dish
-        :type dln_prefix: str
-        :param num_dishes: number of dishes
-        :type num_dishes: int
-        """
-        result = []
-        for dish in range(1, (num_dishes + 1)):
-            self.add_device(dln_prefix + f"000{dish}")
-            result.append(dln_prefix + f"000{dish}")
-        return result
 
     def add_multiple_devices(self, device_list):
         """
