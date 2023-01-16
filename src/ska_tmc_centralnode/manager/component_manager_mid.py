@@ -7,6 +7,7 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 from ska_tmc_common.enum import LivelinessProbeType
+
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorMid,
     TelescopeStateAggregatorMid,

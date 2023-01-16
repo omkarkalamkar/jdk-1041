@@ -8,6 +8,7 @@ package.
 """
 
 from ska_tmc_common.enum import LivelinessProbeType
+
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     TelescopeStateAggregatorLow,
