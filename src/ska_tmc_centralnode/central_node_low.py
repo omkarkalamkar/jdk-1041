@@ -174,7 +174,7 @@ class CentralNodeLow(AbstractCentralNode):
             component_state_changed_callback=None,
             max_workers=self.MaxWorker,
             proxy_timeout=self.ProxyTimeout,
-            _input_parameter=InputParameterLow(None),
+            input_parameter=InputParameterLow(None),
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes

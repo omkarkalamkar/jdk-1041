@@ -452,7 +452,7 @@ class AbstractCentralNode(TMCBaseDevice):
         )
         cm = CNComponentManagerMid(
             self.op_state_model,
-            _input_parameter=InputParameterMid(None),
+            input_parameter=InputParameterMid(None),
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=self.update_telescope_state_callback,

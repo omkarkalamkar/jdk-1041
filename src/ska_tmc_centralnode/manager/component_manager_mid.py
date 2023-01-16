@@ -21,7 +21,7 @@ class CNComponentManagerMid(CNComponentManager):
     def __init__(
         self,
         op_state_model,
-        _input_parameter,
+        input_parameter,
         logger=None,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
@@ -62,7 +62,7 @@ class CNComponentManagerMid(CNComponentManager):
         """
         super().__init__(
             op_state_model,
-            _input_parameter,
+            input_parameter,
             logger,
             _component,
             _liveliness_probe,
