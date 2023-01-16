@@ -4,7 +4,8 @@ This module is inherited from CNComponentManager.
 It is component Manager for Mid Telecope.
 """
 from ska_tmc_common.enum import LivelinessProbeType
-
+from tango import DevState
+from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorMid,
     TelescopeStateAggregatorMid,
@@ -124,3 +125,38 @@ class CNComponentManagerMid(CNComponentManager):
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )
+
+    def is_command_allowed(self, command_name=None):
+        """
+        Checks whether this command is allowed
+        It checks that the device is in a state
+        to perform this command and that all the
+        component needed for the operation are not unresponsive
+
+        :param command_name: name of the command
+        :type command_name: str
+        :return: True if this command is allowed
+
+        :rtype: boolean
+        """
+        if self.op_state_model.op_state in [
+            DevState.FAULT,
+            DevState.UNKNOWN,
+            DevState.DISABLE,
+        ]:
+            raise CommandNotAllowed(
+                "Command is not allowed in current state %s",
+                str(self.op_state_model.op_state),
+            )
+        if command_name in ["TelescopeOn", "TelescopeOff"]:
+            self.logger.debug(f"Checking mid devices for {command_name}")
+            self.check_if_csp_mln_is_responsive()
+            self.check_if_sdp_mln_is_responsive()
+            self.check_if_subarrays_are_responsive()
+            self.check_if_dishes_are_responsive()
+        elif command_name in ["AssignResources", "ReleaseResources"]:
+            self.logger.debug(f"Checking mid devices for {command_name}")
+            self.check_if_subarrays_are_responsive()
+            self.check_if_dishes_are_responsive()
+
+        return True
