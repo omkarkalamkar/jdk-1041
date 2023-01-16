@@ -29,19 +29,11 @@ from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
 from ska_tmc_centralnode.manager.aggregators import (
-    HealthStateAggregatorLow,
-    HealthStateAggregatorMid,
-    TelescopeStateAggregatorLow,
-    TelescopeStateAggregatorMid,
     TMCOpStateAggregator,
 )
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
-from ska_tmc_centralnode.model.input import (
-    InputParameterLow,
-    InputParameterMid,
-)
 
 
 class CNComponentManager(TmcComponentManager):
@@ -388,28 +380,6 @@ class CNComponentManager(TmcComponentManager):
                     return True
         return False
 
-    def _aggregate_health_state(self):
-        """
-        Aggregates all health states
-        and call the relative callback if available
-        """
-        if self._health_state_aggregator is None:
-            if isinstance(self._input_parameter, InputParameterLow):
-                self._health_state_aggregator = HealthStateAggregatorLow(
-                    self, self.logger
-                )
-            elif isinstance(self._input_parameter, InputParameterMid):
-                self._health_state_aggregator = HealthStateAggregatorMid(
-                    self, self.logger
-                )
-            else:
-                pass
-
-        with self.lock:
-            self.component.telescope_health_state = (
-                self._health_state_aggregator.aggregate()
-            )
-
     def get_telescope_health_state(self):
         return self.component.telescope_health_state
 
@@ -419,26 +389,6 @@ class CNComponentManager(TmcComponentManager):
         """
         self._aggregate_telescope_state()
         self._aggregate_tm_op_state()
-
-    def _aggregate_telescope_state(self):
-        """
-        Aggregates telescope state
-        """
-        if self._telescope_state_aggregator is None:
-            if isinstance(self._input_parameter, InputParameterLow):
-                self._telescope_state_aggregator = TelescopeStateAggregatorLow(
-                    self, self.logger
-                )
-            elif isinstance(self._input_parameter, InputParameterMid):
-                self._telescope_state_aggregator = TelescopeStateAggregatorMid(
-                    self, self.logger
-                )
-            else:
-                pass
-
-        with self.lock:
-            new_state = self._telescope_state_aggregator.aggregate()
-            self.component.telescope_state = new_state
 
     def get_telescope_state(self):
         return self.component.telescope_state

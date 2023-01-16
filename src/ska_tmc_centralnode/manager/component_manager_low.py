@@ -7,9 +7,7 @@ It is provided for explanatory purposes, and to support testing of this
 package.
 """
 
-
 from ska_tmc_common.enum import LivelinessProbeType
-
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     TelescopeStateAggregatorLow,
@@ -94,7 +92,10 @@ class CNComponentManagerLow(CNComponentManager):
             self._telescope_state_aggregator = TelescopeStateAggregatorLow(
                 self, self.logger
             )
-        super()._aggregate_telescope_state()
+
+        with self.lock:
+            new_state = self._telescope_state_aggregator.aggregate()
+            self.component.telescope_state = new_state
 
     def _aggregate_health_state(self):
         """
@@ -105,4 +106,8 @@ class CNComponentManagerLow(CNComponentManager):
             self._health_state_aggregator = HealthStateAggregatorLow(
                 self, self.logger
             )
-        super()._aggregate_health_state()
+
+        with self.lock:
+            self.component.telescope_health_state = (
+                self._health_state_aggregator.aggregate()
+            )
