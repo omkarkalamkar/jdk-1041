@@ -301,31 +301,6 @@ class CNComponentManager(TmcComponentManager):
 
         self._aggregate_health_state()
 
-    def update_device_state(self, dev_name, state):
-        """
-        Update a monitored device state,
-        aggregate the states available
-        and call the relative callbacks if available
-
-        :param dev_name: name of the device
-        :type dev_name: str
-        :param state: state of the device
-        :type state: DevState
-        """
-        with self.lock:
-            self.logger.debug(
-                f"State event callback for device {dev_name}: {state}"
-            )
-            devInfo = self.component.get_device(dev_name)
-            devInfo.state = state
-            devInfo.last_event_arrived = time.time()
-            devInfo.update_unresponsive(False)
-            self.component._invoke_device_callback(devInfo)
-
-        self._aggregate_state()
-        if isinstance(self.input_parameter, InputParameterMid):
-            self._update_imaging()
-
     def update_device_obs_state(self, dev_name, obs_state):
         """
         Update a monitored device obs state,
