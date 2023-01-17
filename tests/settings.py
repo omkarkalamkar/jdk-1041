@@ -58,15 +58,15 @@ def count_faulty_devices(cm):
 def create_cm(
     p_liveliness_probe=True,
     p_event_receiver=True,
-    input_parameter=InputParameterMid(None),
+    _input_parameter=InputParameterMid(None),
 ):
     op_state_model = TMCOpStateModel(logger)
 
     """Creating component manager"""
-    if isinstance(input_parameter, InputParameterMid):
+    if isinstance(_input_parameter, InputParameterMid):
         cm = CNComponentManagerMid(
             op_state_model,
-            input_parameter=InputParameterMid(None),
+            _input_parameter=InputParameterMid(None),
             logger=logger,
             p_event_receiver=p_event_receiver,
         )
@@ -74,7 +74,7 @@ def create_cm(
     else:
         cm = CNComponentManagerLow(
             op_state_model,
-            input_parameter=InputParameterLow(None),
+            _input_parameter=InputParameterLow(None),
             logger=logger,
             p_event_receiver=p_event_receiver,
         )
@@ -98,18 +98,18 @@ def create_cm_no_faulty_devices(
     tango_context,
     p_liveliness_probe,
     p_event_receiver,
-    input_parameter=InputParameterMid(None),
+    _input_parameter=InputParameterMid(None),
 ):
     logger.info("%s", tango_context)
-    if isinstance(input_parameter, InputParameterMid):
-        input_parameter = InputParameterMid(None)
+    if isinstance(_input_parameter, InputParameterMid):
+        _input_parameter = InputParameterMid(None)
         cm, start_time = create_cm(
-            p_liveliness_probe, p_event_receiver, input_parameter
+            p_liveliness_probe, p_event_receiver, _input_parameter
         )
     else:
-        input_parameter = InputParameterLow(None)
+        _input_parameter = InputParameterLow(None)
         cm, start_time = create_cm(
-            p_liveliness_probe, p_event_receiver, input_parameter
+            p_liveliness_probe, p_event_receiver, _input_parameter
         )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0

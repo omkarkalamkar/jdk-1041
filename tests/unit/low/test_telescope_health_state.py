@@ -47,7 +47,7 @@ def devices_to_load():
 @pytest.mark.SKA_low
 def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(
-        tango_context, True, True, input_parameter=InputParameterLow(None)
+        tango_context, True, True, _input_parameter=InputParameterLow(None)
     )
     start_time = time.time()
     elapsed_time = 0

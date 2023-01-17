@@ -48,7 +48,7 @@ class CNComponentManager(TmcComponentManager):
     def __init__(
         self,
         op_state_model,
-        input_parameter,
+        _input_parameter,
         logger=None,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
@@ -72,7 +72,7 @@ class CNComponentManager(TmcComponentManager):
 
         :param op_state_model: the operational state model used by this component
             manager
-        :param input_parameter: allows to specify InputParameter class for TMC Mid or Low
+        :param _input_parameter: allows to specify InputParameter class for TMC Mid or Low
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
@@ -83,7 +83,7 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
 
         super().__init__(
-            input_parameter,
+            _input_parameter,
             logger,
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
@@ -150,7 +150,7 @@ class CNComponentManager(TmcComponentManager):
         :return: input parameter
         :rtype: InputParameter
         """
-        return self.input_parameter
+        return self._input_parameter
 
     @property
     def component(self):
@@ -259,7 +259,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo = DeviceInfo(dev_name, False)
         self.component.update_device(devInfo)
 
-    def updateinput_parameter(self):
+    def update_input_parameter(self):
         with self.lock:
             self.input_parameter.update(self)
 
@@ -540,7 +540,7 @@ class CNComponentManager(TmcComponentManager):
                 str(self.op_state_model.op_state),
             )
         if command_name in ["TelescopeOn", "TelescopeOff"]:
-            if isinstance(self.input_parameter, InputParameterMid):
+            if isinstance(self._input_parameter, InputParameterMid):
                 self.logger.debug(f"Checking mid devices for {command_name}")
                 self.check_if_csp_mln_is_responsive()
                 self.check_if_sdp_mln_is_responsive()
@@ -551,7 +551,7 @@ class CNComponentManager(TmcComponentManager):
                 # self.check_if_mccs_mln_is_responsive()
                 self.check_if_subarrays_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
-            if isinstance(self.input_parameter, InputParameterMid):
+            if isinstance(self._input_parameter, InputParameterMid):
                 self.logger.debug(f"Checking mid devices for {command_name}")
                 self.check_if_subarrays_are_responsive()
                 self.check_if_dishes_are_responsive()

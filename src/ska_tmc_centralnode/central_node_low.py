@@ -102,7 +102,7 @@ class CentralNodeLow(AbstractCentralNode):
     # def write_mccsMasterLeafNodeName(self, value):
     #     """Set the mccsmasterleafnodename attribute."""
     #     self.component_manager.input_parameter.mccs_master_leaf_node = value
-    #     self.component_manager.updateinput_parameter()
+    #     self.component_manager.update_input_parameter()
 
     # def read_mccsSubarrayLeafNodeName(self):
     #     """Return the mccsSubarrayLeafNodeName attribute."""
@@ -111,7 +111,7 @@ class CentralNodeLow(AbstractCentralNode):
     # def write_mccsSubarrayLeafNodeName(self, value):
     #     """Set the mccsSubarrayLeafNodeName attribute."""
     #     self.component_manager.input_parameter.mccs_subarray_leaf_node = value
-    #     self.component_manager.updateinput_parameter()
+    #     self.component_manager.update_input_parameter()
 
     # def read_mccsMasterNodeName(self):
     #     """Return the mccsMasterNodeName attribute."""
@@ -120,7 +120,7 @@ class CentralNodeLow(AbstractCentralNode):
     # def write_mccsMasterNodeName(self, value):
     #     """Set the mccsMasterNodeName attribute."""
     #     self.component_manager.input_parameter.mccs_master_dev_name = value
-    #     self.component_manager.updateinput_parameter()
+    #     self.component_manager.update_input_parameter()
 
     def read_cspMasterDevName(self):
         """Return the cspMasterDevName attribute."""
@@ -129,7 +129,7 @@ class CentralNodeLow(AbstractCentralNode):
     def write_cspMasterDevName(self, value):
         """Set the cspMasterDevName attribute."""
         self.component_manager.input_parameter.csp_master_dev_name = value
-        self.component_manager.updateinput_parameter()
+        self.component_manager.update_input_parameter()
 
     def read_sdpMasterDevName(self):
         """Return the sdpMasterDevName attribute."""
@@ -138,7 +138,7 @@ class CentralNodeLow(AbstractCentralNode):
     def write_sdpMasterDevName(self, value):
         """Set the sdpMasterDevName attribute."""
         self.component_manager.input_parameter.sdp_master_dev_name = value
-        self.component_manager.updateinput_parameter()
+        self.component_manager.update_input_parameter()
 
     def read_CspMasterLeafNodeDevName(self):
         """Return the cspMasterLeafNodeDevName attribute."""
@@ -147,7 +147,7 @@ class CentralNodeLow(AbstractCentralNode):
     def write_CspMasterLeafNodeDevName(self, value):
         """Set the cspMasterLeafNodeDevName attribute."""
         self.component_manager.input_parameter.csp_mln_dev_name = value
-        self.component_manager.updateinput_parameter()
+        self.component_manager.update_input_parameter()
 
     def read_SdpMasterLeafNodeDevName(self):
         """Return the sdpMasterLeafNodeDevName attribute."""
@@ -174,7 +174,7 @@ class CentralNodeLow(AbstractCentralNode):
             component_state_changed_callback=None,
             max_workers=self.MaxWorker,
             proxy_timeout=self.ProxyTimeout,
-            input_parameter=InputParameterLow(None),
+            _input_parameter=InputParameterLow(None),
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
@@ -185,7 +185,7 @@ class CentralNodeLow(AbstractCentralNode):
         #     self.MCCSSubarrayLeafNodeFQDN or ""
         # )
         # cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""
-        cm.updateinput_parameter()
+        cm.update_input_parameter()
         return cm
 
     def init_command_objects(self):

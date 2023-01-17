@@ -31,7 +31,7 @@ def devices_to_load():
 @pytest.mark.SKA_low
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
 

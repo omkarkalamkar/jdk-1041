@@ -19,7 +19,7 @@ class CNComponentManagerLow(CNComponentManager):
     def __init__(
         self,
         op_state_model,
-        input_parameter,
+        _input_parameter,
         logger=None,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
@@ -46,7 +46,7 @@ class CNComponentManagerLow(CNComponentManager):
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
-        :param input_parameter : specify input parameter for low.
+        :param _input_parameter : specify input parameter for low.
         :param _liveliness_probe:allows to enable/disable LivelinessProbe usage
         :param _event_receiver : allows to enable/disable EventReceiver usage
         :param max_workers: Optional. Maximum worker threads for
@@ -59,7 +59,7 @@ class CNComponentManagerLow(CNComponentManager):
         """
         super().__init__(
             op_state_model,
-            input_parameter,
+            _input_parameter,
             logger,
             _component,
             _liveliness_probe,
