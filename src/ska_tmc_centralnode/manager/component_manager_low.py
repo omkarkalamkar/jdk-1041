@@ -3,6 +3,7 @@ This module is inherited from CNComponentManager.
 
 It is component Manager for Low Telecope.
 """
+import time
 
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -84,6 +85,29 @@ class CNComponentManagerLow(CNComponentManager):
     #     return self._check_if_device_is_responsive(
     #         [self.input_parameter.mccs_master_leaf_node]
     #     )
+
+    def update_device_state(self, dev_name, state):
+        """
+        Update a monitored device state,
+        aggregate the states available
+        and call the relative callbacks if available
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param state: state of the device
+        :type state: DevState
+        """
+        with self.lock:
+            self.logger.debug(
+                f"State event callback for device {dev_name}: {state}"
+            )
+            devInfo = self.component.get_device(dev_name)
+            devInfo.state = state
+            devInfo.last_event_arrived = time.time()
+            devInfo.update_unresponsive(False)
+            self.component._invoke_device_callback(devInfo)
+
+        self._aggregate_state()
 
     def _aggregate_telescope_state(self):
         """
