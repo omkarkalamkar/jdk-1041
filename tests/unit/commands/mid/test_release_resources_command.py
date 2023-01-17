@@ -49,7 +49,7 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
 
 
 def get_release_resources_command_obj():
-    cm, start_time = create_cm(input_parameter=InputParameterMid(None))
+    cm, start_time = create_cm(_input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -84,7 +84,7 @@ def test_mid_release_resources_command_with_ok(tango_context, task_callback):
 def test_mid_release_resources_command_fail_subarray(
     tango_context, task_callback
 ):
-    cm, start_time = create_cm(input_parameter=InputParameterMid(None))
+    cm, start_time = create_cm(_input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
