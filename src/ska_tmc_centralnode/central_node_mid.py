@@ -192,7 +192,7 @@ class CentralNodeMid(AbstractCentralNode):
     def write_sdpMasterDevName(self, value):
         """Set the sdpMasterDevName attribute."""
         self.component_manager.input_parameter.sdp_master_dev_name = value
-        self.component_manager.updateinput_parameter()
+        self.component_manager.update_input_parameter()
 
     def read_CspMasterLeafNodeDevName(self):
         """Return the cspMasterLeafNodeDevName attribute."""
