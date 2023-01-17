@@ -175,20 +175,9 @@ class CentralNodeLow(AbstractCentralNode):
             max_workers=self.MaxWorker,
             proxy_timeout=self.ProxyTimeout,
             _input_parameter=InputParameterLow(None),
-            skuid_service=self.SkuidService,
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
-        cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
-        cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
-        cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
-        cm.input_parameter.sdp_mln_dev_name = self.SdpMasterLeafNodeFQDN or ""
-        cm.input_parameter.csp_subarray_dev_names = (
-            self.TMCMidCspSubarrayLeafNodes
-        )
-        cm.input_parameter.sdp_subarray_dev_names = (
-            self.TMCMidSdpSubarrayLeafNodes
-        )
         # cm.input_parameter.mccs_master_leaf_node = (
         #     self.MCCSMasterLeafNodeFQDN or ""
         # )
