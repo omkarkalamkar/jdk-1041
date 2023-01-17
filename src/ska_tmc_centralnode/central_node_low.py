@@ -156,7 +156,7 @@ class CentralNodeLow(AbstractCentralNode):
     def write_SdpMasterLeafNodeDevName(self, value):
         """Set the sdpMasterLeafNodeDevName attribute."""
         self.component_manager.input_parameter.sdp_mln_dev_name = value
-        self.component_manager.updateinput_parameter()
+        self.component_manager.update_input_parameter()
 
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
