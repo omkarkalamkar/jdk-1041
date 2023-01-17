@@ -2,6 +2,9 @@
 This module is inherited from CNComponentManager.
 
 It is component Manager for Mid Telecope.
+
+It is provided for explanatory purposes, and to support testing of this
+package.
 """
 import time
 

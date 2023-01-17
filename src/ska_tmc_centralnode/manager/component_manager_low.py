@@ -2,6 +2,9 @@
 This module is inherited from CNComponentManager.
 
 It is component Manager for Low Telecope.
+
+It is provided for explanatory purposes, and to support testing of this
+package.
 """
 
 from ska_tmc_common.enum import LivelinessProbeType
