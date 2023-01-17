@@ -38,7 +38,7 @@ server:
         - name: "ska_mid/tm_leaf_node/sdp_subarray01"
         - name: "ska_low/tm_leaf_node/csp_subarray01"
         - name: "ska_low/tm_leaf_node/sdp_subarray01"
-        - name: "ska_low/tm_leaf_node/mccs_subarray01"
+        # - name: "ska_low/tm_leaf_node/mccs_subarray01"
       - name: "HelperDishDevice"
         devices:
         - name: "mid_d0001/elt/master"
