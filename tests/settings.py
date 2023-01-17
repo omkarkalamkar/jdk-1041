@@ -68,7 +68,7 @@ def create_cm(
             op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=logger,
-            p_event_receiver=p_event_receiver,
+            _event_receiver=p_event_receiver,
         )
         DEVICE_LIST = DEVICE_LIST_MID
     else:
@@ -76,7 +76,7 @@ def create_cm(
             op_state_model,
             _input_parameter=InputParameterLow(None),
             logger=logger,
-            p_event_receiver=p_event_receiver,
+            _event_receiver=p_event_receiver,
         )
         DEVICE_LIST = DEVICE_LIST_LOW
 

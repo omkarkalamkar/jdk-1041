@@ -109,8 +109,7 @@ class CNComponentManagerMid(CNComponentManager):
             self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
-        if isinstance(self.input_parameter, InputParameterMid):
-            self._update_imaging()
+        self._update_imaging()
 
     def add_dishes(self, dln_prefix, num_dishes):
         """
