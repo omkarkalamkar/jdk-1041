@@ -14,7 +14,6 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
-from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class CNComponentManagerMid(CNComponentManager):
