@@ -18,7 +18,12 @@ from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import MID_SUBARRAY_DEVICE, create_cm, logger
+from tests.settings import (
+    MID_CSP_MASTER_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    MID_SUBARRAY_DEVICE, 
+    create_cm, logger
+)
 
 
 @pytest.fixture()
@@ -35,7 +40,9 @@ def devices_to_load():
         {
             "class": SKABaseDevice,
             "devices": [
+                {"name": MID_CSP_MASTER_DEVICE},
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
+                {"name": MID_SDP_MASTER_DEVICE},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
             ],
