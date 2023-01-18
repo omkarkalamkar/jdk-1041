@@ -11,8 +11,8 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_MID,
-    MID_CSP_SUBARRAY_DEVICE,
-    MID_SDP_SUBARRAY_DEVICE,
+    MID_CSP_SLN_DEVICE,
+    MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
@@ -36,8 +36,8 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
-                {"name": MID_CSP_SUBARRAY_DEVICE},
-                {"name": MID_SDP_SUBARRAY_DEVICE},
+                {"name": MID_CSP_SLN_DEVICE},
+                {"name": MID_SDP_SLN_DEVICE},
             ],
         },
     )

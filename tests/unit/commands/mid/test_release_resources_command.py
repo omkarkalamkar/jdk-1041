@@ -19,12 +19,12 @@ from ska_tmc_centralnode.commands.release_resources_command import (
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
-    MID_CSP_MASTER_DEVICE,
-    MID_CSP_SUBARRAY_DEVICE,
-    MID_SDP_MASTER_DEVICE,
-    MID_SDP_SUBARRAY_DEVICE,
+    DISH_LEAF_NODE_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_SLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
-    TMC_DISH1_DEVICE,
     create_cm,
     logger,
 )
@@ -37,18 +37,18 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
-                {"name": MID_CSP_SUBARRAY_DEVICE},
-                {"name": MID_SDP_SUBARRAY_DEVICE},
+                {"name": MID_CSP_SLN_DEVICE},
+                {"name": MID_SDP_SLN_DEVICE},
             ],
         },
         {
             "class": SKABaseDevice,
             "devices": [
                 {
-                    "name": MID_CSP_MASTER_DEVICE,
+                    "name": MID_CSP_MLN_DEVICE,
                 },
-                {"name": MID_SDP_MASTER_DEVICE},
-                {"name": TMC_DISH1_DEVICE},
+                {"name": MID_SDP_MLN_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
     )

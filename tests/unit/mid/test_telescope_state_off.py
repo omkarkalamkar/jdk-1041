@@ -5,15 +5,15 @@ from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
-    MID_CSP_CONTROL_DEVICE,
+    DISH_LEAF_NODE_DEVICE,
+    DISH_MASTER_DEVICE,
     MID_CSP_MASTER_DEVICE,
-    MID_CSP_SUBARRAY_DEVICE,
-    MID_SDP_CONTROL_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_SLN_DEVICE,
     MID_SDP_MASTER_DEVICE,
-    MID_SDP_SUBARRAY_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
-    TMC_DISH1_DEVICE,
-    TMC_DISH2_DEVICE,
     create_cm_no_faulty_devices,
     ensure_telescope_state,
     set_devices_state,
@@ -27,19 +27,19 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
-                {"name": MID_CSP_SUBARRAY_DEVICE},
-                {"name": MID_SDP_SUBARRAY_DEVICE},
+                {"name": MID_CSP_SLN_DEVICE},
+                {"name": MID_SDP_SLN_DEVICE},
             ],
         },
         {
             "class": HelperStateDevice,
             "devices": [
+                {"name": MID_CSP_MLN_DEVICE},
                 {"name": MID_CSP_MASTER_DEVICE},
-                {"name": MID_CSP_CONTROL_DEVICE},
+                {"name": MID_SDP_MLN_DEVICE},
                 {"name": MID_SDP_MASTER_DEVICE},
-                {"name": MID_SDP_CONTROL_DEVICE},
-                {"name": TMC_DISH2_DEVICE},
-                {"name": TMC_DISH1_DEVICE},
+                {"name": DISH_MASTER_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
     )

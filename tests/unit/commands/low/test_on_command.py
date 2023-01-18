@@ -13,9 +13,9 @@ from tango import DevState
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
-    MID_CSP_MASTER_DEVICE,
-    MID_SDP_MASTER_DEVICE,
     create_cm,
     logger,
 )
@@ -37,8 +37,8 @@ def devices_to_load():
         {
             "class": SKABaseDevice,
             "devices": [
-                {"name": MID_CSP_MASTER_DEVICE},
-                {"name": MID_SDP_MASTER_DEVICE},
+                {"name": LOW_CSP_MLN_DEVICE},
+                {"name": LOW_SDP_MLN_DEVICE},
             ],
         },
     )
