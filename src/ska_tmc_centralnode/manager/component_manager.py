@@ -29,7 +29,6 @@ from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
-from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class CNComponentManager(TmcComponentManager):
@@ -516,52 +515,6 @@ class CNComponentManager(TmcComponentManager):
             task_callback=task_callback,
         )
         return task_status, response
-
-    def is_command_allowed(self, command_name=None):
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :param command_name: name of the command
-        :type command_name: str
-        :return: True if this command is allowed
-
-        :rtype: boolean
-        """
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "Command is not allowed in current state %s",
-                str(self.op_state_model.op_state),
-            )
-        if command_name in ["TelescopeOn", "TelescopeOff"]:
-            if isinstance(self._input_parameter, InputParameterMid):
-                self.logger.debug(f"Checking mid devices for {command_name}")
-                self.check_if_csp_mln_is_responsive()
-                self.check_if_sdp_mln_is_responsive()
-                self.check_if_subarrays_are_responsive()
-                self.check_if_dishes_are_responsive()
-            else:
-                self.logger.debug(f"Checking low devices for {command_name}")
-                # self.check_if_mccs_mln_is_responsive()
-                self.check_if_subarrays_are_responsive()
-        elif command_name in ["AssignResources", "ReleaseResources"]:
-            if isinstance(self._input_parameter, InputParameterMid):
-                self.logger.debug(f"Checking mid devices for {command_name}")
-                self.check_if_subarrays_are_responsive()
-                self.check_if_dishes_are_responsive()
-            else:
-                self.logger.debug(f"Checking low devices for {command_name}")
-                # TODO Uncomment below code during integration of MCCS
-                # self.check_if_mccs_mln_is_responsive()
-                self.check_if_subarrays_are_responsive()
-
-        return True
 
     def log_state(self, msg="Device States"):
         device_names = []
