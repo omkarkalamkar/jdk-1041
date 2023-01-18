@@ -26,7 +26,11 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": MID_SUBARRAY_DEVICE}],
+            "devices": [
+                {"name": MID_SUBARRAY_DEVICE},
+                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
+                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+            ],
         },
         {
             "class": SKABaseDevice,
@@ -241,11 +245,16 @@ def test_assign_resources_command_already_assigned(
         cm, adapter_factory, skuid, logger=logger
     )
     # dish0001 is assigned to Subarray1
-    for subarray_devInfo in cm.devices:
-        if isinstance(subarray_devInfo, SubArrayDeviceInfo):
-            if subarray_devInfo.dev_name == MID_SUBARRAY_DEVICE:
-                subarray_devInfo.resources.append("dish0001")
-                logger.info("devInfo is: %s", subarray_devInfo.resources)
+    for devInfo in cm.devices:
+        if isinstance(devInfo, SubArrayDeviceInfo):
+            if devInfo.dev_name == MID_SUBARRAY_DEVICE:
+                logger.info(
+                    "The device info object is for %s and it has %s resources",
+                    devInfo.dev_name,
+                    devInfo.resources,
+                )
+                devInfo.resources.append("dish0001")
+                logger.info("devInfo is: %s", devInfo.resources)
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
