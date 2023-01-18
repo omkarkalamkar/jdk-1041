@@ -12,7 +12,13 @@ from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import LOW_SUBARRAY_DEVICE, create_cm, logger
+from tests.settings import (
+    LOW_SUBARRAY_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    create_cm,
+    logger,
+)
 
 
 @pytest.fixture()
@@ -31,8 +37,8 @@ def devices_to_load():
         {
             "class": SKABaseDevice,
             "devices": [
-                {"name": "ska_low/tm_leaf_node/csp_master"},
-                {"name": "ska_low/tm_leaf_node/sdp_master"},
+                {"name": MID_CSP_MASTER_DEVICE},
+                {"name": MID_SDP_MASTER_DEVICE},
             ],
         },
     )

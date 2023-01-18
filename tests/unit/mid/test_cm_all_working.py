@@ -8,7 +8,15 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
 )
 
 from tests.settings import (
+    MID_CSP_CONTROL_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_CSP_SUBARRAY_DEVICE,
+    MID_SDP_CONTROL_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
+    TMC_DISH1_DEVICE,
+    TMC_DISH2_DEVICE,
     count_faulty_devices,
     create_cm,
     logger,
@@ -22,19 +30,19 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
-                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
-                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+                {"name": MID_CSP_SUBARRAY_DEVICE},
+                {"name": MID_SDP_SUBARRAY_DEVICE},
             ],
         },
         {
             "class": SKABaseDevice,
             "devices": [
-                {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "mid-csp/control/0"},
-                {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid-sdp/control/0"},
-                {"name": "ska_mid/tm_leaf_node/d0001"},
-                {"name": "mid_d0001/elt/master"},
+                {"name": MID_CSP_MASTER_DEVICE},
+                {"name": MID_CSP_CONTROL_DEVICE},
+                {"name": MID_SDP_MASTER_DEVICE},
+                {"name": MID_SDP_CONTROL_DEVICE},
+                {"name": TMC_DISH1_DEVICE},
+                {"name": TMC_DISH2_DEVICE},
             ],
         },
     )

@@ -18,7 +18,16 @@ from ska_tmc_centralnode.commands.release_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import MID_SUBARRAY_DEVICE, create_cm, logger
+from tests.settings import (
+    MID_CSP_MASTER_DEVICE,
+    MID_CSP_SUBARRAY_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_SUBARRAY_DEVICE,
+    MID_SUBARRAY_DEVICE,
+    TMC_DISH1_DEVICE,
+    create_cm,
+    logger,
+)
 
 
 @pytest.fixture()
@@ -28,16 +37,18 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
-                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
-                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+                {"name": MID_CSP_SUBARRAY_DEVICE},
+                {"name": MID_SDP_SUBARRAY_DEVICE},
             ],
         },
         {
             "class": SKABaseDevice,
             "devices": [
-                {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "ska_mid/tm_leaf_node/d0001"},
+                {
+                    "name": MID_CSP_MASTER_DEVICE,
+                },
+                {"name": MID_SDP_MASTER_DEVICE},
+                {"name": TMC_DISH1_DEVICE},
             ],
         },
     )

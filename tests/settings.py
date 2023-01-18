@@ -26,10 +26,16 @@ MID_SDP_MASTER_DEVICE = "ska_mid/tm_leaf_node/sdp_subarray01"
 LOW_SDP_MASTER_DEVICE = "ska_low/tm_leaf_node/sdp_master"
 MID_CSP_SUBARRAY_DEVICE = "ska_mid/tm_leaf_node/csp_subarray01"
 LOW_CSP_SUBARRAY_DEVICE = "ska_low/tm_leaf_node/csp_subarray01"
-MID_SDP_SUBARRAY_DEVICE =  "ska_mid/tm_leaf_node/sdp_subarray01"
+MID_SDP_SUBARRAY_DEVICE = "ska_mid/tm_leaf_node/sdp_subarray01"
 LOW_SDP_SUBARRAY_DEVICE = "ska_low/tm_leaf_node/csp_subarray01"
 MID_SUBARRAY_DEVICE = "ska_mid/tm_subarray_node/1"
 LOW_SUBARRAY_DEVICE = "ska_low/tm_subarray_node/1"
+TMC_DISH1_DEVICE = "ska_mid/tm_leaf_node/d0001"
+TMC_DISH2_DEVICE = "mid_d0001/elt/master"
+MID_SDP_CONTROL_DEVICE = "mid-sdp/control/0"
+MID_CSP_CONTROL_DEVICE = "mid-csp/control/0"
+LOW_CSP_CONTROL_DEVICE = "low-csp/control/0"
+LOW_SDP_CONTROL_DEVICE = "low-sdp/control/0"
 DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_master",
     "mid-csp/control/0",
