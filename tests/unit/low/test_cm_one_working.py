@@ -11,8 +11,6 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
-    LOW_CSP_SLN_DEVICE,
-    LOW_SDP_SLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
@@ -32,15 +30,14 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": LOW_SUBARRAY_DEVICE},
-                {"name": LOW_SDP_SLN_DEVICE},
-                {"name": LOW_CSP_SLN_DEVICE},
             ],
         },
     )
 
-
 @pytest.mark.SKA_low
-def test_low_one_working_other_faulty(tango_context):
+def test_low_one_working_other_faulty(
+    tango_context,
+):
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerLow(
