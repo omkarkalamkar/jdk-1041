@@ -17,9 +17,7 @@ from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     MID_CSP_MLN_DEVICE,
-    MID_CSP_SLN_DEVICE,
     MID_SDP_MLN_DEVICE,
-    MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
     create_cm,
     logger,
@@ -33,8 +31,6 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
-                {"name": MID_CSP_SLN_DEVICE},
-                {"name": MID_SDP_SLN_DEVICE},
             ],
         },
         {

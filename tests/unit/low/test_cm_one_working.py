@@ -34,6 +34,7 @@ def devices_to_load():
         },
     )
 
+
 @pytest.mark.SKA_low
 def test_low_one_working_other_faulty(
     tango_context,
