@@ -12,7 +12,7 @@ from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import create_cm, logger
+from tests.settings import LOW_SUBARRAY_DEVICE, create_cm, logger
 
 
 @pytest.fixture()
@@ -20,7 +20,7 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": "ska_low/tm_subarray_node/1"}],
+            "devices": [{"name": LOW_SUBARRAY_DEVICE}],
         },
         # {
         #     "class": HelperMCCSStateDevice,

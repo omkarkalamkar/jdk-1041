@@ -113,9 +113,6 @@ class CNComponentManagerMid(CNComponentManager):
         self._aggregate_state()
         self._update_imaging()
 
-    def add_device(self, dev_name):
-        super().add_device(dev_name)
-
     def add_dishes(self, dln_prefix, num_dishes):
         """
         Add dishes to the liveliness probe function

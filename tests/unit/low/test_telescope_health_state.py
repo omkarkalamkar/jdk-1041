@@ -11,7 +11,11 @@ from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import TIMEOUT, create_cm_no_faulty_devices
+from tests.settings import (
+    LOW_SUBARRAY_DEVICE,
+    TIMEOUT,
+    create_cm_no_faulty_devices,
+)
 
 
 @pytest.fixture()
@@ -20,7 +24,7 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": LOW_SUBARRAY_DEVICE},
                 {"name": "ska_low/tm_leaf_node/sdp_subarray01"},
                 {"name": "ska_low/tm_leaf_node/csp_subarray01"},
             ],

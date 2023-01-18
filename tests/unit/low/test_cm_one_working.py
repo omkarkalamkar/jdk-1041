@@ -11,6 +11,7 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
+    LOW_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
     count_faulty_devices,
@@ -28,7 +29,9 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": LOW_SUBARRAY_DEVICE},
+                {"name": "ska_low/tm_leaf_node/sdp_subarray01"},
+                {"name": "ska_low/tm_leaf_node/csp_subarray01"},
             ],
         },
     )

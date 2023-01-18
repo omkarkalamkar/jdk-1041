@@ -26,7 +26,11 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": MID_SUBARRAY_DEVICE}],
+            "devices": [
+                {"name": MID_SUBARRAY_DEVICE},
+                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
+                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+            ],
         },
         {
             "class": SKABaseDevice,

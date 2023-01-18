@@ -18,7 +18,7 @@ from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
 from tests.mock_callable import MockCallable
-from tests.settings import create_cm, logger
+from tests.settings import MID_SUBARRAY_DEVICE, create_cm, logger
 
 
 @pytest.fixture()
@@ -26,7 +26,11 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": "ska_mid/tm_subarray_node/1"}],
+            "devices": [
+                {"name": MID_SUBARRAY_DEVICE},
+                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
+                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+            ],
         },
         {
             "class": SKABaseDevice,

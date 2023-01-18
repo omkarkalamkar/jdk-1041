@@ -5,6 +5,7 @@ from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
+    MID_SUBARRAY_DEVICE,
     create_cm_no_faulty_devices,
     ensure_tmc_op_state,
     set_devices_state,
@@ -17,7 +18,7 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_mid/tm_subarray_node/1"},
+                {"name": MID_SUBARRAY_DEVICE},
                 {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
                 {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
             ],

@@ -6,7 +6,11 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import TIMEOUT, create_cm_no_faulty_devices
+from tests.settings import (
+    MID_SUBARRAY_DEVICE,
+    TIMEOUT,
+    create_cm_no_faulty_devices,
+)
 
 
 @pytest.fixture()
@@ -17,7 +21,7 @@ def devices_to_load():
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
                 {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
-                {"name": "ska_mid/tm_subarray_node/1"},
+                {"name": MID_SUBARRAY_DEVICE},
             ],
         },
         {

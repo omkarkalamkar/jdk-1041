@@ -7,7 +7,12 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
 
-from tests.settings import count_faulty_devices, create_cm, logger
+from tests.settings import (
+    MID_SUBARRAY_DEVICE,
+    count_faulty_devices,
+    create_cm,
+    logger,
+)
 
 
 @pytest.fixture()
@@ -16,7 +21,7 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_mid/tm_subarray_node/1"},
+                {"name": MID_SUBARRAY_DEVICE},
                 {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
                 {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
             ],

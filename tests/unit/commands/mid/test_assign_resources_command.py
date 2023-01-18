@@ -248,11 +248,6 @@ def test_assign_resources_command_already_assigned(
     for devInfo in cm.devices:
         if isinstance(devInfo, SubArrayDeviceInfo):
             if devInfo.dev_name == MID_SUBARRAY_DEVICE:
-                logger.info(
-                    "The device info object is for %s and it has %s resources",
-                    devInfo.dev_name,
-                    devInfo.resources,
-                )
                 devInfo.resources.append("dish0001")
                 logger.info("devInfo is: %s", devInfo.resources)
 
