@@ -8,6 +8,8 @@ from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     LOW_CSP_MASTER_DEVICE,
     LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SLN_DEVICE,
+    LOW_SDP_MASTER_DEVICE,
     LOW_SDP_MLN_DEVICE,
     LOW_SDP_SLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
@@ -24,8 +26,8 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": LOW_SUBARRAY_DEVICE},
-                {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_SDP_SLN_DEVICE},
+                {"name": LOW_CSP_SLN_DEVICE},
             ],
         },
         {
@@ -34,7 +36,7 @@ def devices_to_load():
                 {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_CSP_MASTER_DEVICE},
                 {"name": LOW_SDP_MLN_DEVICE},
-                {"name": LOW_SDP_MLN_DEVICE},
+                {"name": LOW_SDP_MASTER_DEVICE},
             ],
         },
     )
