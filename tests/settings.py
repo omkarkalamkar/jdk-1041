@@ -70,7 +70,7 @@ def count_faulty_devices(cm):
 
 
 def create_cm(
-    p_liveliness_probe=True,
+    p_liveliness_probe=False,
     p_event_receiver=True,
     _input_parameter=InputParameterMid(None),
 ):
