@@ -7,10 +7,19 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
 
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_low import (
+    CNComponentManagerLow,
+)
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import (
     DEVICE_LIST_LOW,
+    LOW_CSP_MASTER_DEVICE,
+    LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SLN_DEVICE,
+    LOW_SDP_MASTER_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SDP_SLN_DEVICE,
+    LOW_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
     count_faulty_devices,
@@ -24,16 +33,18 @@ def devices_to_load():
         {
             "class": HelperStateDevice,
             "devices": [
-                {"name": "ska_low/tm_leaf_node/csp_master"},
-                {"name": "low-csp/control/0"},
-                {"name": "ska_low/tm_leaf_node/sdp_master"},
-                {"name": "low-sdp/control/0"},
+                {"name": LOW_CSP_MLN_DEVICE},
+                {"name": LOW_CSP_MASTER_DEVICE},
+                {"name": LOW_SDP_MLN_DEVICE},
+                {"name": LOW_SDP_MASTER_DEVICE},
             ],
         },
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": LOW_SUBARRAY_DEVICE},
+                {"name": LOW_SDP_SLN_DEVICE},
+                {"name": LOW_CSP_SLN_DEVICE},
             ],
         },
     )
@@ -42,7 +53,7 @@ def devices_to_load():
 @pytest.mark.SKA_low
 def test_all_low_devices_faulty():
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(
+    cm = CNComponentManagerLow(
         op_state_model,
         _input_parameter=InputParameterLow(None),
         logger=logger,

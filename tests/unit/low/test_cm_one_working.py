@@ -4,11 +4,14 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_low import (
+    CNComponentManagerLow,
+)
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
+    LOW_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
     count_faulty_devices,
@@ -26,17 +29,19 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": LOW_SUBARRAY_DEVICE},
             ],
         },
     )
 
 
 @pytest.mark.SKA_low
-def test_low_one_working_other_faulty(tango_context):
+def test_low_one_working_other_faulty(
+    tango_context,
+):
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(
+    cm = CNComponentManagerLow(
         op_state_model, _input_parameter=InputParameterLow(None), logger=logger
     )
     for dev in DEVICE_LIST_LOW:

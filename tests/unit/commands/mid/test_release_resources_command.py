@@ -18,7 +18,14 @@ from ska_tmc_centralnode.commands.release_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import MID_SUBARRAY_DEVICE, create_cm, logger
+from tests.settings import (
+    DISH_LEAF_NODE_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SUBARRAY_DEVICE,
+    create_cm,
+    logger,
+)
 
 
 @pytest.fixture()
@@ -26,14 +33,18 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": MID_SUBARRAY_DEVICE}],
+            "devices": [
+                {"name": MID_SUBARRAY_DEVICE},
+            ],
         },
         {
             "class": SKABaseDevice,
             "devices": [
-                {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "ska_mid/tm_leaf_node/d0001"},
+                {
+                    "name": MID_CSP_MLN_DEVICE,
+                },
+                {"name": MID_SDP_MLN_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
     )
@@ -49,7 +60,7 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
 
 
 def get_release_resources_command_obj():
-    cm, start_time = create_cm(input_parameter=InputParameterMid(None))
+    cm, start_time = create_cm(_input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -84,7 +95,7 @@ def test_mid_release_resources_command_with_ok(tango_context, task_callback):
 def test_mid_release_resources_command_fail_subarray(
     tango_context, task_callback
 ):
-    cm, start_time = create_cm(input_parameter=InputParameterMid(None))
+    cm, start_time = create_cm(_input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
