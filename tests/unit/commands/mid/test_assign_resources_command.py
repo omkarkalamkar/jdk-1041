@@ -230,6 +230,7 @@ def test_assign_resources_fail_check_allowed(tango_context):
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
 
+
 def test_assign_resources_command_already_assigned(
     tango_context, task_callback
 ):
