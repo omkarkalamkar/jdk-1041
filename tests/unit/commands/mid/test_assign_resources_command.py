@@ -7,8 +7,7 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
-
-# from ska_tmc_common.device_info import SubArrayDeviceInfo
+from ska_tmc_common.device_info import SubArrayDeviceInfo
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -47,6 +46,40 @@ def devices_to_load():
             ],
         },
     )
+
+
+@pytest.mark.xfail("Unstable behaviour")
+def test_assign_resources_command_already_assigned(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    cm.is_command_allowed("AssignResources")
+    adapter_factory = HelperAdapterFactory()
+
+    attrs = {"fetch_skuid.return_value": 123}
+    skuid = mock.Mock(**attrs)
+
+    assign_res_command = AssignResources(
+        cm, adapter_factory, skuid, logger=logger
+    )
+    # dish0001 is assigned to Subarray1
+    for devInfo in cm.devices:
+        if isinstance(devInfo, SubArrayDeviceInfo):
+            if devInfo.dev_name == MID_SUBARRAY_DEVICE:
+                devInfo.resources.append("dish0001")
+                logger.info("devInfo is: %s", devInfo.resources)
+
+    # Invoke AssignResources to assign already allocated resource - dish0001
+    assign_input_str = get_assign_input_str()
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    (res_code, message) = assign_res_command.do(assign_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "dish0001" in message
 
 
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
@@ -230,36 +263,3 @@ def test_assign_resources_fail_check_allowed(tango_context):
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
-
-
-# def test_assign_resources_command_already_assigned(
-#     tango_context, task_callback
-# ):
-#     logger.info("%s", tango_context)
-#     cm, start_time = create_cm()
-#     elapsed_time = time.time() - start_time
-#     logger.info(
-#         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-#     )
-#     cm.is_command_allowed("AssignResources")
-#     adapter_factory = HelperAdapterFactory()
-
-#     attrs = {"fetch_skuid.return_value": 123}
-#     skuid = mock.Mock(**attrs)
-
-#     assign_res_command = AssignResources(
-#         cm, adapter_factory, skuid, logger=logger
-#     )
-#     # dish0001 is assigned to Subarray1
-#     for devInfo in cm.devices:
-#         if isinstance(devInfo, SubArrayDeviceInfo):
-#             if devInfo.dev_name == MID_SUBARRAY_DEVICE:
-#                 devInfo.resources.append("dish0001")
-#                 logger.info("devInfo is: %s", devInfo.resources)
-
-#     # Invoke AssignResources to assign already allocated resource - dish0001
-#     assign_input_str = get_assign_input_str()
-#     cm.assign_resources(assign_input_str, task_callback=task_callback)
-#     (res_code, message) = assign_res_command.do(assign_input_str)
-#     assert res_code == ResultCode.FAILED
-#     assert "dish0001" in message
