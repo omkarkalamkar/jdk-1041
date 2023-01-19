@@ -47,6 +47,7 @@ def devices_to_load():
         },
     )
 
+
 @pytest.mark.aki
 def test_assign_resources_command_already_assigned(
     tango_context, task_callback
