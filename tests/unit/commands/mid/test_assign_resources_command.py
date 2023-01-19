@@ -47,7 +47,7 @@ def devices_to_load():
         },
     )
 
-
+@pytest.mark.aki
 def test_assign_resources_command_already_assigned(
     tango_context, task_callback
 ):
@@ -70,7 +70,9 @@ def test_assign_resources_command_already_assigned(
     for devInfo in cm.devices:
         if isinstance(devInfo, SubArrayDeviceInfo):
             if devInfo.dev_name == MID_SUBARRAY_DEVICE:
-                devInfo.resources.append("dish0001")
+                if devInfo.resources is not None:
+                    # return False
+                    devInfo.resources.append("dish0001")
                 logger.info("devInfo is: %s", devInfo.resources)
 
     # Invoke AssignResources to assign already allocated resource - dish0001
