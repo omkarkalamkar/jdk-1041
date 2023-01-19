@@ -48,7 +48,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.xfail("Unstable behaviour")
+@pytest.mark.xfail(reason="Unstable behaviour")
 def test_assign_resources_command_already_assigned(
     tango_context, task_callback
 ):
