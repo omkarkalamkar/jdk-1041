@@ -9,6 +9,7 @@ from typing import Callable, Optional
 
 import pandas as pd
 from ska_ser_skuid.client import SkuidClient
+from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
@@ -585,12 +586,18 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
+        # Execute the command if the input JSON is valid
         assign_resources_command = AssignResources(
             self,
             adapter_factory=self.adapter_factory,
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
+        is_valid, _ = assign_resources_command.input_validate_json(
+            argin, assign_resources_command
+        )
+        if not is_valid:
+            return ResultCode.FAILED, "Problem in loading the JSON string"
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
             args=[argin, self.logger],
