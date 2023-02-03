@@ -392,7 +392,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        is_valid, invalid_json_error_msg = self._validate_json(json_argument)
+        is_valid, invalid_json_error_msg = self._validate_low_json(json_argument)
         if not is_valid:
             return self.generate_command_result(
                 ResultCode.FAILED,
