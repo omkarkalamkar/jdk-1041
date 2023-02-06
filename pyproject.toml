@@ -35,6 +35,7 @@ ska-ser-skuid = "*"
 mock = "^4.0.3"
 pandas="1.4.2"
 ipython = "8.5.0"
+ska-control-model="0.3.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.8.0"

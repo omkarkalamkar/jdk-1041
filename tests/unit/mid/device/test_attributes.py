@@ -2,12 +2,8 @@ import json
 
 import pytest
 import tango
-from ska_tango_base.control_model import (
-    ControlMode,
-    HealthState,
-    SimulationMode,
-    TestMode,
-)
+from ska_control_model import HealthState
+from ska_tango_base.control_model import ControlMode, SimulationMode, TestMode
 from tango import DevState
 from tango.test_utils import DeviceTestContext
 
@@ -35,14 +31,12 @@ def central_node_device(request):
 
 
 def test_attributes(central_node_device):
-    assert central_node_device.HealthState in [
-        HealthState.UNKNOWN,
-        HealthState.OK,
-    ]
+
     assert central_node_device.State() in [
         tango._tango.DevState.UNKNOWN,
         tango._tango.DevState.ON,
     ]
+    assert central_node_device.HealthState == HealthState.OK
     assert central_node_device.telescopeHealthstate == HealthState.UNKNOWN
     central_node_device.loggingTargets = ["console::cout"]
     assert "console::cout" in central_node_device.loggingTargets

@@ -5,8 +5,8 @@ of state and mode attributes defined by the SKA Control Model.
 """
 import json
 
+from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
-from ska_tango_base.control_model import HealthState
 from ska_tmc_common.tmc_base_device import TMCBaseDevice
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
@@ -122,6 +122,7 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("telescopeState", True, False)
             self._device.set_change_event("lastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
+            self._device._health_state = HealthState.OK
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
 

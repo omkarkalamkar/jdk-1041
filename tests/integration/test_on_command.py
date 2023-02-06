@@ -1,6 +1,7 @@
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import HealthState
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import PointingState
 
@@ -12,6 +13,7 @@ from tests.integration.conftest import ensure_checked_devices
 def test_on_command_mid(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
     result, unique_id = central_node.TelescopeOn()
@@ -57,6 +59,7 @@ def test_on_command_mid(tango_context, change_event_callbacks):
 def test_on_command_low(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
     result, unique_id = central_node.TelescopeOn()
