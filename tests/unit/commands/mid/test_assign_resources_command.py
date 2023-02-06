@@ -39,7 +39,7 @@ def devices_to_load():
     )
 
 
-def get_assign_input_str(assign_input_file="invalid_key_AssignResources.json"):
+def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
     with open(path, "r") as f:
         assign_input_str = f.read()
@@ -62,6 +62,7 @@ def get_assign_resources_command_obj():
         cm, adapter_factory, skuid, logger=logger
     )
     return assign_res_command, adapter_factory, cm
+
 
 def test_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)

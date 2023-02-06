@@ -593,11 +593,11 @@ class CNComponentManager(TmcComponentManager):
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
-        is_valid = assign_resources_command.input_validate_json(
+        ret_code, error = assign_resources_command.input_validate_json(
             argin, assign_resources_command
         )
-        if not is_valid:
-            return ResultCode.FAILED, "Problem in loading the JSON string"
+        if ret_code == ResultCode.FAILED:
+            return ret_code, error
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
             args=[argin, self.logger],
