@@ -173,7 +173,9 @@ def test_low_assign_resources_command_with_invalide_key(
         assign_input_str, task_callback=task_callback
     )
     assert res_code == ResultCode.FAILED
-    assert "key is not present in the input json argument" in message
+    assert (
+        "subarray id key is not present in the input json argument" in message
+    )
 
 
 @pytest.mark.SKA_low

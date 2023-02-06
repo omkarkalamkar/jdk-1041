@@ -223,7 +223,7 @@ class AssignResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
-        # # check allocated dishes
+        # check allocated dishes
         if "dish" not in json_argument:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -382,12 +382,12 @@ class AssignResources(AbstractAssignReleaseResources):
 
         """
 
-    def input_validate_json(self, argin, assign_resources_command):
+    def validate_input_json(self, argin):
         # Validate the input JSON
         try:
             json_argument = json.loads(argin)
         except Exception as e:
-            return assign_resources_command.generate_command_result(
+            return self.generate_command_result(
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )

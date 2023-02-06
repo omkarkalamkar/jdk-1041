@@ -43,6 +43,7 @@ from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
+from tests.settings import logger
 
 
 class CNComponentManager(TmcComponentManager):
@@ -593,10 +594,9 @@ class CNComponentManager(TmcComponentManager):
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
-        ret_code, error = assign_resources_command.input_validate_json(
-            argin, assign_resources_command
-        )
+        ret_code, error = assign_resources_command.validate_input_json(argin)
         if ret_code == ResultCode.FAILED:
+            logger.info(f"Problem in loading the JSON string{argin}")
             return ret_code, error
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
