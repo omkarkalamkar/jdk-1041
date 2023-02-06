@@ -1,7 +1,7 @@
 import json
 import threading
 
-from ska_tango_base.control_model import HealthState
+from ska_control_model import HealthState
 from ska_tmc_common.device_info import DeviceInfo
 from ska_tmc_common.tmc_component_manager import TmcComponent
 from tango import DevState

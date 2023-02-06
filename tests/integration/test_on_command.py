@@ -1,7 +1,7 @@
 import pytest
 import tango
+from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import HealthState
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import PointingState
 

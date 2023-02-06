@@ -1,4 +1,4 @@
-from ska_tango_base.control_model import HealthState
+from ska_control_model import HealthState
 from ska_tmc_common.aggregators import Aggregator
 from tango import DevState
 
