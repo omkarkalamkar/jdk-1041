@@ -593,7 +593,7 @@ class CNComponentManager(TmcComponentManager):
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
-        is_valid, _ = assign_resources_command.input_validate_json(
+        is_valid = assign_resources_command.input_validate_json(
             argin, assign_resources_command
         )
         if not is_valid:
