@@ -1,6 +1,6 @@
 import pytest
 import tango
-from ska_tango_base.control_model import HealthState
+from ska_control_model import HealthState
 from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
