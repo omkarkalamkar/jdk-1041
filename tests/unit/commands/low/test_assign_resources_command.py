@@ -161,7 +161,7 @@ def test_low_assign_resources_command_empty_input_json(
     (res_code, _) = assign_res_command.do(" ")
     assert res_code == ResultCode.FAILED
 
-
+@pytest.mark.mS
 def test_low_assign_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
