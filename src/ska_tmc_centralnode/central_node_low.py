@@ -9,7 +9,9 @@ from tango import AttrWriteType
 from tango.server import attribute, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_low import (
+    CNComponentManagerLow,
+)
 from ska_tmc_centralnode.model.input import InputParameterLow
 
 __all__ = ["CentralNodeLow", "main"]
@@ -160,7 +162,7 @@ class CentralNodeLow(AbstractCentralNode):
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )
-        cm = CNComponentManager(
+        cm = CNComponentManagerLow(
             self.op_state_model,
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
@@ -168,8 +170,8 @@ class CentralNodeLow(AbstractCentralNode):
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=None,
-            communication_state_changed_callback=None,
-            component_state_changed_callback=None,
+            communication_state_callback=None,
+            component_state_callback=None,
             max_workers=self.MaxWorker,
             proxy_timeout=self.ProxyTimeout,
             _input_parameter=InputParameterLow(None),

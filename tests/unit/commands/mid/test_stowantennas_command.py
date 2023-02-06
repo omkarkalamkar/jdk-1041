@@ -14,7 +14,14 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
 )
 
 from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
-from tests.settings import create_cm, logger
+from tests.settings import (
+    DISH_LEAF_NODE_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SUBARRAY_DEVICE,
+    create_cm,
+    logger,
+)
 
 
 @pytest.fixture()
@@ -22,14 +29,16 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": "ska_mid/tm_subarray_node/1"}],
+            "devices": [
+                {"name": MID_SUBARRAY_DEVICE},
+            ],
         },
         {
             "class": SKABaseDevice,
             "devices": [
-                {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "ska_mid/tm_leaf_node/d0001"},
+                {"name": MID_CSP_MLN_DEVICE},
+                {"name": MID_SDP_MLN_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
     )

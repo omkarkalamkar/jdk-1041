@@ -4,24 +4,38 @@ import time
 import pytest
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_low import (
+    CNComponentManagerLow,
+)
+from ska_tmc_centralnode.manager.component_manager_mid import (
+    CNComponentManagerMid,
+)
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
 
 logger = logging.getLogger(__name__)
-
 SLEEP_TIME = 0.5
 TIMEOUT = 20
-
 DishLeafNodePrefix = "ska_mid/tm_leaf_node/d"
 NumDishes = 10
-
+MID_CSP_MLN_DEVICE = "ska_mid/tm_leaf_node/csp_master"
+LOW_CSP_MLN_DEVICE = "ska_low/tm_leaf_node/csp_master"
+MID_SDP_MLN_DEVICE = "ska_mid/tm_leaf_node/sdp_master"
+LOW_SDP_MLN_DEVICE = "ska_low/tm_leaf_node/sdp_master"
+MID_CSP_SLN_DEVICE = "ska_mid/tm_leaf_node/csp_subarray01"
+LOW_CSP_SLN_DEVICE = "ska_low/tm_leaf_node/csp_subarray01"
+MID_SDP_SLN_DEVICE = "ska_mid/tm_leaf_node/sdp_subarray01"
+LOW_SDP_SLN_DEVICE = "ska_low/tm_leaf_node/sdp_subarray01"
 MID_SUBARRAY_DEVICE = "ska_mid/tm_subarray_node/1"
 LOW_SUBARRAY_DEVICE = "ska_low/tm_subarray_node/1"
-
-
+DISH_LEAF_NODE_DEVICE = "ska_mid/tm_leaf_node/d0001"
+DISH_MASTER_DEVICE = "mid_d0001/elt/master"
+MID_SDP_MASTER_DEVICE = "mid-sdp/control/0"
+MID_CSP_MASTER_DEVICE = "mid-csp/control/0"
+LOW_CSP_MASTER_DEVICE = "low-csp/control/0"
+LOW_SDP_MASTER_DEVICE = "low-sdp/control/0"
 DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_master",
     "mid-csp/control/0",
@@ -33,7 +47,6 @@ DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/d0001",
     "mid_d0001/elt/master",
 ]
-
 DEVICE_LIST_LOW = [
     # "ska_low/tm_leaf_node/mccs_master",
     # "low-mccs/control/control",
@@ -59,17 +72,26 @@ def count_faulty_devices(cm):
 def create_cm(
     p_liveliness_probe=False,
     p_event_receiver=True,
-    input_parameter=InputParameterMid(None),
+    _input_parameter=InputParameterMid(None),
 ):
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(
-        op_state_model,
-        logger=logger,
-        _input_parameter=input_parameter,
-    )
-    if isinstance(input_parameter, InputParameterMid):
+
+    """Creating component manager"""
+    if isinstance(_input_parameter, InputParameterMid):
+        cm = CNComponentManagerMid(
+            op_state_model,
+            _input_parameter=InputParameterMid(None),
+            logger=logger,
+            _event_receiver=p_event_receiver,
+        )
         DEVICE_LIST = DEVICE_LIST_MID
     else:
+        cm = CNComponentManagerLow(
+            op_state_model,
+            _input_parameter=InputParameterLow(None),
+            logger=logger,
+            _event_receiver=p_event_receiver,
+        )
         DEVICE_LIST = DEVICE_LIST_LOW
 
     for dev in DEVICE_LIST:
@@ -83,7 +105,6 @@ def create_cm(
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
-
     return cm, start_time
 
 
@@ -91,16 +112,19 @@ def create_cm_no_faulty_devices(
     tango_context,
     p_liveliness_probe,
     p_event_receiver,
-    input_parameter=InputParameterMid(None),
+    _input_parameter=InputParameterMid(None),
 ):
     logger.info("%s", tango_context)
-    if isinstance(input_parameter, InputParameterMid):
-        input_parameter = InputParameterMid(None)
+    if isinstance(_input_parameter, InputParameterMid):
+        _input_parameter = InputParameterMid(None)
+        cm, start_time = create_cm(
+            p_liveliness_probe, p_event_receiver, _input_parameter
+        )
     else:
-        input_parameter = InputParameterLow(None)
-    cm, start_time = create_cm(
-        p_liveliness_probe, p_event_receiver, input_parameter
-    )
+        _input_parameter = InputParameterLow(None)
+        cm, start_time = create_cm(
+            p_liveliness_probe, p_event_receiver, _input_parameter
+        )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time

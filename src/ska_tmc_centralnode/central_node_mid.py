@@ -4,11 +4,16 @@ Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType
 from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
+from ska_tmc_centralnode.manager.component_manager_mid import (
+    CNComponentManagerMid,
+)
 from ska_tmc_centralnode.model.enum import ModesAvailability
+from ska_tmc_centralnode.model.input import InputParameterMid
 
 __all__ = ["CentralNodeMid", "main"]
 
@@ -208,6 +213,7 @@ class CentralNodeMid(AbstractCentralNode):
         self.component_manager.update_input_parameter()
 
     # TODO: Not in the scope for PI15
+
     # --------
     # Commands
     # --------
@@ -240,6 +246,50 @@ class CentralNodeMid(AbstractCentralNode):
     #     )
     #     self.log_state("Device states after executing StowAntennas command")
     #     return [[ResultCode.QUEUED], [str(unique_id)]]
+
+    def create_component_manager(self):
+        self.op_state_model = TMCOpStateModel(
+            logger=self.logger, callback=super()._update_state
+        )
+        cm = CNComponentManagerMid(
+            self.op_state_model,
+            _input_parameter=InputParameterMid(None),
+            logger=self.logger,
+            _update_device_callback=self.update_device_callback,
+            _update_telescope_state_callback=self.update_telescope_state_callback,
+            _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
+            _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
+            _update_imaging_callback=self.update_imaging_callback,
+            communication_state_callback=None,
+            component_state_callback=None,
+            max_workers=self.MaxWorker,
+            proxy_timeout=self.ProxyTimeout,
+            sleep_time=self.SleepTime,
+            skuid_service=self.SkuidService,
+        )
+        cm.input_parameter.dish_leaf_node_dev_names = []
+        for dish in range(1, (self.NumDishes + 1)):
+            cm.input_parameter.dish_leaf_node_dev_names.append(
+                self.DishLeafNodePrefix + f"000{dish}"
+            )
+        cm.input_parameter.dish_dev_names = []
+        for dish in range(1, (self.NumDishes + 1)):
+            cm.input_parameter.dish_dev_names.append(
+                f"{'mid_d'}000{dish}{'/elt/master'}"
+            )
+        cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
+        cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
+        cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
+        cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
+        cm.input_parameter.sdp_mln_dev_name = self.SdpMasterLeafNodeFQDN or ""
+        cm.input_parameter.csp_subarray_dev_names = (
+            self.TMCMidCspSubarrayLeafNodes
+        )
+        cm.input_parameter.sdp_subarray_dev_names = (
+            self.TMCMidSdpSubarrayLeafNodes
+        )
+        cm.update_input_parameter()
+        return cm
 
     def init_command_objects(self):
         """

@@ -1,8 +1,5 @@
 """
-This module provided a reference implementation of a BaseComponentManager.
-
-It is provided for explanatory purposes, and to support testing of this
-package.
+This module provided an implementation of the Central Node ComponentManager.
 """
 import time
 from typing import Callable, Optional
@@ -29,13 +26,7 @@ from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
-from ska_tmc_centralnode.manager.aggregators import (
-    HealthStateAggregatorLow,
-    HealthStateAggregatorMid,
-    TelescopeStateAggregatorLow,
-    TelescopeStateAggregatorMid,
-    TMCOpStateAggregator,
-)
+from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
@@ -231,11 +222,6 @@ class CNComponentManager(TmcComponentManager):
             self.input_parameter.subarray_dev_names
         )
 
-    def check_if_dishes_are_responsive(self):
-        return self._check_if_device_is_responsive(
-            self.input_parameter.dish_leaf_node_dev_names
-        )
-
     # def check_if_mccs_mln_is_responsive(self):
     #     return self._check_if_device_is_responsive(
     #         [self.input_parameter.mccs_master_leaf_node]
@@ -249,21 +235,6 @@ class CNComponentManager(TmcComponentManager):
                 count += 1
         if count == 0:
             raise CommandNotAllowed(f"{dev_names} not available")
-
-    def add_dishes(self, dln_prefix, num_dishes):
-        """
-        Add dishes to the liveliness probe function
-
-        :param dln_prefix: prefix of the dish
-        :type dln_prefix: str
-        :param num_dishes: number of dishes
-        :type num_dishes: int
-        """
-        result = []
-        for dish in range(1, (num_dishes + 1)):
-            self.add_device(dln_prefix + f"000{dish}")
-            result.append(dln_prefix + f"000{dish}")
-        return result
 
     def add_multiple_devices(self, device_list):
         """
@@ -335,31 +306,6 @@ class CNComponentManager(TmcComponentManager):
 
         self._aggregate_health_state()
 
-    def update_device_state(self, dev_name, state):
-        """
-        Update a monitored device state,
-        aggregate the states available
-        and call the relative callbacks if available
-
-        :param dev_name: name of the device
-        :type dev_name: str
-        :param state: state of the device
-        :type state: DevState
-        """
-        with self.lock:
-            self.logger.debug(
-                f"State event callback for device {dev_name}: {state}"
-            )
-            devInfo = self.component.get_device(dev_name)
-            devInfo.state = state
-            devInfo.last_event_arrived = time.time()
-            devInfo.update_unresponsive(False)
-            self.component._invoke_device_callback(devInfo)
-
-        self._aggregate_state()
-        if isinstance(self.input_parameter, InputParameterMid):
-            self._update_imaging()
-
     def update_device_obs_state(self, dev_name, obs_state):
         """
         Update a monitored device obs state,
@@ -410,28 +356,6 @@ class CNComponentManager(TmcComponentManager):
                     return True
         return False
 
-    def _aggregate_health_state(self):
-        """
-        Aggregates all health states
-        and call the relative callback if available
-        """
-        if self._health_state_aggregator is None:
-            if isinstance(self._input_parameter, InputParameterLow):
-                self._health_state_aggregator = HealthStateAggregatorLow(
-                    self, self.logger
-                )
-            elif isinstance(self._input_parameter, InputParameterMid):
-                self._health_state_aggregator = HealthStateAggregatorMid(
-                    self, self.logger
-                )
-            else:
-                pass
-
-        with self.lock:
-            self.component.telescope_health_state = (
-                self._health_state_aggregator.aggregate()
-            )
-
     def get_telescope_health_state(self):
         return self.component.telescope_health_state
 
@@ -441,26 +365,6 @@ class CNComponentManager(TmcComponentManager):
         """
         self._aggregate_telescope_state()
         self._aggregate_tm_op_state()
-
-    def _aggregate_telescope_state(self):
-        """
-        Aggregates telescope state
-        """
-        if self._telescope_state_aggregator is None:
-            if isinstance(self._input_parameter, InputParameterLow):
-                self._telescope_state_aggregator = TelescopeStateAggregatorLow(
-                    self, self.logger
-                )
-            elif isinstance(self._input_parameter, InputParameterMid):
-                self._telescope_state_aggregator = TelescopeStateAggregatorMid(
-                    self, self.logger
-                )
-            else:
-                pass
-
-        with self.lock:
-            new_state = self._telescope_state_aggregator.aggregate()
-            self.component.telescope_state = new_state
 
     def get_telescope_state(self):
         return self.component.telescope_state
@@ -622,52 +526,6 @@ class CNComponentManager(TmcComponentManager):
             task_callback=task_callback,
         )
         return task_status, response
-
-    def is_command_allowed(self, command_name=None):
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :param command_name: name of the command
-        :type command_name: str
-        :return: True if this command is allowed
-
-        :rtype: boolean
-        """
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "Command is not allowed in current state %s",
-                str(self.op_state_model.op_state),
-            )
-        if command_name in ["TelescopeOn", "TelescopeOff"]:
-            if isinstance(self._input_parameter, InputParameterMid):
-                self.logger.debug(f"Checking mid devices for {command_name}")
-                self.check_if_csp_mln_is_responsive()
-                self.check_if_sdp_mln_is_responsive()
-                self.check_if_subarrays_are_responsive()
-                self.check_if_dishes_are_responsive()
-            else:
-                self.logger.debug(f"Checking low devices for {command_name}")
-                # self.check_if_mccs_mln_is_responsive()
-                self.check_if_subarrays_are_responsive()
-        elif command_name in ["AssignResources", "ReleaseResources"]:
-            if isinstance(self._input_parameter, InputParameterMid):
-                self.logger.debug(f"Checking mid devices for {command_name}")
-                self.check_if_subarrays_are_responsive()
-                self.check_if_dishes_are_responsive()
-            else:
-                self.logger.debug(f"Checking low devices for {command_name}")
-                # TODO Uncomment below code during integration of MCCS
-                # self.check_if_mccs_mln_is_responsive()
-                self.check_if_subarrays_are_responsive()
-
-        return True
 
     def log_state(self, msg="Device States"):
         device_names = []

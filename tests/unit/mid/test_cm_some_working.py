@@ -4,11 +4,16 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
-from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_mid import (
+    CNComponentManagerMid,
+)
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_MID,
+    MID_CSP_SLN_DEVICE,
+    MID_SDP_SLN_DEVICE,
+    MID_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
     DishLeafNodePrefix,
@@ -30,9 +35,9 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_mid/tm_subarray_node/1"},
-                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
-                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+                {"name": MID_SUBARRAY_DEVICE},
+                {"name": MID_CSP_SLN_DEVICE},
+                {"name": MID_SDP_SLN_DEVICE},
             ],
         },
     )
@@ -42,7 +47,7 @@ def test_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
 
     op_state_model = TMCOpStateModel(logger)
-    cm = CNComponentManager(
+    cm = CNComponentManagerMid(
         op_state_model,
         _input_parameter=InputParameterMid(None),
         logger=logger,

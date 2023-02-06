@@ -6,6 +6,13 @@ from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
+    LOW_CSP_MASTER_DEVICE,
+    LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SLN_DEVICE,
+    LOW_SDP_MASTER_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SDP_SLN_DEVICE,
+    LOW_SUBARRAY_DEVICE,
     create_cm_no_faulty_devices,
     ensure_tmc_op_state,
     set_device_state,
@@ -18,18 +25,18 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_low/tm_subarray_node/1"},
-                {"name": "ska_low/tm_leaf_node/sdp_subarray01"},
-                {"name": "ska_low/tm_leaf_node/csp_subarray01"},
+                {"name": LOW_SUBARRAY_DEVICE},
+                {"name": LOW_SDP_SLN_DEVICE},
+                {"name": LOW_CSP_SLN_DEVICE},
             ],
         },
         {
             "class": HelperStateDevice,
             "devices": [
-                {"name": "ska_low/tm_leaf_node/csp_master"},
-                {"name": "low-csp/control/0"},
-                {"name": "ska_low/tm_leaf_node/sdp_master"},
-                {"name": "low-sdp/control/0"},
+                {"name": LOW_CSP_MLN_DEVICE},
+                {"name": LOW_CSP_MASTER_DEVICE},
+                {"name": LOW_SDP_MLN_DEVICE},
+                {"name": LOW_SDP_MASTER_DEVICE},
             ],
         },
     )

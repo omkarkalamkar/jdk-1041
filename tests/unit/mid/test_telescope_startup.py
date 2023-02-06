@@ -4,7 +4,18 @@ from ska_tango_base.control_model import HealthState
 from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import create_cm_no_faulty_devices
+from tests.settings import (
+    DISH_LEAF_NODE_DEVICE,
+    DISH_MASTER_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_SLN_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_SLN_DEVICE,
+    MID_SUBARRAY_DEVICE,
+    create_cm_no_faulty_devices,
+)
 
 
 @pytest.fixture()
@@ -13,20 +24,20 @@ def devices_to_load():
         {
             "class": HelperSubArrayDevice,
             "devices": [
-                {"name": "ska_mid/tm_subarray_node/1"},
-                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
-                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
+                {"name": MID_SUBARRAY_DEVICE},
+                {"name": MID_CSP_SLN_DEVICE},
+                {"name": MID_SDP_SLN_DEVICE},
             ],
         },
         {
             "class": HelperStateDevice,
             "devices": [
-                {"name": "ska_mid/tm_leaf_node/csp_master"},
-                {"name": "mid-csp/control/0"},
-                {"name": "ska_mid/tm_leaf_node/sdp_master"},
-                {"name": "mid-sdp/control/0"},
-                {"name": "ska_mid/tm_leaf_node/d0001"},
-                {"name": "mid_d0001/elt/master"},
+                {"name": MID_CSP_MLN_DEVICE},
+                {"name": MID_CSP_MASTER_DEVICE},
+                {"name": MID_SDP_MLN_DEVICE},
+                {"name": MID_SDP_MASTER_DEVICE},
+                {"name": DISH_MASTER_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
     )

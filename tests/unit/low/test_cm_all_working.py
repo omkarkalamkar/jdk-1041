@@ -6,7 +6,18 @@ from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import count_faulty_devices, create_cm, logger
+from tests.settings import (
+    LOW_CSP_MASTER_DEVICE,
+    LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SLN_DEVICE,
+    LOW_SDP_MASTER_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SDP_SLN_DEVICE,
+    LOW_SUBARRAY_DEVICE,
+    count_faulty_devices,
+    create_cm,
+    logger,
+)
 
 
 @pytest.fixture()
@@ -14,15 +25,19 @@ def devices_to_load():
     return (
         {
             "class": HelperSubArrayDevice,
-            "devices": [{"name": "ska_low/tm_subarray_node/1"}],
+            "devices": [
+                {"name": LOW_SUBARRAY_DEVICE},
+                {"name": LOW_SDP_SLN_DEVICE},
+                {"name": LOW_CSP_SLN_DEVICE},
+            ],
         },
         {
             "class": HelperStateDevice,
             "devices": [
-                {"name": "ska_low/tm_leaf_node/csp_master"},
-                {"name": "low-csp/control/0"},
-                {"name": "ska_low/tm_leaf_node/sdp_master"},
-                {"name": "low-sdp/control/0"},
+                {"name": LOW_CSP_MLN_DEVICE},
+                {"name": LOW_CSP_MASTER_DEVICE},
+                {"name": LOW_SDP_MLN_DEVICE},
+                {"name": LOW_SDP_MASTER_DEVICE},
             ],
         },
     )
@@ -31,7 +46,7 @@ def devices_to_load():
 @pytest.mark.SKA_low
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
-    cm, start_time = create_cm(input_parameter=InputParameterLow(None))
+    cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
 
