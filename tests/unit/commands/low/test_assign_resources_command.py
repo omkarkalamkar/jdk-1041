@@ -56,6 +56,7 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
+@pytest.mark.MS
 @pytest.mark.SKA_low
 def test_low_assign_resources_command(
     tango_context, task_callback, json_factory
@@ -175,7 +176,7 @@ def test_low_assign_resources_command_with_invalide_key(
     )
     assert res_code == ResultCode.FAILED
     assert (
-        "subarray id key is not present in the input json argument" in message
+        "subarray_id key is not present in the input json argument" in message
     )
 
 
