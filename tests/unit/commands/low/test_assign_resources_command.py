@@ -56,10 +56,9 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
-@pytest.mark.MS
 @pytest.mark.SKA_low
 def test_low_assign_resources_command(
-    tango_context, task_callback, json_factory
+    tango_context, task_callback, json_factory, caplog
 ):
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
@@ -163,7 +162,6 @@ def test_low_assign_resources_command_empty_input_json(
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.mS
 def test_low_assign_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
