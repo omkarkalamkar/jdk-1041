@@ -381,6 +381,9 @@ class AssignResources(AbstractAssignReleaseResources):
             AssertionError if  Mccs On command is not completed.
 
         """
+
+    def validate_input_json(self, argin):
+        # Validate the input JSON
         try:
             json_argument = json.loads(argin)
         except Exception as e:
