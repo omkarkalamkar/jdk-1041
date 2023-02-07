@@ -1,11 +1,13 @@
 """
 This module provided an implementation of the Central Node ComponentManager.
 """
+import json
 import time
 from typing import Callable, Optional
 
 import pandas as pd
 from ska_ser_skuid.client import SkuidClient
+from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
@@ -29,6 +31,7 @@ from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
+from ska_tmc_centralnode.model.input import InputParameterLow
 
 
 class CNComponentManager(TmcComponentManager):
@@ -485,12 +488,50 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
+        # Execute the command if the input JSON is valid
         assign_resources_command = AssignResources(
             self,
             adapter_factory=self.adapter_factory,
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
+
+        if isinstance(self.input_parameter, InputParameterLow):
+            try:
+                if type(argin) != dict:
+                    json_argument = json.loads(argin)
+                else:
+                    json_argument = argin
+            except Exception as e:
+                return assign_resources_command.generate_command_result(
+                    ResultCode.FAILED,
+                    ("Problem in loading the JSON string: %s", e),
+                )
+
+            (
+                is_valid,
+                invalid_json_error_msg,
+            ) = assign_resources_command._validate_low_json(json_argument)
+            if not is_valid:
+                return assign_resources_command.generate_command_result(
+                    ResultCode.FAILED,
+                    invalid_json_error_msg,
+                )
+
+            # validate processing block
+            (
+                is_processing_block_present,
+                processing_block_error_msg,
+            ) = assign_resources_command._validate_and_update_resource_config(
+                json_argument
+            )
+
+            if not is_processing_block_present:
+                return assign_resources_command.generate_command_result(
+                    ResultCode.FAILED,
+                    processing_block_error_msg,
+                )
+
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
             args=[argin, self.logger],

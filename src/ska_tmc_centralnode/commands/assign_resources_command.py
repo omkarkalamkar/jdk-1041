@@ -389,27 +389,6 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        is_valid, invalid_json_error_msg = self._validate_low_json(
-            json_argument
-        )
-        if not is_valid:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                invalid_json_error_msg,
-            )
-
-        # validate processing block
-        (
-            is_processing_block_present,
-            processing_block_error_msg,
-        ) = self._validate_and_update_resource_config(json_argument)
-
-        if not is_processing_block_present:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                processing_block_error_msg,
-            )
-
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -476,11 +455,10 @@ class AssignResources(AbstractAssignReleaseResources):
         """
         # Validate assign resource json
         error_msg = "{key} key is not present in the input json argument."
-        is_valid, return_error = self._validate_keys_in_json(
+        is_valid, return_msg = self._validate_keys_in_json(
             json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS, error_msg
         )
-        if not is_valid:
-            return is_valid, return_error
+        return is_valid, return_msg
 
         # TODO Uncomment below code during integration of MCCS
         # Validate MCCS keys
@@ -493,8 +471,6 @@ class AssignResources(AbstractAssignReleaseResources):
         # )
         # if not is_valid:
         #     return is_valid, return_error
-
-        return True, ""
 
     def _validate_and_update_resource_config(self, json_argument):
         """Validate if eb_id present in sdp schema.
