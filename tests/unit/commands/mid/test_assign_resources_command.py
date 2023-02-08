@@ -263,6 +263,7 @@ def test_assign_resources_command_already_assigned(
     assert res_code == ResultCode.FAILED
     assert "dish0001" in message
 
+
 @pytest.mark.aki
 @pytest.mark.temp
 def test_mid_assign_resources_command_with_invalide_key(
