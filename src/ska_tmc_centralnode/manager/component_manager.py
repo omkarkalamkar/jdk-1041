@@ -31,7 +31,10 @@ from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
-from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.model.input import (
+    InputParameterLow,
+    InputParameterMid,
+)
 
 
 class CNComponentManager(TmcComponentManager):
@@ -512,6 +515,42 @@ class CNComponentManager(TmcComponentManager):
                 is_valid,
                 invalid_json_error_msg,
             ) = assign_resources_command._validate_low_json(json_argument)
+            if not is_valid:
+                return assign_resources_command.generate_command_result(
+                    ResultCode.FAILED,
+                    invalid_json_error_msg,
+                )
+
+            # validate processing block
+            (
+                is_processing_block_present,
+                processing_block_error_msg,
+            ) = assign_resources_command._validate_and_update_resource_config(
+                json_argument
+            )
+
+            if not is_processing_block_present:
+                return assign_resources_command.generate_command_result(
+                    ResultCode.FAILED,
+                    processing_block_error_msg,
+                )
+
+        if isinstance(self.input_parameter, InputParameterMid):
+            try:
+                if type(argin) != dict:
+                    json_argument = json.loads(argin)
+                else:
+                    json_argument = argin
+            except Exception as e:
+                return assign_resources_command.generate_command_result(
+                    ResultCode.FAILED,
+                    ("Problem in loading the JSON string: %s", e),
+                )
+
+            (
+                is_valid,
+                invalid_json_error_msg,
+            ) = assign_resources_command._validate_mid_json(json_argument)
             if not is_valid:
                 return assign_resources_command.generate_command_result(
                     ResultCode.FAILED,

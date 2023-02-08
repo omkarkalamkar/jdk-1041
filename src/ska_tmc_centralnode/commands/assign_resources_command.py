@@ -14,6 +14,7 @@ from ska_tmc_centralnode.commands.abstract_command import (
 )
 from ska_tmc_centralnode.utils.constants import (
     REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
+    REQUIRED_MID_ASSIGN_RESOURCE_KEYS,
 )
 
 
@@ -457,6 +458,18 @@ class AssignResources(AbstractAssignReleaseResources):
         error_msg = "{key} key is not present in the input json argument."
         is_valid, return_msg = self._validate_keys_in_json(
             json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS, error_msg
+        )
+        return is_valid, return_msg
+
+    def _validate_mid_json(self, json_argument):
+        """Validate Json for mid
+        Args:
+            json_argument (dict): mid json
+        """
+        # Validate assign resource json
+        error_msg = "{key} key is not present in the input json argument."
+        is_valid, return_msg = self._validate_keys_in_json(
+            json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS, error_msg
         )
         return is_valid, return_msg
 

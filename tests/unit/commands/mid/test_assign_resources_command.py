@@ -262,3 +262,20 @@ def test_assign_resources_command_already_assigned(
     (res_code, message) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
     assert "dish0001" in message
+
+@pytest.mark.aki
+@pytest.mark.temp
+def test_mid_assign_resources_command_with_invalide_key(
+    tango_context, task_callback, json_factory
+):
+    logger.info("%s", tango_context)
+    _, _, cm = get_assign_resources_command_obj()
+    assign_input_str = json_factory("invalid_key_AssignResources")
+    # json_argument = json.loads(assign_input_str)
+    (res_code, message) = cm.assign_resources(
+        assign_input_str, task_callback=task_callback
+    )
+    assert res_code == ResultCode.FAILED
+    assert (
+        "subarray_id key is not present in the input json argument" in message
+    )
