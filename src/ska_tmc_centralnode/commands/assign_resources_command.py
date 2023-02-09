@@ -432,7 +432,7 @@ class AssignResources(AbstractAssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def _validate_keys_in_json(self, json_argument, req_keys, error_message):
+    def _validate_json(self, json_argument, req_keys):
         """_summary_
         Args:
             json_argument (dict): Json Argument
@@ -442,20 +442,11 @@ class AssignResources(AbstractAssignReleaseResources):
         json_keys = json_argument.keys()
         for key in req_keys:
             if key not in json_keys:
-                return False, error_message.format(key=key)
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
         return True, ""
-
-    def _validate_json(self, json_argument, resource_keys):
-        """Validate Json
-        Args:
-            json_argument (dict): low or mid json
-        """
-        # Validate assign resource json
-        error_msg = "{key} key is not present in the input json argument."
-        is_valid, return_msg = self._validate_keys_in_json(
-            json_argument, resource_keys, error_msg
-        )
-        return is_valid, return_msg
 
     # TODO Uncomment below code during integration of MCCS
     # Validate MCCS keys
