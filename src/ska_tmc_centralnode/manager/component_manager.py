@@ -35,6 +35,10 @@ from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
+from ska_tmc_centralnode.utils.constants import (
+    REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
+    REQUIRED_MID_ASSIGN_RESOURCE_KEYS,
+)
 
 
 class CNComponentManager(TmcComponentManager):
@@ -499,77 +503,54 @@ class CNComponentManager(TmcComponentManager):
             logger=self.logger,
         )
 
+        try:
+            if type(argin) != dict:
+                json_argument = json.loads(argin)
+            else:
+                json_argument = argin
+        except Exception as e:
+            return assign_resources_command.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
         if isinstance(self.input_parameter, InputParameterLow):
-            try:
-                if type(argin) != dict:
-                    json_argument = json.loads(argin)
-                else:
-                    json_argument = argin
-            except Exception as e:
-                return assign_resources_command.generate_command_result(
-                    ResultCode.FAILED,
-                    ("Problem in loading the JSON string: %s", e),
-                )
-
             (
                 is_valid,
                 invalid_json_error_msg,
-            ) = assign_resources_command._validate_low_json(json_argument)
+            ) = assign_resources_command._validate_json(
+                json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
+            )
             if not is_valid:
                 return assign_resources_command.generate_command_result(
                     ResultCode.FAILED,
                     invalid_json_error_msg,
                 )
-
-            # validate processing block
-            (
-                is_processing_block_present,
-                processing_block_error_msg,
-            ) = assign_resources_command._validate_and_update_resource_config(
-                json_argument
-            )
-
-            if not is_processing_block_present:
-                return assign_resources_command.generate_command_result(
-                    ResultCode.FAILED,
-                    processing_block_error_msg,
-                )
-
         elif isinstance(self.input_parameter, InputParameterMid):
-            try:
-                if type(argin) != dict:
-                    json_argument = json.loads(argin)
-                else:
-                    json_argument = argin
-            except Exception as e:
-                return assign_resources_command.generate_command_result(
-                    ResultCode.FAILED,
-                    ("Problem in loading the JSON string: %s", e),
-                )
-
             (
                 is_valid,
                 invalid_json_error_msg,
-            ) = assign_resources_command._validate_mid_json(json_argument)
+            ) = assign_resources_command._validate_json(
+                json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
+            )
             if not is_valid:
                 return assign_resources_command.generate_command_result(
                     ResultCode.FAILED,
                     invalid_json_error_msg,
                 )
 
-            # validate processing block
-            (
-                is_processing_block_present,
-                processing_block_error_msg,
-            ) = assign_resources_command._validate_and_update_resource_config(
-                json_argument
-            )
+        # validate processing block
+        (
+            is_processing_block_present,
+            processing_block_error_msg,
+        ) = assign_resources_command._validate_and_update_resource_config(
+            json_argument
+        )
 
-            if not is_processing_block_present:
-                return assign_resources_command.generate_command_result(
-                    ResultCode.FAILED,
-                    processing_block_error_msg,
-                )
+        if not is_processing_block_present:
+            return assign_resources_command.generate_command_result(
+                ResultCode.FAILED,
+                processing_block_error_msg,
+            )
 
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
