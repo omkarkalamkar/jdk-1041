@@ -72,6 +72,7 @@ def get_assign_resources_command_obj():
     )
     return assign_res_command, adapter_factory, cm
 
+
 @pytest.mark.akii
 def test_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
@@ -88,6 +89,7 @@ def test_assign_resources_command_queued(tango_context, task_callback):
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
+
 
 @pytest.mark.aki
 def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
@@ -106,6 +108,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     with pytest.raises(Exception) as e:
         assert "processing_blocks" in e
 
+
 @pytest.mark.aki
 def test_assign_resources_command_with_ok(tango_context, task_callback):
     logger.info("%s", tango_context)
@@ -116,6 +119,7 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.OK
+
 
 @pytest.mark.aki
 def test_assign_resources_command_missing_sdp_key(
@@ -131,6 +135,7 @@ def test_assign_resources_command_missing_sdp_key(
     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
     assert "sdp" in message
+
 
 @pytest.mark.aki
 def test_assign_resources_command_fail_subarray(tango_context, task_callback):
@@ -164,6 +169,7 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
 
+
 @pytest.mark.aki
 def test_telescope_assign_resources_command_empty_input_json(
     tango_context, task_callback
@@ -174,6 +180,7 @@ def test_telescope_assign_resources_command_empty_input_json(
     cm.assign_resources("", task_callback=task_callback)
     (res_code, _) = assign_res_command.do(" ")
     assert res_code == ResultCode.FAILED
+
 
 @pytest.mark.aki
 def test_assign_resources_command_missing_subarray_id(
@@ -190,6 +197,7 @@ def test_assign_resources_command_missing_subarray_id(
     assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
 
+
 @pytest.mark.aki
 def test_assign_resources_command_missing_dish(tango_context, task_callback):
     logger.info("%s", tango_context)
@@ -202,6 +210,7 @@ def test_assign_resources_command_missing_dish(tango_context, task_callback):
     (res_code, message) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
     assert "dish" in message
+
 
 @pytest.mark.aki
 def test_assign_resources_command_missing_receptor_ids(
@@ -218,6 +227,7 @@ def test_assign_resources_command_missing_receptor_ids(
     assert res_code == ResultCode.FAILED
     assert "receptor_ids" in message
 
+
 @pytest.mark.aki
 def test_assign_resources_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
@@ -229,6 +239,7 @@ def test_assign_resources_fail_check_allowed(tango_context):
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
+
 
 @pytest.mark.aki
 def test_assign_resources_command_already_assigned(
