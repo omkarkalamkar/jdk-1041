@@ -6,7 +6,6 @@ REQUIRED_MID_ASSIGN_RESOURCE_KEYS = [
     "subarray_id",
     "dish",
     "sdp",
-    "scan_types",
 ]
 
 MCCS_REQUIRED_KEYS = ["subarray_beam_ids", "station_ids", "channel_blocks"]

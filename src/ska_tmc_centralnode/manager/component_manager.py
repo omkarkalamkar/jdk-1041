@@ -535,7 +535,7 @@ class CNComponentManager(TmcComponentManager):
                     processing_block_error_msg,
                 )
 
-        if isinstance(self.input_parameter, InputParameterMid):
+        elif isinstance(self.input_parameter, InputParameterMid):
             try:
                 if type(argin) != dict:
                     json_argument = json.loads(argin)
