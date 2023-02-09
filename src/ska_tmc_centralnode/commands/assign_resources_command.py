@@ -446,9 +446,9 @@ class AssignResources(AbstractAssignReleaseResources):
         return True, ""
 
     def _validate_json(self, json_argument, resource_keys):
-        """Validate Json for low
+        """Validate Json
         Args:
-            json_argument (dict): low json
+            json_argument (dict): low or mid json
         """
         # Validate assign resource json
         error_msg = "{key} key is not present in the input json argument."
