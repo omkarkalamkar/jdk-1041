@@ -517,7 +517,7 @@ class CNComponentManager(TmcComponentManager):
             (
                 is_valid,
                 invalid_json_error_msg,
-            ) = assign_resources_command._validate_json(
+            ) = assign_resources_command._validate_low_json(
                 json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:
@@ -529,7 +529,7 @@ class CNComponentManager(TmcComponentManager):
             (
                 is_valid,
                 invalid_json_error_msg,
-            ) = assign_resources_command._validate_json(
+            ) = assign_resources_command._validate_mid_json(
                 json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:

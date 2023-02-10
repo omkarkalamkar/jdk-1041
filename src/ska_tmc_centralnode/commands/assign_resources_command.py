@@ -182,12 +182,6 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        if "sdp" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "sdp key is not present in the input json argument.",
-            )
-
         # validate processing block
         (
             is_processing_block_present,
@@ -203,13 +197,6 @@ class AssignResources(AbstractAssignReleaseResources):
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
-        # get subarray ID
-        if "subarray_id" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -219,19 +206,6 @@ class AssignResources(AbstractAssignReleaseResources):
         ret_code, message = self.get_subarray_adapter(subarrayID)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-
-        # check allocated dishes
-        if "dish" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "dish key is not present in the input json argument.",
-            )
-        else:
-            if "receptor_ids" not in json_argument["dish"]:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    "dish.receptor_ids key is not present in the input json argument.",
-                )
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(f"receptor_ids are:{receptor_ids}")
@@ -432,12 +406,35 @@ class AssignResources(AbstractAssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def _validate_json(self, json_argument, req_keys):
+    def _validate_mid_json(self, json_argument, req_keys):
         """_summary_
         Args:
             json_argument (dict): Json Argument
             req_keys (list): Required key list to check in json argument
-            error_message (str): Error message when key not present
+        """
+        json_keys = json_argument.keys()
+        for key in req_keys:
+            if key == "receptor_ids":
+                if key not in json_argument["dish"]:
+                    return (
+                        False,
+                        f"{key} key is not present in the input json argument.",
+                    )
+            elif key not in json_keys:
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
+        )
+
+    def _validate_low_json(self, json_argument, req_keys):
+        """_summary_
+        Args:
+            json_argument (dict): Json Argument
+            req_keys (list): Required key list to check in json argument
         """
         json_keys = json_argument.keys()
         for key in req_keys:
@@ -446,7 +443,10 @@ class AssignResources(AbstractAssignReleaseResources):
                     False,
                     f"{key} key is not present in the input json argument.",
                 )
-        return True, ""
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
+        )
 
     # TODO Uncomment below code during integration of MCCS
     # Validate MCCS keys
