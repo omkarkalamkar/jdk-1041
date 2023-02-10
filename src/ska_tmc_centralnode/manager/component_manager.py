@@ -32,6 +32,9 @@ from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.utils.constants import (
+    REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
+)
 
 
 class CNComponentManager(TmcComponentManager):
@@ -550,6 +553,31 @@ class CNComponentManager(TmcComponentManager):
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
+        try:
+            if type(argin) != dict:
+                json_argument = json.loads(argin)
+            else:
+                json_argument = argin
+        except Exception as e:
+            return release_resources_command.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
+        # Execute the command if the input JSON is valid
+        if isinstance(self.input_parameter, InputParameterLow):
+            (
+                is_valid,
+                invalid_json_error_msg,
+            ) = release_resources_command._validate_low_json(
+                json_argument,
+                REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
+            )
+            if not is_valid:
+                return release_resources_command.generate_command_result(
+                    ResultCode.FAILED,
+                    invalid_json_error_msg,
+                )
+
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
             args=[argin, self.logger],

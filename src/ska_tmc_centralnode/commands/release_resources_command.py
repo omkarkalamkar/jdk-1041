@@ -106,9 +106,9 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
-        ret_code, message = self.validate_input_json(argin)
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        # ret_code, message = self.validate_input_json(argin)
+        # if ret_code == ResultCode.FAILED:
+        #     return ret_code, message
 
         jsonArgument = json.loads(argin)
         if jsonArgument["release_all"]:
@@ -157,10 +157,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
-        ret_code, message = self.validate_input_json(argin)
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
-
         jsonArgument = json.loads(argin)
         if jsonArgument["release_all"] is True:
             ret_code, message = self.release_all_resources(
@@ -185,6 +181,35 @@ class ReleaseResources(AbstractAssignReleaseResources):
             #         return ret_code, message
             return (ResultCode.OK, "")
 
+        try:
+            jsonArgument = json.loads(argin)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
+
+        if "transaction_id" in jsonArgument:
+            del jsonArgument["transaction_id"]
+
+        if "subarray_id" not in jsonArgument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
+        subarrayID = jsonArgument["subarray_id"]
+
+        for adapter in self.subarray_adapters:
+            if str(subarrayID) in adapter.dev_name:
+                self.my_subarray_adapter = adapter
+
+        if self.my_subarray_adapter is None:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("SubArray Id %s is not existing!", subarrayID),
+            )
+        return ResultCode.OK, ""
+
     def release_all_resources(self, adapter):
         return self.send_command(
             [adapter],
@@ -200,32 +225,20 @@ class ReleaseResources(AbstractAssignReleaseResources):
             arg,
         )
 
-    def validate_input_json(self, argin):
-        try:
-            jsonArgument = json.loads(argin)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
-            )
-        if "transaction_id" in jsonArgument:
-            del jsonArgument["transaction_id"]
-
-        if "subarray_id" not in jsonArgument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
-        subarrayID = jsonArgument["subarray_id"]
-
-        for adapter in self.subarray_adapters:
-            if str(subarrayID) in adapter.dev_name:
-                self.my_subarray_adapter = adapter
-
-        if self.my_subarray_adapter is None:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarrayID),
-            )
-        return ResultCode.OK, ""
+    def _validate_low_json(self, json_argument, req_keys):
+        """_summary_
+        Args:
+            json_argument (dict): Json Argument
+            req_keys (list): Required key list to check in json argument
+        """
+        json_keys = json_argument.keys()
+        for key in req_keys:
+            if key not in json_keys:
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
+        )
