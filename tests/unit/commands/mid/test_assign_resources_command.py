@@ -84,7 +84,7 @@ def test_assign_resources_command_queued(tango_context, task_callback):
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    cm.assign_resources(json_argument, task_callback=task_callback)
+    cm.assign_resources(json.dumps(json_argument), task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -127,8 +127,9 @@ def test_assign_resources_command_missing_sdp_key(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == ResultCode.FAILED
     assert "sdp" in message
 
@@ -185,8 +186,9 @@ def test_assign_resources_command_missing_subarray_id(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
 
@@ -198,8 +200,9 @@ def test_assign_resources_command_missing_dish(tango_context, task_callback):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == ResultCode.FAILED
     assert "dish" in message
 
@@ -213,8 +216,9 @@ def test_assign_resources_command_missing_receptor_ids(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]["receptor_ids"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == ResultCode.FAILED
     assert "receptor_ids" in message
 
@@ -262,3 +266,18 @@ def test_assign_resources_command_already_assigned(
     (res_code, message) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
     assert "dish0001" in message
+
+
+def test_mid_assign_resources_command_with_invalide_key(
+    tango_context, task_callback, json_factory
+):
+    logger.info("%s", tango_context)
+    _, _, cm = get_assign_resources_command_obj()
+    assign_input_str = json_factory("invalid_key_AssignResources")
+    (res_code, message) = cm.assign_resources(
+        assign_input_str, task_callback=task_callback
+    )
+    assert res_code == ResultCode.FAILED
+    assert (
+        "subarray_id key is not present in the input json argument" in message
+    )
