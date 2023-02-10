@@ -407,7 +407,7 @@ class AssignResources(AbstractAssignReleaseResources):
         return (ResultCode.OK, "")
 
     def _validate_mid_json(self, json_argument, req_keys):
-        """_summary_
+        """To validate the mid json for assign resources command before entering the queue
         Args:
             json_argument (dict): Json Argument
             req_keys (list): Required key list to check in json argument
@@ -431,7 +431,7 @@ class AssignResources(AbstractAssignReleaseResources):
         )
 
     def _validate_low_json(self, json_argument, req_keys):
-        """_summary_
+        """To validate the low json for assign resources command before entering the queue
         Args:
             json_argument (dict): Json Argument
             req_keys (list): Required key list to check in json argument
