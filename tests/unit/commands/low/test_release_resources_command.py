@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 
 import mock
@@ -45,22 +46,21 @@ def get_release_resources_command_obj():
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     my_adapter_factory = HelperAdapterFactory()
+    cm.adapter_factory = my_adapter_factory
     release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
     return release_command, my_adapter_factory, cm
 
 
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
-    tango_context,
-    task_callback,
-    json_factory,  # caplog
+    tango_context, task_callback, json_factory, caplog
 ):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
     release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     cm.release_resources(json_argument, task_callback=task_callback)
-    # caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
+    caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -121,6 +121,7 @@ def test_low_release_resources_command_with_invalide_key(
         "transaction_id key is not present in the input json argument"
         in message
     )
+
 
 @pytest.mark.SKA_low
 def test_low_release_resources_missing_subarray_id(
