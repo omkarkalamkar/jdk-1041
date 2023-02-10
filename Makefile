@@ -136,6 +136,10 @@ test-requirements:
 
 k8s-pre-test: python-pre-test test-requirements
 
+cred:
+	make k8s-namespace
+	curl -s https://gitlab.com/ska-telescope/templates-repository/-/raw/master/scripts/namespace_auth.sh | bash -s $(SERVICE_ACCOUNT) $(KUBE_NAMESPACE) || true
+
 requirements: ## Install Dependencies
 	poetry install
 
