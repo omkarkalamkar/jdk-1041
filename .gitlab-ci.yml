@@ -90,11 +90,6 @@ include:
 #     - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
 #     - make k8s-delete-namespace
 
-pt:
-#     - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT
-
-
-
 k8s-test:
   variables: 
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA"
@@ -133,3 +128,5 @@ stop-k8s-test-low:
     - make k8s-uninstall-chart
     - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
     - make k8s-delete-namespace
+
+
