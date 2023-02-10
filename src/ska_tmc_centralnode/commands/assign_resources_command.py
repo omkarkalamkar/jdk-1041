@@ -12,6 +12,7 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
+from ska_tmc_centralnode.input_validator import AssignResourceValidator
 
 
 class AssignResources(AbstractAssignReleaseResources):
@@ -173,14 +174,16 @@ class AssignResources(AbstractAssignReleaseResources):
         #     self.logger,
         # )
         # json_argument = input_validator.loads(argin)
-        try:
-            self.logger.debug(f"Loading json string:{argin}")
-            json_argument = json.loads(argin)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
-            )
+        assign_validator = AssignResourceValidator(self.logger)
+        json_argument = assign_validator.loads(argin)
+        # try:
+        #     self.logger.debug(f"Loading json string:{argin}")
+        #     json_argument = json.loads(argin)
+        # except Exception as e:
+        #     return self.generate_command_result(
+        #         ResultCode.FAILED,
+        #         ("Problem in loading the JSON string: %s", e),
+        #     )
 
         # validate processing block
         (
