@@ -8,7 +8,7 @@ from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.device_info import SubArrayDeviceInfo
-from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.exceptions import CommandNotAllowed, KeyError
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
@@ -100,7 +100,8 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]["execution_block"]["eb_id"]
     del json_argument["sdp"]["processing_blocks"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
+    with pytest.raises(KeyError):
+        cm.assign_resources(json_argument, task_callback=task_callback)
     # (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     # assert res_code == ResultCode.FAILED
     # with pytest.raises(Exception) as e:
