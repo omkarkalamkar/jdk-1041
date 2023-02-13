@@ -470,7 +470,7 @@ class AssignResources(AbstractAssignReleaseResources):
             json_argument (dict): low json
         """
         if (
-            json_argument["sdp"].get("execution_block")
+            json_argument["sdp"]["execution_block"]
             and not json_argument["sdp"]["execution_block"]["eb_id"]
         ):
             sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
