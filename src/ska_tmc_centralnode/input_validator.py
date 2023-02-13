@@ -14,7 +14,7 @@ from json import JSONDecodeError
 
 from marshmallow import ValidationError
 from ska_tmc_cdm.messages.central_node.assign_resources import (
-    AssignResourcesRequestSchema,
+    AssignResourcesRequest,
 )
 
 # SKA specific imports
@@ -110,9 +110,7 @@ class AssignResourceValidator:
         # Check if JSON is correct
         self.logger.info("Checking JSON format.")
         try:
-            assign_request = CODEC.loads(
-                AssignResourcesRequestSchema, input_string
-            )
+            assign_request = CODEC.loads(AssignResourcesRequest, input_string)
         except (ValidationError, JSONDecodeError) as json_error:
             self.logger.exception("Exception: %s", str(json_error))
             exception_message = (
