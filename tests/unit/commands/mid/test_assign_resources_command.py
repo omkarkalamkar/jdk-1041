@@ -125,7 +125,7 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, _) = assign_res_command.do(json_argument)
     assert res_code == ResultCode.OK
 
 
