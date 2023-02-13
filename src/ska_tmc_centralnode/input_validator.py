@@ -111,7 +111,7 @@ class AssignResourceValidator:
         self.logger.info("Checking JSON format.")
         try:
             assign_request = CODEC.loads(AssignResourcesRequest, input_string)
-            assign_json = CODEC.dumps(assign_request)
+            assign_json = CODEC.dumps(assign_request).as_json
         except (ValidationError, JSONDecodeError) as json_error:
             self.logger.exception("Exception: %s", str(json_error))
             exception_message = (
