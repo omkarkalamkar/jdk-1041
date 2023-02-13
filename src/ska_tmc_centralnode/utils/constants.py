@@ -3,6 +3,11 @@
 
 REQUIRED_LOW_ASSIGN_RESOURCE_KEYS = ["subarray_id", "sdp", "csp"]
 REQUIRED_LOW_RELEASE_RESOURCE_KEYS = ["transaction_id", "subarray_id"]
+REQUIRED_MID_RELEASE_RESOURCE_KEYS = [
+    "transaction_id",
+    "subarray_id",
+    "receptor_ids",
+]
 
 
 MCCS_REQUIRED_KEYS = ["subarray_beam_ids", "station_ids", "channel_blocks"]

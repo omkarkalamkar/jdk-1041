@@ -45,7 +45,6 @@ def get_release_resources_command_obj():
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     my_adapter_factory = HelperAdapterFactory()
-    cm.adapter_factory = my_adapter_factory
     release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
     return release_command, my_adapter_factory, cm
 
@@ -104,10 +103,10 @@ def test_low_release_resources_empty_input_json(tango_context, task_callback):
     assert res_code == ResultCode.FAILED
 
 
+@pytest.mark.SKA_low
 def test_low_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
-    logger.info("%s", tango_context)
     _, _, cm = get_release_resources_command_obj()
     release_input_str = json_factory("invalid_key_ReleaseResources")
     (res_code, message) = cm.release_resources(

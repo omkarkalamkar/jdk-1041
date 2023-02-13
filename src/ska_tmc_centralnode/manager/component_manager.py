@@ -33,7 +33,7 @@ from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterLow
 from ska_tmc_centralnode.utils.constants import (
-    REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
+    REQUIRED_LOW_RELEASE_RESOURCE_KEYS
 )
 
 
