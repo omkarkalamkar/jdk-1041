@@ -33,7 +33,7 @@ from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterLow
 from ska_tmc_centralnode.utils.constants import (
-    REQUIRED_LOW_RELEASE_RESOURCE_KEYS
+    REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
 )
 
 
@@ -554,10 +554,7 @@ class CNComponentManager(TmcComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
         try:
-            if type(argin) != dict:
-                json_argument = json.loads(argin)
-            else:
-                json_argument = argin
+            json_argument = argin
         except Exception as e:
             return release_resources_command.generate_command_result(
                 ResultCode.FAILED,

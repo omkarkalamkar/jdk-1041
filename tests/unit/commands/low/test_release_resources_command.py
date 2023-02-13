@@ -44,9 +44,11 @@ def get_release_resources_command_obj():
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
-    release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
-    return release_command, my_adapter_factory, cm
+    helper_adapter_factory = HelperAdapterFactory()
+    release_command = ReleaseResources(
+        cm, helper_adapter_factory, logger=logger
+    )
+    return release_command, helper_adapter_factory, cm
 
 
 @pytest.mark.SKA_low

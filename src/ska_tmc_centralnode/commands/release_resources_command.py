@@ -158,31 +158,28 @@ class ReleaseResources(AbstractAssignReleaseResources):
             return ret_code, message
 
         try:
-            if type(argin) != dict:
-                jsonArgument = json.loads(argin)
-            else:
-                jsonArgument = argin
+            jsonArgument = argin
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        subarrayID = jsonArgument["subarray_id"]
+        subarray_id = jsonArgument["subarray_id"]
 
         for adapter in self.subarray_adapters:
-            if str(subarrayID) in adapter.dev_name:
-                self.my_subarray_adapter = adapter
+            if str(subarray_id) in adapter.dev_name:
+                self.subarray_adapter = adapter
 
-        if self.my_subarray_adapter is None:
+        if self.subarray_adapter is None:
             return self.generate_command_result(
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarrayID),
+                ("Subarray id %s is not existing!", subarray_id),
             )
 
         if jsonArgument["release_all"] == "true":
             ret_code, message = self.release_all_resources(
-                self.my_subarray_adapter
+                self.subarray_adapter
             )
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
