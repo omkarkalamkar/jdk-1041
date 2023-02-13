@@ -57,7 +57,6 @@ def get_assign_resources_command_obj():
 
 
 @pytest.mark.SKA_low
-@pytest.mark.temp
 def test_low_assign_resources_command(
     tango_context, task_callback, json_factory, caplog
 ):
@@ -78,7 +77,6 @@ def test_low_assign_resources_command(
 
 
 @pytest.mark.SKA_low
-@pytest.mark.temp
 def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback, json_factory
 ):
@@ -94,7 +92,6 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
         assert "processing_blocks" in e
 
 
-@pytest.mark.temp
 def test_assign_resources_missing_sdp_key(
     tango_context, task_callback, json_factory
 ):
@@ -108,7 +105,6 @@ def test_assign_resources_missing_sdp_key(
     assert "sdp" in message
 
 
-@pytest.mark.temp
 def test_low_assign_resources_command_fail_subarray(
     tango_context, task_callback, json_factory
 ):
@@ -156,7 +152,6 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
 
 
 @pytest.mark.SKA_low
-@pytest.mark.temp
 def test_low_assign_resources_command_empty_input_json(
     tango_context, task_callback
 ):
@@ -167,7 +162,6 @@ def test_low_assign_resources_command_empty_input_json(
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.temp
 def test_low_assign_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
@@ -185,7 +179,6 @@ def test_low_assign_resources_command_with_invalide_key(
 
 
 @pytest.mark.SKA_low
-@pytest.mark.temp
 def test_low_assign_resources_missing_subarray_id(
     tango_context, task_callback, json_factory
 ):
@@ -253,7 +246,6 @@ def test_low_assign_resources_command_missing_station_ids(
 
 
 @pytest.mark.SKA_low
-@pytest.mark.temp
 def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()

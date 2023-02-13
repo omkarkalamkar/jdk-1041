@@ -12,9 +12,6 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
-from ska_tmc_centralnode.utils.constants import (
-    REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
-)
 
 
 class AssignResources(AbstractAssignReleaseResources):
@@ -185,12 +182,6 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        if "sdp" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "sdp key is not present in the input json argument.",
-            )
-
         # validate processing block
         (
             is_processing_block_present,
@@ -206,13 +197,6 @@ class AssignResources(AbstractAssignReleaseResources):
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
-        # get subarray ID
-        if "subarray_id" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -222,19 +206,6 @@ class AssignResources(AbstractAssignReleaseResources):
         ret_code, message = self.get_subarray_adapter(subarrayID)
         if ret_code == ResultCode.FAILED:
             return ret_code, message
-
-        # check allocated dishes
-        if "dish" not in json_argument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "dish key is not present in the input json argument.",
-            )
-        else:
-            if "receptor_ids" not in json_argument["dish"]:
-                return self.generate_command_result(
-                    ResultCode.FAILED,
-                    "dish.receptor_ids key is not present in the input json argument.",
-                )
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(f"receptor_ids are:{receptor_ids}")
@@ -435,42 +406,59 @@ class AssignResources(AbstractAssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def _validate_keys_in_json(self, json_argument, req_keys, error_message):
-        """_summary_
+    def _validate_mid_json(self, json_argument, req_keys):
+        """To validate the mid json for assign resources command before entering the queue
         Args:
             json_argument (dict): Json Argument
             req_keys (list): Required key list to check in json argument
-            error_message (str): Error message when key not present
+        """
+        json_keys = json_argument.keys()
+        for key in req_keys:
+            if key == "receptor_ids":
+                if key not in json_argument["dish"]:
+                    return (
+                        False,
+                        f"{key} key is not present in the input json argument.",
+                    )
+            elif key not in json_keys:
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
+        )
+
+    def _validate_low_json(self, json_argument, req_keys):
+        """To validate the low json for assign resources command before entering the queue
+        Args:
+            json_argument (dict): Json Argument
+            req_keys (list): Required key list to check in json argument
         """
         json_keys = json_argument.keys()
         for key in req_keys:
             if key not in json_keys:
-                return False, error_message.format(key=key)
-        return True, ""
-
-    def _validate_low_json(self, json_argument):
-        """Validate Json for low
-        Args:
-            json_argument (dict): low json
-        """
-        # Validate assign resource json
-        error_msg = "{key} key is not present in the input json argument."
-        is_valid, return_msg = self._validate_keys_in_json(
-            json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS, error_msg
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
         )
-        return is_valid, return_msg
 
-        # TODO Uncomment below code during integration of MCCS
-        # Validate MCCS keys
-        # mccs_json = json_argument.get("mccs", {})
-        # mccs_error_msg = (
-        #     "mccs.{key} key is not present in the input json argument."
-        # )
-        # is_valid, return_error = self._validate_keys_in_json(
-        #     mccs_json, MCCS_REQUIRED_KEYS, mccs_error_msg
-        # )
-        # if not is_valid:
-        #     return is_valid, return_error
+    # TODO Uncomment below code during integration of MCCS
+    # Validate MCCS keys
+    # mccs_json = json_argument.get("mccs", {})
+    # mccs_error_msg = (
+    #     "mccs.{key} key is not present in the input json argument."
+    # )
+    # is_valid, return_error = self._validate_keys_in_json(
+    #     mccs_json, MCCS_REQUIRED_KEYS, mccs_error_msg
+    # )
+    # if not is_valid:
+    #     return is_valid, return_error
 
     def _validate_and_update_resource_config(self, json_argument):
         """Validate if eb_id present in sdp schema.
