@@ -470,18 +470,23 @@ class AssignResources(AbstractAssignReleaseResources):
         Args:
             json_argument (dict): low json
         """
-        if (
-            json_argument["sdp"].get("execution_block")
-            and not json_argument["sdp"]["execution_block"]["eb_id"]
-        ):
-            sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
-            sdp_values = list(json_argument["sdp"]["execution_block"].values())
-            id = sdp_keys[sdp_values.index("")]
-            try:
-                self.update_resource_config_file(json_argument, id)
-            except Exception as e:
-                return False, ("Errors in input json argument: %s", e)
-        return True, ""
+        try:
+            if (
+                json_argument["sdp"].get("execution_block")
+                and not json_argument["sdp"]["execution_block"]["eb_id"]
+            ):
+                sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
+                sdp_values = list(
+                    json_argument["sdp"]["execution_block"].values()
+                )
+                id = sdp_keys[sdp_values.index("")]
+                try:
+                    self.update_resource_config_file(json_argument, id)
+                except Exception as e:
+                    return False, ("Errors in input json argument: %s", e)
+            return True, ""
+        except Exception as e:
+            return False, ("Errors in fetching Keys: %s", e)
 
     # TODO Uncomment below code during integrating of MCCS
     # def create_mccs_cmd_data(self, json_argument):

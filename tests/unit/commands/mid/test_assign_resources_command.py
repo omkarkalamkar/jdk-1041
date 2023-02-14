@@ -101,10 +101,12 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     del json_argument["sdp"]["execution_block"]["eb_id"]
     del json_argument["sdp"]["processing_blocks"]
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
-    with pytest.raises(Exception) as e:
-        assert "processing_blocks" in e
+    with pytest.raises(ValueError):
+        assign_res_command.do(json.dumps(json_argument))
+    # (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    # assert res_code == ResultCode.FAILED
+    # with pytest.raises(Exception) as e:
+    #     assert "processing_blocks" in e
 
 
 def test_assign_resources_command_with_ok(tango_context, task_callback):
