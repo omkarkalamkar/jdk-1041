@@ -31,9 +31,15 @@ from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
-from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.model.input import (
+    InputParameterLow,
+    InputParameterMid,
+)
 from ska_tmc_centralnode.utils.constants import (
+    REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
     REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
+    REQUIRED_MID_ASSIGN_RESOURCE_KEYS,
+    REQUIRED_MID_RELEASE_RESOURCE_KEYS,
 )
 
 
@@ -568,9 +574,9 @@ class CNComponentManager(TmcComponentManager):
         )
         try:
             if type(argin) != dict:
-              json_argument = json.loads(argin)
+                json_argument = json.loads(argin)
             else:
-              json_argument = argin
+                json_argument = argin
         except Exception as e:
             return release_resources_command.generate_command_result(
                 ResultCode.FAILED,
@@ -584,6 +590,18 @@ class CNComponentManager(TmcComponentManager):
             ) = release_resources_command._validate_low_json(
                 json_argument,
                 REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
+            )
+            if not is_valid:
+                return release_resources_command.generate_command_result(
+                    ResultCode.FAILED,
+                    invalid_json_error_msg,
+                )
+        elif isinstance(self.input_parameter, InputParameterMid):
+            (
+                is_valid,
+                invalid_json_error_msg,
+            ) = release_resources_command._validate_mid_json(
+                json_argument, REQUIRED_MID_RELEASE_RESOURCE_KEYS
             )
             if not is_valid:
                 return release_resources_command.generate_command_result(

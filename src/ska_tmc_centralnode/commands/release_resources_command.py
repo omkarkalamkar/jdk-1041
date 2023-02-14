@@ -154,15 +154,16 @@ class ReleaseResources(AbstractAssignReleaseResources):
             return ret_code, message
 
         try:
-            if type(argin) != str:
-               jsonArgument = json.loads(argin)
+            if type(argin) != dict:
+                jsonArgument = json.loads(argin)
             else:
-               jsonArgument = argin
+                jsonArgument = argin
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
+
         if "transaction_id" in jsonArgument:
             del jsonArgument["transaction_id"]
 
@@ -183,6 +184,9 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 ("Subarray id %s is not existing!", subarray_id),
             )
+
+        self.logger.info("****")
+        self.logger.info(jsonArgument)
 
         if jsonArgument["release_all"] is True:
             ret_code, message = self.release_all_resources(

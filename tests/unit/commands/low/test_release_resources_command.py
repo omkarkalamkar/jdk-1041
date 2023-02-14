@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 
 import mock
@@ -50,16 +51,17 @@ def get_release_resources_command_obj():
     )
     return release_command, helper_adapter_factory, cm
 
-@pytest.mark.MS
+
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
-    tango_context, task_callback, json_factory
+    tango_context, task_callback, json_factory, caplog
 ):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
     release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     cm.release_resources(json_argument, task_callback=task_callback)
+    caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
