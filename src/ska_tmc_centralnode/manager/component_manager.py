@@ -554,7 +554,10 @@ class CNComponentManager(TmcComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
         try:
-            json_argument = argin
+            if type(argin) != dict:
+              json_argument = json.loads(argin)
+            else:
+              json_argument = argin
         except Exception as e:
             return release_resources_command.generate_command_result(
                 ResultCode.FAILED,

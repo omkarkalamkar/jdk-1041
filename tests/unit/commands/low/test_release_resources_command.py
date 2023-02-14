@@ -50,7 +50,7 @@ def get_release_resources_command_obj():
     )
     return release_command, helper_adapter_factory, cm
 
-
+@pytest.mark.MS
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
     tango_context, task_callback, json_factory
