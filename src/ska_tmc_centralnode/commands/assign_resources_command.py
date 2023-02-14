@@ -470,12 +470,12 @@ class AssignResources(AbstractAssignReleaseResources):
         Args:
             json_argument (dict): low json
         """
-        execution_block = json_argument["sdp"].get("execution_block")
-        if execution_block and not json_argument["sdp"]["execution_block"].get(
-            "eb_id"
+        if (
+            json_argument["sdp"].get("execution_block")
+            and not json_argument["sdp"]["execution_block"]["eb_id"]
         ):
-            sdp_keys = list(execution_block.keys())
-            sdp_values = list(execution_block.values())
+            sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
+            sdp_values = list(json_argument["sdp"]["execution_block"].values())
             id = sdp_keys[sdp_values.index("")]
             try:
                 self.update_resource_config_file(json_argument, id)
