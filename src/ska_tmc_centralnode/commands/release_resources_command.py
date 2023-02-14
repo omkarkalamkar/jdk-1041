@@ -121,6 +121,29 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 "Partial release resources not supported!",
             )
 
+    def _validate_mid_json(self, json_argument: dict, req_keys: list):
+        """To validate the mid json for release resources command before entering the queue
+        Args:
+            json_argument (dict): Json Argument
+            req_keys (list): Required key list to check in json argument
+        """
+        json_keys = json_argument.keys()
+        for key in req_keys:
+            if key == "receptor_ids":
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
+            elif key not in json_keys:
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
+        )
+
     def do_low(self, argin):
         """
         Method to invoke ReleaseResources command on Subarray Node.

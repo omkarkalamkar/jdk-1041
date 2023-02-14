@@ -149,3 +149,19 @@ def test_telescope_release_resources_fail_check_allowed(tango_context):
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("ReleaseResources")
+
+
+@pytest.mark.MS
+def test_mid_release_resources_command_with_invalide_key(
+    tango_context, task_callback, json_factory
+):
+    logger.info("%s", tango_context)
+    _, _, cm = get_release_resources_command_obj()
+    release_input_str = json_factory("invalid_key_ReleaseResources")
+    (res_code, message) = cm.assign_resources(
+        release_input_str, task_callback=task_callback
+    )
+    assert res_code == ResultCode.FAILED
+    assert (
+        "subarray_id key is not present in the input json argument" in message
+    )
