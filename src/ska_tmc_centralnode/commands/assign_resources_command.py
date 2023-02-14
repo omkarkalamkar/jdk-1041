@@ -175,7 +175,8 @@ class AssignResources(AbstractAssignReleaseResources):
         # )
         # json_argument = input_validator.loads(argin)
         assign_validator = AssignResourceValidator(self.logger)
-        json_argument = assign_validator.loads(argin)
+        validated_json = assign_validator.loads(argin)
+        json_argument = json.loads(validated_json)
         self.logger.info(f"Json argument::{json_argument}")
         # try:
         #     self.logger.debug(f"Loading json string:{argin}")
