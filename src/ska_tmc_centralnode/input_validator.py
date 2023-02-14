@@ -13,13 +13,13 @@ import logging
 from json import JSONDecodeError
 
 from marshmallow import ValidationError
-from ska_tango_base.commands import ResultCode
 from ska_tmc_cdm.messages.central_node.assign_resources import (
     AssignResourcesRequest,
 )
 
 # SKA specific imports
 from ska_tmc_cdm.schemas import CODEC
+from ska_tmc_common.exceptions import InvalidJSONError
 
 module_logger = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ class AssignResourceValidator:
                 + "Full exception info: "
                 + str(json_error)
             )
-            return ResultCode.FAILED, exception_message
+            raise InvalidJSONError(exception_message)
 
         # # Validate subarray ID
         # # TODO: Use the object returned by cdm library instead of parsing
