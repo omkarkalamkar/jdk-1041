@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 
 import mock
@@ -44,20 +45,23 @@ def get_release_resources_command_obj():
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    my_adapter_factory = HelperAdapterFactory()
-    release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
-    return release_command, my_adapter_factory, cm
+    helper_adapter_factory = HelperAdapterFactory()
+    release_command = ReleaseResources(
+        cm, helper_adapter_factory, logger=logger
+    )
+    return release_command, helper_adapter_factory, cm
 
 
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
-    tango_context, task_callback, json_factory
+    tango_context, task_callback, json_factory, caplog
 ):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
     release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     cm.release_resources(json_argument, task_callback=task_callback)
+    caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -71,7 +75,9 @@ def test_low_release_resources_command(
 
 @pytest.mark.SKA_low
 def test_low_release_resources_command_fail_subarray(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
 ):
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -88,11 +94,8 @@ def test_low_release_resources_command_fail_subarray(
     )
     release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
-    release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
-    release_res_command.release_resources(
-        json_argument, logger=logger, task_callback=task_callback
-    )
-    (res_code, _) = release_res_command.do(json.dumps(json_argument))
+    assign_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
+    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
 
 
@@ -100,8 +103,24 @@ def test_low_release_resources_command_fail_subarray(
 def test_low_release_resources_empty_input_json(tango_context, task_callback):
     release_res_command, _, cm = get_release_resources_command_obj()
     cm.release_resources("", task_callback=task_callback)
-    (res_code, _) = release_res_command.do(" ")
+    (res_code, _) = cm.release_resources(" ")
     assert res_code == ResultCode.FAILED
+
+
+@pytest.mark.SKA_low
+def test_low_release_resources_command_with_invalide_key(
+    tango_context, task_callback, json_factory
+):
+    _, _, cm = get_release_resources_command_obj()
+    release_input_str = json_factory("invalid_key_ReleaseResources")
+    (res_code, message) = cm.release_resources(
+        release_input_str, task_callback=task_callback
+    )
+    assert res_code == ResultCode.FAILED
+    assert (
+        "transaction_id key is not present in the input json argument"
+        in message
+    )
 
 
 @pytest.mark.SKA_low
@@ -113,7 +132,7 @@ def test_low_release_resources_missing_subarray_id(
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
     cm.release_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = release_res_command.do(json.dumps(json_argument))
+    (res_code, message) = cm.release_resources(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
 

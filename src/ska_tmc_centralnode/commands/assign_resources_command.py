@@ -174,18 +174,18 @@ class AssignResources(AbstractAssignReleaseResources):
         #     self.logger,
         # )
         # json_argument = input_validator.loads(argin)
-        assign_validator = AssignResourceValidator(self.logger)
-        validated_json = assign_validator.loads(argin)
-        json_argument = json.loads(validated_json)
-        self.logger.info(f"Json argument::{json_argument}")
-        # try:
-        #     self.logger.debug(f"Loading json string:{argin}")
-        #     json_argument = json.loads(argin)
-        # except Exception as e:
-        #     return self.generate_command_result(
-        #         ResultCode.FAILED,
-        #         ("Problem in loading the JSON string: %s", e),
-        #     )
+        # assign_validator = AssignResourceValidator(self.logger)
+        # validated_json = assign_validator.loads(argin)
+        # json_argument = json.loads(validated_json)
+        # self.logger.info(f"Json argument::{json_argument}")
+        try:
+            self.logger.debug(f"Loading json string:{argin}")
+            json_argument = json.loads(argin)
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
 
         # validate processing block
         (
