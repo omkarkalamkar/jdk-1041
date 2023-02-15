@@ -84,7 +84,7 @@ def test_assign_resources_command_queued(tango_context, task_callback):
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    cm.assign_resources(json.dumps(json_argument), task_callback=task_callback)
+    cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -102,7 +102,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     del json_argument["sdp"]["processing_blocks"]
     cm.assign_resources(json_argument, task_callback=task_callback)
     with pytest.raises(ValueError):
-        assign_res_command.do(json.dumps(json_argument))
+        assign_res_command.do(json_argument)
     # (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     # assert res_code == ResultCode.FAILED
     # with pytest.raises(Exception) as e:
@@ -116,7 +116,7 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
-    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, _) = assign_res_command.do(json_argument)
     assert res_code == ResultCode.OK
 
 
@@ -130,7 +130,7 @@ def test_assign_resources_command_missing_sdp_key(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json_argument, task_callback=task_callback
     )
     assert res_code == ResultCode.FAILED
     assert "sdp" in message
