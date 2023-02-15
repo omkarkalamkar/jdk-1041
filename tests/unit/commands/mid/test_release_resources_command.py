@@ -140,6 +140,7 @@ def test_mid_release_resources_command_missing_subarray_id(
     assert "subarray_id" in message
 
 
+@pytest.mark.MS
 def test_telescope_release_resources_fail_check_allowed(tango_context):
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -151,7 +152,6 @@ def test_telescope_release_resources_fail_check_allowed(tango_context):
         cm.is_command_allowed("ReleaseResources")
 
 
-@pytest.mark.MS
 def test_mid_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
