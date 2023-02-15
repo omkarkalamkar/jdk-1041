@@ -106,14 +106,40 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
-        ret_code, message = self.validate_input_json(argin)
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        try:
+            if type(argin) != dict:
+                jsonArgument = json.loads(argin)
+            else:
+                jsonArgument = argin
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
 
-        jsonArgument = json.loads(argin)
-        if jsonArgument["release_all"]:
+        if "transaction_id" in jsonArgument:
+            del jsonArgument["transaction_id"]
+
+        if "subarray_id" not in jsonArgument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
+
+        subarray_id = jsonArgument["subarray_id"]
+
+        for adapter in self.subarray_adapters:
+            if str(subarray_id) in adapter.dev_name:
+                self.subarray_adapter = adapter
+
+        if self.subarray_adapter is None:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Subarray id %s is not existing!", subarray_id),
+            )
+        if jsonArgument["release_all"] is True:
             ret_code, message = self.release_all_resources(
-                self.my_subarray_adapter
+                self.subarray_adapter
             )
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
@@ -124,6 +150,24 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 "Partial release resources not supported!",
             )
+
+    def _validate_mid_json(self, json_argument: dict, req_keys: list):
+        """To validate the low json for release resources command before erterning the queue
+        Args:
+            json_argument (dict): Json Argument
+            req_keys (list): Required key list to check in json argument
+        """
+        json_keys = json_argument.keys()
+        for key in req_keys:
+            if key not in json_keys:
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
+        )
 
     def do_low(self, argin):
         """
@@ -157,33 +201,63 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
-        ret_code, message = self.validate_input_json(argin)
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        try:
+            if type(argin) != dict:
+                jsonArgument = json.loads(argin)
+            else:
+                jsonArgument = argin
+        except Exception as e:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", e),
+            )
 
-        jsonArgument = json.loads(argin)
+        if "transaction_id" in jsonArgument:
+            del jsonArgument["transaction_id"]
+
+        if "subarray_id" not in jsonArgument:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                "subarray_id key is not present in the input json argument.",
+            )
+
+        subarray_id = jsonArgument["subarray_id"]
+
+        for adapter in self.subarray_adapters:
+            if str(subarray_id) in adapter.dev_name:
+                self.subarray_adapter = adapter
+
+        if self.subarray_adapter is None:
+            return self.generate_command_result(
+                ResultCode.FAILED,
+                ("Subarray id %s is not existing!", subarray_id),
+            )
+
+        self.logger.info("****")
+        self.logger.info(jsonArgument)
+
         if jsonArgument["release_all"] is True:
             ret_code, message = self.release_all_resources(
-                self.my_subarray_adapter
+                self.subarray_adapter
             )
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
-
-            # TODO Uncomment below code during integration of MCCS
-            # Invoke ReleaseAllResources on MCCS Master Leaf Node
-            # Send updated input string with inteface key to MCCS Master for ReleaseResource Command
-            # jsonArgument[
-            #     "interface"
-            # ] = "https://schema.skao.int/ska-low-mccs-releaseresources/1.0"
-            # if "transaction_id" in jsonArgument:
-            #     del jsonArgument["transaction_id"]
-
-            #     ret_code, message = self.release_resources_mccs(
-            #         json.dumps(jsonArgument)
-            #     )
-            #     if ret_code == ResultCode.FAILED:
-            #         return ret_code, message
             return (ResultCode.OK, "")
+
+        # TODO Uncomment below code during integration of MCCS
+        # Invoke ReleaseAllResources on MCCS Master Leaf Node
+        # Send updated input string with inteface key to MCCS Master for ReleaseResource Command
+        # jsonArgument[
+        #     "interface"
+        # ] = "https://schema.skao.int/ska-low-mccs-releaseresources/1.0"
+        # if "transaction_id" in jsonArgument:
+        #     del jsonArgument["transaction_id"]
+
+        #     ret_code, message = self.release_resources_mccs(
+        #         json.dumps(jsonArgument)
+        #     )
+        #     if ret_code == ResultCode.FAILED:
+        #         return ret_code, message
 
     def release_all_resources(self, adapter):
         return self.send_command(
@@ -200,32 +274,20 @@ class ReleaseResources(AbstractAssignReleaseResources):
             arg,
         )
 
-    def validate_input_json(self, argin):
-        try:
-            jsonArgument = json.loads(argin)
-        except Exception as e:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
-            )
-        if "transaction_id" in jsonArgument:
-            del jsonArgument["transaction_id"]
-
-        if "subarray_id" not in jsonArgument:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
-        subarrayID = jsonArgument["subarray_id"]
-
-        for adapter in self.subarray_adapters:
-            if str(subarrayID) in adapter.dev_name:
-                self.my_subarray_adapter = adapter
-
-        if self.my_subarray_adapter is None:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarrayID),
-            )
-        return ResultCode.OK, ""
+    def _validate_low_json(self, json_argument: dict, req_keys: list):
+        """To validate the low json for release resources command before erterning the queue
+        Args:
+            json_argument (dict): Json Argument
+            req_keys (list): Required key list to check in json argument
+        """
+        json_keys = json_argument.keys()
+        for key in req_keys:
+            if key not in json_keys:
+                return (
+                    False,
+                    f"{key} key is not present in the input json argument.",
+                )
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
+        )
