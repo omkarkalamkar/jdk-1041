@@ -27,6 +27,7 @@ from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
+from ska_tmc_centralnode.input_validator import AssignResourceValidator
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
@@ -41,7 +42,6 @@ from ska_tmc_centralnode.utils.constants import (
     REQUIRED_MID_ASSIGN_RESOURCE_KEYS,
     REQUIRED_MID_RELEASE_RESOURCE_KEYS,
 )
-from ska_tmc_centralnode.input_validator import AssignResourceValidator
 
 
 class CNComponentManager(TmcComponentManager):

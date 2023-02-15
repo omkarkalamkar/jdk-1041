@@ -12,7 +12,6 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
-from ska_tmc_centralnode.input_validator import AssignResourceValidator
 
 
 class AssignResources(AbstractAssignReleaseResources):
