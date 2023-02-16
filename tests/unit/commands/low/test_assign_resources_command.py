@@ -101,7 +101,7 @@ def test_assign_resources_missing_sdp_key(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
     assert "sdp" in message
 
 
@@ -189,7 +189,7 @@ def test_low_assign_resources_missing_subarray_id(
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
     assert "subarray_id" in message
 
 
