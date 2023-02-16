@@ -51,8 +51,8 @@ def devices_to_load():
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
     with open(path, "r") as f:
-        assign_str = f.read()
-        assign_input_str = json.load(assign_str)
+        assign_input_str = f.read()
+        # assign_input_str = json.load(assign_str)
     return assign_input_str
 
 
@@ -118,7 +118,7 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    cm.assign_resources(json_argument, task_callback=task_callback)
+    cm.assign_resources(json.dumps(json_argument), task_callback=task_callback)
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.OK
 
