@@ -5,7 +5,6 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
@@ -211,10 +210,9 @@ def assign_resources_with_invalid_json(
 
     result, message = central_node.AssignResources(assign_input_str)
 
-
-    assert (
-        ["subarray_id key is not present in the input json argument."] == message
-    )
+    assert [
+        "subarray_id key is not present in the input json argument."
+    ] == message
     assert result[0] == ResultCode.REJECTED
 
 
