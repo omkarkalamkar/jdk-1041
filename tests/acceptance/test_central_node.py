@@ -50,7 +50,6 @@ def call_command(central_node, command_name, json_factory):
                 dirname(__file__),
                 "..",
                 "..",
-                "..",
                 "data",
                 "command_AssignResources.json",
             )

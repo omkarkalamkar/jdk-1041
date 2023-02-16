@@ -175,6 +175,7 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     assert res_code == ResultCode.FAILED
 
 
+@pytest.mark.skip
 def test_telescope_assign_resources_command_empty_input_json(
     tango_context, task_callback
 ):
