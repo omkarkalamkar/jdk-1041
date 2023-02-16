@@ -9,13 +9,13 @@ import pandas as pd
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
-from ska_tango_base.executor import TaskStatus
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
@@ -524,15 +524,18 @@ class CNComponentManager(TmcComponentManager):
                 json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:
-                ret_code,message = assign_resources_command.generate_command_result(
+                (
+                    ret_code,
+                    message,
+                ) = assign_resources_command.generate_command_result(
                     ResultCode.FAILED,
                     invalid_json_error_msg,
                 )
-            # ret_code == ResultCode.FAILED:
+                # ret_code == ResultCode.FAILED:
                 task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.FAILED,
-                exception=message,
+                    status=TaskStatus.COMPLETED,
+                    result=ResultCode.FAILED,
+                    exception=message,
                 )
                 return ret_code, message
         elif isinstance(self.input_parameter, InputParameterMid):
@@ -543,15 +546,18 @@ class CNComponentManager(TmcComponentManager):
                 json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:
-                ret_code,message = assign_resources_command.generate_command_result(
+                (
+                    ret_code,
+                    message,
+                ) = assign_resources_command.generate_command_result(
                     ResultCode.FAILED,
                     invalid_json_error_msg,
                 )
-            # ret_code == ResultCode.FAILED:
+                # ret_code == ResultCode.FAILED:
                 task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.FAILED,
-                exception=message,
+                    status=TaskStatus.COMPLETED,
+                    result=ResultCode.FAILED,
+                    exception=message,
                 )
                 return ret_code, message
 
@@ -564,23 +570,25 @@ class CNComponentManager(TmcComponentManager):
         )
 
         if not is_processing_block_present:
-            ret_code, message =  assign_resources_command.generate_command_result(
+            (
+                ret_code,
+                message,
+            ) = assign_resources_command.generate_command_result(
                 ResultCode.FAILED,
                 processing_block_error_msg,
             )
             task_callback(
-            status=TaskStatus.COMPLETED,
-            result=ResultCode.FAILED,
-            exception=message,
-            )      
-            return ret_code, message      
+                status=TaskStatus.COMPLETED,
+                result=ResultCode.FAILED,
+                exception=message,
+            )
+            return ret_code, message
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
             args=[argin, self.logger],
             task_callback=task_callback,
         )
         return task_status, response
-    
 
     def release_resources(
         self, argin, task_callback: Optional[Callable] = None
