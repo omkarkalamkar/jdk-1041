@@ -100,7 +100,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]["execution_block"]["eb_id"]
     del json_argument["sdp"]["processing_blocks"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
     with pytest.raises(ValueError):
         assign_res_command.do(json.dumps(json_argument))
     # (res_code, _) = assign_res_command.do(json.dumps(json_argument))
@@ -130,7 +130,7 @@ def test_assign_resources_command_missing_sdp_key(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        assign_input_str, task_callback=task_callback
     )
     assert res_code == ResultCode.FAILED
     assert "sdp" in message
@@ -162,7 +162,7 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
         cm, adapter_factory, skuid, logger=logger
     )
     assign_res_command.assign_resources(
-        json_argument, logger=logger, task_callback=task_callback
+        assign_input_str, logger=logger, task_callback=task_callback
     )
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
@@ -189,7 +189,7 @@ def test_assign_resources_command_missing_subarray_id(
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        assign_input_str, task_callback=task_callback
     )
     assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
@@ -203,7 +203,7 @@ def test_assign_resources_command_missing_dish(tango_context, task_callback):
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        assign_input_str, task_callback=task_callback
     )
     assert res_code == ResultCode.FAILED
     assert "dish" in message
@@ -219,7 +219,7 @@ def test_assign_resources_command_missing_receptor_ids(
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]["receptor_ids"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        assign_input_str, task_callback=task_callback
     )
     assert res_code == ResultCode.FAILED
     assert "receptor_ids" in message
