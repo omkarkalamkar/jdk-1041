@@ -1,3 +1,5 @@
+import json
+
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -32,13 +34,28 @@ def release_resources(
         lookahead=2,
     )
 
-    _, unique_id_assign = central_node.AssignResources(assign_input_str)
+    # _, unique_id_assign = central_node.AssignResources(assign_input_str)
+
+    if "ska_mid" in central_node_name:
+        result, unique_id_assign = central_node.AssignResources(
+            json.dumps(assign_input_str)
+        )
+    else:
+        result, unique_id_assign = central_node.AssignResources(
+            assign_input_str
+        )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_assign[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
-    result, unique_id = central_node.ReleaseResources(release_input_string)
+
+    if "ska_mid" in central_node_name:
+        result, unique_id = central_node.ReleaseResources(
+            json.dumps(release_input_string)
+        )
+    else:
+        result, unique_id = central_node.ReleaseResources(release_input_string)
 
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
