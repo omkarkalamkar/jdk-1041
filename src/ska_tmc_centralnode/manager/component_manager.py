@@ -498,12 +498,6 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
-        # Validated the Json using the CDM
-        if isinstance(self.input_parameter, InputParameterMid):
-            assign_validator = AssignResourceValidator(self.logger)
-            validated_json = assign_validator.loads(argin)
-            json_argument = json.loads(validated_json)
-            self.logger.info(f"Json argument::{json_argument}")
 
         # Execute the command if the input JSON is valid
         assign_resources_command = AssignResources(
@@ -512,6 +506,13 @@ class CNComponentManager(TmcComponentManager):
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
+
+        # Validated the Json using the CDM
+        if isinstance(self.input_parameter, InputParameterMid):
+            assign_validator = AssignResourceValidator(self.logger)
+            validated_json = assign_validator.loads(argin)
+            json_argument = json.loads(validated_json)
+            self.logger.info(f"Json argument::{json_argument}")
 
         try:
             if type(argin) != dict:

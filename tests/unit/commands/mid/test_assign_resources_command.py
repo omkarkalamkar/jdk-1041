@@ -296,11 +296,9 @@ def test_mid_assign_resources_command_with_invalide_key(
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("invalid_key_AssignResources")
-    json_argument = json.loads(assign_input_str)
+    # json_argument = json.loads(assign_input_str)
     with pytest.raises(InvalidJSONError):
-        cm.assign_resources(
-            json.dumps(json_argument), task_callback=task_callback
-        )
+        cm.assign_resources(assign_input_str, task_callback=task_callback)
     # assert res_code == ResultCode.FAILED
     # assert (
     #     "subarray_id key is not present in the input json argument" in message
