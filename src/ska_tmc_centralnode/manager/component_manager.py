@@ -501,8 +501,7 @@ class CNComponentManager(TmcComponentManager):
         # Validated the Json using the CDM
         if isinstance(self.input_parameter, InputParameterMid):
             assign_validator = AssignResourceValidator(self.logger)
-            json_loaded = json.loads(argin)
-            validated_json = assign_validator.loads(json_loaded)
+            validated_json = assign_validator.loads(argin)
             json_argument = json.loads(validated_json)
             self.logger.info(f"Json argument::{json_argument}")
 
