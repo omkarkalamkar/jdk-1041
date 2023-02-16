@@ -187,16 +187,16 @@ class AssignResources(AbstractAssignReleaseResources):
             )
 
         # validate processing block
-        (
-            is_processing_block_present,
-            processing_block_error_msg,
-        ) = self._validate_and_update_resource_config(json_argument)
+        # (
+        #     is_processing_block_present,
+        #     processing_block_error_msg,
+        # ) = self._validate_and_update_resource_config(json_argument)
 
-        if not is_processing_block_present:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                processing_block_error_msg,
-            )
+        # if not is_processing_block_present:
+        #     return self.generate_command_result(
+        #         ResultCode.FAILED,
+        #         processing_block_error_msg,
+        #     )
 
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
