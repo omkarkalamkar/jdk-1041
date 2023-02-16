@@ -91,8 +91,9 @@ def get_input_str(path):
     :rtype: String
     """
     with open(path, "r") as f:
-        input_arg = json.load(f)
-    return json.dumps(input_arg)
+        assign_input_str = f.read()
+        # input_arg = json.load(f)
+    return json.loads(assign_input_str)
 
 
 @pytest.fixture()

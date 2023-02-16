@@ -51,7 +51,7 @@ def assign_resources(
     )
 
     result, unique_id = central_node.AssignResources(
-        json.load(assign_input_str)
+        json.dumps(assign_input_str)
     )
     logger.info(
         f"AssignResources Command ID: {unique_id} Returned result: {result}"

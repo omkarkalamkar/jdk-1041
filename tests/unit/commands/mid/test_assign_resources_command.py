@@ -91,7 +91,6 @@ def test_assign_resources_command_queued(tango_context, task_callback):
     )
 
 
-@pytest.mark.skip
 def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):
@@ -102,9 +101,11 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]["execution_block"]["eb_id"]
     del json_argument["sdp"]["processing_blocks"]
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    # cm.assign_resources(assign_input_str, task_callback=task_callback)
     with pytest.raises(ValueError):
-        assign_res_command.do(json.dumps(json_argument))
+        cm.assign_resources(
+            json.dumps(json_argument), task_callback=task_callback
+        )
     # (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     # assert res_code == ResultCode.FAILED
     # with pytest.raises(Exception) as e:
@@ -122,7 +123,6 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     assert res_code == ResultCode.OK
 
 
-@pytest.mark.skip
 def test_assign_resources_command_missing_sdp_key(
     tango_context, task_callback
 ):
@@ -132,11 +132,15 @@ def test_assign_resources_command_missing_sdp_key(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == ResultCode.FAILED
-    assert "sdp" in message
+    with pytest.raises(InvalidJSONError):
+        cm.assign_resources(
+            json.dumps(json_argument), task_callback=task_callback
+        )
+    # (res_code, message) = cm.assign_resources(
+    #     json.dumps(json_argument), task_callback=task_callback
+    # )
+    # assert res_code == ResultCode.FAILED
+    # assert "sdp" in message
 
 
 def test_assign_resources_command_fail_subarray(tango_context, task_callback):
@@ -171,7 +175,6 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip
 def test_telescope_assign_resources_command_empty_input_json(
     tango_context, task_callback
 ):
@@ -179,7 +182,7 @@ def test_telescope_assign_resources_command_empty_input_json(
     assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
     with pytest.raises(InvalidJSONError):
-        assign_res_command.do(" ")
+        cm.assign_resources(" ", task_callback=task_callback)
     # assert res_code == ResultCode.FAILED
 
 
@@ -192,11 +195,15 @@ def test_assign_resources_command_missing_subarray_id(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == ResultCode.FAILED
-    assert "subarray_id" in message
+    with pytest.raises(InvalidJSONError):
+        cm.assign_resources(
+            json.dumps(json_argument), task_callback=task_callback
+        )
+    # (res_code, message) = cm.assign_resources(
+    #     json.dumps(json_argument), task_callback=task_callback
+    # )
+    # assert res_code == ResultCode.FAILED
+    # assert "subarray_id" in message
 
 
 def test_assign_resources_command_missing_dish(tango_context, task_callback):
@@ -206,11 +213,15 @@ def test_assign_resources_command_missing_dish(tango_context, task_callback):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == ResultCode.FAILED
-    assert "dish" in message
+    with pytest.raises(InvalidJSONError):
+        cm.assign_resources(
+            json.dumps(json_argument), task_callback=task_callback
+        )
+    # (res_code, message) = cm.assign_resources(
+    #     json.dumps(json_argument), task_callback=task_callback
+    # )
+    # assert res_code == ResultCode.FAILED
+    # assert "dish" in message
 
 
 def test_assign_resources_command_missing_receptor_ids(
@@ -222,11 +233,15 @@ def test_assign_resources_command_missing_receptor_ids(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]["receptor_ids"]
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == ResultCode.FAILED
-    assert "receptor_ids" in message
+    with pytest.raises(InvalidJSONError):
+        cm.assign_resources(
+            json.dumps(json_argument), task_callback=task_callback
+        )
+    # (res_code, message) = cm.assign_resources(
+    #     json.dumps(json_argument), task_callback=task_callback
+    # )
+    # assert res_code == ResultCode.FAILED
+    # assert "receptor_ids" in message
 
 
 def test_assign_resources_fail_check_allowed(tango_context):
@@ -282,10 +297,11 @@ def test_mid_assign_resources_command_with_invalide_key(
     _, _, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("invalid_key_AssignResources")
     json_argument = json.loads(assign_input_str)
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == ResultCode.FAILED
-    assert (
-        "subarray_id key is not present in the input json argument" in message
-    )
+    with pytest.raises(InvalidJSONError):
+        cm.assign_resources(
+            json.dumps(json_argument), task_callback=task_callback
+        )
+    # assert res_code == ResultCode.FAILED
+    # assert (
+    #     "subarray_id key is not present in the input json argument" in message
+    # )
