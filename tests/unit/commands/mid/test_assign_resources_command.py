@@ -74,7 +74,6 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
-@pytest.mark.skip
 def test_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -123,7 +122,6 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     assert res_code == ResultCode.OK
 
 
-@pytest.mark.skip
 def test_assign_resources_command_missing_sdp_key(
     tango_context, task_callback
 ):
@@ -134,7 +132,7 @@ def test_assign_resources_command_missing_sdp_key(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
     (res_code, message) = cm.assign_resources(
-        assign_input_str, task_callback=task_callback
+        json.dumps(json_argument), task_callback=task_callback
     )
     assert res_code == ResultCode.FAILED
     assert "sdp" in message
@@ -196,7 +194,7 @@ def test_assign_resources_command_missing_subarray_id(
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
     (res_code, message) = cm.assign_resources(
-        assign_input_str, task_callback=task_callback
+        json.dumps(json_argument), task_callback=task_callback
     )
     assert res_code == ResultCode.FAILED
     assert "subarray_id" in message
