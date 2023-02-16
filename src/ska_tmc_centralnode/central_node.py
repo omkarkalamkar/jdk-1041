@@ -340,6 +340,8 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         handler = self.get_command_object("AssignResources")
         args = json.loads(argin)
+        print(args)
+        print (handler(args))
         result_code, unique_id = handler(args)
         return [[result_code], [str(unique_id)]]
 

@@ -138,7 +138,7 @@ def assign_resources(
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
-
+@pytest.mark.aki
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -151,7 +151,7 @@ def test_assign_res_command_mid(
     return assign_resources(
         tango_context,
         central_node_name,
-        json_factory("command_AssignResources"),
+        json_factory("invalid_key_AssignResources"),
         change_event_callbacks,
         MID_SUBARRAY_DEVICE,
     )
