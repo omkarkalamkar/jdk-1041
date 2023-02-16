@@ -511,8 +511,8 @@ class CNComponentManager(TmcComponentManager):
         if isinstance(self.input_parameter, InputParameterMid):
             assign_validator = AssignResourceValidator(self.logger)
             validated_json = assign_validator.loads(argin)
-            json_argument = json.loads(validated_json)
-            self.logger.info(f"Json argument::{json_argument}")
+            argin = json.loads(validated_json)
+            self.logger.info(f"Json argument::{argin}")
 
         try:
             if type(argin) != dict:
@@ -537,6 +537,10 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg,
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
+            assign_validator = AssignResourceValidator(self.logger)
+            validated_json = assign_validator.loads(argin)
+            argin = json.loads(validated_json)
+            self.logger.info(f"Json argument::{json_argument}")
             (
                 is_valid,
                 invalid_json_error_msg,
