@@ -52,7 +52,7 @@ def call_command(central_node, command_name, json_factory):
                 "..",
                 "..",
                 "data",
-                "command_AssignResources",
+                "command_AssignResources.json",
             )
             with open(path, "r") as f:
                 input_arg = json.load(f)

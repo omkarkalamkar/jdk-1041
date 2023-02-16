@@ -27,7 +27,10 @@ from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
-from ska_tmc_centralnode.input_validator import AssignResourceValidator
+from ska_tmc_centralnode.input_validator import (
+    AssignResourceValidator,
+    ReleaseResourceValidator,
+)
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
@@ -603,6 +606,10 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg,
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
+            release_validator = ReleaseResourceValidator(self.logger)
+            validated_json = release_validator.loads(argin)
+            argin = json.loads(validated_json)
+            self.logger.info(f"Json argument::{json_argument}")
             (
                 is_valid,
                 invalid_json_error_msg,

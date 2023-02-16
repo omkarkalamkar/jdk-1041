@@ -11,7 +11,6 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
 )
-from ska_tmc_centralnode.input_validator import ReleaseResourceValidator
 
 
 class ReleaseResources(AbstractAssignReleaseResources):
@@ -202,16 +201,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
-        release_validator = ReleaseResourceValidator(self.logger)
-        validated_json = release_validator.loads(argin)
-        jsonArgument = json.loads(validated_json)
-        self.logger.info(f"Json argument::{jsonArgument}")
-
-        ret_code, message = self.validate_input_json(argin)
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
-
-        # jsonArgument = json.loads(argin)
         try:
             if type(argin) != dict:
                 jsonArgument = json.loads(argin)

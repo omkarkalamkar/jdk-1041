@@ -7,7 +7,7 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.exceptions import CommandNotAllowed, InvalidJSONError
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
@@ -76,7 +76,9 @@ def test_mid_release_resources_command(tango_context, task_callback):
     cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
-    cm.release_resources(json_argument, task_callback=task_callback)
+    cm.release_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -87,7 +89,9 @@ def test_mid_release_resources_command_with_ok(tango_context, task_callback):
     cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
-    cm.release_resources(json_argument, task_callback=task_callback)
+    cm.release_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     (res_code, _) = release_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.OK
 
@@ -109,8 +113,11 @@ def test_mid_release_resources_command_fail_subarray(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
-    release_res_command.release_resources(
-        json_argument, logger=logger, task_callback=task_callback
+    # release_res_command.release_resources(
+    #     json_argument, logger=logger, task_callback=task_callback
+    # )
+    cm.release_resources(
+        json.dumps(json_argument), task_callback=task_callback
     )
     (res_code, _) = release_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
@@ -134,13 +141,15 @@ def test_mid_release_resources_command_missing_subarray_id(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
-    cm.release_resources(json_argument, task_callback=task_callback)
-    (res_code, message) = release_res_command.do(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
-    assert "subarray_id" in message
+    with pytest.raises(ValueError):
+        cm.release_resources(
+            json.dumps(json_argument), task_callback=task_callback
+        )
+    # (res_code, message) = release_res_command.do(json.dumps(json_argument))
+    # assert res_code == ResultCode.FAILED
+    # assert "subarray_id" in message
 
 
-@pytest.mark.MS
 def test_telescope_release_resources_fail_check_allowed(tango_context):
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -158,10 +167,5 @@ def test_mid_release_resources_command_with_invalide_key(
     logger.info("%s", tango_context)
     _, _, cm = get_release_resources_command_obj()
     release_input_str = json_factory("invalid_key_ReleaseResources")
-    (res_code, message) = cm.assign_resources(
-        release_input_str, task_callback=task_callback
-    )
-    assert res_code == ResultCode.FAILED
-    assert (
-        "subarray_id key is not present in the input json argument" in message
-    )
+    with pytest.raises(InvalidJSONError):
+        cm.release_resources(release_input_str, task_callback=task_callback)
