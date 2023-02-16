@@ -132,7 +132,7 @@ def test_assign_resources_command_missing_sdp_key(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
-    with pytest.raises(InvalidJSONError):
+    with pytest.raises(ValueError):
         cm.assign_resources(
             json.dumps(json_argument), task_callback=task_callback
         )
@@ -195,7 +195,7 @@ def test_assign_resources_command_missing_subarray_id(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
-    with pytest.raises(InvalidJSONError):
+    with pytest.raises(ValueError):
         cm.assign_resources(
             json.dumps(json_argument), task_callback=task_callback
         )
@@ -213,7 +213,7 @@ def test_assign_resources_command_missing_dish(tango_context, task_callback):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]
-    with pytest.raises(InvalidJSONError):
+    with pytest.raises(ValueError):
         cm.assign_resources(
             json.dumps(json_argument), task_callback=task_callback
         )
@@ -233,7 +233,7 @@ def test_assign_resources_command_missing_receptor_ids(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]["receptor_ids"]
-    with pytest.raises(InvalidJSONError):
+    with pytest.raises(ValueError):
         cm.assign_resources(
             json.dumps(json_argument), task_callback=task_callback
         )
