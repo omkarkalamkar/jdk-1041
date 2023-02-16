@@ -87,7 +87,7 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
     del json_argument["sdp"]["processing_blocks"]
     (res_code, _) = cm.assign_resources(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
     with pytest.raises(Exception) as e:
         assert "processing_blocks" in e
 
@@ -172,7 +172,7 @@ def test_low_assign_resources_command_with_invalide_key(
     (res_code, message) = cm.assign_resources(
         assign_input_str, task_callback=task_callback
     )
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
     assert (
         "subarray_id key is not present in the input json argument" in message
     )

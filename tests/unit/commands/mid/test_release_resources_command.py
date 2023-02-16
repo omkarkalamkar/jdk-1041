@@ -161,7 +161,7 @@ def test_mid_release_resources_command_with_invalide_key(
     (res_code, message) = cm.assign_resources(
         release_input_str, task_callback=task_callback
     )
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
     assert (
         "subarray_id key is not present in the input json argument" in message
     )
