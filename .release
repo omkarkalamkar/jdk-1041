@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.4.2"
+version="0.4.3"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team SAHYADRI & HIMALAYA"
@@ -10,7 +10,7 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.4.2
-tag=0.4.2
-tag_description=HealthState Attribute initialization to Ok State
-release_notes=This release contains:<br/><ul><li>Updated CentralNode HealthState attribute to Ok State in initialization of the device </li></ul><br/>
+release=0.4.3
+tag=0.4.3
+tag_description=Fix none type bug generated during invalid json string
+release_notes=This release contains:<br/><ul><li>Fix none type bug generated during invalid json string </li></ul><br/>
