@@ -1,5 +1,4 @@
 import json
-from os.path import dirname, join
 
 import numpy as np
 import pytest
@@ -66,24 +65,27 @@ def call_command(central_node, command_name, json_factory):
                 )
         elif command_name == "ReleaseResources":
             logger.info(f"central_node: {central_node.dev_name()}")
-            logger.info(f"central_node: {central_node.dev_name()}")
-            path = join(
-                dirname(__file__),
-                "..",
-                "data",
-                "command_ReleaseResources.json",
-            )
-            with open(path, "r") as f:
-                input_arg = json.load(f)
+            # logger.info(f"central_node: {central_node.dev_name()}")
+            # path = join(
+            #     dirname(__file__),
+            #     "..",
+            #     "data",
+            #     "command_ReleaseResources.json",
+            # )
+            # with open(path, "r") as f:
+            #     input_arg = json.load(f)
             if "ska_mid" in central_node.dev_name():
-                release_res_string = json_factory(json.dumps(input_arg))
+                release_res_string = json_factory("command_ReleaseResources")
+                pytest.command_result = central_node.command_inout(
+                    command_name, json.dumps(release_res_string)
+                )
             else:
                 release_res_string = json_factory(
                     "command_release_resource_low"
                 )
-            pytest.command_result = central_node.command_inout(
-                command_name, release_res_string
-            )
+                pytest.command_result = central_node.command_inout(
+                    command_name, release_res_string
+                )
         else:
             pytest.command_result = central_node.command_inout(command_name)
     except Exception as ex:
