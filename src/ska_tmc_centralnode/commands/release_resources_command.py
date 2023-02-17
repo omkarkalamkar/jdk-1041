@@ -233,7 +233,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 ("Subarray id %s is not existing!", subarray_id),
             )
 
-        self.logger.info("****")
         self.logger.info(jsonArgument)
 
         if jsonArgument["release_all"] is True:

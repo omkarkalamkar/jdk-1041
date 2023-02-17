@@ -354,6 +354,7 @@ class AssignResources(AbstractAssignReleaseResources):
         """
         try:
             json_argument = json.loads(argin)
+            self.logger.debug(f"Loading json string:{argin}")
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -403,7 +404,7 @@ class AssignResources(AbstractAssignReleaseResources):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ResultCode.FAILED, message
-
+        self.logger.info
         return (ResultCode.OK, "")
 
     def _validate_mid_json(self, json_argument, req_keys):
