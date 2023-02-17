@@ -182,7 +182,6 @@ def assign_resources_with_invalid_json(
     change_event_callbacks,
     subarray_device,
 ):
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
 

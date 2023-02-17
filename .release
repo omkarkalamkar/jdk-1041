@@ -12,5 +12,6 @@ copyright=""""""
 
 release=0.4.3
 tag=0.4.3
-tag_description=Fix none type bug generated during invalid json string
-release_notes=This release contains:<br/><ul><li>Fix none type bug generated during invalid json string </li></ul><br/>
+tag_description=When given invalid json string to assign resources command, it returned NoneType error. It is now fixed by returning the TaskStatus
+
+release_notes=This release contains:<br/><ul><li>When given invalid json string to assign resources command, it returned NoneType error. It is now fixed by returning the TaskStatus </li></ul><br/>

@@ -509,9 +509,9 @@ class CNComponentManager(TmcComponentManager):
                 json_argument = json.loads(argin)
             else:
                 json_argument = argin
-        except Exception as e:
+        except Exception:
             return assign_resources_command.reject_command(
-                f"Problem in loading the JSON string: {e}"
+                "The JSON string is invalid. Please provide the correct input"
             )
         if isinstance(self.input_parameter, InputParameterLow):
             (
@@ -571,9 +571,11 @@ class CNComponentManager(TmcComponentManager):
                 json_argument = json.loads(argin)
             else:
                 json_argument = argin
-        except Exception as e:
+        except Exception:
             return release_resources_command.reject_command(
-                ("Problem in loading the JSON string: %s", e)
+                (
+                    "The JSON string is invalid. Please provide the correct input."
+                )
             )
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
