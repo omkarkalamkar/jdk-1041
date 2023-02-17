@@ -140,7 +140,6 @@ def test_mid_release_resources_command_missing_subarray_id(
     assert "subarray_id" in message
 
 
-@pytest.mark.MS
 def test_telescope_release_resources_fail_check_allowed(tango_context):
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -161,7 +160,7 @@ def test_mid_release_resources_command_with_invalide_key(
     (res_code, message) = cm.assign_resources(
         release_input_str, task_callback=task_callback
     )
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
     assert (
         "subarray_id key is not present in the input json argument" in message
     )

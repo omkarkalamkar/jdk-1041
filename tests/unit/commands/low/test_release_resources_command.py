@@ -104,7 +104,7 @@ def test_low_release_resources_empty_input_json(tango_context, task_callback):
     release_res_command, _, cm = get_release_resources_command_obj()
     cm.release_resources("", task_callback=task_callback)
     (res_code, _) = cm.release_resources(" ")
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
 
 
 @pytest.mark.SKA_low
@@ -116,7 +116,7 @@ def test_low_release_resources_command_with_invalide_key(
     (res_code, message) = cm.release_resources(
         release_input_str, task_callback=task_callback
     )
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
     assert (
         "transaction_id key is not present in the input json argument"
         in message
@@ -133,7 +133,7 @@ def test_low_release_resources_missing_subarray_id(
     del json_argument["subarray_id"]
     cm.release_resources(json_argument, task_callback=task_callback)
     (res_code, message) = cm.release_resources(json.dumps(json_argument))
-    assert res_code == ResultCode.FAILED
+    assert res_code == TaskStatus.REJECTED
     assert "subarray_id" in message
 
 
