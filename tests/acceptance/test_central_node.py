@@ -49,7 +49,6 @@ def call_command(central_node, command_name, json_factory):
             path = join(
                 dirname(__file__),
                 "..",
-                "..",
                 "data",
                 "command_AssignResources.json",
             )
@@ -64,8 +63,17 @@ def call_command(central_node, command_name, json_factory):
             )
         elif command_name == "ReleaseResources":
             logger.info(f"central_node: {central_node.dev_name()}")
+            logger.info(f"central_node: {central_node.dev_name()}")
+            path = join(
+                dirname(__file__),
+                "..",
+                "data",
+                "command_ReleaseResources.json",
+            )
+            with open(path, "r") as f:
+                input_arg = json.load(f)
             if "ska_mid" in central_node.dev_name():
-                release_res_string = json_factory("command_ReleaseResources")
+                release_res_string = json_factory(json.dumps(input_arg))
             else:
                 release_res_string = json_factory(
                     "command_release_resource_low"
