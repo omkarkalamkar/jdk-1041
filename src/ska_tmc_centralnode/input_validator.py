@@ -22,7 +22,7 @@ from ska_tmc_cdm.messages.central_node.release_resources import (
 
 # SKA specific imports
 from ska_tmc_cdm.schemas import CODEC
-from ska_tmc_common.exceptions import InvalidJSONError
+from ska_tmc_common.exceptions import InvalidJSONError, SubarrayNotPresentError
 
 module_logger = logging.getLogger(__name__)
 
@@ -31,17 +31,17 @@ class AssignResourceValidator:
 
     """Class to validate the input string of AssignResources command of Central Node"""
 
-    def __init__(self, logger=module_logger):
+    def __init__(self, subarray_list, logger=module_logger):
+
         self.logger = logger
+        self._subarrays = []
+        #     self._receptor_list = []
 
-    #     self._subarrays = []
-    #     self._receptor_list = []
-
-    #     # get the ids of the numerical ids of available subarrays
-    #     for subarray in subarray_list:
-    #         tokens = subarray.split("/")
-    #         self._subarrays.append(int(tokens[2]))
-    #     self.logger.debug("Available subarray ids: %s", self._subarrays)
+        # get the ids of the numerical ids of available subarrays
+        for subarray in subarray_list:
+            tokens = subarray.split("/")
+            self._subarrays.append(int(tokens[2]))
+        self.logger.debug("Available subarray ids: %s", self._subarrays)
 
     #     # Populate the list of receptor ids from list of existing dish leaf node
     #     # FQDNs. The list is used later to search for any invalid receptor id
@@ -54,21 +54,21 @@ class AssignResourceValidator:
 
     #     self._dish_prefix = dish_prefix
 
-    # def _subarray_exists(self, subarray_id):
-    #     """Checks if subarray is present.
+    def _subarray_exists(self, subarray_id):
+        """Checks if subarray is present.
 
-    #     :param: subarray_id: Integer
+        :param: subarray_id: Integer
 
-    #     :return: True if subarray exists. False if the subarray is not present.
-    #     """
-    #     ret_val = False
-    #     self.logger.debug("Subarray ID: %d", subarray_id)
-    #     if subarray_id not in self._subarrays:
-    #         self.logger.debug("The subarray does not exist.")
-    #     else:
-    #         ret_val = True
+        :return: True if subarray exists. False if the subarray is not present.
+        """
+        ret_val = False
+        self.logger.debug("Subarray ID: %d", subarray_id)
+        if subarray_id not in self._subarrays:
+            self.logger.debug("The subarray does not exist.")
+        else:
+            ret_val = True
 
-    #     return ret_val
+        return ret_val
 
     # def _search_invalid_receptors(self, receptor_id_list):
     #     """
@@ -124,18 +124,18 @@ class AssignResourceValidator:
             )
             raise InvalidJSONError(exception_message)
 
-        # # Validate subarray ID
-        # # TODO: Use the object returned by cdm library instead of parsing
-        # # JSON string.
+        # Validate subarray ID
+        # TODO: Use the object returned by cdm library instead of parsing
+        # JSON string.
         # assign_request = json.loads(input_string)
-        # if not self._subarray_exists(assign_request["subarray_id"]):
-        #     exception_message = (
-        #         "The Subarray '"
-        #         + str(assign_request["subarray_id"])
-        #         + "' does not exist."
-        #     )
-        #     raise SubarrayNotPresentError(exception_message)
-        # self.logger.debug("SubarrayID validation successful.")
+        if not self._subarray_exists(assign_request["subarray_id"]):
+            exception_message = (
+                "The Subarray '"
+                + str(assign_request["subarray_id"])
+                + "' does not exist."
+            )
+            raise SubarrayNotPresentError(exception_message)
+        self.logger.debug("SubarrayID validation successful.")
 
         # # Validate receptorIDList
         # try:
