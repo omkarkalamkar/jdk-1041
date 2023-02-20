@@ -113,6 +113,7 @@ class CNComponentManager(TmcComponentManager):
         )
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
+        self.validated_argin = None
 
         if self.event_receiver:
             self.event_receiver_object = CentralNodeEventReceiver(
