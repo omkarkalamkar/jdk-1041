@@ -536,14 +536,14 @@ class CNComponentManager(TmcComponentManager):
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
             available_subarrays_list = self.input_parameter.subarray_dev_names
-            dish_prefix = self.input_parameter.dish_leaf_node_prefix[0]
+            dish_prefix = self.input_parameter.dish_leaf_node_prefix
             available_dish_leaf_node_devices = (
                 self.input_parameter.dish_leaf_node_dev_names
             )
             assign_validator = AssignResourceValidator(
                 available_subarrays_list,
                 available_dish_leaf_node_devices,
-                dish_prefix,
+                dish_prefix[0],
                 self.logger,
             )
             json_argument = assign_validator.loads(argin)
