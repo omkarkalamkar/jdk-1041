@@ -127,8 +127,8 @@ class AssignResourceValidator:
         # Validate subarray ID
         # TODO: Use the object returned by cdm library instead of parsing
         # JSON string.
-        validated_json = json.loads(assign_json)
-        if not self._subarray_exists(validated_json["subarray_id"]):
+        assign_request = json.loads(assign_json)
+        if not self._subarray_exists(assign_request["subarray_id"]):
             exception_message = (
                 "The Subarray '"
                 + str(assign_request["subarray_id"])
@@ -156,7 +156,7 @@ class AssignResourceValidator:
         #     raise ResourceNotPresentError(exception_message)
         # self.logger.debug("receptor_id_list validation successful.")
 
-        return assign_json
+        return assign_request
 
 
 class ReleaseResourceValidator:

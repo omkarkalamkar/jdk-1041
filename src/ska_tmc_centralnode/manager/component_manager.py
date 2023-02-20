@@ -533,12 +533,12 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg,
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
-            subarray_value = self.input_parameter.subarray_dev_names
+            available_subarrays_list = self.input_parameter.subarray_dev_names
             assign_validator = AssignResourceValidator(
-                subarray_value, self.logger
+                available_subarrays_list, self.logger
             )
-            validated_json = assign_validator.loads(argin)
-            argin = json.loads(validated_json)
+            validated_argin = assign_validator.loads(argin)
+            # argin = json.loads(validated_json)
             self.logger.info(f"Json argument::{json_argument}")
             (
                 is_valid,
@@ -568,7 +568,7 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
-            args=[argin, self.logger],
+            args=[validated_argin, self.logger],
             task_callback=task_callback,
         )
         return task_status, response
