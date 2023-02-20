@@ -521,6 +521,19 @@ class CNComponentManager(TmcComponentManager):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
+        # validate processing block
+        (
+            is_processing_block_present,
+            processing_block_error_msg,
+        ) = assign_resources_command._validate_and_update_resource_config(
+            json_argument
+        )
+
+        if not is_processing_block_present:
+            return assign_resources_command.generate_command_result(
+                ResultCode.FAILED,
+                processing_block_error_msg,
+            )
         if isinstance(self.input_parameter, InputParameterLow):
             (
                 is_valid,
@@ -538,7 +551,7 @@ class CNComponentManager(TmcComponentManager):
             assign_validator = AssignResourceValidator(
                 available_subarrays_list, self.logger
             )
-            validated_argin = assign_validator.loads(argin)
+            json_argument = assign_validator.loads(argin)
             # argin = json.loads(validated_json)
             self.logger.info(f"Json argument::{json_argument}")
             (
@@ -553,23 +566,9 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg,
                 )
 
-        # validate processing block
-        (
-            is_processing_block_present,
-            processing_block_error_msg,
-        ) = assign_resources_command._validate_and_update_resource_config(
-            json_argument
-        )
-
-        if not is_processing_block_present:
-            return assign_resources_command.generate_command_result(
-                ResultCode.FAILED,
-                processing_block_error_msg,
-            )
-
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
-            args=[validated_argin, self.logger],
+            args=[json_argument, self.logger],
             task_callback=task_callback,
         )
         return task_status, response
