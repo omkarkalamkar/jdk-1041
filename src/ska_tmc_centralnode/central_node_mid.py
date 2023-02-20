@@ -288,6 +288,8 @@ class CentralNodeMid(AbstractCentralNode):
         cm.input_parameter.sdp_subarray_dev_names = (
             self.TMCMidSdpSubarrayLeafNodes
         )
+        cm.input_parameter.dish_leaf_node_prefix = self.DishLeafNodePrefix
+
         cm.update_input_parameter()
         return cm
 
