@@ -404,7 +404,6 @@ class AssignResources(AbstractAssignReleaseResources):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ResultCode.FAILED, message
-        self.logger.info
         return (ResultCode.OK, "")
 
     def _validate_mid_json(self, json_argument, req_keys):
