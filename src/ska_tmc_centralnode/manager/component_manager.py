@@ -539,7 +539,7 @@ class CNComponentManager(TmcComponentManager):
             self.logger.info(
                 f"Available Subarray list:::{available_subarrays_list}"
             )
-            dish_prefix = self.input_parameter.dish_leaf_node_prefix[0]
+            dish_prefix = self.input_parameter.dish_leaf_node_prefix
             self.logger.info(f"dish prefix:::{dish_prefix}")
             available_dish_leaf_node_devices = (
                 self.input_parameter.dish_leaf_node_dev_names
