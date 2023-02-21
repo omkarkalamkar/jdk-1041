@@ -5,6 +5,7 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tmc_cdm.exceptions import JsonValidationError
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
@@ -213,7 +214,7 @@ def assign_resources_with_invalid_json(
     )
 
     if "ska_mid" in central_node_name:
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, JsonValidationError):
             result, message = central_node.AssignResources(
                 json.dumps(assign_input_str)
             )
