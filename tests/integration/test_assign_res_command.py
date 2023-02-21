@@ -219,6 +219,8 @@ def assign_resources_with_invalid_json(
     else:
         result, message = central_node.AssignResources(assign_input_str)
 
+    logger.info(f"Message::{message}")
+
     assert [
         "subarray_id key is not present in the input json argument."
     ] == message
