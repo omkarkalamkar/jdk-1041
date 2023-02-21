@@ -178,3 +178,79 @@ def test_assign_res_command_low(
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
     )
+
+
+def assign_resources_with_invalid_json(
+    tango_context,
+    central_node_name,
+    assign_input_str,
+    change_event_callbacks,
+    subarray_device,
+):
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+
+    ensure_checked_devices(central_node)
+
+    result, unique_id = central_node.TelescopeOn()
+    logger.info(
+        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=2,
+    )
+
+    result, message = central_node.AssignResources(assign_input_str)
+
+    assert [
+        "subarray_id key is not present in the input json argument."
+    ] == message
+    assert result[0] == ResultCode.REJECTED
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_assign_res_command_mid_invalid_json(
+    tango_context, central_node_name, change_event_callbacks, json_factory
+):
+    return assign_resources_with_invalid_json(
+        tango_context,
+        central_node_name,
+        json_factory("invalid_key_AssignResources"),
+        change_event_callbacks,
+        MID_SUBARRAY_DEVICE,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_low/tm_central/central_node")],
+)
+def test_assign_res_command_low_invalid_json(
+    tango_context, central_node_name, change_event_callbacks, json_factory
+):
+    return assign_resources_with_invalid_json(
+        tango_context,
+        central_node_name,
+        json_factory("invalid_key_AssignResources"),
+        change_event_callbacks,
+        LOW_SUBARRAY_DEVICE,
+    )

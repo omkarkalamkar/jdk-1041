@@ -164,19 +164,6 @@ class AssignResources(AbstractAssignReleaseResources):
                     (ResultCode.OK, "")
 
         """
-        # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
-        # self.logger.info("Validating input string.")
-        # input_validator = AssignResourceValidator(
-        #     self.tm_mid_subarrays,
-        #     device_data._dish_leaf_node_devices,
-        #     self.dln_prefix,
-        #     self.logger,
-        # )
-        # json_argument = input_validator.loads(argin)
-        # assign_validator = AssignResourceValidator(self.logger)
-        # validated_json = assign_validator.loads(argin)
-        # json_argument = json.loads(validated_json)
-        # self.logger.info(f"Json argument::{json_argument}")
         try:
             self.logger.debug(f"Loading json string:{argin}")
             json_argument = json.loads(argin)
@@ -185,18 +172,6 @@ class AssignResources(AbstractAssignReleaseResources):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
-
-        # validate processing block
-        # (
-        #     is_processing_block_present,
-        #     processing_block_error_msg,
-        # ) = self._validate_and_update_resource_config(json_argument)
-
-        # if not is_processing_block_present:
-        #     return self.generate_command_result(
-        #         ResultCode.FAILED,
-        #         processing_block_error_msg,
-        #     )
 
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
@@ -358,6 +333,7 @@ class AssignResources(AbstractAssignReleaseResources):
         """
         try:
             json_argument = json.loads(argin)
+            self.logger.debug(f"Loading json string:{argin}")
         except Exception as e:
             return self.generate_command_result(
                 ResultCode.FAILED,
@@ -407,7 +383,6 @@ class AssignResources(AbstractAssignReleaseResources):
         ]:
             if ret_code == ResultCode.FAILED:
                 return ResultCode.FAILED, message
-
         return (ResultCode.OK, "")
 
     def _validate_mid_json(self, json_argument, req_keys):

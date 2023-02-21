@@ -1,6 +1,7 @@
 import operator
 
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.tmc_command import TMCCommand
 
@@ -63,6 +64,10 @@ class CentralNodeCommand(TMCCommand):
             description,
             command,
         )
+
+    def reject_command(self, message):
+        self.logger.error(message)
+        return TaskStatus.REJECTED, message
 
 
 class AbstractTelescopeOnOff(CentralNodeCommand):

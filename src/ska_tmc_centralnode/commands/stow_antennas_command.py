@@ -104,6 +104,7 @@ class StowAntennas(CentralNodeCommand):
                 if argin[i] not in adapter.dev_name:
                     continue
 
+                self.logger.debug("Set stow mode command invoked")
                 ret_code, message = self.set_stow_mode_dishes(adapter)
                 if ret_code == ResultCode.FAILED:
                     return ret_code, message

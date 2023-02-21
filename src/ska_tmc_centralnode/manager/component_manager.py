@@ -7,7 +7,6 @@ from typing import Callable, Optional
 
 import pandas as pd
 from ska_ser_skuid.client import SkuidClient
-from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
@@ -113,7 +112,6 @@ class CNComponentManager(TmcComponentManager):
         )
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
-        self.validated_argin = None
 
         if self.event_receiver:
             self.event_receiver_object = CentralNodeEventReceiver(
@@ -516,10 +514,9 @@ class CNComponentManager(TmcComponentManager):
                 json_argument = json.loads(argin)
             else:
                 json_argument = argin
-        except Exception as e:
-            return assign_resources_command.generate_command_result(
-                ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
+        except Exception:
+            return assign_resources_command.reject_command(
+                "The JSON string is invalid. Please provide the correct input"
             )
 
         if isinstance(self.input_parameter, InputParameterLow):
@@ -530,11 +527,11 @@ class CNComponentManager(TmcComponentManager):
                 json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:
-                return assign_resources_command.generate_command_result(
-                    ResultCode.FAILED,
-                    invalid_json_error_msg,
+                return assign_resources_command.reject_command(
+                    invalid_json_error_msg
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
+            # Utilize CDM to validate json.
             available_subarrays_list = self.input_parameter.subarray_dev_names
             self.logger.info(
                 f"Available Subarray list:::{available_subarrays_list}"
@@ -554,7 +551,6 @@ class CNComponentManager(TmcComponentManager):
                 self.logger,
             )
             json_argument = assign_validator.loads(argin)
-            # argin = json.loads(validated_json)
             self.logger.info(f"Json argument::{json_argument}")
             (
                 is_valid,
@@ -563,9 +559,8 @@ class CNComponentManager(TmcComponentManager):
                 json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:
-                return assign_resources_command.generate_command_result(
-                    ResultCode.FAILED,
-                    invalid_json_error_msg,
+                return assign_resources_command.reject_command(
+                    invalid_json_error_msg
                 )
 
         # validate processing block
@@ -575,11 +570,9 @@ class CNComponentManager(TmcComponentManager):
         ) = assign_resources_command._validate_and_update_resource_config(
             json_argument
         )
-
         if not is_processing_block_present:
-            return assign_resources_command.generate_command_result(
-                ResultCode.FAILED,
-                processing_block_error_msg,
+            return assign_resources_command.reject_command(
+                processing_block_error_msg
             )
 
         task_status, response = self.submit_task(
@@ -605,10 +598,11 @@ class CNComponentManager(TmcComponentManager):
                 json_argument = json.loads(argin)
             else:
                 json_argument = argin
-        except Exception as e:
-            return release_resources_command.generate_command_result(
-                ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
+        except Exception:
+            return release_resources_command.reject_command(
+                (
+                    "The JSON string is invalid. Please provide the correct input."
+                )
             )
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
@@ -620,11 +614,11 @@ class CNComponentManager(TmcComponentManager):
                 REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
             )
             if not is_valid:
-                return release_resources_command.generate_command_result(
-                    ResultCode.FAILED,
-                    invalid_json_error_msg,
+                return release_resources_command.reject_command(
+                    invalid_json_error_msg
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
+            # Utilize CDM to validate json.
             release_validator = ReleaseResourceValidator(self.logger)
             validated_json = release_validator.loads(argin)
             argin = json.loads(validated_json)
@@ -636,9 +630,8 @@ class CNComponentManager(TmcComponentManager):
                 json_argument, REQUIRED_MID_RELEASE_RESOURCE_KEYS
             )
             if not is_valid:
-                return release_resources_command.generate_command_result(
-                    ResultCode.FAILED,
-                    invalid_json_error_msg,
+                return release_resources_command.reject_command(
+                    invalid_json_error_msg
                 )
 
         task_status, response = self.submit_task(

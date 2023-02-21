@@ -45,14 +45,6 @@ def call_command(central_node, command_name, json_factory):
     try:
         if command_name == "AssignResources":
             logger.info(f"central_node: {central_node.dev_name()}")
-            # path = join(
-            #     dirname(__file__),
-            #     "..",
-            #     "data",
-            #     "command_AssignResources.json",
-            # )
-            # with open(path, "r") as f:
-            #     input_arg = json.load(f)
             if "ska_mid" in central_node.dev_name():
                 assign_res_string = json_factory("command_AssignResources")
                 pytest.command_result = central_node.command_inout(
@@ -65,15 +57,6 @@ def call_command(central_node, command_name, json_factory):
                 )
         elif command_name == "ReleaseResources":
             logger.info(f"central_node: {central_node.dev_name()}")
-            # logger.info(f"central_node: {central_node.dev_name()}")
-            # path = join(
-            #     dirname(__file__),
-            #     "..",
-            #     "data",
-            #     "command_ReleaseResources.json",
-            # )
-            # with open(path, "r") as f:
-            #     input_arg = json.load(f)
             if "ska_mid" in central_node.dev_name():
                 release_res_string = json_factory("command_ReleaseResources")
                 pytest.command_result = central_node.command_inout(
