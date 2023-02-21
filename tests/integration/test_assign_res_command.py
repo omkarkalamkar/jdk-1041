@@ -214,7 +214,7 @@ def assign_resources_with_invalid_json(
     )
 
     if "ska_mid" in central_node_name:
-        with pytest.raises(ValueError, JsonValidationError):
+        with pytest.raises(ValueError, JsonValidationError("Error")):
             result, message = central_node.AssignResources(
                 json.dumps(assign_input_str)
             )
