@@ -171,8 +171,9 @@ def test_telescope_assign_resources_command_empty_input_json(
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-    with pytest.raises(InvalidJSONError):
-        cm.assign_resources(" ", task_callback=task_callback)
+    cm.assign_resources("", task_callback=task_callback)
+    (res_code, _) = assign_res_command.do("")
+    assert res_code == ResultCode.FAILED
 
 
 def test_assign_resources_command_missing_subarray_id(
