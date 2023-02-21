@@ -212,7 +212,12 @@ def assign_resources_with_invalid_json(
         lookahead=2,
     )
 
-    result, message = central_node.AssignResources(assign_input_str)
+    if "ska_mid" in central_node_name:
+        result, message = central_node.AssignResources(
+            json.dumps(assign_input_str)
+        )
+    else:
+        result, message = central_node.AssignResources(assign_input_str)
 
     assert [
         "subarray_id key is not present in the input json argument."
