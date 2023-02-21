@@ -358,7 +358,7 @@ class InputParameterMid(InputParameter):
         :return: the TM dish prefix
         :rtype: tuple
         """
-        return self._dish_leaf_node_dev_names
+        return self._dish_leaf_node_prefix
 
     @dish_leaf_node_prefix.setter
     def dish_leaf_node_prefix(self, value):
