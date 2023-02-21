@@ -47,14 +47,14 @@ class AssignResourceValidator:
         for subarray in subarray_list:
             tokens = subarray.split("/")
             self._subarrays.append(int(tokens[2]))
-        self.logger.debug("Available subarray ids: %s", self._subarrays)
+        self.logger.info("Available subarray ids: %s", self._subarrays)
 
         # Populate the list of receptor ids from list of existing dish leaf node
         # FQDNs. The list is used later to search for any invalid receptor id
         # in AssignReources request JSON.
         for receptor in receptor_list:
             self._receptor_list.append(receptor.replace(dish_prefix, ""))
-        self.logger.debug("Available dish ids: %s", self._receptor_list)
+        self.logger.info("Available dish ids: %s", self._receptor_list)
 
         self._dish_prefix = dish_prefix
 
@@ -66,9 +66,9 @@ class AssignResourceValidator:
         :return: True if subarray exists. False if the subarray is not present.
         """
         ret_val = False
-        self.logger.debug("Subarray ID: %d", subarray_id)
+        self.logger.info("Subarray ID: %d", subarray_id)
         if subarray_id not in self._subarrays:
-            self.logger.debug("The subarray does not exist.")
+            self.logger.info("The subarray does not exist.")
         else:
             ret_val = True
 
@@ -89,11 +89,11 @@ class AssignResourceValidator:
         """
         non_existing_receptors = []
         for receptor_id in receptor_id_list:
-            self.logger.debug("Checking for receptor %s", receptor_id)
+            self.logger.info("Checking for receptor %s", receptor_id)
             if receptor_id not in self._receptor_list:
-                self.logger.debug("Receptor %s. is not present.", receptor_id)
+                self.logger.info("Receptor %s. is not present.", receptor_id)
                 non_existing_receptors.append(receptor_id)
-        self.logger.debug(non_existing_receptors)
+        self.logger.info(non_existing_receptors)
         return non_existing_receptors
 
     def loads(self, input_string):
@@ -139,7 +139,7 @@ class AssignResourceValidator:
                 + "' does not exist."
             )
             raise SubarrayNotPresentError(exception_message)
-        self.logger.debug("SubarrayID validation successful.")
+        self.logger.info("SubarrayID validation successful.")
 
         # Validate receptorIDList
         try:
@@ -158,7 +158,7 @@ class AssignResourceValidator:
                 + str(non_existing_receptors)
             )
             raise ResourceNotPresentError(exception_message)
-        self.logger.debug("receptor_id_list validation successful.")
+        self.logger.info("receptor_id_list validation successful.")
 
         return assign_request
 
