@@ -213,17 +213,17 @@ def assign_resources_with_invalid_json(
     )
 
     if "ska_mid" in central_node_name:
-        result, message = central_node.AssignResources(
-            json.dumps(assign_input_str)
-        )
+        with pytest.raises(ValueError):
+            result, message = central_node.AssignResources(
+                json.dumps(assign_input_str)
+            )
     else:
         result, message = central_node.AssignResources(assign_input_str)
+        assert [
+            "subarray_id key is not present in the input json argument."
+        ] == message
 
     logger.info(f"Message::{message}")
-
-    assert [
-        "subarray_id key is not present in the input json argument."
-    ] == message
     assert result[0] == ResultCode.REJECTED
 
 
