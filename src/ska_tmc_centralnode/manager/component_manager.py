@@ -532,6 +532,18 @@ class CNComponentManager(TmcComponentManager):
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
             # Utilize CDM to validate json.
+
+            (
+                is_valid,
+                invalid_json_error_msg,
+            ) = assign_resources_command._validate_mid_json(
+                json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
+            )
+            if not is_valid:
+                return assign_resources_command.reject_command(
+                    invalid_json_error_msg
+                )
+
             available_subarrays_list = self.input_parameter.subarray_dev_names
             self.logger.info(
                 f"Available Subarray list:::{available_subarrays_list}"
@@ -544,29 +556,26 @@ class CNComponentManager(TmcComponentManager):
             self.logger.info(
                 f"Available dish leaf node devices::{available_dish_leaf_node_devices}"
             )
-            try:
-                assign_validator = AssignResourceValidator(
-                    available_subarrays_list,
-                    available_dish_leaf_node_devices,
-                    dish_prefix,
-                    self.logger,
-                )
-            except Exception:
-                return assign_resources_command.reject_command(
-                    invalid_json_error_msg
-                )
-            json_argument = assign_validator.loads(argin)
-            self.logger.info(f"Json argument::{json_argument}")
-            (
-                is_valid,
-                invalid_json_error_msg,
-            ) = assign_resources_command._validate_mid_json(
-                json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
+
+            assign_validator = AssignResourceValidator(
+                available_subarrays_list,
+                available_dish_leaf_node_devices,
+                dish_prefix,
+                self.logger,
             )
-            if not is_valid:
-                return assign_resources_command.reject_command(
-                    invalid_json_error_msg
-                )
+
+            json_argument = assign_validator.loads(argin)
+
+            # (
+            #     is_valid,
+            #     invalid_json_error_msg,
+            # ) = assign_resources_command._validate_mid_json(
+            #     json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
+            # )
+            # if not is_valid:
+            #     return assign_resources_command.reject_command(
+            #         invalid_json_error_msg
+            #     )
 
         # validate processing block
         (
