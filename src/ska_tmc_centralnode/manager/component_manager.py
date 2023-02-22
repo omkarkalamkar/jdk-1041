@@ -544,12 +544,17 @@ class CNComponentManager(TmcComponentManager):
             self.logger.info(
                 f"Available dish leaf node devices::{available_dish_leaf_node_devices}"
             )
-            assign_validator = AssignResourceValidator(
-                available_subarrays_list,
-                available_dish_leaf_node_devices,
-                dish_prefix,
-                self.logger,
-            )
+            try:
+                assign_validator = AssignResourceValidator(
+                    available_subarrays_list,
+                    available_dish_leaf_node_devices,
+                    dish_prefix,
+                    self.logger,
+                )
+            except Exception:
+                return assign_resources_command.reject_command(
+                    invalid_json_error_msg
+                )
             json_argument = assign_validator.loads(argin)
             self.logger.info(f"Json argument::{json_argument}")
             (
