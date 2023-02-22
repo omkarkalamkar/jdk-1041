@@ -220,7 +220,7 @@ def assign_resources_with_invalid_json(
             )
             assert (
                 str(e.value)
-                == "data is not compliant with\
+                == "JSON validation error: data is not compliant with\
                   https://schema.skao.int/ska-tmc-assignresources/2.1"
             )
 
