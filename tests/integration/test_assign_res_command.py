@@ -212,26 +212,11 @@ def assign_resources_with_invalid_json(
         lookahead=2,
     )
 
-    if "ska_mid" in central_node_name:
-        with pytest.raises(tango.DevFailed) as e:
-            result, _ = central_node.AssignResources(
-                json.dumps(assign_input_str)
-            )
+    result, message = central_node.AssignResources(assign_input_str)
 
-            assert (
-                "JSON validation error: data is not compliant with\
-                  https://schema.skao.int/ska-tmc-assignresources/2.1"
-                in e.args[0].desc
-            )
-
-            logger.info(f"Error::{e.args[0].desc}")
-
-    else:
-        result, message = central_node.AssignResources(assign_input_str)
-        assert [
-            "subarray_id key is not present in the input json argument."
-        ] == message
-
+    assert [
+        "subarray_id key is not present in the input json argument."
+    ] == message
     assert result[0] == ResultCode.REJECTED
 
 
