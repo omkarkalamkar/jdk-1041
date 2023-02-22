@@ -52,7 +52,6 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
     with open(path, "r") as f:
         assign_input_str = f.read()
-        # assign_input_str = json.load(assign_str)
     return assign_input_str
 
 
@@ -99,12 +98,13 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    del json_argument["sdp"]["execution_block"]["eb_id"]
+    json_argument["sdp"]["execution_block"]["eb_id"] = ""
     del json_argument["sdp"]["processing_blocks"]
-    with pytest.raises(ValueError):
-        cm.assign_resources(
-            json.dumps(json_argument), task_callback=task_callback
-        )
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    assert res_code == ResultCode.FAILED
+    with pytest.raises(Exception) as e:
+        assert "processing_blocks" in e
 
 
 def test_assign_resources_command_with_ok(tango_context, task_callback):
@@ -113,7 +113,7 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    cm.assign_resources(json.dumps(json_argument), task_callback=task_callback)
+    cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.OK
 
@@ -127,10 +127,11 @@ def test_assign_resources_command_missing_sdp_key(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
-    with pytest.raises(ValueError):
-        cm.assign_resources(
-            json.dumps(json_argument), task_callback=task_callback
-        )
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
+    assert res_code == TaskStatus.REJECTED
+    assert "sdp" in message
 
 
 def test_assign_resources_command_fail_subarray(tango_context, task_callback):
@@ -158,8 +159,8 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
     )
-    (res_code, _) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+    assign_res_command.assign_resources(
+        json_argument, logger=logger, task_callback=task_callback
     )
     (res_code, _) = assign_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
@@ -172,7 +173,7 @@ def test_telescope_assign_resources_command_empty_input_json(
     assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
     cm.assign_resources("", task_callback=task_callback)
-    (res_code, _) = assign_res_command.do("")
+    (res_code, _) = assign_res_command.do(" ")
     assert res_code == ResultCode.FAILED
 
 
@@ -185,10 +186,11 @@ def test_assign_resources_command_missing_subarray_id(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
-    with pytest.raises(ValueError):
-        cm.assign_resources(
-            json.dumps(json_argument), task_callback=task_callback
-        )
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
+    assert res_code == TaskStatus.REJECTED
+    assert "subarray_id" in message
 
 
 def test_assign_resources_command_missing_dish(tango_context, task_callback):
@@ -198,10 +200,11 @@ def test_assign_resources_command_missing_dish(tango_context, task_callback):
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]
-    with pytest.raises(ValueError):
-        cm.assign_resources(
-            json.dumps(json_argument), task_callback=task_callback
-        )
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
+    assert res_code == TaskStatus.REJECTED
+    assert "dish" in message
 
 
 def test_assign_resources_command_missing_receptor_ids(
@@ -213,10 +216,11 @@ def test_assign_resources_command_missing_receptor_ids(
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["dish"]["receptor_ids"]
-    with pytest.raises(ValueError):
-        cm.assign_resources(
-            json.dumps(json_argument), task_callback=task_callback
-        )
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
+    assert res_code == TaskStatus.REJECTED
+    assert "receptor_ids" in message
 
 
 def test_assign_resources_fail_check_allowed(tango_context):
@@ -258,8 +262,7 @@ def test_assign_resources_command_already_assigned(
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    cm.assign_resources(json.dumps(json_argument), task_callback=task_callback)
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
     (res_code, message) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
     assert "dish0001" in message
@@ -271,5 +274,10 @@ def test_mid_assign_resources_command_with_invalid_key(
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("invalid_key_AssignResources")
-    with pytest.raises(ValueError):
-        cm.assign_resources(assign_input_str, task_callback=task_callback)
+    (res_code, message) = cm.assign_resources(
+        assign_input_str, task_callback=task_callback
+    )
+    assert res_code == TaskStatus.REJECTED
+    assert (
+        "subarray_id key is not present in the input json argument" in message
+    )
