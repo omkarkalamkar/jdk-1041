@@ -7,8 +7,9 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_cdm.exceptions import JsonValidationError
 from ska_tmc_common.device_info import SubArrayDeviceInfo
-from ska_tmc_common.exceptions import CommandNotAllowed, InvalidJSONError
+from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
@@ -271,5 +272,10 @@ def test_mid_assign_resources_command_with_invalid_key(
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("invalid_key_AssignResources")
-    with pytest.raises(InvalidJSONError):
+    with pytest.raises(
+        JsonValidationError(
+            "JSON validation error: data is not compliant with\
+              https://schema.skao.int/ska-tmc-assignresources/2.1"
+        )
+    ):
         cm.assign_resources(assign_input_str, task_callback=task_callback)
