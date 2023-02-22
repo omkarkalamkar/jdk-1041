@@ -531,8 +531,6 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
-            # Utilize CDM to validate json.
-
             (
                 is_valid,
                 invalid_json_error_msg,
@@ -544,19 +542,12 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
 
+            # Utilize CDM to validate json.
             available_subarrays_list = self.input_parameter.subarray_dev_names
-            self.logger.info(
-                f"Available Subarray list:::{available_subarrays_list}"
-            )
             dish_prefix = self.input_parameter.dish_leaf_node_prefix
-            self.logger.info(f"dish prefix:::{dish_prefix}")
             available_dish_leaf_node_devices = (
                 self.input_parameter.dish_leaf_node_dev_names
             )
-            self.logger.info(
-                f"Available dish leaf node devices::{available_dish_leaf_node_devices}"
-            )
-
             assign_validator = AssignResourceValidator(
                 available_subarrays_list,
                 available_dish_leaf_node_devices,
@@ -565,17 +556,6 @@ class CNComponentManager(TmcComponentManager):
             )
 
             json_argument = assign_validator.loads(argin)
-
-            # (
-            #     is_valid,
-            #     invalid_json_error_msg,
-            # ) = assign_resources_command._validate_mid_json(
-            #     json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
-            # )
-            # if not is_valid:
-            #     return assign_resources_command.reject_command(
-            #         invalid_json_error_msg
-            #     )
 
         # validate processing block
         (

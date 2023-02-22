@@ -113,9 +113,6 @@ def test_mid_release_resources_command_fail_subarray(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
-    # release_res_command.release_resources(
-    #     json_argument, logger=logger, task_callback=task_callback
-    # )
     cm.release_resources(
         json.dumps(json_argument), task_callback=task_callback
     )
@@ -145,9 +142,6 @@ def test_mid_release_resources_command_missing_subarray_id(
         cm.release_resources(
             json.dumps(json_argument), task_callback=task_callback
         )
-    # (res_code, message) = release_res_command.do(json.dumps(json_argument))
-    # assert res_code == ResultCode.FAILED
-    # assert "subarray_id" in message
 
 
 def test_telescope_release_resources_fail_check_allowed(tango_context):
