@@ -272,10 +272,5 @@ def test_mid_assign_resources_command_with_invalid_key(
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("invalid_key_AssignResources")
-    with pytest.raises(
-        JsonValidationError(
-            "JSON validation error: data is not compliant with\
-              https://schema.skao.int/ska-tmc-assignresources/2.1"
-        )
-    ):
+    with pytest.raises(ValueError):
         cm.assign_resources(assign_input_str, task_callback=task_callback)
