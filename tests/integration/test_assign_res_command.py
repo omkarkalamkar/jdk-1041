@@ -219,9 +219,10 @@ def assign_resources_with_invalid_json(
                 json.dumps(assign_input_str)
             )
 
-            assert ("JSON validation error: data is not compliant with\
-                  https://schema.skao.int/ska-tmc-assignresources/2.1" in
-                  e.args[0].desc
+            assert (
+                "JSON validation error: data is not compliant with\
+                  https://schema.skao.int/ska-tmc-assignresources/2.1"
+                in e.args[0].desc
             )
 
             logger.info(f"Error::{e.args[0].desc}")
