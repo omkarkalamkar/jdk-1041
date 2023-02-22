@@ -214,10 +214,16 @@ def assign_resources_with_invalid_json(
     )
 
     if "ska_mid" in central_node_name:
-        with pytest.raises(ValueError, JsonValidationError("Error")):
-            result, message = central_node.AssignResources(
+        with pytest.raises(JsonValidationError) as e:
+            result, _ = central_node.AssignResources(
                 json.dumps(assign_input_str)
             )
+            assert (
+                str(e.value)
+                == "data is not compliant with\
+                  https://schema.skao.int/ska-tmc-assignresources/2.1"
+            )
+
     else:
         result, message = central_node.AssignResources(assign_input_str)
         assert [
