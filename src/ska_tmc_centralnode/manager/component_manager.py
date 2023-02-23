@@ -612,7 +612,6 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
-            # argin = json.loads(validated_json)
             self.logger.info(f"Json argument::{json_argument}")
             (
                 is_valid,

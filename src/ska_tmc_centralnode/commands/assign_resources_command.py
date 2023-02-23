@@ -455,11 +455,9 @@ class AssignResources(AbstractAssignReleaseResources):
                 )
                 id = sdp_keys[sdp_values.index("")]
                 self.update_resource_config_file(json_argument, id)
-                # except Exception as e:
-                #     return False, ("Errors in input json argument: %s", e)
             return True, ""
         except Exception as e:
-            return False, ("Errors in input json argument: %s", e)
+            return False, ("Error while updating SDP schema: %s", e)
 
     # TODO Uncomment below code during integrating of MCCS
     # def create_mccs_cmd_data(self, json_argument):
