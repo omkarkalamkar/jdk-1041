@@ -6,6 +6,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
+from tests.settings import logger
 
 
 def release_resources(
@@ -55,6 +56,7 @@ def release_resources(
     else:
         result, unique_id = central_node.ReleaseResources(release_input_string)
 
+    logger.info(f"Unique id:{unique_id[0]}")
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
 
