@@ -189,6 +189,7 @@ class ReleaseResourceValidator:
         """
 
         # Check if JSON is correct
+        self.logger.info("Checking JSON format.")
         self.logger.debug("Checking JSON format.")
         try:
             release_request = CODEC.loads(
@@ -203,6 +204,5 @@ class ReleaseResourceValidator:
                 + str(json_error)
             )
             raise InvalidJSONError(exception_message)
-        release_request = json.loads(release_json)
 
-        return release_request
+        return release_json
