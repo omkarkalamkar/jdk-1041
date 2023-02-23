@@ -195,7 +195,9 @@ class ReleaseResourceValidator:
             release_request = CODEC.loads(
                 ReleaseResourcesRequest, input_string
             )
+            self.logger.info(f"Release request:::{release_request}")
             release_json = CODEC.dumps(release_request)
+            self.logger.info(f"Release json::{release_json}")
         except (ValidationError, JSONDecodeError) as json_error:
             self.logger.exception("Exception: %s", str(json_error))
             exception_message = (
@@ -205,5 +207,6 @@ class ReleaseResourceValidator:
             )
             raise InvalidJSONError(exception_message)
         release_request = json.loads(release_json)
+        self.logger.info(f"Release request afetr load::{release_request}")
 
         return release_request
