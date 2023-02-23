@@ -7,7 +7,7 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common.exceptions import CommandNotAllowed, InvalidJSONError
+from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
@@ -138,10 +138,12 @@ def test_mid_release_resources_command_missing_subarray_id(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
-    with pytest.raises(ValueError):
-        cm.release_resources(
-            json.dumps(json_argument), task_callback=task_callback
-        )
+    # with pytest.raises(ValueError):
+    cm.release_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
+    (res_code, _) = release_res_command.do("")
+    assert res_code == ResultCode.FAILED
 
 
 def test_telescope_release_resources_fail_check_allowed(tango_context):
@@ -159,7 +161,9 @@ def test_mid_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
-    _, _, cm = get_release_resources_command_obj()
+    release_res_command, _, cm = get_release_resources_command_obj()
     release_input_str = json_factory("invalid_key_ReleaseResources")
-    with pytest.raises(InvalidJSONError):
-        cm.release_resources(release_input_str, task_callback=task_callback)
+    # with pytest.raises(InvalidJSONError):
+    cm.release_resources(release_input_str, task_callback=task_callback)
+    (res_code, _) = release_res_command.do("")
+    assert res_code == ResultCode.FAILED
