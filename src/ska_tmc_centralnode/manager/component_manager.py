@@ -612,9 +612,6 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
-            # Utilize CDM to validate json.
-            release_validator = ReleaseResourceValidator(self.logger)
-            json_argument = release_validator.loads(argin)
             # argin = json.loads(validated_json)
             self.logger.info(f"Json argument::{json_argument}")
             (
@@ -627,6 +624,10 @@ class CNComponentManager(TmcComponentManager):
                 return release_resources_command.reject_command(
                     invalid_json_error_msg
                 )
+
+            # Utilize CDM to validate json.
+            release_validator = ReleaseResourceValidator(self.logger)
+            json_argument = release_validator.loads(argin)
 
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
