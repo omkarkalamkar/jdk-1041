@@ -453,8 +453,8 @@ class AssignResources(AbstractAssignReleaseResources):
                 sdp_values = list(
                     json_argument["sdp"]["execution_block"].values()
                 )
-                id = sdp_keys[sdp_values.index("")]
-                self.update_resource_config_file(json_argument, id)
+                sdp_id = sdp_keys[sdp_values.index("")]
+                self.update_resource_config_file(json_argument, sdp_id)
             return True, ""
         except Exception as e:
             return False, ("Error while updating SDP schema: %s", e)

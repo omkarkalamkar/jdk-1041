@@ -120,7 +120,9 @@ class AssignResourceValidator:
             assign_request = CODEC.loads(AssignResourcesRequest, input_string)
             assign_json = CODEC.dumps(assign_request)
         except (ValidationError, JSONDecodeError) as json_error:
-            self.logger.exception("Exception: %s", str(json_error))
+            self.logger.exception(
+                "Exception while parsing the json: %s", str(json_error)
+            )
             exception_message = (
                 "Malformed input string. Please check the JSON format."
                 + "Full exception info: "
@@ -195,7 +197,9 @@ class ReleaseResourceValidator:
             r_request = CODEC.loads(ReleaseResourcesRequest, input_string)
             release_json = CODEC.dumps(r_request)
         except (ValidationError, JSONDecodeError) as json_error:
-            self.logger.exception("Exception: %s", str(json_error))
+            self.logger.exception(
+                "Exception while parsing the json: %s", str(json_error)
+            )
             exception_message = (
                 "Malformed input string. Please check the JSON format."
                 + "Full exception info: "
