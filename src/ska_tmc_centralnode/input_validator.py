@@ -203,5 +203,6 @@ class ReleaseResourceValidator:
                 + str(json_error)
             )
             raise InvalidJSONError(exception_message)
+        release_request = json.loads(release_json)
 
-        return release_json
+        return release_request
