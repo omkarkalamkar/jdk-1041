@@ -454,13 +454,12 @@ class AssignResources(AbstractAssignReleaseResources):
                     json_argument["sdp"]["execution_block"].values()
                 )
                 id = sdp_keys[sdp_values.index("")]
-                try:
-                    self.update_resource_config_file(json_argument, id)
-                except Exception as e:
-                    return False, ("Errors in input json argument: %s", e)
+                self.update_resource_config_file(json_argument, id)
+                # except Exception as e:
+                #     return False, ("Errors in input json argument: %s", e)
             return True, ""
         except Exception as e:
-            return False, ("Errors in fetching Keys: %s", e)
+            return False, ("Errors in input json argument: %s", e)
 
     # TODO Uncomment below code during integrating of MCCS
     # def create_mccs_cmd_data(self, json_argument):
