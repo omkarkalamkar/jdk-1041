@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.4.3"
+version="0.5.0"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team SAHYADRI & HIMALAYA"
@@ -10,8 +10,8 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.4.3
-tag=0.4.3
-tag_description=When given invalid json string to assign resources command, it returned NoneType error. It is now fixed by returning the TaskStatus
+release=0.5.0
+tag=0.5.0
+tag_description=Utilised CDM to validate AssignResources and ReleaseResources schema.
 
-release_notes=This release contains:<br/><ul><li>When given invalid json string to assign resources command, it returned NoneType error. It is now fixed by returning the TaskStatus </li></ul><br/>
+release_notes=This release contains:<br/><ul><li>Utilised CDM to validate AssignResources and ReleaseResources schema. </li></ul><br/>
