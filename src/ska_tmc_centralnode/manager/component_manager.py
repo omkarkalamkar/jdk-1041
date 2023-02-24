@@ -26,6 +26,10 @@ from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
+from ska_tmc_centralnode.input_validator import (
+    AssignResourceValidator,
+    ReleaseResourceValidator,
+)
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
@@ -496,6 +500,7 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
+
         # Execute the command if the input JSON is valid
         assign_resources_command = AssignResources(
             self,
@@ -513,6 +518,7 @@ class CNComponentManager(TmcComponentManager):
             return assign_resources_command.reject_command(
                 "The JSON string is invalid. Please provide the correct input"
             )
+
         if isinstance(self.input_parameter, InputParameterLow):
             (
                 is_valid,
@@ -536,6 +542,21 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
 
+            # Utilize CDM to validate json.
+            available_subarrays_list = self.input_parameter.subarray_dev_names
+            dish_prefix = self.input_parameter.dish_leaf_node_prefix
+            available_dish_leaf_node_devices = (
+                self.input_parameter.dish_leaf_node_dev_names
+            )
+            assign_validator = AssignResourceValidator(
+                available_subarrays_list,
+                available_dish_leaf_node_devices,
+                dish_prefix,
+                self.logger,
+            )
+
+            json_argument = assign_validator.loads(argin)
+
         # validate processing block
         (
             is_processing_block_present,
@@ -550,7 +571,7 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
-            args=[argin, self.logger],
+            args=[json_argument, self.logger],
             task_callback=task_callback,
         )
         return task_status, response
@@ -591,6 +612,7 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
+            self.logger.info(f"Json argument::{json_argument}")
             (
                 is_valid,
                 invalid_json_error_msg,
@@ -602,9 +624,13 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
 
+            # Utilize CDM to validate json.
+            release_validator = ReleaseResourceValidator(self.logger)
+            json_argument = release_validator.loads(argin)
+
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
-            args=[argin, self.logger],
+            args=[json_argument, self.logger],
             task_callback=task_callback,
         )
         return task_status, response

@@ -164,15 +164,6 @@ class AssignResources(AbstractAssignReleaseResources):
                     (ResultCode.OK, "")
 
         """
-        # TODO: Uncomment this code when CDM library will be aligned as per ADR-35
-        # self.logger.info("Validating input string.")
-        # input_validator = AssignResourceValidator(
-        #     self.tm_mid_subarrays,
-        #     device_data._dish_leaf_node_devices,
-        #     self.dln_prefix,
-        #     self.logger,
-        # )
-        # json_argument = input_validator.loads(argin)
         try:
             self.logger.debug(f"Loading json string:{argin}")
             json_argument = json.loads(argin)
@@ -180,18 +171,6 @@ class AssignResources(AbstractAssignReleaseResources):
             return self.generate_command_result(
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
-            )
-
-        # validate processing block
-        (
-            is_processing_block_present,
-            processing_block_error_msg,
-        ) = self._validate_and_update_resource_config(json_argument)
-
-        if not is_processing_block_present:
-            return self.generate_command_result(
-                ResultCode.FAILED,
-                processing_block_error_msg,
             )
 
         if "transaction_id" in json_argument:
@@ -465,18 +444,20 @@ class AssignResources(AbstractAssignReleaseResources):
         Args:
             json_argument (dict): low json
         """
-        if (
-            json_argument["sdp"].get("execution_block")
-            and not json_argument["sdp"]["execution_block"]["eb_id"]
-        ):
-            sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
-            sdp_values = list(json_argument["sdp"]["execution_block"].values())
-            id = sdp_keys[sdp_values.index("")]
-            try:
-                self.update_resource_config_file(json_argument, id)
-            except Exception as e:
-                return False, ("Errors in input json argument: %s", e)
-        return True, ""
+        try:
+            if (
+                json_argument["sdp"].get("execution_block")
+                and not json_argument["sdp"]["execution_block"]["eb_id"]
+            ):
+                sdp_keys = list(json_argument["sdp"]["execution_block"].keys())
+                sdp_values = list(
+                    json_argument["sdp"]["execution_block"].values()
+                )
+                sdp_id = sdp_keys[sdp_values.index("")]
+                self.update_resource_config_file(json_argument, sdp_id)
+            return True, ""
+        except Exception as e:
+            return False, ("Error while updating SDP schema: %s", e)
 
     # TODO Uncomment below code during integrating of MCCS
     # def create_mccs_cmd_data(self, json_argument):

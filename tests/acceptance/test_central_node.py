@@ -47,22 +47,28 @@ def call_command(central_node, command_name, json_factory):
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
                 assign_res_string = json_factory("command_AssignResources")
+                pytest.command_result = central_node.command_inout(
+                    command_name, json.dumps(assign_res_string)
+                )
             else:
                 assign_res_string = json_factory("command_assign_resource_low")
-            pytest.command_result = central_node.command_inout(
-                command_name, assign_res_string
-            )
+                pytest.command_result = central_node.command_inout(
+                    command_name, assign_res_string
+                )
         elif command_name == "ReleaseResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
                 release_res_string = json_factory("command_ReleaseResources")
+                pytest.command_result = central_node.command_inout(
+                    command_name, json.dumps(release_res_string)
+                )
             else:
                 release_res_string = json_factory(
                     "command_release_resource_low"
                 )
-            pytest.command_result = central_node.command_inout(
-                command_name, release_res_string
-            )
+                pytest.command_result = central_node.command_inout(
+                    command_name, release_res_string
+                )
         else:
             pytest.command_result = central_node.command_inout(command_name)
     except Exception as ex:

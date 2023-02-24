@@ -2,7 +2,8 @@ name: "centralnode-test"
 function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
-command: "python3 /app/src/ska_tmc_centralnode/central_node_mid.py"
+entrypoints:
+  - name: "ska_tmc_centralnode.central_node_mid.CentralNodeMid"
 server:
   name: "central_node_mid"
   instances:

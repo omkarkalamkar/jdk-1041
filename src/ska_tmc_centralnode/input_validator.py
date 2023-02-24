@@ -16,6 +16,9 @@ from marshmallow import ValidationError
 from ska_tmc_cdm.messages.central_node.assign_resources import (
     AssignResourcesRequest,
 )
+from ska_tmc_cdm.messages.central_node.release_resources import (
+    ReleaseResourcesRequest,
+)
 
 # SKA specific imports
 from ska_tmc_cdm.schemas import CODEC
@@ -35,6 +38,7 @@ class AssignResourceValidator:
     def __init__(
         self, subarray_list, receptor_list, dish_prefix, logger=module_logger
     ):
+
         self.logger = logger
         self._subarrays = []
         self._receptor_list = []
@@ -50,8 +54,6 @@ class AssignResourceValidator:
         # in AssignReources request JSON.
         for receptor in receptor_list:
             self._receptor_list.append(receptor.replace(dish_prefix, ""))
-        self.logger.debug(self._receptor_list)
-
         self.logger.debug("Available dish ids: %s", self._receptor_list)
 
         self._dish_prefix = dish_prefix
@@ -113,11 +115,14 @@ class AssignResourceValidator:
         """
 
         # Check if JSON is correct
-        self.logger.info("Checking JSON format.")
+        self.logger.debug("Checking JSON format.")
         try:
             assign_request = CODEC.loads(AssignResourcesRequest, input_string)
+            assign_json = CODEC.dumps(assign_request)
         except (ValidationError, JSONDecodeError) as json_error:
-            self.logger.exception("Exception: %s", str(json_error))
+            self.logger.exception(
+                "Exception while parsing the json: %s", str(json_error)
+            )
             exception_message = (
                 "Malformed input string. Please check the JSON format."
                 + "Full exception info: "
@@ -128,7 +133,7 @@ class AssignResourceValidator:
         # Validate subarray ID
         # TODO: Use the object returned by cdm library instead of parsing
         # JSON string.
-        assign_request = json.loads(input_string)
+        assign_request = json.loads(assign_json)
         if not self._subarray_exists(assign_request["subarray_id"]):
             exception_message = (
                 "The Subarray '"
@@ -158,3 +163,48 @@ class AssignResourceValidator:
         self.logger.debug("receptor_id_list validation successful.")
 
         return assign_request
+
+
+class ReleaseResourceValidator:
+
+    """Class to validate the input string of ReleaseResources command of Central Node"""
+
+    def __init__(self, logger=module_logger):
+        self.logger = logger
+
+    def loads(self, input_string):
+        """
+        Validates the input string received as an argument of ReleaseResources command.
+        If the request is correct, returns the deserialized JSON object. The ska-tmc-cdm
+        is used to validate the JSON.
+
+        :param: input_string: A JSON string
+
+        :return: Deserialized JSON object if successful.
+
+        :throws:
+            InvalidJSONError: When the JSON string is not formatted properly.
+
+            SubarrayNotPresentError: If the subarray is not present.
+
+            ResourceNotPresentError: When a receptor in the receptor_id_list is not present.
+        """
+
+        # Check if JSON is correct
+        self.logger.info("Checking JSON format.")
+        self.logger.debug("Checking JSON format.")
+        try:
+            r_request = CODEC.loads(ReleaseResourcesRequest, input_string)
+            release_json = CODEC.dumps(r_request)
+        except (ValidationError, JSONDecodeError) as json_error:
+            self.logger.exception(
+                "Exception while parsing the json: %s", str(json_error)
+            )
+            exception_message = (
+                "Malformed input string. Please check the JSON format."
+                + "Full exception info: "
+                + str(json_error)
+            )
+            raise InvalidJSONError(exception_message)
+        release_request = json.loads(release_json)
+        return release_request

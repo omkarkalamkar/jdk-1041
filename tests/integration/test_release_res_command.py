@@ -1,9 +1,12 @@
+import json
+
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
+from tests.settings import logger
 
 
 def release_resources(
@@ -32,14 +35,28 @@ def release_resources(
         lookahead=2,
     )
 
-    _, unique_id_assign = central_node.AssignResources(assign_input_str)
+    if "ska_mid" in central_node_name:
+        result, unique_id_assign = central_node.AssignResources(
+            json.dumps(assign_input_str)
+        )
+    else:
+        result, unique_id_assign = central_node.AssignResources(
+            assign_input_str
+        )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_assign[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
-    result, unique_id = central_node.ReleaseResources(release_input_string)
 
+    if "ska_mid" in central_node_name:
+        result, unique_id = central_node.ReleaseResources(
+            json.dumps(release_input_string)
+        )
+    else:
+        result, unique_id = central_node.ReleaseResources(release_input_string)
+
+    logger.info(f"Unique id:{unique_id[0]}")
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
 

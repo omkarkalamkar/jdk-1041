@@ -346,7 +346,33 @@ class InputParameterMid(InputParameter):
         self._sdp_master_dev_name = "mid-sdp/control/0"
         self._sdp_mln_dev_name = "ska_mid/tm_leaf_node/sdp_master"
         self._csp_mln_dev_name = "ska_mid/tm_leaf_node/csp_master"
+        self._dish_leaf_node_prefix = "ska_mid/tm_leaf_node/d"
         self._changed_callback = changed_callback
+
+    @property
+    def dish_leaf_node_prefix(self):
+        """
+        Input parameter
+        Return the TM dish prefix
+
+        :return: the TM dish prefix
+        :rtype: tuple
+        """
+        return self._dish_leaf_node_prefix
+
+    @dish_leaf_node_prefix.setter
+    def dish_leaf_node_prefix(self, value):
+        """
+        Input parameter
+        Set the TM dish prefix to be
+        managed by the CentralNode
+
+        :param value: the TM dish prefix
+        :type value: tuple
+        """
+        self._dish_leaf_node_prefix = value
+        if self._changed_callback is not None:
+            self._changed_callback()
 
     @property
     def dish_leaf_node_dev_names(self):
