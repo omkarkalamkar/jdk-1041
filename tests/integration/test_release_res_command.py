@@ -1,5 +1,3 @@
-import json
-
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -37,7 +35,7 @@ def release_resources(
 
     if "ska_mid" in central_node_name:
         result, unique_id_assign = central_node.AssignResources(
-            json.dumps(assign_input_str)
+            assign_input_str
         )
     else:
         result, unique_id_assign = central_node.AssignResources(
@@ -49,12 +47,7 @@ def release_resources(
         lookahead=4,
     )
 
-    if "ska_mid" in central_node_name:
-        result, unique_id = central_node.ReleaseResources(
-            json.dumps(release_input_string)
-        )
-    else:
-        result, unique_id = central_node.ReleaseResources(release_input_string)
+    result, unique_id = central_node.ReleaseResources(release_input_string)
 
     logger.info(f"Unique id:{unique_id[0]}")
     assert unique_id[0].endswith("ReleaseResources")

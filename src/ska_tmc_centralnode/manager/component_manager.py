@@ -555,7 +555,7 @@ class CNComponentManager(TmcComponentManager):
                 self.logger,
             )
 
-            json_argument = assign_validator.loads(argin)
+            json_argument = assign_validator.loads(json.dumps(argin))
 
         # validate processing block
         (
