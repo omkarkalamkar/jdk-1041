@@ -259,7 +259,9 @@ def test_assign_resources_command_already_assigned(
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    cm.assign_resources(
+        json.loads(assign_input_str), task_callback=task_callback
+    )
     (res_code, message) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
     assert "dish0001" in message
