@@ -76,9 +76,7 @@ def test_mid_release_resources_command(tango_context, task_callback):
     cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
-    cm.release_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
+    cm.release_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -92,7 +90,7 @@ def test_mid_release_resources_command_with_ok(tango_context, task_callback):
     cm.release_resources(
         json.dumps(json_argument), task_callback=task_callback
     )
-    (res_code, _) = release_res_command.do(json.dumps(json_argument))
+    (res_code, _) = release_res_command.do(json_argument)
     assert res_code == ResultCode.OK
 
 
@@ -113,9 +111,7 @@ def test_mid_release_resources_command_fail_subarray(
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
-    cm.release_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
+    cm.release_resources(json_argument, task_callback=task_callback)
     (res_code, _) = release_res_command.do(json.dumps(json_argument))
     assert res_code == ResultCode.FAILED
 
