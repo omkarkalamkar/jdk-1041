@@ -118,7 +118,7 @@ def test_low_release_resources_command_with_invalide_key(
     )
     assert res_code == TaskStatus.REJECTED
     assert (
-        "transaction_id key is not present in the input json argument"
+        "subarray_id key is not present in the input json argument"
         in message
     )
 
