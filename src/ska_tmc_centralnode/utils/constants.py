@@ -3,10 +3,8 @@
 
 REQUIRED_LOW_ASSIGN_RESOURCE_KEYS = ["subarray_id", "sdp", "csp"]
 REQUIRED_LOW_RELEASE_RESOURCE_KEYS = ["subarray_id"]
-REQUIRED_MID_RELEASE_RESOURCE_KEYS = [
-    "subarray_id"
-]
-#TODO:Add receptor id validation if necessary
+REQUIRED_MID_RELEASE_RESOURCE_KEYS = ["subarray_id"]
+# TODO:Add receptor id validation if necessary
 REQUIRED_MID_ASSIGN_RESOURCE_KEYS = [
     "subarray_id",
     "dish",
