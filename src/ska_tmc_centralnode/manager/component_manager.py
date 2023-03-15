@@ -555,7 +555,7 @@ class CNComponentManager(TmcComponentManager):
                 self.logger,
             )
 
-            json_argument = assign_validator.loads(argin)
+            json_argument = assign_validator.loads(json.dumps(argin))
 
         # validate processing block
         (
@@ -626,7 +626,7 @@ class CNComponentManager(TmcComponentManager):
 
             # Utilize CDM to validate json.
             release_validator = ReleaseResourceValidator(self.logger)
-            json_argument = release_validator.loads(argin)
+            json_argument = release_validator.loads(json.dumps(argin))
 
         task_status, response = self.submit_task(
             release_resources_command.release_resources,

@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.5.0"
+version="0.5.2"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team SAHYADRI & HIMALAYA"
@@ -10,8 +10,8 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.5.0
-tag=0.5.0
-tag_description=Utilised CDM to validate AssignResources and ReleaseResources schema.
+release=0.5.2
+tag=0.5.2
+tag_description= Updated cenralnode to make transaction_id optional in schema validation.
 
-release_notes=This release contains:<br/><ul><li>Utilised CDM to validate AssignResources and ReleaseResources schema. </li></ul><br/>
+release_notes=This release contains:<br/><ul><li>Updated cenralnode  to make transaction_id optional in schema validation.</li></ul><br/>

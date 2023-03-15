@@ -51,9 +51,7 @@ def assign_resources(
     )
 
     if "ska_mid" in central_node_name:
-        result, unique_id = central_node.AssignResources(
-            json.dumps(assign_input_str)
-        )
+        result, unique_id = central_node.AssignResources(assign_input_str)
     else:
         result, unique_id = central_node.AssignResources(assign_input_str)
     logger.info(
