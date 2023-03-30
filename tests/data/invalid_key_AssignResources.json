@@ -2,7 +2,7 @@
   "interface": "https://schema.skao.int/ska-tmc-assignresources/2.1",
   "transaction_id": "txn-....-00001",
   "dish": {
-      "receptor_ids": ["0001"]
+      "receptor_ids": ["SKA001"]
   },
   "sdp": {
       "interface": "https://schema.skao.int/ska-sdp-assignres/0.4",

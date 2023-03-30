@@ -56,7 +56,7 @@ class AssignResourceValidator:
             self._receptor_list.append(receptor.replace(dish_prefix, ""))
         self.logger.debug("Available dish ids: %s", self._receptor_list)
 
-        self._dish_prefix = dish_prefix
+        self._dish_prefix = "SKA" + dish_prefix[1:]
 
     def _subarray_exists(self, subarray_id):
         """Checks if subarray is present.
