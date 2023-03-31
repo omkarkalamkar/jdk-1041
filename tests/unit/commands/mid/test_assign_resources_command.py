@@ -73,7 +73,6 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
-@pytest.mark.tst2
 def test_assign_resources_command_queued(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -105,7 +104,6 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
         cm.assign_resources(json_argument, task_callback=task_callback)
 
 
-@pytest.mark.tst3
 def test_assign_resources_command_with_ok(tango_context, task_callback):
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
@@ -234,7 +232,6 @@ def test_assign_resources_fail_check_allowed(tango_context):
         cm.is_command_allowed("AssignResources")
 
 
-@pytest.mark.tst1
 def test_assign_resources_command_already_assigned(
     tango_context, task_callback
 ):
