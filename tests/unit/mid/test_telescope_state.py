@@ -48,7 +48,7 @@ def devices_to_load():
 def set_device_init(devFactory, cm, expected_elapsed_time):
     set_device_state("mid-csp/control/0", tango.DevState.INIT, devFactory)
     set_device_state("mid-sdp/control/0", tango.DevState.DISABLE, devFactory)
-    set_device_state("ska001/dish/master", tango.DevState.OFF, devFactory)
+    set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
     ensure_telescope_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
@@ -64,7 +64,7 @@ def test_telescope_state_init(tango_context):
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     set_device_state("mid-csp/control/0", tango.DevState.FAULT, devFactory)
     set_device_state("mid-sdp/control/0", tango.DevState.STANDBY, devFactory)
-    set_device_state("ska001/dish/master", tango.DevState.OFF, devFactory)
+    set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
     ensure_telescope_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
@@ -78,7 +78,7 @@ def test_telescope_state_fault_over_standby(tango_context):
 def set_device_standby(devFactory, cm, expected_elapsed_time):
     set_device_state("mid-csp/control/0", tango.DevState.STANDBY, devFactory)
     set_device_state("mid-sdp/control/0", tango.DevState.ON, devFactory)
-    set_device_state("ska001/dish/master", tango.DevState.OFF, devFactory)
+    set_device_state("mid_d0001/elt/master", tango.DevState.OFF, devFactory)
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
 

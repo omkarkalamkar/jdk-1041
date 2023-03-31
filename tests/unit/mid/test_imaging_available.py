@@ -51,7 +51,7 @@ def test_imaging_available(tango_context):
     set_devices_state(
         devices=[
             "mid-csp/control/0",
-            "ska001/dish/master",
+            "mid_d0001/elt/master",
         ],
         devFactory=DevFactory(),
         state=tango.DevState.ON,
