@@ -41,7 +41,7 @@ server:
         # - name: "ska_low/tm_leaf_node/mccs_subarray01"
       - name: "HelperDishDevice"
         devices:
-        - name: "mid_d0001/elt/master"
+        - name: "ska001/dish/master"
         - name: "ska_mid/tm_leaf_node/d0001"
 depends_on:
   - device: sys/database/2
