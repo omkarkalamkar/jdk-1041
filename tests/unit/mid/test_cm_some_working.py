@@ -11,13 +11,13 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_MID,
+    DISH_LEAF_NODE_PREFIX,
     MID_CSP_SLN_DEVICE,
     MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
+    NUM_DISHES,
     SLEEP_TIME,
     TIMEOUT,
-    DishLeafNodePrefix,
-    NumDishes,
     count_faulty_devices,
     logger,
 )
@@ -43,6 +43,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.some
 def test_some_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
 
@@ -52,13 +53,13 @@ def test_some_working_other_faulty(tango_context):
         _input_parameter=InputParameterMid(None),
         logger=logger,
     )
-    cm.add_dishes(DishLeafNodePrefix, NumDishes)
+    cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
         cm.add_device(dev)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
     # the device list contains one duplicate of the dishes
-    num_devices = len(DEVICE_LIST_MID) + NumDishes - 1
+    num_devices = len(DEVICE_LIST_MID) + NUM_DISHES - 1
     while num_devices != len(cm.checked_devices):
         logger.info("Faulty devices %s", num_faulty)
         time.sleep(SLEEP_TIME)
