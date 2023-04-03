@@ -2094,7 +2094,7 @@
         "attributes": [
           {
             "attribute": {
-              "device": "mid_d0001/elt/master",
+              "device": "ska001/dish/master",
               "attribute": "state",
               "label": "State"
             },
@@ -2351,7 +2351,7 @@
         "attributes": [
           {
             "attribute": {
-              "device": "mid_d0001/elt/master",
+              "device": "ska001/dish/master",
               "attribute": "healthstate",
               "label": "healthState"
             },
@@ -2465,14 +2465,14 @@
       "height": 3,
       "type": "LABEL",
       "inputs": {
-        "text": "mid_d0001/elt/master",
+        "text": "ska001/dish/master",
         "textColor": "#000000",
         "backgroundColor": "#ffffff",
         "size": 1,
         "borderWidth": 0,
         "borderColor": "#000000",
         "font": "Helvetica",
-        "linkTo": "https://k8s.stfc.skao.int/demo/taranta/devices/mid_d0001/elt/master/server",
+        "linkTo": "https://k8s.stfc.skao.int/demo/taranta/devices/ska001/dish/master/server",
         "customCss": "font-size: 12px;\npadding-left: 0px;"
       },
       "order": 103
@@ -2487,7 +2487,7 @@
       "type": "ATTRIBUTE_DISPLAY",
       "inputs": {
         "attribute": {
-          "device": "mid_d0001/elt/master",
+          "device": "ska001/dish/master",
           "attribute": "state",
           "label": "State"
         },
@@ -2512,7 +2512,7 @@
       "height": 4,
       "type": "DEVICE_STATUS",
       "inputs": {
-        "device": "mid_d0001/elt/master",
+        "device": "ska001/dish/master",
         "state": {
           "device": null,
           "attribute": null
@@ -2535,7 +2535,7 @@
       "type": "ATTRIBUTE_DISPLAY",
       "inputs": {
         "attribute": {
-          "device": "mid_d0001/elt/master",
+          "device": "ska001/dish/master",
           "attribute": "healthstate",
           "label": "healthState"
         },
