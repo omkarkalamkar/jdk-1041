@@ -36,7 +36,11 @@ class AssignResourceValidator:
     """Class to validate the input string of AssignResources command of Central Node"""
 
     def __init__(
-        self, subarray_list, receptor_list, dish_leaf_node_prefix, logger=module_logger
+        self,
+        subarray_list,
+        receptor_list,
+        dish_leaf_node_prefix,
+        logger=module_logger,
     ):
 
         self.logger = logger
