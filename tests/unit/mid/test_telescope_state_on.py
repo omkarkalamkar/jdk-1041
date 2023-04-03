@@ -50,7 +50,7 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
         devices=[
             "mid-csp/control/0",
             "mid-sdp/control/0",
-            "mid_d0001/elt/master",
+            "ska001/dish/master",
         ],
         devFactory=devFactory,
         state=tango.DevState.ON,

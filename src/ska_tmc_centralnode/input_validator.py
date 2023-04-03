@@ -36,7 +36,7 @@ class AssignResourceValidator:
     """Class to validate the input string of AssignResources command of Central Node"""
 
     def __init__(
-        self, subarray_list, receptor_list, dish_prefix, logger=module_logger
+        self, subarray_list, receptor_list, dish_leaf_node_prefix, logger=module_logger
     ):
 
         self.logger = logger
@@ -54,11 +54,9 @@ class AssignResourceValidator:
         # in AssignReources request JSON.
         for receptor in receptor_list:
             self._receptor_list.append(
-                receptor.replace(dish_prefix + "0", "SKA")
+                receptor.replace(dish_leaf_node_prefix , "SKA")
             )
         self.logger.debug("Available dish ids: %s", self._receptor_list)
-
-        self._dish_prefix = "SKA" + dish_prefix[1:]
 
     def _subarray_exists(self, subarray_id):
         """Checks if subarray is present.

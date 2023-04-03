@@ -51,7 +51,7 @@ def test_telescope_state_off(tango_context):
         devices=[
             "mid-csp/control/0",
             "mid-sdp/control/0",
-            "mid_d0001/elt/master",
+            "ska001/dish/master",
         ],
         devFactory=DevFactory(),
         state=tango.DevState.OFF

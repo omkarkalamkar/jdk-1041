@@ -12,6 +12,3 @@ copyright=""""""
 
 release=0.5.2
 tag=0.5.2
-tag_description= Updated centralnode to make transaction_id optional in schema validation.
-
-release_notes=This release contains:<br/><ul><li>Updated cenralnode  to make transaction_id optional in schema validation.</li></ul><br/>

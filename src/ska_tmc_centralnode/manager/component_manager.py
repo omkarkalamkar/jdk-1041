@@ -544,14 +544,14 @@ class CNComponentManager(TmcComponentManager):
 
             # Utilize CDM to validate json.
             available_subarrays_list = self.input_parameter.subarray_dev_names
-            dish_prefix = self.input_parameter.dish_leaf_node_prefix
+            dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
             available_dish_leaf_node_devices = (
                 self.input_parameter.dish_leaf_node_dev_names
             )
             assign_validator = AssignResourceValidator(
                 available_subarrays_list,
                 available_dish_leaf_node_devices,
-                dish_prefix,
+                dish_leaf_node_prefix,
                 self.logger,
             )
 
