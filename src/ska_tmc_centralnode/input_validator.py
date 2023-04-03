@@ -54,7 +54,7 @@ class AssignResourceValidator:
         # in AssignReources request JSON.
         for receptor in receptor_list:
             self._receptor_list.append(
-                receptor.replace(dish_leaf_node_prefix , "SKA")
+                receptor.replace(dish_leaf_node_prefix, "SKA")
             )
         self.logger.debug("Available dish ids: %s", self._receptor_list)
 
