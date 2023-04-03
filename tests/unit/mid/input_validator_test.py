@@ -303,14 +303,13 @@ class TestAssignResourceValidator:
         "ska_mid/tm_leaf_node/d0003",
         "ska_mid/tm_leaf_node/d0004",
     ]
-
     def test_validate_good_json(self):
         """This function tests the validate method when good formatted json is provided"""
 
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "ska_mid/tm_leaf_node/d",
+            "ska_mid/tm_leaf_node/d0",
         )
         output_config = input_validator.loads(
             json.dumps(sample_assign_resources_request)
