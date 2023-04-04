@@ -270,7 +270,7 @@ class CentralNodeMid(AbstractCentralNode):
         cm.input_parameter.dish_leaf_node_dev_names = []
         for dish in range(1, (self.NumDishes + 1)):
             cm.input_parameter.dish_leaf_node_dev_names.append(
-                self.DishLeafNodePrefix + f"00{dish}"
+                self.DishLeafNodePrefix + "{:03d}".format(dish)
             )
 
         cm.input_parameter.dish_dev_names = []

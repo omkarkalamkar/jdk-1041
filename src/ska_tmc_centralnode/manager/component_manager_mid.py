@@ -124,8 +124,9 @@ class CNComponentManagerMid(CNComponentManager):
         """
         result = []
         for dish in range(1, (num_dishes + 1)):
-            self.add_device(dln_prefix + f"00{dish}")
-            result.append(dln_prefix + f"00{dish}")
+
+            self.add_device(dln_prefix + "{:03d}".format(dish))
+            result.append(dln_prefix + "{:03d}".format(dish))
         return result
 
     def _aggregate_telescope_state(self):
