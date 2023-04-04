@@ -329,7 +329,7 @@ class AbstractCentralNode(TMCBaseDevice):
         doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
         "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
         "The individual string should contain dish numbers in string format with "
-        "preceding zeroes upto 3 digits. E.g. 0001, 0002",
+        "preceding zeroes upto 3 digits. E.g. SKA001, SKA002",
         dtype_out="DevVarLongStringArray",
         doc_out="information-only string",
     )

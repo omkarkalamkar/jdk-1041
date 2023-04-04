@@ -21,7 +21,7 @@ sample_assign_resources_request = {
     "interface": "https://schema.skao.int/ska-tmc-assignresources/2.1",
     "transaction_id": "txn-....-00001",
     "subarray_id": 1,
-    "dish": {"receptor_ids": ["0001"]},
+    "dish": {"receptor_ids": ["SKA001"]},
     "sdp": {
         "interface": "https://schema.skao.int/ska-sdp-assignres/0.4",
         "execution_block": {
@@ -310,7 +310,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "ska_mid/tm_leaf_node/d",
+            "ska_mid/tm_leaf_node/d0",
         )
         output_config = input_validator.loads(
             json.dumps(sample_assign_resources_request)

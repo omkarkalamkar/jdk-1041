@@ -40,7 +40,7 @@ def devices_to_load():
                 {"name": "mid-csp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
                 {"name": "mid-sdp/control/0"},
-                {"name": "mid_d0001/elt/master"},
+                {"name": "ska001/dish/master"},
                 {"name": "ska_mid/tm_leaf_node/d0001"},
                 {"name": "ska_low/tm_subarray_node/1"},
                 # {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
@@ -71,7 +71,7 @@ def devices_to_load():
                             "ska_mid/tm_leaf_node/sdp_master"
                         ],
                         "SdpMasterFQDN": ["mid-sdp/control/0"],
-                        "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d"],
+                        "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d0"],
                         "TMCMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
                         "TMCMidCspSubarrayLeafNodes": [
                             "ska_mid/tm_leaf_node/csp_subarray01"

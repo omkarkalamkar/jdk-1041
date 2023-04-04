@@ -11,11 +11,11 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_MID,
+    DISH_LEAF_NODE_PREFIX,
     MID_SUBARRAY_DEVICE,
+    NUM_DISHES,
     SLEEP_TIME,
     TIMEOUT,
-    DishLeafNodePrefix,
-    NumDishes,
     count_faulty_devices,
     logger,
 )
@@ -43,7 +43,7 @@ def test_one_working_other_faulty(tango_context):
     cm = CNComponentManagerMid(
         op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
     )
-    cm.add_dishes(DishLeafNodePrefix, NumDishes)
+    cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
         cm.add_device(dev)
     start_time = time.time()
