@@ -10,9 +10,9 @@
 """Release information for Python Package"""
 
 name = """ska-tmc-centralnode"""
-version = "0.7.0"
+version = "0.7.1"
 version_info = version.split(".")
-description = """Central Node is a coordinator of the complete M&C system."""
+description = """Using latest common package with updated helper devices."""
 author = "Team NCRA"
 author_email = "telmgt-internal@googlegroups.com"
 license = """BSD-3-Clause"""
