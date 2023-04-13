@@ -89,11 +89,10 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
         for ret_code, message in [
-            self.set_standby_fp_mode_dishes(),
+            self.turn_on_dishes(),
             self.turn_on_csp(),
             self.turn_on_sdp(),
             self.turn_on_subarrays(),
-            self.set_operate_mode_dishes(),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
@@ -124,18 +123,11 @@ class TelescopeOn(AbstractTelescopeOnOff):
             "On",
         )
 
-    def set_standby_fp_mode_dishes(self):
+    def turn_on_dishes(self):
         return self.send_command(
             self.dish_adapters,
-            f"Error in calling SetStandbyFPMode() command on {self.dish_adapters}",
-            "SetStandbyFPMode",
-        )
-
-    def set_operate_mode_dishes(self):
-        return self.send_command(
-            self.dish_adapters,
-            f"Error in calling SetOperateMode() command on {self.dish_adapters}",
-            "SetOperateMode",
+            f"Error in calling On() command on {self.dish_adapters}",
+            "On",
         )
 
     def do_low(self, argin=None):
