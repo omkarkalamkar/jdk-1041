@@ -1,4 +1,3 @@
-import logging
 import time
 
 import mock
@@ -120,7 +119,6 @@ def test_telescope_standby_command_fail_subarray(tango_context):
 
 
 def test_telescope_standby_command_fail_dish(tango_context):
-    logger.setLevel(logging.DEBUG)
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
