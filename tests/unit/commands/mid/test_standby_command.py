@@ -1,3 +1,4 @@
+import logging
 import time
 
 import mock
@@ -119,6 +120,7 @@ def test_telescope_standby_command_fail_subarray(tango_context):
 
 
 def test_telescope_standby_command_fail_dish(tango_context):
+    logger.setLevel(logging.DEBUG)
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -130,12 +132,11 @@ def test_telescope_standby_command_fail_dish(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeStandby command
-    failing_dev = "ska_mid/tm_leaf_node/d0001"
 
-    attrs = {"SetStandbyFPMode.side_effect": Exception}
+    attrs = {"Off.side_effect": Exception}
     dishMasterLeafMock = mock.Mock(**attrs)
     my_adapter_factory.get_or_create_adapter(
-        failing_dev, proxy=dishMasterLeafMock
+        DISH_LEAF_NODE_DEVICE, proxy=dishMasterLeafMock
     )
 
     unique_id = f"{time.time()}_TelescopeStandby"
