@@ -246,13 +246,13 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
     def set_standby_fp_mode_dishes(self):
         self.logger.info(
-            f"SetStandbyFpMode command on Dish Leaf Nodes: {self.dish_adapters}"
+            f"SetStandbyFPMode command on Dish Leaf Nodes: {self.dish_adapters}"
         )
         return self.send_command(
             self.dish_adapters,
-            "Error in calling SetStandbyFpMode() on Dish Leaf Nodes:"
+            "Error in calling SetStandbyFPMode() on Dish Leaf Nodes:"
             + "{}".format(self.dish_adapters),
-            "SetStandbyFpMode",
+            "SetStandbyFPMode",
         )
 
     def set_standby_lp_mode_dishes(self):
