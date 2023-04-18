@@ -25,7 +25,7 @@ def test_off_command_mid(tango_context, change_event_callbacks):
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_on[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=2,
     )
 
     result_off, unique_id_off = central_node.TelescopeOff()
@@ -59,7 +59,7 @@ def test_off_command_mid(tango_context, change_event_callbacks):
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=4
+        "telescopeState", tango._tango.DevState.OFF, lookahead=6
     )
 
 
