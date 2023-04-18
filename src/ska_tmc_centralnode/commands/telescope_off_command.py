@@ -120,10 +120,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
             time.sleep(self._step_sleep)
 
         for ret_code, message in [
-            self.set_standby_fp_mode_dishes(),
+            self.turn_off_dishes(),
             self.turn_off_csp(),
             self.turn_off_sdp(),
-            self.set_standby_lp_mode_dishes(),
         ]:
             if ret_code == ResultCode.FAILED:
                 return ret_code, message
@@ -147,26 +146,18 @@ class TelescopeOff(AbstractTelescopeOnOff):
         )
 
     def turn_off_subarrays(self):
-        self.logger.info("TelescopeOff for tm subarrays  devices")
+        self.logger.info("TelescopeOff for tm subarrays devices")
         return self.send_command(
             self.subarray_adapters,
             f"Error in calling Off() for {self.subarray_adapters}",
             "Off",
         )
 
-    def set_standby_fp_mode_dishes(self):
+    def turn_off_dishes(self):
         return self.send_command(
             self.dish_adapters,
             "Error in calling TelescopeOff() on TMC Dish leaf node",
-            "SetStandbyFPMode",
-        )
-
-    def set_standby_lp_mode_dishes(self):
-        self.logger.info("TelescopeOff for dish devices")
-        return self.send_command(
-            self.dish_adapters,
-            f"Error in calling SetStandbyLPMode()command on {self.dish_adapters}",
-            "SetStandbyLPMode",
+            "Off",
         )
 
     def do_low(self, argin=None):
