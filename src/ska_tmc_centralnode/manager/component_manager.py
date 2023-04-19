@@ -9,7 +9,11 @@ import pandas as pd
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory
-from ska_tmc_common.device_info import DeviceInfo, SubArrayDeviceInfo
+from ska_tmc_common.device_info import (
+    DeviceInfo,
+    DishDeviceInfo,
+    SubArrayDeviceInfo,
+)
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
@@ -269,6 +273,8 @@ class CNComponentManager(TmcComponentManager):
 
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
+        elif "dish/master" in dev_name.lower():
+            devInfo = DishDeviceInfo(dev_name, False)
         else:
             devInfo = DeviceInfo(dev_name, False)
         self.component.update_device(devInfo)

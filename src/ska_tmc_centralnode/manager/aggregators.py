@@ -1,5 +1,6 @@
 from ska_control_model import HealthState
 from ska_tmc_common.aggregators import Aggregator
+from ska_tmc_common.enum import DishMode
 from tango import DevState
 
 
@@ -20,7 +21,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
             ):
-                telescopeStateList.append(dev.state)
+                telescopeStateList.append(dev.dishMode)
                 dish_count += 1
             elif (
                 name
@@ -36,6 +37,7 @@ class TelescopeStateAggregatorMid(Aggregator):
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
+        self._logger.info("The telescope state list is %s", telescopeStateList)
         if not sdp_master and not csp_master:
             self._logger.info(
                 "missing devices: %s=%s %s=%s",
@@ -48,9 +50,9 @@ class TelescopeStateAggregatorMid(Aggregator):
         elif dish_count == 0:
             self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
-        elif telescopeSetStateList == set([DevState.ON]):
+        elif telescopeSetStateList == set([DevState.ON, DishMode.STANDBY_FP]):
             return DevState.ON
-        elif telescopeSetStateList == set([DevState.OFF]):
+        elif telescopeSetStateList == set([DevState.OFF, DishMode.STANDBY_LP]):
             return DevState.OFF
         elif DevState.INIT in telescopeSetStateList:
             return DevState.INIT

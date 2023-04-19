@@ -8,7 +8,7 @@ package.
 """
 import time
 
-from ska_tmc_common.enum import LivelinessProbeType
+from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
@@ -112,6 +112,21 @@ class CNComponentManagerMid(CNComponentManager):
 
         self._aggregate_state()
         self._update_imaging()
+
+    def update_device_dish_mode(self, dev_name, dish_mode: DishMode) -> None:
+        """
+        Update the dish mode of the given dish and call
+        the relative callbacks if available.
+        :param dishMode: Dish mode of the device
+        :type dishMode: DishMode
+        """
+        with self.lock:
+            dev_info = self.component.get_device(dev_name)
+            dev_info.dishMode = dish_mode
+            dev_info.last_event_arrived = time.time()
+            dev_info.update_unresponsive(False)
+
+        self._aggregate_state()
 
     def add_dishes(self, dln_prefix, num_dishes):
         """
