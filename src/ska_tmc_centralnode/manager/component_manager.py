@@ -262,15 +262,12 @@ class CNComponentManager(TmcComponentManager):
             result.append(dev_name)
         return result
 
-    def add_device(self, dev_name):
+    def add_device(self, dev_name: str) -> None:
         """
         Add device to the liveliness probe function
         :param dev_name: device name
         :type dev_name: str
         """
-        if dev_name is None:
-            return
-
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
         elif "dish/master" in dev_name.lower():

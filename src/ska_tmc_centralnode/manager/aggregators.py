@@ -11,6 +11,7 @@ class TelescopeStateAggregatorMid(Aggregator):
     def aggregate(self):
         # import debugpy; debugpy.debug_this_thread()
         telescopeStateList = []
+        dishmodeset = set()
         dish_count = 0
         csp_master = False
         sdp_master = False
@@ -21,7 +22,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
             ):
-                telescopeStateList.append(dev.dishMode)
+                dishmodeset.add(dev.dishMode)
                 dish_count += 1
             elif (
                 name
@@ -37,7 +38,11 @@ class TelescopeStateAggregatorMid(Aggregator):
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
-        self._logger.info("The telescope state list is %s", telescopeStateList)
+        self._logger.info(
+            "telescopeSetStateList : %s , dishmodeset : %s ",
+            telescopeSetStateList,
+            dishmodeset,
+        )
         if not sdp_master and not csp_master:
             self._logger.info(
                 "missing devices: %s=%s %s=%s",
@@ -50,20 +55,24 @@ class TelescopeStateAggregatorMid(Aggregator):
         elif dish_count == 0:
             self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
-        elif telescopeSetStateList == set([DevState.ON, DishMode.STANDBY_FP]):
+        elif telescopeSetStateList == {DevState.ON} and dishmodeset == {
+            DishMode.STANDBY_FP
+        }:
             return DevState.ON
-        elif telescopeSetStateList == set([DevState.OFF, DishMode.STANDBY_LP]):
+        elif telescopeSetStateList == {DevState.OFF} and dishmodeset == {
+            DishMode.STANDBY_LP
+        }:
             return DevState.OFF
         elif DevState.INIT in telescopeSetStateList:
             return DevState.INIT
         elif DevState.FAULT in telescopeSetStateList:
             return DevState.FAULT
-        elif DevState.STANDBY in telescopeSetStateList:
+        elif (
+            DevState.STANDBY in telescopeSetStateList
+            or DishMode.STANDBY_LP in dishmodeset
+        ):
             return DevState.STANDBY
         else:
-            # self._logger.info(
-            #     "telescopeSetStateList: %s", telescopeSetStateList
-            # )
             return DevState.UNKNOWN
 
 
