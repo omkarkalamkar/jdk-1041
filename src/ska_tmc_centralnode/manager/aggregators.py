@@ -22,7 +22,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
             ):
-                dishmodeset.add(dev.dishMode)
+                dishmodeset.add(dev._dish_mode)
                 dish_count += 1
             elif (
                 name

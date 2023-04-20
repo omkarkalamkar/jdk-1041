@@ -76,6 +76,7 @@ class CentralNodeEventReceiver(EventReceiver):
             event_flag (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
+        self._logger.info("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL subscribing")
         if event_flag.err:
             error = event_flag.errors[0]
             error_msg = f"{error.reason},{error.desc}"

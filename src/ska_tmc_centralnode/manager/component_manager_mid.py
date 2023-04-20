@@ -101,7 +101,7 @@ class CNComponentManagerMid(CNComponentManager):
         :type state: DevState
         """
         with self.lock:
-            self.logger.debug(
+            self.logger.info(
                 f"State event callback for device {dev_name}: {state}"
             )
             devInfo = self.component.get_device(dev_name)
@@ -120,13 +120,18 @@ class CNComponentManagerMid(CNComponentManager):
         :param dishMode: Dish mode of the device
         :type dishMode: DishMode
         """
+
         with self.lock:
+            self.logger.info(
+                f"Dish event callback for device::::::::::: {dev_name}: {dish_mode}"
+            )
             dev_info = self.component.get_device(dev_name)
             dev_info.dishMode = dish_mode
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
 
         self._aggregate_state()
+        self._update_imaging()
 
     def add_dishes(self, dln_prefix, num_dishes):
         """
