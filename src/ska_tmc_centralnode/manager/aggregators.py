@@ -10,7 +10,7 @@ class TelescopeStateAggregatorMid(Aggregator):
 
     def aggregate(self):
         # import debugpy; debugpy.debug_this_thread()
-        telescopeStateList = []
+        telescopeStateset = set()
         dishmodeset = set()
         dish_count = 0
         csp_master = False
@@ -28,19 +28,18 @@ class TelescopeStateAggregatorMid(Aggregator):
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                telescopeStateList.append(dev.state)
+                telescopeStateset.add(dev.state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                telescopeStateList.append(dev.state)
+                telescopeStateset.add(dev.state)
                 sdp_master = True
 
-        telescopeSetStateList = set(telescopeStateList)
         self._logger.info(
-            "telescopeSetStateList : %s , dishmodeset : %s ",
-            telescopeSetStateList,
+            "telescopeSetStateset : %s , dishmodeset : %s ",
+            telescopeStateset,
             dishmodeset,
         )
         if not sdp_master and not csp_master:
@@ -55,20 +54,20 @@ class TelescopeStateAggregatorMid(Aggregator):
         elif dish_count == 0:
             self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
-        elif telescopeSetStateList == {DevState.ON} and dishmodeset == {
+        elif telescopeStateset == {DevState.ON} and dishmodeset == {
             DishMode.STANDBY_FP
         }:
             return DevState.ON
-        elif telescopeSetStateList == {DevState.OFF} and dishmodeset == {
+        elif telescopeStateset == {DevState.OFF} and dishmodeset == {
             DishMode.STANDBY_LP
         }:
             return DevState.OFF
-        elif DevState.INIT in telescopeSetStateList:
+        elif DevState.INIT in telescopeStateset:
             return DevState.INIT
-        elif DevState.FAULT in telescopeSetStateList:
+        elif DevState.FAULT in telescopeStateset:
             return DevState.FAULT
         elif (
-            DevState.STANDBY in telescopeSetStateList
+            DevState.STANDBY in telescopeStateset
             or DishMode.STANDBY_LP in dishmodeset
         ):
             return DevState.STANDBY

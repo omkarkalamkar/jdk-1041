@@ -123,7 +123,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         with self.lock:
             self.logger.info(
-                f"Dish event callback for device::::::::::: {dev_name}: {dish_mode}"
+                f"Dish event callback for device {dev_name}: {dish_mode}"
             )
             dev_info = self.component.get_device(dev_name)
             dev_info.dishMode = dish_mode

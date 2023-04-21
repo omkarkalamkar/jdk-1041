@@ -67,5 +67,5 @@ def test_telescope_state_off(tango_context):
 
     dish_master = DevFactory().get_device(DISH_MASTER_DEVICE)
     dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
-    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=30)
+    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=12)
     assert cm.component.telescope_state == tango.DevState.OFF
