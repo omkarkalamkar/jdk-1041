@@ -2,7 +2,7 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.enum import PointingState
+from ska_tmc_common.enum import DishMode, PointingState
 
 from tests.integration.conftest import ensure_checked_devices
 
@@ -49,7 +49,7 @@ def test_off_command_mid(tango_context, change_event_callbacks):
     sdp_master.SetDirectState(tango.DevState.OFF)
 
     dish_master = dev_factory.get_device("ska001/dish/master")
-    dish_master.SetDirectState(tango.DevState.OFF)
+    dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
     dish_master.SetDirectPointingState(PointingState.READY)
 
     central_node.subscribe_event(
