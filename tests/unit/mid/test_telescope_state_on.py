@@ -52,7 +52,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.ON
 def test_telescope_state_on(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
