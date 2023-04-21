@@ -77,9 +77,10 @@ class CentralNodeEventReceiver(EventReceiver):
             change in event.
         """
         if event_data.err:
-            error = event_data.errors[0]
-            error_msg = f"{error.reason},{error.desc}"
-            self._logger.error(error_msg)
+            errors = event_data.errors
+            for error in errors:
+                error_msg = f"{error.reason},{error.desc}"
+                self._logger.error(error_msg)
             self._component_manager.update_event_failure()
             return
         new_value = event_data.attr_value.value
