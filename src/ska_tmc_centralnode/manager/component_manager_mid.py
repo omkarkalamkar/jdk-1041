@@ -8,7 +8,7 @@ package.
 """
 import time
 
-from ska_tmc_common.enum import LivelinessProbeType
+from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
@@ -101,7 +101,7 @@ class CNComponentManagerMid(CNComponentManager):
         :type state: DevState
         """
         with self.lock:
-            self.logger.debug(
+            self.logger.info(
                 f"State event callback for device {dev_name}: {state}"
             )
             devInfo = self.component.get_device(dev_name)
@@ -109,6 +109,26 @@ class CNComponentManagerMid(CNComponentManager):
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
             self.component._invoke_device_callback(devInfo)
+
+        self._aggregate_state()
+        self._update_imaging()
+
+    def update_device_dish_mode(self, dev_name, dish_mode: DishMode) -> None:
+        """
+        Update the dish mode of the given dish and call
+        the relative callbacks if available.
+        :param dishMode: Dish mode of the device
+        :type dishMode: DishMode
+        """
+
+        with self.lock:
+            self.logger.info(
+                f"Dish event callback for device {dev_name}: {dish_mode}"
+            )
+            dev_info = self.component.get_device(dev_name)
+            dev_info.dishMode = dish_mode
+            dev_info.last_event_arrived = time.time()
+            dev_info.update_unresponsive(False)
 
         self._aggregate_state()
         self._update_imaging()

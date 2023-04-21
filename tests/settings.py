@@ -139,6 +139,10 @@ def ensure_telescope_state(cm, state, expected_elapsed_time):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
+            logger.error(
+                "The current telescope state is %s",
+                cm.component.telescope_state,
+            )
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time
 

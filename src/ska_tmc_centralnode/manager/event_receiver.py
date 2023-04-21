@@ -38,6 +38,13 @@ class CentralNodeEventReceiver(EventReceiver):
                     self.handle_assigned_resource_event,
                     stateless=True,
                 )
+            if "dish/master" in dev_info.dev_name:
+                proxy.subscribe_event(
+                    "dishMode",
+                    tango.EventType.CHANGE_EVENT,
+                    self.handle_dish_mode_event,
+                    stateless=True,
+                )
 
         except Exception as e:
             self._logger.debug(
@@ -60,3 +67,24 @@ class CentralNodeEventReceiver(EventReceiver):
         self._component_manager.update_device_assigned_resource(
             evt.device.dev_name(), new_value
         )
+
+    def handle_dish_mode_event(self, event_data: tango.EventData) -> None:
+        """Method to handle and update the latest value of dishMode
+        attribute.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        if event_data.err:
+            errors = event_data.errors
+            for error in errors:
+                error_msg = f"{error.reason},{error.desc}"
+                self._logger.error(error_msg)
+            self._component_manager.update_event_failure()
+            return
+        new_value = event_data.attr_value.value
+        self._component_manager.update_device_dish_mode(
+            event_data.device.dev_name(), new_value
+        )
+        self._logger.info(f"DishMode value updated to {new_value}")

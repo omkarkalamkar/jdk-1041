@@ -1,5 +1,6 @@
 from ska_control_model import HealthState
 from ska_tmc_common.aggregators import Aggregator
+from ska_tmc_common.enum import DishMode
 from tango import DevState
 
 
@@ -9,7 +10,8 @@ class TelescopeStateAggregatorMid(Aggregator):
 
     def aggregate(self):
         # import debugpy; debugpy.debug_this_thread()
-        telescopeStateList = []
+        subsystem_states = set()
+        dish_modes = set()
         dish_count = 0
         csp_master = False
         sdp_master = False
@@ -20,22 +22,26 @@ class TelescopeStateAggregatorMid(Aggregator):
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
             ):
-                telescopeStateList.append(dev.state)
+                dish_modes.add(dev.dishMode)
                 dish_count += 1
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                telescopeStateList.append(dev.state)
+                subsystem_states.add(dev.state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                telescopeStateList.append(dev.state)
+                subsystem_states.add(dev.state)
                 sdp_master = True
 
-        telescopeSetStateList = set(telescopeStateList)
+        self._logger.info(
+            "telescopeSetStateset : %s , dishmodeset : %s ",
+            subsystem_states,
+            dish_modes,
+        )
         if not sdp_master and not csp_master:
             self._logger.info(
                 "missing devices: %s=%s %s=%s",
@@ -48,20 +54,24 @@ class TelescopeStateAggregatorMid(Aggregator):
         elif dish_count == 0:
             self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
-        elif telescopeSetStateList == set([DevState.ON]):
+        elif subsystem_states == {DevState.ON} and dish_modes == {
+            DishMode.STANDBY_FP
+        }:
             return DevState.ON
-        elif telescopeSetStateList == set([DevState.OFF]):
+        elif subsystem_states == {DevState.OFF} and dish_modes == {
+            DishMode.STANDBY_LP
+        }:
             return DevState.OFF
-        elif DevState.INIT in telescopeSetStateList:
+        elif DevState.INIT in subsystem_states:
             return DevState.INIT
-        elif DevState.FAULT in telescopeSetStateList:
+        elif DevState.FAULT in subsystem_states:
             return DevState.FAULT
-        elif DevState.STANDBY in telescopeSetStateList:
+        elif (
+            DevState.STANDBY in subsystem_states
+            or DishMode.STANDBY_LP in dish_modes
+        ):
             return DevState.STANDBY
         else:
-            # self._logger.info(
-            #     "telescopeSetStateList: %s", telescopeSetStateList
-            # )
             return DevState.UNKNOWN
 
 
