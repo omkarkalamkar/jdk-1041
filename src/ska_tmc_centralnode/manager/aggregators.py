@@ -10,8 +10,8 @@ class TelescopeStateAggregatorMid(Aggregator):
 
     def aggregate(self):
         # import debugpy; debugpy.debug_this_thread()
-        telescope_state_set = set()
-        dish_mode_set = set()
+        subsystem_states = set()
+        dish_modes = set()
         dish_count = 0
         csp_master = False
         sdp_master = False
@@ -22,25 +22,25 @@ class TelescopeStateAggregatorMid(Aggregator):
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
             ):
-                dish_mode_set.add(dev.dishMode)
+                dish_modes.add(dev.dishMode)
                 dish_count += 1
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                telescope_state_set.add(dev.state)
+                subsystem_states.add(dev.state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                telescope_state_set.add(dev.state)
+                subsystem_states.add(dev.state)
                 sdp_master = True
 
         self._logger.info(
             "telescopeSetStateset : %s , dishmodeset : %s ",
-            telescope_state_set,
-            dish_mode_set,
+            subsystem_states,
+            dish_modes,
         )
         if not sdp_master and not csp_master:
             self._logger.info(
@@ -54,21 +54,21 @@ class TelescopeStateAggregatorMid(Aggregator):
         elif dish_count == 0:
             self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
-        elif telescope_state_set == {DevState.ON} and dish_mode_set == {
+        elif subsystem_states == {DevState.ON} and dish_modes == {
             DishMode.STANDBY_FP
         }:
             return DevState.ON
-        elif telescope_state_set == {DevState.OFF} and dish_mode_set == {
+        elif subsystem_states == {DevState.OFF} and dish_modes == {
             DishMode.STANDBY_LP
         }:
             return DevState.OFF
-        elif DevState.INIT in telescope_state_set:
+        elif DevState.INIT in subsystem_states:
             return DevState.INIT
-        elif DevState.FAULT in telescope_state_set:
+        elif DevState.FAULT in subsystem_states:
             return DevState.FAULT
         elif (
-            DevState.STANDBY in telescope_state_set
-            or DishMode.STANDBY_LP in dish_mode_set
+            DevState.STANDBY in subsystem_states
+            or DishMode.STANDBY_LP in dish_modes
         ):
             return DevState.STANDBY
         else:
