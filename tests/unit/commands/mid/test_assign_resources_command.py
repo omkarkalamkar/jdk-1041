@@ -94,14 +94,20 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    _, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]["execution_block"]["eb_id"]
     del json_argument["sdp"]["processing_blocks"]
-    with pytest.raises(ValueError):
-        cm.assign_resources(json_argument, task_callback=task_callback)
+    res_code, message = cm.assign_resources(
+        json_argument, task_callback=task_callback
+    )
+    assert (
+        "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-assignresources/2.1"
+        in message
+    )
+    assert res_code == TaskStatus.REJECTED
 
 
 def test_assign_resources_command_with_ok(tango_context, task_callback):

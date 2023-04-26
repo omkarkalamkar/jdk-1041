@@ -551,14 +551,17 @@ class CNComponentManager(TmcComponentManager):
             available_dish_leaf_node_devices = (
                 self.input_parameter.dish_leaf_node_dev_names
             )
-            assign_validator = AssignResourceValidator(
-                available_subarrays_list,
-                available_dish_leaf_node_devices,
-                dish_leaf_node_prefix,
-                self.logger,
-            )
+            try:
+                assign_validator = AssignResourceValidator(
+                    available_subarrays_list,
+                    available_dish_leaf_node_devices,
+                    dish_leaf_node_prefix,
+                    self.logger,
+                )
 
-            json_argument = assign_validator.loads(json.dumps(argin))
+                json_argument = assign_validator.loads(json.dumps(argin))
+            except Exception as e:
+                return assign_resources_command.reject_command(str(e))
 
         # validate processing block
         (
@@ -628,8 +631,11 @@ class CNComponentManager(TmcComponentManager):
                 )
 
             # Utilize CDM to validate json.
-            release_validator = ReleaseResourceValidator(self.logger)
-            json_argument = release_validator.loads(json.dumps(argin))
+            try:
+                release_validator = ReleaseResourceValidator(self.logger)
+                json_argument = release_validator.loads(json.dumps(argin))
+            except Exception as e:
+                return release_resources_command.reject_command(str(e))
 
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
