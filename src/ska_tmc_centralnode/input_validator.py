@@ -122,7 +122,12 @@ class AssignResourceValidator:
         try:
             assign_request = CODEC.loads(AssignResourcesRequest, input_string)
             assign_json = CODEC.dumps(assign_request)
-        except (JsonValidationError, SchemaNotFound, ValueError) as json_error:
+        except (
+            JsonValidationError,
+            SchemaNotFound,
+            ValueError,
+            Exception,
+        ) as json_error:
             self.logger.exception(
                 "Exception while parsing the json: %s", str(json_error)
             )
@@ -194,12 +199,16 @@ class ReleaseResourceValidator:
         """
 
         # Check if JSON is correct
-        self.logger.info("Checking JSON format.")
         self.logger.debug("Checking JSON format.")
         try:
             r_request = CODEC.loads(ReleaseResourcesRequest, input_string)
             release_json = CODEC.dumps(r_request)
-        except (JsonValidationError, SchemaNotFound, ValueError) as json_error:
+        except (
+            JsonValidationError,
+            SchemaNotFound,
+            ValueError,
+            Exception,
+        ) as json_error:
             self.logger.exception(
                 "Exception while parsing the json: %s", str(json_error)
             )
