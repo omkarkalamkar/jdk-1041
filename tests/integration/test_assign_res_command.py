@@ -141,6 +141,7 @@ def assign_resources(
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
+
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -269,8 +270,12 @@ def assign_resources_without_subarray_id(
 
     result, message = central_node.AssignResources(assign_input_str)
 
-    assert "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-assignresources/2.1" in message[0]
+    assert (
+        "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-assignresources/2.1"
+        in message[0]
+    )
     assert result[0] == ResultCode.REJECTED
+
 
 @pytest.mark.assign
 @pytest.mark.post_deployment
