@@ -385,30 +385,6 @@ class AssignResources(AbstractAssignReleaseResources):
                 return ResultCode.FAILED, message
         return (ResultCode.OK, "")
 
-    def _validate_mid_json(self, json_argument, req_keys):
-        """To validate the mid json for assign resources command before entering the queue
-        Args:
-            json_argument (dict): Json Argument
-            req_keys (list): Required key list to check in json argument
-        """
-        json_keys = json_argument.keys()
-        for key in req_keys:
-            if key == "receptor_ids":
-                if key not in json_argument["dish"]:
-                    return (
-                        False,
-                        f"{key} key is not present in the input json argument.",
-                    )
-            elif key not in json_keys:
-                return (
-                    False,
-                    f"{key} key is not present in the input json argument.",
-                )
-        return (
-            True,
-            "The json argument has all the required keys. Validation successful.",
-        )
-
     def _validate_low_json(self, json_argument, req_keys):
         """To validate the low json for assign resources command before entering the queue
         Args:

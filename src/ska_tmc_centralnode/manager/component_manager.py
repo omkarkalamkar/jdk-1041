@@ -45,8 +45,6 @@ from ska_tmc_centralnode.model.input import (
 from ska_tmc_centralnode.utils.constants import (
     REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
     REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
-    REQUIRED_MID_ASSIGN_RESOURCE_KEYS,
-    REQUIRED_MID_RELEASE_RESOURCE_KEYS,
 )
 
 
@@ -534,17 +532,6 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
-            (
-                is_valid,
-                invalid_json_error_msg,
-            ) = assign_resources_command._validate_mid_json(
-                json_argument, REQUIRED_MID_ASSIGN_RESOURCE_KEYS
-            )
-            if not is_valid:
-                return assign_resources_command.reject_command(
-                    invalid_json_error_msg
-                )
-
             # Utilize CDM to validate json.
             available_subarrays_list = self.input_parameter.subarray_dev_names
             dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
@@ -619,17 +606,6 @@ class CNComponentManager(TmcComponentManager):
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
             self.logger.info(f"Json argument::{json_argument}")
-            (
-                is_valid,
-                invalid_json_error_msg,
-            ) = release_resources_command._validate_mid_json(
-                json_argument, REQUIRED_MID_RELEASE_RESOURCE_KEYS
-            )
-            if not is_valid:
-                return release_resources_command.reject_command(
-                    invalid_json_error_msg
-                )
-
             # Utilize CDM to validate json.
             try:
                 release_validator = ReleaseResourceValidator(self.logger)
