@@ -275,7 +275,7 @@ def assign_resources_without_subarray_id(
         in message[0]
     )
     assert result[0] == ResultCode.REJECTED
-    
+
     result, unique_id = central_node.TelescopeOff()
     logger.info(
         f"TelescopeOff Command ID: {unique_id} Returned result: {result}"
