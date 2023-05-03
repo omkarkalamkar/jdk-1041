@@ -1,9 +1,9 @@
 import pytest
 import tango
+from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
-from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
@@ -34,7 +34,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperStateDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": MID_CSP_MLN_DEVICE},
                 {"name": MID_CSP_MASTER_DEVICE},

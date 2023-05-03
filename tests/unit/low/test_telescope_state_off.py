@@ -1,7 +1,7 @@
 import pytest
 import tango
+from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
@@ -31,7 +31,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperStateDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_CSP_MASTER_DEVICE},

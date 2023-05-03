@@ -1,7 +1,7 @@
 import pytest
 import tango
 from ska_tango_base.control_model import HealthState
-from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
+from ska_tmc_common import HelperBaseDevice
 
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
@@ -30,7 +30,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperStateDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": MID_CSP_MLN_DEVICE},
                 {"name": MID_CSP_MASTER_DEVICE},

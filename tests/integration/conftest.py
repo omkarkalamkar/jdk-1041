@@ -3,8 +3,8 @@ import logging
 import time
 
 import pytest
+from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 from tango.test_context import MultiDeviceTestContext
 
 from ska_tmc_centralnode.central_node_low import CentralNodeLow
@@ -34,7 +34,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperStateDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
                 {"name": "mid-csp/control/0"},

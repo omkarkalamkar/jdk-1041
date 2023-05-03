@@ -3,7 +3,7 @@ function: testing
 domain: mocks
 instances: ["01"]
 entrypoints:
-  - name: "ska_tmc_common.test_helpers.helper_state_device.HelperStateDevice"
+  - name: "ska_tmc_common.test_helpers.helper_state_device.HelperBaseDevice"
   # - name: "ska_tmc_common.test_helpers.helper_state_mccsdevice.HelperMCCSStateDevice"
   - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
   - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
@@ -14,7 +14,7 @@ server:
   instances:
     - name: "01"
       classes:
-      - name: "HelperStateDevice"
+      - name: "HelperBaseDevice"
         devices:
         - name: "ska_mid/tm_leaf_node/csp_master"
         - name: "mid-csp/control/0"
