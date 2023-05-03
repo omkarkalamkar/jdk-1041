@@ -46,7 +46,7 @@ class CentralNodeCommand(TMCCommand):
                     f"Invoked {command_name} on device {adapter.dev_name}"
                 )
         except Exception as e:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 f"{err_msg} {adapter.dev_name}: {e}",
             )
@@ -99,7 +99,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
             )
         except Exception as e:
-            return self.adapter_error_message_result(
+            return (
                 self.component_manager.input_parameter.csp_mln_dev_name,
                 e,
             )
@@ -112,7 +112,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
             )
         except Exception as e:
-            return self.adapter_error_message_result(
+            return (
                 self.component_manager.input_parameter.sdp_mln_dev_name,
                 e,
             )
@@ -143,7 +143,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         if num_working == 0:
             message = f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}"
-            return self.generate_command_result(ResultCode.FAILED, message)
+            return (ResultCode.FAILED, message)
 
         error_dev_names = []
         num_working = 0
@@ -173,7 +173,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
             message = (
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}"
             )
-            return self.generate_command_result(ResultCode.FAILED, message)
+            return (ResultCode.FAILED, message)
 
         return ResultCode.OK, ""
 
@@ -191,7 +191,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
             )
         except Exception as e:
-            return self.adapter_error_message_result(
+            return (
                 self.component_manager.input_parameter.csp_mln_dev_name,
                 e,
             )
@@ -204,7 +204,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         #         AdapterType.MCCS,
         #     )
         # except Exception as e:
-        #     return self.adapter_error_message_result(
+        #     return (
         #         self.component_manager.input_parameter.mccs_master_leaf_node,
         #         e,
         #     )
@@ -217,7 +217,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
             )
         except Exception as e:
-            return self.adapter_error_message_result(
+            return (
                 self.component_manager.input_parameter.sdp_mln_dev_name,
                 e,
             )
@@ -228,7 +228,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         #         AdapterType.MCCS,
         #     )
         # except Exception as e:
-        #     return self.adapter_error_message_result(
+        #     return (
         #         self.component_manager.input_parameter.mccs_master_leaf_node,
         #         e,
         #     )
@@ -256,7 +256,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         if num_working == 0:
             message = f"Error in creating tm subarray low adapters {'.'.join(error_dev_names)}"
-            return self.generate_command_result(ResultCode.FAILED, message)
+            return (ResultCode.FAILED, message)
 
         return ResultCode.OK, ""
 
@@ -303,7 +303,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
             )
@@ -332,7 +332,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}",
             )
@@ -350,7 +350,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         #         AdapterType.MCCS,
         #     )
         # except Exception as e:
-        #     return self.adapter_error_message_result(
+        #     return (
         #         self.component_manager.input_parameter.mccs_master_leaf_node,
         #         e,
         #     )
@@ -377,7 +377,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
             )
