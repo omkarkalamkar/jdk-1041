@@ -3,7 +3,7 @@ function: testing
 domain: mocks
 instances: ["01"]
 entrypoints:
-  - name: "ska_tmc_common.test_helpers.helper_state_device.HelperBaseDevice"
+  - name: "ska_tmc_common.helper_base_device.HelperBaseDevice"
   # - name: "ska_tmc_common.test_helpers.helper_state_mccsdevice.HelperMCCSStateDevice"
   - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
   - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
