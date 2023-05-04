@@ -8,6 +8,7 @@ from typing import Callable, Optional
 import pandas as pd
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.control_model import ObsState
+from ska_tmc_cdm.exceptions import JsonValidationError, SchemaNotFound
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.device_info import (
     DeviceInfo,
@@ -15,7 +16,7 @@ from ska_tmc_common.device_info import (
     SubArrayDeviceInfo,
 )
 from ska_tmc_common.enum import LivelinessProbeType
-from ska_tmc_common.exceptions import CommandNotAllowed, InvalidJSONError
+from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
@@ -547,7 +548,12 @@ class CNComponentManager(TmcComponentManager):
                 )
 
                 json_argument = assign_validator.loads(json.dumps(argin))
-            except InvalidJSONError as e:
+            except (
+                JsonValidationError,
+                SchemaNotFound,
+                ValueError,
+                Exception,
+            ) as e:
                 return assign_resources_command.reject_command(str(e))
 
         # validate processing block
@@ -610,7 +616,12 @@ class CNComponentManager(TmcComponentManager):
             try:
                 release_validator = ReleaseResourceValidator(self.logger)
                 json_argument = release_validator.loads(json.dumps(argin))
-            except InvalidJSONError as e:
+            except (
+                JsonValidationError,
+                SchemaNotFound,
+                ValueError,
+                Exception,
+            ) as e:
                 return release_resources_command.reject_command(str(e))
 
         task_status, response = self.submit_task(
