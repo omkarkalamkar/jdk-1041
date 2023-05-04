@@ -113,7 +113,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
                     all_empty = False
             elapsed_time = time.time() - start_time
             if elapsed_time > self._timeout_subarrays:
-                return self.generate_command_result(
+                return (
                     ResultCode.FAILED,
                     "Timeout in waiting for subarrays devices to be empty",
                 )
@@ -208,7 +208,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
                     all_empty = False
             elapsed_time = time.time() - start_time
             if elapsed_time > self._timeout_subarrays:
-                return self.generate_command_result(
+                return (
                     ResultCode.FAILED,
                     """Timeout in waiting for the subarray devices to be in
                     EMPTY observation state""",

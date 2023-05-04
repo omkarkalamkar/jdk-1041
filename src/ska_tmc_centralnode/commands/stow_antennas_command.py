@@ -83,7 +83,7 @@ class StowAntennas(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}",
             )
