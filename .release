@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.7.5"
+version="0.7.6"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team SAHYADRI & HIMALAYA"
