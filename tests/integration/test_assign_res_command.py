@@ -241,7 +241,6 @@ def assign_resources_without_subarray_id(
     central_node_name,
     assign_input_str,
     change_event_callbacks,
-    subarray_device,
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -309,5 +308,4 @@ def test_assign_res_command_mid_without_subarray_id(
         central_node_name,
         json_factory("invalid_key_AssignResources"),
         change_event_callbacks,
-        MID_SUBARRAY_DEVICE,
     )
