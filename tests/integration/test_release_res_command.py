@@ -123,7 +123,9 @@ def release_resources_without_subarray_id(
         lookahead=4,
     )
 
-    result, message = central_node.ReleaseResources(invalid_release_input_string)
+    result, message = central_node.ReleaseResources(
+        invalid_release_input_string
+    )
 
     assert (
         "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-releaseresources"
@@ -142,7 +144,7 @@ def release_resources_without_subarray_id(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
-    
+
     result, unique_id = central_node.TelescopeOff()
     logger.info(
         f"TelescopeOff Command ID: {unique_id} Returned result: {result}"
@@ -156,6 +158,7 @@ def release_resources_without_subarray_id(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
