@@ -130,6 +130,20 @@ def release_resources_without_subarray_id(
     )
     assert result[0] == ResultCode.REJECTED
 
+    result, unique_id = central_node.TelescopeOff()
+    logger.info(
+        f"TelescopeOff Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("TelescopeOff")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
