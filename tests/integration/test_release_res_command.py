@@ -92,6 +92,7 @@ def release_resources_without_subarray_id(
     tango_context,
     central_node_name,
     assign_input_str,
+    invalid_release_input_string,
     release_input_string,
     change_event_callbacks,
 ):
@@ -122,14 +123,26 @@ def release_resources_without_subarray_id(
         lookahead=4,
     )
 
-    result, message = central_node.ReleaseResources(release_input_string)
+    result, message = central_node.ReleaseResources(invalid_release_input_string)
 
     assert (
-        "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-releaseresources/2.0"
+        "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-releaseresources"
         in message[0]
     )
     assert result[0] == ResultCode.REJECTED
 
+    result, unique_id = central_node.ReleaseResources(release_input_string)
+
+    logger.info(f"Unique id:{unique_id[0]}")
+    assert unique_id[0].endswith("ReleaseResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+    
     result, unique_id = central_node.TelescopeOff()
     logger.info(
         f"TelescopeOff Command ID: {unique_id} Returned result: {result}"
@@ -144,7 +157,6 @@ def release_resources_without_subarray_id(
         lookahead=4,
     )
 
-
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid_without_subarray_id(
@@ -155,5 +167,6 @@ def test_release_res_command_mid_without_subarray_id(
         "ska_mid/tm_central/central_node",
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources_without_subarray_id"),
+        json_factory("command_ReleaseResources"),
         change_event_callbacks,
     )
