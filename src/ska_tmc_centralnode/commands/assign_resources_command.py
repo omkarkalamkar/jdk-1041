@@ -168,7 +168,7 @@ class AssignResources(AbstractAssignReleaseResources):
             self.logger.debug(f"Loading json string:{argin}")
             json_argument = json.loads(argin)
         except Exception as e:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
@@ -192,7 +192,7 @@ class AssignResources(AbstractAssignReleaseResources):
             dish_id = "dish0" + receptor_id[3:]
             self.logger.debug(f"dish_id is:{dish_id}")
             if self.component_manager.is_already_assigned(dish_id):
-                return self.generate_command_result(
+                return (
                     ResultCode.FAILED,
                     ("Dish %s is already allocated", dish_id),
                 )
@@ -335,7 +335,7 @@ class AssignResources(AbstractAssignReleaseResources):
             json_argument = json.loads(argin)
             self.logger.debug(f"Loading json string:{argin}")
         except Exception as e:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
@@ -351,7 +351,7 @@ class AssignResources(AbstractAssignReleaseResources):
             return ret_code, message
 
         if self.my_subarray_adapter is None:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 ("SubArray Id %s is not existing!", subarrayID),
             )
@@ -360,7 +360,7 @@ class AssignResources(AbstractAssignReleaseResources):
         # try:
         #     input_mccs_master = self.create_mccs_cmd_data(json_argument)
         # except Exception as e:
-        #     return self.generate_command_result(
+        #     return (
         #         ResultCode.FAILED, ("Errors in input json argument: %s", e)
         #     )
 
@@ -464,7 +464,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 self.my_subarray_adapter = adapter
 
         if self.my_subarray_adapter is None:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 ("SubArray Id %s is not existing!", subarray_id),
             )

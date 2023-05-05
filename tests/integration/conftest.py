@@ -3,8 +3,8 @@ import logging
 import time
 
 import pytest
+from ska_tmc_common import HelperBaseDevice, HelperDishDevice
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_state_device import HelperStateDevice
 from tango.test_context import MultiDeviceTestContext
 
 from ska_tmc_centralnode.central_node_low import CentralNodeLow
@@ -27,6 +27,7 @@ def devices_to_load():
             "class": HelperSubArrayDevice,
             "devices": [
                 {"name": "ska_mid/tm_subarray_node/1"},
+                {"name": "ska_low/tm_subarray_node/1"},
                 {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
                 {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
                 {"name": "ska_low/tm_leaf_node/csp_subarray01"},
@@ -34,15 +35,19 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperStateDevice,
+            "class": HelperDishDevice,
+            "devices": [
+                {"name": "ska001/dish/master"},
+                {"name": "ska_mid/tm_leaf_node/d0001"},
+            ],
+        },
+        {
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_master"},
                 {"name": "mid-csp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
                 {"name": "mid-sdp/control/0"},
-                {"name": "ska001/dish/master"},
-                {"name": "ska_mid/tm_leaf_node/d0001"},
-                {"name": "ska_low/tm_subarray_node/1"},
                 # {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
                 {"name": "ska_low/tm_leaf_node/csp_master"},
                 {"name": "low-csp/control/0"},

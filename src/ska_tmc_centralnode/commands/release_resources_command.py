@@ -112,7 +112,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             else:
                 jsonArgument = argin
         except Exception as e:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
@@ -121,7 +121,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             del jsonArgument["transaction_id"]
 
         if "subarray_id" not in jsonArgument:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 "subarray_id key is not present in the input json argument.",
             )
@@ -133,7 +133,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 self.subarray_adapter = adapter
 
         if self.subarray_adapter is None:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 ("Subarray id %s is not existing!", subarray_id),
             )
@@ -189,7 +189,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             else:
                 jsonArgument = argin
         except Exception as e:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
@@ -198,7 +198,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             del jsonArgument["transaction_id"]
 
         if "subarray_id" not in jsonArgument:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 "subarray_id key is not present in the input json argument.",
             )
@@ -210,7 +210,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 self.subarray_adapter = adapter
 
         if self.subarray_adapter is None:
-            return self.generate_command_result(
+            return (
                 ResultCode.FAILED,
                 ("Subarray id %s is not existing!", subarray_id),
             )
