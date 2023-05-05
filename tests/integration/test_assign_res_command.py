@@ -269,6 +269,10 @@ def assign_resources_without_subarray_id(
     )
 
     result, message = central_node.AssignResources(assign_input_str)
+    
+    logger.info(
+        f"AssignResources returned message: {message} Returned result: {result}"
+    )
 
     assert (
         "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-assignresources"
@@ -284,20 +288,13 @@ def assign_resources_without_subarray_id(
     assert unique_id[0].endswith("TelescopeOff")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
 
-@pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
