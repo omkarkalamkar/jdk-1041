@@ -7,6 +7,7 @@ from tango import DevState
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
+
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_standby_command_mid(tango_context, change_event_callbacks):
