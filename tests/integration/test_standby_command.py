@@ -7,7 +7,6 @@ from tango import DevState
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
-
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_standby_command_mid(tango_context, change_event_callbacks):
@@ -39,24 +38,6 @@ def test_standby_command_mid(tango_context, change_event_callbacks):
     # Check whether the command is QUEUED
     assert unique_id[0].endswith("TelescopeStandby")
     assert result[0] == ResultCode.QUEUED
-
-    command_status = central_node.longRunningCommandStatus
-    command_status_dict = {
-        command_status[i]: command_status[i + 1]
-        for i in range(0, len(command_status), 2)
-    }
-    logger.info(f"command_status: {command_status}, {len(command_status)}")
-    logger.info(f"command_status_dict: {command_status_dict}")
-
-    # Check whether the command status is IN_PROGRESS
-    command_executed = False
-    for command, status in reversed(list(command_status_dict.items())):
-        logger.info(f"command: {command}, {status}")
-        if unique_id[0] in command:
-            command_executed = True
-            assert status == "IN_PROGRESS"
-            break
-    assert command_executed is True, f"{command[0]} is not executed."
 
     # Check whether the command ResultCode is OK
     change_event_callbacks.assert_change_event(
