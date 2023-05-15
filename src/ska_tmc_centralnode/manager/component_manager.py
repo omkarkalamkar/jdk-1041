@@ -65,6 +65,7 @@ class CNComponentManager(TmcComponentManager):
         self,
         op_state_model,
         _input_parameter,
+        *args,
         logger=None,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
@@ -80,7 +81,6 @@ class CNComponentManager(TmcComponentManager):
         proxy_timeout=500,
         sleep_time=1,
         skuid_service="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
-        *args,
         **kwargs,
     ):
         """
@@ -100,6 +100,7 @@ class CNComponentManager(TmcComponentManager):
 
         super().__init__(
             _input_parameter,
+            *args,
             logger,
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
@@ -109,7 +110,6 @@ class CNComponentManager(TmcComponentManager):
             max_workers=max_workers,
             proxy_timeout=proxy_timeout,
             sleep_time=sleep_time,
-            *args,
             **kwargs,
         )
         self.op_state_model = op_state_model
@@ -310,6 +310,7 @@ class CNComponentManager(TmcComponentManager):
         with self.lock:
             devInfo = self.component.get_device(dev_name)
             devInfo.health_state = health_state
+            self.logger.info("MuskanShaaaaaaaaaaa %s", health_state)
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
             self.component._invoke_device_callback(devInfo)

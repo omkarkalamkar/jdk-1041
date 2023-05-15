@@ -24,6 +24,7 @@ class CNComponentManagerLow(CNComponentManager):
         self,
         op_state_model,
         _input_parameter,
+        *args,
         logger=None,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
@@ -39,7 +40,6 @@ class CNComponentManagerLow(CNComponentManager):
         proxy_timeout=500,
         sleep_time=1,
         skuid_service="",
-        *args,
         **kwargs,
     ):
         """
@@ -64,6 +64,7 @@ class CNComponentManagerLow(CNComponentManager):
         super().__init__(
             op_state_model,
             _input_parameter,
+            *args,
             logger,
             _component,
             _liveliness_probe,
@@ -79,7 +80,6 @@ class CNComponentManagerLow(CNComponentManager):
             proxy_timeout,
             sleep_time,
             skuid_service="",
-            *args,
             **kwargs,
         )
 
