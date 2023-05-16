@@ -108,7 +108,7 @@ class CNComponentManager(TmcComponentManager):
             logger,
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
-            _event_receiver=_event_receiver,
+            _event_receiver=False,
             communication_state_callback=communication_state_callback,
             component_state_callback=component_state_callback,
             max_workers=max_workers,
@@ -120,6 +120,7 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
 
+        self.event_receiver = _event_receiver
         if self.event_receiver:
             self.event_receiver_object = CentralNodeEventReceiver(
                 self,
@@ -127,8 +128,7 @@ class CNComponentManager(TmcComponentManager):
                 proxy_timeout=self.proxy_timeout,
                 sleep_time=self.sleep_time,
             )
-
-        self.start_event_receiver()
+            self.start_event_receiver()
 
         self._component.set_op_callbacks(
             _update_device_callback,
