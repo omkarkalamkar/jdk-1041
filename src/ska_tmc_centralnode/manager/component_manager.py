@@ -121,14 +121,14 @@ class CNComponentManager(TmcComponentManager):
         self.adapter_factory = AdapterFactory()
 
         self.event_receiver = _event_receiver
-        if _event_receiver:
+        if self.event_receiver:
             self.event_receiver_object = CentralNodeEventReceiver(
                 self,
                 logger=self.logger,
                 proxy_timeout=self.proxy_timeout,
                 sleep_time=self.sleep_time,
             )
-            self.event_receiver_object.start()
+            self.start_event_receiver()
 
         self._component.set_op_callbacks(
             _update_device_callback,
