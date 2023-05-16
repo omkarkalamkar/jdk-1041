@@ -14,9 +14,12 @@ from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorMid,
+    TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+
+# from threading import Timer
 
 
 class CNComponentManagerMid(CNComponentManager):
@@ -35,6 +38,7 @@ class CNComponentManagerMid(CNComponentManager):
         _update_imaging_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
+        _telescope_availability_callback=None,
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
@@ -76,6 +80,7 @@ class CNComponentManagerMid(CNComponentManager):
             _update_imaging_callback,
             communication_state_callback,
             component_state_callback,
+            _telescope_availability_callback,
             max_workers,
             proxy_timeout,
             sleep_time,
@@ -83,6 +88,14 @@ class CNComponentManagerMid(CNComponentManager):
             *args,
             **kwargs,
         )
+
+        self.subarray_availability = {"ska_mid/tm_subarray_node/1": False}
+        self.csp_mln_availability = False
+        self.sdp_mln_availability = False
+        self._telescope_availability_aggregator = (
+            TelescopeAvailabilityAggregatorMid(self, self.logger)
+        )
+        # self._aggregate_telescope_availability()
 
     def check_if_dishes_are_responsive(self):
         return self._check_if_device_is_responsive(
@@ -211,3 +224,21 @@ class CNComponentManagerMid(CNComponentManager):
             self.check_if_dishes_are_responsive()
 
         return True
+
+    def update_telescope_availability(self, device_name, event_value):
+        if "tm_subarray_node" in device_name:
+            self.subarray_availability[device_name] = event_value
+        elif "tm_leaf_node/csp_master" in device_name:
+            self.csp_mln_availability = event_value
+        elif "tm_leaf_node/sdp_master" in device_name:
+            self.sdp_mln_availability = event_value
+        self._telescope_availability_aggregator.aggregate()
+
+    # def _aggregate_telescope_availability(self):
+    #     """
+    #     Aggregates TMC devices availability for each second
+    #     """
+    #     Timer(1, self._aggregate_telescope_availability).start()
+    #     with self.lock:
+    #         if self.subarray_availability:
+    #             self._telescope_availability_aggregator.aggregate()

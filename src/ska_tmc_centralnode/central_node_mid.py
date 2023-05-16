@@ -260,6 +260,7 @@ class CentralNodeMid(AbstractCentralNode):
             _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=self.update_imaging_callback,
+            _telescope_availability_callback=self.update_telescope_availability_callback,
             communication_state_callback=None,
             component_state_callback=None,
             max_workers=self.MaxWorker,

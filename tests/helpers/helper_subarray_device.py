@@ -6,7 +6,7 @@ from typing import Callable
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
 from ska_tango_base.subarray import SKASubarray, SubarrayComponentManager
-from tango import DevState
+from tango import AttrWriteType, DevState
 from tango.server import attribute, command
 
 
@@ -122,6 +122,7 @@ class HelperSubArrayDevice(SKASubarray):
         super().init_device()
         self._health_state = HealthState.OK
         self._resources_assigned = []
+        self._is_subarray_available = False
 
     class InitCommand(SKASubarray.InitCommand):
         def do(self):
@@ -130,6 +131,7 @@ class HelperSubArrayDevice(SKASubarray):
             self._device.set_change_event("healthState", True, False)
             self._device.set_change_event("obsState", True, False)
             self._device.set_change_event("assignedResources", True, False)
+            self._device.set_change_event("isSubarrayAvailable", True, False)
             return (ResultCode.OK, "")
 
     """Device attribute."""
@@ -139,6 +141,10 @@ class HelperSubArrayDevice(SKASubarray):
         doc="The list of resources assigned to the subarray.",
     )
 
+    isSubarrayAvailable = attribute(
+        dtype="DevBoolean", access=AttrWriteType.READ
+    )
+
     def read_assignedResources(self):
         """
         Read the resources assigned to the device.
@@ -146,6 +152,10 @@ class HelperSubArrayDevice(SKASubarray):
         :return: Resources assigned to the device.
         """
         return self._resources_assigned
+
+    def read_isSubarrayAvailable(self) -> bool:
+        """Returns subarray availability in boolean format."""
+        return self._is_subarray_available
 
     def create_component_manager(self):
         cm = EmptySubArrayComponentManager(
@@ -157,6 +167,18 @@ class HelperSubArrayDevice(SKASubarray):
 
     def set_state(self, state):
         return super().set_state(state)
+
+    @command(
+        dtype_in="DevBoolean",
+        doc_in="Set subarray's availability",
+    )
+    def SetIsSubarrayAvailable(self, value: bool) -> None:
+        """This method sets subarray availability in boolean format."""
+        self.logger.info("Setting the subarray availability : %s", value)
+        self._is_subarray_available = value
+        self.push_change_event(
+            "isSubarrayAvailable", self._is_subarray_available
+        )
 
     @command(
         dtype_in="DevState",

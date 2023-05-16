@@ -80,6 +80,11 @@ class AbstractCentralNode(TMCBaseDevice):
         max_dim_x=16,
     )
 
+    telescopeAvailability = attribute(
+        dtype=("DevString",),
+        access=AttrWriteType.READ,
+    )
+
     def update_device_callback(self, devInfo):
         self.last_device_info_changed = devInfo.to_json()
         self.push_change_event("lastDeviceInfoChanged", devInfo.to_json())
@@ -93,6 +98,10 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_tmc_op_state_callback(self, tmc_op_state):
         self.push_change_event("tmOpState", tmc_op_state)
+
+    def update_telescope_availability_callback(self, telescope_availability):
+        self.logger.info(f"telescope_availability: {telescope_availability}")
+        self.push_change_event("telescopeAvailability", telescope_availability)
 
     # ---------------
     # General methods
@@ -171,6 +180,10 @@ class AbstractCentralNode(TMCBaseDevice):
         """Set the subarrayDevNames attribute."""
         self.component_manager.input_parameter.subarray_dev_names = value
         self.component_manager.update_input_parameter()
+
+    def read_telescopeAvailability(self):
+        "Returns telescope availability"
+        return self.component_manager.component.telescope_availability
 
     # --------
     # Commands

@@ -76,6 +76,7 @@ class CNComponentManager(TmcComponentManager):
         _update_imaging_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
+        _telescope_availability_callback=None,
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
@@ -131,6 +132,7 @@ class CNComponentManager(TmcComponentManager):
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_imaging_callback,
+            _telescope_availability_callback,
         )
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
@@ -278,6 +280,20 @@ class CNComponentManager(TmcComponentManager):
         with self.lock:
             self.input_parameter.update(self)
 
+    def update_ping_info(self, ping, dev_name):
+        """
+        Update a device with correct ping information.
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param ping: device response time
+        :type ping: int
+        """
+        with self.lock:
+            dev_info = self.get_device(dev_name)
+            dev_info.ping = ping
+            self._telescope_availability_aggregator.aggregate()
+
     def device_failed(self, device_info, exception):
         """
         Set a device to failed and call the relative callback if available
@@ -289,6 +305,7 @@ class CNComponentManager(TmcComponentManager):
         """
         with self.lock:
             self.component.update_device_exception(device_info, exception)
+            self._telescope_availability_aggregator.aggregate()
 
     def update_event_failure(self, dev_name):
         with self.lock:

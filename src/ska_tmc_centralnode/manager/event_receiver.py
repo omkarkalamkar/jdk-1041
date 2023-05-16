@@ -38,11 +38,27 @@ class CentralNodeEventReceiver(EventReceiver):
                     self.handle_assigned_resource_event,
                     stateless=True,
                 )
+                proxy.subscribe_event(
+                    "isSubarrayAvailable",
+                    tango.EventType.CHANGE_EVENT,
+                    self.handle_device_available_event,
+                    stateless=True,
+                )
             if "dish/master" in dev_info.dev_name:
                 proxy.subscribe_event(
                     "dishMode",
                     tango.EventType.CHANGE_EVENT,
                     self.handle_dish_mode_event,
+                    stateless=True,
+                )
+            if (
+                "tm_leaf_node/csp_master"
+                or "tm_leaf_node/sdp_master" in dev_info.dev_name
+            ):
+                proxy.subscribe_event(
+                    "isSubarrayAvailable",
+                    tango.EventType.CHANGE_EVENT,
+                    self.handle_device_available_event,
                     stateless=True,
                 )
 
@@ -88,3 +104,28 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data.device.dev_name(), new_value
         )
         self._logger.info(f"DishMode value updated to {new_value}")
+
+    def handle_device_available_event(
+        self, event_data: tango.EventData
+    ) -> None:
+        """Method to handle and update the latest value of isSubarrayAvailable
+        attribute.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        if event_data.err:
+            errors = event_data.errors
+            for error in errors:
+                error_msg = f"{error.reason},{error.desc}"
+                self._logger.error(error_msg)
+            self._component_manager.update_event_failure(
+                event_data.device.dev_name()
+            )
+            return
+        new_value = event_data.attr_value.value
+        self._logger.info(f"New value: {new_value}")
+        self._component_manager.update_telescope_availability(
+            event_data.device.dev_name(), new_value
+        )

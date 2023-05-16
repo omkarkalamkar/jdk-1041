@@ -82,6 +82,7 @@ class CNComponentManagerLow(CNComponentManager):
             *args,
             **kwargs,
         )
+        self._telescope_availability_aggregator = None
 
     # TODO: Mccs integration is not included in PI#17 scope, will be done in near future.
     # def check_if_mccs_mln_is_responsive(self):
