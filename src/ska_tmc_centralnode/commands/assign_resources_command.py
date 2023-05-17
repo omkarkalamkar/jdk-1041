@@ -3,7 +3,7 @@ AssignResources class for CentralNode.
 """
 import json
 import threading
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
@@ -89,7 +89,7 @@ class AssignResources(AbstractAssignReleaseResources):
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
 
-    def do_mid(self, argin):
+    def do_mid(self, argin) -> Tuple[ResultCode, str]:
         """
             Method to invoke AssignResources command on Subarray.
 
@@ -181,7 +181,7 @@ class AssignResources(AbstractAssignReleaseResources):
         except Exception as e:
             return (
                 ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
+                f"Problem in loading the JSON string: {e}",
             )
 
         if "transaction_id" in json_argument:
@@ -205,7 +205,7 @@ class AssignResources(AbstractAssignReleaseResources):
             if self.component_manager.is_already_assigned(dish_id):
                 return (
                     ResultCode.FAILED,
-                    ("Dish %s is already allocated", dish_id),
+                    f"Dish {dish_id} is already allocated",
                 )
             else:
                 self.logger.info("Resources are already assigned")
@@ -477,7 +477,7 @@ class AssignResources(AbstractAssignReleaseResources):
         if self.my_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarray_id),
+                f"SubArray Id {subarray_id} is not existing!",
             )
 
         return ResultCode.OK, ""
