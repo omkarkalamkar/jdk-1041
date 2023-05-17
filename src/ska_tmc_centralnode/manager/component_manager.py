@@ -390,8 +390,9 @@ class CNComponentManager(TmcComponentManager):
             value,
         )
         try:
-            if value[1] == ResultCode.OK:
-                self.command_result = ResultCode.OK
+            if self.command_in_progress == "AssignResources":
+                if int(value[1]) == ResultCode.OK:
+                    self.command_result = ResultCode.OK
 
         except ValueError:
             if self.command_in_progress == "AssignResources":
