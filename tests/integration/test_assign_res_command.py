@@ -354,7 +354,7 @@ def test_assign_resources_exception_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device: ska_mid/tm_subarray_node/1",
+            "Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device",
         ),
         lookahead=4,
     )

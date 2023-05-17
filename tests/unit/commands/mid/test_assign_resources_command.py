@@ -7,6 +7,7 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import DevFactory
 from ska_tmc_common.device_info import SubArrayDeviceInfo
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -73,9 +74,8 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
-def test_assign_resources_command_queued(tango_context, task_callback):
+def test_assign_resources_command_completed(tango_context, task_callback):
     logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -88,6 +88,40 @@ def test_assign_resources_command_queued(tango_context, task_callback):
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+    )
+
+
+def test_assign_resources_exception_on_sn(tango_context, task_callback):
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDefective(True)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=ResultCode.FAILED,
+        exception="Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device",
+    )
+    subarray_device.SetDefective(False)
 
 
 def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(

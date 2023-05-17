@@ -390,7 +390,10 @@ class CNComponentManager(TmcComponentManager):
             value,
         )
         try:
-            if self.command_in_progress == "AssignResources":
+            if not value[1]:
+                # This is in case an empty event is received.
+                pass
+            elif self.command_in_progress == "AssignResources":
                 if int(value[1]) == ResultCode.OK:
                     self.command_result = ResultCode.OK
 
