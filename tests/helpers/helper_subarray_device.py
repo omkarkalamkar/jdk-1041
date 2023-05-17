@@ -337,7 +337,7 @@ class HelperSubArrayDevice(SKASubarray):
             self.push_change_event("obsState", self._obs_state)
         self._resources_assigned = ["0001"]
         self.push_change_event("assignedResources", self._resources_assigned)
-        command_result = ("1000", str(ResultCode.OK))
+        command_result = ("1000", str(ResultCode.OK.value))
         self.push_change_event("longRunningCommandResult", command_result)
         return [[ResultCode.OK], [""]]
 
