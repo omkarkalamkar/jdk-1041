@@ -65,6 +65,7 @@ def test_low_assign_resources_command(
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
+    cm.command_result = ResultCode.OK
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )

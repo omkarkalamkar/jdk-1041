@@ -42,6 +42,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.subarray_adapters = []
         self.my_subarray_adapter = None
         self._skuid = skuid
+        self.task_callback: Callable
 
     def assign_resources(
         self,
@@ -62,21 +63,31 @@ class AssignResources(AbstractAssignReleaseResources):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
+        self.task_callback = task_callback
         task_callback(status=TaskStatus.IN_PROGRESS)
-        self.logger.debug("Executing do hook for centralnode mid")
+        self.component_manager.command_in_progress = "AssignResources"
+        self.component_manager.command_result = ResultCode.STARTED
+
         ret_code, message = self.do(argin=json.dumps(argin))
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.FAILED,
-                exception=message,
+            self.update_task_status(ret_code, message)
+        else:
+            self.start_tracker_thread(
+                self.component_manager.get_command_result,
+                ResultCode.OK,
+                command_id=self.component_manager.assign_id,
+                lrcr_callback=self.component_manager.long_running_result_callback,
+            )
+
+    def update_task_status(self, result: ResultCode, message: str = ""):
+        """Updates the task status for command"""
+        if result == ResultCode.FAILED:
+            self.task_callback(
+                result=result, status=TaskStatus.COMPLETED, exception=message
             )
         else:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.OK,
-            )
+            self.task_callback(result=result, status=TaskStatus.COMPLETED)
 
     def do_mid(self, argin):
         """

@@ -61,18 +61,6 @@ def assign_resources(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
-    )
-
     def get_subarray_device(json_model):
         for device in json_model["devices"]:
             if device["dev_name"] == subarray_device:
@@ -112,6 +100,12 @@ def assign_resources(
             pytest.fail("Timeout occurred while executing the test")
 
     assert len(device["resources"]) > 0
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
 
     # TODO Uncomment below code during integration of MCCS
     # if "ska_low" in central_node_name:
