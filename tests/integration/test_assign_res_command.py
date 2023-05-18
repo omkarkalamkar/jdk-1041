@@ -61,18 +61,6 @@ def assign_resources(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
-    )
-
     def get_subarray_device(json_model):
         for device in json_model["devices"]:
             if device["dev_name"] == subarray_device:
@@ -112,6 +100,12 @@ def assign_resources(
             pytest.fail("Timeout occurred while executing the test")
 
     assert len(device["resources"]) > 0
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
 
     # TODO Uncomment below code during integration of MCCS
     # if "ska_low" in central_node_name:
@@ -309,3 +303,61 @@ def test_assign_res_command_mid_without_subarray_id(
         json_factory("invalid_key_AssignResources"),
         change_event_callbacks,
     )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_assign_resources_exception_propagation(
+    tango_context, change_event_callbacks, json_factory
+):
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+
+    ensure_checked_devices(central_node)
+
+    result, unique_id = central_node.TelescopeOn()
+    logger.info(
+        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=2,
+    )
+
+    tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+    tmc_subarray.SetDefective(True)
+
+    result, unique_id = central_node.AssignResources(
+        json_factory("command_AssignResources")
+    )
+
+    logger.info(
+        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("AssignResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            "Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device",
+        ),
+        lookahead=4,
+    )
+
+    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    tmc_subarray.SetDefective(False)

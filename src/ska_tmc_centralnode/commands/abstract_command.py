@@ -1,4 +1,5 @@
 import operator
+from typing import Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
@@ -12,7 +13,7 @@ class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
         super().__init__(component_manager, *args, logger=logger, **kwargs)
 
-    def init_adapters(self):
+    def init_adapters(self) -> Tuple[ResultCode, str]:
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
         ):
@@ -69,6 +70,13 @@ class CentralNodeCommand(TMCCommand):
         self.logger.error(message)
         return TaskStatus.REJECTED, message
 
+    def adapter_error_message(
+        self, dev_name: str, error
+    ) -> Tuple[ResultCode, str]:
+        message = f"Adapter creation failed for {dev_name}: {str(error)}"
+        self.logger.error(message)
+        return ResultCode.FAILED, message
+
 
 class AbstractTelescopeOnOff(CentralNodeCommand):
     def __init__(
@@ -86,7 +94,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         self.subarray_adapters = []
         self.dish_adapters = []
 
-    def init_adapters_mid(self):
+    def init_adapters_mid(self) -> Tuple[ResultCode, str]:
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         self.subarray_adapters = []
@@ -99,7 +107,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
             )
         except Exception as e:
-            return (
+            return self.adapter_error_message(
                 self.component_manager.input_parameter.csp_mln_dev_name,
                 e,
             )
@@ -112,7 +120,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
             )
         except Exception as e:
-            return (
+            return self.adapter_error_message(
                 self.component_manager.input_parameter.sdp_mln_dev_name,
                 e,
             )
@@ -177,7 +185,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
 
         return ResultCode.OK, ""
 
-    def init_adapters_low(self):
+    def init_adapters_low(self) -> Tuple[ResultCode, str]:
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         # self.tm_leaf_mccs_mln_adapter = None
@@ -191,7 +199,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
             )
         except Exception as e:
-            return (
+            return self.adapter_error_message(
                 self.component_manager.input_parameter.csp_mln_dev_name,
                 e,
             )
@@ -217,7 +225,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
             )
         except Exception as e:
-            return (
+            return self.adapter_error_message(
                 self.component_manager.input_parameter.sdp_mln_dev_name,
                 e,
             )
@@ -275,7 +283,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         self.dish_adapters = []
         self.subarray_adapters = []
 
-    def init_adapters_mid(self):
+    def init_adapters_mid(self) -> Tuple[ResultCode, str]:
         self.dish_adapters = []
         self.subarray_adapters = []
         error_dev_names = []
@@ -339,7 +347,7 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
 
         return (ResultCode.OK, "")
 
-    def init_adapters_low(self):
+    def init_adapters_low(self) -> Tuple[ResultCode, str]:
 
         # self.tm_leaf_mccs_mln_adapter = None
         self.subarray_adapters = []

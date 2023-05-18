@@ -29,27 +29,38 @@ class CentralNodeEventReceiver(EventReceiver):
         super().subscribe_events(dev_info)
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
-            if ("subarray" in dev_info.dev_name) and (
-                "leaf" not in dev_info.dev_name
-            ):
-                proxy.subscribe_event(
-                    "assignedResources",
-                    tango.EventType.CHANGE_EVENT,
-                    self.handle_assigned_resource_event,
-                    stateless=True,
-                )
-            if "dish/master" in dev_info.dev_name:
-                proxy.subscribe_event(
-                    "dishMode",
-                    tango.EventType.CHANGE_EVENT,
-                    self.handle_dish_mode_event,
-                    stateless=True,
-                )
-
         except Exception as e:
-            self._logger.debug(
-                "event not working for device %s/%s", proxy.dev_name, e
-            )
+            self._logger.error("Exception occured while creating proxy: %s", e)
+        else:
+            try:
+                if ("subarray" in dev_info.dev_name) and (
+                    "leaf" not in dev_info.dev_name
+                ):
+                    proxy.subscribe_event(
+                        "assignedResources",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_assigned_resource_event,
+                        stateless=True,
+                    )
+                if "dish/master" in dev_info.dev_name:
+                    proxy.subscribe_event(
+                        "dishMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_dish_mode_event,
+                        stateless=True,
+                    )
+                if "subarray_node" in dev_info.dev_name:
+                    proxy.subscribe_event(
+                        "longRunningCommandResult",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_lrcr_event,
+                        stateless=True,
+                    )
+
+            except Exception as e:
+                self._logger.error(
+                    "Event not working for device %s: %s", proxy.dev_name, e
+                )
 
     def handle_assigned_resource_event(self, evt):
         if evt.err:
@@ -81,10 +92,34 @@ class CentralNodeEventReceiver(EventReceiver):
             for error in errors:
                 error_msg = f"{error.reason},{error.desc}"
                 self._logger.error(error_msg)
-            self._component_manager.update_event_failure()
+            self._component_manager.update_event_failure(
+                event_data.device.dev_name()
+            )
             return
         new_value = event_data.attr_value.value
         self._component_manager.update_device_dish_mode(
             event_data.device.dev_name(), new_value
         )
         self._logger.info(f"DishMode value updated to {new_value}")
+
+    def handle_lrcr_event(self, event_data: tango.EventData) -> None:
+        """Method to handle and update the latest value of
+        longRunningCommandResult attribute.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        if event_data.err:
+            errors = event_data.errors
+            for error in errors:
+                error_msg = f"{error.reason},{error.desc}"
+                self._logger.error(error_msg)
+            self._component_manager.update_event_failure(
+                event_data.device.dev_name()
+            )
+            return
+        new_value = event_data.attr_value.value
+        self._component_manager.update_long_running_command_result(
+            event_data.device.dev_name(), new_value
+        )

@@ -1,5 +1,6 @@
 # Note: This helper class module is explicitly required for CentralNode. Hence kept it here and not in ska-tmc-common repo.
 import logging
+import threading
 import time
 from typing import Callable
 
@@ -16,14 +17,14 @@ class EmptySubArrayComponentManager(SubarrayComponentManager):
         logger: logging.Logger,
         communication_state_callback: Callable,
         component_state_callback: Callable,
-        **state
+        **state,
     ):
         self.logger = logger
         super().__init__(
             logger,
             communication_state_callback,
             component_state_callback,
-            **state
+            **state,
         )
         self._assigned_resources = []
 
@@ -122,6 +123,8 @@ class HelperSubArrayDevice(SKASubarray):
         super().init_device()
         self._health_state = HealthState.OK
         self._resources_assigned = []
+        self._defective = False
+        self.dev_name = self.get_name()
 
     class InitCommand(SKASubarray.InitCommand):
         def do(self):
@@ -130,6 +133,9 @@ class HelperSubArrayDevice(SKASubarray):
             self._device.set_change_event("healthState", True, False)
             self._device.set_change_event("obsState", True, False)
             self._device.set_change_event("assignedResources", True, False)
+            self._device.set_change_event(
+                "longRunningCommandResult", True, False
+            )
             return (ResultCode.OK, "")
 
     """Device attribute."""
@@ -139,6 +145,8 @@ class HelperSubArrayDevice(SKASubarray):
         doc="The list of resources assigned to the subarray.",
     )
 
+    defective = attribute(dtype=bool, doc="Attribute to set device defective")
+
     def read_assignedResources(self):
         """
         Read the resources assigned to the device.
@@ -146,6 +154,14 @@ class HelperSubArrayDevice(SKASubarray):
         :return: Resources assigned to the device.
         """
         return self._resources_assigned
+
+    def read_defective(self):
+        """
+        Read the defective attribute value for device.
+
+        :return: bool.
+        """
+        return self._defective
 
     def create_component_manager(self):
         cm = EmptySubArrayComponentManager(
@@ -173,6 +189,16 @@ class HelperSubArrayDevice(SKASubarray):
             time.sleep(0.1)
             self.push_change_event("State", self.dev_state())
             time.sleep(0.1)
+
+    @command(
+        dtype_in=bool,
+        doc_in="Set defective",
+    )
+    def SetDefective(self, argin: bool):
+        """
+        Sets the defective value.
+        """
+        self._defective = argin
 
     @command(
         dtype_in=int,
@@ -297,12 +323,39 @@ class HelperSubArrayDevice(SKASubarray):
         doc_out="(ReturnType, 'informational message')",
     )
     def AssignResources(self, argin):
+        if self._defective:
+            self._obs_state = ObsState.RESOURCING
+            self.push_change_event("obsState", self._obs_state)
+
+            command_result = (
+                "1000",
+                "Error occured on device",
+            )
+            thread = threading.Thread(
+                target=self.push_result_event, args=[command_result]
+            )
+            thread.start()
+
+            return [[ResultCode.FAILED], ["Device Defective"]]
+
         if self._obs_state != ObsState.IDLE:
             self._obs_state = ObsState.IDLE
             self.push_change_event("obsState", self._obs_state)
         self._resources_assigned = ["0001"]
         self.push_change_event("assignedResources", self._resources_assigned)
+
+        command_result = ("1000", str(ResultCode.OK.value))
+        thread = threading.Thread(
+            target=self.push_result_event, args=[command_result]
+        )
+        thread.start()
+
         return [[ResultCode.OK], [""]]
+
+    def push_result_event(self, command_result: tuple):
+        """Pushes a longRunningCommandResult event after 2 secs with given result."""
+        time.sleep(2)
+        self.push_change_event("longRunningCommandResult", command_result)
 
     def is_ReleaseAllResources_allowed(self):
         """
