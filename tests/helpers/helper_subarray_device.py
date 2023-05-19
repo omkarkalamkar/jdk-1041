@@ -172,7 +172,7 @@ class HelperSubArrayDevice(SKASubarray):
         dtype_in="DevBoolean",
         doc_in="Set subarray's availability",
     )
-    def SetIsSubarrayAvailable(self, value: bool) -> None:
+    def SetisSubarrayAvailable(self, value: bool) -> None:
         """This method sets subarray availability in boolean format."""
         self.logger.info("Setting the subarray availability : %s", value)
         self._is_subarray_available = value
