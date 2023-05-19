@@ -36,9 +36,9 @@ class CNComponentManagerMid(CNComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
+        _telescope_availability_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
-        _telescope_availability_callback=None,
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
@@ -95,7 +95,6 @@ class CNComponentManagerMid(CNComponentManager):
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorMid(self, self.logger)
         )
-        # self._aggregate_telescope_availability()
 
     def check_if_dishes_are_responsive(self):
         return self._check_if_device_is_responsive(
@@ -233,12 +232,3 @@ class CNComponentManagerMid(CNComponentManager):
         elif "tm_leaf_node/sdp_master" in device_name:
             self.sdp_mln_availability = event_value
         self._telescope_availability_aggregator.aggregate()
-
-    # def _aggregate_telescope_availability(self):
-    #     """
-    #     Aggregates TMC devices availability for each second
-    #     """
-    #     Timer(1, self._aggregate_telescope_availability).start()
-    #     with self.lock:
-    #         if self.subarray_availability:
-    #             self._telescope_availability_aggregator.aggregate()

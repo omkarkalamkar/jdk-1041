@@ -74,7 +74,6 @@ class CentralComponent(TmcComponent):
             "tmc_subarrays": {},
             "csp_master_leaf_node": True,
             "sdp_master_leaf_node": True,
-            "abc": True,
         }
         self.lock = threading.Lock()
         self._desired_telescope_state = DevState.ON
@@ -97,7 +96,9 @@ class CentralComponent(TmcComponent):
         )
         self._update_tmc_op_state_callback = _update_tmc_op_state_callback
         self._update_imaging_callback = _update_imaging_callback
-        self._update_imaging_callback = _telescope_availability_callback
+        self._telescope_availability_callback = (
+            _telescope_availability_callback
+        )
 
     def _invoke_device_callback(self, dev_info):
         if self._update_device_callback is not None:
@@ -239,8 +240,6 @@ class CentralComponent(TmcComponent):
         :return: the telescope availability
         :rtype: DevVarStringArray
         """
-        self.logger.info("Returning telescope_availability")
-        self.logger.info(f"{self._telescope_availability}")
         return self._telescope_availability
 
     @telescope_availability.setter
@@ -251,9 +250,11 @@ class CentralComponent(TmcComponent):
         :param value: the new telescope availability
         :type value: DevState
         """
-        self.logger.info(f"{value}")
         if self._telescope_availability != value:
             self._telescope_availability = value
+            self.logger.info(
+                f"Telescope_Availability: {self._telescope_availability}"
+            )
             self._invoke_telescope_availability_callback()
 
     @property

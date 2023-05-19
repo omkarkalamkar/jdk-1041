@@ -327,3 +327,46 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
             self._component_manager.component.telescope_availability = (
                 telescope_availability
             )
+
+
+class TelescopeAvailabilityAggregatorLow(Aggregator):
+    def __init__(self, cm, logger) -> None:
+        super().__init__(cm, logger)
+        self.logger = logger
+
+    def aggregate(self):
+        telescope_availability = (
+            self._component_manager.component.telescope_availability
+        )
+        for dev in self._component_manager.checked_devices:
+
+            if "tm_subarray_node" in dev.dev_name:
+                if dev.unresponsive:
+                    telescope_availability["tmc_subarrays"][
+                        dev.dev_name
+                    ] = False
+                else:
+                    telescope_availability["tmc_subarrays"][
+                        dev.dev_name
+                    ] = self._component_manager.subarray_availability[
+                        dev.dev_name
+                    ]
+            elif "tm_leaf_node/csp_master" in dev.dev_name:
+                if dev.unresponsive:
+                    telescope_availability["csp_master_leaf_node"] = False
+                else:
+                    telescope_availability[
+                        "csp_master_leaf_node"
+                    ] = self._component_manager.csp_mln_availability
+
+            elif "tm_leaf_node/sdp_master" in dev.dev_name:
+                if dev.unresponsive:
+                    telescope_availability["sdp_master_leaf_node"] = False
+                else:
+                    telescope_availability[
+                        "sdp_master_leaf_node"
+                    ] = self._component_manager.sdp_mln_availability
+
+            self._component_manager.component.telescope_availability = (
+                telescope_availability
+            )

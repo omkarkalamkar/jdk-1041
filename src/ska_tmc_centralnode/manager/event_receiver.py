@@ -56,7 +56,7 @@ class CentralNodeEventReceiver(EventReceiver):
                 or "tm_leaf_node/sdp_master" in dev_info.dev_name
             ):
                 proxy.subscribe_event(
-                    "isSubarrayAvailable",
+                    "isSubsystemAvailable",
                     tango.EventType.CHANGE_EVENT,
                     self.handle_device_available_event,
                     stateless=True,
@@ -125,7 +125,6 @@ class CentralNodeEventReceiver(EventReceiver):
             )
             return
         new_value = event_data.attr_value.value
-        self._logger.info(f"New value: {new_value}")
         self._component_manager.update_telescope_availability(
             event_data.device.dev_name(), new_value
         )

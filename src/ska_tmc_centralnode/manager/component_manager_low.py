@@ -14,6 +14,7 @@ from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
+    TelescopeAvailabilityAggregatorLow,
     TelescopeStateAggregatorLow,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
@@ -33,6 +34,7 @@ class CNComponentManagerLow(CNComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
+        _telescope_availability_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
         max_workers=5,
@@ -75,6 +77,7 @@ class CNComponentManagerLow(CNComponentManager):
             _update_imaging_callback,
             communication_state_callback,
             component_state_callback,
+            _telescope_availability_callback,
             max_workers,
             proxy_timeout,
             sleep_time,
@@ -83,6 +86,12 @@ class CNComponentManagerLow(CNComponentManager):
             **kwargs,
         )
         self._telescope_availability_aggregator = None
+        self.subarray_availability = {"ska_mid/tm_subarray_node/1": False}
+        self.csp_mln_availability = False
+        self.sdp_mln_availability = False
+        self._telescope_availability_aggregator = (
+            TelescopeAvailabilityAggregatorLow(self, self.logger)
+        )
 
     # TODO: Mccs integration is not included in PI#17 scope, will be done in near future.
     # def check_if_mccs_mln_is_responsive(self):
@@ -174,3 +183,12 @@ class CNComponentManagerLow(CNComponentManager):
             self.check_if_subarrays_are_responsive()
 
         return True
+
+    def update_telescope_availability(self, device_name, event_value):
+        if "tm_subarray_node" in device_name:
+            self.subarray_availability[device_name] = event_value
+        elif "tm_leaf_node/csp_master" in device_name:
+            self.csp_mln_availability = event_value
+        elif "tm_leaf_node/sdp_master" in device_name:
+            self.sdp_mln_availability = event_value
+        self._telescope_availability_aggregator.aggregate()

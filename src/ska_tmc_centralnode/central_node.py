@@ -81,7 +81,7 @@ class AbstractCentralNode(TMCBaseDevice):
     )
 
     telescopeAvailability = attribute(
-        dtype=("DevString",),
+        dtype="str",
         access=AttrWriteType.READ,
     )
 
@@ -101,7 +101,9 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_telescope_availability_callback(self, telescope_availability):
         self.logger.info(f"telescope_availability: {telescope_availability}")
-        self.push_change_event("telescopeAvailability", telescope_availability)
+        self.push_change_event(
+            "telescopeAvailability", str(telescope_availability)
+        )
 
     # ---------------
     # General methods
@@ -131,6 +133,7 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("telescopeState", True, False)
             self._device.set_change_event("lastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
+            self._device.set_change_event("telescopeAvailability", True, False)
             self._device._health_state = HealthState.OK
             self._device.op_state_model.perform_action("component_on")
             return (ResultCode.OK, "")
