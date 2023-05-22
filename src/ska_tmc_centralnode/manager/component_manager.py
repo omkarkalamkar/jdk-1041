@@ -7,16 +7,21 @@ from typing import Callable, Optional
 
 import pandas as pd
 from ska_ser_skuid.client import SkuidClient
+from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tmc_common.adapters import AdapterFactory
-from ska_tmc_common.device_info import (
+from ska_tmc_common import (
+    AdapterFactory,
+    CommandNotAllowed,
     DeviceInfo,
     DishDeviceInfo,
+    InvalidJSONError,
+    LivelinessProbeType,
+    LRCRCallback,
+    ResourceNotPresentError,
     SubArrayDeviceInfo,
+    SubarrayNotPresentError,
+    TmcComponentManager,
 )
-from ska_tmc_common.enum import LivelinessProbeType
-from ska_tmc_common.exceptions import CommandNotAllowed, InvalidJSONError
-from ska_tmc_common.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
@@ -104,7 +109,7 @@ class CNComponentManager(TmcComponentManager):
             logger,
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
-            _event_receiver=_event_receiver,
+            _event_receiver=False,
             communication_state_callback=communication_state_callback,
             component_state_callback=component_state_callback,
             max_workers=max_workers,
@@ -117,6 +122,7 @@ class CNComponentManager(TmcComponentManager):
         self.adapter_factory = AdapterFactory()
         self.event_receiver = True
 
+        self.event_receiver = _event_receiver
         if self.event_receiver:
             self.event_receiver_object = CentralNodeEventReceiver(
                 self,
@@ -124,8 +130,7 @@ class CNComponentManager(TmcComponentManager):
                 proxy_timeout=self.proxy_timeout,
                 sleep_time=self.sleep_time,
             )
-
-        self.start_event_receiver()
+            self.start_event_receiver()
 
         self._component.set_op_callbacks(
             _update_device_callback,
@@ -139,6 +144,10 @@ class CNComponentManager(TmcComponentManager):
         self._health_state_aggregator = None
         self._op_state_aggregator = None
         self.skuid_service = skuid_service
+        self.assign_id: str
+        self.long_running_result_callback = LRCRCallback(self.logger)
+        self.command_in_progress: str = ""
+        self.command_result: ResultCode
 
     def stop_event_receiver(self):
         if self.event_receiver:
@@ -209,6 +218,10 @@ class CNComponentManager(TmcComponentManager):
                 result.append(dev)
                 continue
         return result
+
+    def get_command_result(self) -> ResultCode:
+        """Returns ResultCode from subarray node"""
+        return self.command_result
 
     def get_device(self, dev_name):
         """
@@ -387,6 +400,37 @@ class CNComponentManager(TmcComponentManager):
     def get_telescope_health_state(self):
         return self.component.telescope_health_state
 
+    def update_long_running_command_result(self, dev_name: str, value):
+        """Updates the LRCR callback with received event"""
+        self.logger.info(
+            "Recieved longRunningCommandResult event for device: %s, with value: %s",
+            dev_name,
+            value,
+        )
+        try:
+            if not value[1]:
+                # This is in case an empty event is received.
+                pass
+            elif self.command_in_progress == "AssignResources":
+                if int(value[1]) == ResultCode.OK:
+                    self.command_result = ResultCode.OK
+
+        except ValueError:
+            if self.command_in_progress == "AssignResources":
+                self.logger.info(
+                    "Updating LRCRCallback with value: %s for Assign for device: %s",
+                    value,
+                    dev_name,
+                )
+                exception_message = (
+                    f"Exception occured on device: {dev_name}: {value[1]}"
+                )
+                self.long_running_result_callback(
+                    self.assign_id,
+                    ResultCode.FAILED,
+                    exception_msg=exception_message,
+                )
+
     def _aggregate_state(self):
         """
         Aggregates both telescope state and tmc op state
@@ -527,6 +571,7 @@ class CNComponentManager(TmcComponentManager):
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
+        self.assign_id = f"{time.time()}-{AssignResources.__name__}"
 
         try:
             if type(argin) != dict:
@@ -565,7 +610,11 @@ class CNComponentManager(TmcComponentManager):
                 )
 
                 json_argument = assign_validator.loads(json.dumps(argin))
-            except InvalidJSONError as e:
+            except (
+                InvalidJSONError,
+                SubarrayNotPresentError,
+                ResourceNotPresentError,
+            ) as e:
                 return assign_resources_command.reject_command(str(e))
 
         # validate processing block

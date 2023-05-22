@@ -1,5 +1,6 @@
 import json
 import time
+
 import pytest
 import tango
 from ska_tmc_common.dev_factory import DevFactory
@@ -11,7 +12,7 @@ from tests.settings import (
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
     MID_SUBARRAY_DEVICE,
-    logger
+    logger,
 )
 
 
@@ -65,6 +66,7 @@ def telescope_availability(
     #     expected_result,
     #     lookahead=2,
     # )
+
 
 @pytest.mark.ava
 @pytest.mark.post_deployment

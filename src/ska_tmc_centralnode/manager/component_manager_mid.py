@@ -138,7 +138,7 @@ class CNComponentManagerMid(CNComponentManager):
                 f"Dish event callback for device {dev_name}: {dish_mode}"
             )
             dev_info = self.component.get_device(dev_name)
-            dev_info.dishMode = dish_mode
+            dev_info.dish_mode = dish_mode
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
 

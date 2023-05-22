@@ -3,7 +3,7 @@ AssignResources class for CentralNode.
 """
 import json
 import threading
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
@@ -42,6 +42,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.subarray_adapters = []
         self.my_subarray_adapter = None
         self._skuid = skuid
+        self.task_callback: Callable
 
     def assign_resources(
         self,
@@ -62,23 +63,33 @@ class AssignResources(AbstractAssignReleaseResources):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
+        self.task_callback = task_callback
         task_callback(status=TaskStatus.IN_PROGRESS)
-        self.logger.debug("Executing do hook for centralnode mid")
+        self.component_manager.command_in_progress = "AssignResources"
+        self.component_manager.command_result = ResultCode.STARTED
+
         ret_code, message = self.do(argin=json.dumps(argin))
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.FAILED,
-                exception=message,
-            )
+            self.update_task_status(ret_code, message)
         else:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.OK,
+            self.start_tracker_thread(
+                self.component_manager.get_command_result,
+                ResultCode.OK,
+                command_id=self.component_manager.assign_id,
+                lrcr_callback=self.component_manager.long_running_result_callback,
             )
 
-    def do_mid(self, argin):
+    def update_task_status(self, result: ResultCode, message: str = ""):
+        """Updates the task status for command"""
+        if result == ResultCode.FAILED:
+            self.task_callback(
+                result=result, status=TaskStatus.COMPLETED, exception=message
+            )
+        else:
+            self.task_callback(result=result, status=TaskStatus.COMPLETED)
+
+    def do_mid(self, argin) -> Tuple[ResultCode, str]:
         """
             Method to invoke AssignResources command on Subarray.
 
@@ -170,7 +181,7 @@ class AssignResources(AbstractAssignReleaseResources):
         except Exception as e:
             return (
                 ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
+                f"Problem in loading the JSON string: {e}",
             )
 
         if "transaction_id" in json_argument:
@@ -194,7 +205,7 @@ class AssignResources(AbstractAssignReleaseResources):
             if self.component_manager.is_already_assigned(dish_id):
                 return (
                     ResultCode.FAILED,
-                    ("Dish %s is already allocated", dish_id),
+                    f"Dish {dish_id} is already allocated",
                 )
             else:
                 self.logger.info("Resources are already assigned")
@@ -466,7 +477,7 @@ class AssignResources(AbstractAssignReleaseResources):
         if self.my_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarray_id),
+                f"SubArray Id {subarray_id} is not existing!",
             )
 
         return ResultCode.OK, ""

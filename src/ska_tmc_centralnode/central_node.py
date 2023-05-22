@@ -186,7 +186,9 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def read_telescopeAvailability(self):
         "Returns telescope availability"
-        return json.dumps(self.component_manager.component.telescope_availability)
+        return json.dumps(
+            self.component_manager.component.telescope_availability
+        )
 
     # --------
     # Commands
