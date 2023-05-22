@@ -174,11 +174,16 @@ class HelperSubArrayDevice(SKASubarray):
     )
     def SetisSubarrayAvailable(self, value: bool) -> None:
         """This method sets subarray availability in boolean format."""
-        self.logger.info("Setting the subarray availability : %s", value)
-        self._is_subarray_available = value
-        self.push_change_event(
-            "isSubarrayAvailable", self._is_subarray_available
-        )
+        if self._is_subarray_available != value:
+            self.logger.info("Setting the subarray availability : %s", value)
+            self._is_subarray_available = value
+            try:
+                self.push_change_event(
+                    "isSubarrayAvailable", self._is_subarray_available
+                )
+            except Exception as e:
+                self.logger.exception(f"Error pushing the event. {e}")
+            self.logger.info("isSubarrayAvailable event pushed...")
 
     @command(
         dtype_in="DevState",

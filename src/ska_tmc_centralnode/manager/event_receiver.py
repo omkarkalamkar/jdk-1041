@@ -44,6 +44,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     self.handle_device_available_event,
                     stateless=True,
                 )
+
             if "dish/master" in dev_info.dev_name:
                 proxy.subscribe_event(
                     "dishMode",
@@ -116,6 +117,7 @@ class CentralNodeEventReceiver(EventReceiver):
             change in event.
         """
         if event_data.err:
+            self._logger.info(f"Event Received for " + str(event_data.device.dev_name()) + str(event_data))
             errors = event_data.errors
             for error in errors:
                 error_msg = f"{error.reason},{error.desc}"
@@ -125,6 +127,7 @@ class CentralNodeEventReceiver(EventReceiver):
             )
             return
         new_value = event_data.attr_value.value
+        self._logger.info(f"Event Received for " + str(event_data.device.dev_name()) + str(event_data))
         self._component_manager.update_telescope_availability(
             event_data.device.dev_name(), new_value
         )

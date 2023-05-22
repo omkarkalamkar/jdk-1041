@@ -74,9 +74,9 @@ class CNComponentManager(TmcComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
+        _telescope_availability_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
-        _telescope_availability_callback=None,
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
@@ -115,6 +115,7 @@ class CNComponentManager(TmcComponentManager):
         )
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
+        self.event_receiver = True
 
         if self.event_receiver:
             self.event_receiver_object = CentralNodeEventReceiver(

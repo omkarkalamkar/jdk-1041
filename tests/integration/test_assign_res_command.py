@@ -141,7 +141,7 @@ def assign_resources(
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
-
+@pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
