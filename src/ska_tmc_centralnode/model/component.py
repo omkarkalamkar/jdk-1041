@@ -72,8 +72,8 @@ class CentralComponent(TmcComponent):
         self._telescope_availability_callback = None
         self._telescope_availability = {
             "tmc_subarrays": {},
-            "csp_master_leaf_node": True,
-            "sdp_master_leaf_node": True,
+            "csp_master_leaf_node": False,
+            "sdp_master_leaf_node": False,
         }
         self.lock = threading.Lock()
         self._desired_telescope_state = DevState.ON
@@ -252,10 +252,10 @@ class CentralComponent(TmcComponent):
         """
         if self._telescope_availability != value:
             self._telescope_availability = value
+            self._invoke_telescope_availability_callback()
             self.logger.info(
                 f"Telescope_Availability: {self._telescope_availability}"
             )
-            self._invoke_telescope_availability_callback()
 
     @property
     def telescope_health_state(self):

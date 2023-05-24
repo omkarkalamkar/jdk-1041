@@ -345,12 +345,14 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                     telescope_availability["tmc_subarrays"][
                         dev.dev_name
                     ] = False
+                    self.logger.info("TMC SubarrayNode is not available")
                 else:
                     telescope_availability["tmc_subarrays"][
                         dev.dev_name
                     ] = self._component_manager.subarray_availability[
                         dev.dev_name
                     ]
+                    self.logger.info("TMC SubarrayNode is available")
             elif "tm_leaf_node/csp_master" in dev.dev_name:
                 if dev.unresponsive:
                     telescope_availability["csp_master_leaf_node"] = False

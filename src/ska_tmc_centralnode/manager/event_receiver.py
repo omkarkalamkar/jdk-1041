@@ -62,8 +62,8 @@ class CentralNodeEventReceiver(EventReceiver):
                     self.handle_device_available_event,
                     stateless=True,
                     )
-                    
-                if ("tm_leaf_node/csp_master" or "tm_leaf_node/sdp_master" in dev_info.dev_name):
+
+                if dev_info.dev_name in ["ska_mid/tm_leaf_node/csp_master", "ska_mid/tm_leaf_node/sdp_master"]:
                     proxy.subscribe_event(
                     "isSubsystemAvailable",
                     tango.EventType.CHANGE_EVENT,
@@ -153,10 +153,12 @@ class CentralNodeEventReceiver(EventReceiver):
             for error in errors:
                 error_msg = f"{error.reason},{error.desc}"
                 self._logger.error(error_msg)
+                self._logger.error(str(event_data))
             self._component_manager.update_event_failure(
                 event_data.device.dev_name()
             )
             return
+        self._logger.info(str(event_data))
         new_value = event_data.attr_value.value
         self._component_manager.update_telescope_availability(
             event_data.device.dev_name(), new_value

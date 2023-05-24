@@ -317,6 +317,8 @@ class CNComponentManager(TmcComponentManager):
         :param exception: an exception
         :type: Exception
         """
+        self.logger.info(f"device failed {device_info}")
+        self.logger.error(str(exception))
         with self.lock:
             self.component.update_device_exception(device_info, exception)
             self._telescope_availability_aggregator.aggregate()
