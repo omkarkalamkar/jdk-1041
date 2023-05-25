@@ -66,6 +66,8 @@ class CentralNodeEventReceiver(EventReceiver):
                 if dev_info.dev_name in [
                     "ska_mid/tm_leaf_node/csp_master",
                     "ska_mid/tm_leaf_node/sdp_master",
+                    "ska_low/tm_leaf_node/csp_master",
+                    "ska_low/tm_leaf_node/sdp_master",
                 ]:
                     proxy.subscribe_event(
                         "isSubsystemAvailable",
