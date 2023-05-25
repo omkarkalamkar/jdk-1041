@@ -57,18 +57,21 @@ class CentralNodeEventReceiver(EventReceiver):
                         stateless=True,
                     )
                     proxy.subscribe_event(
-                    "isSubarrayAvailable",
-                    tango.EventType.CHANGE_EVENT,
-                    self.handle_device_available_event,
-                    stateless=True,
+                        "isSubarrayAvailable",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_device_available_event,
+                        stateless=True,
                     )
 
-                if dev_info.dev_name in ["ska_mid/tm_leaf_node/csp_master", "ska_mid/tm_leaf_node/sdp_master"]:
+                if dev_info.dev_name in [
+                    "ska_mid/tm_leaf_node/csp_master",
+                    "ska_mid/tm_leaf_node/sdp_master",
+                ]:
                     proxy.subscribe_event(
-                    "isSubsystemAvailable",
-                    tango.EventType.CHANGE_EVENT,
-                    self.handle_device_available_event,
-                    stateless=True,
+                        "isSubsystemAvailable",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_device_available_event,
+                        stateless=True,
                     )
 
             except Exception as e:
@@ -137,7 +140,7 @@ class CentralNodeEventReceiver(EventReceiver):
         self._component_manager.update_long_running_command_result(
             event_data.device.dev_name(), new_value
         )
-        
+
     def handle_device_available_event(
         self, event_data: tango.EventData
     ) -> None:

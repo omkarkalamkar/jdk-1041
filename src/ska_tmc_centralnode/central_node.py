@@ -100,7 +100,6 @@ class AbstractCentralNode(TMCBaseDevice):
         self.push_change_event("tmOpState", tmc_op_state)
 
     def update_telescope_availability_callback(self, telescope_availability):
-        self.logger.info(f"telescope_availability: {telescope_availability}")
         self.push_change_event(
             "telescopeAvailability", json.dumps(telescope_availability)
         )

@@ -253,9 +253,6 @@ class CentralComponent(TmcComponent):
         if self._telescope_availability != value:
             self._telescope_availability = value
             self._invoke_telescope_availability_callback()
-            self.logger.info(
-                f"Telescope_Availability: {self._telescope_availability}"
-            )
 
     @property
     def telescope_health_state(self):

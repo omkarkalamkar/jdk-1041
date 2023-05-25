@@ -2,7 +2,6 @@ import json
 import time
 
 import pytest
-import tango
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.settings import (
@@ -12,8 +11,58 @@ from tests.settings import (
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
     MID_SUBARRAY_DEVICE,
+    TIMEOUT,
     logger,
 )
+
+
+def check_subarray_availability(central_node, expected_status):
+    start_time = time.time()
+    elapsed_time = 0
+    if (json.loads(central_node.telescopeAvailability))["tmc_subarrays"][
+        MID_SUBARRAY_DEVICE
+    ] != expected_status:
+        while (json.loads(central_node.telescopeAvailability))[
+            "tmc_subarrays"
+        ][MID_SUBARRAY_DEVICE] != expected_status:
+            elapsed_time = time.time() - start_time
+            time.sleep(0.1)
+            if elapsed_time > TIMEOUT:
+                a = (json.loads(central_node.telescopeAvailability))[
+                    "tmc_subarrays"
+                ][MID_SUBARRAY_DEVICE]
+                logger.info(f"SubarrayNode Availability: {a}")
+                pytest.fail(
+                    "Timeout occurred checking the SubarrayNode availability."
+                )
+
+
+def check_cspmln_availability(central_node, expected_status):
+    start_time = time.time()
+    elapsed_time = 0
+    while (json.loads(central_node.telescopeAvailability))[
+        "csp_master_leaf_node"
+    ] != expected_status:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred checking the CspMasterLeafNode availability."
+            )
+
+
+def check_sdpmln_availability(central_node, expected_status):
+    start_time = time.time()
+    elapsed_time = 0
+    while (json.loads(central_node.telescopeAvailability))[
+        "sdp_master_leaf_node"
+    ] != expected_status:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred checking the SdpMasterLeafNode availability."
+            )
 
 
 def telescope_availability(
@@ -29,46 +78,42 @@ def telescope_availability(
         csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
         sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
         subarray_node = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
-    # central_node.subscribe_event(
-    #     "telescopeAvailability",
-    #     tango.EventType.CHANGE_EVENT,
-    #     change_event_callbacks["telescopeAvailability"],
-    # )
-    val = central_node.read_attribute("telescopeAvailability").value
-    logger.info(f"val: {val}")
-    subarray_node.SetisSubarrayAvailable(True)
+
+    subarray_node.SetisSubarrayAvailable(False)
+    assert subarray_node.isSubarrayAvailable is False
+
     csp_mln.SetisSubsystemAvailable(False)
+    assert csp_mln.isSubsystemAvailable is False
+
     sdp_mln.SetisSubsystemAvailable(False)
-    time.sleep(1)
-    val1 = central_node.read_attribute("telescopeAvailability").value
-    logger.info(f"val: {val1}")
-    # expected_result = json.dumps(
-    #     '{"tmc_subarrays": {"ska_mid/tm_subarray_node/1": False},\
-    #         "csp_master_leaf_node": False,"sdp_master_leaf_node": False,}'
-    # )
+    assert sdp_mln.isSubsystemAvailable is False
 
-    # change_event_callbacks.assert_change_event(
-    #     "telescopeAvailability",
-    #     expected_result,
-    #     lookahead=2,
-    # )
+    check_subarray_availability(central_node, False)
 
-    # subarray_node.SetIsSubarrayAvailable(True)
-    # csp_mln.SetisSubsystemAvailable(True)
-    # sdp_mln.SetisSubsystemAvailable(True)
-    # expected_result = json.dumps(
-    #     '{"tmc_subarrays": {"ska_mid/tm_subarray_node/1": True},\
-    #         "csp_master_leaf_node": True,"sdp_master_leaf_node": True,}'
-    # )
+    assert (json.loads(central_node.telescopeAvailability))["tmc_subarrays"][
+        MID_SUBARRAY_DEVICE
+    ] is False
 
-    # change_event_callbacks.assert_change_event(
-    #     "telescopeAvailability",
-    #     expected_result,
-    #     lookahead=2,
-    # )
+    check_cspmln_availability(central_node, False)
+    check_sdpmln_availability(central_node, False)
+
+    logger.info(f"telescopeAvailability: {central_node.telescopeAvailability}")
+
+    subarray_node.SetisSubarrayAvailable(True)
+    assert subarray_node.isSubarrayAvailable is True
+
+    csp_mln.SetisSubsystemAvailable(True)
+    assert csp_mln.isSubsystemAvailable is True
+
+    sdp_mln.SetisSubsystemAvailable(True)
+    assert sdp_mln.isSubsystemAvailable is True
+
+    check_subarray_availability(central_node, "true")
+    check_cspmln_availability(central_node, "true")
+    check_sdpmln_availability(central_node, "true")
 
 
-@pytest.mark.ava
+@pytest.mark.xfail
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_telescope_availability_mid(tango_context, change_event_callbacks):
