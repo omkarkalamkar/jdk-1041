@@ -19,15 +19,12 @@ from tests.settings import (
 def check_subarray_availability(central_node, expected_status):
     start_time = time.time()
     elapsed_time = 0
-    while (json.loads(central_node.telescopeAvailability))[
-        "tmc_subarrays"
-    ][MID_SUBARRAY_DEVICE] != expected_status:
+    while (json.loads(central_node.telescopeAvailability))["tmc_subarrays"][
+        MID_SUBARRAY_DEVICE
+    ] != expected_status:
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            a = (json.loads(central_node.telescopeAvailability))[
-                "tmc_subarrays"
-            ][MID_SUBARRAY_DEVICE]
             pytest.fail(
                 "Timeout occurred while checking the SubarrayNode availability."
             )
@@ -88,7 +85,9 @@ def telescope_availability(
     check_cspmln_availability(central_node, False)
     check_sdpmln_availability(central_node, False)
 
-    logger.info(f"telescopeAvailability attribute value: {central_node.telescopeAvailability}")
+    logger.info(
+        f"telescopeAvailability attribute value: {central_node.telescopeAvailability}"
+    )
 
     subarray_node.SetisSubarrayAvailable(True)
     assert subarray_node.isSubarrayAvailable is True
@@ -99,8 +98,10 @@ def telescope_availability(
     sdp_mln.SetisSubsystemAvailable(True)
     assert sdp_mln.isSubsystemAvailable is True
 
-    logger.info(f"telescopeAvailability attribute value: {central_node.telescopeAvailability}")
-    
+    logger.info(
+        f"telescopeAvailability attribute value: {central_node.telescopeAvailability}"
+    )
+
     check_subarray_availability(central_node, True)
     check_cspmln_availability(central_node, True)
     check_sdpmln_availability(central_node, True)
@@ -114,6 +115,7 @@ def test_telescope_availability_mid(tango_context, change_event_callbacks):
         "ska_mid/tm_central/central_node",
         change_event_callbacks,
     )
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
