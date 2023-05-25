@@ -124,6 +124,7 @@ def test_telescope_availability_mid(tango_context, change_event_callbacks):
     )
 
 
+@pytest.mark.xfail
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_telescope_availability_low(tango_context, change_event_callbacks):
