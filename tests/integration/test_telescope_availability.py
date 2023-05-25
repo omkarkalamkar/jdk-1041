@@ -16,11 +16,11 @@ from tests.settings import (
 )
 
 
-def check_subarray_availability(central_node, expected_status):
+def check_subarray_availability(central_node, subarray_fqdn, expected_status):
     start_time = time.time()
     elapsed_time = 0
     while (json.loads(central_node.telescopeAvailability))["tmc_subarrays"][
-        MID_SUBARRAY_DEVICE
+        subarray_fqdn
     ] != expected_status:
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
@@ -81,7 +81,11 @@ def telescope_availability(
     sdp_mln.SetisSubsystemAvailable(False)
     assert sdp_mln.isSubsystemAvailable is False
 
-    check_subarray_availability(central_node, False)
+    if "ska_mid" in central_node_fqdn:
+        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, False)
+    else:
+        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, False)
+
     check_cspmln_availability(central_node, False)
     check_sdpmln_availability(central_node, False)
 
@@ -102,7 +106,11 @@ def telescope_availability(
         f"telescopeAvailability attribute value: {central_node.telescopeAvailability}"
     )
 
-    check_subarray_availability(central_node, True)
+    if "ska_mid" in central_node_fqdn:
+        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    else:
+        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+
     check_cspmln_availability(central_node, True)
     check_sdpmln_availability(central_node, True)
 
