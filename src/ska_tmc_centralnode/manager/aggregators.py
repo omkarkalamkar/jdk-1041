@@ -336,7 +336,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
 
     def aggregate(self):
         telescope_availability = (
-            self._component_manager.telescope_availability()
+            self._component_manager.get_telescope_availability()
         )
         for dev in self._component_manager.checked_devices:
 
