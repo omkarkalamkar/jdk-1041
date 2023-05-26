@@ -585,6 +585,13 @@ class CNComponentManager(TmcComponentManager):
                 "The JSON string is invalid. Please provide the correct input"
             )
 
+        # subarray_id = json_argument["subarray_id"]
+        # subarray_suffics = "/" + str(subarray_id)
+        # subarrays_list= list(self._component.telescope_availability["tmc_subarrays"].keys())
+        # for subarray in subarrays_list:
+        #     if (subarray.endswith(subarray_suffics) and self._component.telescope_availability["tmc_subarrays"][subarray]==False):
+        #         assign_resources_command.reject_command(f"Subarray {subarray} is not available.")
+
         if isinstance(self.input_parameter, InputParameterLow):
             (
                 is_valid,

@@ -86,7 +86,10 @@ class CNComponentManagerLow(CNComponentManager):
             **kwargs,
         )
         self._telescope_availability_aggregator = None
-        self.subarray_availability = {"ska_low/tm_subarray_node/1": False}
+        self.subarray_availability = {
+            subarray: False
+            for subarray in self.input_parameter.subarray_dev_names
+        }
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
         self._telescope_availability_aggregator = (

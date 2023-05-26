@@ -1,6 +1,13 @@
 import tango
 from ska_tmc_common.event_receiver import EventReceiver
 
+from ska_tmc_centralnode.utils.constants import (
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
+)
+
 
 class CentralNodeEventReceiver(EventReceiver):
     """
@@ -64,10 +71,10 @@ class CentralNodeEventReceiver(EventReceiver):
                     )
 
                 if dev_info.dev_name in [
-                    "ska_mid/tm_leaf_node/csp_master",
-                    "ska_mid/tm_leaf_node/sdp_master",
-                    "ska_low/tm_leaf_node/csp_master",
-                    "ska_low/tm_leaf_node/sdp_master",
+                    MID_CSP_MLN_DEVICE,
+                    MID_SDP_MLN_DEVICE,
+                    LOW_CSP_MLN_DEVICE,
+                    LOW_SDP_MLN_DEVICE,
                 ]:
                     proxy.subscribe_event(
                         "isSubsystemAvailable",
