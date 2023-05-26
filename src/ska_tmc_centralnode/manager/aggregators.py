@@ -293,7 +293,7 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
 
     def aggregate(self):
         telescope_availability = (
-            self._component_manager.component.telescope_availability
+            self._component_manager.get_telescope_availability()
         )
         for dev in self._component_manager.checked_devices:
 
@@ -324,7 +324,7 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
                         "sdp_master_leaf_node"
                     ] = self._component_manager.sdp_mln_availability
 
-            self._component_manager.component.telescope_availability = (
+            self._component_manager.set_telescope_availability = (
                 telescope_availability
             )
 
@@ -336,7 +336,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
 
     def aggregate(self):
         telescope_availability = (
-            self._component_manager.component.telescope_availability
+            self._component_manager.telescope_availability()
         )
         for dev in self._component_manager.checked_devices:
 
@@ -367,6 +367,6 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                         "sdp_master_leaf_node"
                     ] = self._component_manager.sdp_mln_availability
 
-            self._component_manager.component.telescope_availability = (
+            self._component_manager.set_telescope_availability = (
                 telescope_availability
             )

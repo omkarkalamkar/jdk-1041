@@ -402,6 +402,12 @@ class CNComponentManager(TmcComponentManager):
     def get_telescope_health_state(self):
         return self.component.telescope_health_state
 
+    def get_telescope_availability(self):
+        return self.component.telescope_availability
+
+    def set_telescope_availability(self, telescope_availability):
+        self.component.telescope_availability = telescope_availability
+
     def update_long_running_command_result(self, dev_name: str, value):
         """Updates the LRCR callback with received event"""
         self.logger.info(
