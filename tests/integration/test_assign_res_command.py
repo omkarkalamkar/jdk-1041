@@ -52,6 +52,9 @@ def assign_resources(
         lookahead=2,
     )
 
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, subarray_device, True)
+
     if "ska_mid" in central_node_name:
         result, unique_id = central_node.AssignResources(assign_input_str)
     else:
@@ -59,9 +62,6 @@ def assign_resources(
     logger.info(
         f"AssignResources Command ID: {unique_id} Returned result: {result}"
     )
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, subarray_device, True)
 
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
