@@ -44,7 +44,10 @@ def release_resources(
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    if "ska_mid" in central_node_name:
+        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    else:
+        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
 
     if "ska_mid" in central_node_name:
         result, unique_id_assign = central_node.AssignResources(
@@ -87,6 +90,7 @@ def test_release_res_command_mid(
     )
 
 
+@pytest.mark.jk
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
