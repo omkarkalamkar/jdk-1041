@@ -73,7 +73,6 @@ def get_release_resources_command_obj():
     return release_command, my_adapter_factory, cm
 
 
-@pytest.mark.jk
 def test_mid_release_resources_command(tango_context, task_callback):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")

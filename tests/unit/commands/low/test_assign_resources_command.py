@@ -5,6 +5,7 @@ import mock
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -62,6 +63,11 @@ def test_low_assign_resources_command(
 ):
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
