@@ -70,6 +70,7 @@ class CentralComponent(TmcComponent):
         self._update_telescope_health_state_callback = None
         self._update_tmc_op_state_callback = None
         self._telescope_availability_callback = None
+
         self._telescope_availability = {
             "tmc_subarrays": {},
             "csp_master_leaf_node": False,

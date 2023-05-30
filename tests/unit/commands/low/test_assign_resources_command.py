@@ -16,7 +16,7 @@ from ska_tmc_centralnode.commands.assign_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import LOW_SUBARRAY_DEVICE, create_cm, logger
+from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
 @pytest.fixture()
@@ -257,3 +257,17 @@ def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
+
+
+def check_if_subarray_is_available(cm):
+    start_time = time.time()
+    elapsed_time = 0
+    while (cm.component.telescope_availability)["tmc_subarrays"][
+        LOW_SUBARRAY_DEVICE
+    ] is not True:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the SubarrayNode availability."
+            )

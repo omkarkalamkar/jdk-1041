@@ -4,7 +4,12 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import logger
+from tests.settings import (
+    LOW_SUBARRAY_DEVICE,
+    MID_SUBARRAY_DEVICE,
+    check_subarray_availability,
+    logger,
+)
 
 
 def release_resources(
@@ -16,6 +21,11 @@ def release_resources(
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    if "ska_mid" in central_node_name:
+        subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    else:
+        subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+
     ensure_checked_devices(central_node)
 
     result, unique_id_on = central_node.TelescopeOn()
@@ -32,6 +42,9 @@ def release_resources(
         (unique_id_on[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     if "ska_mid" in central_node_name:
         result, unique_id_assign = central_node.AssignResources(
@@ -98,6 +111,7 @@ def release_resources_without_subarray_id(
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     ensure_checked_devices(central_node)
 
     result, unique_id_on = central_node.TelescopeOn()
@@ -114,6 +128,9 @@ def release_resources_without_subarray_id(
         (unique_id_on[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id_assign = central_node.AssignResources(assign_input_str)
 
