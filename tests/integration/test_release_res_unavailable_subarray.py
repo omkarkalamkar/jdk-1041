@@ -66,9 +66,36 @@ def release_resources(
 
     result, unique_id = central_node.ReleaseResources(release_input_string)
 
-    logger.info(f"Unique id:{unique_id[0]}")
-
     assert result[0] == ResultCode.REJECTED
+    
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, subarray_fqdn, True)
+
+    result, unique_id = central_node.ReleaseResources(release_input_string)
+
+    logger.info(f"Unique id:{unique_id[0]}")
+    assert unique_id[0].endswith("ReleaseResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+    
+    result_off, unique_id_off = central_node.TelescopeOff()
+    assert result_off[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_off[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
 
 
 @pytest.mark.post_deployment
