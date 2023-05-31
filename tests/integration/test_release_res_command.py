@@ -79,7 +79,10 @@ def release_resources(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(
-    tango_context, change_event_callbacks, json_factory
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     return release_resources(
         tango_context,
@@ -90,11 +93,13 @@ def test_release_res_command_mid(
     )
 
 
-@pytest.mark.jk
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
-    tango_context, change_event_callbacks, json_factory
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_low_sdp_csp_mln_availability_for_aggregation,
 ):
     return release_resources(
         tango_context,
@@ -184,7 +189,10 @@ def release_resources_without_subarray_id(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid_without_subarray_id(
-    tango_context, change_event_callbacks, json_factory
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     return release_resources_without_subarray_id(
         tango_context,

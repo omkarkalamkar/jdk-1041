@@ -234,15 +234,15 @@ class CNComponentManager(TmcComponentManager):
         """
         return self.component.get_device(dev_name)
 
-    def check_if_csp_mln_is_responsive(self):
-        return self._check_if_device_is_responsive(
-            [self.input_parameter.csp_mln_dev_name]
-        )
+    def check_if_csp_mln_is_available(self):
+        telescope_availability = self.get_telescope_availability()
+        if not telescope_availability["csp_master_leaf_node"] is True:
+            raise CommandNotAllowed("csp_master_leaf_node is not available")
 
-    def check_if_sdp_mln_is_responsive(self):
-        return self._check_if_device_is_responsive(
-            [self.input_parameter.sdp_mln_dev_name]
-        )
+    def check_if_sdp_mln_is_available(self):
+        telescope_availability = self.get_telescope_availability()
+        if not telescope_availability["sdp_master_leaf_node"] is True:
+            raise CommandNotAllowed("sdp_master_leaf_node is not available")
 
     def check_if_subarrays_are_responsive(self):
         return self._check_if_device_is_responsive(
