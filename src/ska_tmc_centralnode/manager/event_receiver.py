@@ -66,7 +66,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     proxy.subscribe_event(
                         "isSubarrayAvailable",
                         tango.EventType.CHANGE_EVENT,
-                        self.handle_device_available_event,
+                        self.handle_subarray_availability_event,
                         stateless=True,
                     )
 
@@ -79,7 +79,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     proxy.subscribe_event(
                         "isSubsystemAvailable",
                         tango.EventType.CHANGE_EVENT,
-                        self.handle_device_available_event,
+                        self.handle_masterln_availability_event,
                         stateless=True,
                     )
 
@@ -150,7 +150,33 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data.device.dev_name(), new_value
         )
 
-    def handle_device_available_event(
+    def handle_masterln_availability_event(
+        self, event_data: tango.EventData
+    ) -> None:
+        """Method to handle and update the latest value of isSubsystemAvailable
+        attribute.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        if event_data.err:
+            errors = event_data.errors
+            for error in errors:
+                error_msg = f"{error.reason},{error.desc}"
+                self._logger.error(error_msg)
+                self._logger.error(str(event_data))
+            self._component_manager.update_event_failure(
+                event_data.device.dev_name()
+            )
+            return
+        self._logger.info(str(event_data))
+        new_value = event_data.attr_value.value
+        self._component_manager.update_telescope_availability(
+            event_data.device.dev_name(), new_value
+        )
+
+    def handle_subarray_availability_event(
         self, event_data: tango.EventData
     ) -> None:
         """Method to handle and update the latest value of isSubarrayAvailable
