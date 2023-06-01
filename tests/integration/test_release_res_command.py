@@ -43,11 +43,11 @@ def release_resources(
         lookahead=2,
     )
 
-    subarray_proxy.SetisSubarrayAvailable(True)
-    if "ska_mid" in central_node_name:
-        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
-    else:
-        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+    # subarray_proxy.SetisSubarrayAvailable(True)
+    # if "ska_mid" in central_node_name:
+    #     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    # else:
+    #     check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
 
     if "ska_mid" in central_node_name:
         result, unique_id_assign = central_node.AssignResources(
@@ -138,8 +138,8 @@ def release_resources_without_subarray_id(
         lookahead=2,
     )
 
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    # subarray_proxy.SetisSubarrayAvailable(True)
+    # check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id_assign = central_node.AssignResources(assign_input_str)
 

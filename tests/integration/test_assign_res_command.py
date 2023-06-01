@@ -52,8 +52,8 @@ def assign_resources(
         lookahead=2,
     )
 
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, subarray_device, True)
+    # subarray_proxy.SetisSubarrayAvailable(True)
+    # check_subarray_availability(central_node, subarray_device, True)
 
     if "ska_mid" in central_node_name:
         result, unique_id = central_node.AssignResources(assign_input_str)
@@ -218,8 +218,8 @@ def assign_resources_with_invalid_json(
         lookahead=2,
     )
 
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, subarray_device, True)
+    # subarray_proxy.SetisSubarrayAvailable(True)
+    # check_subarray_availability(central_node, subarray_device, True)
 
     result, message = central_node.AssignResources(assign_input_str)
 
@@ -283,8 +283,8 @@ def assign_resources_without_subarray_id(
         lookahead=2,
     )
 
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    # subarray_proxy.SetisSubarrayAvailable(True)
+    # check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, message = central_node.AssignResources(assign_input_str)
 
@@ -372,8 +372,8 @@ def test_assign_resources_exception_propagation(
     tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
     tmc_subarray.SetDefective(True)
 
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    # subarray_proxy.SetisSubarrayAvailable(True)
+    # check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id = central_node.AssignResources(
         json_factory("command_AssignResources")

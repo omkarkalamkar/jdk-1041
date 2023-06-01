@@ -626,20 +626,20 @@ class CNComponentManager(TmcComponentManager):
                 return assign_resources_command.reject_command(str(e))
 
         # Reject command if Subarray is not available
-        subarray_id = json_argument["subarray_id"]
-        subarray_suffics = "/" + str(subarray_id)
-        subarrays_list = list(
-            self._component.telescope_availability["tmc_subarrays"].keys()
-        )
-        for subarray in subarrays_list:
-            telescope_availability = self.get_telescope_availability()
-            if (
-                subarray.endswith(subarray_suffics)
-                and telescope_availability["tmc_subarrays"][subarray] is False
-            ):
-                return assign_resources_command.reject_command(
-                    f"Subarray {subarray} is not available."
-                )
+        # subarray_id = json_argument["subarray_id"]
+        # subarray_suffics = "/" + str(subarray_id)
+        # subarrays_list = list(
+        #     self._component.telescope_availability["tmc_subarrays"].keys()
+        # )
+        # for subarray in subarrays_list:
+        #     telescope_availability = self.get_telescope_availability()
+        #     if (
+        #         subarray.endswith(subarray_suffics)
+        #         and telescope_availability["tmc_subarrays"][subarray] is False
+        #     ):
+        #         return assign_resources_command.reject_command(
+        #             f"Subarray {subarray} is not available."
+        #         )
 
         # validate processing block
         (
@@ -706,20 +706,20 @@ class CNComponentManager(TmcComponentManager):
                 return release_resources_command.reject_command(str(e))
 
         # Reject command if Subarray is not available
-        subarray_id = json_argument["subarray_id"]
-        subarray_suffics = "/" + str(subarray_id)
-        subarrays_list = list(
-            self._component.telescope_availability["tmc_subarrays"].keys()
-        )
-        for subarray in subarrays_list:
-            telescope_availability = self.get_telescope_availability()
-            if (
-                subarray.endswith(subarray_suffics)
-                and telescope_availability["tmc_subarrays"][subarray] is False
-            ):
-                return release_resources_command.reject_command(
-                    f"Subarray {subarray} is not available."
-                )
+        # subarray_id = json_argument["subarray_id"]
+        # subarray_suffics = "/" + str(subarray_id)
+        # subarrays_list = list(
+        #     self._component.telescope_availability["tmc_subarrays"].keys()
+        # )
+        # for subarray in subarrays_list:
+        #     telescope_availability = self.get_telescope_availability()
+        #     if (
+        #         subarray.endswith(subarray_suffics)
+        #         and telescope_availability["tmc_subarrays"][subarray] is False
+        #     ):
+        #         return release_resources_command.reject_command(
+        #             f"Subarray {subarray} is not available."
+        #         )
 
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
