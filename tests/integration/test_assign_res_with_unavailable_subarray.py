@@ -68,7 +68,10 @@ def assign_resources(
 
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
-@pytest.mark.skip(reason="This functionality is not present in the current version")
+
+@pytest.mark.skip(
+    reason="This functionality is not present in the current version"
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -86,7 +89,10 @@ def test_assign_res_command_mid(
         MID_SUBARRAY_DEVICE,
     )
 
-@pytest.mark.skip(reason="This functionality is not present in the current version")
+
+@pytest.mark.skip(
+    reason="This functionality is not present in the current version"
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(

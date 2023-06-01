@@ -97,7 +97,10 @@ def release_resources(
         lookahead=4,
     )
 
-@pytest.mark.skip(reason="This functionality is not present in the current version")
+
+@pytest.mark.skip(
+    reason="This functionality is not present in the current version"
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(
@@ -111,7 +114,10 @@ def test_release_res_command_mid(
         change_event_callbacks,
     )
 
-@pytest.mark.skip(reason="This functionality is not present in the current version")
+
+@pytest.mark.skip(
+    reason="This functionality is not present in the current version"
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
