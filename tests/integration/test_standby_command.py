@@ -10,7 +10,11 @@ from tests.settings import logger
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_standby_command_mid(tango_context, change_event_callbacks):
+def test_standby_command_mid(
+    tango_context,
+    change_event_callbacks,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -70,7 +74,11 @@ def test_standby_command_mid(tango_context, change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_standby_command_low(tango_context, change_event_callbacks):
+def test_standby_command_low(
+    tango_context,
+    change_event_callbacks,
+    set_low_sdp_csp_mln_availability_for_aggregation,
+):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")

@@ -5,6 +5,7 @@ import mock
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -16,7 +17,7 @@ from ska_tmc_centralnode.commands.assign_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.helper_subarray_device import HelperSubArrayDevice
-from tests.settings import LOW_SUBARRAY_DEVICE, create_cm, logger
+from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
 @pytest.fixture()
@@ -62,6 +63,11 @@ def test_low_assign_resources_command(
 ):
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     cm.assign_resources(json_argument, task_callback=task_callback)
@@ -257,3 +263,17 @@ def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
+
+
+def check_if_subarray_is_available(cm):
+    start_time = time.time()
+    elapsed_time = 0
+    while (cm.component.telescope_availability)["tmc_subarrays"][
+        LOW_SUBARRAY_DEVICE
+    ] is not True:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the SubarrayNode availability."
+            )

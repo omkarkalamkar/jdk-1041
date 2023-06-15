@@ -14,9 +14,12 @@ from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorMid,
+    TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+
+# from threading import Timer
 
 
 class CNComponentManagerMid(CNComponentManager):
@@ -33,6 +36,7 @@ class CNComponentManagerMid(CNComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
+        _telescope_availability_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
         max_workers=5,
@@ -76,12 +80,28 @@ class CNComponentManagerMid(CNComponentManager):
             _update_imaging_callback,
             communication_state_callback,
             component_state_callback,
+            _telescope_availability_callback,
             max_workers,
             proxy_timeout,
             sleep_time,
             skuid_service,
             *args,
             **kwargs,
+        )
+
+        self.subarray_availability = {
+            subarray: False
+            for subarray in self.input_parameter.subarray_dev_names
+        }
+        self.csp_mln_availability = False
+        self.sdp_mln_availability = False
+
+        telescope_availability = self.get_telescope_availability()
+        telescope_availability["tmc_subarrays"] = self.subarray_availability
+        self.set_telescope_availability = telescope_availability
+
+        self._telescope_availability_aggregator = (
+            TelescopeAvailabilityAggregatorMid(self, self.logger)
         )
 
     def check_if_dishes_are_responsive(self):
@@ -201,8 +221,8 @@ class CNComponentManagerMid(CNComponentManager):
             )
         if command_name in ["TelescopeOn", "TelescopeOff"]:
             self.logger.debug(f"Checking mid devices for {command_name}")
-            self.check_if_csp_mln_is_responsive()
-            self.check_if_sdp_mln_is_responsive()
+            self.check_if_csp_mln_is_available()
+            self.check_if_sdp_mln_is_available()
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
@@ -211,3 +231,13 @@ class CNComponentManagerMid(CNComponentManager):
             self.check_if_dishes_are_responsive()
 
         return True
+
+    def update_telescope_availability(self, device_name, event_value):
+        with self.lock:
+            if "tm_subarray_node" in device_name:
+                self.subarray_availability[device_name] = event_value
+            elif "tm_leaf_node/csp_master" in device_name:
+                self.csp_mln_availability = event_value
+            elif "tm_leaf_node/sdp_master" in device_name:
+                self.sdp_mln_availability = event_value
+            self._telescope_availability_aggregator.aggregate()

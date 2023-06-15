@@ -1,9 +1,10 @@
 import time
 
 import pytest
-from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import HelperBaseDevice
+from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -16,6 +17,7 @@ from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
+    TIMEOUT,
     create_cm,
     logger,
 )
@@ -35,7 +37,7 @@ def devices_to_load():
         #     ],
         # },
         {
-            "class": SKABaseDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_SDP_MLN_DEVICE},
@@ -53,6 +55,19 @@ def test_low_telescope_on_command(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    csp_mln.SetisSubsystemAvailable(True)
+    sdp_mln.SetisSubsystemAvailable(True)
+    check_cspmln_availability(cm, True)
+    check_sdpmln_availability(cm, True)
+    assert (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] is True
+    assert (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] is True
     cm.is_command_allowed("TelescopeOn")
     cm.adapter_factory = HelperAdapterFactory()
     cm.telescope_on(task_callback=task_callback)
@@ -75,6 +90,19 @@ def test_telescope_on_command_fail_subarray(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    csp_mln.SetisSubsystemAvailable(True)
+    sdp_mln.SetisSubsystemAvailable(True)
+    check_cspmln_availability(cm, True)
+    check_sdpmln_availability(cm, True)
+    assert (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] is True
+    assert (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] is True
     cm.is_command_allowed("TelescopeOn")
     adapter_factory = HelperAdapterFactory()
 
@@ -109,3 +137,31 @@ def test_low_telescope_on_fail_check_allowed(tango_context):
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("TelescopeOn")
+
+
+def check_cspmln_availability(cm, expected_status):
+    start_time = time.time()
+    elapsed_time = 0
+    while (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] != expected_status:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the CspMasterLeafNode availability."
+            )
+
+
+def check_sdpmln_availability(cm, expected_status):
+    start_time = time.time()
+    elapsed_time = 0
+    while (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] != expected_status:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the SdpMasterLeafNode availability."
+            )

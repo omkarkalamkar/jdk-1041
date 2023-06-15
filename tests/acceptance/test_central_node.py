@@ -9,7 +9,12 @@ from ska_tango_base.control_model import HealthState, ObsState
 from ska_tmc_common.dev_factory import DevFactory
 from tango import Database, DeviceProxy
 
-from tests.settings import LOW_SUBARRAY_DEVICE, MID_SUBARRAY_DEVICE, logger
+from tests.settings import (
+    LOW_SUBARRAY_DEVICE,
+    MID_SUBARRAY_DEVICE,
+    check_subarray_availability,
+    logger,
+)
 
 
 @given(
@@ -43,14 +48,29 @@ def internal_model(central_node):
 @when(parsers.parse("I call the command {command_name}"))
 def call_command(central_node, command_name, json_factory):
     try:
+        dev_factory = DevFactory()
         if command_name == "AssignResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
+
+                subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+                subarray_proxy.SetisSubarrayAvailable(True)
+                check_subarray_availability(
+                    central_node, MID_SUBARRAY_DEVICE, True
+                )
+
                 assign_res_string = json_factory("command_AssignResources")
                 pytest.command_result = central_node.command_inout(
                     command_name, assign_res_string
                 )
             else:
+
+                subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+                subarray_proxy.SetisSubarrayAvailable(True)
+                check_subarray_availability(
+                    central_node, LOW_SUBARRAY_DEVICE, True
+                )
+
                 assign_res_string = json_factory("command_assign_resource_low")
                 pytest.command_result = central_node.command_inout(
                     command_name, assign_res_string
@@ -58,11 +78,25 @@ def call_command(central_node, command_name, json_factory):
         elif command_name == "ReleaseResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
+
+                subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+                subarray_proxy.SetisSubarrayAvailable(True)
+                check_subarray_availability(
+                    central_node, MID_SUBARRAY_DEVICE, True
+                )
+
                 release_res_string = json_factory("command_ReleaseResources")
                 pytest.command_result = central_node.command_inout(
                     command_name, release_res_string
                 )
             else:
+
+                subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+                subarray_proxy.SetisSubarrayAvailable(True)
+                check_subarray_availability(
+                    central_node, LOW_SUBARRAY_DEVICE, True
+                )
+
                 release_res_string = json_factory(
                     "command_release_resource_low"
                 )

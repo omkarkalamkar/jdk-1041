@@ -4,13 +4,14 @@ from os.path import dirname, join
 
 import mock
 import pytest
-from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
+from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
@@ -23,6 +24,7 @@ from tests.settings import (
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
     MID_SUBARRAY_DEVICE,
+    TIMEOUT,
     create_cm,
     logger,
 )
@@ -38,7 +40,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": SKABaseDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {
                     "name": MID_CSP_MLN_DEVICE,
@@ -74,6 +76,10 @@ def get_release_resources_command_obj():
 def test_mid_release_resources_command(tango_context, task_callback):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
     release_input_str = get_release_input_str()
     json_argument = json.loads(release_input_str)
     cm.release_resources(json_argument, task_callback=task_callback)
@@ -145,3 +151,17 @@ def test_mid_release_resources_command_with_invalide_key(
     cm.release_resources(release_input_str, task_callback=task_callback)
     (res_code, _) = release_res_command.do("")
     assert res_code == ResultCode.FAILED
+
+
+def check_if_subarray_is_available(cm):
+    start_time = time.time()
+    elapsed_time = 0
+    while (cm.component.telescope_availability)["tmc_subarrays"][
+        MID_SUBARRAY_DEVICE
+    ] is not True:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the SubarrayNode availability."
+            )
