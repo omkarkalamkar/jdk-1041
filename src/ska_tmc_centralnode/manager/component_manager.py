@@ -306,6 +306,7 @@ class CNComponentManager(TmcComponentManager):
         with self.lock:
             dev_info = self.get_device(dev_name)
             dev_info.ping = ping
+            dev_info.update_unresponsive(False)
             self._telescope_availability_aggregator.aggregate()
 
     def device_failed(self, device_info, exception):
