@@ -19,8 +19,6 @@ from ska_tmc_centralnode.manager.aggregators import (
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 
-# from threading import Timer
-
 
 class CNComponentManagerMid(CNComponentManager):
     def __init__(

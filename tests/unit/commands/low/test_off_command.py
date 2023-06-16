@@ -17,7 +17,8 @@ from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
-    TIMEOUT,
+    check_cspmln_availability,
+    check_sdpmln_availability,
     create_cm,
     logger,
 )
@@ -137,31 +138,3 @@ def test_low_telescope_off_fail_check_allowed(tango_context):
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("TelescopeOff")
-
-
-def check_cspmln_availability(cm, expected_status):
-    start_time = time.time()
-    elapsed_time = 0
-    while (cm.component.telescope_availability)[
-        "csp_master_leaf_node"
-    ] != expected_status:
-        elapsed_time = time.time() - start_time
-        time.sleep(0.1)
-        if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the CspMasterLeafNode availability."
-            )
-
-
-def check_sdpmln_availability(cm, expected_status):
-    start_time = time.time()
-    elapsed_time = 0
-    while (cm.component.telescope_availability)[
-        "sdp_master_leaf_node"
-    ] != expected_status:
-        elapsed_time = time.time() - start_time
-        time.sleep(0.1)
-        if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the SdpMasterLeafNode availability."
-            )

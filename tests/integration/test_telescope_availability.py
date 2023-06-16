@@ -1,6 +1,3 @@
-import json
-import time
-
 import pytest
 from ska_tmc_common.dev_factory import DevFactory
 
@@ -11,7 +8,8 @@ from tests.settings import (
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
     MID_SUBARRAY_DEVICE,
-    TIMEOUT,
+    check_cspmln_availability,
+    check_sdpmln_availability,
     check_subarray_availability,
     logger,
 )
@@ -28,34 +26,6 @@ from tests.settings import (
 #             pytest.fail(
 #                 "Timeout occurred while checking the SubarrayNode availability."
 #             )
-
-
-def check_cspmln_availability(central_node, expected_status):
-    start_time = time.time()
-    elapsed_time = 0
-    while (json.loads(central_node.telescopeAvailability))[
-        "csp_master_leaf_node"
-    ] != expected_status:
-        elapsed_time = time.time() - start_time
-        time.sleep(0.1)
-        if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the CspMasterLeafNode availability."
-            )
-
-
-def check_sdpmln_availability(central_node, expected_status):
-    start_time = time.time()
-    elapsed_time = 0
-    while (json.loads(central_node.telescopeAvailability))[
-        "sdp_master_leaf_node"
-    ] != expected_status:
-        elapsed_time = time.time() - start_time
-        time.sleep(0.1)
-        if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the SdpMasterLeafNode availability."
-            )
 
 
 def telescope_availability(
