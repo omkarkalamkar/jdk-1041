@@ -395,7 +395,9 @@ class CNComponentManager(TmcComponentManager):
         self.logger.info(f"Dish Id is: {dish_id}")
         for devInfo in self.devices:
             if isinstance(devInfo, SubArrayDeviceInfo):
-                self.logger.info(f"Subarray Device resources: {devInfo.resources}")
+                self.logger.info(
+                    f"Subarray Device resources: {devInfo.resources}"
+                )
                 if devInfo.resources is None:
                     return False
                 elif dish_id in devInfo.resources:
@@ -662,7 +664,9 @@ class CNComponentManager(TmcComponentManager):
             task_callback=task_callback,
         )
 
-        self.logger.info(f"Component manager assign task callback: {task_callback}")
+        self.logger.info(
+            f"Component manager assign task callback: {task_callback}"
+        )
         return task_status, response
 
     def release_resources(
