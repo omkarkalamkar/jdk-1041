@@ -3,7 +3,11 @@ import tango
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common import HelperBaseDevice
 
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
+
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,

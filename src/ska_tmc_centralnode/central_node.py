@@ -463,7 +463,7 @@ class AbstractCentralNode(TMCBaseDevice):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        for (command_name, method_name) in [
+        for command_name, method_name in [
             ("TelescopeOn", "telescope_on"),
             ("TelescopeStandby", "telescope_standby"),
             ("TelescopeOff", "telescope_off"),

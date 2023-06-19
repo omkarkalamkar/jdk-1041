@@ -8,10 +8,14 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
+
+# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,

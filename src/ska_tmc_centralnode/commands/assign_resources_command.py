@@ -51,7 +51,6 @@ class AssignResources(AbstractAssignReleaseResources):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-
         """This is a long running method for TelescopeOn command, it executes do hook,
         invokes TelescopeOn command on lowe level devices.
 
@@ -63,12 +62,14 @@ class AssignResources(AbstractAssignReleaseResources):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
+        self.logger.info("command assign_resources ....")
         self.task_callback = task_callback
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "AssignResources"
         self.component_manager.command_result = ResultCode.STARTED
 
         ret_code, message = self.do(argin=json.dumps(argin))
+        self.logger.info(f"command assign_resources returncode: {ret_code}")
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             self.update_task_status(ret_code, message)

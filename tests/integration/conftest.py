@@ -3,13 +3,18 @@ import logging
 import time
 
 import pytest
-from ska_tmc_common import HelperBaseDevice, HelperDishDevice
+from ska_tmc_common import (
+    HelperBaseDevice,
+    HelperDishDevice,
+    HelperSubArrayDevice,
+)
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
 
 from ska_tmc_centralnode.central_node_low import CentralNodeLow
 from ska_tmc_centralnode.central_node_mid import CentralNodeMid
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+
+# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 # from ska_tmc_common.test_helpers.helper_state_mccsdevice import (

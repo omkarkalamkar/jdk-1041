@@ -99,7 +99,6 @@ def test_telescope_stow_antennas_fail_dish(tango_context):
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_stow_antennas_fail_check_allowed(tango_context):
-
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time

@@ -39,7 +39,6 @@ class TelescopeOff(AbstractTelescopeOnOff):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-
         """This is a long running method
 
         :param logger: logger

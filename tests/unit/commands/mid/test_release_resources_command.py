@@ -12,13 +12,17 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
 from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
+
+# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     MID_CSP_MLN_DEVICE,

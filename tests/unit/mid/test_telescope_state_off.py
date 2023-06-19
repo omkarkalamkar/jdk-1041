@@ -5,7 +5,11 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
 
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
+
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,

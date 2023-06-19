@@ -52,7 +52,6 @@ def call_command(central_node, command_name, json_factory):
         if command_name == "AssignResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
-
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
                 subarray_proxy.SetisSubarrayAvailable(True)
                 check_subarray_availability(
@@ -64,7 +63,6 @@ def call_command(central_node, command_name, json_factory):
                     command_name, assign_res_string
                 )
             else:
-
                 subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
                 subarray_proxy.SetisSubarrayAvailable(True)
                 check_subarray_availability(
@@ -78,7 +76,6 @@ def call_command(central_node, command_name, json_factory):
         elif command_name == "ReleaseResources":
             logger.info(f"central_node: {central_node.dev_name()}")
             if "ska_mid" in central_node.dev_name():
-
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
                 subarray_proxy.SetisSubarrayAvailable(True)
                 check_subarray_availability(
@@ -90,7 +87,6 @@ def call_command(central_node, command_name, json_factory):
                     command_name, release_res_string
                 )
             else:
-
                 subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
                 subarray_proxy.SetisSubarrayAvailable(True)
                 check_subarray_availability(
@@ -144,7 +140,6 @@ def check_internal_model(device_list):
     )
 )
 def check_command(central_node, command_name, change_event_callbacks):
-
     if pytest.command_result == "CommandNotAllowed":
         return
 

@@ -4,11 +4,15 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
+# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
+
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_MID,
     DISH_LEAF_NODE_PREFIX,

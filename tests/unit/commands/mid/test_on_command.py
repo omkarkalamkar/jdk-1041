@@ -9,10 +9,14 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
+
+# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.mock_callable import MockCallable
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,

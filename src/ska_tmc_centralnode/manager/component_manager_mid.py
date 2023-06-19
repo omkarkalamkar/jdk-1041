@@ -44,7 +44,6 @@ class CNComponentManagerMid(CNComponentManager):
         *args,
         **kwargs,
     ):
-
         """
         Initialise a new ComponentManager instance for mid.
 
@@ -162,7 +161,6 @@ class CNComponentManagerMid(CNComponentManager):
         """
         result = []
         for dish in range(1, (num_dishes + 1)):
-
             self.add_device(dln_prefix + "{:03d}".format(dish))
             result.append(dln_prefix + "{:03d}".format(dish))
         return result

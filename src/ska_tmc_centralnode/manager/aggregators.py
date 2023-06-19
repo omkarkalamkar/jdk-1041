@@ -80,7 +80,6 @@ class TelescopeStateAggregatorLow(Aggregator):
         super().__init__(cm, logger)
 
     def aggregate(self):
-
         telescopeStateList = []
         #  mccs_master = False
         csp_master = False
@@ -296,7 +295,6 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
             self._component_manager.get_telescope_availability()
         )
         for dev in self._component_manager.checked_devices:
-
             if "tm_subarray_node" in dev.dev_name:
                 if dev.unresponsive:
                     telescope_availability["tmc_subarrays"][
@@ -339,7 +337,6 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
             self._component_manager.get_telescope_availability()
         )
         for dev in self._component_manager.checked_devices:
-
             if "tm_subarray_node" in dev.dev_name:
                 if dev.unresponsive:
                     telescope_availability["tmc_subarrays"][
