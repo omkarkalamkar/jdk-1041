@@ -11,8 +11,6 @@ from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
-
-# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
     LOW_SUBARRAY_DEVICE,

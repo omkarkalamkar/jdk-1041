@@ -325,6 +325,9 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
             self._component_manager.set_telescope_availability = (
                 telescope_availability
             )
+            self.logger.info(
+                f"self._component_manager.set_telescope_availability ....: {self._component_manager.set_telescope_availability}"
+            )
 
 
 class TelescopeAvailabilityAggregatorLow(Aggregator):

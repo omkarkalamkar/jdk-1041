@@ -196,6 +196,9 @@ class CNComponentManagerLow(CNComponentManager):
 
     def update_telescope_availability(self, device_name, event_value):
         with self.lock:
+            self.logger.info(f"device_name is ...... {device_name}")
+            self.logger.info(f"event_value is ...... {event_value}")
+
             if "tm_subarray_node" in device_name:
                 self.subarray_availability[device_name] = event_value
             elif "tm_leaf_node/csp_master" in device_name:

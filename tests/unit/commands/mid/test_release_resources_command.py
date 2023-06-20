@@ -12,8 +12,6 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
 from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
-
-# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )

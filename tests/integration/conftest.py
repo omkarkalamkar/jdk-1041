@@ -13,8 +13,7 @@ from tango.test_context import MultiDeviceTestContext
 
 from ska_tmc_centralnode.central_node_low import CentralNodeLow
 from ska_tmc_centralnode.central_node_mid import CentralNodeMid
-
-# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 # from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
@@ -29,10 +28,15 @@ pytest.event_arrived = False
 def devices_to_load():
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": "ska_mid/tm_subarray_node/1"},
                 {"name": "ska_low/tm_subarray_node/1"},
+            ],
+        },
+        {
+            "class": HelperSubArrayDevice,
+            "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
                 {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
                 {"name": "ska_low/tm_leaf_node/csp_subarray01"},

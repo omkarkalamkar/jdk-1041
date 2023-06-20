@@ -13,6 +13,7 @@ from tests.settings import (
     MID_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
+    check_subarray_availability,
     logger,
 )
 
@@ -27,7 +28,7 @@ def assign_resources(
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
-    # subarray_proxy = dev_factory.get_device(subarray_device)
+    subarray_proxy = dev_factory.get_device(subarray_device)
 
     ensure_checked_devices(central_node)
 
@@ -51,8 +52,8 @@ def assign_resources(
         lookahead=2,
     )
 
-    # subarray_proxy.SetisSubarrayAvailable(True)
-    # check_subarray_availability(central_node, subarray_device, True)
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, subarray_device, True)
 
     if "ska_mid" in central_node_name:
         result, unique_id = central_node.AssignResources(assign_input_str)
@@ -140,6 +141,7 @@ def assign_resources(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
+@pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(

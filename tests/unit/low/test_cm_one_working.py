@@ -3,8 +3,6 @@ import time
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
-
-# from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )

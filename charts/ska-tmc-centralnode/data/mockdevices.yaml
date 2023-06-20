@@ -7,7 +7,8 @@ entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
   - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
   - name: "ska_tmc_common.test_helpers.helper_csp_master_device.HelperCspMasterDevice"
-  - name: "ska_tmc_common.test_helpers.helper_subarray_device.HelperSubArrayDevice"
+  - name: "cn_helper_subarray_device.CNHelperSubArrayDevice"
+    path: "/app/tests/helpers/cn_helper_subarray_device.py"
 server:
   name: "mocks"
   instances:
@@ -25,7 +26,7 @@ server:
         - name: "ska_low/tm_leaf_node/sdp_master"
         - name: "mid-sdp/control/0"
         - name: "low-sdp/control/0"
-      - name: "HelperSubArrayDevice"
+      - name: "CNHelperSubArrayDevice"
         devices:
         - name: "ska_mid/tm_subarray_node/1"
         - name: "ska_low/tm_subarray_node/1"
