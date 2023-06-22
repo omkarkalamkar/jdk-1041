@@ -16,6 +16,7 @@ from tests.settings import (
     logger,
 )
 
+# TODO: For future reference.
 # def check_subarray_availability(central_node, subarray_fqdn, expected_status):
 #     start_time = time.time()
 #     elapsed_time = 0

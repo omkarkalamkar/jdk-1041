@@ -221,9 +221,7 @@ class CNComponentManager(TmcComponentManager):
 
     def get_command_result(self) -> ResultCode:
         """Returns ResultCode from subarray node"""
-        self.logger.info(
-            f"self.command_result ..........: {self.command_result}"
-        )
+        self.logger.debug(f"self.command_result is: {self.command_result}")
         return self.command_result
 
     def get_device(self, dev_name):
@@ -248,7 +246,7 @@ class CNComponentManager(TmcComponentManager):
             raise CommandNotAllowed("sdp_master_leaf_node is not available")
 
     def check_if_subarrays_are_responsive(self):
-        self.logger.info("Checking if subarrays are responsive .......")
+        self.logger.info("Checking if subarrays are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.subarray_dev_names
         )
@@ -263,13 +261,12 @@ class CNComponentManager(TmcComponentManager):
         for dev_name in dev_names:
             dev_info = self.get_device(dev_name)
             if dev_info is not None and not dev_info.unresponsive:
-                self.logger.info(
-                    f"Device {dev_name} dev_info.unresponsive ........ : {dev_info.unresponsive} "
+                self.logger.debug(
+                    f"Device {dev_name} dev_info.unresponsive: {dev_info.unresponsive} "
                 )
                 count += 1
         if count == 0:
             raise CommandNotAllowed(f"{dev_names} not available")
-        self.logger.info(f"Count is ....... : {count}")
 
     def add_multiple_devices(self, device_list):
         """
@@ -326,7 +323,7 @@ class CNComponentManager(TmcComponentManager):
         :param exception: an exception
         :type: Exception
         """
-        self.logger.info(f"device failed {device_info}")
+        self.logger.info(f"device failed: {device_info.dev_name}")
         self.logger.error(str(exception))
         with self.lock:
             self.component.update_device_exception(device_info, exception)
@@ -400,10 +397,10 @@ class CNComponentManager(TmcComponentManager):
 
         :return True is already assigned, False otherwise
         """
-        self.logger.info(f"Dish Id is: {dish_id}")
+        self.logger.debug(f"Dish Id is: {dish_id}")
         for devInfo in self.devices:
             if isinstance(devInfo, SubArrayDeviceInfo):
-                self.logger.info(
+                self.logger.debug(
                     f"Subarray Device resources: {devInfo.resources}"
                 )
                 if devInfo.resources is None:
@@ -434,7 +431,7 @@ class CNComponentManager(TmcComponentManager):
                 pass
             elif self.command_in_progress == "AssignResources":
                 self.logger.info(
-                    f"LongRunningCommandResult event occurred ..... : {int(value[1])}"
+                    f"LongRunningCommandResult event occurred: {int(value[1])}"
                 )
                 if int(value[1]) == ResultCode.OK:
                     self.command_result = ResultCode.OK
@@ -651,10 +648,10 @@ class CNComponentManager(TmcComponentManager):
         )
         for subarray in subarrays_list:
             telescope_availability = self.get_telescope_availability()
-            self.logger.info(
-                f"Telescope availability is ........ {telescope_availability}"
+            self.logger.debug(
+                f"Telescope availability is: {telescope_availability}"
             )
-            self.logger.info(f"subarrays_list is ........ {subarrays_list}")
+            self.logger.debug(f"subarrays_list is: {subarrays_list}")
             if (
                 subarray.endswith(subarray_suffics)
                 and telescope_availability["tmc_subarrays"][subarray] is False

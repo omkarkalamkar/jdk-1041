@@ -19,18 +19,12 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
 
     def init_device(self):
         super().init_device()
-        # self._health_state = HealthState.OK
         self._resources_assigned = []
         self._is_subarray_available = False
-        # self._defective = False
-        # self.dev_name = self.get_name()
 
     class InitCommand(HelperSubArrayDevice.InitCommand):
         def do(self):
             super().do()
-            # self._device.set_change_event("State", True, False)
-            # self._device.set_change_event("healthState", True, False)
-            # self._device.set_change_event("obsState", True, False)
             self._device.set_change_event("assignedResources", True, False)
             self._device.set_change_event("isSubarrayAvailable", True, False)
             self._device.set_change_event(
@@ -48,7 +42,6 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
     isSubarrayAvailable = attribute(
         dtype="DevBoolean", access=AttrWriteType.READ
     )
-    # defective = attribute(dtype=bool, doc="Attribute to set device defective")
 
     def read_assignedResources(self):
         """
@@ -61,25 +54,6 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
     def read_isSubarrayAvailable(self) -> bool:
         """Returns subarray availability in boolean format."""
         return self._is_subarray_available
-
-    # def read_defective(self):
-    #     """
-    #     Read the defective attribute value for device.
-
-    #     :return: bool.
-    #     """
-    #     return self._defective
-
-    # def create_component_manager(self):
-    #     cm = EmptySubArrayComponentManager(
-    #         logger=self.logger,
-    #         communication_state_callback=None,
-    #         component_state_callback=None,
-    #     )
-    #     return cm
-
-    # def set_state(self, state):
-    #     return super().set_state(state)
 
     @command(
         dtype_in="DevBoolean",
@@ -97,113 +71,6 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             except Exception as e:
                 self.logger.exception(f"Error pushing the event. {e}")
             self.logger.info("isSubarrayAvailable event pushed...")
-
-    # @command(
-    #     dtype_in="DevState",
-    #     doc_in="state to assign",
-    # )
-    # def SetDirectState(self, argin):
-    #     """
-    #     Trigger a DevState change
-    #     """
-    #     # import debugpy; debugpy.debug_this_thread()
-
-    #     if self.dev_state() != argin:
-    #         self.set_state(argin)
-    #         time.sleep(0.1)
-    #         self.push_change_event("State", self.dev_state())
-    #         time.sleep(0.1)
-
-    # @command(
-    #     dtype_in=bool,
-    #     doc_in="Set defective",
-    # )
-    # def SetDefective(self, argin: bool):
-    #     """
-    #     Sets the defective value.
-    #     """
-    #     self._defective = argin
-
-    # @command(
-    #     dtype_in=int,
-    #     doc_in="state to assign",
-    # )
-    # def SetDirectHealthState(self, argin):
-    #     """
-    #     Trigger a HealthState change
-    #     """
-    #     # import debugpy; debugpy.debug_this_thread()
-    #     # # pylint: disable=E0203
-    #     value = HealthState(argin)
-    #     if self._health_state != value:
-    #         self._health_state = HealthState(argin)
-    #         self.push_change_event("healthState", self._health_state)
-
-    # @command(
-    #     dtype_in=int,
-    #     doc_in="Set ObsState",
-    # )
-    # def SetDirectObsState(self, argin):
-    #     """
-    #     Trigger a ObsState change
-    #     """
-    #     # import debugpy; debugpy.debug_this_thread()
-    #     value = ObsState(argin)
-    #     if self._obs_state != value:
-    #         self._obs_state = value
-    #         self.push_change_event("obsState", self._obs_state)
-
-    # def is_On_allowed(self):
-    #     return True
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="(ReturnType, 'informational message')",
-    # )
-    # def On(self):
-    #     if self.dev_state() != DevState.ON:
-    #         self.set_state(DevState.ON)
-    #         self.push_change_event("State", self.dev_state())
-    #     return [[ResultCode.OK], [""]]
-
-    # def is_Off_allowed(self):
-    #     return True
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="(ReturnType, 'informational message')",
-    # )
-    # def Off(self):
-    #     if self.dev_state() != DevState.OFF:
-    #         self.set_state(DevState.OFF)
-    #         self.push_change_event("State", self.dev_state())
-    #     return [[ResultCode.OK], [""]]
-
-    # def is_Standby_allowed(self):
-    #     return True
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="(ReturnType, 'informational message')",
-    # )
-    # def Standby(self):
-    #     if self.dev_state() != DevState.STANDBY:
-    #         self.set_state(DevState.STANDBY)
-    #         self.push_change_event("State", self.dev_state())
-    #     return [[ResultCode.OK], [""]]
-
-    # def is_TelescopeOn_allowed(self):
-    #     return True
-
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    #     doc_out="(ReturnType, 'informational message')",
-    # )
-    # def TelescopeOn(self):
-    #     if self.dev_state() != DevState.ON:
-    #         self.set_state(DevState.ON)
-    #         self.push_change_event("State", self.dev_state())
-    #     return [[ResultCode.OK], [""]]
 
     def is_TelescopeOff_allowed(self):
         return True
@@ -267,11 +134,10 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             self._obs_state = ObsState.IDLE
             self.push_change_event("obsState", self._obs_state)
         self._resources_assigned = ["0001"]
-        self.logger.info("Pushing the assignedResources event ..........")
+        self.logger.info("Pushing the assignedResources event")
         self.push_change_event("assignedResources", self._resources_assigned)
         command_result = ("1000", str(ResultCode.OK.value))
-        self.logger.info("Calling the LRCR event ..........")
-        # self.push_change_event("longRunningCommandResult", command_result)
+        self.logger.debug("Calling the LRCR event method")
         thread = threading.Thread(
             target=self.push_result_event, args=[command_result]
         )
@@ -282,9 +148,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
     def push_result_event(self, command_result: tuple):
         """Pushes a longRunningCommandResult event after 2 secs with given result."""
         time.sleep(2)
-        self.logger.info(
-            f"Pushing the LRCR event ..........: {command_result}"
-        )
+        self.logger.info(f"Pushing the LRCR event: {command_result}")
         self.push_change_event("longRunningCommandResult", command_result)
 
     def is_ReleaseAllResources_allowed(self):

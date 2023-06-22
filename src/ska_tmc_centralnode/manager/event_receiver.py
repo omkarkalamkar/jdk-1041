@@ -136,7 +136,6 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._logger.info("In handle_lrcr_event")
         if event_data.err:
             errors = event_data.errors
             for error in errors:
@@ -146,8 +145,8 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.device.dev_name()
             )
             return
-        self._logger.info(
-            f"In handle_lrcr_event event_data.attr_value.value ......: {event_data.attr_value.value}"
+        self._logger.debug(
+            f"In handle_lrcr_event event_data.attr_value.value is: {event_data.attr_value.value}"
         )
         new_value = event_data.attr_value.value
         self._component_manager.update_long_running_command_result(

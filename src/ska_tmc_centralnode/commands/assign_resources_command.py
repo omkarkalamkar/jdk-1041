@@ -62,7 +62,6 @@ class AssignResources(AbstractAssignReleaseResources):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
-        self.logger.info("command assign_resources ....")
         self.task_callback = task_callback
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "AssignResources"
@@ -74,7 +73,6 @@ class AssignResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             self.update_task_status(ret_code, message)
         else:
-            self.logger.info("start tracker thread .....")
             self.start_tracker_thread(
                 self.component_manager.get_command_result,
                 ResultCode.OK,

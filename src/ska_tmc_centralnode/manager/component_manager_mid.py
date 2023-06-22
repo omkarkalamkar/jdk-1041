@@ -102,7 +102,7 @@ class CNComponentManagerMid(CNComponentManager):
         )
 
     def check_if_dishes_are_responsive(self):
-        self.logger.info("Checking if dishes are responsive .......")
+        self.logger.info("Checking if dishes are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )

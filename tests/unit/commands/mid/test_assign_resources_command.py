@@ -99,11 +99,6 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
-# @pytest.mark.xfail(
-#     reason=(
-#         "SubarrayNode LongRunningCommandResult attribute event is not received."
-#     )
-# )
 def test_assign_resources_command_completed(tango_context, task_callback):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -112,7 +107,7 @@ def test_assign_resources_command_completed(tango_context, task_callback):
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     result = cm.is_command_allowed("AssignResources")
-    logger.info(f"Command allowed result is ......: {result}")
+    logger.info(f"Command allowed result is: {result}")
 
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
@@ -136,11 +131,6 @@ def test_assign_resources_command_completed(tango_context, task_callback):
     )
 
 
-# @pytest.mark.xfail(
-#     reason=(
-#         "SubarrayNode LongRunningCommandResult attribute event is not received."
-#     )
-# )
 def test_assign_resources_exception_on_sn(tango_context, task_callback):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
