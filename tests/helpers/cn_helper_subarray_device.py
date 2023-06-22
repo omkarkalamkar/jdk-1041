@@ -33,9 +33,9 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             # self._device.set_change_event("obsState", True, False)
             self._device.set_change_event("assignedResources", True, False)
             self._device.set_change_event("isSubarrayAvailable", True, False)
-            # self._device.set_change_event(
-            #     "longRunningCommandResult", True, False
-            # )
+            self._device.set_change_event(
+                "longRunningCommandResult", True, False
+            )
             return (ResultCode.OK, "")
 
     """Device attribute."""
@@ -247,6 +247,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def AssignResources(self, argin):
+        self.logger.info("In SubarrayNode AssignResources ........")
         if self._defective:
             self._obs_state = ObsState.RESOURCING
             self.push_change_event("obsState", self._obs_state)
@@ -266,9 +267,11 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             self._obs_state = ObsState.IDLE
             self.push_change_event("obsState", self._obs_state)
         self._resources_assigned = ["0001"]
+        self.logger.info("Pushing the assignedResources event ..........")
         self.push_change_event("assignedResources", self._resources_assigned)
-
         command_result = ("1000", str(ResultCode.OK.value))
+        self.logger.info("Calling the LRCR event ..........")
+        # self.push_change_event("longRunningCommandResult", command_result)
         thread = threading.Thread(
             target=self.push_result_event, args=[command_result]
         )
@@ -279,6 +282,9 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
     def push_result_event(self, command_result: tuple):
         """Pushes a longRunningCommandResult event after 2 secs with given result."""
         time.sleep(2)
+        self.logger.info(
+            f"Pushing the LRCR event ..........: {command_result}"
+        )
         self.push_change_event("longRunningCommandResult", command_result)
 
     def is_ReleaseAllResources_allowed(self):
