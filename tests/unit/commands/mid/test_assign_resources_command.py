@@ -99,11 +99,11 @@ def get_assign_resources_command_obj():
     return assign_res_command, adapter_factory, cm
 
 
-@pytest.mark.xfail(
-    reason=(
-        "SubarrayNode LongRunningCommandResult attribute event is not received."
-    )
-)
+# @pytest.mark.xfail(
+#     reason=(
+#         "SubarrayNode LongRunningCommandResult attribute event is not received."
+#     )
+# )
 def test_assign_resources_command_completed(tango_context, task_callback):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -136,11 +136,11 @@ def test_assign_resources_command_completed(tango_context, task_callback):
     )
 
 
-@pytest.mark.xfail(
-    reason=(
-        "SubarrayNode LongRunningCommandResult attribute event is not received."
-    )
-)
+# @pytest.mark.xfail(
+#     reason=(
+#         "SubarrayNode LongRunningCommandResult attribute event is not received."
+#     )
+# )
 def test_assign_resources_exception_on_sn(tango_context, task_callback):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
