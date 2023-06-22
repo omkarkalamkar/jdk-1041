@@ -7,6 +7,7 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
 
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,
@@ -28,9 +29,14 @@ from tests.settings import (
 def devices_to_load():
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
+            ],
+        },
+        {
+            "class": HelperSubArrayDevice,
+            "devices": [
                 {"name": MID_CSP_SLN_DEVICE},
                 {"name": MID_SDP_SLN_DEVICE},
             ],

@@ -2,15 +2,12 @@ import time
 
 import mock
 import pytest
-from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common import HelperBaseDevice, HelperSubArrayDevice
 from ska_tmc_common.adapters import DishAdapter
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
-)
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
 )
 
 from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
@@ -34,7 +31,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": SKABaseDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": MID_CSP_MLN_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},

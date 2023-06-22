@@ -2,16 +2,13 @@ import time
 
 import mock
 import pytest
-from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import HelperBaseDevice, HelperSubArrayDevice
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
-)
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
 )
 from tango import DevState
 
@@ -41,7 +38,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": SKABaseDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": MID_CSP_MLN_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},

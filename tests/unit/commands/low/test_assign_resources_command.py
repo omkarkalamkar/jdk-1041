@@ -10,15 +10,13 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
@@ -26,7 +24,7 @@ from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 def devices_to_load():
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": LOW_SUBARRAY_DEVICE},
             ],

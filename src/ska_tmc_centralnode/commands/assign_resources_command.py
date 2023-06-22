@@ -205,10 +205,12 @@ class AssignResources(AbstractAssignReleaseResources):
             if self.component_manager.is_already_assigned(dish_id):
                 return (
                     ResultCode.FAILED,
-                    f"Dish {dish_id} is already allocated",
+                    f"Dish {receptor_id} is already allocated",
                 )
             else:
-                self.logger.info("Resources are already assigned")
+                self.logger.info(
+                    f"Dish {receptor_id} is available for assignment."
+                )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
