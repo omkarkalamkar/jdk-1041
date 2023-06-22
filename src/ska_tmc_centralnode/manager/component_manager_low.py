@@ -180,7 +180,7 @@ class CNComponentManagerLow(CNComponentManager):
                 "Command is not allowed in current state %s",
                 str(self.op_state_model.op_state),
             )
-        if command_name in ["TelescopeOn", "TelescopeOff"]:
+        if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
             self.logger.debug(f"Checking low devices for {command_name}")
             # self.check_if_mccs_mln_is_responsive()
             self.check_if_csp_mln_is_available()
