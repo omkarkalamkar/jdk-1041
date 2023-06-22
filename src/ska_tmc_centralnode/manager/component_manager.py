@@ -79,6 +79,7 @@ class CNComponentManager(TmcComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
+        _telescope_availability_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
         max_workers=5,
@@ -119,6 +120,7 @@ class CNComponentManager(TmcComponentManager):
         )
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
+        self.event_receiver = True
 
         self.event_receiver = _event_receiver
         if self.event_receiver:
@@ -136,6 +138,7 @@ class CNComponentManager(TmcComponentManager):
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_imaging_callback,
+            _telescope_availability_callback,
         )
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
@@ -218,6 +221,7 @@ class CNComponentManager(TmcComponentManager):
 
     def get_command_result(self) -> ResultCode:
         """Returns ResultCode from subarray node"""
+        self.logger.debug(f"self.command_result is: {self.command_result}")
         return self.command_result
 
     def get_device(self, dev_name):
@@ -231,17 +235,18 @@ class CNComponentManager(TmcComponentManager):
         """
         return self.component.get_device(dev_name)
 
-    def check_if_csp_mln_is_responsive(self):
-        return self._check_if_device_is_responsive(
-            [self.input_parameter.csp_mln_dev_name]
-        )
+    def check_if_csp_mln_is_available(self):
+        telescope_availability = self.get_telescope_availability()
+        if not telescope_availability["csp_master_leaf_node"] is True:
+            raise CommandNotAllowed("csp_master_leaf_node is not available")
 
-    def check_if_sdp_mln_is_responsive(self):
-        return self._check_if_device_is_responsive(
-            [self.input_parameter.sdp_mln_dev_name]
-        )
+    def check_if_sdp_mln_is_available(self):
+        telescope_availability = self.get_telescope_availability()
+        if not telescope_availability["sdp_master_leaf_node"] is True:
+            raise CommandNotAllowed("sdp_master_leaf_node is not available")
 
     def check_if_subarrays_are_responsive(self):
+        self.logger.info("Checking if subarrays are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.subarray_dev_names
         )
@@ -256,6 +261,9 @@ class CNComponentManager(TmcComponentManager):
         for dev_name in dev_names:
             dev_info = self.get_device(dev_name)
             if dev_info is not None and not dev_info.unresponsive:
+                self.logger.debug(
+                    f"Device {dev_name} dev_info.unresponsive: {dev_info.unresponsive} "
+                )
                 count += 1
         if count == 0:
             raise CommandNotAllowed(f"{dev_names} not available")
@@ -291,6 +299,21 @@ class CNComponentManager(TmcComponentManager):
         with self.lock:
             self.input_parameter.update(self)
 
+    def update_ping_info(self, ping, dev_name):
+        """
+        Update a device with correct ping information.
+
+        :param dev_name: name of the device
+        :type dev_name: str
+        :param ping: device response time
+        :type ping: int
+        """
+        with self.lock:
+            dev_info = self.get_device(dev_name)
+            dev_info.ping = ping
+            dev_info.update_unresponsive(False)
+            self._telescope_availability_aggregator.aggregate()
+
     def device_failed(self, device_info, exception):
         """
         Set a device to failed and call the relative callback if available
@@ -300,8 +323,11 @@ class CNComponentManager(TmcComponentManager):
         :param exception: an exception
         :type: Exception
         """
+        self.logger.info(f"device failed: {device_info.dev_name}")
+        self.logger.error(str(exception))
         with self.lock:
             self.component.update_device_exception(device_info, exception)
+            self._telescope_availability_aggregator.aggregate()
 
     def update_event_failure(self, dev_name):
         with self.lock:
@@ -371,8 +397,12 @@ class CNComponentManager(TmcComponentManager):
 
         :return True is already assigned, False otherwise
         """
+        self.logger.debug(f"Dish Id is: {dish_id}")
         for devInfo in self.devices:
             if isinstance(devInfo, SubArrayDeviceInfo):
+                self.logger.debug(
+                    f"Subarray Device resources: {devInfo.resources}"
+                )
                 if devInfo.resources is None:
                     return False
                 elif dish_id in devInfo.resources:
@@ -381,6 +411,12 @@ class CNComponentManager(TmcComponentManager):
 
     def get_telescope_health_state(self):
         return self.component.telescope_health_state
+
+    def get_telescope_availability(self):
+        return self.component.telescope_availability
+
+    def set_telescope_availability(self, telescope_availability):
+        self.component.telescope_availability = telescope_availability
 
     def update_long_running_command_result(self, dev_name: str, value):
         """Updates the LRCR callback with received event"""
@@ -394,6 +430,9 @@ class CNComponentManager(TmcComponentManager):
                 # This is in case an empty event is received.
                 pass
             elif self.command_in_progress == "AssignResources":
+                self.logger.info(
+                    f"LongRunningCommandResult event occurred: {int(value[1])}"
+                )
                 if int(value[1]) == ResultCode.OK:
                     self.command_result = ResultCode.OK
 
@@ -547,6 +586,7 @@ class CNComponentManager(TmcComponentManager):
         """
 
         # Execute the command if the input JSON is valid
+        self.logger.info("Calling component manager assign_resources method")
         assign_resources_command = AssignResources(
             self,
             adapter_factory=self.adapter_factory,
@@ -560,6 +600,7 @@ class CNComponentManager(TmcComponentManager):
                 json_argument = json.loads(argin)
             else:
                 json_argument = argin
+            self.logger.info("JSON argin is in correct format.")
         except Exception:
             return assign_resources_command.reject_command(
                 "The JSON string is invalid. Please provide the correct input"
@@ -598,6 +639,26 @@ class CNComponentManager(TmcComponentManager):
                 ResourceNotPresentError,
             ) as e:
                 return assign_resources_command.reject_command(str(e))
+
+        # Reject command if Subarray is not available
+        subarray_id = json_argument["subarray_id"]
+        subarray_suffics = "/" + str(subarray_id)
+        subarrays_list = list(
+            self._component.telescope_availability["tmc_subarrays"].keys()
+        )
+        for subarray in subarrays_list:
+            telescope_availability = self.get_telescope_availability()
+            self.logger.debug(
+                f"Telescope availability is: {telescope_availability}"
+            )
+            self.logger.debug(f"subarrays_list is: {subarrays_list}")
+            if (
+                subarray.endswith(subarray_suffics)
+                and telescope_availability["tmc_subarrays"][subarray] is False
+            ):
+                return assign_resources_command.reject_command(
+                    f"Subarray {subarray} is not available."
+                )
 
         # validate processing block
         (
@@ -640,6 +701,7 @@ class CNComponentManager(TmcComponentManager):
                     "The JSON string is invalid. Please provide the correct input."
                 )
             )
+
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
             (
@@ -661,6 +723,22 @@ class CNComponentManager(TmcComponentManager):
                 json_argument = release_validator.loads(json.dumps(argin))
             except InvalidJSONError as e:
                 return release_resources_command.reject_command(str(e))
+
+        # Reject command if Subarray is not available
+        subarray_id = json_argument["subarray_id"]
+        subarray_suffics = "/" + str(subarray_id)
+        subarrays_list = list(
+            self._component.telescope_availability["tmc_subarrays"].keys()
+        )
+        for subarray in subarrays_list:
+            telescope_availability = self.get_telescope_availability()
+            if (
+                subarray.endswith(subarray_suffics)
+                and telescope_availability["tmc_subarrays"][subarray] is False
+            ):
+                return release_resources_command.reject_command(
+                    f"Subarray {subarray} is not available."
+                )
 
         task_status, response = self.submit_task(
             release_resources_command.release_resources,

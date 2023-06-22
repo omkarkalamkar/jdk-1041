@@ -69,6 +69,13 @@ class CentralComponent(TmcComponent):
         self._update_telescope_state_callback = None
         self._update_telescope_health_state_callback = None
         self._update_tmc_op_state_callback = None
+        self._telescope_availability_callback = None
+
+        self._telescope_availability = {
+            "tmc_subarrays": {},
+            "csp_master_leaf_node": False,
+            "sdp_master_leaf_node": False,
+        }
         self.lock = threading.Lock()
         self._desired_telescope_state = DevState.ON
 
@@ -79,6 +86,7 @@ class CentralComponent(TmcComponent):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
+        _telescope_availability_callback=None,
     ):
         self._update_device_callback = _update_device_callback
         self._update_telescope_state_callback = (
@@ -89,6 +97,9 @@ class CentralComponent(TmcComponent):
         )
         self._update_tmc_op_state_callback = _update_tmc_op_state_callback
         self._update_imaging_callback = _update_imaging_callback
+        self._telescope_availability_callback = (
+            _telescope_availability_callback
+        )
 
     def _invoke_device_callback(self, dev_info):
         if self._update_device_callback is not None:
@@ -111,6 +122,10 @@ class CentralComponent(TmcComponent):
     def _invoke_imaging_callback(self):
         if self._update_imaging_callback is not None:
             self._update_imaging_callback(self.imaging)
+
+    def _invoke_telescope_availability_callback(self):
+        if self._telescope_availability_callback is not None:
+            self._telescope_availability_callback(self.telescope_availability)
 
     @property
     def desired_telescope_state(self):
@@ -217,6 +232,28 @@ class CentralComponent(TmcComponent):
         if self._telescope_state != value:
             self._telescope_state = value
             self._invoke_telescope_state_callback()
+
+    @property
+    def telescope_availability(self):
+        """
+        Returns the telescope availability
+
+        :return: the telescope availability
+        :rtype: DevVarStringArray
+        """
+        return self._telescope_availability
+
+    @telescope_availability.setter
+    def telescope_availability(self, value):
+        """
+        Set telescope availability
+
+        :param value: the new telescope availability
+        :type value: DevState
+        """
+        if self._telescope_availability != value:
+            self._telescope_availability = value
+            self._invoke_telescope_availability_callback()
 
     @property
     def telescope_health_state(self):

@@ -12,6 +12,13 @@ from ska_tango_testing.mock.tango.event_callback import (
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
 
+from tests.settings import (
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
+)
+
 
 def pytest_sessionstart(session):
     """
@@ -105,3 +112,49 @@ def json_factory():
         return get_input_str(join(dirname(__file__), "data", f"{slug}.json"))
 
     return _get_json
+
+
+@pytest.fixture
+def set_mid_sdp_csp_mln_availability_for_aggregation():
+    """
+    Setting mid Csp subarray leaf node and Sdp subarray leaf node availabilty
+    attribute isSubsystemAvailable as True for aggregation
+    """
+    dev_factory = DevFactory()
+    proxy_csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    proxy_csp_mln.SetisSubsystemAvailable(True)
+
+    proxy_sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    proxy_sdp_mln.SetisSubsystemAvailable(True)
+
+    logging.debug(
+        "CspSubarrayLeafNode availability is: %s",
+        proxy_csp_mln.isSubsystemAvailable,
+    )
+    logging.debug(
+        "SdpSubarrayLeafNode availability is: %s",
+        proxy_sdp_mln.isSubsystemAvailable,
+    )
+
+
+@pytest.fixture
+def set_low_sdp_csp_mln_availability_for_aggregation():
+    """
+    Setting low Csp subarray leaf node and Sdp subarray leaf node availabilty
+    attribute isSubsystemAvailable as True for aggregation
+    """
+    dev_factory = DevFactory()
+    proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    proxy_csp_mln.SetisSubsystemAvailable(True)
+
+    proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    proxy_sdp_mln.SetisSubsystemAvailable(True)
+
+    logging.debug(
+        "CspSubarrayLeafNode availability is: %s",
+        proxy_csp_mln.isSubsystemAvailable,
+    )
+    logging.debug(
+        "SdpSubarrayLeafNode availability is: %s",
+        proxy_sdp_mln.isSubsystemAvailable,
+    )

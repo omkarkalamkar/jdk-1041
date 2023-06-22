@@ -4,7 +4,12 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import logger
+from tests.settings import (
+    LOW_SUBARRAY_DEVICE,
+    MID_SUBARRAY_DEVICE,
+    check_subarray_availability,
+    logger,
+)
 
 
 def release_resources(
@@ -16,6 +21,11 @@ def release_resources(
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    if "ska_mid" in central_node_name:
+        subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    else:
+        subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+
     ensure_checked_devices(central_node)
 
     result, unique_id_on = central_node.TelescopeOn()
@@ -32,6 +42,12 @@ def release_resources(
         (unique_id_on[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    if "ska_mid" in central_node_name:
+        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    else:
+        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
 
     if "ska_mid" in central_node_name:
         result, unique_id_assign = central_node.AssignResources(
@@ -63,7 +79,10 @@ def release_resources(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(
-    tango_context, change_event_callbacks, json_factory
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     return release_resources(
         tango_context,
@@ -77,7 +96,10 @@ def test_release_res_command_mid(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
-    tango_context, change_event_callbacks, json_factory
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_low_sdp_csp_mln_availability_for_aggregation,
 ):
     return release_resources(
         tango_context,
@@ -98,6 +120,7 @@ def release_resources_without_subarray_id(
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     ensure_checked_devices(central_node)
 
     result, unique_id_on = central_node.TelescopeOn()
@@ -114,6 +137,9 @@ def release_resources_without_subarray_id(
         (unique_id_on[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id_assign = central_node.AssignResources(assign_input_str)
 
@@ -163,7 +189,10 @@ def release_resources_without_subarray_id(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid_without_subarray_id(
-    tango_context, change_event_callbacks, json_factory
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     return release_resources_without_subarray_id(
         tango_context,

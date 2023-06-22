@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 
@@ -180,3 +181,45 @@ def set_device_state(device, state, devFactory):
     proxy = devFactory.get_device(device)
     proxy.SetDirectState(state)
     assert proxy.State() == state
+
+
+def check_subarray_availability(central_node, subarray_fqdn, expected_status):
+    start_time = time.time()
+    elapsed_time = 0
+    while (json.loads(central_node.telescopeAvailability))["tmc_subarrays"][
+        subarray_fqdn
+    ] != expected_status:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the SubarrayNode availability."
+            )
+
+
+def check_cspmln_availability(cm, expected_status):
+    start_time = time.time()
+    elapsed_time = 0
+    while (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] != expected_status:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the CspMasterLeafNode availability."
+            )
+
+
+def check_sdpmln_availability(cm, expected_status):
+    start_time = time.time()
+    elapsed_time = 0
+    while (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] != expected_status:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the SdpMasterLeafNode availability."
+            )

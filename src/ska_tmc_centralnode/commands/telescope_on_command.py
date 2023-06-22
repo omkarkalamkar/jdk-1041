@@ -38,7 +38,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-
         """This is a long running method for TelescopeOn command, it executes do hook,
         invokes TelescopeOn command on lowe level devices.
 

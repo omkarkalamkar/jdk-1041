@@ -31,7 +31,6 @@ def central_node_device(request):
 
 
 def test_attributes(central_node_device):
-
     assert central_node_device.State() in [
         tango._tango.DevState.UNKNOWN,
         tango._tango.DevState.ON,

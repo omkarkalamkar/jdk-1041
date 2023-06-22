@@ -41,7 +41,6 @@ class AssignResourceValidator:
         dish_leaf_node_prefix,
         logger=module_logger,
     ):
-
         self.logger = logger
         self._subarrays = []
         self._receptor_list = []

@@ -58,7 +58,6 @@ class StowAntennas(CentralNodeCommand):
         return True
 
     def init_adapters(self):
-
         self.dish_adapters = []
 
         error_dev_names = []

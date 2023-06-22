@@ -47,7 +47,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-
         """This is a long running method for ReleaseResources command, it executes do hook,
         invokes ReleaseResources command on lower level devices.
 

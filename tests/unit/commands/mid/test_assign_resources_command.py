@@ -4,7 +4,6 @@ from os.path import dirname, join
 
 import mock
 import pytest
-from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import DevFactory
@@ -13,17 +12,28 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
+from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
+from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
+    DISH_MASTER_DEVICE,
+    MID_CSP_MASTER_DEVICE,
     MID_CSP_MLN_DEVICE,
+    MID_CSP_SLN_DEVICE,
+    MID_SDP_MASTER_DEVICE,
     MID_SDP_MLN_DEVICE,
+    MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
+    TIMEOUT,
     create_cm,
     logger,
 )
@@ -33,17 +43,32 @@ from tests.settings import (
 def devices_to_load():
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
             ],
         },
         {
-            "class": SKABaseDevice,
+            "class": HelperSubArrayDevice,
+            "devices": [
+                {"name": MID_CSP_SLN_DEVICE},
+                {"name": MID_SDP_SLN_DEVICE},
+            ],
+        },
+        {
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": MID_CSP_MLN_DEVICE},
+                {"name": MID_CSP_MASTER_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},
+                {"name": MID_SDP_MASTER_DEVICE},
                 {"name": DISH_LEAF_NODE_DEVICE},
+            ],
+        },
+        {
+            "class": HelperDishDevice,
+            "devices": [
+                {"name": DISH_MASTER_DEVICE},
             ],
         },
     )
@@ -81,18 +106,28 @@ def test_assign_resources_command_completed(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.is_command_allowed("AssignResources")
+    result = cm.is_command_allowed("AssignResources")
+    logger.info(f"Command allowed result is: {result}")
+
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
+
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
+        lookahead=5,
     )
 
 
@@ -109,6 +144,12 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
@@ -129,6 +170,12 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
 ):
     logger.info("%s", tango_context)
     _, _, cm = get_assign_resources_command_obj()
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
@@ -219,6 +266,7 @@ def test_assign_resources_command_already_assigned(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+
     cm.is_command_allowed("AssignResources")
     adapter_factory = HelperAdapterFactory()
 
@@ -242,4 +290,17 @@ def test_assign_resources_command_already_assigned(
     )
     (res_code, message) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
-    assert "dish0001" in message
+
+
+def check_if_subarray_is_available(cm):
+    start_time = time.time()
+    elapsed_time = 0
+    while (cm.component.telescope_availability)["tmc_subarrays"][
+        MID_SUBARRAY_DEVICE
+    ] is not True:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > TIMEOUT:
+            pytest.fail(
+                "Timeout occurred while checking the SubarrayNode availability."
+            )

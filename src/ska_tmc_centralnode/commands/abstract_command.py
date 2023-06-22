@@ -54,7 +54,6 @@ class CentralNodeCommand(TMCCommand):
         return (ResultCode.OK, "")
 
     def send_command(self, adapters, description, command, argin=None):
-
         if argin is None:
             return self.invoke_command(
                 adapters, operator.methodcaller(command), description, command
@@ -348,7 +347,6 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
-
         # self.tm_leaf_mccs_mln_adapter = None
         self.subarray_adapters = []
 

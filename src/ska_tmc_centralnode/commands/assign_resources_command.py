@@ -51,7 +51,6 @@ class AssignResources(AbstractAssignReleaseResources):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-
         """This is a long running method for TelescopeOn command, it executes do hook,
         invokes TelescopeOn command on lowe level devices.
 
@@ -69,6 +68,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.component_manager.command_result = ResultCode.STARTED
 
         ret_code, message = self.do(argin=json.dumps(argin))
+        self.logger.info(f"command assign_resources returncode: {ret_code}")
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             self.update_task_status(ret_code, message)
@@ -205,10 +205,12 @@ class AssignResources(AbstractAssignReleaseResources):
             if self.component_manager.is_already_assigned(dish_id):
                 return (
                     ResultCode.FAILED,
-                    f"Dish {dish_id} is already allocated",
+                    f"Dish {receptor_id} is already allocated",
                 )
             else:
-                self.logger.info("Resources are already assigned")
+                self.logger.info(
+                    f"Dish {receptor_id} is available for assignment."
+                )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )

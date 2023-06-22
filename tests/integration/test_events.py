@@ -11,7 +11,11 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_internal_model_events_mid(tango_context, change_event_callbacks):
+def test_internal_model_events_mid(
+    tango_context,
+    change_event_callbacks,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
     pytest.num_events_arrived = 0
 
     def event_callback(evt):
@@ -57,7 +61,9 @@ def test_internal_model_events_mid(tango_context, change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_internal_model_events_low(tango_context):
+def test_internal_model_events_low(
+    tango_context, set_low_sdp_csp_mln_availability_for_aggregation
+):
     pytest.num_events_arrived = 0
 
     def event_callback(evt):
@@ -128,7 +134,11 @@ def commands_result_events(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_command_result_events_mid(tango_context, change_event_callbacks):
+def test_command_result_events_mid(
+    tango_context,
+    change_event_callbacks,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
     commands_result_events(
         tango_context,
         change_event_callbacks,
@@ -139,7 +149,11 @@ def test_command_result_events_mid(tango_context, change_event_callbacks):
 @pytest.mark.skip(reason="Needs to be tested.")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_command_result_events_low(tango_context, change_event_callbacks):
+def test_command_result_events_low(
+    tango_context,
+    change_event_callbacks,
+    set_low_sdp_csp_mln_availability_for_aggregation,
+):
     commands_result_events(
         tango_context,
         change_event_callbacks,

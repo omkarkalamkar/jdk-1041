@@ -2,15 +2,12 @@ import time
 
 import mock
 import pytest
-from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common import HelperBaseDevice, HelperSubArrayDevice
 from ska_tmc_common.adapters import DishAdapter
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
-)
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
 )
 
 from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
@@ -34,7 +31,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": SKABaseDevice,
+            "class": HelperBaseDevice,
             "devices": [
                 {"name": MID_CSP_MLN_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},
@@ -99,7 +96,6 @@ def test_telescope_stow_antennas_fail_dish(tango_context):
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
 def test_telescope_stow_antennas_fail_check_allowed(tango_context):
-
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time

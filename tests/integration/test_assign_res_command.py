@@ -13,6 +13,7 @@ from tests.settings import (
     MID_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
+    check_subarray_availability,
     logger,
 )
 
@@ -27,6 +28,7 @@ def assign_resources(
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    subarray_proxy = dev_factory.get_device(subarray_device)
 
     ensure_checked_devices(central_node)
 
@@ -49,6 +51,9 @@ def assign_resources(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, subarray_device, True)
 
     if "ska_mid" in central_node_name:
         result, unique_id = central_node.AssignResources(assign_input_str)
@@ -143,7 +148,11 @@ def assign_resources(
     [("ska_mid/tm_central/central_node")],
 )
 def test_assign_res_command_mid(
-    tango_context, central_node_name, change_event_callbacks, json_factory
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     return assign_resources(
         tango_context,
@@ -161,7 +170,11 @@ def test_assign_res_command_mid(
     [("ska_low/tm_central/central_node")],
 )
 def test_assign_res_command_low(
-    tango_context, central_node_name, change_event_callbacks, json_factory
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+    set_low_sdp_csp_mln_availability_for_aggregation,
 ):
     return assign_resources(
         tango_context,
@@ -181,6 +194,7 @@ def assign_resources_with_invalid_json(
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    subarray_proxy = dev_factory.get_device(subarray_device)
 
     ensure_checked_devices(central_node)
 
@@ -204,6 +218,9 @@ def assign_resources_with_invalid_json(
         lookahead=2,
     )
 
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, subarray_device, True)
+
     result, message = central_node.AssignResources(assign_input_str)
 
     assert [
@@ -219,7 +236,11 @@ def assign_resources_with_invalid_json(
     [("ska_low/tm_central/central_node")],
 )
 def test_assign_res_command_low_invalid_json(
-    tango_context, central_node_name, change_event_callbacks, json_factory
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+    set_low_sdp_csp_mln_availability_for_aggregation,
 ):
     return assign_resources_with_invalid_json(
         tango_context,
@@ -238,6 +259,7 @@ def assign_resources_without_subarray_id(
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
 
@@ -260,6 +282,9 @@ def assign_resources_without_subarray_id(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, message = central_node.AssignResources(assign_input_str)
 
@@ -295,7 +320,11 @@ def assign_resources_without_subarray_id(
     [("ska_mid/tm_central/central_node")],
 )
 def test_assign_res_command_mid_without_subarray_id(
-    tango_context, central_node_name, change_event_callbacks, json_factory
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     return assign_resources_without_subarray_id(
         tango_context,
@@ -308,11 +337,15 @@ def test_assign_res_command_mid_without_subarray_id(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_assign_resources_exception_propagation(
-    tango_context, change_event_callbacks, json_factory
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
 
@@ -338,6 +371,9 @@ def test_assign_resources_exception_propagation(
 
     tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
     tmc_subarray.SetDefective(True)
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id = central_node.AssignResources(
         json_factory("command_AssignResources")

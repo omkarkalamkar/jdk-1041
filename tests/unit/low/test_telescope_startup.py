@@ -2,9 +2,11 @@ import pytest
 import tango
 from ska_control_model import HealthState
 from ska_tmc_common import HelperBaseDevice
+from ska_tmc_common.test_helpers.helper_subarray_device import (
+    HelperSubArrayDevice,
+)
 
 from ska_tmc_centralnode.model.input import InputParameterLow
-from tests.helpers.helper_subarray_device import HelperSubArrayDevice
 from tests.settings import (
     LOW_CSP_MASTER_DEVICE,
     LOW_CSP_MLN_DEVICE,
