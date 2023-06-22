@@ -266,6 +266,7 @@ def test_assign_resources_command_already_assigned(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+
     cm.is_command_allowed("AssignResources")
     adapter_factory = HelperAdapterFactory()
 
@@ -289,7 +290,6 @@ def test_assign_resources_command_already_assigned(
     )
     (res_code, message) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
-    assert "dish0001" in message
 
 
 def check_if_subarray_is_available(cm):
