@@ -102,6 +102,7 @@ class CNComponentManagerMid(CNComponentManager):
         )
 
     def check_if_dishes_are_responsive(self):
+        self.logger.info("Checking if dishes are responsive .......")
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )
@@ -222,7 +223,7 @@ class CNComponentManagerMid(CNComponentManager):
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
-            self.logger.debug(f"Checking mid devices for {command_name}")
+            self.logger.info(f"Checking mid devices for {command_name}")
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
 

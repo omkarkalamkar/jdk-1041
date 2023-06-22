@@ -74,6 +74,7 @@ class AssignResources(AbstractAssignReleaseResources):
         if ret_code == ResultCode.FAILED:
             self.update_task_status(ret_code, message)
         else:
+            self.logger.info("start tracker thread .....")
             self.start_tracker_thread(
                 self.component_manager.get_command_result,
                 ResultCode.OK,

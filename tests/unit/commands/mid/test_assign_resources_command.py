@@ -14,7 +14,6 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 )
 from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
 from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
-
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )

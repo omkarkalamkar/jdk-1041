@@ -221,6 +221,9 @@ class CNComponentManager(TmcComponentManager):
 
     def get_command_result(self) -> ResultCode:
         """Returns ResultCode from subarray node"""
+        self.logger.info(
+            f"self.command_result ..........: {self.command_result}"
+        )
         return self.command_result
 
     def get_device(self, dev_name):
@@ -245,6 +248,7 @@ class CNComponentManager(TmcComponentManager):
             raise CommandNotAllowed("sdp_master_leaf_node is not available")
 
     def check_if_subarrays_are_responsive(self):
+        self.logger.info("Checking if subarrays are responsive .......")
         return self._check_if_device_is_responsive(
             self.input_parameter.subarray_dev_names
         )
@@ -259,9 +263,13 @@ class CNComponentManager(TmcComponentManager):
         for dev_name in dev_names:
             dev_info = self.get_device(dev_name)
             if dev_info is not None and not dev_info.unresponsive:
+                self.logger.info(
+                    f"Device {dev_name} dev_info.unresponsive ........ : {dev_info.unresponsive} "
+                )
                 count += 1
         if count == 0:
             raise CommandNotAllowed(f"{dev_names} not available")
+        self.logger.info(f"Count is ....... : {count}")
 
     def add_multiple_devices(self, device_list):
         """
@@ -425,6 +433,9 @@ class CNComponentManager(TmcComponentManager):
                 # This is in case an empty event is received.
                 pass
             elif self.command_in_progress == "AssignResources":
+                self.logger.info(
+                    f"LongRunningCommandResult event occurred ..... : {int(value[1])}"
+                )
                 if int(value[1]) == ResultCode.OK:
                     self.command_result = ResultCode.OK
 
@@ -578,6 +589,7 @@ class CNComponentManager(TmcComponentManager):
         """
 
         # Execute the command if the input JSON is valid
+        self.logger.info("Calling component manager assign_resources method")
         assign_resources_command = AssignResources(
             self,
             adapter_factory=self.adapter_factory,
@@ -591,6 +603,7 @@ class CNComponentManager(TmcComponentManager):
                 json_argument = json.loads(argin)
             else:
                 json_argument = argin
+            self.logger.info("JSON argin is in correct format.")
         except Exception:
             return assign_resources_command.reject_command(
                 "The JSON string is invalid. Please provide the correct input"
@@ -666,10 +679,6 @@ class CNComponentManager(TmcComponentManager):
             assign_resources_command.assign_resources,
             args=[json_argument, self.logger],
             task_callback=task_callback,
-        )
-
-        self.logger.info(
-            f"Component manager assign task callback: {task_callback}"
         )
         return task_status, response
 
