@@ -5,6 +5,7 @@ import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -23,6 +24,8 @@ from tests.settings import (
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
     MID_SUBARRAY_DEVICE,
+    check_cspmln_availability,
+    check_sdpmln_availability,
     create_cm,
     logger,
 )
@@ -64,6 +67,21 @@ def test_telescope_standby_command(tango_context):
     )
     unique_id = f"{time.time()}_TelescopeStandby"
     task_callback = MockCallable(unique_id)
+
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_mln.SetisSubsystemAvailable(True)
+    sdp_mln.SetisSubsystemAvailable(True)
+    check_cspmln_availability(cm, True)
+    check_sdpmln_availability(cm, True)
+    assert (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] is True
+    assert (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] is True
+
     cm.is_command_allowed("TelescopeStandby")
     cm.telescope_standby(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
@@ -76,6 +94,21 @@ def test_telescope_standby_command_task_completed(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_mln.SetisSubsystemAvailable(True)
+    sdp_mln.SetisSubsystemAvailable(True)
+    check_cspmln_availability(cm, True)
+    check_sdpmln_availability(cm, True)
+    assert (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] is True
+    assert (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] is True
+
     cm.is_command_allowed("TelescopeStandby")
     my_adapter_factory = HelperAdapterFactory()
 
@@ -97,6 +130,21 @@ def test_telescope_standby_command_fail_subarray(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_mln.SetisSubsystemAvailable(True)
+    sdp_mln.SetisSubsystemAvailable(True)
+    check_cspmln_availability(cm, True)
+    check_sdpmln_availability(cm, True)
+    assert (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] is True
+    assert (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] is True
+
     cm.is_command_allowed("TelescopeStandby")
     my_adapter_factory = HelperAdapterFactory()
 
@@ -125,6 +173,20 @@ def test_telescope_standby_command_fail_dish(tango_context):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_mln.SetisSubsystemAvailable(True)
+    sdp_mln.SetisSubsystemAvailable(True)
+    check_cspmln_availability(cm, True)
+    check_sdpmln_availability(cm, True)
+    assert (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] is True
+    assert (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] is True
 
     cm.is_command_allowed("TelescopeStandby")
     my_adapter_factory = HelperAdapterFactory()
