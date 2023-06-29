@@ -580,9 +580,9 @@ class CNComponentManager(TmcComponentManager):
         self, argin, task_callback: Optional[Callable] = None
     ):
         """
-        Submit the AssignResources command in queue.
-
-        :return: a result code and message
+                Submit the AssignResources command in queue.
+        type(json_argument)
+                :return: a result code and message
         """
 
         # Execute the command if the input JSON is valid
@@ -595,23 +595,15 @@ class CNComponentManager(TmcComponentManager):
         )
         self.assign_id = f"{time.time()}-{AssignResources.__name__}"
 
-        try:
-            if type(argin) != dict:
-                json_argument = json.loads(argin)
-            else:
-                json_argument = argin
-            self.logger.info("JSON argin is in correct format.")
-        except Exception:
-            return assign_resources_command.reject_command(
-                "The JSON string is invalid. Please provide the correct input"
-            )
+        json_argument = json.loads(argin)
+        self.logger.info("JSON argin is in correct format.")
 
         if isinstance(self.input_parameter, InputParameterLow):
             (
                 is_valid,
                 invalid_json_error_msg,
             ) = assign_resources_command._validate_low_json(
-                json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
+                json.loads(argin), REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:
                 return assign_resources_command.reject_command(
@@ -632,7 +624,7 @@ class CNComponentManager(TmcComponentManager):
                     self.logger,
                 )
 
-                json_argument = assign_validator.loads(json.dumps(argin))
+                json_argument = assign_validator.loads(argin)
             except (
                 InvalidJSONError,
                 SubarrayNotPresentError,
@@ -641,6 +633,7 @@ class CNComponentManager(TmcComponentManager):
                 return assign_resources_command.reject_command(str(e))
 
         # Reject command if Subarray is not available
+        json_argument = json.loads(argin)
         subarray_id = json_argument["subarray_id"]
         subarray_suffics = "/" + str(subarray_id)
         subarrays_list = list(
@@ -690,17 +683,8 @@ class CNComponentManager(TmcComponentManager):
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        try:
-            if type(argin) != dict:
-                json_argument = json.loads(argin)
-            else:
-                json_argument = argin
-        except Exception:
-            return release_resources_command.reject_command(
-                (
-                    "The JSON string is invalid. Please provide the correct input."
-                )
-            )
+        json_argument = json.loads(argin)
+        self.logger.info("JSON argin is in correct format.")
 
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
@@ -708,7 +692,7 @@ class CNComponentManager(TmcComponentManager):
                 is_valid,
                 invalid_json_error_msg,
             ) = release_resources_command._validate_low_json(
-                json_argument,
+                json.loads(argin),
                 REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
             )
             if not is_valid:
@@ -720,10 +704,9 @@ class CNComponentManager(TmcComponentManager):
             # Utilize CDM to validate json.
             try:
                 release_validator = ReleaseResourceValidator(self.logger)
-                json_argument = release_validator.loads(json.dumps(argin))
+                json_argument = release_validator.loads(argin)
             except InvalidJSONError as e:
                 return release_resources_command.reject_command(str(e))
-
         # Reject command if Subarray is not available
         subarray_id = json_argument["subarray_id"]
         subarray_suffics = "/" + str(subarray_id)

@@ -1,3 +1,6 @@
+import json
+from os.path import dirname, join
+
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -10,6 +13,13 @@ from tests.settings import (
     check_subarray_availability,
     logger,
 )
+
+
+def get_assign_input_str(assign_input_file="command_AssignResources.json"):
+    path = join(dirname(__file__), "..", "data", assign_input_file)
+    with open(path, "r") as f:
+        assign_input_str = f.read()
+    return assign_input_str
 
 
 def release_resources(
@@ -51,11 +61,11 @@ def release_resources(
 
     if "ska_mid" in central_node_name:
         result, unique_id_assign = central_node.AssignResources(
-            assign_input_str
+            json.dumps(assign_input_str)
         )
     else:
         result, unique_id_assign = central_node.AssignResources(
-            assign_input_str
+            json.dumps(assign_input_str)
         )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
@@ -63,7 +73,9 @@ def release_resources(
         lookahead=4,
     )
 
-    result, unique_id = central_node.ReleaseResources(release_input_string)
+    result, unique_id = central_node.ReleaseResources(
+        json.dumps(release_input_string)
+    )
 
     logger.info(f"Unique id:{unique_id[0]}")
     assert unique_id[0].endswith("ReleaseResources")
@@ -81,14 +93,13 @@ def release_resources(
 def test_release_res_command_mid(
     tango_context,
     change_event_callbacks,
-    json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     return release_resources(
         tango_context,
         "ska_mid/tm_central/central_node",
-        json_factory("command_AssignResources"),
-        json_factory("command_ReleaseResources"),
+        get_assign_input_str("command_AssignResources.json"),
+        get_assign_input_str("command_ReleaseResources.json"),
         change_event_callbacks,
     )
 
@@ -104,8 +115,8 @@ def test_release_res_command_low(
     return release_resources(
         tango_context,
         "ska_low/tm_central/central_node",
-        json_factory("command_assign_resource_low"),
-        json_factory("command_release_resource_low"),
+        get_assign_input_str("command_assign_resource_low.json"),
+        get_assign_input_str("command_release_resource_low.json"),
         change_event_callbacks,
     )
 
@@ -141,7 +152,9 @@ def release_resources_without_subarray_id(
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
-    result, unique_id_assign = central_node.AssignResources(assign_input_str)
+    result, unique_id_assign = central_node.AssignResources(
+        json.dumps(assign_input_str)
+    )
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
@@ -150,7 +163,7 @@ def release_resources_without_subarray_id(
     )
 
     result, message = central_node.ReleaseResources(
-        invalid_release_input_string
+        json.dumps(invalid_release_input_string)
     )
 
     assert (
@@ -159,7 +172,9 @@ def release_resources_without_subarray_id(
     )
     assert result[0] == ResultCode.REJECTED
 
-    result, unique_id = central_node.ReleaseResources(release_input_string)
+    result, unique_id = central_node.ReleaseResources(
+        json.dumps(release_input_string)
+    )
 
     logger.info(f"Unique id:{unique_id[0]}")
     assert unique_id[0].endswith("ReleaseResources")
@@ -191,14 +206,15 @@ def release_resources_without_subarray_id(
 def test_release_res_command_mid_without_subarray_id(
     tango_context,
     change_event_callbacks,
-    json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     return release_resources_without_subarray_id(
         tango_context,
         "ska_mid/tm_central/central_node",
-        json_factory("command_AssignResources"),
-        json_factory("command_ReleaseResources_without_subarray_id"),
-        json_factory("command_ReleaseResources"),
+        get_assign_input_str("command_AssignResources.json"),
+        get_assign_input_str(
+            "command_ReleaseResources_without_subarray_id.json"
+        ),
+        get_assign_input_str("command_ReleaseResources.json"),
         change_event_callbacks,
     )
