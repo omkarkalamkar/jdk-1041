@@ -66,8 +66,7 @@ def test_low_release_resources_command(
     check_if_subarray_is_available(cm)
 
     release_input_str = json_factory("command_release_resource_low")
-    json_argument = json.loads(release_input_str)
-    cm.release_resources(json_argument, task_callback=task_callback)
+    cm.release_resources(release_input_str, task_callback=task_callback)
     caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
@@ -100,9 +99,8 @@ def test_low_release_resources_command_fail_subarray(
         LOW_SUBARRAY_DEVICE, proxy=subarrayMock
     )
     release_input_str = json_factory("command_release_resource_low")
-    json_argument = json.loads(release_input_str)
     assign_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
-    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, _) = assign_res_command.do(release_input_str)
     assert res_code == ResultCode.FAILED
 
 

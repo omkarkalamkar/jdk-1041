@@ -113,10 +113,9 @@ def test_mid_release_resources_command_fail_subarray(
         MID_SUBARRAY_DEVICE, proxy=subarrayMock
     )
     release_input_str = get_release_input_str()
-    json_argument = json.loads(release_input_str)
     release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
-    cm.release_resources(json_argument, task_callback=task_callback)
-    (res_code, _) = release_res_command.do(json.dumps(json_argument))
+    cm.release_resources(release_input_str, task_callback=task_callback)
+    (res_code, _) = release_res_command.do(release_input_str)
     assert res_code == ResultCode.FAILED
 
 
