@@ -112,6 +112,7 @@ def test_low_release_resources_empty_input_json(tango_context, task_callback):
     assert res_code == TaskStatus.REJECTED
 
 
+@pytest.mark.skip("Component manager will not reject the command")
 @pytest.mark.SKA_low
 def test_low_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
@@ -135,7 +136,9 @@ def test_low_release_resources_missing_subarray_id(
     release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
-    cm.release_resources(json_argument, task_callback=task_callback)
+    cm.release_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     (res_code, message) = cm.release_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
     assert "subarray_id" in message

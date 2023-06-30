@@ -15,11 +15,11 @@ from tests.settings import (
 )
 
 
-def get_assign_input_str(assign_input_file="command_AssignResources.json"):
-    path = join(dirname(__file__), "..", "data", assign_input_file)
+def get_input_str(input_file="command_ReleaseResources.json"):
+    path = join(dirname(__file__), "..", "data", input_file)
     with open(path, "r") as f:
-        assign_input_str = f.read()
-    return assign_input_str
+        input_str = f.read()
+    return input_str
 
 
 def release_resources(
@@ -98,8 +98,8 @@ def test_release_res_command_mid(
     return release_resources(
         tango_context,
         "ska_mid/tm_central/central_node",
-        get_assign_input_str("command_AssignResources.json"),
-        get_assign_input_str("command_ReleaseResources.json"),
+        get_input_str("command_AssignResources.json"),
+        get_input_str("command_ReleaseResources.json"),
         change_event_callbacks,
     )
 
@@ -115,8 +115,8 @@ def test_release_res_command_low(
     return release_resources(
         tango_context,
         "ska_low/tm_central/central_node",
-        get_assign_input_str("command_assign_resource_low.json"),
-        get_assign_input_str("command_release_resource_low.json"),
+        get_input_str("command_assign_resource_low.json"),
+        get_input_str("command_release_resource_low.json"),
         change_event_callbacks,
     )
 
@@ -211,10 +211,8 @@ def test_release_res_command_mid_without_subarray_id(
     return release_resources_without_subarray_id(
         tango_context,
         "ska_mid/tm_central/central_node",
-        get_assign_input_str("command_AssignResources.json"),
-        get_assign_input_str(
-            "command_ReleaseResources_without_subarray_id.json"
-        ),
-        get_assign_input_str("command_ReleaseResources.json"),
+        get_input_str("command_AssignResources.json"),
+        get_input_str("command_ReleaseResources_without_subarray_id.json"),
+        get_input_str("command_ReleaseResources.json"),
         change_event_callbacks,
     )
