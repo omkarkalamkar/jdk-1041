@@ -595,8 +595,13 @@ class CNComponentManager(TmcComponentManager):
         )
         self.assign_id = f"{time.time()}-{AssignResources.__name__}"
 
-        json_argument = json.loads(argin)
-        self.logger.info("JSON argin is in correct format.")
+        try:
+            json_argument = json.loads(argin)
+            self.logger.info("JSON argin is in correct format.")
+        except Exception:
+            return assign_resources_command.reject_command(
+                "The JSON string is invalid. Please provide the correct input"
+            )
 
         if isinstance(self.input_parameter, InputParameterLow):
             (
@@ -683,8 +688,13 @@ class CNComponentManager(TmcComponentManager):
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        json_argument = json.loads(argin)
-        self.logger.info("JSON argin is in correct format.")
+        try:
+            json_argument = json.loads(argin)
+            self.logger.info("JSON argin is in correct format.")
+        except Exception:
+            return release_resources_command.reject_command(
+                "The JSON string is invalid. Please provide the correct input"
+            )
 
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):

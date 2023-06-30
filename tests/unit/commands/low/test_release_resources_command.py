@@ -112,7 +112,6 @@ def test_low_release_resources_empty_input_json(tango_context, task_callback):
     assert res_code == TaskStatus.REJECTED
 
 
-@pytest.mark.skip("Component manager will not reject the command")
 @pytest.mark.SKA_low
 def test_low_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
