@@ -98,6 +98,7 @@ def get_assign_resources_command_obj():
     )
     return assign_res_command, adapter_factory, cm
 
+
 def test_assign_resources_command_completed(tango_context, task_callback):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
