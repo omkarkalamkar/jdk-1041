@@ -149,7 +149,6 @@ def assign_resources(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
-@pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -173,7 +172,6 @@ def test_assign_res_command_mid(
     )
 
 
-@pytest.mark.lowtest
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
@@ -241,7 +239,6 @@ def assign_resources_with_invalid_json(
     assert result[0] == ResultCode.REJECTED
 
 
-@pytest.mark.ks
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(

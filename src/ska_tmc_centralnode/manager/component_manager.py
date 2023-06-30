@@ -577,12 +577,12 @@ class CNComponentManager(TmcComponentManager):
         return task_status, response
 
     def assign_resources(
-        self, argin, task_callback: Optional[Callable] = None
+        self, argin: str, task_callback: Optional[Callable] = None
     ):
         """
-                Submit the AssignResources command in queue.
-        type(json_argument)
-                :return: a result code and message
+        Submit the AssignResources command in queue.
+
+        :return: a result code and message
         """
 
         # Execute the command if the input JSON is valid
@@ -597,10 +597,10 @@ class CNComponentManager(TmcComponentManager):
 
         try:
             json_argument = json.loads(argin)
-            self.logger.info("JSON argin is in correct format.")
-        except Exception:
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
             return assign_resources_command.reject_command(
-                "The JSON string is invalid. Please provide the correct input"
+                f"The JSON string is malformed. Error: {str(e)}"
             )
 
         if isinstance(self.input_parameter, InputParameterLow):
@@ -608,7 +608,7 @@ class CNComponentManager(TmcComponentManager):
                 is_valid,
                 invalid_json_error_msg,
             ) = assign_resources_command._validate_low_json(
-                json.loads(argin), REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
+                json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:
                 return assign_resources_command.reject_command(
@@ -690,10 +690,10 @@ class CNComponentManager(TmcComponentManager):
         )
         try:
             json_argument = json.loads(argin)
-            self.logger.info("JSON argin is in correct format.")
-        except Exception:
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
             return release_resources_command.reject_command(
-                "The JSON string is invalid. Please provide the correct input"
+                f"The JSON string is malformed. Error: {str(e)}"
             )
 
         # Execute the command if the input JSON is valid
@@ -702,7 +702,7 @@ class CNComponentManager(TmcComponentManager):
                 is_valid,
                 invalid_json_error_msg,
             ) = release_resources_command._validate_low_json(
-                json.loads(argin),
+                json_argument,
                 REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
             )
             if not is_valid:
