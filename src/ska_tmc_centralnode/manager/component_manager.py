@@ -582,7 +582,14 @@ class CNComponentManager(TmcComponentManager):
         """
         Submit the AssignResources command in queue.
 
-        :return: a result code and message
+        Description:
+        Submits the AssignResources command to the queue for processing.
+
+        Arguments:
+        - json_argument (str): A dictionary containing the necessary information for assigning resources.
+
+        Returns:
+        - None: No return value.
         """
 
         # Execute the command if the input JSON is valid
@@ -638,7 +645,6 @@ class CNComponentManager(TmcComponentManager):
                 return assign_resources_command.reject_command(str(e))
 
         # Reject command if Subarray is not available
-        json_argument = json.loads(argin)
         subarray_id = json_argument["subarray_id"]
         subarray_suffics = "/" + str(subarray_id)
         subarrays_list = list(
