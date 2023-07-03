@@ -584,8 +584,8 @@ class CNComponentManager(TmcComponentManager):
 
         :param argin: input json string for assign resource command
         :type argin: str
-        :return: None
-        :rtype: None
+        :return: task_status
+        :rtype: tuple
         """
         # Execute the command if the input JSON is valid
         self.logger.info("Calling component manager assign_resources method")
