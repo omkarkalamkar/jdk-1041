@@ -577,14 +577,18 @@ class CNComponentManager(TmcComponentManager):
         return task_status, response
 
     def assign_resources(
-        self, argin, task_callback: Optional[Callable] = None
+        self, argin: str, task_callback: Optional[Callable] = None
     ):
         """
         Submit the AssignResources command in queue.
 
-        :return: a result code and message
+        :param argin: input json string for assign resource command
+        :type argin: str
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :return: task_status
+        :rtype: tuple
         """
-
         # Execute the command if the input JSON is valid
         self.logger.info("Calling component manager assign_resources method")
         assign_resources_command = AssignResources(
@@ -596,14 +600,11 @@ class CNComponentManager(TmcComponentManager):
         self.assign_id = f"{time.time()}-{AssignResources.__name__}"
 
         try:
-            if type(argin) != dict:
-                json_argument = json.loads(argin)
-            else:
-                json_argument = argin
-            self.logger.info("JSON argin is in correct format.")
-        except Exception:
+            json_argument = json.loads(argin)
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
             return assign_resources_command.reject_command(
-                "The JSON string is invalid. Please provide the correct input"
+                f"The JSON string is malformed. Error: {str(e)}"
             )
 
         if isinstance(self.input_parameter, InputParameterLow):
@@ -632,7 +633,7 @@ class CNComponentManager(TmcComponentManager):
                     self.logger,
                 )
 
-                json_argument = assign_validator.loads(json.dumps(argin))
+                json_argument = assign_validator.loads(argin)
             except (
                 InvalidJSONError,
                 SubarrayNotPresentError,
@@ -641,6 +642,7 @@ class CNComponentManager(TmcComponentManager):
                 return assign_resources_command.reject_command(str(e))
 
         # Reject command if Subarray is not available
+        json_argument = json.loads(argin)
         subarray_id = json_argument["subarray_id"]
         subarray_suffics = "/" + str(subarray_id)
         subarrays_list = list(
@@ -683,23 +685,24 @@ class CNComponentManager(TmcComponentManager):
         self, argin, task_callback: Optional[Callable] = None
     ):
         """
-        Submit the ReleaseResources command in queue.
+        Submit the ReleaseResource command in queue.
 
-        :return: a result code and message
+        :param argin: input json string for release resource command
+        :type argin: str
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :return: task_status
+        :rtype: tuple
         """
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
         try:
-            if type(argin) != dict:
-                json_argument = json.loads(argin)
-            else:
-                json_argument = argin
-        except Exception:
+            json_argument = json.loads(argin)
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
             return release_resources_command.reject_command(
-                (
-                    "The JSON string is invalid. Please provide the correct input."
-                )
+                f"The JSON string is malformed. Error: {str(e)}"
             )
 
         # Execute the command if the input JSON is valid
@@ -720,10 +723,9 @@ class CNComponentManager(TmcComponentManager):
             # Utilize CDM to validate json.
             try:
                 release_validator = ReleaseResourceValidator(self.logger)
-                json_argument = release_validator.loads(json.dumps(argin))
+                json_argument = release_validator.loads(argin)
             except InvalidJSONError as e:
                 return release_resources_command.reject_command(str(e))
-
         # Reject command if Subarray is not available
         subarray_id = json_argument["subarray_id"]
         subarray_suffics = "/" + str(subarray_id)

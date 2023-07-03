@@ -59,6 +59,7 @@ def call_command(central_node, command_name, json_factory):
                 )
 
                 assign_res_string = json_factory("command_AssignResources")
+
                 pytest.command_result = central_node.command_inout(
                     command_name, assign_res_string
                 )
@@ -70,6 +71,7 @@ def call_command(central_node, command_name, json_factory):
                 )
 
                 assign_res_string = json_factory("command_assign_resource_low")
+
                 pytest.command_result = central_node.command_inout(
                     command_name, assign_res_string
                 )

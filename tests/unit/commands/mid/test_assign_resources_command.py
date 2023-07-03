@@ -110,14 +110,13 @@ def test_assign_resources_command_completed(tango_context, task_callback):
     logger.info(f"Command allowed result is: {result}")
 
     assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
 
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.assign_resources(json_argument, task_callback=task_callback)
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -143,14 +142,13 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     )
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
 
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.assign_resources(json_argument, task_callback=task_callback)
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -181,6 +179,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]["execution_block"]["eb_id"]
     del json_argument["sdp"]["processing_blocks"]
+    json_argument = json.dumps(json_argument)
     res_code, message = cm.assign_resources(
         json_argument, task_callback=task_callback
     )
@@ -196,9 +195,8 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    res_code, _ = assign_res_command.do(json.dumps(json_argument))
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    res_code, _ = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.OK
 
 
@@ -223,14 +221,15 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     )
 
     assign_input_str = get_assign_input_str()
-    json_argument = json.loads(assign_input_str)
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
     )
     assign_res_command.assign_resources(
-        json_argument, logger=logger, task_callback=task_callback
+        json.loads(assign_input_str),
+        logger=logger,
+        task_callback=task_callback,
     )
-    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, _) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
 
 
@@ -285,9 +284,7 @@ def test_assign_resources_command_already_assigned(
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
-    cm.assign_resources(
-        json.loads(assign_input_str), task_callback=task_callback
-    )
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
     (res_code, message) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
 

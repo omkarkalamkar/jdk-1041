@@ -69,8 +69,7 @@ def test_low_assign_resources_command(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     assign_input_str = json_factory("command_assign_resource_low")
-    json_argument = json.loads(assign_input_str)
-    cm.assign_resources(json_argument, task_callback=task_callback)
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -134,11 +133,10 @@ def test_low_assign_resources_command_fail_subarray(
         LOW_SUBARRAY_DEVICE, proxy=subarrayMock
     )
     assign_input_str = json_factory("command_assign_resource_low")
-    json_argument = json.loads(assign_input_str)
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
     )
-    (res_code, _) = assign_res_command.do(json.dumps(json_argument))
+    (res_code, _) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
 
 

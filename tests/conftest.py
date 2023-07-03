@@ -1,5 +1,4 @@
 # pylint: disable=unused-argument
-import json
 import logging
 from os.path import dirname, join
 
@@ -97,9 +96,9 @@ def get_input_str(path):
     Returns input json string
     :rtype: String
     """
-    with open(path, "r") as f:
-        input_arg = json.load(f)
-    return json.dumps(input_arg)
+    with open(path, "r", encoding="utf-8") as f:
+        input_arg = f.read()
+    return input_arg
 
 
 @pytest.fixture()
