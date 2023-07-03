@@ -586,7 +586,6 @@ class CNComponentManager(TmcComponentManager):
         :type argin: str
         :param task_callback: Update task state, defaults to None
         :type task_callback: Callable, optional
-        :type task_call_back
         :return: task_status
         :rtype: tuple
         """
@@ -686,11 +685,13 @@ class CNComponentManager(TmcComponentManager):
         self, argin, task_callback: Optional[Callable] = None
     ):
         """
-        Submit the ReleaseResources command in queue.
+        Submit the ReleaseResource command in queue.
 
         :param argin: input json string for release resource command
         :type argin: str
-        :return: task status and status
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :return: task_status
         :rtype: tuple
         """
         release_resources_command = ReleaseResources(
