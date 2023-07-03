@@ -1,5 +1,3 @@
-import json
-
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -89,8 +87,8 @@ def test_release_res_command_mid(
     return release_resources(
         tango_context,
         "ska_mid/tm_central/central_node",
-        json.dumps(json_factory("command_AssignResources")),
-        json.dumps(json_factory("command_ReleaseResources")),
+        json_factory("command_AssignResources"),
+        json_factory("command_ReleaseResources"),
         change_event_callbacks,
     )
 
@@ -106,8 +104,8 @@ def test_release_res_command_low(
     return release_resources(
         tango_context,
         "ska_low/tm_central/central_node",
-        json.dumps(json_factory("command_assign_resource_low")),
-        json.dumps(json_factory("command_release_resource_low")),
+        json_factory("command_assign_resource_low"),
+        json_factory("command_release_resource_low"),
         change_event_callbacks,
     )
 
@@ -199,10 +197,8 @@ def test_release_res_command_mid_without_subarray_id(
     return release_resources_without_subarray_id(
         tango_context,
         "ska_mid/tm_central/central_node",
-        json.dumps(json_factory("command_AssignResources")),
-        json.dumps(
-            json_factory("command_ReleaseResources_without_subarray_id")
-        ),
-        json.dumps(json_factory("command_ReleaseResources")),
+        json_factory("command_AssignResources"),
+        json_factory("command_ReleaseResources_without_subarray_id"),
+        json_factory("command_ReleaseResources"),
         change_event_callbacks,
     )

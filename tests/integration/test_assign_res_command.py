@@ -157,7 +157,7 @@ def test_assign_res_command_mid(
     return assign_resources(
         tango_context,
         central_node_name,
-        json.dumps(json_factory("command_AssignResources")),
+        json_factory("command_AssignResources"),
         change_event_callbacks,
         MID_SUBARRAY_DEVICE,
     )
@@ -179,7 +179,7 @@ def test_assign_res_command_low(
     return assign_resources(
         tango_context,
         central_node_name,
-        json.dumps(json_factory("command_assign_resource_low")),
+        json_factory("command_assign_resource_low"),
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
     )
@@ -245,7 +245,7 @@ def test_assign_res_command_low_invalid_json(
     return assign_resources_with_invalid_json(
         tango_context,
         central_node_name,
-        json.dumps(json_factory("invalid_key_AssignResources")),
+        json_factory("invalid_key_AssignResources"),
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
     )
@@ -329,7 +329,7 @@ def test_assign_res_command_mid_without_subarray_id(
     return assign_resources_without_subarray_id(
         tango_context,
         central_node_name,
-        json.dumps(json_factory("invalid_key_AssignResources")),
+        json_factory("invalid_key_AssignResources"),
         change_event_callbacks,
     )
 
@@ -376,7 +376,7 @@ def test_assign_resources_exception_propagation(
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id = central_node.AssignResources(
-        json.dumps(json_factory("command_AssignResources"))
+        json_factory("command_AssignResources")
     )
 
     logger.info(

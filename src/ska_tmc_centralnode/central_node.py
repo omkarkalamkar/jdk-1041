@@ -356,8 +356,7 @@ class AbstractCentralNode(TMCBaseDevice):
         AssignResources command invokes the AssignResources command on lower level devices.
         """
         handler = self.get_command_object("AssignResources")
-        args = json.loads(argin)
-        result_code, unique_id = handler(args)
+        result_code, unique_id = handler(argin)
         return [[result_code], [str(unique_id)]]
 
     def is_ReleaseResources_allowed(self):
@@ -383,8 +382,7 @@ class AbstractCentralNode(TMCBaseDevice):
         Releases all the resources assigned to the given Subarray.
         """
         handler = self.get_command_object("ReleaseResources")
-        args = json.loads(argin)
-        result_code, unique_id = handler(args)
+        result_code, unique_id = handler(argin)
         return [[result_code], [str(unique_id)]]
 
     # TODO: Check with OET if these commands are required, else can be removed

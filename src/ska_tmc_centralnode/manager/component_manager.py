@@ -584,6 +584,9 @@ class CNComponentManager(TmcComponentManager):
 
         :param argin: input json string for assign resource command
         :type argin: str
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: Callable, optional
+        :type task_call_back
         :return: task_status
         :rtype: tuple
         """

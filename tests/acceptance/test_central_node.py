@@ -58,9 +58,8 @@ def call_command(central_node, command_name, json_factory):
                     central_node, MID_SUBARRAY_DEVICE, True
                 )
 
-                assign_res_string = json.dumps(
-                    json_factory("command_AssignResources")
-                )
+                assign_res_string = json_factory("command_AssignResources")
+
                 pytest.command_result = central_node.command_inout(
                     command_name, assign_res_string
                 )
@@ -71,9 +70,8 @@ def call_command(central_node, command_name, json_factory):
                     central_node, LOW_SUBARRAY_DEVICE, True
                 )
 
-                assign_res_string = json.dumps(
-                    json_factory("command_assign_resource_low")
-                )
+                assign_res_string = json_factory("command_assign_resource_low")
+
                 pytest.command_result = central_node.command_inout(
                     command_name, assign_res_string
                 )
@@ -86,9 +84,7 @@ def call_command(central_node, command_name, json_factory):
                     central_node, MID_SUBARRAY_DEVICE, True
                 )
 
-                release_res_string = json.dumps(
-                    json_factory("command_ReleaseResources")
-                )
+                release_res_string = json_factory("command_ReleaseResources")
                 pytest.command_result = central_node.command_inout(
                     command_name, release_res_string
                 )
@@ -99,8 +95,8 @@ def call_command(central_node, command_name, json_factory):
                     central_node, LOW_SUBARRAY_DEVICE, True
                 )
 
-                release_res_string = json.dumps(
-                    json_factory("command_release_resource_low")
+                release_res_string = json_factory(
+                    "command_release_resource_low"
                 )
                 pytest.command_result = central_node.command_inout(
                     command_name, release_res_string
