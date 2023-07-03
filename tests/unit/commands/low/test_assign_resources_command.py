@@ -69,7 +69,6 @@ def test_low_assign_resources_command(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     assign_input_str = json_factory("command_assign_resource_low")
-    # json_argument = json.loads(assign_input_str)
     cm.assign_resources(assign_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
