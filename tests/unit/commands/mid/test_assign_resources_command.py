@@ -275,11 +275,11 @@ def test_assign_resources_command_already_assigned(
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
     )
-    # dish0001 is assigned to Subarray1
+    # SKA001 is assigned to Subarray1
     for devInfo in cm.devices:
         if isinstance(devInfo, SubArrayDeviceInfo):
             if devInfo.dev_name == MID_SUBARRAY_DEVICE:
-                devInfo.resources.append("dish0001")
+                devInfo.resources.append("SKA001")
                 logger.info("devInfo is: %s", devInfo.resources)
 
     # Invoke AssignResources to assign already allocated resource - dish0001
