@@ -200,9 +200,9 @@ class AssignResources(AbstractAssignReleaseResources):
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(f"receptor_ids are:{receptor_ids}")
         for receptor_id in receptor_ids:
-            dish_id = "dish0" + receptor_id[3:]
-            self.logger.debug(f"dish_id is:{dish_id}")
-            if self.component_manager.is_already_assigned(dish_id):
+            # dish_id = "dish0" + receptor_id[3:]
+            # self.logger.debug(f"dish_id is:{dish_id}")
+            if self.component_manager.is_already_assigned(receptor_id):
                 return (
                     ResultCode.FAILED,
                     f"Dish {receptor_id} is already allocated",

@@ -83,18 +83,19 @@ class AssignResourceValidator:
         system. The receptor ids that are not found in the list of present receptors are added in a
         list and returned to the caller.
 
-        :param: receptor_id_list: List of strings
+        :param: receptor_id_list: List of strings for exa. ["SKA001", "SKA002"]
 
         :returns: List of receptors that do not exist. Empty list is returned
         when all receptors exist.
 
         """
         non_existing_receptors = []
-        for receptor_id in receptor_id_list:
-            self.logger.debug("Checking for receptor %s", receptor_id)
-            if receptor_id not in self._receptor_list:
-                self.logger.debug("Receptor %s. is not present.", receptor_id)
-                non_existing_receptors.append(receptor_id)
+        for receptor in receptor_id_list:
+            if receptor[:3] == "MKT":
+                continue
+            if receptor not in self._receptor_list:
+                self.logger.debug("Receptor %s. is not present.", receptor)
+                non_existing_receptors.append(receptor)
         self.logger.debug(non_existing_receptors)
         return non_existing_receptors
 
