@@ -130,16 +130,15 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
 
             return [[ResultCode.FAILED], ["Device Defective"]]
 
-        if self._obs_state != ObsState.IDLE:
-            self._obs_state = ObsState.IDLE
-            self.push_change_event("obsState", self._obs_state)
+        self._obs_state = ObsState.RESOURCING
+        self.push_change_event("obsState", self._obs_state)
         self._resources_assigned = ["0001"]
         self.logger.info("Pushing the assignedResources event")
         self.push_change_event("assignedResources", self._resources_assigned)
-        command_result = ("1000", str(ResultCode.OK.value))
+        # command_result = ("1000", str(ResultCode.OK.value))
         self.logger.debug("Calling the LRCR event method")
         thread = threading.Thread(
-            target=self.push_result_event, args=[command_result]
+            target=self.update_device_obsstate, args=[ObsState.IDLE]
         )
         thread.start()
 
