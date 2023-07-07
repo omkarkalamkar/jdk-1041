@@ -219,7 +219,7 @@ class CNComponentManager(TmcComponentManager):
                 continue
         return result
 
-    def get_subarray_obsstate(self) -> ObsState:
+    def get_subarray_obsstate(self) -> Optional[ObsState]:
         """
         Get Current device obsState
         """

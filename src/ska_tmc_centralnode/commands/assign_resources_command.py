@@ -9,6 +9,7 @@ from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import SubArrayAdapter
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -41,7 +42,7 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         self.dish_adapters = []
         self.subarray_adapters = []
-        self.tm_subarray_adapter = None
+        self.tm_subarray_adapter: SubArrayAdapter
         self._skuid = skuid
         self.task_callback: Callable
 
