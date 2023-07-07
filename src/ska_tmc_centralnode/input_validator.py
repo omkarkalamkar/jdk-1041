@@ -23,6 +23,7 @@ from ska_tmc_cdm.messages.central_node.release_resources import (
 from ska_tmc_cdm.schemas import CODEC
 from ska_tmc_common.exceptions import (
     InvalidJSONError,
+    InvalidReceptorIdError,
     ResourceNotPresentError,
     SubarrayNotPresentError,
 )
@@ -157,6 +158,31 @@ class AssignResourceValidator:
             assert len(receptor_list) > 0
         except AssertionError as ae:
             raise ValueError("Empty receptorIDList") from ae
+
+        # Validate the receptor IDs to be in the correct format. The expected format is 'SKAnnn' or 'MKTnnn'.
+        # SKA nnn is a 3 digit number in range 001 to 133. MKT nnn is a 3 digit number in range 000 to 063.
+        for leaf_id in receptor_list:
+            if len(leaf_id) != 6:
+                exception_message = (
+                    f"The dish id {leaf_id} is not in the correct format."
+                )
+                raise InvalidReceptorIdError(exception_message)
+            if not leaf_id[3:].isdigit():
+                exception_message = (
+                    f"The dish id {leaf_id} is not in the correct format."
+                )
+                raise InvalidReceptorIdError(exception_message)
+            if leaf_id[:3] not in ["SKA", "MKT"]:
+                exception_message = f"The dish prefix {leaf_id} is invalid."
+                raise InvalidReceptorIdError(exception_message)
+            if leaf_id[:3] == "SKA":
+                if (1 > int(leaf_id[3:])) or (int(leaf_id[3:]) > 133):
+                    exception_message = f"The dish id {leaf_id} is invalid."
+                    raise InvalidReceptorIdError(exception_message)
+            if leaf_id[:3] == "MKT":
+                if (0 > int(leaf_id[3:])) or (int(leaf_id[3:]) > 63):
+                    exception_message = f"The dish id {leaf_id} is invalid."
+                    raise InvalidReceptorIdError(exception_message)
 
         # if(not self._receptor_exists(assign_request["dish"]["receptor_ids"])):
         non_existing_receptors = self._search_invalid_receptors(
