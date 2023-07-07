@@ -33,6 +33,12 @@ class CentralNodeMid(AbstractCentralNode):
         doc="Number of Dishes",
     )
 
+    DishIds = device_property(
+        dtype=("str",),
+        doc="List of the available dish ids",
+        default_value=tuple(),
+    )
+
     DishLeafNodePrefix = device_property(
         dtype="str",
         default_value="",
@@ -269,15 +275,24 @@ class CentralNodeMid(AbstractCentralNode):
             skuid_service=self.SkuidService,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
-        for dish in range(1, (self.NumDishes + 1)):
-            cm.input_parameter.dish_leaf_node_dev_names.append(
-                self.DishLeafNodePrefix + "{:03d}".format(dish)
-            )
+        # for dish in range(1, (self.NumDishes + 1)):
+        #     cm.input_parameter.dish_leaf_node_dev_names.append(
+        #         self.DishLeafNodePrefix + "{:03d}".format(dish)
+        #     )
+        # cm.input_parameter.dish_dev_names = []
+        # for dish in range(1, (self.NumDishes + 1)):
+        #     cm.input_parameter.dish_dev_names.append(
+        #         f"{'ska'}00{dish}{'/dish/master'}"
+        #     )
 
-        cm.input_parameter.dish_dev_names = []
-        for dish in range(1, (self.NumDishes + 1)):
+        for dish in self.DishIds:
+            dish_id = dish[3:]
+
+            cm.input_parameter.dish_leaf_node_dev_names.append(
+                self.DishLeafNodePrefix + dish_id
+            )
             cm.input_parameter.dish_dev_names.append(
-                f"{'ska'}00{dish}{'/dish/master'}"
+                f"{'ska'}00{dish_id}{'/dish/master'}"
             )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""

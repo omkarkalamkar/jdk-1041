@@ -72,6 +72,7 @@ deviceServers:
       SdpMasterFQDN: "mid-sdp/control/0"
       DishLeafNodePrefix: "ska_mid/tm_leaf_node/d0"
       NumDishes: 1
+      DishIds: "SKA001"
     low:
       CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"
       CspMasterFQDN: "low-csp/control/0"

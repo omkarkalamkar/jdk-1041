@@ -31,6 +31,9 @@ server:
         - name: "NumDishes"
           values:
           - "{{.Values.deviceServers.centralnode.mid.NumDishes}}"
+          - name: "DishIds"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishIds}}"
         - name: "SkuidService"
           values:
           - "{{.Values.deviceServers.centralnode.SkuidService}}"
