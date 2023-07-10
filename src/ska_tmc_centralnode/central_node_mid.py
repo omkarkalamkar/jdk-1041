@@ -286,8 +286,11 @@ class CentralNodeMid(AbstractCentralNode):
         #         f"{'ska'}00{dish}{'/dish/master'}"
         #     )
         for dish in self.DishIds:
-            dish_id = dish[3:]
+            if "MKT" in dish:
+                continue
 
+            # For now generate FQDNs for SKA dishes only
+            dish_id = dish[3:]
             cm.input_parameter.dish_leaf_node_dev_names.append(
                 self.DishLeafNodePrefix + dish_id
             )

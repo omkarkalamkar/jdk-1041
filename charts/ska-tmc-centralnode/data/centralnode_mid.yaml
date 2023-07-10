@@ -34,6 +34,7 @@ server:
         - name: "DishIds"
           values:
           - "SKA001"
+          - "MKT001"
         - name: "SkuidService"
           values:
           - "{{.Values.deviceServers.centralnode.SkuidService}}"
