@@ -36,6 +36,7 @@ class CentralNodeMid(AbstractCentralNode):
     DishIds = device_property(
         dtype=("str",),
         doc="List of the available dish ids",
+        default_value=tuple(),
     )
 
     DishLeafNodePrefix = device_property(
