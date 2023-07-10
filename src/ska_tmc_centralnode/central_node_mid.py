@@ -115,7 +115,7 @@ class CentralNodeMid(AbstractCentralNode):
         max_dim_x=100,
     )
 
-    DishLeafNodeDevNames = attribute(
+    dishLeafNodeDevNames = attribute(
         dtype=("DevString",),
         access=AttrWriteType.READ_WRITE,
         max_dim_x=100,
@@ -173,11 +173,11 @@ class CentralNodeMid(AbstractCentralNode):
         self.component_manager.input_parameter.dish_dev_names = value
         self.component_manager.update_input_parameter()
 
-    def read_DishLeafNodeDevNames(self):
+    def read_dishLeafNodeDevNames(self):
         """Return the dishLeafNodedevnames attribute."""
         return self.component_manager.input_parameter.dish_leaf_node_dev_names
 
-    def write_DishLeafNodeDevNames(self, value):
+    def write_dishLeafNodeDevNames(self, value):
         """Set the dishLeafNodedevnames attribute."""
         self.component_manager.input_parameter.dish_leaf_node_dev_names = value
         self.component_manager.update_input_parameter()
@@ -275,6 +275,7 @@ class CentralNodeMid(AbstractCentralNode):
             skuid_service=self.SkuidService,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
+        cm.input_parameter.dish_dev_names = []
         # for dish in range(1, (self.NumDishes + 1)):
         #     cm.input_parameter.dish_leaf_node_dev_names.append(
         #         self.DishLeafNodePrefix + "{:03d}".format(dish)
@@ -284,7 +285,6 @@ class CentralNodeMid(AbstractCentralNode):
         #     cm.input_parameter.dish_dev_names.append(
         #         f"{'ska'}00{dish}{'/dish/master'}"
         #     )
-
         for dish in self.DishIds:
             dish_id = dish[3:]
 
@@ -292,7 +292,7 @@ class CentralNodeMid(AbstractCentralNode):
                 self.DishLeafNodePrefix + dish_id
             )
             cm.input_parameter.dish_dev_names.append(
-                f"{'ska'}00{dish_id}{'/dish/master'}"
+                f"{'ska'}{dish_id}{'/dish/master'}"
             )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""

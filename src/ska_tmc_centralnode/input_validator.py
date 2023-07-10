@@ -164,24 +164,26 @@ class AssignResourceValidator:
         for leaf_id in receptor_list:
             if len(leaf_id) != 6:
                 exception_message = (
-                    f"The dish id {leaf_id} is not in the correct format."
+                    f"The dish id {leaf_id} is not of the correct lenght."
                 )
                 raise InvalidReceptorIdError(exception_message)
             if not leaf_id[3:].isdigit():
-                exception_message = (
-                    f"The dish id {leaf_id} is not in the correct format."
-                )
+                exception_message = f"The dish id {leaf_id} does not have id in the correct format."
                 raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] not in ["SKA", "MKT"]:
                 exception_message = f"The dish prefix {leaf_id} is invalid."
                 raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] == "SKA":
                 if (1 > int(leaf_id[3:])) or (int(leaf_id[3:]) > 133):
-                    exception_message = f"The dish id {leaf_id} is invalid."
+                    exception_message = (
+                        f"The SKA dish id {leaf_id} is invalid."
+                    )
                     raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] == "MKT":
                 if (0 > int(leaf_id[3:])) or (int(leaf_id[3:]) > 63):
-                    exception_message = f"The dish id {leaf_id} is invalid."
+                    exception_message = (
+                        f"The MKT dish id {leaf_id} is invalid."
+                    )
                     raise InvalidReceptorIdError(exception_message)
 
         # if(not self._receptor_exists(assign_request["dish"]["receptor_ids"])):

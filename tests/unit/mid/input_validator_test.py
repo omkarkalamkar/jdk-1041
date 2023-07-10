@@ -7,6 +7,7 @@ from os.path import dirname, join
 import pytest
 from ska_tmc_common.exceptions import (
     InvalidJSONError,
+    InvalidReceptorIdError,
     ResourceNotPresentError,
     ResourceReassignmentError,
     SubarrayNotPresentError,
@@ -336,14 +337,102 @@ class TestAssignResourceValidator:
         with pytest.raises(SubarrayNotPresentError) as excinfo:
             input_validator.loads(json.dumps(input_json))
 
-    def test_validate_incorrect_receptor_id(self):
+    def test_validate_incorrect_receptor_id_length(self):
         """
-        Tests that ResourceNotPresentError is raised when a receptor id is given incorrect
-        value in the input string.
+        Tests that InvalidReceptorIdError is raised when a receptor id given is not of correct length.
         """
 
         input_json = sample_assign_resources_request
-        invalid_receptor_id_list = ["9999"]
+        invalid_receptor_id_list = ["SKA000001"]
+        input_json["dish"]["receptor_ids"] = invalid_receptor_id_list
+
+        input_validator = AssignResourceValidator(
+            self._test_subarray_list,
+            self._test_receptor_id_list,
+            "ska_mid/tm_leaf_node/d",
+        )
+        with pytest.raises(InvalidReceptorIdError) as excinfo:
+            input_validator.loads(json.dumps(input_json))
+
+    def test_validate_receptor_ids_with_no_digits(self):
+        """
+        Tests that InvalidReceptorIdError is raised when last 3 characters in the receptor id are not digits.
+        """
+
+        input_json = sample_assign_resources_request
+        invalid_receptor_id_list = ["SKAABC"]
+        input_json["dish"]["receptor_ids"] = invalid_receptor_id_list
+
+        input_validator = AssignResourceValidator(
+            self._test_subarray_list,
+            self._test_receptor_id_list,
+            "ska_mid/tm_leaf_node/d",
+        )
+
+        with pytest.raises(InvalidReceptorIdError) as excinfo:
+            input_validator.loads(json.dumps(input_json))
+
+    def test_validate_receptor_ids_with_incorrect_prefix(self):
+        """
+        Tests that InvalidReceptorIdError is raised when last 3 characters in the receptor id are not digits.
+        """
+
+        input_json = sample_assign_resources_request
+        invalid_receptor_id_list = ["ABC001"]
+        input_json["dish"]["receptor_ids"] = invalid_receptor_id_list
+
+        input_validator = AssignResourceValidator(
+            self._test_subarray_list,
+            self._test_receptor_id_list,
+            "ska_mid/tm_leaf_node/d",
+        )
+
+        with pytest.raises(InvalidReceptorIdError) as excinfo:
+            input_validator.loads(json.dumps(input_json))
+
+    def test_validate_receptor_ids_with_incorrect_ska_dish_id(self):
+        """
+        Tests that InvalidReceptorIdError is raised when SKA dish id is invalid.
+        """
+
+        input_json = sample_assign_resources_request
+        invalid_receptor_id_list = ["SKA200"]
+        input_json["dish"]["receptor_ids"] = invalid_receptor_id_list
+
+        input_validator = AssignResourceValidator(
+            self._test_subarray_list,
+            self._test_receptor_id_list,
+            "ska_mid/tm_leaf_node/d",
+        )
+
+        with pytest.raises(InvalidReceptorIdError) as excinfo:
+            input_validator.loads(json.dumps(input_json))
+
+    def test_validate_receptor_ids_with_incorrect_mkt_dish_id(self):
+        """
+        Tests that InvalidReceptorIdError is raised when MeerKAT dish id is invalid.
+        """
+
+        input_json = sample_assign_resources_request
+        invalid_receptor_id_list = ["MKT200"]
+        input_json["dish"]["receptor_ids"] = invalid_receptor_id_list
+
+        input_validator = AssignResourceValidator(
+            self._test_subarray_list,
+            self._test_receptor_id_list,
+            "ska_mid/tm_leaf_node/d",
+        )
+
+        with pytest.raises(InvalidReceptorIdError) as excinfo:
+            input_validator.loads(json.dumps(input_json))
+
+    def test_validate_receptor_not_present(self):
+        """
+        Tests that ResourceNotPresentError is raised when a receptor is not available.
+        """
+
+        input_json = sample_assign_resources_request
+        invalid_receptor_id_list = ["SKA004"]
         input_json["dish"]["receptor_ids"] = invalid_receptor_id_list
 
         input_validator = AssignResourceValidator(
