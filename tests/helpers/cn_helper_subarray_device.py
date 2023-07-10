@@ -135,7 +135,6 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         self._resources_assigned = ["0001"]
         self.logger.info("Pushing the assignedResources event")
         self.push_change_event("assignedResources", self._resources_assigned)
-        # command_result = ("1000", str(ResultCode.OK.value))
         self.logger.debug("Calling the LRCR event method")
         thread = threading.Thread(
             target=self.update_device_obsstate, args=[ObsState.IDLE]
