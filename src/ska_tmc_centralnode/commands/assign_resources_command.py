@@ -7,7 +7,9 @@ from typing import Callable, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import SubArrayAdapter
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -40,7 +42,7 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         self.dish_adapters = []
         self.subarray_adapters = []
-        self.my_subarray_adapter = None
+        self.tm_subarray_adapter: Optional[SubArrayAdapter] = None
         self._skuid = skuid
         self.task_callback: Callable
 
@@ -67,15 +69,15 @@ class AssignResources(AbstractAssignReleaseResources):
         self.component_manager.command_in_progress = "AssignResources"
         self.component_manager.command_result = ResultCode.STARTED
 
-        ret_code, message = self.do(argin=json.dumps(argin))
-        self.logger.info(f"command assign_resources returncode: {ret_code}")
+        result_code, message = self.do(argin=json.dumps(argin))
+        self.logger.info(f"command assign_resources returncode: {result_code}")
         self.logger.info(message)
-        if ret_code == ResultCode.FAILED:
-            self.update_task_status(ret_code, message)
+        if result_code == ResultCode.FAILED:
+            self.update_task_status(result_code, message)
         else:
             self.start_tracker_thread(
-                self.component_manager.get_command_result,
-                ResultCode.OK,
+                self.component_manager.get_subarray_obsstate,
+                ObsState.IDLE,
                 command_id=self.component_manager.assign_id,
                 lrcr_callback=self.component_manager.long_running_result_callback,
             )
@@ -86,6 +88,7 @@ class AssignResources(AbstractAssignReleaseResources):
             self.task_callback(
                 result=result, status=TaskStatus.COMPLETED, exception=message
             )
+            self.component_manager.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
 
@@ -187,15 +190,15 @@ class AssignResources(AbstractAssignReleaseResources):
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        result_code, message = self.init_adapters()
+        if result_code == ResultCode.FAILED:
+            return result_code, message
 
         subarrayID = int(json_argument["subarray_id"])
 
-        ret_code, message = self.get_subarray_adapter(subarrayID)
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        result_code, message = self.get_subarray_adapter(subarrayID)
+        if result_code == ResultCode.FAILED:
+            return result_code, message
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(f"receptor_ids are:{receptor_ids}")
@@ -214,20 +217,20 @@ class AssignResources(AbstractAssignReleaseResources):
         )
 
         self.logger.debug(
-            f"Invoking AssignResources command on:{self.my_subarray_adapter}"
+            f"Invoking AssignResources command on:{self.tm_subarray_adapter}"
         )
 
-        ret_code, message = self.send_command(
-            [self.my_subarray_adapter],
+        result_code, message = self.send_command(
+            [self.tm_subarray_adapter],
             "Error in calling AssignResources on subarray",
             "AssignResources",
             json.dumps(json_argument),
         )
 
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        if result_code == ResultCode.FAILED:
+            return result_code, message
         self.logger.debug(
-            f"Resources assigned successfully to:{self.my_subarray_adapter}"
+            f"Resources assigned successfully to:{self.tm_subarray_adapter}"
         )
 
         return (ResultCode.OK, "")
@@ -350,17 +353,17 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        result_code, message = self.init_adapters()
+        if result_code == ResultCode.FAILED:
+            return result_code, message
 
         subarrayID = int(json_argument["subarray_id"])
 
-        ret_code, message = self.get_subarray_adapter(subarrayID)
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        result_code, message = self.get_subarray_adapter(subarrayID)
+        if result_code == ResultCode.FAILED:
+            return result_code, message
 
-        if self.my_subarray_adapter is None:
+        if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
                 ("SubArray Id %s is not existing!", subarrayID),
@@ -377,10 +380,10 @@ class AssignResources(AbstractAssignReleaseResources):
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
-        for ret_code, message in [
+        for result_code, message in [
             self.send_command(
-                [self.my_subarray_adapter],
-                f"Error in calling AssignResources on subarray: {self.my_subarray_adapter.dev_name}",
+                [self.tm_subarray_adapter],
+                f"Error in calling AssignResources on subarray: {self.tm_subarray_adapter.dev_name}",
                 "AssignResources",
                 json.dumps(json_argument),
             ),
@@ -391,7 +394,7 @@ class AssignResources(AbstractAssignReleaseResources):
             #     input_mccs_master,
             # ),
         ]:
-            if ret_code == ResultCode.FAILED:
+            if result_code == ResultCode.FAILED:
                 return ResultCode.FAILED, message
         return (ResultCode.OK, "")
 
@@ -471,9 +474,10 @@ class AssignResources(AbstractAssignReleaseResources):
     def get_subarray_adapter(self, subarray_id):
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
-                self.my_subarray_adapter = adapter
+                self.tm_subarray_adapter = adapter
+                self.component_manager.subarray_devname = adapter.dev_name
 
-        if self.my_subarray_adapter is None:
+        if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
                 f"SubArray Id {subarray_id} is not existing!",

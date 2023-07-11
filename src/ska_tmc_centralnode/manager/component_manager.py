@@ -147,7 +147,7 @@ class CNComponentManager(TmcComponentManager):
         self.assign_id: str
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
-        self.command_result: ResultCode
+        self.subarray_devname: str = ""
 
     def stop_event_receiver(self):
         if self.event_receiver:
@@ -219,10 +219,12 @@ class CNComponentManager(TmcComponentManager):
                 continue
         return result
 
-    def get_command_result(self) -> ResultCode:
-        """Returns ResultCode from subarray node"""
-        self.logger.debug(f"self.command_result is: {self.command_result}")
-        return self.command_result
+    def get_subarray_obsstate(self) -> Optional[ObsState]:
+        """
+        Get Current device obsState
+        """
+        if self.subarray_devname:
+            return self.get_device(self.subarray_devname).obs_state
 
     def get_device(self, dev_name):
         """

@@ -84,7 +84,7 @@ class AssignResourceValidator:
         system. The receptor ids that are not found in the list of present receptors are added in a
         list and returned to the caller.
 
-        :param: receptor_id_list: List of strings for exa. ["SKA001", "SKA002", "MKT001"]
+        :param: receptor_id_list: List of strings for example ["SKA001", "SKA002", "MKT001"]
 
         :returns: List of receptors that do not exist. Empty list is returned
         when all receptors exist.
