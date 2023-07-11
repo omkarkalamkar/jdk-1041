@@ -22,6 +22,7 @@ def assign_resources(
     tango_context,
     central_node_name,
     assign_input_str,
+    release_input_string,
     change_event_callbacks,
     subarray_device,
 ):
@@ -112,7 +113,6 @@ def assign_resources(
         lookahead=4,
     )
 
-    release_input_string = json_factory("command_ReleaseResources")
     result, unique_id = central_node.ReleaseResources(release_input_string)
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
@@ -148,6 +148,7 @@ def assign_resources(
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
+
 @pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
@@ -166,6 +167,7 @@ def test_assign_res_command_mid(
         tango_context,
         central_node_name,
         json_factory("command_AssignResources"),
+        json_factory("command_ReleaseResources"),
         change_event_callbacks,
         MID_SUBARRAY_DEVICE,
     )
@@ -188,6 +190,7 @@ def test_assign_res_command_low(
         tango_context,
         central_node_name,
         json_factory("command_assign_resource_low"),
+        json_factory("command_release_resource_low"),
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
     )
@@ -319,6 +322,7 @@ def assign_resources_without_subarray_id(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
+
 
 # @pytest.mark.assign
 @pytest.mark.post_deployment

@@ -128,7 +128,6 @@ def test_assign_resources_command_completed(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
         lookahead=5,
     )
-    
 
 
 def test_assign_resources_command_with_mkt_ids_completed(
