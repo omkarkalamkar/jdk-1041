@@ -130,6 +130,41 @@ def test_assign_resources_command_completed(tango_context, task_callback):
     )
 
 
+def test_assign_resources_command_with_mkt_ids_completed(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    result = cm.is_command_allowed("AssignResources")
+    logger.info(f"Command allowed result is: {result}")
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    json_argument["dish"]["receptor_ids"] = ["MKT001", "MKT002"]
+    json_argument = json.dumps(json_argument)
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
+        lookahead=5,
+    )
+
+
 def test_assign_resources_exception_on_sn(tango_context, task_callback):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
@@ -197,6 +232,23 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     assign_input_str = get_assign_input_str()
     cm.assign_resources(assign_input_str, task_callback=task_callback)
     res_code, _ = assign_res_command.do(assign_input_str)
+    assert res_code == ResultCode.OK
+
+
+def test_assign_resources_command_with_mkt_ids_ok(
+    tango_context, task_callback
+):
+    logger.info("%s", tango_context)
+    assign_res_command, _, cm = get_assign_resources_command_obj()
+    cm.is_command_allowed("AssignResources")
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    json_argument["dish"]["receptor_ids"] = ["MKT001", "MKT002"]
+    json_argument = json.dumps(json_argument)
+
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    res_code, _ = assign_res_command.do(json_argument)
     assert res_code == ResultCode.OK
 
 
@@ -275,11 +327,11 @@ def test_assign_resources_command_already_assigned(
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
     )
-    # dish0001 is assigned to Subarray1
+    # SKA001 is assigned to Subarray1
     for devInfo in cm.devices:
         if isinstance(devInfo, SubArrayDeviceInfo):
             if devInfo.dev_name == MID_SUBARRAY_DEVICE:
-                devInfo.resources.append("dish0001")
+                devInfo.resources.append("SKA001")
                 logger.info("devInfo is: %s", devInfo.resources)
 
     # Invoke AssignResources to assign already allocated resource - dish0001

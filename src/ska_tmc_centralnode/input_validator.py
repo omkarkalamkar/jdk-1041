@@ -23,6 +23,7 @@ from ska_tmc_cdm.messages.central_node.release_resources import (
 from ska_tmc_cdm.schemas import CODEC
 from ska_tmc_common.exceptions import (
     InvalidJSONError,
+    InvalidReceptorIdError,
     ResourceNotPresentError,
     SubarrayNotPresentError,
 )
@@ -83,18 +84,19 @@ class AssignResourceValidator:
         system. The receptor ids that are not found in the list of present receptors are added in a
         list and returned to the caller.
 
-        :param: receptor_id_list: List of strings
+        :param: receptor_id_list: List of strings for example ["SKA001", "SKA002", "MKT001"]
 
         :returns: List of receptors that do not exist. Empty list is returned
         when all receptors exist.
 
         """
         non_existing_receptors = []
-        for receptor_id in receptor_id_list:
-            self.logger.debug("Checking for receptor %s", receptor_id)
-            if receptor_id not in self._receptor_list:
-                self.logger.debug("Receptor %s. is not present.", receptor_id)
-                non_existing_receptors.append(receptor_id)
+        for receptor in receptor_id_list:
+            if (receptor[:3] != "MKT") and (
+                receptor not in self._receptor_list
+            ):
+                self.logger.debug("Receptor %s. is not present.", receptor)
+                non_existing_receptors.append(receptor)
         self.logger.debug(non_existing_receptors)
         return non_existing_receptors
 
@@ -154,10 +156,36 @@ class AssignResourceValidator:
         try:
             receptor_list = assign_request["dish"]["receptor_ids"]
             assert len(receptor_list) > 0
-        except AssertionError as ae:
-            raise ValueError("Empty receptorIDList") from ae
+        except AssertionError as assertion_error:
+            raise ValueError("Empty receptorIDList") from assertion_error
 
-        # if(not self._receptor_exists(assign_request["dish"]["receptor_ids"])):
+        # Validate the receptor IDs to be in the correct format. The expected format is 'SKAnnn' or 'MKTnnn'.
+        # SKA nnn is a 3 digit number in range 001 to 133. MKT nnn is a 3 digit number in range 000 to 063.
+        for leaf_id in receptor_list:
+            if len(leaf_id) != 6:
+                exception_message = (
+                    f"The dish id {leaf_id} is not of the correct length."
+                )
+                raise InvalidReceptorIdError(exception_message)
+            if not leaf_id[3:].isdigit():
+                exception_message = f"The dish id {leaf_id} does not have id in the correct format."
+                raise InvalidReceptorIdError(exception_message)
+            if leaf_id[:3] not in ["SKA", "MKT"]:
+                exception_message = f"The dish prefix {leaf_id} is invalid."
+                raise InvalidReceptorIdError(exception_message)
+            if leaf_id[:3] == "SKA":
+                if int(leaf_id[3:]) not in range(1, 134):
+                    exception_message = (
+                        f"The SKA dish id {leaf_id} is invalid."
+                    )
+                    raise InvalidReceptorIdError(exception_message)
+            if leaf_id[:3] == "MKT":
+                if int(leaf_id[3:]) not in range(0, 64):
+                    exception_message = (
+                        f"The MKT dish id {leaf_id} is invalid."
+                    )
+                    raise InvalidReceptorIdError(exception_message)
+
         non_existing_receptors = self._search_invalid_receptors(
             assign_request["dish"]["receptor_ids"]
         )

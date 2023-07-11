@@ -70,7 +70,6 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
                 )
             except Exception as e:
                 self.logger.exception(f"Error pushing the event. {e}")
-            self.logger.info("isSubarrayAvailable event pushed...")
 
     def is_TelescopeOff_allowed(self):
         return True
@@ -114,7 +113,6 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def AssignResources(self, argin):
-        self.logger.info("In SubarrayNode AssignResources ........")
         if self._defective:
             self._obs_state = ObsState.RESOURCING
             self.push_change_event("obsState", self._obs_state)
@@ -132,7 +130,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
 
         self._obs_state = ObsState.RESOURCING
         self.push_change_event("obsState", self._obs_state)
-        self._resources_assigned = ["0001"]
+        self._resources_assigned = ["SKA001"]
         self.logger.info("Pushing the assignedResources event")
         self.push_change_event("assignedResources", self._resources_assigned)
         self.logger.debug("Calling the LRCR event method")

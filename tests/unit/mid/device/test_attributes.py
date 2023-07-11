@@ -70,8 +70,8 @@ def test_attributes(central_node_device):
     assert len(central_node_device.dishDevNames) == 0
     central_node_device.dishDevNames = ["dish1"]
     assert len(central_node_device.dishDevNames) == 1
-    central_node_device.DishLeafNodeDevNames = ["dish1"]
-    assert len(central_node_device.DishLeafNodeDevNames) == 1
+    central_node_device.dishLeafNodeDevNames = ["dish1"]
+    assert len(central_node_device.dishLeafNodeDevNames) == 1
     json_model = json.loads(central_node_device.internalModel)
     assert "telescope_state" in json_model
     assert "tmc_op_state" in json_model
