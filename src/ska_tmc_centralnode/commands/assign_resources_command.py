@@ -42,7 +42,7 @@ class AssignResources(AbstractAssignReleaseResources):
         )
         self.dish_adapters = []
         self.subarray_adapters = []
-        self.tm_subarray_adapter: SubArrayAdapter = None
+        self.tm_subarray_adapter: Optional[SubArrayAdapter] = None
         self._skuid = skuid
         self.task_callback: Callable
 
