@@ -112,6 +112,14 @@ def assign_resources(
         lookahead=4,
     )
 
+    release_input_string = json_factory("command_ReleaseResources")
+    result, unique_id = central_node.ReleaseResources(release_input_string)
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
     # TODO Uncomment below code during integration of MCCS
     # if "ska_low" in central_node_name:
     #     device = get_mccs_device_resources(
@@ -140,7 +148,7 @@ def assign_resources(
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
-
+@pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -312,7 +320,7 @@ def assign_resources_without_subarray_id(
         lookahead=4,
     )
 
-
+# @pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -334,6 +342,7 @@ def test_assign_res_command_mid_without_subarray_id(
     )
 
 
+# @pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_assign_resources_exception_propagation(

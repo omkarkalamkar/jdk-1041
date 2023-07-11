@@ -81,15 +81,6 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     return assign_input_str
 
 
-def get_assign_input_str_with_mkt_id(
-    assign_input_file="command_AssignResources_with_mkt_ids.json",
-):
-    path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
-    with open(path, "r") as f:
-        assign_input_str_with_mkt_ids = f.read()
-    return assign_input_str_with_mkt_ids
-
-
 def get_assign_resources_command_obj():
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -137,6 +128,7 @@ def test_assign_resources_command_completed(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
         lookahead=5,
     )
+    
 
 
 def test_assign_resources_command_with_mkt_ids_completed(
