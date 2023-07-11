@@ -84,7 +84,7 @@ class AssignResourceValidator:
         system. The receptor ids that are not found in the list of present receptors are added in a
         list and returned to the caller.
 
-        :param: receptor_id_list: List of strings for exa. ["SKA001", "SKA002"]
+        :param: receptor_id_list: List of strings for exa. ["SKA001", "SKA002", "MKT001"]
 
         :returns: List of receptors that do not exist. Empty list is returned
         when all receptors exist.
@@ -92,9 +92,9 @@ class AssignResourceValidator:
         """
         non_existing_receptors = []
         for receptor in receptor_id_list:
-            if receptor[:3] == "MKT":
-                continue
-            if receptor not in self._receptor_list:
+            if (receptor[:3] != "MKT") and (
+                receptor not in self._receptor_list
+            ):
                 self.logger.debug("Receptor %s. is not present.", receptor)
                 non_existing_receptors.append(receptor)
         self.logger.debug(non_existing_receptors)
@@ -156,15 +156,15 @@ class AssignResourceValidator:
         try:
             receptor_list = assign_request["dish"]["receptor_ids"]
             assert len(receptor_list) > 0
-        except AssertionError as ae:
-            raise ValueError("Empty receptorIDList") from ae
+        except AssertionError as assertion_error:
+            raise ValueError("Empty receptorIDList") from assertion_error
 
         # Validate the receptor IDs to be in the correct format. The expected format is 'SKAnnn' or 'MKTnnn'.
         # SKA nnn is a 3 digit number in range 001 to 133. MKT nnn is a 3 digit number in range 000 to 063.
         for leaf_id in receptor_list:
             if len(leaf_id) != 6:
                 exception_message = (
-                    f"The dish id {leaf_id} is not of the correct lenght."
+                    f"The dish id {leaf_id} is not of the correct length."
                 )
                 raise InvalidReceptorIdError(exception_message)
             if not leaf_id[3:].isdigit():
@@ -174,19 +174,18 @@ class AssignResourceValidator:
                 exception_message = f"The dish prefix {leaf_id} is invalid."
                 raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] == "SKA":
-                if (1 > int(leaf_id[3:])) or (int(leaf_id[3:]) > 133):
+                if int(leaf_id[3:]) not in range(1, 134):
                     exception_message = (
                         f"The SKA dish id {leaf_id} is invalid."
                     )
                     raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] == "MKT":
-                if (0 > int(leaf_id[3:])) or (int(leaf_id[3:]) > 63):
+                if int(leaf_id[3:]) not in range(0, 64):
                     exception_message = (
                         f"The MKT dish id {leaf_id} is invalid."
                     )
                     raise InvalidReceptorIdError(exception_message)
 
-        # if(not self._receptor_exists(assign_request["dish"]["receptor_ids"])):
         non_existing_receptors = self._search_invalid_receptors(
             assign_request["dish"]["receptor_ids"]
         )

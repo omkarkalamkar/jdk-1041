@@ -276,15 +276,6 @@ class CentralNodeMid(AbstractCentralNode):
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
-        # for dish in range(1, (self.NumDishes + 1)):
-        #     cm.input_parameter.dish_leaf_node_dev_names.append(
-        #         self.DishLeafNodePrefix + "{:03d}".format(dish)
-        #     )
-        # cm.input_parameter.dish_dev_names = []
-        # for dish in range(1, (self.NumDishes + 1)):
-        #     cm.input_parameter.dish_dev_names.append(
-        #         f"{'ska'}00{dish}{'/dish/master'}"
-        #     )
         for dish in self.DishIds:
             if "MKT" in dish:
                 continue
