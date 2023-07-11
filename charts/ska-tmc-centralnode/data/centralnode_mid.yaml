@@ -28,9 +28,6 @@ server:
         - name: "DishLeafNodePrefix"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
-        - name: "NumDishes"
-          values:
-          - "{{.Values.deviceServers.centralnode.mid.NumDishes}}"
         - name: "DishIDs"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}

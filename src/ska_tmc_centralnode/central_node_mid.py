@@ -27,11 +27,6 @@ class CentralNodeMid(AbstractCentralNode):
     # -----------------
     # Device Properties
     # -----------------
-    NumDishes = device_property(
-        dtype="uint",
-        default_value=0,
-        doc="Number of Dishes",
-    )
 
     DishIDs = device_property(
         dtype=("str",),
