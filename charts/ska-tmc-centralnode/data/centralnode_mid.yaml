@@ -33,8 +33,9 @@ server:
           - "{{.Values.deviceServers.centralnode.mid.NumDishes}}"
         - name: "DishIds"
           values:
-          - "SKA001"
-          - "MKT001"
+          {{- range  (.Values.deviceServers.centralnode.mid.DishIds)  }}
+          - "{{ . }}"
+          {{- end }}
         - name: "SkuidService"
           values:
           - "{{.Values.deviceServers.centralnode.SkuidService}}"
