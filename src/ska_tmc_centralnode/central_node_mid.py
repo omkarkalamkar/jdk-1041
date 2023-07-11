@@ -33,7 +33,7 @@ class CentralNodeMid(AbstractCentralNode):
         doc="Number of Dishes",
     )
 
-    DishIds = device_property(
+    DishIDs = device_property(
         dtype=("str",),
         doc="List of the available dish ids",
         default_value=tuple(),
@@ -276,7 +276,7 @@ class CentralNodeMid(AbstractCentralNode):
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
-        for dish in self.DishIds:
+        for dish in self.DishIDs:
             if "MKT" in dish:
                 continue
 

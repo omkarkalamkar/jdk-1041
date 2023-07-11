@@ -94,7 +94,7 @@ def devices_to_load():
                             "ska_mid/tm_leaf_node/sdp_subarray01"
                         ],
                         "NumDishes": [1],
-                        "DishIds": ["SKA001"],
+                        "DishIDs": ["SKA001"],
                     },
                 }
             ],
