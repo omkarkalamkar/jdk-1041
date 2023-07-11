@@ -150,17 +150,17 @@ def test_assign_resources_command_with_mkt_ids_completed(
     )
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
-
-    assign_input_str_with_mkt_ids = get_assign_input_str_with_mkt_id()
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    json_argument["dish"]["receptor_ids"] = ["MKT001", "MKT002"]
+    json_argument = json.dumps(json_argument)
 
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.assign_resources(
-        assign_input_str_with_mkt_ids, task_callback=task_callback
-    )
+    cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -250,11 +250,14 @@ def test_assign_resources_command_with_mkt_ids_ok(
     logger.info("%s", tango_context)
     assign_res_command, _, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-    assign_input_str_with_mkt_ids = get_assign_input_str_with_mkt_id()
-    cm.assign_resources(
-        assign_input_str_with_mkt_ids, task_callback=task_callback
-    )
-    res_code, _ = assign_res_command.do(assign_input_str_with_mkt_ids)
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    json_argument["dish"]["receptor_ids"] = ["MKT001", "MKT002"]
+    json_argument = json.dumps(json_argument)
+
+    cm.assign_resources(json_argument, task_callback=task_callback)
+    res_code, _ = assign_res_command.do(json_argument)
     assert res_code == ResultCode.OK
 
 

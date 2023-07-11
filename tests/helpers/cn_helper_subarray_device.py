@@ -70,7 +70,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
                 )
             except Exception as e:
                 self.logger.exception(f"Error pushing the event. {e}")
-            self.logger.info("isSubarrayAvailable event pushed")
+            self.logger.info(f"isSubarrayAvailable event pushed: {value}")
 
     def is_TelescopeOff_allowed(self):
         return True
