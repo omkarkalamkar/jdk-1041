@@ -308,6 +308,39 @@ def test_assign_resources_fail_check_allowed(tango_context):
         cm.is_command_allowed("AssignResources")
 
 
+def test_assign_resources_command_timeout(tango_context, task_callback):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    cm.command_timeout = 2
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    result = cm.is_command_allowed("AssignResources")
+    logger.info(f"Command allowed result is: {result}")
+
+    assign_input_str = get_assign_input_str()
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=ResultCode.FAILED,
+        exception="Timeout has occured, command failed",
+    )
+
+
 def test_assign_resources_command_already_assigned(
     tango_context, task_callback
 ):

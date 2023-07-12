@@ -39,6 +39,7 @@ class CNComponentManagerMid(CNComponentManager):
         component_state_callback=None,
         max_workers=5,
         proxy_timeout=500,
+        command_timeout=30,
         sleep_time=1,
         skuid_service="",
         *args,
@@ -82,6 +83,7 @@ class CNComponentManagerMid(CNComponentManager):
             proxy_timeout,
             sleep_time,
             skuid_service,
+            command_timeout,
             *args,
             **kwargs,
         )

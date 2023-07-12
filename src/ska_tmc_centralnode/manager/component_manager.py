@@ -85,6 +85,7 @@ class CNComponentManager(TmcComponentManager):
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
+        command_timeout=30,
         skuid_service="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
         *args,
         **kwargs,
@@ -121,6 +122,7 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
         self.event_receiver = True
+        self.command_timeout = command_timeout
 
         self.event_receiver = _event_receiver
         if self.event_receiver:
