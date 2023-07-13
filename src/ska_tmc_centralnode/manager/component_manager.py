@@ -85,8 +85,8 @@ class CNComponentManager(TmcComponentManager):
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
-        command_timeout=30,
         skuid_service="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
+        command_timeout=30,
         *args,
         **kwargs,
     ):

@@ -339,6 +339,7 @@ def test_assign_resources_command_timeout(tango_context, task_callback):
         result=ResultCode.FAILED,
         exception="Timeout has occured, command failed",
     )
+    subarray_device.SetDefective(False)
 
 
 def test_assign_resources_command_already_assigned(
