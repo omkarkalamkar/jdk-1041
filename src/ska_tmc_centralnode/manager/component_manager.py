@@ -446,9 +446,9 @@ class CNComponentManager(TmcComponentManager):
                     ResultCode.FAILED,
                     exception_message=value[1],
                 )
-            elif "ReleaseAllResources" in value[0]:
+            elif "ReleaseResources" in value[0]:
                 self.logger.info(
-                    "Updating LRCRCallback with value: %s for ReleaseAllResources for device: %s",
+                    "Updating LRCRCallback with value: %s for ReleaseResources for device: %s",
                     value,
                     dev_name,
                 )

@@ -66,7 +66,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         # Indicate that the task has started
         self.task_callback = task_callback
         task_callback(status=TaskStatus.IN_PROGRESS)
-        self.component_manager.command_in_progress = "AssignResources"
+        self.component_manager.command_in_progress = "ReleaseResources"
         self.component_manager.command_result = ResultCode.STARTED
         self.component_manager.start_timer(
             self.timeout_id,
