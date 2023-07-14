@@ -3,10 +3,13 @@ ReleaseResources class for CentralNode.
 """
 import json
 import threading
+import time
 from typing import Callable, Optional
 
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import TimeoutCallback
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -39,6 +42,9 @@ class ReleaseResources(AbstractAssignReleaseResources):
         )
         self.subarray_adapters = []
         self.my_subarray_adapter = None
+        self.task_callback: Callable
+        self.timeout_id = f"{time.time()}_{__class__.__name__}"
+        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
 
     def release_resources(
         self,
@@ -58,21 +64,41 @@ class ReleaseResources(AbstractAssignReleaseResources):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
+        self.task_callback = task_callback
         task_callback(status=TaskStatus.IN_PROGRESS)
+        self.component_manager.command_in_progress = "AssignResources"
+        self.component_manager.command_result = ResultCode.STARTED
+        self.component_manager.start_timer(
+            self.timeout_id,
+            self.component_manager.command_timeout,
+            self.timeout_callback,
+        )
 
         ret_code, message = self.do(argin=json.dumps(argin))
+        self.logger.info(f"command assign_resources returncode:{ret_code}")
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.FAILED,
-                exception=message,
-            )
+            self.update_task_status(ret_code, message)
+            self.component_manager.stop_timer()
         else:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.OK,
+            self.start_tracker_thread(
+                self.component_manager.get_subarray_obsstate,
+                ObsState.EMPTY,
+                timeout_id=self.timeout_id,
+                timeout_callback=self.timeout_callback,
+                command_id=self.component_manager.release_id,
+                lrcr_callback=self.component_manager.long_running_result_callback,
             )
+
+    def update_task_status(self, result: ResultCode, message: str = ""):
+        """Updates the task status for command"""
+        if result == ResultCode.FAILED:
+            self.task_callback(
+                result=result, status=TaskStatus.COMPLETED, exception=message
+            )
+            self.component_manager.subarray_devname = ""
+        else:
+            self.task_callback(result=result, status=TaskStatus.COMPLETED)
 
     def do_mid(self, argin):
         """

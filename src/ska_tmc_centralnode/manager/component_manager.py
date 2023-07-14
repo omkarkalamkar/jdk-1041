@@ -147,6 +147,7 @@ class CNComponentManager(TmcComponentManager):
         self._op_state_aggregator = None
         self.skuid_service = skuid_service
         self.assign_id: str
+        self.release_id: str
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
         self.subarray_devname: str = ""
@@ -430,30 +431,30 @@ class CNComponentManager(TmcComponentManager):
             value,
         )
         try:
-            if not value[1]:
-                # This is in case an empty event is received.
-                pass
-            elif self.command_in_progress == "AssignResources":
-                self.logger.info(
-                    f"LongRunningCommandResult event occurred: {int(value[1])}"
-                )
-                if int(value[1]) == ResultCode.OK:
-                    self.command_result = ResultCode.OK
-
+            # Ignoring ResultCode events
+            int(value[1])
         except ValueError:
-            if self.command_in_progress == "AssignResources":
+            if "AssignResources" in value[0]:
                 self.logger.info(
-                    "Updating LRCRCallback with value: %s for Assign for device: %s",
+                    "Updating LRCRCallback with value: %s for AssignResources for device: %s",
                     value,
                     dev_name,
-                )
-                exception_message = (
-                    f"Exception occured on device: {dev_name}: {value[1]}"
                 )
                 self.long_running_result_callback(
                     self.assign_id,
                     ResultCode.FAILED,
-                    exception_msg=exception_message,
+                    exception_message=value[1],
+                )
+            elif "ReleaseAllResources" in value[0]:
+                self.logger.info(
+                    "Updating LRCRCallback with value: %s for ReleaseAllResources for device: %s",
+                    value,
+                    dev_name,
+                )
+                self.long_running_result_callback(
+                    self.release_id,
+                    ResultCode.FAILED,
+                    exception_message=value[1],
                 )
 
     def _aggregate_state(self):
@@ -701,6 +702,7 @@ class CNComponentManager(TmcComponentManager):
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
+        self.release_id = f"{time.time()}-{ReleaseResources.__name__}"
         try:
             json_argument = json.loads(argin)
             self.logger.debug("JSON argin is in correct format.")
