@@ -15,6 +15,7 @@ from ska_tmc_common import (
     DeviceInfo,
     DishDeviceInfo,
     InvalidJSONError,
+    InvalidReceptorIdError,
     LivelinessProbeType,
     LRCRCallback,
     ResourceNotPresentError,
@@ -640,6 +641,8 @@ class CNComponentManager(TmcComponentManager):
                 InvalidJSONError,
                 SubarrayNotPresentError,
                 ResourceNotPresentError,
+                ValueError,
+                InvalidReceptorIdError,
             ) as e:
                 return assign_resources_command.reject_command(str(e))
 
