@@ -76,6 +76,70 @@ def release_resources(
     )
 
 
+def release_resources_mid_timeout(
+    tango_context,
+    central_node_name,
+    assign_input_str,
+    release_input_string,
+    change_event_callbacks,
+):
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    if "ska_mid" in central_node_name:
+        subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    else:
+        subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+
+    ensure_checked_devices(central_node)
+
+    result, unique_id_on = central_node.TelescopeOn()
+    assert unique_id_on[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id_on[0], str(int(ResultCode.OK))),
+        lookahead=2,
+    )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    if "ska_mid" in central_node_name:
+        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    else:
+        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+
+    if "ska_mid" in central_node_name:
+        result, unique_id_assign = central_node.AssignResources(
+            assign_input_str
+        )
+    else:
+        result, unique_id_assign = central_node.AssignResources(
+            assign_input_str
+        )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_assign[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
+    result, unique_id = central_node.ReleaseResources(release_input_string)
+
+    logger.info(f"Unique id:{unique_id[0]}")
+    assert unique_id[0].endswith("ReleaseResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], "Timeout has occured, command failed"),
+        lookahead=4,
+    )
+
+
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(

@@ -1,5 +1,4 @@
 import json
-import logging
 import time
 
 import mock
@@ -11,6 +10,7 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
+from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
@@ -18,7 +18,15 @@ from ska_tmc_centralnode.commands.release_resources_command import (
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
-from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
+from tests.settings import (
+    DISH_LEAF_NODE_DEVICE,
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SUBARRAY_DEVICE,
+    TIMEOUT,
+    create_cm,
+    logger,
+)
 
 
 @pytest.fixture()
@@ -37,6 +45,16 @@ def devices_to_load():
         #         {"name": "low-mccs/control/control"},
         #     ],
         # },
+        {
+            "class": HelperBaseDevice,
+            "devices": [
+                {
+                    "name": LOW_CSP_MLN_DEVICE,
+                },
+                {"name": LOW_SDP_MLN_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE},
+            ],
+        },
     )
 
 
@@ -55,7 +73,7 @@ def get_release_resources_command_obj():
 
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
-    tango_context, task_callback, json_factory, caplog
+    tango_context, task_callback, json_factory
 ):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
@@ -67,14 +85,12 @@ def test_low_release_resources_command(
 
     release_input_str = json_factory("command_release_resource_low")
     cm.release_resources(release_input_str, task_callback=task_callback)
-    caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
     )

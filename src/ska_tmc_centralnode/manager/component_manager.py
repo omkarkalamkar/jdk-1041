@@ -427,7 +427,7 @@ class CNComponentManager(TmcComponentManager):
     def update_long_running_command_result(self, dev_name: str, value):
         """Updates the LRCR callback with received event"""
         self.logger.info(
-            "Recieved longRunningCommandResult event for device: %s, with value: %s",
+            "Received longRunningCommandResult event for device: %s, with value: %s",
             dev_name,
             value,
         )
