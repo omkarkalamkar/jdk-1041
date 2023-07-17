@@ -142,6 +142,107 @@ def release_resources_mid_timeout(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+def test_release_resources_command_mid(
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
+    return release_resources_mid_timeout(
+        tango_context,
+        change_event_callbacks,
+        "ska_mid/tm_central/central_node",
+        json_factory("command_AssignResources"),
+        json_factory("command_ReleaseResources"),
+    )
+
+
+def release_resources_exception_propagation(
+    tango_context,
+    central_node_name,
+    assign_input_str,
+    release_input_string,
+    change_event_callbacks,
+):
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    if "ska_mid" in central_node_name:
+        subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    else:
+        subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+
+    ensure_checked_devices(central_node)
+
+    result, unique_id_on = central_node.TelescopeOn()
+    assert unique_id_on[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id_on[0], str(int(ResultCode.OK))),
+        lookahead=2,
+    )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    if "ska_mid" in central_node_name:
+        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    else:
+        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+
+    if "ska_mid" in central_node_name:
+        result, unique_id_assign = central_node.AssignResources(
+            assign_input_str
+        )
+    else:
+        result, unique_id_assign = central_node.AssignResources(
+            assign_input_str
+        )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_assign[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
+    result, unique_id = central_node.ReleaseResources(release_input_string)
+
+    logger.info(f"Unique id:{unique_id[0]}")
+    assert unique_id[0].endswith("ReleaseResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            "Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device",
+        ),
+        lookahead=4,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_release_resources_error_propagation(
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
+    return release_resources_exception_propagation(
+        tango_context,
+        change_event_callbacks,
+        "ska_mid/tm_central/central_node",
+        json_factory("command_AssignResources"),
+        json_factory("command_ReleaseResources"),
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
 def test_release_res_command_mid(
     tango_context,
     change_event_callbacks,
@@ -247,22 +348,4 @@ def release_resources_without_subarray_id(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=4,
-    )
-
-
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_release_res_command_mid_without_subarray_id(
-    tango_context,
-    change_event_callbacks,
-    json_factory,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-):
-    return release_resources_without_subarray_id(
-        tango_context,
-        "ska_mid/tm_central/central_node",
-        json_factory("command_AssignResources"),
-        json_factory("command_ReleaseResources_without_subarray_id"),
-        json_factory("command_ReleaseResources"),
-        change_event_callbacks,
     )
