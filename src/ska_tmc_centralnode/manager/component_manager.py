@@ -432,30 +432,50 @@ class CNComponentManager(TmcComponentManager):
             value,
         )
         try:
-            # Ignoring ResultCode events
-            int(value[1])
+            if not value[1]:
+                # This is in case an empty event is received.
+                pass
+            elif self.command_in_progress == "AssignResources":
+                self.logger.info(
+                    f"LongRunningCommandResult event occurred: {(value[1])}"
+                )
+                if int(value[1]) == ResultCode.OK:
+                    self.command_result = ResultCode.OK
+            elif self.command_in_progress == "ReleaseResources":
+                self.logger.info(
+                    f"LongRunningCommandResult event occurred: {(value[1])}"
+                )
+                if int(value[1]) == ResultCode.OK:
+                    self.command_result = ResultCode.OK
+
         except ValueError:
-            if "AssignResources" in value[0]:
+            if self.command_in_progress == "AssignResources":
                 self.logger.info(
                     "Updating LRCRCallback with value: %s for AssignResources for device: %s",
                     value,
                     dev_name,
                 )
+                exception_message = (
+                    f"Exception occured on device: {dev_name}: {value[1]}"
+                )
                 self.long_running_result_callback(
                     self.assign_id,
                     ResultCode.FAILED,
-                    exception_message=value[1],
+                    exception_msg=exception_message,
                 )
-            elif "ReleaseResources" in value[0]:
+            elif self.command_in_progress == "ReleaseResources":
                 self.logger.info(
                     "Updating LRCRCallback with value: %s for ReleaseResources for device: %s",
                     value,
                     dev_name,
                 )
+                exception_message = (
+                    f"Exception occured on device: {dev_name}: {value[1]}"
+                )
                 self.long_running_result_callback(
                     self.release_id,
                     ResultCode.FAILED,
-                    exception_message=value[1],
+                    exception_msg=exception_message,
                 )
 
     def _aggregate_state(self):
