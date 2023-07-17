@@ -4,7 +4,7 @@ ReleaseResources class for CentralNode.
 import json
 import threading
 import time
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
@@ -100,7 +100,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
 
-    def do_mid(self, argin):
+    def do_mid(self, argin) -> Tuple[ResultCode, str]:
         """
         Method to invoke ReleaseResources command on Subarray.
 
@@ -139,9 +139,8 @@ class ReleaseResources(AbstractAssignReleaseResources):
         except Exception as e:
             return (
                 ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
+                f"Problem in loading the JSON string: {e}",
             )
-
         if "transaction_id" in jsonArgument:
             del jsonArgument["transaction_id"]
 
@@ -160,7 +159,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if self.subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("Subarray id %s is not existing!", subarray_id),
+                f"Subarray Id {subarray_id} is not existing!",
             )
         if jsonArgument["release_all"] is True:
             ret_code, message = self.release_all_resources(

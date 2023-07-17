@@ -1,4 +1,5 @@
 import json
+import logging
 import time
 from os.path import dirname, join
 
@@ -165,7 +166,9 @@ def test_assign_resources_command_with_mkt_ids_completed(
     )
 
 
-def test_assign_resources_exception_on_sn(tango_context, task_callback):
+def test_assign_resources_exception_on_sn(
+    tango_context, task_callback, caplog
+):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -184,6 +187,7 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     check_if_subarray_is_available(cm)
 
     cm.assign_resources(assign_input_str, task_callback=task_callback)
+    caplog.set_level(logging.DEBUG, logger="ska_tango_testing.mock")
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )

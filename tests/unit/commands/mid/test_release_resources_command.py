@@ -183,6 +183,39 @@ def test_release_resources_command_timeout(tango_context, task_callback):
     subarray_device.SetDefective(False)
 
 
+def test_release_resources_exception_on_sn(tango_context, task_callback):
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDefective(True)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    cm.is_command_allowed("ReleaseResources")
+    release_input_str = get_release_input_str()
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
+    cm.release_resources(release_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=ResultCode.FAILED,
+        exception="Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device",
+    )
+    subarray_device.SetDefective(False)
+
+
 def check_if_subarray_is_available(cm):
     start_time = time.time()
     elapsed_time = 0
