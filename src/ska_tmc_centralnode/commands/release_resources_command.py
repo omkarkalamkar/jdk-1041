@@ -75,7 +75,9 @@ class ReleaseResources(AbstractAssignReleaseResources):
         )
 
         result_code, message = self.do(argin=json.dumps(argin))
-        self.logger.info(f"command release_resources returncode:{result_code}")
+        self.logger.info(
+            "command release_resources returncode: %s", result_code
+        )
         self.logger.info(message)
         if result_code == ResultCode.FAILED:
             self.update_task_status(result_code, message)

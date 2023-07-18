@@ -1,11 +1,13 @@
+import json
 import time
 from os.path import dirname, join
 
 import mock
 import pytest
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import DevFactory
+from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -155,13 +157,22 @@ def test_release_resources_command_timeout(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    result = cm.is_command_allowed("AssignResources")
+    result = cm.is_command_allowed("ReleaseResources")
     logger.info(f"Command allowed result is: {result}")
+
+    defect = {
+        "enabled": True,
+        "fault_type": FaultType.STUCK_IN_INTERMEDIATE_STATE,
+        "error_message": "Command stuck in processing",
+        "result": ResultCode.FAILED,
+        "intermediate_state": ObsState.RESOURCING,
+    }
+    subarray_device = DevFactory().get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDefective(json.dumps(defect))
+    cm.release_resources(task_callback)
 
     release_input_str = get_release_input_str()
 
-    dev_factory = DevFactory()
-    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
@@ -178,28 +189,30 @@ def test_release_resources_command_timeout(tango_context, task_callback):
         result=ResultCode.FAILED,
         exception="Timeout has occured, command failed",
     )
-    subarray_device.SetDefective(False)
+    subarray_device.SetDefective(json.dumps({"enabled": False}))
 
 
 def test_release_resources_exception_on_sn(tango_context, task_callback):
     logger.info("%s", tango_context)
-    dev_factory = DevFactory()
-    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-    subarray_device.SetDefective(True)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     cm.is_command_allowed("ReleaseResources")
-    release_input_str = get_release_input_str()
-
-    dev_factory = DevFactory()
-    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    defect = {
+        "enabled": True,
+        "fault_type": FaultType.COMMAND_NOT_ALLOWED,
+        "error_message": "Command not allowed on leaf node.",
+        "result": ResultCode.FAILED,
+    }
+    subarray_device = DevFactory().get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDefective(json.dumps(defect))
+    cm.release_resources(task_callback)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.release_resources(release_input_str, task_callback=task_callback)
+    cm.release_resources(task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -211,7 +224,7 @@ def test_release_resources_exception_on_sn(tango_context, task_callback):
         result=ResultCode.FAILED,
         exception="Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device",
     )
-    subarray_device.SetDefective(False)
+    subarray_device.SetDefective(json.dumps({"enabled": False}))
 
 
 def check_if_subarray_is_available(cm):

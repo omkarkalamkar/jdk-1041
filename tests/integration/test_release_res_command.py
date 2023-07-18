@@ -3,14 +3,14 @@ import json
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import ObsState
-from ska_tmc_common import FaultType
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
+    ERROR_PROPAGATION_DEFECT,
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
+    TIMEOUT_DEFECT,
     check_subarray_availability,
     logger,
 )
@@ -265,8 +265,8 @@ def test_release_resources_error_propagation(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
-    tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
-    tmc_subarray.SetDefective(True)
+    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
+    tmc_subarray.SetDefective(json.dumps(ERROR_PROPAGATION_DEFECT))
 
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
@@ -290,8 +290,7 @@ def test_release_resources_error_propagation(
         ),
         lookahead=4,
     )
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
-    tmc_subarray.SetDefective(False)
+    tmc_subarray.SetDefective(json.dumps({"enabled": False}))
 
 
 @pytest.mark.post_deployment
@@ -351,15 +350,9 @@ def test_release_resources_mid_timeout(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=2,
     )
-    defect = {
-        "enabled": True,
-        "fault_type": FaultType.STUCK_IN_INTERMEDIATE_STATE,
-        "error_message": "Command stuck in processing",
-        "result": ResultCode.FAILED,
-        "intermediate_state": ObsState.RESOURCING,
-    }
+
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(json.dumps(defect))
+    tmc_subarray.SetDefective(json.dumps(TIMEOUT_DEFECT))
 
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
