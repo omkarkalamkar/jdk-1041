@@ -178,8 +178,6 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
 
-    dev_factory = DevFactory()
-    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
