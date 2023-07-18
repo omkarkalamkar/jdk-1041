@@ -5,6 +5,7 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common import FaultType
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
@@ -412,6 +413,7 @@ def test_assign_resources_exception_propagation(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.assign1
 def test_assign_resources_mid_timeout(
     tango_context,
     change_event_callbacks,
@@ -421,7 +423,7 @@ def test_assign_resources_mid_timeout(
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
-    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    # subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
 
@@ -445,11 +447,20 @@ def test_assign_resources_mid_timeout(
         lookahead=2,
     )
 
-    tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
-    tmc_subarray.SetDefective(True)
+    # tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
+    # central_node.SetDefective(True)
+    defect = {
+        "enabled": True,
+        "fault_type": FaultType.STUCK_IN_INTERMEDIATE_STATE,
+        "error_message": "Command stuck in processing",
+        "result": ResultCode.FAILED,
+        "intermediate_state": ObsState.RESOURCING,
+    }
+    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
+    tmc_subarray.SetDefective(json.dumps(defect))
 
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    # subarray_proxy.SetisSubarrayAvailable(True)
+    # check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id = central_node.AssignResources(
         json_factory("command_AssignResources")
@@ -470,6 +481,5 @@ def test_assign_resources_mid_timeout(
         ),
         lookahead=4,
     )
-
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    # tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     tmc_subarray.SetDefective(False)

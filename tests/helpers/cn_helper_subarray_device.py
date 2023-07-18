@@ -1,9 +1,11 @@
 # Note: This helper class module is explicitly required for CentralNode. Hence kept it here and not in ska-tmc-common repo.
 import threading
 import time
+from typing import List, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common import CommandNotAllowed, FaultType
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
@@ -78,6 +80,45 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         dtype_out="DevVarLongStringArray",
         doc_out="(ReturnType, 'informational message')",
     )
+    def induce_fault(
+        self,
+        command_name: str,
+    ) -> Tuple[List[ResultCode], List[str]]:
+        """Induces fault into device according to given parameters
+
+        :params:
+
+        command_name: Name of the command for which fault is being induced
+        dtype: str
+        rtype: Tuple[List[ResultCode], List[str]]
+        """
+        fault_type = self.defective_params["fault_type"]
+        result = self.defective_params["result"]
+        fault_message = self.defective_params["error_message"]
+        intermediate_state = (
+            self.defective_params.get("intermediate_state")
+            or ObsState.RESOURCING
+        )
+
+        if fault_type == FaultType.FAILED_RESULT:
+            return [result], [fault_message]
+
+        if fault_type == FaultType.LONG_RUNNING_EXCEPTION:
+            thread = threading.Timer(
+                self._delay,
+                function=self.push_command_result,
+                args=[result, command_name, fault_message],
+            )
+            thread.start()
+            return [ResultCode.QUEUED], [""]
+
+        if fault_type == FaultType.STUCK_IN_INTERMEDIATE_STATE:
+            self._obs_state = intermediate_state
+            self.push_obs_state_event(intermediate_state)
+            return [ResultCode.QUEUED], [""]
+
+        return [ResultCode.OK], [""]
+
     def TelescopeOff(self):
         if self.dev_state() != DevState.OFF:
             self.set_state(DevState.OFF)
@@ -97,13 +138,16 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
-    def is_AssignResources_allowed(self):
+    def is_AssignResources_allowed(self) -> bool:
         """
-        Check if command `AssignResources` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
+        This method checks if the AssignResources command is allowed or not
         """
+        if self.defective_params["enabled"]:
+            if (
+                self.defective_params["fault_type"]
+                == FaultType.COMMAND_NOT_ALLOWED
+            ):
+                raise CommandNotAllowed(self.defective_params["error_message"])
         return True
 
     @command(
@@ -112,34 +156,27 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         dtype_out="DevVarLongStringArray",
         doc_out="(ReturnType, 'informational message')",
     )
-    def AssignResources(self, argin):
-        if self._defective:
-            self._obs_state = ObsState.RESOURCING
-            self.push_change_event("obsState", self._obs_state)
-
-            command_result = (
-                "1000",
-                "Error occured on device",
+    def AssignResources(
+        self, argin: str = ""
+    ) -> Tuple[List[ResultCode], List[str]]:
+        """
+        This is the method to invoke AssignResources command.
+        :return: ResultCode, message
+        :rtype: tuple
+        """
+        if self.defective_params["enabled"]:
+            return self.induce_fault(
+                "AssignResources",
             )
-            thread = threading.Thread(
-                target=self.push_result_event, args=[command_result]
-            )
-            thread.start()
-
-            return [[ResultCode.FAILED], ["Device Defective"]]
 
         self._obs_state = ObsState.RESOURCING
-        self.push_change_event("obsState", self._obs_state)
-        self._resources_assigned = ["SKA001"]
-        self.logger.info("Pushing the assignedResources event")
-        self.push_change_event("assignedResources", self._resources_assigned)
-        self.logger.debug("Calling the LRCR event method")
-        thread = threading.Thread(
-            target=self.update_device_obsstate, args=[ObsState.IDLE]
+        self.push_obs_state_event(self._obs_state)
+        thread = threading.Timer(
+            self._delay, self.update_device_obsstate, args=[ObsState.IDLE]
         )
         thread.start()
-
-        return [[ResultCode.OK], [""]]
+        self.push_command_result(ResultCode.OK, "AssignResources")
+        return [ResultCode.OK], [""]
 
     def push_result_event(self, command_result: tuple):
         """Pushes a longRunningCommandResult event after 2 secs with given result."""

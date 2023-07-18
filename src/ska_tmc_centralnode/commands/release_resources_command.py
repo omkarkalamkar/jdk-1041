@@ -74,11 +74,11 @@ class ReleaseResources(AbstractAssignReleaseResources):
             self.timeout_callback,
         )
 
-        ret_code, message = self.do(argin=json.dumps(argin))
-        self.logger.info(f"command release_resources returncode:{ret_code}")
+        result_code, message = self.do(argin=json.dumps(argin))
+        self.logger.info(f"command release_resources returncode:{result_code}")
         self.logger.info(message)
-        if ret_code == ResultCode.FAILED:
-            self.update_task_status(ret_code, message)
+        if result_code == ResultCode.FAILED:
+            self.update_task_status(result_code, message)
             self.component_manager.stop_timer()
         else:
             self.start_tracker_thread(
