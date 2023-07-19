@@ -232,6 +232,8 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
 
         self._obs_state = ObsState.RESOURCING
         self.push_obs_state_event(self._obs_state)
+        self._resources_assigned = ["SKA001"]
+        self.push_change_event("assignedResources", self._resources_assigned)
         thread = threading.Timer(
             self._delay, self.update_device_obsstate, args=[ObsState.IDLE]
         )
