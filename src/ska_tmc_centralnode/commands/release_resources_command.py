@@ -76,9 +76,10 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         result_code, message = self.do(argin=json.dumps(argin))
         self.logger.info(
-            "ReleaseResources command execution result: %s", result_code
+            "ReleaseResources command execution result: %s, message: %s",
+            result_code,
+            message,
         )
-        self.logger.info("ReleaseResources command message: %s", message)
         if result_code == ResultCode.FAILED:
             self.update_task_status(result_code, message)
             self.component_manager.stop_timer()

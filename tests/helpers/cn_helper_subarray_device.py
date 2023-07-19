@@ -58,9 +58,10 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
 
     def read_defective(self) -> str:
         """
-        Returns defective status of devices
+        Returns defective status of devices as a JSON-encoded string.
 
-        :rtype: dict
+        :return: JSON-encoded string representing the defective status of devices
+        :rtype: str
         """
         return self._defective
 
@@ -77,6 +78,15 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         return self._is_subarray_available
 
     def push_obs_state_event(self, obs_state: ObsState) -> None:
+        """
+        Pushes a change event for the provided observation state.
+
+        Args:
+            obs_state (ObsState): The observation state to push.
+
+        Returns:
+            None
+        """
         self.logger.info("Pushing change event for obsState: %s", obs_state)
         self.push_change_event("obsState", obs_state)
 
@@ -252,7 +262,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         This method checks if the ReleaseAllResources command is allowed in
         the current device state.
         :return: ResultCode, message
-        :rtype: tuple
+        :rtype: bool
         """
         if self.defective_params["enabled"]:
             if (
