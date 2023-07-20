@@ -63,20 +63,25 @@ DEVICE_LIST_LOW = [
     "ska_low/tm_leaf_node/csp_subarray01",
     "ska_low/tm_leaf_node/sdp_subarray01",
 ]
-TIMEOUT_DEFECT = {
-    "enabled": True,
-    "fault_type": FaultType.STUCK_IN_INTERMEDIATE_STATE,
-    "error_message": "Command stuck in processing",
-    "result": ResultCode.FAILED,
-    "intermediate_state": ObsState.RESOURCING,
-}
+TIMEOUT_DEFECT = json.dumps(
+    {
+        "enabled": True,
+        "fault_type": FaultType.STUCK_IN_INTERMEDIATE_STATE,
+        "error_message": "Command stuck in processing",
+        "result": ResultCode.FAILED,
+        "intermediate_state": ObsState.RESOURCING,
+    }
+)
 
-ERROR_PROPAGATION_DEFECT = {
-    "enabled": True,
-    "fault_type": FaultType.COMMAND_NOT_ALLOWED,
-    "error_message": "Command not allowed on leaf node.",
-    "result": ResultCode.FAILED,
-}
+ERROR_PROPAGATION_DEFECT = json.dumps(
+    {
+        "enabled": True,
+        "fault_type": FaultType.LONG_RUNNING_EXCEPTION,
+        "error_message": "Exception occured, command failed.",
+        "result": ResultCode.FAILED,
+    }
+)
+
 
 RESET_DEFECT = json.dumps(
     {

@@ -1,5 +1,3 @@
-import json
-
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -211,7 +209,6 @@ def test_release_res_command_mid_without_subarray_id(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.MS
 def test_release_resources_error_propagation(
     tango_context,
     change_event_callbacks,
@@ -268,7 +265,7 @@ def test_release_resources_error_propagation(
         lookahead=2,
     )
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(json.dumps(ERROR_PROPAGATION_DEFECT))
+    tmc_subarray.SetDefective(ERROR_PROPAGATION_DEFECT)
 
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
@@ -288,7 +285,7 @@ def test_release_resources_error_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Command not allowed on leaf node.",
+            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occured, command failed.",
         ),
         lookahead=4,
     )
@@ -354,7 +351,7 @@ def test_release_resources_mid_timeout(
     )
 
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(json.dumps(TIMEOUT_DEFECT))
+    tmc_subarray.SetDefective(TIMEOUT_DEFECT)
 
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
