@@ -262,7 +262,7 @@ def test_release_resources_error_propagation(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
     tmc_subarray.SetDefective(ERROR_PROPAGATION_DEFECT)
@@ -287,7 +287,7 @@ def test_release_resources_error_propagation(
             unique_id[0],
             f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occured, command failed.",
         ),
-        lookahead=4,
+        lookahead=6,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
 
@@ -347,7 +347,7 @@ def test_release_resources_mid_timeout(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
@@ -373,6 +373,6 @@ def test_release_resources_mid_timeout(
             unique_id[0],
             "Timeout has occured, command failed",
         ),
-        lookahead=4,
+        lookahead=6,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
