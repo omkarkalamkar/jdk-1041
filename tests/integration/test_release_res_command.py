@@ -211,6 +211,7 @@ def test_release_res_command_mid_without_subarray_id(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.MS
 def test_release_resources_error_propagation(
     tango_context,
     change_event_callbacks,
@@ -287,7 +288,7 @@ def test_release_resources_error_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Exception occurred on device:{MID_SUBARRAY_DEVICE}: Error occurred on device",
+            "Command not allowed on leaf node.",
         ),
         lookahead=4,
     )

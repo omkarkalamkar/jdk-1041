@@ -327,7 +327,6 @@ def assign_resources_without_subarray_id(
     )
 
 
-# @pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -403,13 +402,9 @@ def test_assign_resources_exception_propagation(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (
-            unique_id[0],
-            "Exception occurred on device:{MID_SUBARRAY_DEVICE}: Error occurred on device",
-        ),
+        (unique_id[0], "Command not allowed on leaf node."),
         lookahead=4,
     )
-
     tmc_subarray.SetDefective(RESET_DEFECT)
 
 
