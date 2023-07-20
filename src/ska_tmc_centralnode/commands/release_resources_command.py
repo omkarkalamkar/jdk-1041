@@ -288,6 +288,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             json_argument (dict): Json Argument
             req_keys (list): Required key list to check in json argument
         """
+        json_argument = json.loads(json_argument)
         json_keys = json_argument.keys()
         for key in req_keys:
             if key not in json_keys:

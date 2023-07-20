@@ -783,7 +783,7 @@ class CNComponentManager(TmcComponentManager):
         )
         self.release_id = f"{time.time()}-{ReleaseResources.__name__}"
         try:
-            json_argument = json.loads(argin)
+            json_argument = argin
             self.logger.debug("JSON argin is in correct format.")
         except json.JSONDecodeError as e:
             return release_resources_command.reject_command(
@@ -812,6 +812,7 @@ class CNComponentManager(TmcComponentManager):
             except InvalidJSONError as e:
                 return release_resources_command.reject_command(str(e))
         # Reject command if Subarray is not available
+        json_argument = json.loads(json_argument)
         subarray_id = json_argument["subarray_id"]
         subarray_suffics = "/" + str(subarray_id)
         subarrays_list = list(

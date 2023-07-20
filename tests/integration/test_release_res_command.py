@@ -10,6 +10,7 @@ from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
+    RESET_DEFECT,
     TIMEOUT_DEFECT,
     check_subarray_availability,
     logger,
@@ -290,7 +291,7 @@ def test_release_resources_error_propagation(
         ),
         lookahead=4,
     )
-    tmc_subarray.SetDefective(json.dumps({"enabled": False}))
+    tmc_subarray.SetDefective(RESET_DEFECT)
 
 
 @pytest.mark.post_deployment
@@ -376,4 +377,4 @@ def test_release_resources_mid_timeout(
         ),
         lookahead=4,
     )
-    tmc_subarray.SetDefective(json.dumps({"enabled": False}))
+    tmc_subarray.SetDefective(RESET_DEFECT)

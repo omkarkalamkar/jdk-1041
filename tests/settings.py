@@ -78,6 +78,15 @@ ERROR_PROPAGATION_DEFECT = {
     "result": ResultCode.FAILED,
 }
 
+RESET_DEFECT = json.dumps(
+    {
+        "enabled": False,
+        "fault_type": FaultType.FAILED_RESULT,
+        "error_message": "Default exception.",
+        "result": ResultCode.FAILED,
+    }
+)
+
 
 def count_faulty_devices(cm):
     result = 0

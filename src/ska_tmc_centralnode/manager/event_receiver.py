@@ -37,7 +37,9 @@ class CentralNodeEventReceiver(EventReceiver):
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
-            self._logger.error("Exception occurred while creating proxy: %s", e)
+            self._logger.error(
+                "Exception occurred while creating proxy: %s", e
+            )
         else:
             try:
                 if ("subarray" in dev_info.dev_name) and (

@@ -169,7 +169,6 @@ def test_release_resources_command_timeout(tango_context, task_callback):
     }
     subarray_device = DevFactory().get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetDefective(json.dumps(defect))
-    cm.release_resources(task_callback)
 
     release_input_str = get_release_input_str()
 
@@ -208,22 +207,20 @@ def test_release_resources_exception_on_sn(tango_context, task_callback):
     }
     subarray_device = DevFactory().get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetDefective(json.dumps(defect))
-    cm.release_resources(task_callback)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
-
-    cm.release_resources(task_callback)
+    release_input_str = get_release_input_str()
+    cm.release_resources(release_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED,
-        result=ResultCode.FAILED,
-        exception="Exception occurred on device: ska_mid/tm_subarray_node/1: Error occurred on device",
+    result = task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
     )
+    assert "Command not allowed on leaf node." in result["exception"]
     subarray_device.SetDefective(json.dumps({"enabled": False}))
 
 
