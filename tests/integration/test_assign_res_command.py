@@ -472,3 +472,4 @@ def test_assign_resources_mid_timeout(
         lookahead=4,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
+    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
