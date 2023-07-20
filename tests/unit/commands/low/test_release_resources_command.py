@@ -1,5 +1,4 @@
 import json
-import logging
 import time
 
 import mock
@@ -86,7 +85,7 @@ def get_release_resources_command_obj():
 
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
-    tango_context, task_callback, json_factory, caplog
+    tango_context, task_callback, json_factory
 ):
     _, _, cm = get_release_resources_command_obj()
     cm.is_command_allowed("ReleaseResources")
@@ -104,7 +103,6 @@ def test_low_release_resources_command(
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    caplog.set_level(logging.DEBUG, logger="ska-tango-testing.mock")
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
     )

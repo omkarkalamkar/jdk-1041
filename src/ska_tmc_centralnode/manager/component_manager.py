@@ -424,59 +424,6 @@ class CNComponentManager(TmcComponentManager):
     def set_telescope_availability(self, telescope_availability):
         self.component.telescope_availability = telescope_availability
 
-    # def update_long_running_command_result(self, dev_name: str, value):
-    #     """Updates the LRCR callback with received event"""
-    #     self.logger.info(
-    #         "Received longRunningCommandResult event for device: %s, with value: %s",
-    #         dev_name,
-    #         value,
-    #     )
-    #     try:
-    #         if not value[1]:
-    #             # This is in case an empty event is received.
-    #             pass
-    #         elif self.command_in_progress == "AssignResources":
-    #             self.logger.info(
-    #                 f"LongRunningCommandResult event occurred: {(value[1])}"
-    #             )
-    #             if int(value[1]) == ResultCode.OK:
-    #                 self.command_result = ResultCode.OK
-    #         elif self.command_in_progress == "ReleaseResources":
-    #             self.logger.info(
-    #                 f"LongRunningCommandResult event occurred: {(value[1])}"
-    #             )
-    #             if int(value[1]) == ResultCode.OK:
-    #                 self.command_result = ResultCode.OK
-
-    #     except ValueError:
-    #         if self.command_in_progress == "AssignResources":
-    #             self.logger.info(
-    #                 "Updating LRCRCallback with value: %s for AssignResources for device: %s",
-    #                 value,
-    #                 dev_name,
-    #             )
-    #             exception_message = (
-    #                 f"Exception occurred on device: {dev_name}: {value[1]}"
-    #             )
-    #             self.long_running_result_callback(
-    #                 self.assign_id,
-    #                 ResultCode.FAILED,
-    #                 exception_msg=exception_message,
-    #             )
-    #         elif self.command_in_progress == "ReleaseResources":
-    #             self.logger.info(
-    #                 "Updating LRCRCallback with value: %s for ReleaseResources for device: %s",
-    #                 value,
-    #                 dev_name,
-    #             )
-    #             exception_message = (
-    #                 f"Exception occurred on device: {dev_name}: {value[1]}"
-    #             )
-    #             self.long_running_result_callback(
-    #                 self.release_id,
-    #                 ResultCode.FAILED,
-    #                 exception_msg=exception_message,
-    #             )
 
     def update_long_running_command_result(self, dev_name: str, value):
         """Updates the LRCR callback with received event"""

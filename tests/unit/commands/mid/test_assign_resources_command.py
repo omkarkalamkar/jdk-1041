@@ -346,7 +346,7 @@ def test_assign_resources_command_timeout(tango_context, task_callback):
     task_callback.assert_against_call(
         status=TaskStatus.COMPLETED,
         result=ResultCode.FAILED,
-        exception="Timeout has occurred, command failed",
+        exception="Timeout has occured, command failed",
     )
     subarray_device.SetDefective(json.dumps({"enabled": False}))
 
