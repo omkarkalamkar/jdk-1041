@@ -191,7 +191,7 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     task_callback.assert_against_call(
         status=TaskStatus.COMPLETED,
         result=ResultCode.FAILED,
-        exception="Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device",
+        exception="Exception occurred on device: ska_mid/tm_subarray_node/1: Error occurred on device",
     )
     subarray_device.SetDefective(False)
 
@@ -335,7 +335,7 @@ def test_assign_resources_command_timeout(tango_context, task_callback):
     task_callback.assert_against_call(
         status=TaskStatus.COMPLETED,
         result=ResultCode.FAILED,
-        exception="Timeout has occured, command failed",
+        exception="Timeout has occurred, command failed",
     )
     subarray_device.SetDefective(False)
 

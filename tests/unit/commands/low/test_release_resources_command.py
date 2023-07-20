@@ -48,9 +48,7 @@ def devices_to_load():
         {
             "class": HelperBaseDevice,
             "devices": [
-                {
-                    "name": LOW_CSP_MLN_DEVICE,
-                },
+                {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_SDP_MLN_DEVICE},
                 {"name": DISH_LEAF_NODE_DEVICE},
             ],

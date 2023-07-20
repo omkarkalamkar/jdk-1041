@@ -162,7 +162,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if self.subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                f"Subarray Id {subarray_id} is not existing!",
+                f"Subarray Id {subarray_id} doesn't exit!",
             )
         if jsonArgument["release_all"] is True:
             ret_code, message = self.release_all_resources(
@@ -239,7 +239,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if self.subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("Subarray id %s doesn't exist!", subarray_id),
+                f"Subarray Id {subarray_id} doesn't exit!",
             )
 
         self.logger.info(jsonArgument)
