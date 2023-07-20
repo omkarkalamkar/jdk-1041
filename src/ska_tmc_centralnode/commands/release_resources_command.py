@@ -158,12 +158,14 @@ class ReleaseResources(AbstractAssignReleaseResources):
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.subarray_adapter = adapter
+                self.component_manager.subarray_devname = adapter.dev_name
 
         if self.subarray_adapter is None:
             return (
                 ResultCode.FAILED,
                 f"Subarray Id {subarray_id} doesn't exit!",
             )
+
         if jsonArgument["release_all"] is True:
             ret_code, message = self.release_all_resources(
                 self.subarray_adapter
@@ -235,6 +237,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.subarray_adapter = adapter
+                self.component_manager.subarray_devname = adapter.dev_name
 
         if self.subarray_adapter is None:
             return (
@@ -288,7 +291,6 @@ class ReleaseResources(AbstractAssignReleaseResources):
             json_argument (dict): Json Argument
             req_keys (list): Required key list to check in json argument
         """
-        json_argument = json.loads(json_argument)
         json_keys = json_argument.keys()
         for key in req_keys:
             if key not in json_keys:
