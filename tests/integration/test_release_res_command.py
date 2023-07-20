@@ -371,7 +371,7 @@ def test_release_resources_mid_timeout(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Timeout has occurred, command failed",
+            "Timeout has occured, command failed",
         ),
         lookahead=4,
     )
