@@ -1,6 +1,7 @@
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
@@ -376,3 +377,4 @@ def test_release_resources_mid_timeout(
         lookahead=6,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
+    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
