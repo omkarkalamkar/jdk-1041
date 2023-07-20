@@ -239,7 +239,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if self.subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("Subarray id %s is not existing!", subarray_id),
+                ("Subarray id %s doesn't exist!", subarray_id),
             )
 
         self.logger.info(jsonArgument)
