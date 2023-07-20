@@ -291,6 +291,8 @@ def test_release_resources_error_propagation(
         lookahead=6,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
+    # Tear Down
+    tmc_subarray.ReleaseAllResources()
 
 
 @pytest.mark.post_deployment

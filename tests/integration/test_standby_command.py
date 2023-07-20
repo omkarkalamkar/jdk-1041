@@ -10,6 +10,7 @@ from tests.settings import logger
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.MS
 def test_standby_command_mid(
     tango_context,
     change_event_callbacks,
