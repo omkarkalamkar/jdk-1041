@@ -66,7 +66,7 @@ def task_callback() -> MockCallable:
 
     :rtype: MockCallable
     """
-    task_callback = MockCallable(5)
+    task_callback = MockCallable(15)
     return task_callback
 
 
@@ -87,7 +87,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "telescopeHealthState",
         "tmOpState",
         "lastDeviceInfoChanged",
-        timeout=30.0,
+        timeout=50.0,
     )
 
 

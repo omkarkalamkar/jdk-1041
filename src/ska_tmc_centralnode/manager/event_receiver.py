@@ -37,7 +37,9 @@ class CentralNodeEventReceiver(EventReceiver):
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
-            self._logger.error("Exception occured while creating proxy: %s", e)
+            self._logger.error(
+                "Exception occurred while creating proxy: %s", e
+            )
         else:
             try:
                 if ("subarray" in dev_info.dev_name) and (
@@ -47,6 +49,12 @@ class CentralNodeEventReceiver(EventReceiver):
                         "assignedResources",
                         tango.EventType.CHANGE_EVENT,
                         self.handle_assigned_resource_event,
+                        stateless=True,
+                    )
+                    proxy.subscribe_event(
+                        "obsState",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_obs_state_event,
                         stateless=True,
                     )
                 if "dish/master" in dev_info.dev_name:

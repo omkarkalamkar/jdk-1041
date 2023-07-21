@@ -1,9 +1,12 @@
 # Note: This helper class module is explicitly required for CentralNode. Hence kept it here and not in ska-tmc-common repo.
+import json
 import threading
 import time
+from typing import List, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tmc_common import CommandNotAllowed, FaultType
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
@@ -21,6 +24,15 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         super().init_device()
         self._resources_assigned = []
         self._is_subarray_available = False
+        self._defective = json.dumps(
+            {
+                "enabled": False,
+                "fault_type": FaultType.FAILED_RESULT,
+                "error_message": "Default exception.",
+                "result": ResultCode.FAILED,
+            }
+        )
+        self.defective_params = json.loads(self._defective)
 
     class InitCommand(HelperSubArrayDevice.InitCommand):
         def do(self):
@@ -42,6 +54,16 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
     isSubarrayAvailable = attribute(
         dtype="DevBoolean", access=AttrWriteType.READ
     )
+    defective = attribute(dtype=str, access=AttrWriteType.READ)
+
+    def read_defective(self) -> str:
+        """
+        Returns defective status of devices as a JSON-encoded string.
+
+        :return: JSON-encoded string representing the defective status of devices
+        :rtype: str
+        """
+        return self._defective
 
     def read_assignedResources(self):
         """
@@ -54,6 +76,96 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
     def read_isSubarrayAvailable(self) -> bool:
         """Returns subarray availability in boolean format."""
         return self._is_subarray_available
+
+    def push_obs_state_event(self, obs_state: ObsState) -> None:
+        """
+        Pushes a change event for the provided observation state.
+
+        Args:
+            obs_state (ObsState): The observation state to push.
+
+        Returns:
+            None
+        """
+        self.logger.info("Pushing change event for obsState: %s", obs_state)
+        self.push_change_event("obsState", obs_state)
+
+    def induce_fault(
+        self,
+        command_name: str,
+    ) -> Tuple[List[ResultCode], List[str]]:
+        """Induces fault into device according to given parameters
+
+        :params:
+
+        command_name: Name of the command for which fault is being induced
+        dtype: str
+        rtype: Tuple[List[ResultCode], List[str]]
+        """
+        fault_type = self.defective_params["fault_type"]
+        result = self.defective_params["result"]
+        fault_message = self.defective_params["error_message"]
+        intermediate_state = (
+            self.defective_params.get("intermediate_state")
+            or ObsState.RESOURCING
+        )
+
+        if fault_type == FaultType.FAILED_RESULT:
+            return [result], [fault_message]
+
+        if fault_type == FaultType.LONG_RUNNING_EXCEPTION:
+            thread = threading.Timer(
+                self._delay,
+                function=self.push_command_result,
+                args=[result, command_name, fault_message],
+            )
+            thread.start()
+            return [ResultCode.QUEUED], [""]
+
+        if fault_type == FaultType.STUCK_IN_INTERMEDIATE_STATE:
+            self._obs_state = intermediate_state
+            self.push_obs_state_event(intermediate_state)
+            return [ResultCode.QUEUED], [""]
+
+        return [ResultCode.OK], [""]
+
+    def push_command_result(
+        self, result: ResultCode, command: str, exception: str = ""
+    ) -> None:
+        """Push long running command result event for given command.
+
+        :params:
+
+        result: The result code to be pushed as an event
+        dtype: ResultCode
+
+        command: The command name for which the event is being pushed
+        dtype: str
+
+        exception: Exception message to be pushed as an event
+        dtype: str
+        """
+        command_id = f"{time.time()}-{command}"
+        if exception:
+            command_result = (command_id, exception)
+            self.push_change_event("longRunningCommandResult", command_result)
+        command_result = (command_id, json.dumps(result))
+        self.push_change_event("longRunningCommandResult", command_result)
+
+    @command(
+        dtype_in=str,
+        doc_in="Set Defective parameters",
+    )
+    def SetDefective(self, values: str) -> None:
+        """
+        Trigger defective change
+        :param: values
+        :type: str
+        """
+        input_dict = json.loads(values)
+        self.logger.info("Setting defective params to %s", input_dict)
+        for key, value in input_dict.items():
+            self.defective_params[key] = value
 
     @command(
         dtype_in="DevBoolean",
@@ -97,13 +209,16 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             self.push_change_event("State", self.dev_state())
         return [[ResultCode.OK], [""]]
 
-    def is_AssignResources_allowed(self):
+    def is_AssignResources_allowed(self) -> bool:
         """
-        Check if command `AssignResources` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
+        This method checks if the AssignResources command is allowed or not
         """
+        if self.defective_params["enabled"]:
+            if (
+                self.defective_params["fault_type"]
+                == FaultType.COMMAND_NOT_ALLOWED
+            ):
+                raise CommandNotAllowed(self.defective_params["error_message"])
         return True
 
     @command(
@@ -112,34 +227,29 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         dtype_out="DevVarLongStringArray",
         doc_out="(ReturnType, 'informational message')",
     )
-    def AssignResources(self, argin):
-        if self._defective:
-            self._obs_state = ObsState.RESOURCING
-            self.push_change_event("obsState", self._obs_state)
-
-            command_result = (
-                "1000",
-                "Error occured on device",
+    def AssignResources(
+        self, argin: str = ""
+    ) -> Tuple[List[ResultCode], List[str]]:
+        """
+        This is the method to invoke AssignResources command.
+        :return: ResultCode, message
+        :rtype: tuple
+        """
+        if self.defective_params["enabled"]:
+            return self.induce_fault(
+                "AssignResources",
             )
-            thread = threading.Thread(
-                target=self.push_result_event, args=[command_result]
-            )
-            thread.start()
-
-            return [[ResultCode.FAILED], ["Device Defective"]]
 
         self._obs_state = ObsState.RESOURCING
-        self.push_change_event("obsState", self._obs_state)
+        self.push_obs_state_event(self._obs_state)
         self._resources_assigned = ["SKA001"]
-        self.logger.info("Pushing the assignedResources event")
         self.push_change_event("assignedResources", self._resources_assigned)
-        self.logger.debug("Calling the LRCR event method")
-        thread = threading.Thread(
-            target=self.update_device_obsstate, args=[ObsState.IDLE]
+        thread = threading.Timer(
+            self._delay, self.update_device_obsstate, args=[ObsState.IDLE]
         )
         thread.start()
-
-        return [[ResultCode.OK], [""]]
+        self.push_command_result(ResultCode.OK, "AssignResources")
+        return [ResultCode.OK], [""]
 
     def push_result_event(self, command_result: tuple):
         """Pushes a longRunningCommandResult event after 2 secs with given result."""
@@ -147,14 +257,46 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         self.logger.info(f"Pushing the LRCR event: {command_result}")
         self.push_change_event("longRunningCommandResult", command_result)
 
-    def is_ReleaseAllResources_allowed(self):
+    def is_ReleaseAllResources_allowed(self) -> bool:
         """
-        Check if command `ReleaseAllResources` is allowed in the current device state.
-
-        :return: ``True`` if the command is allowed
-        :rtype: boolean
+        This method checks if the ReleaseAllResources command is allowed in
+        the current device state.
+        :return: ResultCode, message
+        :rtype: bool
         """
+        if self.defective_params["enabled"]:
+            if (
+                self.defective_params["fault_type"]
+                == FaultType.COMMAND_NOT_ALLOWED
+            ):
+                raise CommandNotAllowed(self.defective_params["error_message"])
         return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def ReleaseAllResources(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        This is the method to invoke ReleaseAllResources command.
+        :return: ResultCode, message
+        :rtype: tuple
+        """
+        if self.defective_params["enabled"]:
+            return self.induce_fault(
+                "ReleaseAllResources",
+            )
+
+        self._obs_state = ObsState.RESOURCING
+        self.push_obs_state_event(self._obs_state)
+        self._resources_assigned = []
+        self.push_change_event("assignedResources", self._resources_assigned)
+        thread = threading.Timer(
+            self._delay, self.update_device_obsstate, args=[ObsState.EMPTY]
+        )
+        thread.start()
+        self.push_command_result(ResultCode.OK, "ReleaseAllResources")
+        return [ResultCode.OK], [""]
 
     def is_ReleaseResources_allowed(self):
         """
@@ -164,15 +306,3 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         :rtype: boolean
         """
         return True
-
-    @command(
-        dtype_out="DevVarLongStringArray",
-        doc_out="(ReturnType, 'informational message')",
-    )
-    def ReleaseAllResources(self):
-        if self._obs_state != ObsState.EMPTY:
-            self._obs_state = ObsState.EMPTY
-            self.push_change_event("obsState", self._obs_state)
-        self._resources_assigned = []
-        self.push_change_event("assignedResources", self._resources_assigned)
-        return [[ResultCode.OK], [""]]

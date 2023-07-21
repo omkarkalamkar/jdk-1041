@@ -3,13 +3,14 @@ AssignResources class for CentralNode.
 """
 import json
 import threading
+import time
 from typing import Callable, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import SubArrayAdapter
+from ska_tmc_common import SubArrayAdapter, TimeoutCallback
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -45,6 +46,8 @@ class AssignResources(AbstractAssignReleaseResources):
         self.tm_subarray_adapter: Optional[SubArrayAdapter] = None
         self._skuid = skuid
         self.task_callback: Callable
+        self.timeout_id = f"{time.time()}_{__class__.__name__}"
+        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
 
     def assign_resources(
         self,
@@ -68,16 +71,24 @@ class AssignResources(AbstractAssignReleaseResources):
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "AssignResources"
         self.component_manager.command_result = ResultCode.STARTED
+        self.component_manager.start_timer(
+            self.timeout_id,
+            self.component_manager.command_timeout,
+            self.timeout_callback,
+        )
 
         result_code, message = self.do(argin=json.dumps(argin))
         self.logger.info(f"command assign_resources returncode: {result_code}")
         self.logger.info(message)
         if result_code == ResultCode.FAILED:
             self.update_task_status(result_code, message)
+            self.component_manager.stop_timer()
         else:
             self.start_tracker_thread(
                 self.component_manager.get_subarray_obsstate,
                 ObsState.IDLE,
+                timeout_id=self.timeout_id,
+                timeout_callback=self.timeout_callback,
                 command_id=self.component_manager.assign_id,
                 lrcr_callback=self.component_manager.long_running_result_callback,
             )

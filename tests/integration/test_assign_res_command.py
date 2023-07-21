@@ -9,10 +9,13 @@ from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
+    ERROR_PROPAGATION_DEFECT,
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
+    RESET_DEFECT,
     SLEEP_TIME,
     TIMEOUT,
+    TIMEOUT_DEFECT,
     check_subarray_availability,
     logger,
 )
@@ -324,7 +327,6 @@ def assign_resources_without_subarray_id(
     )
 
 
-# @pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -346,7 +348,6 @@ def test_assign_res_command_mid_without_subarray_id(
     )
 
 
-# @pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_assign_resources_exception_propagation(
@@ -382,8 +383,8 @@ def test_assign_resources_exception_propagation(
         lookahead=2,
     )
 
-    tmc_subarray = dev_factory.get_device("ska_mid/tm_subarray_node/1")
-    tmc_subarray.SetDefective(True)
+    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
+    tmc_subarray.SetDefective(ERROR_PROPAGATION_DEFECT)
 
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
@@ -403,10 +404,72 @@ def test_assign_resources_exception_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Exception occured on device: ska_mid/tm_subarray_node/1: Error occured on device",
+            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occured, command failed.",
         ),
         lookahead=4,
     )
+    tmc_subarray.SetDefective(RESET_DEFECT)
 
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_assign_resources_mid_timeout(
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+
+    ensure_checked_devices(central_node)
+
+    result, unique_id = central_node.TelescopeOn()
+    logger.info(
+        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=2,
+    )
+
+    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
+    tmc_subarray.SetDefective(TIMEOUT_DEFECT)
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+
+    result, unique_id = central_node.AssignResources(
+        json_factory("command_AssignResources")
+    )
+
+    logger.info(
+        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("AssignResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            "Timeout has occured, command failed",
+        ),
+        lookahead=4,
+    )
+    tmc_subarray.SetDefective(RESET_DEFECT)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
-    tmc_subarray.SetDefective(False)

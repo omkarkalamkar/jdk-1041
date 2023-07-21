@@ -87,6 +87,7 @@ class CNComponentManager(TmcComponentManager):
         proxy_timeout=500,
         sleep_time=1,
         skuid_service="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
+        command_timeout=30,
         *args,
         **kwargs,
     ):
@@ -122,6 +123,7 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
         self.event_receiver = True
+        self.command_timeout = command_timeout
 
         self.event_receiver = _event_receiver
         if self.event_receiver:
@@ -146,6 +148,7 @@ class CNComponentManager(TmcComponentManager):
         self._op_state_aggregator = None
         self.skuid_service = skuid_service
         self.assign_id: str
+        self.release_id: str
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
         self.subarray_devname: str = ""
@@ -424,7 +427,7 @@ class CNComponentManager(TmcComponentManager):
     def update_long_running_command_result(self, dev_name: str, value):
         """Updates the LRCR callback with received event"""
         self.logger.info(
-            "Recieved longRunningCommandResult event for device: %s, with value: %s",
+            "Received longRunningCommandResult event for device: %s, with value: %s",
             dev_name,
             value,
         )
@@ -434,23 +437,45 @@ class CNComponentManager(TmcComponentManager):
                 pass
             elif self.command_in_progress == "AssignResources":
                 self.logger.info(
-                    f"LongRunningCommandResult event occurred: {int(value[1])}"
+                    f"LongRunningCommandResult event occurred: {(value[1])}"
                 )
                 if int(value[1]) == ResultCode.OK:
+                    # Update the command_result only if it's "AssignResources" and successful.
+                    self.command_result = ResultCode.OK
+            elif self.command_in_progress == "ReleaseResources":
+                self.logger.info(
+                    f"LongRunningCommandResult event occurred: {(value[1])}"
+                )
+                if int(value[1]) == ResultCode.OK:
+                    # Update the command_result only if it's "ReleaseResources" and successful.
                     self.command_result = ResultCode.OK
 
         except ValueError:
             if self.command_in_progress == "AssignResources":
                 self.logger.info(
-                    "Updating LRCRCallback with value: %s for Assign for device: %s",
+                    "Updating LRCRCallback with value: %s for AssignResources for device: %s",
                     value,
                     dev_name,
                 )
                 exception_message = (
-                    f"Exception occured on device: {dev_name}: {value[1]}"
+                    f"Exception occurred on device: {dev_name}: {value[1]}"
                 )
                 self.long_running_result_callback(
                     self.assign_id,
+                    ResultCode.FAILED,
+                    exception_msg=exception_message,
+                )
+            elif self.command_in_progress == "ReleaseResources":
+                self.logger.info(
+                    "Updating LRCRCallback with value: %s for ReleaseResources for device: %s",
+                    value,
+                    dev_name,
+                )
+                exception_message = (
+                    f"Exception occurred on device: {dev_name}: {value[1]}"
+                )
+                self.long_running_result_callback(
+                    self.release_id,
                     ResultCode.FAILED,
                     exception_msg=exception_message,
                 )
@@ -687,7 +712,7 @@ class CNComponentManager(TmcComponentManager):
         return task_status, response
 
     def release_resources(
-        self, argin, task_callback: Optional[Callable] = None
+        self, argin: str, task_callback: Optional[Callable] = None
     ):
         """
         Submit the ReleaseResource command in queue.
@@ -702,6 +727,7 @@ class CNComponentManager(TmcComponentManager):
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
+        self.release_id = f"{time.time()}-{ReleaseResources.__name__}"
         try:
             json_argument = json.loads(argin)
             self.logger.debug("JSON argin is in correct format.")

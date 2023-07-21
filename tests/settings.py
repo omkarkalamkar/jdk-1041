@@ -3,6 +3,9 @@ import logging
 import time
 
 import pytest
+from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
+from ska_tmc_common import FaultType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -60,6 +63,34 @@ DEVICE_LIST_LOW = [
     "ska_low/tm_leaf_node/csp_subarray01",
     "ska_low/tm_leaf_node/sdp_subarray01",
 ]
+TIMEOUT_DEFECT = json.dumps(
+    {
+        "enabled": True,
+        "fault_type": FaultType.STUCK_IN_INTERMEDIATE_STATE,
+        "error_message": "Command stuck in processing",
+        "result": ResultCode.FAILED,
+        "intermediate_state": ObsState.RESOURCING,
+    }
+)
+
+ERROR_PROPAGATION_DEFECT = json.dumps(
+    {
+        "enabled": True,
+        "fault_type": FaultType.LONG_RUNNING_EXCEPTION,
+        "error_message": "Exception occured, command failed.",
+        "result": ResultCode.FAILED,
+    }
+)
+
+
+RESET_DEFECT = json.dumps(
+    {
+        "enabled": False,
+        "fault_type": FaultType.FAILED_RESULT,
+        "error_message": "Default exception.",
+        "result": ResultCode.FAILED,
+    }
+)
 
 
 def count_faulty_devices(cm):

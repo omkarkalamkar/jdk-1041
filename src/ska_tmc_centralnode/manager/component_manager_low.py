@@ -41,6 +41,7 @@ class CNComponentManagerLow(CNComponentManager):
         proxy_timeout=500,
         sleep_time=1,
         skuid_service="",
+        command_timeout=30,
         *args,
         **kwargs,
     ):
@@ -82,6 +83,7 @@ class CNComponentManagerLow(CNComponentManager):
             proxy_timeout,
             sleep_time,
             skuid_service="",
+            command_timeout=30,
             *args,
             **kwargs,
         )

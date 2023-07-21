@@ -49,6 +49,8 @@ class AbstractCentralNode(TMCBaseDevice):
     MaxWorker = device_property(dtype="DevUShort", default_value=1)
 
     ProxyTimeout = device_property(dtype="DevUShort", default_value=500)
+
+    CommandTimeout = device_property(dtype="DevUShort", default_value=30)
     # ----------
     # Attributes
     # ----------

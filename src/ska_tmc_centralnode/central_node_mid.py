@@ -264,6 +264,7 @@ class CentralNodeMid(AbstractCentralNode):
             _telescope_availability_callback=self.update_telescope_availability_callback,
             communication_state_callback=None,
             component_state_callback=None,
+            command_timeout=self.CommandTimeout,
             max_workers=self.MaxWorker,
             proxy_timeout=self.ProxyTimeout,
             sleep_time=self.SleepTime,
