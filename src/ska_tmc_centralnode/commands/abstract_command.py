@@ -42,7 +42,21 @@ class CentralNodeCommand(TMCCommand):
     ):
         try:
             for adapter in adapters:
-                command_caller(adapter)
+                unique_id, _ = command_caller(adapter)
+                if (
+                    self.component_manager.command_in_progress
+                    == "AssignResources"
+                ):
+                    self.compomnent_manager.command_mapping[
+                        self.component_manager.assign_id
+                    ] = unique_id
+                elif (
+                    self.component_manager.command_in_progress
+                    == "ReleaseResources"
+                ):
+                    self.compomnent_manager.command_mapping[
+                        self.component_manager.release_id
+                    ] = unique_id
                 self.logger.debug(
                     f"Invoked {command_name} on device {adapter.dev_name}"
                 )

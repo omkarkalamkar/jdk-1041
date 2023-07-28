@@ -152,6 +152,7 @@ class CNComponentManager(TmcComponentManager):
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
         self.subarray_devname: str = ""
+        self.command_mapping = {}
 
     def stop_event_receiver(self):
         if self.event_receiver:
@@ -439,19 +440,25 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.info(
                     f"LongRunningCommandResult event occurred: {(value[1])}"
                 )
-                if int(value[1]) == ResultCode.OK:
+                if int(value[1]) == ResultCode.OK and value[
+                    0
+                ] == self.command_mapping.get(self.assign_id):
                     # Update the command_result only if it's "AssignResources" and successful.
                     self.command_result = ResultCode.OK
             elif self.command_in_progress == "ReleaseResources":
                 self.logger.info(
                     f"LongRunningCommandResult event occurred: {(value[1])}"
                 )
-                if int(value[1]) == ResultCode.OK:
+                if int(value[1]) == ResultCode.OK and value[
+                    0
+                ] == self.command_mapping.get(self.assign_id):
                     # Update the command_result only if it's "ReleaseResources" and successful.
                     self.command_result = ResultCode.OK
 
         except ValueError:
-            if self.command_in_progress == "AssignResources":
+            if self.command_in_progress == "AssignResources" and value[
+                0
+            ] == self.command_mapping.get(self.assign_id):
                 self.logger.info(
                     "Updating LRCRCallback with value: %s for AssignResources for device: %s",
                     value,
@@ -465,7 +472,9 @@ class CNComponentManager(TmcComponentManager):
                     ResultCode.FAILED,
                     exception_msg=exception_message,
                 )
-            elif self.command_in_progress == "ReleaseResources":
+            elif self.command_in_progress == "ReleaseResources" and value[
+                0
+            ] == self.command_mapping.get(self.release_id):
                 self.logger.info(
                     "Updating LRCRCallback with value: %s for ReleaseResources for device: %s",
                     value,
