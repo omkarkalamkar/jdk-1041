@@ -417,7 +417,7 @@ class AssignResources(AbstractAssignReleaseResources):
             #     input_mccs_master,
             # ),
         ]:
-            if result_code in [ResultCode.FAILED.ResultCode.REJECTED]:
+            if result_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                 return (
                     ResultCode.FAILED,
                     message_or_unique_id,
