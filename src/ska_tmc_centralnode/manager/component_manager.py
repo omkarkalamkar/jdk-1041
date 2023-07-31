@@ -147,8 +147,6 @@ class CNComponentManager(TmcComponentManager):
         self._health_state_aggregator = None
         self._op_state_aggregator = None
         self.skuid_service = skuid_service
-        self.assign_id: str
-        self.release_id: str
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
         self.subarray_devname: str = ""
@@ -433,32 +431,22 @@ class CNComponentManager(TmcComponentManager):
             value,
         )
         try:
+            self.logger.info(
+                f"LongRunningCommandResult event occurred: {(value[1])}"
+            )
             if not value[1]:
                 # This is in case an empty event is received.
                 pass
-            elif self.command_in_progress == "AssignResources":
-                self.logger.info(
-                    f"LongRunningCommandResult event occurred: {(value[1])}"
-                )
-                if int(value[1]) == ResultCode.OK and value[
-                    0
-                ] == self.command_mapping.get(self.assign_id):
-                    # Update the command_result only if it's "AssignResources" and successful.
-                    self.command_result = ResultCode.OK
-            elif self.command_in_progress == "ReleaseResources":
-                self.logger.info(
-                    f"LongRunningCommandResult event occurred: {(value[1])}"
-                )
-                if int(value[1]) == ResultCode.OK and value[
-                    0
-                ] == self.command_mapping.get(self.assign_id):
-                    # Update the command_result only if it's "ReleaseResources" and successful.
-                    self.command_result = ResultCode.OK
+            elif (
+                int(value[1]) == ResultCode.OK
+                and value[0] in self.command_mapping.values()
+            ):
+                # Update the command_result only if it's "AssignResources" or "ReleaseResources" and successful.
+                self.command_result = ResultCode.OK
 
         except ValueError:
-            if self.command_in_progress == "AssignResources" and value[
-                0
-            ] == self.command_mapping.get(self.assign_id):
+            self.logger.info(str(self.command_mapping.values()))
+            if value[0] in self.command_mapping.values():
                 self.logger.info(
                     "Updating LRCRCallback with value: %s for AssignResources for device: %s",
                     value,
@@ -467,24 +455,11 @@ class CNComponentManager(TmcComponentManager):
                 exception_message = (
                     f"Exception occurred on device: {dev_name}: {value[1]}"
                 )
+
                 self.long_running_result_callback(
-                    self.assign_id,
-                    ResultCode.FAILED,
-                    exception_msg=exception_message,
-                )
-            elif self.command_in_progress == "ReleaseResources" and value[
-                0
-            ] == self.command_mapping.get(self.release_id):
-                self.logger.info(
-                    "Updating LRCRCallback with value: %s for ReleaseResources for device: %s",
-                    value,
-                    dev_name,
-                )
-                exception_message = (
-                    f"Exception occurred on device: {dev_name}: {value[1]}"
-                )
-                self.long_running_result_callback(
-                    self.release_id,
+                    list(self.command_mapping.keys())[
+                        list(self.command_mapping.values()).index(value[0])
+                    ],
                     ResultCode.FAILED,
                     exception_msg=exception_message,
                 )
@@ -634,7 +609,6 @@ class CNComponentManager(TmcComponentManager):
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
-        self.assign_id = f"{time.time()}-{AssignResources.__name__}"
 
         try:
             json_argument = json.loads(argin)
@@ -736,7 +710,6 @@ class CNComponentManager(TmcComponentManager):
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        self.release_id = f"{time.time()}-{ReleaseResources.__name__}"
         try:
             json_argument = json.loads(argin)
             self.logger.debug("JSON argin is in correct format.")

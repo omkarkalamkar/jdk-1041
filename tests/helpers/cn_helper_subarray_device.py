@@ -92,7 +92,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
 
     def induce_fault(
         self,
-        command_name: str,
+        command_id: str,
     ) -> Tuple[List[ResultCode], List[str]]:
         """Induces fault into device according to given parameters
 
@@ -117,20 +117,20 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             thread = threading.Timer(
                 self._delay,
                 function=self.push_command_result,
-                args=[result, command_name, fault_message],
+                args=[result, command_id, fault_message],
             )
             thread.start()
-            return [ResultCode.QUEUED], [""]
+            return [ResultCode.QUEUED], [command_id]
 
         if fault_type == FaultType.STUCK_IN_INTERMEDIATE_STATE:
             self._obs_state = intermediate_state
             self.push_obs_state_event(intermediate_state)
-            return [ResultCode.QUEUED], [""]
+            return [ResultCode.QUEUED], [command_id]
 
-        return [ResultCode.OK], [""]
+        return [ResultCode.OK], [command_id]
 
     def push_command_result(
-        self, result: ResultCode, command: str, exception: str = ""
+        self, result: ResultCode, command_id: str, exception: str = ""
     ) -> None:
         """Push long running command result event for given command.
 
@@ -145,7 +145,6 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         exception: Exception message to be pushed as an event
         dtype: str
         """
-        command_id = f"{time.time()}-{command}"
         if exception:
             command_result = (command_id, exception)
             self.push_change_event("longRunningCommandResult", command_result)
@@ -183,31 +182,64 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             except Exception as e:
                 self.logger.exception(f"Error pushing the event. {e}")
 
-    def is_TelescopeOff_allowed(self):
+    def is_On_allowed(self) -> bool:
         return True
 
     @command(
         dtype_out="DevVarLongStringArray",
         doc_out="(ReturnType, 'informational message')",
     )
-    def TelescopeOff(self):
-        if self.dev_state() != DevState.OFF:
-            self.set_state(DevState.OFF)
-            self.push_change_event("State", self.dev_state())
-        return [[ResultCode.OK], [""]]
+    def On(self) -> Tuple[List[ResultCode], List[str]]:
+        if not self.defective_params["enabled"]:
+            if self.dev_state() != DevState.ON:
+                self.set_state(DevState.ON)
+                self.push_change_event("State", self.dev_state())
+            return [ResultCode.OK], [""]
 
-    def is_TelescopeStandBy_allowed(self):
+        return [ResultCode.FAILED], [
+            "Device is defective, cannot process command."
+        ]
+
+    def is_Off_allowed(self) -> bool:
         return True
 
     @command(
         dtype_out="DevVarLongStringArray",
         doc_out="(ReturnType, 'informational message')",
     )
-    def TelescopeStandBy(self):
-        if self.dev_state() != DevState.STANDBY:
-            self.set_state(DevState.STANDBY)
-            self.push_change_event("State", self.dev_state())
-        return [[ResultCode.OK], [""]]
+    def Off(self) -> Tuple[List[ResultCode], List[str]]:
+        if not self.defective_params["enabled"]:
+            if self.dev_state() != DevState.OFF:
+                self.set_state(DevState.OFF)
+                self.push_change_event("State", self.dev_state())
+            return [ResultCode.OK], [""]
+
+        return [ResultCode.FAILED], [
+            "Device is defective, cannot process command."
+        ]
+
+    def is_Standby_allowed(self) -> bool:
+        return True
+
+    @command(
+        dtype_out="DevVarLongStringArray",
+        doc_out="(ReturnType, 'informational message')",
+    )
+    def Standby(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        This method invokes Standby command on subarray devices
+        :return: ResultCode, message
+        :rtype: tuple
+        """
+        if not self.defective_params["enabled"]:
+            if self.dev_state() != DevState.STANDBY:
+                self.set_state(DevState.STANDBY)
+                self.push_change_event("State", self.dev_state())
+            return [ResultCode.OK], [""]
+
+        return [ResultCode.FAILED], [
+            "Device is defective, cannot process command."
+        ]
 
     def is_AssignResources_allowed(self) -> bool:
         """
@@ -235,10 +267,9 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         :return: ResultCode, message
         :rtype: tuple
         """
+        command_id = f"{time.time()}_AssignResources"
         if self.defective_params["enabled"]:
-            return self.induce_fault(
-                "AssignResources",
-            )
+            return self.induce_fault(command_id)
 
         self._obs_state = ObsState.RESOURCING
         self.push_obs_state_event(self._obs_state)
@@ -248,8 +279,8 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             self._delay, self.update_device_obsstate, args=[ObsState.IDLE]
         )
         thread.start()
-        self.push_command_result(ResultCode.OK, "AssignResources")
-        return [ResultCode.OK], [""]
+        self.push_command_result(ResultCode.OK, command_id)
+        return [ResultCode.OK], ["1000_AssignResources"]
 
     def push_result_event(self, command_result: tuple):
         """Pushes a longRunningCommandResult event after 2 secs with given result."""
@@ -282,9 +313,10 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         :return: ResultCode, message
         :rtype: tuple
         """
+        command_id = f"{time.time()}_ReleaseAllResources"
         if self.defective_params["enabled"]:
             return self.induce_fault(
-                "ReleaseAllResources",
+                command_id,
             )
 
         self._obs_state = ObsState.RESOURCING
@@ -295,8 +327,8 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             self._delay, self.update_device_obsstate, args=[ObsState.EMPTY]
         )
         thread.start()
-        self.push_command_result(ResultCode.OK, "ReleaseAllResources")
-        return [ResultCode.OK], [""]
+        self.push_command_result(ResultCode.OK, command_id)
+        return [ResultCode.OK], ["1000_ReleaseAllResources"]
 
     def is_ReleaseResources_allowed(self):
         """

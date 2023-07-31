@@ -41,26 +41,20 @@ class CentralNodeCommand(TMCCommand):
         command_name: str,
     ):
         try:
+            if len(adapters) == 1:
+                return_code, message_or_unique_id = command_caller(adapters[0])
+                self.logger.debug(
+                    f"Invoked {command_name} on device {adapters[0].dev_name}"
+                )
+                return return_code[0], message_or_unique_id[0]
             for adapter in adapters:
-                unique_id, _ = command_caller(adapter)
-                if (
-                    self.component_manager.command_in_progress
-                    == "AssignResources"
-                ):
-                    self.compomnent_manager.command_mapping[
-                        self.component_manager.assign_id
-                    ] = unique_id
-                elif (
-                    self.component_manager.command_in_progress
-                    == "ReleaseResources"
-                ):
-                    self.compomnent_manager.command_mapping[
-                        self.component_manager.release_id
-                    ] = unique_id
+                command_caller(adapter)
                 self.logger.debug(
                     f"Invoked {command_name} on device {adapter.dev_name}"
                 )
+
         except Exception as e:
+            self.logger.error(f"{e}")
             return (
                 ResultCode.FAILED,
                 f"{err_msg} {adapter.dev_name}: {e}",
