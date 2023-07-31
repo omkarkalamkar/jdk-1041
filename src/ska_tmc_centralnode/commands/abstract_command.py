@@ -42,9 +42,10 @@ class CentralNodeCommand(TMCCommand):
     ):
         try:
             if len(adapters) == 1:
-                return_code, message_or_unique_id = command_caller(adapters[0])
+                adapter = adapters[0]
+                return_code, message_or_unique_id = command_caller(adapter)
                 self.logger.debug(
-                    f"Invoked {command_name} on device {adapters[0].dev_name}"
+                    f"Invoked {command_name} on device {adapter.dev_name}"
                 )
                 return return_code[0], message_or_unique_id[0]
             for adapter in adapters:
