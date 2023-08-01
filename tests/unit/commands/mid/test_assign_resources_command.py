@@ -224,7 +224,16 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
 
 def test_assign_resources_command_with_ok(tango_context, task_callback):
     logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
     assign_res_command, cm = get_assign_resources_command_obj()
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(assign_input_str, task_callback=task_callback)
@@ -238,7 +247,10 @@ def test_assign_resources_command_with_mkt_ids_ok(
     logger.info("%s", tango_context)
     assign_res_command, cm = get_assign_resources_command_obj()
     cm.is_command_allowed("AssignResources")
-
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
     json_argument["dish"]["receptor_ids"] = ["MKT001", "MKT002"]
