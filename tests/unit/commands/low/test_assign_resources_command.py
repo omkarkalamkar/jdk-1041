@@ -46,15 +46,11 @@ def get_assign_resources_command_obj():
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
 
-    adapter_factory = HelperAdapterFactory()
-
     attrs = {"fetch_skuid.return_value": 123}
     skuid = mock.Mock(**attrs)
 
-    assign_res_command = AssignResources(
-        cm, adapter_factory, skuid, logger=logger
-    )
-    return assign_res_command, adapter_factory, cm
+    assign_res_command = AssignResources(cm, skuid, logger=logger)
+    return assign_res_command, cm
 
 
 @pytest.mark.SKA_low
@@ -62,7 +58,7 @@ def test_low_assign_resources_command(
     tango_context, task_callback, json_factory, caplog
 ):
     logger.info("%s", tango_context)
-    _, _, cm = get_assign_resources_command_obj()
+    _, cm = get_assign_resources_command_obj()
 
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
@@ -87,7 +83,7 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assign_res_command, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
@@ -102,7 +98,7 @@ def test_assign_resources_missing_sdp_key(
     tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assign_res_command, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
@@ -145,7 +141,7 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assign_res_command, cm = get_assign_resources_command_obj()
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
@@ -162,7 +158,7 @@ def test_low_assign_resources_command_empty_input_json(
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assign_res_command, cm = get_assign_resources_command_obj()
     (res_code, _) = assign_res_command.do(" ")
     assert res_code == ResultCode.FAILED
 
@@ -171,7 +167,7 @@ def test_low_assign_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
-    _, _, cm = get_assign_resources_command_obj()
+    _, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("invalid_key_AssignResources")
     # json_argument = json.loads(assign_input_str)
     (res_code, message) = cm.assign_resources(
@@ -189,7 +185,7 @@ def test_low_assign_resources_missing_subarray_id(
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assign_res_command, cm = get_assign_resources_command_obj()
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
@@ -204,7 +200,7 @@ def test_low_assign_resources_command_missing_mccs(
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assign_res_command, cm = get_assign_resources_command_obj()
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
@@ -221,7 +217,7 @@ def test_low_assign_resources_command_missing_channel_blocks(
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assign_res_command, cm = get_assign_resources_command_obj()
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
@@ -238,7 +234,7 @@ def test_low_assign_resources_command_missing_station_ids(
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    assign_res_command, _, cm = get_assign_resources_command_obj()
+    assign_res_command, cm = get_assign_resources_command_obj()
 
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("command_assign_resource_low")
