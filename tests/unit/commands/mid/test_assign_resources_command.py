@@ -185,7 +185,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
-    cm, _ = create_cm
+    cm, _ = create_cm()
 
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -253,6 +253,13 @@ def test_assign_resources_command_with_mkt_ids_ok(
 
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
     )
 
@@ -298,7 +305,7 @@ def test_telescope_assign_resources_command_empty_input_json(
     cm.is_command_allowed("AssignResources")
     cm.assign_resources("", task_callback=task_callback)
     (res_code, _) = cm.assign_resources(" ")
-    assert res_code == ResultCode.REJECTED
+    assert res_code == TaskStatus.REJECTED
 
 
 def test_assign_resources_fail_check_allowed(tango_context):

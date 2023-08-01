@@ -146,7 +146,7 @@ def test_low_assign_resources_command_empty_input_json(
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     (res_code, _) = cm.assign_resources(" ")
-    assert res_code == ResultCode.REJECTED
+    assert res_code == TaskStatus.REJECTED
 
 
 def test_low_assign_resources_command_with_invalide_key(
