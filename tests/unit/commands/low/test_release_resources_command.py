@@ -156,7 +156,7 @@ def test_low_release_resources_missing_subarray_id(
     )
     (res_code, message) = cm.release_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
-    assert "subarray_id" in message
+    assert "Malformed input string" in message
 
 
 @pytest.mark.SKA_low

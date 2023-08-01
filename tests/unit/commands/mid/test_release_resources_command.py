@@ -57,23 +57,13 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
     return release_input_str
 
 
-def test_mid_release_resources_command(tango_context, task_callback):
+def test_mid_release_resources_command_with_ok(tango_context, task_callback):
     cm, _ = create_cm()
     cm.is_command_allowed("ReleaseResources")
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
-    release_input_str = get_release_input_str()
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
-
-
-def test_mid_release_resources_command_with_ok(tango_context, task_callback):
-    cm, _ = create_cm()
-    cm.is_command_allowed("ReleaseResources")
     release_input_str = get_release_input_str()
     cm.release_resources(release_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
@@ -104,6 +94,13 @@ def test_mid_release_resources_command_fail_subarray(
     )
     release_input_str = get_release_input_str()
     cm.release_resources(release_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
     task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
@@ -138,15 +135,16 @@ def test_mid_release_resources_command_with_invalide_key(
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm()
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
     release_input_str = json_factory("invalid_key_ReleaseResources")
     # with pytest.raises(InvalidJSONError):
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.COMPLETED,
-            "result": ResultCode.FAILED,
-        }
+    result_code, message = cm.release_resources(
+        release_input_str, task_callback=task_callback
     )
+    assert result_code == TaskStatus.REJECTED
 
 
 def test_release_resources_command_timeout(tango_context, task_callback):
