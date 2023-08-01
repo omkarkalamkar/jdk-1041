@@ -83,7 +83,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 ObsState.IDLE,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
-                command_id=self.assign_id,
+                command_id=self.command_id,
                 lrcr_callback=self.component_manager.long_running_result_callback,
             )
 
@@ -97,8 +97,8 @@ class AssignResources(AbstractAssignReleaseResources):
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.component_manager.command_in_progress = ""
-        if self.component_manager.command_mapping.get(self.assign_id):
-            self.component_manager.command_mapping.pop(self.assign_id)
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
 
     def do_mid(self, argin) -> Tuple[ResultCode, str]:
         """
@@ -242,7 +242,7 @@ class AssignResources(AbstractAssignReleaseResources):
             return ResultCode.FAILED, message_or_unique_id
         elif result_code in [ResultCode.QUEUED, ResultCode.OK]:
             self.component_manager.command_mapping[
-                self.assign_id
+                self.command_id
             ] = message_or_unique_id
 
         self.logger.debug(
@@ -417,7 +417,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
             elif result_code in [ResultCode.QUEUED, ResultCode.OK]:
                 self.component_manager.command_mapping[
-                    self.assign_id
+                    self.command_id
                 ] = message_or_unique_id
 
         return (ResultCode.OK, "")

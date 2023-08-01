@@ -77,14 +77,14 @@ class ReleaseResources(AbstractAssignReleaseResources):
         if result_code == ResultCode.FAILED:
             self.update_task_status(result_code, message)
             self.component_manager.stop_timer()
-            self.component_manager.command_mapping.pop(self.release_id)
+            self.component_manager.command_mapping.pop(self.command_id)
         else:
             self.start_tracker_thread(
                 self.component_manager.get_subarray_obsstate,
                 ObsState.EMPTY,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
-                command_id=self.release_id,
+                command_id=self.command_id,
                 lrcr_callback=self.component_manager.long_running_result_callback,
             )
 
@@ -97,8 +97,8 @@ class ReleaseResources(AbstractAssignReleaseResources):
             self.component_manager.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
-        if self.component_manager.command_mapping.get(self.release_id):
-            self.component_manager.command_mapping.pop(self.release_id)
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
         self.component_manager.command_in_progress = ""
 
     def do_mid(self, argin) -> Tuple[ResultCode, str]:
@@ -175,7 +175,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
             elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
                 self.component_manager.command_mapping[
-                    self.release_id
+                    self.command_id
                 ] = message_or_unique_id
             return (ResultCode.OK, "")
         else:
@@ -262,7 +262,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
             elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
                 self.component_manager.command_mapping[
-                    self.release_id
+                    self.command_id
                 ] = message_or_unique_id
             return (ResultCode.OK, "")
 
@@ -281,7 +281,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         # if return_code in [ResultCode.FAILED,ResultCode.REJECTED]:
         #     return ResultCode.FAILED, message_or_unique_id # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
         # elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
-        #     self.component_manager.command_mapping[self.release_id] = message_or_unique_id
+        #     self.component_manager.command_mapping[self.command_id] = message_or_unique_id
 
     def release_all_resources(self, adapter):
         return self.send_command(
