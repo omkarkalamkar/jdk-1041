@@ -47,26 +47,18 @@ class CentralNodeCommand(TMCCommand):
         command_name: str,
     ):
         try:
-            if len(adapters) == 1:
-                adapter = adapters[0]
+            for adapter in adapters:
                 return_code, message_or_unique_id = command_caller(adapter)
                 self.logger.debug(
                     f"Invoked {command_name} on device {adapter.dev_name}"
                 )
-                return return_code[0], message_or_unique_id[0]
-            for adapter in adapters:
-                command_caller(adapter)
-                self.logger.debug(
-                    f"Invoked {command_name} on device {adapter.dev_name}"
-                )
+                yield return_code[0], message_or_unique_id[0]
 
         except Exception as e:
-            self.logger.error(f"{e}")
             return (
                 ResultCode.FAILED,
                 f"{err_msg} {adapter.dev_name}: {e}",
             )
-        return (ResultCode.OK, "")
 
     def send_command(self, adapters, description, command, argin=None):
         if argin is None:
