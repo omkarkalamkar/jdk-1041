@@ -70,24 +70,11 @@ def devices_to_load():
     )
 
 
-def get_release_resources_command_obj():
-    cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
-    helper_adapter_factory = HelperAdapterFactory()
-    release_command = ReleaseResources(
-        cm, helper_adapter_factory, logger=logger
-    )
-    return release_command, helper_adapter_factory, cm
-
-
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
     tango_context, task_callback, json_factory
 ):
-    _, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     cm.is_command_allowed("ReleaseResources")
 
     dev_factory = DevFactory()
@@ -135,7 +122,7 @@ def test_low_release_resources_command_fail_subarray(
 
 @pytest.mark.SKA_low
 def test_low_release_resources_empty_input_json(tango_context, task_callback):
-    release_res_command, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     cm.release_resources("", task_callback=task_callback)
     (res_code, _) = cm.release_resources(" ")
     assert res_code == TaskStatus.REJECTED
@@ -145,7 +132,7 @@ def test_low_release_resources_empty_input_json(tango_context, task_callback):
 def test_low_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
-    _, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     release_input_str = json_factory("invalid_key_ReleaseResources")
     (res_code, message) = cm.release_resources(
         release_input_str, task_callback=task_callback
@@ -160,7 +147,7 @@ def test_low_release_resources_command_with_invalide_key(
 def test_low_release_resources_missing_subarray_id(
     tango_context, task_callback, json_factory
 ):
-    release_res_command, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm()
     release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
