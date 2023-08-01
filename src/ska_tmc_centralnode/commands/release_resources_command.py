@@ -3,13 +3,11 @@ ReleaseResources class for CentralNode.
 """
 import json
 import threading
-import time
 from typing import Callable, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import TimeoutCallback
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -40,12 +38,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.subarray_adapters = []
         self.my_subarray_adapter = None
-        self.task_callback: Callable
-        self.timeout_id = f"{time.time()}_{__class__.__name__}"
-        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
-        self.release_id = f"{time.time()}-{ReleaseResources.__name__}"
 
     def release_resources(
         self,

@@ -82,20 +82,6 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     return assign_input_str
 
 
-def get_assign_resources_command_obj():
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
-
-    attrs = {"fetch_skuid.return_value": 123}
-    skuid = mock.Mock(**attrs)
-
-    assign_res_command = AssignResources(cm, skuid, logger=logger)
-    return assign_res_command, cm
-
-
 def test_assign_resources_command_completed(tango_context, task_callback):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -199,7 +185,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
-    _, cm = get_assign_resources_command_obj()
+    cm, _ = create_cm
 
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -229,7 +215,7 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    assign_res_command, cm = get_assign_resources_command_obj()
+    cm, _ = create_cm()
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
@@ -237,15 +223,24 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(assign_input_str, task_callback=task_callback)
-    res_code, _ = assign_res_command.do(assign_input_str)
-    assert res_code == ResultCode.OK
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
+        lookahead=5,
+    )
 
 
 def test_assign_resources_command_with_mkt_ids_ok(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
-    assign_res_command, cm = get_assign_resources_command_obj()
+    cm, _ = create_cm()
     cm.is_command_allowed("AssignResources")
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -257,8 +252,9 @@ def test_assign_resources_command_with_mkt_ids_ok(
     json_argument = json.dumps(json_argument)
 
     cm.assign_resources(json_argument, task_callback=task_callback)
-    res_code, _ = assign_res_command.do(json_argument)
-    assert res_code == ResultCode.OK
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+    )
 
 
 def test_assign_resources_command_fail_subarray(tango_context, task_callback):
@@ -298,11 +294,11 @@ def test_telescope_assign_resources_command_empty_input_json(
     tango_context, task_callback
 ):
     logger.info("%s", tango_context)
-    assign_res_command, cm = get_assign_resources_command_obj()
+    cm, _ = create_cm()
     cm.is_command_allowed("AssignResources")
     cm.assign_resources("", task_callback=task_callback)
-    (res_code, _) = assign_res_command.do(" ")
-    assert res_code == ResultCode.FAILED
+    (res_code, _) = cm.assign_resources(" ")
+    assert res_code == ResultCode.REJECTED
 
 
 def test_assign_resources_fail_check_allowed(tango_context):

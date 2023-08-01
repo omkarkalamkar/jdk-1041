@@ -1,8 +1,10 @@
 import operator
-from typing import Tuple
+import time
+from typing import Callable, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import TimeoutCallback
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.tmc_command import TMCCommand
 
@@ -12,6 +14,10 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
         super().__init__(component_manager, *args, logger=logger, **kwargs)
+        self.command_id = f"{time.time()}_{self.__class__.__name__}"
+        self.timeout_id = f"{time.time()}_{self.__class__.__name__}"
+        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
+        self.task_callback: Callable | None = None
 
     def init_adapters(self) -> Tuple[ResultCode, str]:
         if isinstance(

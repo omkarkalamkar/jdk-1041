@@ -3,14 +3,13 @@ AssignResources class for CentralNode.
 """
 import json
 import threading
-import time
 from typing import Callable, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import SubArrayAdapter, TimeoutCallback
+from ska_tmc_common import SubArrayAdapter
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -41,14 +40,8 @@ class AssignResources(AbstractAssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.dish_adapters = []
-        self.subarray_adapters = []
         self.tm_subarray_adapter: Optional[SubArrayAdapter] = None
         self._skuid = skuid
-        self.task_callback: Callable
-        self.timeout_id = f"{time.time()}_{__class__.__name__}"
-        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
-        self.assign_id = f"{time.time()}-{AssignResources.__name__}"
 
     def assign_resources(
         self,

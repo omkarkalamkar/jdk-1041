@@ -280,7 +280,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         )
         thread.start()
         self.push_command_result(ResultCode.OK, command_id)
-        return [ResultCode.OK], ["1000_AssignResources"]
+        return [ResultCode.OK], [command_id]
 
     def push_result_event(self, command_result: tuple):
         """Pushes a longRunningCommandResult event after 2 secs with given result."""
@@ -328,7 +328,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         )
         thread.start()
         self.push_command_result(ResultCode.OK, command_id)
-        return [ResultCode.OK], ["1000_ReleaseAllResources"]
+        return [ResultCode.OK], [command_id]
 
     def is_ReleaseResources_allowed(self):
         """
