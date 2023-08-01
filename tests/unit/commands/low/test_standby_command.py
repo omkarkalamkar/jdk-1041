@@ -71,7 +71,6 @@ def test_low_telescope_standby_command(tango_context, task_callback):
     ] is True
 
     cm.is_command_allowed("TelescopeStandby")
-    cm.adapter_factory = HelperAdapterFactory()
     cm.telescope_standby(task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}

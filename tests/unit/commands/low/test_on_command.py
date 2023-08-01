@@ -72,7 +72,6 @@ def test_low_telescope_on_command(tango_context, task_callback):
         "sdp_master_leaf_node"
     ] is True
     cm.is_command_allowed("TelescopeOn")
-    cm.adapter_factory = HelperAdapterFactory()
     cm.telescope_on(task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
