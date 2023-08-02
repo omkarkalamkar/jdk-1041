@@ -430,36 +430,38 @@ class CNComponentManager(TmcComponentManager):
             dev_name,
             value,
         )
+        unique_id, result_code_or_exception_or_task_status = value
         try:
             self.logger.info(
-                f"LongRunningCommandResult event occurred: {(value[1])}"
+                f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
             )
-            if not value[1]:
+            if not result_code_or_exception_or_task_status:
                 # This is in case an empty event is received.
                 pass
             elif (
-                int(value[1]) == ResultCode.OK
-                and value[0] in self.command_mapping.values()
+                int(result_code_or_exception_or_task_status) == ResultCode.OK
+                and unique_id in self.command_mapping.values()
             ):
                 # Update the command_result only if it's "AssignResources" or "ReleaseResources" and successful.
                 self.command_result = ResultCode.OK
 
         except ValueError:
             self.logger.info(str(self.command_mapping.values()))
-            if value[0] in self.command_mapping.values():
+            if unique_id in self.command_mapping.values():
                 self.logger.info(
                     "Updating LRCRCallback with value: %s for AssignResources for device: %s",
                     value,
                     dev_name,
                 )
-                exception_message = (
-                    f"Exception occurred on device: {dev_name}: {value[1]}"
-                )
-
+                exception_message = f"Exception occurred on device: {dev_name}: {result_code_or_exception_or_task_status}"
+                index_of_unique_id = list(self.command_mapping.values()).index(
+                    unique_id
+                )  # get index location of unique_id received in event
+                command_id = list(self.command_mapping.keys())[
+                    index_of_unique_id
+                ]  # command id mapped to unique id
                 self.long_running_result_callback(
-                    list(self.command_mapping.keys())[
-                        list(self.command_mapping.values()).index(value[0])
-                    ],
+                    command_id,
                     ResultCode.FAILED,
                     exception_msg=exception_message,
                 )

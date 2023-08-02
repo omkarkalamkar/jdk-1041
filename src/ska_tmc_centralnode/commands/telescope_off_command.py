@@ -51,9 +51,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         task_callback(status=TaskStatus.IN_PROGRESS)
 
-        ret_code, message = self.do(argin=None)
+        return_code, message = self.do(argin=None)
         self.logger.info(message)
-        if ret_code == ResultCode.FAILED:
+        if return_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
                 result=ResultCode.FAILED,
@@ -80,17 +80,20 @@ class TelescopeOff(AbstractTelescopeOnOff):
         """
         self.component_manager.component.desired_telescope_state = DevState.OFF
 
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_code, message = self.init_adapters()
+        if return_code == ResultCode.FAILED:
+            return return_code, message
 
         self.component_manager.log_state(
             "Device states before executing TelescopeOff command"
         )
 
-        ret_code, message = self.turn_off_subarrays()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_codes, message_or_unique_ids = self.turn_off_subarrays()
+        for return_code, message_or_unique_id in zip(
+            return_codes, message_or_unique_ids
+        ):
+            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
             "waiting for ALL Subarray devices obsState to be Empty"
@@ -118,13 +121,16 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
-        for ret_code, message in [
+        for return_codes, message_or_unique_ids in [
             self.turn_off_dishes(),
             self.turn_off_csp(),
             self.turn_off_sdp(),
         ]:
-            if ret_code == ResultCode.FAILED:
-                return ret_code, message
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return ResultCode.FAILED, message_or_unique_id
 
         return (ResultCode.OK, "")
 
@@ -182,9 +188,12 @@ class TelescopeOff(AbstractTelescopeOnOff):
             "Device states before executing TelescopeOff command"
         )
 
-        ret_code, message = self.turn_off_subarrays()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_codes, message_or_unique_ids = self.turn_off_subarrays()
+        for return_code, message_or_unique_id in zip(
+            return_codes, message_or_unique_ids
+        ):
+            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
             """Waiting for all the Subarray devices to be in EMPTY
@@ -214,13 +223,16 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
-        for ret_code, message in [
+        for return_codes, message_or_unique_ids in [
             # self.turn_off_mccs_mln(),
             self.turn_off_csp(),
             self.turn_off_sdp(),
         ]:
-            if ret_code == ResultCode.FAILED:
-                return ret_code, message
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return ResultCode.FAILED, message_or_unique_id
 
         return (ResultCode.OK, "")
 

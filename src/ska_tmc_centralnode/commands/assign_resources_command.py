@@ -228,22 +228,22 @@ class AssignResources(AbstractAssignReleaseResources):
             f"Invoking AssignResources command on:{self.tm_subarray_adapter}"
         )
 
-        result_code, message_or_unique_id = self.send_command(
+        return_codes, message_or_unique_ids = self.send_command(
             [self.tm_subarray_adapter],
             "Error in calling AssignResources on subarray",
             "AssignResources",
             json.dumps(json_argument),
         )
-
-        if (
-            result_code == ResultCode.FAILED
-            or result_code == ResultCode.REJECTED
+        for return_code, message_or_unique_id in zip(
+            return_codes, message_or_unique_ids
         ):
-            return ResultCode.FAILED, message_or_unique_id
-        elif result_code in [ResultCode.QUEUED, ResultCode.OK]:
-            self.component_manager.command_mapping[
-                self.command_id
-            ] = message_or_unique_id
+            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                return ResultCode.FAILED, message_or_unique_id
+
+            elif result_code in [ResultCode.QUEUED, ResultCode.OK]:
+                self.component_manager.command_mapping[
+                    self.command_id
+                ] = message_or_unique_id
 
         self.logger.debug(
             f"Resources assigned successfully to:{self.tm_subarray_adapter}"
@@ -396,7 +396,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
-        for result_code, message_or_unique_id in [
+        for return_codes, message_or_unique_ids in [
             self.send_command(
                 [self.tm_subarray_adapter],
                 f"Error in calling AssignResources on subarray: {self.tm_subarray_adapter.dev_name}",
@@ -410,15 +410,18 @@ class AssignResources(AbstractAssignReleaseResources):
             #     input_mccs_master,
             # ),
         ]:
-            if result_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                return (
-                    ResultCode.FAILED,
-                    message_or_unique_id,
-                )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-            elif result_code in [ResultCode.QUEUED, ResultCode.OK]:
-                self.component_manager.command_mapping[
-                    self.command_id
-                ] = message_or_unique_id
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return (
+                        ResultCode.FAILED,
+                        message_or_unique_id,
+                    )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
+                elif result_code in [ResultCode.QUEUED, ResultCode.OK]:
+                    self.component_manager.command_mapping[
+                        self.command_id
+                    ] = message_or_unique_id
 
         return (ResultCode.OK, "")
 

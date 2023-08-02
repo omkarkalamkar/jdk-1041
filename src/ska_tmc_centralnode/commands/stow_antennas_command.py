@@ -104,10 +104,15 @@ class StowAntennas(CentralNodeCommand):
                     continue
 
                 self.logger.debug("Set stow mode command invoked")
-                ret_code, message = self.set_stow_mode_dishes(adapter)
-                if ret_code == ResultCode.FAILED:
-                    return ret_code, message
-
+                (
+                    return_codes,
+                    message_or_unique_ids,
+                ) = self.set_stow_mode_dishes(adapter)
+                for return_code, message_or_unique_id in zip(
+                    return_codes, message_or_unique_ids
+                ):
+                    if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                        return ResultCode.FAILED, message_or_unique_id
         return (ResultCode.OK, "")
 
     def set_stow_mode_dishes(self, adapters):

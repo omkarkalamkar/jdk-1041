@@ -83,9 +83,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             DevState.STANDBY
         )
 
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_code, message = self.init_adapters()
+        if return_code == ResultCode.FAILED:
+            return return_code, message
 
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
@@ -93,9 +93,12 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.logger.info(
             "Invoking TelescopeStandby command on the lower level devices"
         )
-        ret_code, message = self.turn_standby_subarrays()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_codes, message_or_unique_ids = self.turn_standby_subarrays()
+        for return_code, message_or_unique_id in zip(
+            return_codes, message_or_unique_ids
+        ):
+            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
             "waiting for ALL Subarray devices obsState to be Empty"
@@ -123,14 +126,16 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
-        for ret_code, message in [
+        for return_codes, message_or_unique_ids in [
             self.turn_off_dishes(),
             self.turn_standby_csp(),
             self.turn_standby_sdp(),
         ]:
-            if ret_code == ResultCode.FAILED:
-                return ret_code, message
-
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return ResultCode.FAILED, message_or_unique_id
         self.logger.info(
             "TelescopeStandby command is completed successfully on the CentralNode"
         )
@@ -153,9 +158,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             DevState.STANDBY
         )
 
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_code, message = self.init_adapters()
+        if return_code == ResultCode.FAILED:
+            return return_code, message
 
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
@@ -163,9 +168,12 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.logger.info(
             "Invoking TelescopeStandby command on the lower level devices"
         )
-        ret_code, message = self.turn_standby_subarrays()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_codes, message_or_unique_ids = self.turn_standby_subarrays()
+        for return_code, message_or_unique_id in zip(
+            return_codes, message_or_unique_ids
+        ):
+            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                return ResultCode.FAILED, message_or_unique_id
         self.logger.info(
             "waiting for ALL Subarray devices obsState to be Empty"
         )
@@ -192,13 +200,16 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
-        for ret_code, message in [
+        for return_codes, message_or_unique_ids in [
             # self.turn_standby_mccs(),
             self.turn_standby_csp(),
             self.turn_standby_sdp(),
         ]:
-            if ret_code == ResultCode.FAILED:
-                return ret_code, message
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
             "TelescopeStandby command is completed successfully on the CentralNode"

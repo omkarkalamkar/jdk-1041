@@ -165,18 +165,21 @@ class ReleaseResources(AbstractAssignReleaseResources):
             )
 
         if jsonArgument["release_all"] is True:
-            return_code, message_or_unique_id = self.release_all_resources(
+            return_codes, message_or_unique_ids = self.release_all_resources(
                 self.subarray_adapter
             )
-            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                return (
-                    ResultCode.FAILED,
-                    message_or_unique_id,
-                )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-            elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                self.component_manager.command_mapping[
-                    self.command_id
-                ] = message_or_unique_id
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return (
+                        ResultCode.FAILED,
+                        message_or_unique_id,
+                    )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
+                elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                    self.component_manager.command_mapping[
+                        self.command_id
+                    ] = message_or_unique_id
             return (ResultCode.OK, "")
         else:
             return (
@@ -252,18 +255,21 @@ class ReleaseResources(AbstractAssignReleaseResources):
         self.logger.info(jsonArgument)
 
         if jsonArgument["release_all"] is True:
-            return_code, message_or_unique_id = self.release_all_resources(
+            return_codes, message_or_unique_ids = self.release_all_resources(
                 self.subarray_adapter
             )
-            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                return (
-                    ResultCode.FAILED,
-                    message_or_unique_id,
-                )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-            elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                self.component_manager.command_mapping[
-                    self.command_id
-                ] = message_or_unique_id
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return (
+                        ResultCode.FAILED,
+                        message_or_unique_id,
+                    )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
+                elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                    self.component_manager.command_mapping[
+                        self.command_id
+                    ] = message_or_unique_id
             return (ResultCode.OK, "")
 
         # TODO Uncomment below code during integration of MCCS
