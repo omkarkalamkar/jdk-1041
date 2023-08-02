@@ -341,10 +341,7 @@ class AssignResources(AbstractAssignReleaseResources):
         "processing_blocks":[{"pb_id":"pb-mvp01-20200325-00001","sbi_ids":["sbi-mvp01-20200325-00001"],"script":{},"parameters":{},
         "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00002","sbi_ids":["sbi-mvp01-20200325-00002"],"script":{},"parameters":{},
         "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00003","sbi_ids":["sbi-mvp01-20200325-00001","sbi-mvp01-20200325-00002"],"script":{},
-        "parameters":{},"dependencies":{}}],"resources":{"csp_links":[1,2,3,4],"receptors":["FS4","FS8"],"receive_nodes":10}},
-        "csp":{"interface":"https://schema.skao.int/ska-low-csp-assignresources/2.0","common":{"subarray_id":1},
-        "lowcbf":{"resources":[{"device":"fsp_01","shared":true,"fw_image":"pst","fw_mode":"unused"},
-        {"device":"p4_01","shared":true,"fw_image":"p4.bin","fw_mode":"p4"}]}}}
+        "parameters":{},"dependencies":{}}],"resources":{"csp_links":[1,2,3,4],"receptors":["FS4","FS8"],"receive_nodes":10}}}
 
 
         Note: From Jive, enter above input string without any space.
