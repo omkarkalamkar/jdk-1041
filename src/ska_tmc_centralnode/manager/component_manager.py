@@ -431,17 +431,20 @@ class CNComponentManager(TmcComponentManager):
             value,
         )
         unique_id, result_code_or_exception_or_task_status = value
-        if unique_id.endswith("AssignResources") or unique_id.endswith("ReleaseResources"): # ignoring other command events
+        if unique_id.endswith("AssignResources") or unique_id.endswith(
+            "ReleaseResources"
+        ):  # ignoring other command events
             try:
                 self.logger.info(
                     f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
                 )
-                
+
                 if not result_code_or_exception_or_task_status:
                     # This is in case an empty event is received.
                     pass
                 elif (
-                    int(result_code_or_exception_or_task_status) == ResultCode.OK
+                    int(result_code_or_exception_or_task_status)
+                    == ResultCode.OK
                     and unique_id in self.command_mapping.values()
                 ):
                     # Update the command_result only if it's "AssignResources" or "ReleaseResources" and successful.
@@ -455,7 +458,9 @@ class CNComponentManager(TmcComponentManager):
                         dev_name,
                     )
                     exception_message = f"Exception occurred on device: {dev_name}: {result_code_or_exception_or_task_status}"
-                    index_of_unique_id = list(self.command_mapping.values()).index(
+                    index_of_unique_id = list(
+                        self.command_mapping.values()
+                    ).index(
                         unique_id
                     )  # get index location of unique_id received in event
                     command_id = list(self.command_mapping.keys())[
