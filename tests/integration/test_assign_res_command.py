@@ -152,7 +152,6 @@ def assign_resources(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
-@pytest.mark.new
 @pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
