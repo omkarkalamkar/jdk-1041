@@ -12,43 +12,13 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
-from tests.settings import (
-    DISH_LEAF_NODE_DEVICE,
-    MID_CSP_MLN_DEVICE,
-    MID_SDP_MLN_DEVICE,
-    MID_SUBARRAY_DEVICE,
-    TIMEOUT,
-    create_cm,
-    logger,
-)
-
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": CNHelperSubArrayDevice,
-            "devices": [
-                {"name": MID_SUBARRAY_DEVICE},
-            ],
-        },
-        {
-            "class": HelperBaseDevice,
-            "devices": [
-                {"name": MID_CSP_MLN_DEVICE},
-                {"name": MID_SDP_MLN_DEVICE},
-                {"name": DISH_LEAF_NODE_DEVICE},
-            ],
-        },
-    )
+from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
 def get_release_input_str(release_input_file="command_ReleaseResources.json"):

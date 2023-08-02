@@ -16,27 +16,7 @@ from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
-
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": CNHelperSubArrayDevice,
-            "devices": [
-                {"name": LOW_SUBARRAY_DEVICE},
-            ],
-        },
-        # {
-        #     "class": HelperMCCSStateDevice,
-        #     "devices": [
-        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
-        #         {"name": "low-mccs/control/control"},
-        #     ],
-        # },
-    )
 
 
 @pytest.mark.SKA_low

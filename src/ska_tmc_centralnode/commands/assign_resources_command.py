@@ -240,7 +240,7 @@ class AssignResources(AbstractAssignReleaseResources):
             if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                 return ResultCode.FAILED, message_or_unique_id
 
-            elif result_code in [ResultCode.QUEUED, ResultCode.OK]:
+            elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
                 self.component_manager.command_mapping[
                     self.command_id
                 ] = message_or_unique_id
@@ -418,7 +418,7 @@ class AssignResources(AbstractAssignReleaseResources):
                         ResultCode.FAILED,
                         message_or_unique_id,
                     )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-                elif result_code in [ResultCode.QUEUED, ResultCode.OK]:
+                elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
                     self.component_manager.command_mapping[
                         self.command_id
                     ] = message_or_unique_id

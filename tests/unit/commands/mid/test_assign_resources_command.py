@@ -13,66 +13,12 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
-from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
-from tests.settings import (
-    DISH_LEAF_NODE_DEVICE,
-    DISH_MASTER_DEVICE,
-    MID_CSP_MASTER_DEVICE,
-    MID_CSP_MLN_DEVICE,
-    MID_CSP_SLN_DEVICE,
-    MID_SDP_MASTER_DEVICE,
-    MID_SDP_MLN_DEVICE,
-    MID_SDP_SLN_DEVICE,
-    MID_SUBARRAY_DEVICE,
-    TIMEOUT,
-    create_cm,
-    logger,
-)
-
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": CNHelperSubArrayDevice,
-            "devices": [
-                {"name": MID_SUBARRAY_DEVICE},
-            ],
-        },
-        {
-            "class": HelperSubArrayDevice,
-            "devices": [
-                {"name": MID_CSP_SLN_DEVICE},
-                {"name": MID_SDP_SLN_DEVICE},
-            ],
-        },
-        {
-            "class": HelperBaseDevice,
-            "devices": [
-                {"name": MID_CSP_MLN_DEVICE},
-                {"name": MID_CSP_MASTER_DEVICE},
-                {"name": MID_SDP_MLN_DEVICE},
-                {"name": MID_SDP_MASTER_DEVICE},
-                {"name": DISH_LEAF_NODE_DEVICE},
-            ],
-        },
-        {
-            "class": HelperDishDevice,
-            "devices": [
-                {"name": DISH_MASTER_DEVICE},
-            ],
-        },
-    )
+from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):

@@ -10,64 +10,13 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
-from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
-    HelperSubarrayLeafDevice,
-)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
-from tests.settings import (
-    LOW_CSP_MASTER_DEVICE,
-    LOW_CSP_MLN_DEVICE,
-    LOW_CSP_SLN_DEVICE,
-    LOW_SDP_MASTER_DEVICE,
-    LOW_SDP_MLN_DEVICE,
-    LOW_SDP_SLN_DEVICE,
-    LOW_SUBARRAY_DEVICE,
-    TIMEOUT,
-    create_cm,
-    logger,
-)
-
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": CNHelperSubArrayDevice,
-            "devices": [
-                {"name": LOW_SUBARRAY_DEVICE},
-            ],
-        },
-        # {
-        #     "class": HelperMCCSStateDevice,
-        #     "devices": [
-        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
-        #         {"name": "low-mccs/control/control"},
-        #     ],
-        # },
-        {
-            "class": HelperSubarrayLeafDevice,
-            "devices": [
-                {"name": LOW_CSP_SLN_DEVICE},
-                {"name": LOW_SDP_SLN_DEVICE},
-            ],
-        },
-        {
-            "class": HelperBaseDevice,
-            "devices": [
-                {"name": LOW_CSP_MLN_DEVICE},
-                {"name": LOW_CSP_MASTER_DEVICE},
-                {"name": LOW_SDP_MLN_DEVICE},
-                {"name": LOW_SDP_MASTER_DEVICE},
-            ],
-        },
-    )
+from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
 @pytest.mark.SKA_low

@@ -46,7 +46,8 @@ class CentralNodeCommand(TMCCommand):
         err_msg: str,
         command_name: str,
     ):
-        return_codes, message_or_unique_ids = [], []
+        return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
+        message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
         try:
             for adapter in adapters:
                 return_code, message_or_unique_id = command_caller(adapter)
