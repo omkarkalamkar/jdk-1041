@@ -190,15 +190,14 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def On(self) -> Tuple[List[ResultCode], List[str]]:
-        if not self.defective_params["enabled"]:
-            if self.dev_state() != DevState.ON:
-                self.set_state(DevState.ON)
-                self.push_change_event("State", self.dev_state())
-            return [ResultCode.OK], [""]
-
-        return [ResultCode.FAILED], [
-            "Device is defective, cannot process command."
-        ]
+        if self.defective_params["enabled"]:
+            return [ResultCode.FAILED], [
+                "Device is defective, cannot process command."
+            ]
+        if self.dev_state() != DevState.ON:
+            self.set_state(DevState.ON)
+            self.push_change_event("State", self.dev_state())
+        return [ResultCode.OK], [""]
 
     def is_Off_allowed(self) -> bool:
         return True
@@ -208,15 +207,14 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def Off(self) -> Tuple[List[ResultCode], List[str]]:
-        if not self.defective_params["enabled"]:
-            if self.dev_state() != DevState.OFF:
-                self.set_state(DevState.OFF)
-                self.push_change_event("State", self.dev_state())
-            return [ResultCode.OK], [""]
-
-        return [ResultCode.FAILED], [
-            "Device is defective, cannot process command."
-        ]
+        if self.defective_params["enabled"]:
+            return [ResultCode.FAILED], [
+                "Device is defective, cannot process command."
+            ]
+        if self.dev_state() != DevState.OFF:
+            self.set_state(DevState.OFF)
+            self.push_change_event("State", self.dev_state())
+        return [ResultCode.OK], [""]
 
     def is_Standby_allowed(self) -> bool:
         return True
@@ -231,15 +229,14 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         :return: ResultCode, message
         :rtype: tuple
         """
-        if not self.defective_params["enabled"]:
-            if self.dev_state() != DevState.STANDBY:
-                self.set_state(DevState.STANDBY)
-                self.push_change_event("State", self.dev_state())
-            return [ResultCode.OK], [""]
-
-        return [ResultCode.FAILED], [
-            "Device is defective, cannot process command."
-        ]
+        if self.defective_params["enabled"]:
+            return [ResultCode.FAILED], [
+                "Device is defective, cannot process command."
+            ]
+        if self.dev_state() != DevState.STANDBY:
+            self.set_state(DevState.STANDBY)
+            self.push_change_event("State", self.dev_state())
+        return [ResultCode.OK], [""]
 
     def is_AssignResources_allowed(self) -> bool:
         """
