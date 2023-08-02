@@ -431,8 +431,10 @@ class CNComponentManager(TmcComponentManager):
             value,
         )
         unique_id, result_code_or_exception_or_task_status = value
-        if unique_id.endswith("AssignResources") or unique_id.endswith(
-            "ReleaseResources"
+        if (
+            unique_id.endswith("AssignResources")
+            or unique_id.endswith("ReleaseResources")
+            or unique_id.endswith("ReleaseAllResources")
         ):  # ignoring other command events
             try:
                 self.logger.info(
