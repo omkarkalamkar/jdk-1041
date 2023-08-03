@@ -12,43 +12,13 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
-from tests.settings import (
-    DISH_LEAF_NODE_DEVICE,
-    MID_CSP_MLN_DEVICE,
-    MID_SDP_MLN_DEVICE,
-    MID_SUBARRAY_DEVICE,
-    TIMEOUT,
-    create_cm,
-    logger,
-)
-
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": CNHelperSubArrayDevice,
-            "devices": [
-                {"name": MID_SUBARRAY_DEVICE},
-            ],
-        },
-        {
-            "class": HelperBaseDevice,
-            "devices": [
-                {"name": MID_CSP_MLN_DEVICE},
-                {"name": MID_SDP_MLN_DEVICE},
-                {"name": DISH_LEAF_NODE_DEVICE},
-            ],
-        },
-    )
+from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
 def get_release_input_str(release_input_file="command_ReleaseResources.json"):
@@ -60,20 +30,8 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
     return release_input_str
 
 
-def get_release_resources_command_obj():
-    cm, start_time = create_cm(_input_parameter=InputParameterMid(None))
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
-
-    my_adapter_factory = HelperAdapterFactory()
-    release_command = ReleaseResources(cm, my_adapter_factory, logger=logger)
-    return release_command, my_adapter_factory, cm
-
-
-def test_mid_release_resources_command(tango_context, task_callback):
-    _, _, cm = get_release_resources_command_obj()
+def test_mid_release_resources_command_with_ok(tango_context, task_callback):
+    cm, _ = create_cm()
     cm.is_command_allowed("ReleaseResources")
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -85,14 +43,12 @@ def test_mid_release_resources_command(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.QUEUED}
     )
 
-
-def test_mid_release_resources_command_with_ok(tango_context, task_callback):
-    release_res_command, _, cm = get_release_resources_command_obj()
-    cm.is_command_allowed("ReleaseResources")
-    release_input_str = get_release_input_str()
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    (res_code, _) = release_res_command.do(release_input_str)
-    assert res_code == ResultCode.OK
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+    )
 
 
 def test_mid_release_resources_command_fail_subarray(
@@ -110,20 +66,19 @@ def test_mid_release_resources_command_fail_subarray(
         MID_SUBARRAY_DEVICE, proxy=subarrayMock
     )
     release_input_str = get_release_input_str()
-    release_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    (res_code, _) = release_res_command.do(release_input_str)
+    assign_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
+    (res_code, _) = assign_res_command.do(release_input_str)
     assert res_code == ResultCode.FAILED
 
 
 def test_mid_release_resources_command_empty_input_json(
     tango_context, task_callback
 ):
-    release_res_command, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm()
     cm.is_command_allowed("ReleaseResources")
     cm.release_resources("", task_callback=task_callback)
-    (res_code, _) = release_res_command.do("")
-    assert res_code == ResultCode.FAILED
+    (res_code, _) = cm.release_resources("")
+    assert res_code == TaskStatus.REJECTED
 
 
 def test_telescope_release_resources_fail_check_allowed(tango_context):
@@ -141,12 +96,17 @@ def test_mid_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
-    release_res_command, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm()
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
     release_input_str = json_factory("invalid_key_ReleaseResources")
     # with pytest.raises(InvalidJSONError):
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    (res_code, _) = release_res_command.do("")
-    assert res_code == ResultCode.FAILED
+    result_code, message = cm.release_resources(
+        release_input_str, task_callback=task_callback
+    )
+    assert result_code == TaskStatus.REJECTED
 
 
 def test_release_resources_command_timeout(tango_context, task_callback):

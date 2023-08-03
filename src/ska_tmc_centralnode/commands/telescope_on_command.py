@@ -75,9 +75,9 @@ class TelescopeOn(AbstractTelescopeOnOff):
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
 
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_code, message = self.init_adapters()
+        if return_code == ResultCode.FAILED:
+            return return_code, message
 
         self.component_manager.log_state(
             "Device states before executing TelescopeOn command"
@@ -87,14 +87,17 @@ class TelescopeOn(AbstractTelescopeOnOff):
             "Invoking TelescopeOn command on the lower level devices"
         )
 
-        for ret_code, message in [
+        for return_codes, message_or_unique_ids in [
             self.set_standby_fp_mode_dishes(),
             self.turn_on_csp(),
             self.turn_on_sdp(),
             self.turn_on_subarrays(),
         ]:
-            if ret_code == ResultCode.FAILED:
-                return ret_code, message
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return ResultCode.FAILED, message_or_unique_id
         self.logger.info(
             "TelescopeOn command is invoked successfully on the lower level devices"
         )
@@ -139,24 +142,26 @@ class TelescopeOn(AbstractTelescopeOnOff):
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
 
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        return_code, message = self.init_adapters()
+        if return_code == ResultCode.FAILED:
+            return return_code, message
 
         self.component_manager.log_state(
             "Device states before executing TelescopeOn command"
         )
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
-        for ret_code, message in [
+        for return_codes, message_or_unique_ids in [
             # self.turn_on_mccs_master(),
             self.turn_on_subarrays(),
             self.turn_on_csp(),
             self.turn_on_sdp(),
         ]:
-            if ret_code == ResultCode.FAILED:
-                return ret_code, message
-
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return ResultCode.FAILED, message_or_unique_id
         return (ResultCode.OK, "")
 
     # def turn_on_mccs_master(self):

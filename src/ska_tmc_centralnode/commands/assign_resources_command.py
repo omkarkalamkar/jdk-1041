@@ -3,14 +3,13 @@ AssignResources class for CentralNode.
 """
 import json
 import threading
-import time
 from typing import Callable, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import SubArrayAdapter, TimeoutCallback
+from ska_tmc_common import SubArrayAdapter
 
 from ska_tmc_centralnode.commands.abstract_command import (
     AbstractAssignReleaseResources,
@@ -41,13 +40,8 @@ class AssignResources(AbstractAssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.dish_adapters = []
-        self.subarray_adapters = []
         self.tm_subarray_adapter: Optional[SubArrayAdapter] = None
         self._skuid = skuid
-        self.task_callback: Callable
-        self.timeout_id = f"{time.time()}_{__class__.__name__}"
-        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
 
     def assign_resources(
         self,
@@ -89,7 +83,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 ObsState.IDLE,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
-                command_id=self.component_manager.assign_id,
+                command_id=self.command_id,
                 lrcr_callback=self.component_manager.long_running_result_callback,
             )
 
@@ -102,6 +96,9 @@ class AssignResources(AbstractAssignReleaseResources):
             self.component_manager.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
+        self.component_manager.command_in_progress = ""
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
 
     def do_mid(self, argin) -> Tuple[ResultCode, str]:
         """
@@ -231,15 +228,23 @@ class AssignResources(AbstractAssignReleaseResources):
             f"Invoking AssignResources command on:{self.tm_subarray_adapter}"
         )
 
-        result_code, message = self.send_command(
+        return_codes, message_or_unique_ids = self.send_command(
             [self.tm_subarray_adapter],
             "Error in calling AssignResources on subarray",
             "AssignResources",
             json.dumps(json_argument),
         )
+        for return_code, message_or_unique_id in zip(
+            return_codes, message_or_unique_ids
+        ):
+            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                return ResultCode.FAILED, message_or_unique_id
 
-        if result_code == ResultCode.FAILED:
-            return result_code, message
+            elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                self.component_manager.command_mapping[
+                    self.command_id
+                ] = message_or_unique_id
+
         self.logger.debug(
             f"Resources assigned successfully to:{self.tm_subarray_adapter}"
         )
@@ -388,7 +393,7 @@ class AssignResources(AbstractAssignReleaseResources):
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
-        for result_code, message in [
+        for return_codes, message_or_unique_ids in [
             self.send_command(
                 [self.tm_subarray_adapter],
                 f"Error in calling AssignResources on subarray: {self.tm_subarray_adapter.dev_name}",
@@ -402,8 +407,19 @@ class AssignResources(AbstractAssignReleaseResources):
             #     input_mccs_master,
             # ),
         ]:
-            if result_code == ResultCode.FAILED:
-                return ResultCode.FAILED, message
+            for return_code, message_or_unique_id in zip(
+                return_codes, message_or_unique_ids
+            ):
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return (
+                        ResultCode.FAILED,
+                        message_or_unique_id,
+                    )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
+                elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                    self.component_manager.command_mapping[
+                        self.command_id
+                    ] = message_or_unique_id
+
         return (ResultCode.OK, "")
 
     def _validate_low_json(self, json_argument, req_keys):

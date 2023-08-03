@@ -147,11 +147,15 @@ class CNComponentManager(TmcComponentManager):
         self._health_state_aggregator = None
         self._op_state_aggregator = None
         self.skuid_service = skuid_service
-        self.assign_id: str
-        self.release_id: str
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
         self.subarray_devname: str = ""
+        self.command_mapping = {}
+        self.supported_commands = (
+            "AssignResources",
+            "ReleaseResources",
+            "ReleaseAllResources",
+        )
 
     def stop_event_receiver(self):
         if self.event_receiver:
@@ -424,61 +428,67 @@ class CNComponentManager(TmcComponentManager):
     def set_telescope_availability(self, telescope_availability):
         self.component.telescope_availability = telescope_availability
 
-    def update_long_running_command_result(self, dev_name: str, value):
-        """Updates the LRCR callback with received event"""
+    def update_long_running_command_result(self, dev_name: str, value: tuple):
+        """Updates the LRCR callback with received event.
+
+        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
+        Whenever there is exception occured , (unique_id,exception_msg) event is first raised
+        and catched in ValueError.The exception_msg and command_id is then passed to long_running_result_callback.
+        Command_mapping contains {centralnode_command_id:unique_id} , all events are verified with respect to this mapping.
+        If there is no command_mapping present the event might be of old command.
+
+        :param dev_name: name of the device who's event has been captured in this method
+        :type dev_name: str
+        :param value: longRunningCommandResult attribute event.
+        :type value: tuple
+        """
         self.logger.info(
             "Received longRunningCommandResult event for device: %s, with value: %s",
             dev_name,
             value,
         )
-        try:
-            if not value[1]:
-                # This is in case an empty event is received.
-                pass
-            elif self.command_in_progress == "AssignResources":
+        unique_id, result_code_or_exception_or_task_status = value
+        if unique_id.endswith(
+            self.supported_commands
+        ):  # ignoring other command events
+            try:
                 self.logger.info(
-                    f"LongRunningCommandResult event occurred: {(value[1])}"
+                    f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
                 )
-                if int(value[1]) == ResultCode.OK:
-                    # Update the command_result only if it's "AssignResources" and successful.
-                    self.command_result = ResultCode.OK
-            elif self.command_in_progress == "ReleaseResources":
-                self.logger.info(
-                    f"LongRunningCommandResult event occurred: {(value[1])}"
-                )
-                if int(value[1]) == ResultCode.OK:
-                    # Update the command_result only if it's "ReleaseResources" and successful.
+
+                if not result_code_or_exception_or_task_status:
+                    # This is in case an empty event is received.
+                    pass
+                elif (
+                    int(result_code_or_exception_or_task_status)
+                    == ResultCode.OK
+                    and unique_id in self.command_mapping.values()
+                ):
+                    # Update the command_result only if it's "AssignResources" or "ReleaseResources" and successful.
                     self.command_result = ResultCode.OK
 
-        except ValueError:
-            if self.command_in_progress == "AssignResources":
-                self.logger.info(
-                    "Updating LRCRCallback with value: %s for AssignResources for device: %s",
-                    value,
-                    dev_name,
-                )
-                exception_message = (
-                    f"Exception occurred on device: {dev_name}: {value[1]}"
-                )
-                self.long_running_result_callback(
-                    self.assign_id,
-                    ResultCode.FAILED,
-                    exception_msg=exception_message,
-                )
-            elif self.command_in_progress == "ReleaseResources":
-                self.logger.info(
-                    "Updating LRCRCallback with value: %s for ReleaseResources for device: %s",
-                    value,
-                    dev_name,
-                )
-                exception_message = (
-                    f"Exception occurred on device: {dev_name}: {value[1]}"
-                )
-                self.long_running_result_callback(
-                    self.release_id,
-                    ResultCode.FAILED,
-                    exception_msg=exception_message,
-                )
+            except ValueError:
+                if unique_id in self.command_mapping.values():
+                    self.logger.info(
+                        "Updating LRCRCallback with value: %s for %s for device: %s",
+                        unique_id,
+                        value,
+                        dev_name,
+                    )
+                    exception_message = f"Exception occurred on device: {dev_name}: {result_code_or_exception_or_task_status}"
+                    index_of_unique_id = list(
+                        self.command_mapping.values()
+                    ).index(
+                        unique_id
+                    )  # get index location of unique_id received in event
+                    command_id = list(self.command_mapping.keys())[
+                        index_of_unique_id
+                    ]  # command id mapped to unique id
+                    self.long_running_result_callback(
+                        command_id,
+                        ResultCode.FAILED,
+                        exception_msg=exception_message,
+                    )
 
     def _aggregate_state(self):
         """
@@ -625,7 +635,6 @@ class CNComponentManager(TmcComponentManager):
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
-        self.assign_id = f"{time.time()}-{AssignResources.__name__}"
 
         try:
             json_argument = json.loads(argin)
@@ -727,7 +736,6 @@ class CNComponentManager(TmcComponentManager):
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        self.release_id = f"{time.time()}-{ReleaseResources.__name__}"
         try:
             json_argument = json.loads(argin)
             self.logger.debug("JSON argin is in correct format.")

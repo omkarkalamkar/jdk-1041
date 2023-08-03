@@ -10,84 +10,20 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
-from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
-    HelperSubarrayLeafDevice,
-)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
-from tests.settings import (
-    LOW_CSP_MASTER_DEVICE,
-    LOW_CSP_MLN_DEVICE,
-    LOW_CSP_SLN_DEVICE,
-    LOW_SDP_MASTER_DEVICE,
-    LOW_SDP_MLN_DEVICE,
-    LOW_SDP_SLN_DEVICE,
-    LOW_SUBARRAY_DEVICE,
-    TIMEOUT,
-    create_cm,
-    logger,
-)
-
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": CNHelperSubArrayDevice,
-            "devices": [
-                {"name": LOW_SUBARRAY_DEVICE},
-            ],
-        },
-        # {
-        #     "class": HelperMCCSStateDevice,
-        #     "devices": [
-        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
-        #         {"name": "low-mccs/control/control"},
-        #     ],
-        # },
-        {
-            "class": HelperSubarrayLeafDevice,
-            "devices": [
-                {"name": LOW_CSP_SLN_DEVICE},
-                {"name": LOW_SDP_SLN_DEVICE},
-            ],
-        },
-        {
-            "class": HelperBaseDevice,
-            "devices": [
-                {"name": LOW_CSP_MLN_DEVICE},
-                {"name": LOW_CSP_MASTER_DEVICE},
-                {"name": LOW_SDP_MLN_DEVICE},
-                {"name": LOW_SDP_MASTER_DEVICE},
-            ],
-        },
-    )
-
-
-def get_release_resources_command_obj():
-    cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
-    helper_adapter_factory = HelperAdapterFactory()
-    release_command = ReleaseResources(
-        cm, helper_adapter_factory, logger=logger
-    )
-    return release_command, helper_adapter_factory, cm
+from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
     tango_context, task_callback, json_factory
 ):
-    _, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     cm.is_command_allowed("ReleaseResources")
 
     dev_factory = DevFactory()
@@ -135,7 +71,7 @@ def test_low_release_resources_command_fail_subarray(
 
 @pytest.mark.SKA_low
 def test_low_release_resources_empty_input_json(tango_context, task_callback):
-    release_res_command, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     cm.release_resources("", task_callback=task_callback)
     (res_code, _) = cm.release_resources(" ")
     assert res_code == TaskStatus.REJECTED
@@ -145,7 +81,7 @@ def test_low_release_resources_empty_input_json(tango_context, task_callback):
 def test_low_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory
 ):
-    _, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     release_input_str = json_factory("invalid_key_ReleaseResources")
     (res_code, message) = cm.release_resources(
         release_input_str, task_callback=task_callback
@@ -160,7 +96,7 @@ def test_low_release_resources_command_with_invalide_key(
 def test_low_release_resources_missing_subarray_id(
     tango_context, task_callback, json_factory
 ):
-    release_res_command, _, cm = get_release_resources_command_obj()
+    cm, _ = create_cm()
     release_input_str = json_factory("command_release_resource_low")
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
@@ -169,7 +105,7 @@ def test_low_release_resources_missing_subarray_id(
     )
     (res_code, message) = cm.release_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
-    assert "subarray_id" in message
+    assert "Malformed input string" in message
 
 
 @pytest.mark.SKA_low

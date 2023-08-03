@@ -3,7 +3,6 @@ import time
 import mock
 import pytest
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common import HelperBaseDevice, HelperSubArrayDevice
 from ska_tmc_common.adapters import DishAdapter
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -11,34 +10,7 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 )
 
 from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
-from tests.settings import (
-    DISH_LEAF_NODE_DEVICE,
-    MID_CSP_MLN_DEVICE,
-    MID_SDP_MLN_DEVICE,
-    MID_SUBARRAY_DEVICE,
-    create_cm,
-    logger,
-)
-
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": HelperSubArrayDevice,
-            "devices": [
-                {"name": MID_SUBARRAY_DEVICE},
-            ],
-        },
-        {
-            "class": HelperBaseDevice,
-            "devices": [
-                {"name": MID_CSP_MLN_DEVICE},
-                {"name": MID_SDP_MLN_DEVICE},
-                {"name": DISH_LEAF_NODE_DEVICE},
-            ],
-        },
-    )
+from tests.settings import create_cm, logger
 
 
 @pytest.mark.skip(

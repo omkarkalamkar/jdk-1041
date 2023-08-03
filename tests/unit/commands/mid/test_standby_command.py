@@ -4,7 +4,6 @@ import mock
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import HelperBaseDevice, HelperSubArrayDevice
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -20,33 +19,11 @@ from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
-    MID_SUBARRAY_DEVICE,
     check_cspmln_availability,
     check_sdpmln_availability,
     create_cm,
     logger,
 )
-
-
-@pytest.fixture()
-def devices_to_load():
-    return (
-        {
-            "class": HelperSubArrayDevice,
-            "devices": [
-                {"name": MID_SUBARRAY_DEVICE},
-            ],
-        },
-        {
-            "class": HelperBaseDevice,
-            "devices": [
-                {"name": MID_CSP_MLN_DEVICE},
-                {"name": MID_SDP_MLN_DEVICE},
-                {"name": DISH_LEAF_NODE_DEVICE},
-            ],
-        },
-    )
-
 
 # Modified the TelescopeStandby integration test as per latest base classes.
 # Review is expected for below tests.
