@@ -136,19 +136,21 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
     def turn_off_csp(self):
         self.logger.info("TelescopeOff for Csp devices")
-        return self.send_command(
-            [self.csp_mln_adapter],
-            f"Error in calling Off() command for {self.csp_mln_adapter}",
-            "Off",
-        )
+        if self.component_manager.check_if_csp_mln_is_available is True:
+            return self.send_command(
+                [self.csp_mln_adapter],
+                f"Error in calling Off() command for {self.csp_mln_adapter}",
+                "Off",
+            )
 
     def turn_off_sdp(self):
         self.logger.info("TelescopeOff for Sdp devices")
-        return self.send_command(
-            [self.sdp_mln_adapter],
-            f"Error in calling Off() command for {self.sdp_mln_adapter}",
-            "Off",
-        )
+        if self.component_manager.check_if_sdp_mln_is_available is True:
+            return self.send_command(
+                [self.sdp_mln_adapter],
+                f"Error in calling Off() command for {self.sdp_mln_adapter}",
+                "Off",
+            )
 
     def turn_off_subarrays(self):
         self.logger.info("TelescopeOff for tm subarrays devices")

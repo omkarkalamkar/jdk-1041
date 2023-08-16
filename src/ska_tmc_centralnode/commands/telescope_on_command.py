@@ -105,18 +105,22 @@ class TelescopeOn(AbstractTelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
-        return self.send_command(
-            [self.sdp_mln_adapter],
-            f"Error in calling On() command on {self.sdp_mln_adapter.dev_name}",
-            "On",
-        )
+        self.logger.info("TelescopeOn for Sdp devices")
+        if self.component_manager.check_if_sdp_mln_is_available is True:
+            return self.send_command(
+                [self.sdp_mln_adapter],
+                f"Error in calling On() command on {self.sdp_mln_adapter.dev_name}",
+                "On",
+            )
 
     def turn_on_csp(self):
-        return self.send_command(
-            [self.csp_mln_adapter],
-            f"Error in calling On() command on {self.csp_mln_adapter.dev_name}",
-            "On",
-        )
+        self.logger.info("TelescopeOn for Csp devices")
+        if self.component_manager.check_if_csp_mln_is_available is True:
+            return self.send_command(
+                [self.csp_mln_adapter],
+                f"Error in calling On() command on {self.csp_mln_adapter.dev_name}",
+                "On",
+            )
 
     def turn_on_subarrays(self):
         return self.send_command(

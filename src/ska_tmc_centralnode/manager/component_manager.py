@@ -248,12 +248,18 @@ class CNComponentManager(TmcComponentManager):
     def check_if_csp_mln_is_available(self):
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["csp_master_leaf_node"] is True:
-            raise CommandNotAllowed("csp_master_leaf_node is not available")
+            # raise CommandNotAllowed("csp_master_leaf_node is not available")
+            self.logger.info("csp_master_leaf_node is not available")
+        else:
+            return True
 
     def check_if_sdp_mln_is_available(self):
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["sdp_master_leaf_node"] is True:
-            raise CommandNotAllowed("sdp_master_leaf_node is not available")
+            # raise CommandNotAllowed("sdp_master_leaf_node is not available")
+            self.logger.info("sdp_master_leaf_node is not available")
+        else:
+            return True
 
     def check_if_subarrays_are_responsive(self):
         self.logger.info("Checking if subarrays are responsive")
