@@ -166,14 +166,16 @@ def check_command(central_node, command_name, change_event_callbacks):
     next_result = change_event_callbacks.assert_against_call(
         "longRunningCommandResult",
     )
+    logger.info(f"HERE IS RESULT {next_result}")
     command_id, result = next_result["attribute_value"]
-
+    logger.info(f"HERE IS RESULT {command_id}{result}")
     if command_id != unique_id:
         next_result = change_event_callbacks.assert_against_call(
             "longRunningCommandResult",
             lookahead=2,
         )
         command_id, result = next_result["attribute_value"]
+    logger.info(f"HERE IS RESULT {result}")
     assert command_id == unique_id
     assert int(result) == ResultCode.OK or int(result) == ResultCode.FAILED
 
