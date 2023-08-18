@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+from typing import List
 
 import pytest
 from ska_tango_base.commands import ResultCode
@@ -254,3 +255,17 @@ def check_sdpmln_availability(cm, expected_status):
             pytest.fail(
                 "Timeout occurred while checking the SdpMasterLeafNode availability."
             )
+
+
+def event_remover(change_event_callbacks, attributes: List[str]) -> None:
+    """Removes residual events from the queue."""
+    for attribute in attributes:
+        try:
+            iterable = change_event_callbacks._mock_consumer_group._views[
+                attribute
+            ]._iterable
+            for node in iterable:
+                logger.info("Payload is: %s", repr(node.payload))
+                node.drop()
+        except KeyError:
+            pass
