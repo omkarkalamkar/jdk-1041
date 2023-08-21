@@ -136,7 +136,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
     def turn_off_csp(self):
         self.logger.info(
-            f"Invoking TelescopeOff command for {self.csp_mln_adapter.dev_name} devices"
+            f"Invoking Off command on {self.csp_mln_adapter.dev_name} devices"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
