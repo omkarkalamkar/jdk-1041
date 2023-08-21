@@ -219,20 +219,22 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
     def turn_standby_subarrays(self):
         self.logger.info(
-            f"Standby command on TMC SubarrayNode devices: {self.subarray_adapters}"
+            f"Invoking Standby command for {self.subarray_adapters} devices"
         )
         return self.send_command(
             self.subarray_adapters,
-            f"Error in calling Standby() on TMC SubarrayNode devices: {self.subarray_adapters}",
+            f"Error in calling Standby command for {self.subarray_adapters}",
             "Standby",
         )
 
     def turn_standby_sdp(self):
-        self.logger.info(f"Standby command on {self.sdp_mln_adapter.dev_name}")
+        self.logger.info(
+            f"Invoking Standby command for {self.sdp_mln_adapter.dev_name} devices"
+        )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling Standby() on {self.sdp_mln_adapter.dev_name}",
+                f"Error in calling Standby command for {self.sdp_mln_adapter.dev_name}",
                 "Standby",
             )
         else:
@@ -242,11 +244,13 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             )
 
     def turn_standby_csp(self):
-        self.logger.info(f"Standby command on {self.csp_mln_adapter.dev_name}")
+        self.logger.info(
+            f"Invoking Standby command for {self.csp_mln_adapter.dev_name} devices"
+        )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling Standby() on {self.csp_mln_adapter.dev_name}",
+                f"Error in calling Standby command for {self.csp_mln_adapter.dev_name}",
                 "Standby",
             )
         else:

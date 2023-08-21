@@ -245,7 +245,7 @@ class CNComponentManager(TmcComponentManager):
         """
         return self.component.get_device(dev_name)
 
-    def check_if_csp_mln_is_available(self):
+    def check_if_csp_mln_is_available(self) -> bool:
         """
         Returns boolean value based on availability of CspMasterLeafNode,
         which ultimately indicated availability of CspMasterNode
@@ -259,7 +259,7 @@ class CNComponentManager(TmcComponentManager):
         else:
             return True
 
-    def check_if_sdp_mln_is_available(self):
+    def check_if_sdp_mln_is_available(self) -> bool:
         """
         Returns boolean value based on availability of SdpMasterLeafNode,
         which ultimately indicated availability of SdpMasterNode

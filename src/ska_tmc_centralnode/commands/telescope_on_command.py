@@ -105,11 +105,13 @@ class TelescopeOn(AbstractTelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
-        self.logger.info("TelescopeOn for Sdp devices")
+        self.logger.info(
+            f"Invoking TelescopeOn command for {self.sdp_mln_adapter.dev_name} devices"
+        )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling On() command on {self.sdp_mln_adapter.dev_name}",
+                f"Error in calling On command for {self.sdp_mln_adapter.dev_name}",
                 "On",
             )
         else:
@@ -119,11 +121,13 @@ class TelescopeOn(AbstractTelescopeOnOff):
             )
 
     def turn_on_csp(self):
-        self.logger.info("TelescopeOn for Csp devices")
+        self.logger.info(
+            f"Invoking TelescopeOn command for {self.csp_mln_adapter.dev_name} devices"
+        )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling On() command on {self.csp_mln_adapter.dev_name}",
+                f"Error in calling On command for {self.csp_mln_adapter.dev_name}",
                 "On",
             )
         else:
@@ -133,9 +137,12 @@ class TelescopeOn(AbstractTelescopeOnOff):
             )
 
     def turn_on_subarrays(self):
+        self.logger.info(
+            f"Invoking TelescopeOn command for {self.subarray_adapters} devices"
+        )
         return self.send_command(
             self.subarray_adapters,
-            f"Error in calling On() command on {self.subarray_adapters}",
+            f"Error in calling On command for {self.subarray_adapters}",
             "On",
         )
 
