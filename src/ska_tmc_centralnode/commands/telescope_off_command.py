@@ -142,6 +142,11 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 f"Error in calling Off() command for {self.csp_mln_adapter}",
                 "Off",
             )
+        else:
+            return (
+                [ResultCode.OK],
+                ["cspmasterleafnode is not available"],
+            )
 
     def turn_off_sdp(self):
         self.logger.info("TelescopeOff for Sdp devices")
@@ -150,6 +155,11 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 [self.sdp_mln_adapter],
                 f"Error in calling Off() command for {self.sdp_mln_adapter}",
                 "Off",
+            )
+        else:
+            return (
+                [ResultCode.OK],
+                ["sdpmasterleafnode is not available"],
             )
 
     def turn_off_subarrays(self):

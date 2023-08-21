@@ -235,6 +235,11 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 f"Error in calling Standby() on {self.sdp_mln_adapter.dev_name}",
                 "Standby",
             )
+        else:
+            return (
+                [ResultCode.OK],
+                ["sdpmasterleafnode is not available"],
+            )
 
     def turn_standby_csp(self):
         self.logger.info(f"Standby command on {self.csp_mln_adapter.dev_name}")
@@ -243,6 +248,11 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 [self.csp_mln_adapter],
                 f"Error in calling Standby() on {self.csp_mln_adapter.dev_name}",
                 "Standby",
+            )
+        else:
+            return (
+                [ResultCode.OK],
+                ["cspmasterleafnode is not available"],
             )
 
     # def turn_standby_mccs(self):
