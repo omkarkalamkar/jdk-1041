@@ -13,7 +13,6 @@ from tests.settings import (
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
     check_subarray_availability,
-    event_remover,
     logger,
 )
 
@@ -143,10 +142,6 @@ def check_internal_model(device_list):
     )
 )
 def check_command(central_node, command_name, change_event_callbacks):
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandsInQueue", "longRunningCommandResult"],
-    )
     if pytest.command_result == "CommandNotAllowed":
         return
 
@@ -175,14 +170,12 @@ def check_command(central_node, command_name, change_event_callbacks):
     )
     logger.info(f"HERE IS RESULT {next_result}")
     command_id, result = next_result["attribute_value"]
-    logger.info(f"HERE IS RESULT {command_id}{result}")
     if command_id != unique_id:
         next_result = change_event_callbacks.assert_against_call(
             "longRunningCommandResult",
             lookahead=2,
         )
         command_id, result = next_result["attribute_value"]
-    logger.info(f"HERE IS RESULT {result}")
     assert command_id == unique_id
     assert int(result) == ResultCode.OK or int(result) == ResultCode.FAILED
 

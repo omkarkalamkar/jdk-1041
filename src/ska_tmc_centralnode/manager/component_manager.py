@@ -250,6 +250,7 @@ class CNComponentManager(TmcComponentManager):
         if not telescope_availability["csp_master_leaf_node"] is True:
             # raise CommandNotAllowed("csp_master_leaf_node is not available")
             self.logger.info("csp_master_leaf_node is not available")
+            return False
         else:
             return True
 
@@ -258,6 +259,7 @@ class CNComponentManager(TmcComponentManager):
         if not telescope_availability["sdp_master_leaf_node"] is True:
             # raise CommandNotAllowed("sdp_master_leaf_node is not available")
             self.logger.info("sdp_master_leaf_node is not available")
+            return False
         else:
             return True
 
