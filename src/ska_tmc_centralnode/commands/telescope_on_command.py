@@ -115,7 +115,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         else:
             return (
                 [ResultCode.OK],
-                ["sdpmasterleafnode is not available"],
+                ["SdpMasterLeafNode is not available to receive command"],
             )
 
     def turn_on_csp(self):
@@ -129,7 +129,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         else:
             return (
                 [ResultCode.OK],
-                ["cspmasterleafnode is not available"],
+                ["CspMasterLeafNode is not available to receive command"],
             )
 
     def turn_on_subarrays(self):

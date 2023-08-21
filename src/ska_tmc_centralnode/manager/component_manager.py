@@ -246,21 +246,29 @@ class CNComponentManager(TmcComponentManager):
         return self.component.get_device(dev_name)
 
     def check_if_csp_mln_is_available(self):
-        # get_telescope_availability has csp_master_leaf_node
-        # with ultimately indicates availibility of csp_master_node
+        """
+        Returns boolean value based on availability of CspMasterLeafNode,
+        which ultimately indicated availability of CspMasterNode
+        """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["csp_master_leaf_node"] is True:
-            # raise CommandNotAllowed("csp_master_leaf_node is not available")
-            self.logger.info("csp_master_leaf_node is not available")
+            self.logger.info(
+                "CspMasterLeafNode is not available to receive command"
+            )
             return False
         else:
             return True
 
     def check_if_sdp_mln_is_available(self):
+        """
+        Returns boolean value based on availability of SdpMasterLeafNode,
+        which ultimately indicated availability of SdpMasterNode
+        """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["sdp_master_leaf_node"] is True:
-            # raise CommandNotAllowed("sdp_master_leaf_node is not available")
-            self.logger.info("sdp_master_leaf_node is not available")
+            self.logger.info(
+                "SdpMasterLeafNode is not available to receive command"
+            )
             return False
         else:
             return True

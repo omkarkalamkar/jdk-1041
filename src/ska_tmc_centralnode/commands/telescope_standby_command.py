@@ -238,7 +238,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         else:
             return (
                 [ResultCode.OK],
-                ["sdpmasterleafnode is not available"],
+                ["SdpMasterLeafNode is not available to receive command"],
             )
 
     def turn_standby_csp(self):
@@ -252,7 +252,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         else:
             return (
                 [ResultCode.OK],
-                ["cspmasterleafnode is not available"],
+                ["CspMasterLeafNode is not available to receive command"],
             )
 
     # def turn_standby_mccs(self):
