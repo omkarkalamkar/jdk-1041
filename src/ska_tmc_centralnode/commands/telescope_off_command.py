@@ -121,6 +121,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self.turn_off_dishes(),
             self.turn_off_csp(),
@@ -130,13 +131,20 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 return_codes, message_or_unique_ids
             ):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return ResultCode.FAILED, message_or_unique_id
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_ids.split(" ")[0]
+                    )
 
-        return (ResultCode.OK, "")
+        self.logger.info(f"Unavailable devices are {unavailable_devices}")
+        return (
+            ResultCode.OK,
+            f"Unavailable devices are {unavailable_devices}",
+        )
 
     def turn_off_csp(self):
         self.logger.info(
-            f"Invoking Off command on {self.csp_mln_adapter.dev_name} devices"
+            f"Invoking TelescopeOff command for {self.csp_mln_adapter.dev_name} devices"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
@@ -147,7 +155,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
         else:
             return (
                 [ResultCode.OK],
-                ["CspMasterLeafNode is not available to receive command"],
+                [
+                    f"{self.csp_mln_adapter.dev_name} is not available to receive command"
+                ],
             )
 
     def turn_off_sdp(self):
@@ -163,7 +173,9 @@ class TelescopeOff(AbstractTelescopeOnOff):
         else:
             return (
                 [ResultCode.OK],
-                ["SdpMasterLeafNode is not available to receive command"],
+                [
+                    f"{self.sdp_mln_adapter.dev_name} is not available to receive command"
+                ],
             )
 
     def turn_off_subarrays(self):
@@ -241,6 +253,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             # self.turn_off_mccs_mln(),
             self.turn_off_csp(),
@@ -250,9 +263,16 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 return_codes, message_or_unique_ids
             ):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return ResultCode.FAILED, message_or_unique_id
+                    # return (ResultCode.FAILED, message_or_unique_id.split(" ")[0])
+                    unavailable_devices.append(
+                        message_or_unique_ids.split(" ")[0]
+                    )
 
-        return (ResultCode.OK, "")
+        self.logger.info(f"Unavailable devices are {unavailable_devices}")
+        return (
+            ResultCode.OK,
+            f"Unavailable devices are {unavailable_devices}",
+        )
 
     # def turn_off_mccs_mln(self):
     #     return self.send_command(

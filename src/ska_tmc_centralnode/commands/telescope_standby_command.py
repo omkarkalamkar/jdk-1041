@@ -126,6 +126,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self.turn_off_dishes(),
             self.turn_standby_csp(),
@@ -135,12 +136,15 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 return_codes, message_or_unique_ids
             ):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return ResultCode.FAILED, message_or_unique_id
-        self.logger.info(
-            "TelescopeStandby command is completed successfully on the CentralNode"
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_ids.split(" ")[0]
+                    )
+        self.logger.info(f"Unavailable devices are {unavailable_devices}")
+        return (
+            ResultCode.OK,
+            f"Unavailable devices are {unavailable_devices}",
         )
-
-        return (ResultCode.OK, "")
 
     def do_low(self, argin=None):
         """
@@ -200,6 +204,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             # self.turn_standby_mccs(),
             self.turn_standby_csp(),
@@ -209,13 +214,16 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 return_codes, message_or_unique_ids
             ):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return ResultCode.FAILED, message_or_unique_id
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_ids.split(" ")[0]
+                    )
 
-        self.logger.info(
-            "TelescopeStandby command is completed successfully on the CentralNode"
+        self.logger.info(f"Unavailable devices are {unavailable_devices}")
+        return (
+            ResultCode.OK,
+            f"Unavailable devices are {unavailable_devices}",
         )
-
-        return (ResultCode.OK, "")
 
     def turn_standby_subarrays(self):
         self.logger.info(

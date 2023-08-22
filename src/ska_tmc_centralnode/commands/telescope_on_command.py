@@ -87,6 +87,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             "Invoking TelescopeOn command on the lower level devices"
         )
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self.set_standby_fp_mode_dishes(),
             self.turn_on_csp(),
@@ -97,11 +98,12 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 return_codes, message_or_unique_ids
             ):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return ResultCode.FAILED, message_or_unique_id
-        self.logger.info(
-            "TelescopeOn command is invoked successfully on the lower level devices"
-        )
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_ids.split(" ")[0]
+                    )
 
+        self.logger.info(f"Unavailable devices are {unavailable_devices}")
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
@@ -172,6 +174,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             # self.turn_on_mccs_master(),
             self.turn_on_subarrays(),
@@ -182,8 +185,15 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 return_codes, message_or_unique_ids
             ):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return ResultCode.FAILED, message_or_unique_id
-        return (ResultCode.OK, "")
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_ids.split(" ")[0]
+                    )
+        self.logger.info(f"Unavailable devices are {unavailable_devices}")
+        return (
+            ResultCode.OK,
+            f"Unavailable devices are {unavailable_devices}",
+        )
 
     # def turn_on_mccs_master(self):
     #     return self.send_command(
