@@ -133,7 +133,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_ids.split(" ")[0]
+                        message_or_unique_id.split(" ")[0]
                     )
 
         self.logger.info(f"Unavailable devices are {unavailable_devices}")
@@ -265,7 +265,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                     # return (ResultCode.FAILED, message_or_unique_id.split(" ")[0])
                     unavailable_devices.append(
-                        message_or_unique_ids.split(" ")[0]
+                        message_or_unique_id.split(" ")[0]
                     )
 
         self.logger.info(f"Unavailable devices are {unavailable_devices}")

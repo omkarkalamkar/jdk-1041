@@ -138,7 +138,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_ids.split(" ")[0]
+                        message_or_unique_id.split(" ")[0]
                     )
         self.logger.info(f"Unavailable devices are {unavailable_devices}")
         return (
@@ -216,7 +216,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_ids.split(" ")[0]
+                        message_or_unique_id.split(" ")[0]
                     )
 
         self.logger.info(f"Unavailable devices are {unavailable_devices}")
@@ -248,7 +248,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         else:
             return (
                 [ResultCode.OK],
-                ["SdpMasterLeafNode is not available to receive command"],
+                [
+                    f"{self.sdp_mln_adapter.dev_name} is not available to receive command"
+                ],
             )
 
     def turn_standby_csp(self):
@@ -264,7 +266,9 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         else:
             return (
                 [ResultCode.OK],
-                ["CspMasterLeafNode is not available to receive command"],
+                [
+                    f"{self.csp_mln_adapter.dev_name} is not available to receive command"
+                ],
             )
 
     # def turn_standby_mccs(self):
