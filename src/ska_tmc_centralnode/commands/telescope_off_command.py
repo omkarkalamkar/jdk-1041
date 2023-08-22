@@ -128,24 +128,20 @@ class TelescopeOff(AbstractTelescopeOnOff):
             self.turn_off_sdp(),
         ]:
             for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
+                    return_codes, message_or_unique_ids
             ):
                 # condition for exception raised during invoking command
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
                 elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
+                        message_or_unique_id.split(" ")[0])
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (
-                ResultCode.FAILED,
-                f"Unavailable devices are {unavailable_devices}",
-            )
+            return (ResultCode.OK, f"Unavailable devices are {unavailable_devices}")
 
         return (ResultCode.OK, "")
 
@@ -267,7 +263,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
             self.turn_off_sdp(),
         ]:
             for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
+                    return_codes, message_or_unique_ids
             ):
                 # condition for exception raised during invoking command
                 if return_code in [ResultCode.FAILED]:
@@ -276,15 +272,13 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
+                        message_or_unique_id.split(" ")[0])
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (
-                ResultCode.FAILED,
-                f"Unavailable devices are {unavailable_devices}",
-            )
+            return (ResultCode.OK, f"Unavailable devices are {unavailable_devices}")
+
+        return (ResultCode.OK, "")
 
     # def turn_off_mccs_mln(self):
     #     return self.send_command(

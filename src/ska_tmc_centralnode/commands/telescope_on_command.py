@@ -103,19 +103,12 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 # condition for unavailable devices
                 elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
-                    self.logger.info(
-                        f"RETURN MESSAGE IS HERE {return_code}{message_or_unique_id} {type(message_or_unique_id)}"
-                    )
                     unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
+                        message_or_unique_id.split(" ")[0])
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
+            return (ResultCode.OK,f"Unavailable devices are {unavailable_devices}")
 
         return (ResultCode.OK, "")
 
@@ -123,9 +116,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info(
             f"Invoking TelescopeOn command for {self.sdp_mln_adapter.dev_name} devices"
         )
-        self.logger.info(
-            f"Available condition {self.component_manager.check_if_sdp_mln_is_available()}"
-        )
+        self.logger.info(f"Available condition {self.component_manager.check_if_sdp_mln_is_available()}")
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
@@ -144,9 +135,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info(
             f"Invoking TelescopeOn command for {self.csp_mln_adapter.dev_name} devices"
         )
-        self.logger.info(
-            f"availablity check {self.component_manager.check_if_csp_mln_is_available()}"
-        )
+        self.logger.info(f"availablity check {self.component_manager.check_if_csp_mln_is_available()}")
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
@@ -206,7 +195,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             self.turn_on_sdp(),
         ]:
             for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
+                    return_codes, message_or_unique_ids
             ):
                 # condition for exception raised during invoking command
                 if return_code in [ResultCode.FAILED]:
@@ -214,19 +203,12 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 # condition for unavailable devices
                 elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
-                    self.logger.info(
-                        f"RETURN MESSAGE IS HERE {return_code}{message_or_unique_id} {type(message_or_unique_id)}"
-                    )
                     unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
+                        message_or_unique_id.split(" ")[0])
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
+            return (ResultCode.OK, f"Unavailable devices are {unavailable_devices}")
 
         return (ResultCode.OK, "")
 
