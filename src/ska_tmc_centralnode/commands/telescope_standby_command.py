@@ -135,14 +135,22 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
+                # condition for exception raised during invoking command
                 if return_code in [ResultCode.FAILED]:
+                    return ResultCode.FAILED, message_or_unique_id
+                # condition for unavailable devices
+                elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
                     )
+
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return f"Unavailable devices are {unavailable_devices}"
+            return (
+                ResultCode.FAILED,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 
@@ -213,7 +221,11 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                if return_code in [ResultCode.FAILED]:
+                # condition for exception raised during invoking command
+                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                    return ResultCode.FAILED, message_or_unique_id
+                # condition for unavailable devices
+                elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -221,7 +233,10 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return f"Unavailable devices are {unavailable_devices}"
+            return (
+                ResultCode.FAILED,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 

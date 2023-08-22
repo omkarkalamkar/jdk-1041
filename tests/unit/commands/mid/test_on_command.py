@@ -50,6 +50,38 @@ def test_telescope_on_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
+@pytest.mark.skip
+def test_telescope_on_command_unavailibility(tango_context):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    unique_id = f"{time.time()}_TelescopeOn"
+    task_callback = MockCallable(unique_id)
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_mln.SetisSubsystemAvailable(False)
+    sdp_mln.SetisSubsystemAvailable(False)
+    check_cspmln_availability(cm, False)
+    check_sdpmln_availability(cm, False)
+    assert (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] is False
+    assert (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] is False
+    cm.is_command_allowed("TelescopeOn")
+
+    cm.telescope_on(task_callback=task_callback)
+    time.sleep(1)
+    logger.info(f"final res {task_callback.result}")
+    assert task_callback.result == ResultCode.OK
+
+
 def test_telescope_on_command_fail_subarray(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
