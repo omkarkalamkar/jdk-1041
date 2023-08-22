@@ -135,16 +135,16 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                if return_code in [ResultCode.FAILED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
                     )
-        self.logger.info(f"Unavailable devices are {unavailable_devices}")
-        return (
-            ResultCode.OK,
-            f"Unavailable devices are {unavailable_devices}",
-        )
+        if unavailable_devices:
+            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            return f"Unavailable devices are {unavailable_devices}"
+
+        return (ResultCode.OK, "")
 
     def do_low(self, argin=None):
         """
@@ -213,17 +213,17 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                if return_code in [ResultCode.FAILED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
                     )
 
-        self.logger.info(f"Unavailable devices are {unavailable_devices}")
-        return (
-            ResultCode.OK,
-            f"Unavailable devices are {unavailable_devices}",
-        )
+        if unavailable_devices:
+            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            return f"Unavailable devices are {unavailable_devices}"
+
+        return (ResultCode.OK, "")
 
     def turn_standby_subarrays(self):
         self.logger.info(
@@ -247,7 +247,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             )
         else:
             return (
-                [ResultCode.OK],
+                [ResultCode.FAILED],
                 [
                     f"{self.sdp_mln_adapter.dev_name} is not available to receive command"
                 ],
@@ -265,7 +265,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             )
         else:
             return (
-                [ResultCode.OK],
+                [ResultCode.FAILED],
                 [
                     f"{self.csp_mln_adapter.dev_name} is not available to receive command"
                 ],
