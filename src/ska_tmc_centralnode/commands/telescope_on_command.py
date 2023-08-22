@@ -83,9 +83,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
 
-        self.logger.info(
-            "Invoking TelescopeOn command on the lower level devices"
-        )
+        self.logger.info("Invoking On command on the lower level devices")
         unavailable_devices = []
 
         for return_codes, message_or_unique_ids in [
@@ -104,19 +102,25 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0])
+                        message_or_unique_id.split(" ")[0]
+                    )
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (ResultCode.OK,f"Unavailable devices are {unavailable_devices}")
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
         self.logger.info(
-            f"Invoking TelescopeOn command for {self.sdp_mln_adapter.dev_name} devices"
+            f"Invoking On command for {self.sdp_mln_adapter.dev_name} devices"
         )
-        self.logger.info(f"Available condition {self.component_manager.check_if_sdp_mln_is_available()}")
+        self.logger.info(
+            f"Available condition {self.component_manager.check_if_sdp_mln_is_available()}"
+        )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
@@ -133,9 +137,11 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def turn_on_csp(self):
         self.logger.info(
-            f"Invoking TelescopeOn command for {self.csp_mln_adapter.dev_name} devices"
+            f"Invoking On command for {self.csp_mln_adapter.dev_name} devices"
         )
-        self.logger.info(f"availablity check {self.component_manager.check_if_csp_mln_is_available()}")
+        self.logger.info(
+            f"availablity check {self.component_manager.check_if_csp_mln_is_available()}"
+        )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
@@ -152,7 +158,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def turn_on_subarrays(self):
         self.logger.info(
-            f"Invoking TelescopeOn command for {self.subarray_adapters} devices"
+            f"Invoking On command for {self.subarray_adapters} devices"
         )
 
         return self.send_command(
@@ -195,7 +201,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             self.turn_on_sdp(),
         ]:
             for return_code, message_or_unique_id in zip(
-                    return_codes, message_or_unique_ids
+                return_codes, message_or_unique_ids
             ):
                 # condition for exception raised during invoking command
                 if return_code in [ResultCode.FAILED]:
@@ -204,11 +210,15 @@ class TelescopeOn(AbstractTelescopeOnOff):
                 elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0])
+                        message_or_unique_id.split(" ")[0]
+                    )
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (ResultCode.OK, f"Unavailable devices are {unavailable_devices}")
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 

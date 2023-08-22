@@ -90,9 +90,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info(
-            "Invoking TelescopeStandby command on the lower level devices"
-        )
+        self.logger.info("Invoking Standby command on the lower level devices")
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -133,7 +131,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             self.turn_standby_sdp(),
         ]:
             for return_code, message_or_unique_id in zip(
-                    return_codes, message_or_unique_ids
+                return_codes, message_or_unique_ids
             ):
                 # condition for exception raised during invoking command
                 if return_code in [ResultCode.FAILED]:
@@ -142,11 +140,15 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0])
+                        message_or_unique_id.split(" ")[0]
+                    )
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (ResultCode.OK, f"Unavailable devices are {unavailable_devices}")
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 
@@ -173,9 +175,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info(
-            "Invoking TelescopeStandby command on the lower level devices"
-        )
+        self.logger.info("Invoking Standby command on the lower level devices")
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -215,7 +215,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             self.turn_standby_sdp(),
         ]:
             for return_code, message_or_unique_id in zip(
-                    return_codes, message_or_unique_ids
+                return_codes, message_or_unique_ids
             ):
                 # condition for exception raised during invoking command
                 if return_code in [ResultCode.FAILED]:
@@ -224,11 +224,15 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 elif return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0])
+                        message_or_unique_id.split(" ")[0]
+                    )
 
         if unavailable_devices:
             self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (ResultCode.OK, f"Unavailable devices are {unavailable_devices}")
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 
