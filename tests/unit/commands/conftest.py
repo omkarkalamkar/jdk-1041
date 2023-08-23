@@ -63,13 +63,13 @@ def devices_to_load():
                 {"name": MID_CSP_MASTER_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},
                 {"name": MID_SDP_MASTER_DEVICE},
-                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
         {
             "class": HelperDishDevice,
             "devices": [
                 {"name": DISH_MASTER_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
         {
