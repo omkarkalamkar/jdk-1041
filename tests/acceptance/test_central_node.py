@@ -155,7 +155,7 @@ def check_command(central_node, command_name, change_event_callbacks):
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandsInQueue",
-        (str(command_name),),
+        (command_name,),
         lookahead=4,
     )
 

@@ -50,7 +50,6 @@ def test_telescope_on_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
-@pytest.mark.skip
 def test_telescope_on_command_unavailibility(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
