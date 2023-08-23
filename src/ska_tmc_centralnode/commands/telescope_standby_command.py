@@ -258,7 +258,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             )
         else:
             return (
-                [ResultCode.FAILED],
+                [ResultCode.REJECTED],
                 [
                     f"{self.sdp_mln_adapter.dev_name} is not available to receive command"
                 ],
@@ -276,7 +276,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             )
         else:
             return (
-                [ResultCode.FAILED],
+                [ResultCode.REJECTED],
                 [
                     f"{self.csp_mln_adapter.dev_name} is not available to receive command"
                 ],

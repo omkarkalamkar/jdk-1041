@@ -84,8 +84,8 @@ class TelescopeOn(AbstractTelescopeOnOff):
         )
 
         self.logger.info("Invoking On command on the lower level devices")
-        unavailable_devices = []
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self.set_standby_fp_mode_dishes(),
             self.turn_on_csp(),
@@ -118,9 +118,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
         self.logger.info(
             f"Invoking On command for {self.sdp_mln_adapter.dev_name} devices"
         )
-        self.logger.info(
-            f"Available condition {self.component_manager.check_if_sdp_mln_is_available()}"
-        )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
@@ -138,9 +135,6 @@ class TelescopeOn(AbstractTelescopeOnOff):
     def turn_on_csp(self):
         self.logger.info(
             f"Invoking On command for {self.csp_mln_adapter.dev_name} devices"
-        )
-        self.logger.info(
-            f"availablity check {self.component_manager.check_if_csp_mln_is_available()}"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
