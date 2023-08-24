@@ -154,7 +154,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
     def do_low(self, argin=None):
         """
-        Method to invoke TelescopeStandby command on SubarrayNode and MCCS
+        Method to invoke Standby command on SubarrayNode and MCCS
         Master Leaf Node.
 
         param:
@@ -260,7 +260,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             return (
                 [ResultCode.REJECTED],
                 [
-                    f"{self.sdp_mln_adapter.dev_name} is not available to receive command"
+                    f"{self.sdp_mln_adapter.dev_name} is not available to receive Standby command"
                 ],
             )
 
@@ -278,7 +278,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             return (
                 [ResultCode.REJECTED],
                 [
-                    f"{self.csp_mln_adapter.dev_name} is not available to receive command"
+                    f"{self.csp_mln_adapter.dev_name} is not available to receive Standby command"
                 ],
             )
 

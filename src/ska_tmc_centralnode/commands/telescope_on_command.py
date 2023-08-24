@@ -67,7 +67,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def do_mid(self, argin=None):
         """
-        Method to invoke Telescope On command on Lower level devices.
+        Method to invoke On command on Lower level devices.
 
         param argin:
             None.
@@ -128,7 +128,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             return (
                 [ResultCode.REJECTED],
                 [
-                    f"{self.sdp_mln_adapter.dev_name} is not available to receive command"
+                    f"{self.sdp_mln_adapter.dev_name} is not available to receive On command"
                 ],
             )
 
@@ -146,7 +146,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
             return (
                 [ResultCode.REJECTED],
                 [
-                    f"{self.csp_mln_adapter.dev_name} is not available to receive command"
+                    f"{self.csp_mln_adapter.dev_name} is not available to receive On command"
                 ],
             )
 
@@ -170,7 +170,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def do_low(self, argin=None):
         """
-        Method to invoke Telescope On command on Lower level devices.
+        Method to invoke On command on Lower level devices.
 
         param argin:
             None.

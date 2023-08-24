@@ -50,7 +50,7 @@ def test_telescope_on_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
-def test_telescope_on_command_unavailibility(tango_context):
+def test_telescope_on_command_unavailability(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
@@ -77,7 +77,6 @@ def test_telescope_on_command_unavailibility(tango_context):
 
     cm.telescope_on(task_callback=task_callback)
     time.sleep(1)
-    logger.info(f"final res {task_callback.result}")
     assert task_callback.result == ResultCode.OK
 
 

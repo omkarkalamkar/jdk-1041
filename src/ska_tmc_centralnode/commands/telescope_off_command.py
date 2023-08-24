@@ -67,7 +67,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
     def do_mid(self, argin=None):
         """
-        Method to invoke telescopeoff command on Lower level devices.
+        Method to invoke Off command on Lower level devices.
         param:
             None
 
@@ -151,7 +151,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
     def turn_off_csp(self):
         self.logger.info(
-            f"Invoking TelescopeOff command for {self.csp_mln_adapter.dev_name} devices"
+            f"Invoking Off command for {self.csp_mln_adapter.dev_name} devices"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
@@ -163,13 +163,13 @@ class TelescopeOff(AbstractTelescopeOnOff):
             return (
                 [ResultCode.REJECTED],
                 [
-                    f"{self.csp_mln_adapter.dev_name} is not available to receive command"
+                    f"{self.csp_mln_adapter.dev_name} is not available to receive Off command"
                 ],
             )
 
     def turn_off_sdp(self):
         self.logger.info(
-            f"Invoking TelescopeOff command for {self.sdp_mln_adapter.dev_name} devices"
+            f"Invoking Off command for {self.sdp_mln_adapter.dev_name} devices"
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
@@ -181,13 +181,13 @@ class TelescopeOff(AbstractTelescopeOnOff):
             return (
                 [ResultCode.REJECTED],
                 [
-                    f"{self.sdp_mln_adapter.dev_name} is not available to receive command"
+                    f"{self.sdp_mln_adapter.dev_name} is not available to receive Off command"
                 ],
             )
 
     def turn_off_subarrays(self):
         self.logger.info(
-            f"Invoking TelescopeOff command for {self.subarray_adapters} devices"
+            f"Invoking Off command for {self.subarray_adapters} devices"
         )
         return self.send_command(
             self.subarray_adapters,
@@ -198,13 +198,13 @@ class TelescopeOff(AbstractTelescopeOnOff):
     def turn_off_dishes(self):
         return self.send_command(
             self.dish_adapters,
-            "Error in calling TelescopeOff() on TMC Dish leaf node",
+            "Error in calling Off() on TMC Dish leaf node",
             "Off",
         )
 
     def do_low(self, argin=None):
         """
-        Method to invoke telescopeoff command on Lower level devices.
+        Method to invoke Off command on Lower level devices.
         param:
             None
 
