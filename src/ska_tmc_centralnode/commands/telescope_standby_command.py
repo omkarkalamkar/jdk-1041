@@ -90,9 +90,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info(
-            "Invoking TelescopeStandby command on the lower level devices"
-        )
+        self.logger.info("Invoking Standby command on the lower level devices")
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -126,6 +124,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self.turn_off_dishes(),
             self.turn_standby_csp(),
@@ -134,17 +133,28 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                # condition for exception raised during invoking command
+                if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
-        self.logger.info(
-            "TelescopeStandby command is completed successfully on the CentralNode"
-        )
+                # condition for unavailable devices
+                elif return_code in [ResultCode.REJECTED]:
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_id.split(" ")[0]
+                    )
+
+        if unavailable_devices:
+            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 
     def do_low(self, argin=None):
         """
-        Method to invoke TelescopeStandby command on SubarrayNode and MCCS
+        Method to invoke Standby command on SubarrayNode and MCCS
         Master Leaf Node.
 
         param:
@@ -165,9 +175,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info(
-            "Invoking TelescopeStandby command on the lower level devices"
-        )
+        self.logger.info("Invoking Standby command on the lower level devices")
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -200,6 +208,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             # self.turn_standby_mccs(),
             self.turn_standby_csp(),
@@ -208,40 +217,70 @@ class TelescopeStandby(AbstractTelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                # condition for exception raised during invoking command
+                if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
+                # condition for unavailable devices
+                elif return_code in [ResultCode.REJECTED]:
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_id.split(" ")[0]
+                    )
 
-        self.logger.info(
-            "TelescopeStandby command is completed successfully on the CentralNode"
-        )
+        if unavailable_devices:
+            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 
     def turn_standby_subarrays(self):
         self.logger.info(
-            f"Standby command on TMC SubarrayNode devices: {self.subarray_adapters}"
+            f"Invoking Standby command for {self.subarray_adapters} devices"
         )
         return self.send_command(
             self.subarray_adapters,
-            f"Error in calling Standby() on TMC SubarrayNode devices: {self.subarray_adapters}",
+            f"Error in calling Standby command for {self.subarray_adapters}",
             "Standby",
         )
 
     def turn_standby_sdp(self):
-        self.logger.info(f"Standby command on {self.sdp_mln_adapter.dev_name}")
-        return self.send_command(
-            [self.sdp_mln_adapter],
-            f"Error in calling Standby() on {self.sdp_mln_adapter.dev_name}",
-            "Standby",
+        self.logger.info(
+            f"Invoking Standby command for {self.sdp_mln_adapter.dev_name} devices"
         )
+        if self.component_manager.check_if_sdp_mln_is_available() is True:
+            return self.send_command(
+                [self.sdp_mln_adapter],
+                f"Error in calling Standby command for {self.sdp_mln_adapter.dev_name}",
+                "Standby",
+            )
+        else:
+            return (
+                [ResultCode.REJECTED],
+                [
+                    f"{self.sdp_mln_adapter.dev_name} is not available to receive Standby command"
+                ],
+            )
 
     def turn_standby_csp(self):
-        self.logger.info(f"Standby command on {self.csp_mln_adapter.dev_name}")
-        return self.send_command(
-            [self.csp_mln_adapter],
-            f"Error in calling Standby() on {self.csp_mln_adapter.dev_name}",
-            "Standby",
+        self.logger.info(
+            f"Invoking Standby command for {self.csp_mln_adapter.dev_name} devices"
         )
+        if self.component_manager.check_if_csp_mln_is_available() is True:
+            return self.send_command(
+                [self.csp_mln_adapter],
+                f"Error in calling Standby command for {self.csp_mln_adapter.dev_name}",
+                "Standby",
+            )
+        else:
+            return (
+                [ResultCode.REJECTED],
+                [
+                    f"{self.csp_mln_adapter.dev_name} is not available to receive Standby command"
+                ],
+            )
 
     # def turn_standby_mccs(self):
     #     self.logger.info(

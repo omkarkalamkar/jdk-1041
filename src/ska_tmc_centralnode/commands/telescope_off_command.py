@@ -67,7 +67,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
     def do_mid(self, argin=None):
         """
-        Method to invoke telescopeoff command on Lower level devices.
+        Method to invoke Off command on Lower level devices.
         param:
             None
 
@@ -121,6 +121,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self.turn_off_dishes(),
             self.turn_off_csp(),
@@ -129,45 +130,81 @@ class TelescopeOff(AbstractTelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                # condition for exception raised during invoking command
+                if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
+                # condition for unavailable devices
+                elif return_code in [ResultCode.REJECTED]:
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_id.split(" ")[0]
+                    )
+
+        if unavailable_devices:
+            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 
     def turn_off_csp(self):
-        self.logger.info("TelescopeOff for Csp devices")
-        return self.send_command(
-            [self.csp_mln_adapter],
-            f"Error in calling Off() command for {self.csp_mln_adapter}",
-            "Off",
+        self.logger.info(
+            f"Invoking Off command for {self.csp_mln_adapter.dev_name} devices"
         )
+        if self.component_manager.check_if_csp_mln_is_available() is True:
+            return self.send_command(
+                [self.csp_mln_adapter],
+                f"Error in calling Off command for {self.csp_mln_adapter.dev_name}",
+                "Off",
+            )
+        else:
+            return (
+                [ResultCode.REJECTED],
+                [
+                    f"{self.csp_mln_adapter.dev_name} is not available to receive Off command"
+                ],
+            )
 
     def turn_off_sdp(self):
-        self.logger.info("TelescopeOff for Sdp devices")
-        return self.send_command(
-            [self.sdp_mln_adapter],
-            f"Error in calling Off() command for {self.sdp_mln_adapter}",
-            "Off",
+        self.logger.info(
+            f"Invoking Off command for {self.sdp_mln_adapter.dev_name} devices"
         )
+        if self.component_manager.check_if_sdp_mln_is_available() is True:
+            return self.send_command(
+                [self.sdp_mln_adapter],
+                f"Error in calling Off command for {self.sdp_mln_adapter.dev_name}",
+                "Off",
+            )
+        else:
+            return (
+                [ResultCode.REJECTED],
+                [
+                    f"{self.sdp_mln_adapter.dev_name} is not available to receive Off command"
+                ],
+            )
 
     def turn_off_subarrays(self):
-        self.logger.info("TelescopeOff for tm subarrays devices")
+        self.logger.info(
+            f"Invoking Off command for {self.subarray_adapters} devices"
+        )
         return self.send_command(
             self.subarray_adapters,
-            f"Error in calling Off() for {self.subarray_adapters}",
+            f"Error in calling Off command for {self.subarray_adapters}",
             "Off",
         )
 
     def turn_off_dishes(self):
         return self.send_command(
             self.dish_adapters,
-            "Error in calling TelescopeOff() on TMC Dish leaf node",
+            "Error in calling Off() on TMC Dish leaf node",
             "Off",
         )
 
     def do_low(self, argin=None):
         """
-        Method to invoke telescopeoff command on Lower level devices.
+        Method to invoke Off command on Lower level devices.
         param:
             None
 
@@ -223,6 +260,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
                 )
             time.sleep(self._step_sleep)
 
+        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             # self.turn_off_mccs_mln(),
             self.turn_off_csp(),
@@ -231,8 +269,22 @@ class TelescopeOff(AbstractTelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                # condition for exception raised during invoking command
+                if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
+                # condition for unavailable devices
+                elif return_code in [ResultCode.REJECTED]:
+                    # return ResultCode.FAILED, message_or_unique_id
+                    unavailable_devices.append(
+                        message_or_unique_id.split(" ")[0]
+                    )
+
+        if unavailable_devices:
+            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
 
         return (ResultCode.OK, "")
 

@@ -154,7 +154,9 @@ def check_command(central_node, command_name, change_event_callbacks):
         change_event_callbacks["longRunningCommandsInQueue"],
     )
     change_event_callbacks.assert_change_event(
-        "longRunningCommandsInQueue", (str(command_name),)
+        "longRunningCommandsInQueue",
+        (command_name,),
+        lookahead=4,
     )
 
     central_node.subscribe_event(
@@ -167,7 +169,6 @@ def check_command(central_node, command_name, change_event_callbacks):
         "longRunningCommandResult",
     )
     command_id, result = next_result["attribute_value"]
-
     if command_id != unique_id:
         next_result = change_event_callbacks.assert_against_call(
             "longRunningCommandResult",
