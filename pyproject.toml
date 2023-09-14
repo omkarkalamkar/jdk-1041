@@ -62,6 +62,8 @@ sphinx-autodoc-typehints = "^1.19.3"
 sphinxcontrib-plantuml = "^0.22"
 typing_extensions  = "^4.3.0"
 sphinx-rtd-theme = "^1.2.2"
+ska-control-model="0.3.1"
+pandas="1.4.2"
 
 [tool.isort]
 multi_line_output = 3
