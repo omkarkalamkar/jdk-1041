@@ -97,7 +97,6 @@ Coverage XML written to file build/reports/code-coverage.xml
 
 ======================== 48 passed, 5 deselected in 42.42s ========================
 
-
 Formatting the code:
 ::
 $ make python-format
