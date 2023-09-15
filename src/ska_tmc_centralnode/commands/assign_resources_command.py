@@ -154,7 +154,7 @@ class AssignResources(AbstractAssignReleaseResources):
                         parameters:
                             {}
         .. code-block::
-        
+
             Example:
             {"interface":"https://schema.skao.int/ska-tmc-assignresources/2.1",
             "transaction_id":"txn-....-00001","subarray_id":1,"dish":{"receptor_ids":

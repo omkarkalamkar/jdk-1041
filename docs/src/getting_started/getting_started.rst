@@ -48,7 +48,7 @@ Please note that:
  * the best way to get the framework is compiling it (instructions can be found `here <https://gitlab.com/tango-controls/cppTango/-/blob/main/INSTALL.md>`_);
  * the above script has been tested with Ubuntu 20.04.
 
-*During this step, `libtango-dev` instalation can ask for the Tango Server IP:PORT. Just accept the default proposed value.*
+*During this step, `libtango-dev` installation can ask for the Tango Server IP:PORT. Just accept the default proposed value.*
 
 Install python requirements for linting and unit testing:
 ::
