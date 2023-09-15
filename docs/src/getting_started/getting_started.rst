@@ -33,7 +33,7 @@ How to Use
 
 Clone this repo:
 ::
-git clone https://gitlab.com/ska-telescope/ska-tmc-centralnode.git
+git clone https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode.git
 cd ska-tmc-centralnode
 
 Install dependencies
@@ -122,7 +122,7 @@ $ make helm-lint
 
 Build the container image for the project:
 ::
-$ make oci-build
+$ make oci-image-build
 [...]
 [+] Building 111.7s (14/14) FINISHED 
 [...]
