@@ -69,7 +69,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
         """
         Method to invoke Off command on Lower level devices.
         param:
-            None
+        None
 
         return:
             A tuple containing a return code and a string message indicating status.
@@ -206,7 +206,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
         """
         Method to invoke Off command on Lower level devices.
         param:
-            None
+        None
 
         return:
             A tuple containing a return code and a string message indicating status.

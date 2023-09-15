@@ -104,55 +104,52 @@ class AssignResources(AbstractAssignReleaseResources):
         """
             Method to invoke AssignResources command on Subarray.
 
-            :param argin: The string in JSON format. The JSON contains following values:
+            :param argin:
+            The string in JSON format. The JSON contains following values:
+            subarray_id:
+                DevShort. Mandatory.
+            dish:
+                Mandatory JSON object consisting of
 
-                subarray_id:
-                    DevShort. Mandatory.
+                receptor_ids:
+                    DevVarStringArray
+                    The individual string should contain dish numbers in string format
+                    with preceding zeroes upto 3 digits. E.g. SKA001, SKA002.
+            sdp:
+                Mandatory JSON object consisting of
 
-                dish:
-                    Mandatory JSON object consisting of
-
-                    receptor_ids:
-                        DevVarStringArray
-                        The individual string should contain dish numbers in string format
-                        with preceding zeroes upto 3 digits. E.g. SKA001, SKA002.
-
-                sdp:
-                    Mandatory JSON object consisting of
+                eb_id:
+                    DevString
+                    The SBI id.
+                max_length:
+                    DevDouble
+                    Maximum length of the SBI in seconds.
+                scan_types:
+                    array of the blocks each consisting following parameters
+                    scan_type_id:
+                        DevString
+                        The scan id.
+                    coordinate_system:
+                        DevString
+                    ra:
+                        DevString
+                    Dec:
+                        DevString
+                processing_blocks:
+                    array of the blocks each consisting following parameters
 
                     eb_id:
                         DevString
-                        The SBI id.
-                    max_length:
-                        DevDouble
-                        Maximum length of the SBI in seconds.
-                    scan_types:
-                        array of the blocks each consisting following parameters
-                        scan_type_id:
-                           DevString
-                           The scan id.
-                        coordinate_system:
-                           DevString
-                        ra:
-                           DevString
-                        Dec:
-                           DevString
-
-                    processing_blocks:
-                        array of the blocks each consisting following parameters
-
-                        eb_id:
+                        The Processing Block id.
+                    workflow:
+                        kind:
                             DevString
-                            The Processing Block id.
-                        workflow:
-                            kind:
-                               DevString
-                            name:
-                               DevString
-                            version:
-                               DevString
-                        parameters:
-                            {}
+                        name:
+                            DevString
+                        version:
+                            DevString
+                    parameters:
+                        {}
         .. code-block::
 
             Example:
@@ -179,12 +176,12 @@ class AssignResources(AbstractAssignReleaseResources):
             ["FS4","FS8"],"receive_nodes":10}}}
 
 
-            Note: From Jive, enter above input string without any space.
+        Note: From Jive, enter above input string without any space.
 
-            return:
-                A tuple containing a return code and a string msg.
-                For Example:
-                    (ResultCode.OK, "")
+        return:
+        A tuple containing a return code and a string msg.
+        For Example:
+            (ResultCode.OK, "")
 
         """
         try:
@@ -294,25 +291,26 @@ class AssignResources(AbstractAssignReleaseResources):
         """
         Method to invoke AssignResources command on Subarray.
 
-        :param argin: The string in JSON format. The JSON contains following values:
-            interface:
-                DevString. Mandatory.
-                Version of schema to allocate assign resources.
+        :param argin:
+        The string in JSON format. The JSON contains following values:
+        interface:
+            DevString. Mandatory.
+            Version of schema to allocate assign resources.
 
-            subarray_id:
-                DevShort. Mandatory.
-                Sub-Array to allocate resources to
+        subarray_id:
+            DevShort. Mandatory.
+            Sub-Array to allocate resources to
 
-            mccs:
-                subarray_beam_ids:
-                    DevArray. Mandatory
-                    logical ID of beam
-                station_ids:
-                    DevArray. Mandatory
-                    list of stations contributing beams to the data set
-                channel_blocks:
-                    DevArray. Mandatory
-                    list of channels used
+        mccs:
+            subarray_beam_ids:
+                DevArray. Mandatory
+                logical ID of beam
+            station_ids:
+                DevArray. Mandatory
+                list of stations contributing beams to the data set
+            channel_blocks:
+                DevArray. Mandatory
+                list of channels used
 
         .. code-block::
 
