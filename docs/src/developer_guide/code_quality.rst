@@ -1,5 +1,5 @@
 ###################################
-CentralNode code quality guidelines
+Central Node code quality guidelines
 ###################################
 
 ***********************
@@ -15,7 +15,7 @@ The CI pipeline does check that if code has been formatted using black or not.
 
 Linting
 ^^^^^^^
-CentralNode uses below libraries/utilities for linting. Linting can be checked 
+Central Node uses below libraries/utilities for linting. Linting can be checked 
 using command ``make python-lint``.
 
 * ``isort`` - It provides a command line utility, Python library and 
@@ -33,7 +33,7 @@ using command ``make python-lint``.
 Test coverage
 *************
 
-CentralNode uses pytest to test its code, with the pytest-cov plugin for
+Central Node uses pytest to test its code, with the pytest-cov plugin for
 measuring coverage. .
 
 
