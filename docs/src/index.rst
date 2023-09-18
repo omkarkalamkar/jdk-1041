@@ -1,8 +1,8 @@
 =========================
-CentralNode documentation
+Central Node documentation
 =========================
 
-This project is developing the CentralNode (Mid and Low) component of the Telescope Monitoring and Control (TMC) prototype, for the `Square Kilometre Array`_.
+This project is developing the Central Node (Mid and Low) component of the Telescope Monitoring and Control (TMC) prototype, for the `Square Kilometre Array`_.
 
 .. _Square Kilometre Array: https://skatelescope.org/
 
