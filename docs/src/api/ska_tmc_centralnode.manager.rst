@@ -21,13 +21,6 @@ ska\_tmc\_centralnode.manager.component\_manager module
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.manager.monitoring\_loop module
------------------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.manager.monitoring_loop
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Module contents
 ---------------

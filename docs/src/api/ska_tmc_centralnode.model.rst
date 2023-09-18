@@ -28,14 +28,6 @@ ska\_tmc\_centralnode.model.input module
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.model.op\_state\_model module
----------------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.model.op_state_model
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

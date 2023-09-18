@@ -3,7 +3,7 @@ Getting started
 ===============
 
 This page contains instructions for software developers who want to get
-started with usage and development of the CentralNode.
+started with usage and development of the Central Node.
 
 Background
 ----------
@@ -33,7 +33,7 @@ How to Use
 
 Clone this repo:
 ::
-    git clone https://gitlab.com/ska-telescope/ska-tmc-centralnode.git
+    git clone https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode.git
     cd ska-tmc-centralnode
 
 Install dependencies
@@ -48,7 +48,7 @@ Please note that:
  * the best way to get the framework is compiling it (instructions can be found `here <https://gitlab.com/tango-controls/cppTango/-/blob/main/INSTALL.md>`_);
  * the above script has been tested with Ubuntu 20.04.
 
-*During this step, `libtango-dev` instalation can ask for the Tango Server IP:PORT. Just accept the default proposed value.*
+*During this step, `libtango-dev` installation can ask for the Tango Server IP:PORT. Just accept the default proposed value.*
 
 Install python requirements for linting and unit testing:
 ::
@@ -56,16 +56,15 @@ Install python requirements for linting and unit testing:
 
 Activate the poetry environment:
 ::
-    $ source $(poetry env info --path)/bin/activate
+$ source $(poetry env info --path)/bin/activate
 
 Alternate way to install and activate poetry
 ::
+    Follow the steps till installation of dependencies. then, 
 
-Follow the steps till installation of dependencies. then, 
-
-    $ virtualenv cn_venv
-    $ source cn_venv/bin/activate
-    $ make requirements
+        $ virtualenv cn_venv
+        $ source cn_venv/bin/activate
+        $ make requirements
 
 Run python-test:
 ::
@@ -98,17 +97,16 @@ Run python-test:
 
     ======================== 48 passed, 5 deselected in 42.42s ========================
 
-
-Formatting the code:
-::
+    Formatting the code:
+    ::
     $ make python-format
     [...]
     --------------------------------------------------------------------
     Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
 
 
-Python linting:
-::
+    Python linting:
+    ::
     $ make python-lint
     [...]
     --------------------------------------------------------------------
@@ -124,7 +122,7 @@ Helm Charts linting:
 
 Build the container image for the project:
 ::
-    $ make oci-build
+    $ make oci-image-build
     [...]
     [+] Building 111.7s (14/14) FINISHED 
     [...]

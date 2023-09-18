@@ -38,22 +38,6 @@ ska\_tmc\_centralnode.central\_node\_mid module
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.dev\_factory module
------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.dev_factory
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ska\_tmc\_centralnode.exceptions module
----------------------------------------
-
-.. automodule:: ska_tmc_centralnode.exceptions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ska\_tmc\_centralnode.input\_validator module
 ---------------------------------------------
 
