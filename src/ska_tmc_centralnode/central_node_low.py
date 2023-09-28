@@ -6,7 +6,7 @@ of state and mode attributes defined by the SKA Control Model.
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType
-from tango.server import attribute,device_property, run
+from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_low import (

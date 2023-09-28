@@ -218,12 +218,10 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
     def turn_on_mccs(self):
         self.logger.info(
-                f"Invoking On command for {self.mccs_mln_adapter.dev_name} devices"
-            ) 
+            f"Invoking On command for {self.mccs_mln_adapter.dev_name} devices"
+        )
         return self.send_command(
             [self.mccs_mln_adapter],
             f"Error in calling On command for {self.mccs_mln_adapter.dev_name}",
             "On",
         )
-    
-

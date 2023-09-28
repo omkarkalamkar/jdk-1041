@@ -228,7 +228,9 @@ class InputParameterLow(InputParameter):
         self._subarray_dev_names = ["ska_low/tm_subarray_node/1"]
         self._csp_subarray_dev_names = ["ska_low/tm_leaf_node/csp_subarray01"]
         self._sdp_subarray_dev_names = ["ska_low/tm_leaf_node/sdp_subarray01"]
-        self._mccs_subarray_dev_names = ["ska_low/tm_leaf_node/mccs_subarray01"]
+        self._mccs_subarray_dev_names = [
+            "ska_low/tm_leaf_node/mccs_subarray01"
+        ]
         self._csp_master_dev_name = "low-csp/control/0"
         self._sdp_master_dev_name = "low-sdp/control/0"
         self._mccs_master_dev_name = "low-mccs/control/control"
@@ -318,7 +320,7 @@ class InputParameterLow(InputParameter):
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
-       
+
         dev_name = self.mccs_mln_dev_name
         if dev_name != "" and component_manager.get_device(dev_name) is None:
             component_manager.add_device(dev_name)
