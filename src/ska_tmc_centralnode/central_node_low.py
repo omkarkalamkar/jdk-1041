@@ -6,7 +6,7 @@ of state and mode attributes defined by the SKA Control Model.
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType
-from tango.server import attribute, run
+from tango.server import attribute,device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -26,11 +26,11 @@ class CentralNodeLow(AbstractCentralNode):
     # -----------------
     # Device Properties
     # -----------------
-    # MCCSMasterLeafNodeFQDN = device_property(dtype="str")
+    MCCSMasterLeafNodeFQDN = device_property(dtype="str")
 
-    # MCCSSubarrayLeafNodeFQDN = device_property(dtype="str")
+    MCCSSubarrayLeafNodeFQDN = device_property(dtype="str")
 
-    # MCCSMasterNodeFQDN = device_property(dtype="str")
+    MCCSMasterNodeFQDN = device_property(dtype="str")
     # ----------
     # Attributes
     # ----------
@@ -55,20 +55,20 @@ class CentralNodeLow(AbstractCentralNode):
         access=AttrWriteType.READ_WRITE,
     )
 
-    # mccsMasterLeafNodeName = attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    # )
+    mccsMasterLeafNodeName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
 
-    # mccsSubarrayLeafNodeName = attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    # )
+    mccsSubarrayLeafNodeName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
 
-    # mccsMasterNodeName = attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    # )
+    mccsMasterNodeName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
 
     # ---------------
     # General methods
@@ -95,32 +95,32 @@ class CentralNodeLow(AbstractCentralNode):
     # Attributes methods
     # ------------------
 
-    # def read_mccsMasterLeafNodeName(self):
-    #     """Return the mccsmasterleafnodename attribute."""
-    #     return self.component_manager.input_parameter.mccs_master_leaf_node
+    def read_mccsMasterLeafNodeName(self):
+        """Return the mccsmasterleafnodename attribute."""
+        return self.component_manager.input_parameter.mccs_mln_dev_name
 
-    # def write_mccsMasterLeafNodeName(self, value):
-    #     """Set the mccsmasterleafnodename attribute."""
-    #     self.component_manager.input_parameter.mccs_master_leaf_node = value
-    #     self.component_manager.update_input_parameter()
+    def write_mccsMasterLeafNodeName(self, value):
+        """Set the mccsmasterleafnodename attribute."""
+        self.component_manager.input_parameter.mccs_mln_dev_name = value
+        self.component_manager.update_input_parameter()
 
-    # def read_mccsSubarrayLeafNodeName(self):
-    #     """Return the mccsSubarrayLeafNodeName attribute."""
-    #     return self.component_manager.input_parameter.mccs_subarray_leaf_node
+    def read_mccsSubarrayLeafNodeName(self):
+        """Return the mccsSubarrayLeafNodeName attribute."""
+        return self.component_manager.input_parameter.mccs_subarray_dev_names
 
-    # def write_mccsSubarrayLeafNodeName(self, value):
-    #     """Set the mccsSubarrayLeafNodeName attribute."""
-    #     self.component_manager.input_parameter.mccs_subarray_leaf_node = value
-    #     self.component_manager.update_input_parameter()
+    def write_mccsSubarrayLeafNodeName(self, value):
+        """Set the mccsSubarrayLeafNodeName attribute."""
+        self.component_manager.input_parameter.mccs_subarray_dev_names = value
+        self.component_manager.update_input_parameter()
 
-    # def read_mccsMasterNodeName(self):
-    #     """Return the mccsMasterNodeName attribute."""
-    #     return self.component_manager.input_parameter.mccs_master_dev_name
+    def read_mccsMasterNodeName(self):
+        """Return the mccsMasterNodeName attribute."""
+        return self.component_manager.input_parameter.mccs_master_dev_name
 
-    # def write_mccsMasterNodeName(self, value):
-    #     """Set the mccsMasterNodeName attribute."""
-    #     self.component_manager.input_parameter.mccs_master_dev_name = value
-    #     self.component_manager.update_input_parameter()
+    def write_mccsMasterNodeName(self, value):
+        """Set the mccsMasterNodeName attribute."""
+        self.component_manager.input_parameter.mccs_master_dev_name = value
+        self.component_manager.update_input_parameter()
 
     def read_cspMasterDevName(self):
         """Return the cspMasterDevName attribute."""
@@ -180,10 +180,10 @@ class CentralNodeLow(AbstractCentralNode):
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
-        # cm.input_parameter.mccs_master_leaf_node = (
+        # cm.input_parameter.mccs_mln_dev_name = (
         #     self.MCCSMasterLeafNodeFQDN or ""
         # )
-        # cm.input_parameter.mccs_subarray_leaf_node = (
+        # cm.input_parameter.mccs_subarray_dev_names = (
         #     self.MCCSSubarrayLeafNodeFQDN or ""
         # )
         # cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""

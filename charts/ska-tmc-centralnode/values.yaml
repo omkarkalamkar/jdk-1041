@@ -73,13 +73,13 @@ deviceServers:
       DishLeafNodePrefix: "ska_mid/tm_leaf_node/d0"
       DishIDs: ["SKA001", "MKT001"]
     low:
+      file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"
       CspMasterFQDN: "low-csp/control/0"
       SdpMasterLeafNodeFQDN: "ska_low/tm_leaf_node/sdp_master"
       SdpMasterFQDN: "low-sdp/control/0"
-      file: "data/centralnode_low.yaml"
-      # MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
-      # MCCSMasterNodeFQDN: "low-mccs/control/control"
+      MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
+      MCCSMasterNodeFQDN: "low-mccs/control/control"
 
 
 nodeSelector: {}
