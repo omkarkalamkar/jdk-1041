@@ -82,6 +82,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             self.start_tracker_thread(
                 self.component_manager.get_subarray_obsstate,
                 [ObsState.RESOURCING, ObsState.EMPTY],
+                task_abort_event,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
                 command_id=self.command_id,
