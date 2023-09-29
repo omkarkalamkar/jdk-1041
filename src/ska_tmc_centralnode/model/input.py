@@ -320,7 +320,6 @@ class InputParameterLow(InputParameter):
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
-
         dev_name = self.mccs_mln_dev_name
         if dev_name != "" and component_manager.get_device(dev_name) is None:
             component_manager.add_device(dev_name)

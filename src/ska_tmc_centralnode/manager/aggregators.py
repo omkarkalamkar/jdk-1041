@@ -118,7 +118,7 @@ class TelescopeStateAggregatorLow(Aggregator):
                 self._component_manager.input_parameter.csp_master_dev_name,
                 csp_master,
                 self._component_manager.input_parameter.mccs_master_dev_name,
-                csp_master,
+                mccs_master,
             )
             return DevState.UNKNOWN
         elif telescopeSetStateList == set([DevState.ON]):
@@ -205,8 +205,7 @@ class HealthStateAggregatorLow(Aggregator):
         csp_master = False
         sdp_master = False
         mccs_master = False
-        # get health states of sdp and csp master devices
-        # TODO: Add MCCS once it is integrated
+        # get health states of sdp, csp and mccs master devices
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
             if dev.unresponsive:
@@ -238,8 +237,6 @@ class HealthStateAggregatorLow(Aggregator):
 
         healthStateSetList = set(healthStateList)
         self._logger.info("Health state list : %s", healthStateList)
-        # if not mccs_master:
-        #     return HealthState.UNKNOWN
         if subarray_count == 0:
             return HealthState.UNKNOWN
         elif not sdp_master and not csp_master and not mccs_master:

@@ -99,8 +99,8 @@ def test_off_command_low(
         lookahead=3,
     )
 
-    # mccs_master = dev_factory.get_device("low-mccs/control/control")
-    # mccs_master.SetDirectState(tango.DevState.OFF)
+    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master.SetDirectState(tango.DevState.OFF)
     csp_master = dev_factory.get_device("low-csp/control/0")
     csp_master.SetDirectState(tango._tango.DevState.OFF)
 

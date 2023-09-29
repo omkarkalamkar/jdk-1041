@@ -180,13 +180,13 @@ class CentralNodeLow(AbstractCentralNode):
             sleep_time=self.SleepTime,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
-        # cm.input_parameter.mccs_mln_dev_name = (
-        #     self.MCCSMasterLeafNodeFQDN or ""
-        # )
-        # cm.input_parameter.mccs_subarray_dev_names = (
-        #     self.MCCSSubarrayLeafNodeFQDN or ""
-        # )
-        # cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""
+        cm.input_parameter.mccs_mln_dev_name = (
+            self.MCCSMasterLeafNodeFQDN or ""
+        )
+        cm.input_parameter.mccs_subarray_dev_names = (
+            self.MCCSSubarrayLeafNodeFQDN or ""
+        )
+        cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""
         cm.update_input_parameter()
         return cm
 

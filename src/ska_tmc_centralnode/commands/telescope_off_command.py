@@ -262,7 +262,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
-            # self.turn_off_mccs_mln(),
+            self.turn_off_mccs(),
             self.turn_off_csp(),
             self.turn_off_sdp(),
         ]:
@@ -288,9 +288,12 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         return (ResultCode.OK, "")
 
-    # def turn_off_mccs_mln(self):
-    #     return self.send_command(
-    #         [self.tm_leaf_mccs_master_adapter],
-    #         f"Error in calling TelescopeOff() for {self.tm_leaf_mccs_master_adapter}",
-    #         "Off",
-    #     )
+    def turn_off_mccs(self):
+        self.logger.info(
+            f"Invoking On command for {self.mccs_mln_adapter.dev_name} devices"
+        )
+        return self.send_command(
+            [self.mccs_mln_adapter],
+            f"Error in calling On command for {self.mccs_mln_adapter.dev_name}",
+            "On",
+        )

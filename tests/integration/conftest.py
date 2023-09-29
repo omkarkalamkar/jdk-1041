@@ -3,7 +3,7 @@ import logging
 import time
 
 import pytest
-from ska_tmc_common import (
+from ska_tmc_common import (  # HelperMCCSController,; HelperMCCSMasterLeafNode,
     HelperBaseDevice,
     HelperDishDevice,
     HelperSubArrayDevice,
@@ -65,9 +65,14 @@ def devices_to_load():
             ],
         },
         # {
-        #     "class": HelperMCCSStateDevice,
+        #     "class": HelperMCCSMasterLeafNode,
         #     "devices": [
         #         {"name": "ska_low/tm_leaf_node/mccs_master"},
+        #     ],
+        # },
+        # {
+        #     "class": HelperMCCSController,
+        #     "devices": [
         #         {"name": "low-mccs/control/control"},
         #     ],
         # },
@@ -112,6 +117,10 @@ def devices_to_load():
                             "ska_low/tm_leaf_node/sdp_master"
                         ],
                         "SdpMasterFQDN": ["low-sdp/control/0"],
+                        # "MCCSMasterLeafNodeFQDN": [
+                        #     "ska_low/tm_leaf_node/mccs_master"
+                        # ],
+                        # "MCCSMasterNodeFQDN": ["low-mccs/control/control"],
                         "TMCLowSubarrayNodes": ["ska_low/tm_subarray_node/1"],
                         "TMCLowCspSubarrayLeafNodes": [
                             "ska_low/tm_leaf_node/csp_subarray01"

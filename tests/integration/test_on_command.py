@@ -58,7 +58,6 @@ def test_on_command_mid(
     assert central_node.telescopeState == tango.DevState.ON
 
 
-@pytest.mark.kk
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_on_command_low(

@@ -293,7 +293,7 @@ def assign_resources_without_subarray_id(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], str(int(ResultCode.FAILED))),
         lookahead=2,
     )
 
