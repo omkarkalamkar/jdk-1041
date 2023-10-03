@@ -10,23 +10,23 @@
               "apertures": [
                 {
                   "station_id": 1,
-                  "aperture_id": “AP001.01” 
+                  "aperture_id": "AP001.01" 
                 },
                 {
                   "station_id": 1,
-                  "aperture_id": “AP001.02”
+                  "aperture_id": "AP001.02"
                 },
                 {
                   "station_id": 2,
-                  "aperture_id": “AP002.01”
+                  "aperture_id": "AP002.01"
                 },
                 {
                   "station_id": 2,
-                  "aperture_id": “AP002.02”
+                  "aperture_id": "AP002.02"
                 },
                 {
                   "station_id": 3,
-                  "aperture_id": “AP003.01”
+                  "aperture_id": "AP003.01"
                 }
               ],
               "number_of_channels": 32
