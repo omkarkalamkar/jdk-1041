@@ -150,9 +150,9 @@ class AssignResources(AbstractAssignReleaseResources):
                             DevString
                     parameters:
                         {}
-        .. code-block::
+        Example:
 
-            Example:
+        .. code-block::
 
             {"interface": "https://schema.skao.int/ska-tmc-assignresources/2.1","transaction_id":
             "txn-....-00001","subarray_id": 1,"dish": {"receptor_ids": ["SKA001"]},"sdp": {

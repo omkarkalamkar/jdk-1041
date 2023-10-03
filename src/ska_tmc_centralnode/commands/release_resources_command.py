@@ -117,6 +117,9 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 DevVarStringArray. Empty when release_all tag is True.
 
             Example:
+
+            .. code-block::
+
                 {
                     "interface": "https://schema.skao.int/ska-tmc-releaseresources/2.0",
                     "transaction_id": "txn-....-00001",
@@ -200,10 +203,16 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 Boolean(True or False). Mandatory. True when all the resources to be released from Subarray.
 
             Example:
+
+            .. code-block::
+
                 {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
             Note: From Jive, enter input as:
+
+            .. code-block::
+
                 {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
-                without any space.
+            without any space.
         return:
             None
 
