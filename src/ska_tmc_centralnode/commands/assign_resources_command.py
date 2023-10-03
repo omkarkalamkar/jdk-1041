@@ -50,8 +50,8 @@ class AssignResources(AbstractAssignReleaseResources):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-        """This is a long running method for TelescopeOn command, it executes do hook,
-        invokes TelescopeOn command on lowe level devices.
+        """This is a long running method for AssignResources command, it executes do hook,
+        invokes AssignResources command on lower level devices.
 
         :param logger: logger
         :type logger: logging.Logger
