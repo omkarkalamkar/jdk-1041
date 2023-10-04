@@ -105,7 +105,7 @@ class AssignResources(AbstractAssignReleaseResources):
             Method to invoke AssignResources command on Subarray.
 
             :param argin: DevString
-            
+
         Example:
 
         .. code-block::
