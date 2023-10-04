@@ -339,7 +339,7 @@ class AssignResources(AbstractAssignReleaseResources):
             channel_blocks:
                 DevArray. Mandatory
                 list of channels used
-        Example: 
+        Example:
 
         .. code-block::
 
