@@ -339,10 +339,10 @@ class AssignResources(AbstractAssignReleaseResources):
             channel_blocks:
                 DevArray. Mandatory
                 list of channels used
+        Example: 
 
         .. code-block::
 
-            Example:
             {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/3.0","transaction_id":"txn-....-00001","subarray_id":1,
             "mccs":{"subarray_beam_ids":[1],"station_ids":[[1,2]],"channel_blocks":[3]},
             "sdp":{"interface":"https://schema.skao.int/ska-sdp-assignres/0.4","execution_block":{"eb_id":"eb-mvp01-20200325-00001",
