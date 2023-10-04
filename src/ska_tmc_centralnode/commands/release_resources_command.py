@@ -185,13 +185,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         """
         Method to invoke ReleaseResources command on Subarray Node.
 
-        :param argin: The string in JSON format. The JSON contains following values:
-
-            subarray_id:
-                DevShort. Mandatory.
-
-            release_all:
-                Boolean(True or False). Mandatory. True when all the resources to be released from Subarray.
+        :param argin: DevString
 
             Example:
 
