@@ -104,52 +104,7 @@ class AssignResources(AbstractAssignReleaseResources):
         """
             Method to invoke AssignResources command on Subarray.
 
-            :param argin:
-            The string in JSON format. The JSON contains following values:
-            subarray_id:
-                DevShort. Mandatory.
-            dish:
-                Mandatory JSON object consisting of
-
-                receptor_ids:
-                    DevVarStringArray
-                    The individual string should contain dish numbers in string format
-                    with preceding zeroes upto 3 digits. E.g. SKA001, SKA002.
-            sdp:
-                Mandatory JSON object consisting of
-
-                eb_id:
-                    DevString
-                    The SBI id.
-                max_length:
-                    DevDouble
-                    Maximum length of the SBI in seconds.
-                scan_types:
-                    array of the blocks each consisting following parameters
-                    scan_type_id:
-                        DevString
-                        The scan id.
-                    coordinate_system:
-                        DevString
-                    ra:
-                        DevString
-                    Dec:
-                        DevString
-                processing_blocks:
-                    array of the blocks each consisting following parameters
-
-                    eb_id:
-                        DevString
-                        The Processing Block id.
-                    workflow:
-                        kind:
-                            DevString
-                        name:
-                            DevString
-                        version:
-                            DevString
-                    parameters:
-                        {}
+            :param argin: DevString
         Example:
 
         .. code-block::
@@ -202,9 +157,6 @@ class AssignResources(AbstractAssignReleaseResources):
             "FS346", "FS347", "FS348", "FS349", "FS350", "FS351", "FS352", "FS353", "FS354", "FS355",
             "FS356", "FS429", "FS430", "FS431", "FS432", "FS433", "FS434", "FS465", "FS466", "FS467",
             "FS468", "FS469", "FS470"],"receive_nodes": 10}}}
-
-
-        Note: From Jive, enter above input string without any space.
 
         return:
         A tuple containing a return code and a string msg.
@@ -319,26 +271,8 @@ class AssignResources(AbstractAssignReleaseResources):
         """
         Method to invoke AssignResources command on Subarray.
 
-        :param argin:
-        The string in JSON format. The JSON contains following values:
-        interface:
-            DevString. Mandatory.
-            Version of schema to allocate assign resources.
+        :param argin: DevString
 
-        subarray_id:
-            DevShort. Mandatory.
-            Sub-Array to allocate resources to
-
-        mccs:
-            subarray_beam_ids:
-                DevArray. Mandatory
-                logical ID of beam
-            station_ids:
-                DevArray. Mandatory
-                list of stations contributing beams to the data set
-            channel_blocks:
-                DevArray. Mandatory
-                list of channels used
         Example:
 
         .. code-block::
@@ -370,9 +304,6 @@ class AssignResources(AbstractAssignReleaseResources):
             "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00002","sbi_ids":["sbi-mvp01-20200325-00002"],"script":{},"parameters":{},
             "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00003","sbi_ids":["sbi-mvp01-20200325-00001","sbi-mvp01-20200325-00002"],"script":{},
             "parameters":{},"dependencies":{}}],"resources":{"csp_links":[1,2,3,4],"receptors":["FS4","FS8"],"receive_nodes":10}}}
-
-
-        Note: From Jive, enter above input string without any space.
 
         return:
             None
