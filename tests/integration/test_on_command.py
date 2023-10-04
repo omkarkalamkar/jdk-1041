@@ -56,7 +56,7 @@ def test_on_command_mid(
         "telescopeState", tango._tango.DevState.ON, lookahead=4
     )
     assert central_node.telescopeState == tango.DevState.ON
-    result, unique_id = central_node.TelescopeOff()
+    # result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment

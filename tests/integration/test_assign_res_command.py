@@ -151,7 +151,7 @@ def assign_resources(
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
-    result, unique_id = central_node.TelescopeOff()
+    # result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -242,7 +242,7 @@ def assign_resources_with_invalid_json(
         "subarray_id key is not present in the input json argument."
     ] == message
     assert result[0] == ResultCode.REJECTED
-    result, unique_id = central_node.TelescopeOff()
+    # result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -411,7 +411,7 @@ def test_assign_resources_exception_propagation(
         lookahead=4,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
-    result, unique_id = central_node.TelescopeOff()
+    # result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -476,4 +476,4 @@ def test_assign_resources_mid_timeout(
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
-    result, unique_id = central_node.TelescopeOff()
+    # result, unique_id = central_node.TelescopeOff()
