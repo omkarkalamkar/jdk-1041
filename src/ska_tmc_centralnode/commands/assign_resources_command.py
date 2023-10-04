@@ -405,7 +405,7 @@ class AssignResources(AbstractAssignReleaseResources):
                 [self.mccs_mln_adapter],
                 "Error in calling AssignResource command on MCCS Master Leaf Node",
                 "AssignResources",
-                input_mccs_master,
+                json.dumps(input_mccs_master),
             ),
         ]:
             for return_code, message_or_unique_id in zip(
