@@ -105,16 +105,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
         """
         Method to invoke ReleaseResources command on Subarray.
 
-        :param argin: The string in JSON format. The JSON contains following values:
-
-            subarray_id:
-                DevShort. Mandatory.
-
-            release_all:
-                Boolean(True or False). Mandatory. True when all the resources to be released from Subarray.
-
-            receptor_ids:
-                DevVarStringArray. Empty when release_all tag is True.
+        :param argin: DevString
 
             Example:
 
@@ -207,12 +198,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
             .. code-block::
 
                 {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
-            Note: From Jive, enter input as:
 
-            .. code-block::
-
-                {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
-            without any space.
         return:
             None
 
