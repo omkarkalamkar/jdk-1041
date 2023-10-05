@@ -56,7 +56,6 @@ DEVICE_LIST_MID = [
 DEVICE_LIST_LOW = [
     "ska_low/tm_leaf_node/mccs_master",
     "low-mccs/control/control",
-    # "ska_low/tm_leaf_node/mccs_subarray01",
     "ska_low/tm_subarray_node/1",
     "low-sdp/control/0",
     "low-csp/control/0",

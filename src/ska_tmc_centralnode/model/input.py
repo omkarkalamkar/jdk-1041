@@ -228,9 +228,6 @@ class InputParameterLow(InputParameter):
         self._subarray_dev_names = ["ska_low/tm_subarray_node/1"]
         self._csp_subarray_dev_names = ["ska_low/tm_leaf_node/csp_subarray01"]
         self._sdp_subarray_dev_names = ["ska_low/tm_leaf_node/sdp_subarray01"]
-        self._mccs_subarray_dev_names = [
-            "ska_low/tm_leaf_node/mccs_subarray01"
-        ]
         self._csp_master_dev_name = "low-csp/control/0"
         self._sdp_master_dev_name = "low-sdp/control/0"
         self._mccs_master_dev_name = "low-mccs/control/control"
@@ -265,31 +262,6 @@ class InputParameterLow(InputParameter):
             self._changed_callback()
 
     @property
-    def mccs_subarray_dev_names(self):
-        """
-        Input parameter
-        Return the MCCS Subarray Leaf Node device name
-
-        :return: the MCCS Subarray Leaf Node device name
-        :rtype: str
-        """
-        return self._mccs_subarray_dev_names
-
-    @mccs_subarray_dev_names.setter
-    def mccs_subarray_dev_names(self, value):
-        """
-        Input parameter
-        Set the TM MCCS Subarray Leaf Node name to be
-        managed by the CentralNode
-
-        :param value: the MCCS Subarray Leaf Node device name
-        :type value: str
-        """
-        self._mccs_subarray_dev_names = value
-        if self._changed_callback is not None:
-            self._changed_callback()
-
-    @property
     def mccs_master_dev_name(self):
         """
         Input parameter
@@ -316,10 +288,6 @@ class InputParameterLow(InputParameter):
 
     def update(self, component_manager):
         list_dev_names = super().update(component_manager)
-        for dev_name in self.mccs_subarray_dev_names:
-            if component_manager.get_device(dev_name) is None:
-                component_manager.add_device(dev_name)
-                list_dev_names.append(dev_name)
         dev_name = self.mccs_mln_dev_name
         if dev_name != "" and component_manager.get_device(dev_name) is None:
             component_manager.add_device(dev_name)
