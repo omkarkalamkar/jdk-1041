@@ -40,6 +40,8 @@ MID_SDP_MASTER_DEVICE = "mid-sdp/control/0"
 MID_CSP_MASTER_DEVICE = "mid-csp/control/0"
 LOW_CSP_MASTER_DEVICE = "low-csp/control/0"
 LOW_SDP_MASTER_DEVICE = "low-sdp/control/0"
+MCCS_CONTROLLER = "low-mccs/control/control"
+MCCS_MLN_DEVICE = "ska_low/tm_leaf_node/mccs_master"
 DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_master",
     "mid-csp/control/0",
@@ -52,9 +54,8 @@ DEVICE_LIST_MID = [
     "ska001/dish/master",
 ]
 DEVICE_LIST_LOW = [
-    # "ska_low/tm_leaf_node/mccs_master",
-    # "low-mccs/control/control",
-    # "ska_low/tm_leaf_node/mccs_subarray01",
+    "ska_low/tm_leaf_node/mccs_master",
+    "low-mccs/control/control",
     "ska_low/tm_subarray_node/1",
     "low-sdp/control/0",
     "low-csp/control/0",

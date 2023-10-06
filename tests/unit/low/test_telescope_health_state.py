@@ -2,11 +2,11 @@ import time
 
 import pytest
 from ska_tango_base.control_model import HealthState
-
-# from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
-#     HelperMCCSStateDevice,
-# )
-from ska_tmc_common import HelperBaseDevice
+from ska_tmc_common import (
+    HelperBaseDevice,
+    HelperMCCSController,
+    HelperMCCSMasterLeafNode,
+)
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
@@ -21,6 +21,8 @@ from tests.settings import (
     LOW_SDP_MLN_DEVICE,
     LOW_SDP_SLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
+    MCCS_CONTROLLER,
+    MCCS_MLN_DEVICE,
     TIMEOUT,
     create_cm_no_faulty_devices,
 )
@@ -46,13 +48,18 @@ def devices_to_load():
                 {"name": LOW_SDP_MASTER_DEVICE},
             ],
         },
-        # {
-        #     "class": HelperMCCSStateDevice,
-        #     "devices": [
-        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
-        #         {"name": "low-mccs/control/control"},
-        #     ],
-        # },
+        {
+            "class": HelperMCCSMasterLeafNode,
+            "devices": [
+                {"name": MCCS_MLN_DEVICE},
+            ],
+        },
+        {
+            "class": HelperMCCSController,
+            "devices": [
+                {"name": MCCS_CONTROLLER},
+            ],
+        },
     )
 
 

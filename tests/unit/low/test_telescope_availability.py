@@ -1,7 +1,11 @@
 import time
 
 import pytest
-from ska_tmc_common import HelperBaseDevice
+from ska_tmc_common import (
+    HelperBaseDevice,
+    HelperMCCSController,
+    HelperMCCSMasterLeafNode,
+)
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
@@ -17,6 +21,8 @@ from tests.settings import (
     LOW_SDP_MLN_DEVICE,
     LOW_SDP_SLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
+    MCCS_CONTROLLER,
+    MCCS_MLN_DEVICE,
     TIMEOUT,
     check_cspmln_availability,
     check_sdpmln_availability,
@@ -47,6 +53,18 @@ def devices_to_load():
                 {"name": LOW_CSP_MASTER_DEVICE},
                 {"name": LOW_SDP_MLN_DEVICE},
                 {"name": LOW_SDP_MASTER_DEVICE},
+            ],
+        },
+        {
+            "class": HelperMCCSMasterLeafNode,
+            "devices": [
+                {"name": MCCS_MLN_DEVICE},
+            ],
+        },
+        {
+            "class": HelperMCCSController,
+            "devices": [
+                {"name": MCCS_CONTROLLER},
             ],
         },
     )

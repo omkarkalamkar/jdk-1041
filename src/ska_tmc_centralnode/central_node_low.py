@@ -28,8 +28,6 @@ class CentralNodeLow(AbstractCentralNode):
     # -----------------
     MCCSMasterLeafNodeFQDN = device_property(dtype="str")
 
-    MCCSSubarrayLeafNodeFQDN = device_property(dtype="str")
-
     MCCSMasterNodeFQDN = device_property(dtype="str")
     # ----------
     # Attributes
@@ -59,12 +57,6 @@ class CentralNodeLow(AbstractCentralNode):
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
-
-    mccsSubarrayLeafNodeName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
     mccsMasterNodeName = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
@@ -102,15 +94,6 @@ class CentralNodeLow(AbstractCentralNode):
     def write_mccsMasterLeafNodeName(self, value):
         """Set the mccsmasterleafnodename attribute."""
         self.component_manager.input_parameter.mccs_mln_dev_name = value
-        self.component_manager.update_input_parameter()
-
-    def read_mccsSubarrayLeafNodeName(self):
-        """Return the mccsSubarrayLeafNodeName attribute."""
-        return self.component_manager.input_parameter.mccs_subarray_dev_names
-
-    def write_mccsSubarrayLeafNodeName(self, value):
-        """Set the mccsSubarrayLeafNodeName attribute."""
-        self.component_manager.input_parameter.mccs_subarray_dev_names = value
         self.component_manager.update_input_parameter()
 
     def read_mccsMasterNodeName(self):
@@ -182,9 +165,6 @@ class CentralNodeLow(AbstractCentralNode):
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.mccs_mln_dev_name = (
             self.MCCSMasterLeafNodeFQDN or ""
-        )
-        cm.input_parameter.mccs_subarray_dev_names = (
-            self.MCCSSubarrayLeafNodeFQDN or ""
         )
         cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""
         cm.update_input_parameter()

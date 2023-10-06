@@ -57,7 +57,6 @@ def devices_to_load():
                 {"name": "mid-csp/control/0"},
                 {"name": "ska_mid/tm_leaf_node/sdp_master"},
                 {"name": "mid-sdp/control/0"},
-                # {"name": "ska_low/tm_leaf_node/mccs_subarray01"},
                 {"name": "ska_low/tm_leaf_node/csp_master"},
                 {"name": "low-csp/control/0"},
                 {"name": "ska_low/tm_leaf_node/sdp_master"},
