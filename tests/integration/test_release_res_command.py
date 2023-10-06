@@ -79,6 +79,9 @@ def release_resources(
         lookahead=4,
     )
 
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
@@ -189,6 +192,9 @@ def release_resources_without_subarray_id(
         lookahead=4,
     )
 
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
@@ -293,6 +299,8 @@ def test_release_resources_error_propagation(
     tmc_subarray.SetDefective(RESET_DEFECT)
     # Tear Down
     tmc_subarray.ReleaseAllResources()
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -380,3 +388,5 @@ def test_release_resources_mid_timeout(
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()

@@ -56,6 +56,7 @@ def test_on_command_mid(
         "telescopeState", tango._tango.DevState.ON, lookahead=4
     )
     assert central_node.telescopeState == tango.DevState.ON
+    # Teardown
     result, unique_id = central_node.TelescopeOff()
 
 
@@ -106,3 +107,6 @@ def test_on_command_low(
         "telescopeState", tango._tango.DevState.ON, lookahead=2
     )
     assert central_node.telescopeState == tango.DevState.ON
+
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
