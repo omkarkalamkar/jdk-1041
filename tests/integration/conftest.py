@@ -3,11 +3,10 @@ import logging
 import time
 
 import pytest
-from ska_tmc_common import (  
-    HelperMCCSController,
-    HelperMCCSMasterLeafNode,
+from ska_tmc_common import (  # HelperMCCSController,
     HelperBaseDevice,
     HelperDishDevice,
+    HelperMCCSMasterLeafNode,
     HelperSubArrayDevice,
 )
 from ska_tmc_common.dev_factory import DevFactory
@@ -17,8 +16,6 @@ from ska_tmc_centralnode.central_node_low import CentralNodeLow
 from ska_tmc_centralnode.central_node_mid import CentralNodeMid
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
-
-
 
 pytest.event_arrived = False
 
