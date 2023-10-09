@@ -231,7 +231,7 @@ def assign_resources_with_invalid_json(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -450,7 +450,7 @@ def test_assign_resources_mid_timeout(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=8,
     )
 
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)

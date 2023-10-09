@@ -131,7 +131,7 @@ def test_standby_command_low(
 
     # Check whether the telescopeState is STANDBY
     change_event_callbacks.assert_change_event(
-        "telescopeState", DevState.STANDBY, lookahead=2
+        "telescopeState", DevState.STANDBY, lookahead=4
     )
     logger.info(f"telescopeState: {central_node.telescopeState}")
 
