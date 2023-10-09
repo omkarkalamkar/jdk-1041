@@ -3,7 +3,9 @@ import logging
 import time
 
 import pytest
-from ska_tmc_common import (  # HelperMCCSController,; HelperMCCSMasterLeafNode,
+from ska_tmc_common import (  
+    HelperMCCSController,
+    HelperMCCSMasterLeafNode,
     HelperBaseDevice,
     HelperDishDevice,
     HelperSubArrayDevice,
@@ -16,9 +18,6 @@ from ska_tmc_centralnode.central_node_mid import CentralNodeMid
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
-# from ska_tmc_common.test_helpers.helper_state_mccsdevice import (
-#     HelperMCCSStateDevice,
-# )
 
 
 pytest.event_arrived = False
@@ -63,12 +62,12 @@ def devices_to_load():
                 {"name": "low-sdp/control/0"},
             ],
         },
-        # {
-        #     "class": HelperMCCSMasterLeafNode,
-        #     "devices": [
-        #         {"name": "ska_low/tm_leaf_node/mccs_master"},
-        #     ],
-        # },
+        {
+            "class": HelperMCCSMasterLeafNode,
+            "devices": [
+                {"name": "ska_low/tm_leaf_node/mccs_master"},
+            ],
+        },
         # {
         #     "class": HelperMCCSController,
         #     "devices": [
@@ -116,9 +115,9 @@ def devices_to_load():
                             "ska_low/tm_leaf_node/sdp_master"
                         ],
                         "SdpMasterFQDN": ["low-sdp/control/0"],
-                        # "MCCSMasterLeafNodeFQDN": [
-                        #     "ska_low/tm_leaf_node/mccs_master"
-                        # ],
+                        "MCCSMasterLeafNodeFQDN": [
+                            "ska_low/tm_leaf_node/mccs_master"
+                        ],
                         # "MCCSMasterNodeFQDN": ["low-mccs/control/control"],
                         "TMCLowSubarrayNodes": ["ska_low/tm_subarray_node/1"],
                         "TMCLowCspSubarrayLeafNodes": [

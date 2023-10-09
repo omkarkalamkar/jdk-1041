@@ -183,16 +183,6 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
                 self.logger.exception(f"Error pushing the event. {e}")
 
     def is_On_allowed(self) -> bool:
-        if self.defective_params["enabled"]:
-            if (
-                self.defective_params["fault_type"]
-                == FaultType.COMMAND_NOT_ALLOWED
-            ):
-                self.logger.info(
-                    "Device is defective, cannot process command."
-                )
-                raise CommandNotAllowed(self.defective_params["error_message"])
-        self.logger.info("On Command is allowed")
         return True
 
     @command(
@@ -200,23 +190,14 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
         doc_out="(ReturnType, 'informational message')",
     )
     def On(self) -> Tuple[List[ResultCode], List[str]]:
-        self.logger.info("Instructed simulator to invoke On command")
         if self.defective_params["enabled"]:
-            self.logger.info("Subarray defect enabled.")
-            self.induce_fault(
-                "ReleaseAllResources",
-            )
-        else:
-            # if self.dev_state() != DevState.ON:
-            #     self.logger.info("On command completed.")
-            #     self.set_state(DevState.ON)
-            #     self.push_change_event("State", self.dev_state())
-            self.logger.info("On command completed.")
-            return [ResultCode.OK], [""]
-
-        return [ResultCode.FAILED], [
-            "Device is defective, cannot process command."
-        ]
+            return [ResultCode.FAILED], [
+                "Device is defective, cannot process command."
+            ]
+        if self.dev_state() != DevState.ON:
+            self.set_state(DevState.ON)
+            self.push_change_event("State", self.dev_state())
+        return [ResultCode.OK], [""]
 
     def is_Off_allowed(self) -> bool:
         return True
