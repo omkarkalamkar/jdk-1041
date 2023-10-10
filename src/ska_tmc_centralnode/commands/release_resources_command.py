@@ -106,18 +106,12 @@ class ReleaseResources(AssignReleaseResources):
         """
         Method to invoke ReleaseResources command on Subarray.
 
-        :param argin: The string in JSON format. The JSON contains following values:
-
-            subarray_id:
-                DevShort. Mandatory.
-
-            release_all:
-                Boolean(True or False). Mandatory. True when all the resources to be released from Subarray.
-
-            receptor_ids:
-                DevVarStringArray. Empty when release_all tag is True.
+        :param argin: DevString
 
             Example:
+
+            .. code-block::
+
                 {
                     "interface": "https://schema.skao.int/ska-tmc-releaseresources/2.0",
                     "transaction_id": "txn-....-00001",
@@ -192,19 +186,14 @@ class ReleaseResources(AssignReleaseResources):
         """
         Method to invoke ReleaseResources command on Subarray Node.
 
-        :param argin: The string in JSON format. The JSON contains following values:
-
-            subarray_id:
-                DevShort. Mandatory.
-
-            release_all:
-                Boolean(True or False). Mandatory. True when all the resources to be released from Subarray.
+        :param argin: DevString
 
             Example:
+
+            .. code-block::
+
                 {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
-            Note: From Jive, enter input as:
-                {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
-                without any space.
+
         return:
             None
 
@@ -256,7 +245,7 @@ class ReleaseResources(AssignReleaseResources):
         if json_argument["release_all"] is True:
             for return_codes, message_or_unique_ids in (
                 self.release_all_resources(self.subarray_adapter),
-                self.release_resources_mccs(json.dumps(json_argument)),
+                self.release_resources_mccs(self.mccs_mln_adapter),
             ):
                 for return_code, message_or_unique_id in zip(
                     return_codes, message_or_unique_ids
@@ -279,12 +268,11 @@ class ReleaseResources(AssignReleaseResources):
             "ReleaseAllResources",
         )
 
-    def release_resources_mccs(self, arg):
+    def release_resources_mccs(self, adapter):
         return self.send_command(
-            [self.mccs_mln_adapter],
+            [adapter],
             "Error in calling ReleaseResources() on MCCS Master Leaf Node",
             "ReleaseResources",
-            arg,
         )
 
     def _validate_low_json(self, json_argument: dict, req_keys: list):

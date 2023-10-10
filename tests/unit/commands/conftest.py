@@ -2,10 +2,6 @@ import pytest
 from ska_tmc_common import HelperMCCSController, HelperMCCSMasterLeafNode
 from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
 from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
-
-# from ska_tmc_common.test_helpers.helper_subarray_device import (
-#     HelperSubArrayDevice,
-# )
 from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
 )

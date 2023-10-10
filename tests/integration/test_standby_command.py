@@ -117,8 +117,8 @@ def test_standby_command_low(
         f"longRunningCommandResult: {central_node.longRunningCommandResult}"
     )
 
-    # mccs_master = dev_factory.get_device("low-mccs/control/control")
-    # mccs_master.SetDirectState(DevState.STANDBY)
+    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master.SetDirectState(DevState.STANDBY)
 
     csp_master = dev_factory.get_device("low-csp/control/0")
     csp_master.SetDirectState(DevState.STANDBY)
