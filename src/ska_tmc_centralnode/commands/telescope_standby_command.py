@@ -7,7 +7,7 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import TelescopeOnOff
+from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 
 
 class TelescopeStandby(TelescopeOnOff):

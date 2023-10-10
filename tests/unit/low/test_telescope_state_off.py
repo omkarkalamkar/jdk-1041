@@ -71,7 +71,7 @@ def test_telescope_state_off(tango_context):
         devices=[
             "low-sdp/control/0",
             "low-csp/control/0",
-            "low-mccs/control/control" "",
+            "low-mccs/control/control",
         ],
         devFactory=DevFactory(),
         state=tango.DevState.OFF,

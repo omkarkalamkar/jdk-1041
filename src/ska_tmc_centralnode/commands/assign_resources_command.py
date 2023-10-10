@@ -11,7 +11,7 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import SubArrayAdapter
 
-from ska_tmc_centralnode.commands.abstract_command import (
+from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
 )
 

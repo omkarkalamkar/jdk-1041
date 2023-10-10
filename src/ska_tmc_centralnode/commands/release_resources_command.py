@@ -9,7 +9,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 
-from ska_tmc_centralnode.commands.abstract_command import (
+from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
 )
 
@@ -252,8 +252,6 @@ class ReleaseResources(AssignReleaseResources):
                 ResultCode.FAILED,
                 f"Subarray Id {subarray_id} doesn't exit!",
             )
-
-        self.logger.info(json_argument)
 
         if json_argument["release_all"] is True:
             for return_codes, message_or_unique_ids in (

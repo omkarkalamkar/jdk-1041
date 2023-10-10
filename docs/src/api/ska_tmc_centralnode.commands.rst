@@ -7,7 +7,7 @@ Submodules
 ska\_tmc\_centralnode.commands.abstract\_command module
 -------------------------------------------------------
 
-.. automodule:: ska_tmc_centralnode.commands.abstract_command
+.. automodule:: ska_tmc_centralnode.commands.central_node_command
    :members:
    :undoc-members:
    :show-inheritance:

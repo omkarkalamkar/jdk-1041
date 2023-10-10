@@ -7,7 +7,7 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import TelescopeOnOff
+from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 
 
 class TelescopeOff(TelescopeOnOff):
@@ -288,7 +288,7 @@ class TelescopeOff(TelescopeOnOff):
 
     def turn_off_mccs(self):
         self.logger.info(
-            f"Invoking Off command for {self.mccs_mln_adapter.dev_name} devices"
+            f"Invoking Off command for {self.mccs_mln_adapter.dev_name} device"
         )
         return self.send_command(
             [self.mccs_mln_adapter],
