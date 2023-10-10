@@ -11,12 +11,12 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import SubArrayAdapter
 
-from ska_tmc_centralnode.commands.abstract_command import (
-    AbstractAssignReleaseResources,
+from ska_tmc_centralnode.commands.central_node_command import (
+    AssignReleaseResources,
 )
 
 
-class AssignResources(AbstractAssignReleaseResources):
+class AssignResources(AssignReleaseResources):
     """
     A class for CentralNode's AssignResources() command.
 
@@ -81,6 +81,7 @@ class AssignResources(AbstractAssignReleaseResources):
             self.start_tracker_thread(
                 self.component_manager.get_subarray_obsstate,
                 [ObsState.RESOURCING, ObsState.IDLE],
+                task_abort_event,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
                 command_id=self.command_id,
@@ -342,13 +343,13 @@ class AssignResources(AbstractAssignReleaseResources):
                 ("SubArray Id %s is not existing!", subarrayID),
             )
 
-        # TODO Uncomment below code during integrating of MCCS
-        # try:
-        #     input_mccs_master = self.create_mccs_cmd_data(json_argument)
-        # except Exception as e:
-        #     return (
-        #         ResultCode.FAILED, ("Errors in input json argument: %s", e)
-        #     )
+        try:
+            input_mccs_master = self.create_mccs_cmd_data(json_argument)
+        except Exception as e:
+            return (
+                ResultCode.FAILED,
+                ("Errors in input json argument: %s", e),
+            )
 
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
@@ -360,12 +361,12 @@ class AssignResources(AbstractAssignReleaseResources):
                 "AssignResources",
                 json.dumps(json_argument),
             ),
-            # self.send_command(
-            #     [self.tm_leaf_mccs_master_adapter],
-            #     "Error in calling AssignResource command on TM MCCS Master Leaf",
-            #     "AssignResources",
-            #     input_mccs_master,
-            # ),
+            self.send_command(
+                [self.mccs_mln_adapter],
+                "Error in calling AssignResources command on MCCS Master Leaf Node",
+                "AssignResources",
+                json.dumps(input_mccs_master),
+            ),
         ]:
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
@@ -395,22 +396,50 @@ class AssignResources(AbstractAssignReleaseResources):
                     False,
                     f"{key} key is not present in the input json argument.",
                 )
+
+        try:
+            json_argument["mccs"]["interface"]
+        except KeyError:
+            return (
+                False,
+                "JSON Error: Missing 'interface' key in input json arguement",
+            )
+        try:
+            subarray_beams = json_argument["mccs"]["subarray_beams"]
+        except KeyError:
+            return (
+                False,
+                "JSON Error: Missing 'subarray_beams' key in input json arguement",
+            )
+
+        for subarray_beam in subarray_beams:
+            try:
+                subarray_beam["subarray_beam_id"]
+            except KeyError:
+                return (
+                    False,
+                    "JSON Error: Missing 'subarray_beam_id' key in input json arguement.",
+                )
+
+            try:
+                subarray_beam["apertures"]
+            except KeyError:
+                return (
+                    False,
+                    "JSON Error: Missing 'apertures' key in input json arguement.",
+                )
+
+            try:
+                subarray_beam["number_of_channels"]
+            except KeyError:
+                return (
+                    False,
+                    "JSON Error: Missing 'number_of_channels' key in input json arguement",
+                )
         return (
             True,
             "The json argument has all the required keys. Validation successful.",
         )
-
-    # TODO Uncomment below code during integration of MCCS
-    # Validate MCCS keys
-    # mccs_json = json_argument.get("mccs", {})
-    # mccs_error_msg = (
-    #     "mccs.{key} key is not present in the input json argument."
-    # )
-    # is_valid, return_error = self._validate_keys_in_json(
-    #     mccs_json, MCCS_REQUIRED_KEYS, mccs_error_msg
-    # )
-    # if not is_valid:
-    #     return is_valid, return_error
 
     def _validate_and_update_resource_config(self, json_argument):
         """Validate if eb_id present in sdp schema.
@@ -430,30 +459,23 @@ class AssignResources(AbstractAssignReleaseResources):
                 self.update_resource_config_file(json_argument, sdp_id)
             return True, ""
         except Exception as e:
-            return False, ("Error while updating SDP schema: %s", e)
+            return False, f"Error while updating SDP schema: {e}"
 
-    # TODO Uncomment below code during integrating of MCCS
-    # def create_mccs_cmd_data(self, json_argument):
-    #     """
-    #     Remove 'sdp' and 'mccs' key from input JSON argument and forward the updated JSON to mccs master leaf node.
+    def create_mccs_cmd_data(self, json_argument: dict) -> dict:
+        """
+        Method to prepare the input json_argument required while invoking AssignResources()
+        command on MCCS Master Leaf Node.
+        :param json_argument: The string in JSON format.
 
-    #     :param json_argument: The string in JSON format.
-
-    #     :return: The string in JSON format.
-    #     """
-    #     mccs_value = json_argument["mccs"]
-    #     json_argument[
-    #         "interface"
-    #     ] = "https://schema.skao.int/ska-low-mccs-assignresources/1.0"
-    #     if "transaction_id" in json_argument:
-    #         del json_argument["transaction_id"]
-    #     if "sdp" in json_argument:
-    #         del json_argument["sdp"]
-    #     if "mccs" in json_argument:
-    #         del json_argument["mccs"]
-    #     json_argument.update(mccs_value)
-    #     input_to_mccs = json.dumps(json_argument)
-    #     return input_to_mccs
+        :return: The string in JSON format.
+        """
+        try:
+            subarray_id = json_argument["subarray_id"]
+            mccs_input = json_argument["mccs"]
+            mccs_input["subarray_id"] = subarray_id
+            return mccs_input
+        except Exception as e:
+            raise Exception("Error while creating MCCS input json") from e
 
     def get_subarray_adapter(self, subarray_id):
         for adapter in self.subarray_adapters:

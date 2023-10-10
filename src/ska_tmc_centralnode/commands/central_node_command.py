@@ -88,7 +88,7 @@ class CentralNodeCommand(TMCCommand):
         return ResultCode.FAILED, message
 
 
-class AbstractTelescopeOnOff(CentralNodeCommand):
+class TelescopeOnOff(CentralNodeCommand):
     def __init__(
         self,
         component_manager,
@@ -198,7 +198,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
-        # self.tm_leaf_mccs_mln_adapter = None
+        self.mccs_mln_adapter = None
         self.subarray_adapters = []
 
         try:
@@ -214,18 +214,21 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 e,
             )
 
-        # self.tm_leaf_mccs_master_adapter = None
-        # TODO Uncomment below code during integration of MCCS
-        # try:
-        #     self.tm_leaf_mccs_master_adapter = self._adapter_factory.get_or_create_adapter(
-        #         self.component_manager.input_parameter.mccs_master_leaf_node,
-        #         AdapterType.MCCS,
-        #     )
-        # except Exception as e:
-        #     return (
-        #         self.component_manager.input_parameter.mccs_master_leaf_node,
-        #         e,
-        #     )
+        try:
+            self.mccs_mln_adapter = (
+                self._adapter_factory.get_or_create_adapter(
+                    self.component_manager.input_parameter.mccs_mln_dev_name,
+                    AdapterType.MCCS_MASTER_LEAF_NODE,
+                )
+            )
+            self.logger.debug(
+                f"Adapter is created for MCCS Master Leaf Node {self.component_manager.input_parameter.mccs_mln_dev_name}: {self.mccs_mln_adapter}"
+            )
+        except Exception as e:
+            return (
+                self.component_manager.input_parameter.mccs_mln_dev_name,
+                e,
+            )
 
         try:
             self.sdp_mln_adapter = self._adapter_factory.get_or_create_adapter(
@@ -239,17 +242,6 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name,
                 e,
             )
-
-        # try:
-        #     self.tm_leaf_mccs_mln_adapter = self._adapter_factory.get_or_create_adapter(
-        #         self.component_manager.input_parameter.mccs_master_leaf_node,
-        #         AdapterType.MCCS,
-        #     )
-        # except Exception as e:
-        #     return (
-        #         self.component_manager.input_parameter.mccs_master_leaf_node,
-        #         e,
-        #     )
 
         error_dev_names = []
         num_working = 0
@@ -279,7 +271,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
 
-class AbstractAssignReleaseResources(CentralNodeCommand):
+class AssignReleaseResources(CentralNodeCommand):
     def __init__(
         self,
         component_manager,
@@ -358,19 +350,21 @@ class AbstractAssignReleaseResources(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
-        # self.tm_leaf_mccs_mln_adapter = None
+        self.mccs_mln_adapter = None
         self.subarray_adapters = []
 
-        # try:
-        #     self.tm_leaf_mccs_mln_adapter = self._adapter_factory.get_or_create_adapter(
-        #         self.component_manager.input_parameter.mccs_master_leaf_node,
-        #         AdapterType.MCCS,
-        #     )
-        # except Exception as e:
-        #     return (
-        #         self.component_manager.input_parameter.mccs_master_leaf_node,
-        #         e,
-        #     )
+        try:
+            self.mccs_mln_adapter = (
+                self._adapter_factory.get_or_create_adapter(
+                    self.component_manager.input_parameter.mccs_mln_dev_name,
+                    AdapterType.MCCS_MASTER_LEAF_NODE,
+                )
+            )
+        except Exception as e:
+            return (
+                self.component_manager.input_parameter.mccs_mln_dev_name,
+                e,
+            )
 
         error_dev_names = []
         num_working = 0

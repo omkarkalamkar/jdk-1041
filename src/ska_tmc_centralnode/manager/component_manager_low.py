@@ -103,11 +103,11 @@ class CNComponentManagerLow(CNComponentManager):
             TelescopeAvailabilityAggregatorLow(self, self.logger)
         )
 
-    # TODO: Mccs integration is not included in PI#17 scope, will be done in near future.
-    # def check_if_mccs_mln_is_responsive(self):
-    #     return self._check_if_device_is_responsive(
-    #         [self.input_parameter.mccs_master_leaf_node]
-    #     )
+    def check_if_mccs_mln_is_responsive(self):
+        self.logger.info("Checking if MCCSMasterLeafNode is responsive")
+        return self._check_if_device_is_responsive(
+            [self.input_parameter.mccs_mln_dev_name]
+        )
 
     def update_device_state(self, dev_name, state):
         """
@@ -184,12 +184,12 @@ class CNComponentManagerLow(CNComponentManager):
             )
         if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
             self.logger.debug(f"Checking low devices for {command_name}")
+            self.check_if_mccs_mln_is_responsive()
             self.check_if_subarrays_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
             self.logger.debug(f"Checking low devices for {command_name}")
-            # TODO Uncomment below code during integration of MCCS
-            # self.check_if_mccs_mln_is_responsive()
             self.check_if_subarrays_are_responsive()
+            self.check_if_mccs_mln_is_responsive()
 
         return True
 

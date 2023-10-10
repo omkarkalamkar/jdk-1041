@@ -48,7 +48,7 @@ def test_standby_command_mid(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=3,
+        lookahead=4,
     )
     logger.info(
         f"longRunningCommandResult: {central_node.longRunningCommandResult}"
@@ -65,7 +65,7 @@ def test_standby_command_mid(
 
     # Check whether the telescopeState is STANDBY
     change_event_callbacks.assert_change_event(
-        "telescopeState", DevState.STANDBY, lookahead=2
+        "telescopeState", DevState.STANDBY, lookahead=4
     )
     logger.info(f"telescopeState: {central_node.telescopeState}")
 
@@ -117,8 +117,8 @@ def test_standby_command_low(
         f"longRunningCommandResult: {central_node.longRunningCommandResult}"
     )
 
-    # mccs_master = dev_factory.get_device("low-mccs/control/control")
-    # mccs_master.SetDirectState(DevState.STANDBY)
+    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master.SetDirectState(DevState.STANDBY)
 
     csp_master = dev_factory.get_device("low-csp/control/0")
     csp_master.SetDirectState(DevState.STANDBY)
@@ -131,7 +131,7 @@ def test_standby_command_low(
 
     # Check whether the telescopeState is STANDBY
     change_event_callbacks.assert_change_event(
-        "telescopeState", DevState.STANDBY, lookahead=2
+        "telescopeState", DevState.STANDBY, lookahead=4
     )
     logger.info(f"telescopeState: {central_node.telescopeState}")
 

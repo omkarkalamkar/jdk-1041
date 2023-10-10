@@ -1,6 +1,10 @@
 import pytest
 import tango
-from ska_tmc_common import HelperBaseDevice
+from ska_tmc_common import (
+    HelperBaseDevice,
+    HelperMCCSController,
+    HelperMCCSMasterLeafNode,
+)
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
@@ -15,6 +19,8 @@ from tests.settings import (
     LOW_SDP_MLN_DEVICE,
     LOW_SDP_SLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
+    MCCS_CONTROLLER,
+    MCCS_MLN_DEVICE,
     create_cm_no_faulty_devices,
     ensure_telescope_state,
     set_device_state,
@@ -39,6 +45,18 @@ def devices_to_load():
                 {"name": LOW_CSP_MASTER_DEVICE},
                 {"name": LOW_SDP_MLN_DEVICE},
                 {"name": LOW_SDP_MASTER_DEVICE},
+            ],
+        },
+        {
+            "class": HelperMCCSMasterLeafNode,
+            "devices": [
+                {"name": MCCS_MLN_DEVICE},
+            ],
+        },
+        {
+            "class": HelperMCCSController,
+            "devices": [
+                {"name": MCCS_CONTROLLER},
             ],
         },
     )

@@ -279,11 +279,6 @@ class CNComponentManager(TmcComponentManager):
             self.input_parameter.subarray_dev_names
         )
 
-    # def check_if_mccs_mln_is_responsive(self):
-    #     return self._check_if_device_is_responsive(
-    #         [self.input_parameter.mccs_master_leaf_node]
-    #     )
-
     def _check_if_device_is_responsive(self, dev_names):
         count = 0
         for dev_name in dev_names:

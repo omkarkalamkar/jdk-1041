@@ -7,12 +7,10 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import (
-    AbstractTelescopeOnOff,
-)
+from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 
 
-class TelescopeStandby(AbstractTelescopeOnOff):
+class TelescopeStandby(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeStandby() command.
     """
@@ -210,7 +208,7 @@ class TelescopeStandby(AbstractTelescopeOnOff):
 
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
-            # self.turn_standby_mccs(),
+            self.turn_standby_mccs(),
             self.turn_standby_csp(),
             self.turn_standby_sdp(),
         ]:
@@ -282,15 +280,15 @@ class TelescopeStandby(AbstractTelescopeOnOff):
                 ],
             )
 
-    # def turn_standby_mccs(self):
-    #     self.logger.info(
-    #         f"Standby command on  {self.tm_leaf_mccs_master_adapter.dev_name}"
-    #     )
-    #     return self.send_command(
-    #         [self.tm_leaf_mccs_master_adapter],
-    #         f"Error in calling Standby() on {self.tm_leaf_mccs_master_adapter.dev_name}",
-    #         "Standby",
-    #     )
+    def turn_standby_mccs(self):
+        self.logger.info(
+            f"Standby command on  {self.mccs_mln_adapter.dev_name}"
+        )
+        return self.send_command(
+            [self.mccs_mln_adapter],
+            f"Error in calling Standby() on {self.mccs_mln_adapter.dev_name}",
+            "Standby",
+        )
 
     def turn_off_dishes(self):
         self.logger.info(

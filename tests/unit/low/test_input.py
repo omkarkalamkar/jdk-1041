@@ -8,10 +8,10 @@ def test_properties():
     input = InputParameterLow(None)
     input.subarray_dev_names = ("1", "2")
     assert input.subarray_dev_names == ("1", "2")
-    # input.mccs_master_leaf_node = "leaf node"
-    # assert input.mccs_master_leaf_node == "leaf node"
-    # input.mccs_master_dev_name = "master node"
-    # assert input.mccs_master_dev_name == "master node"
+    input.mccs_mln_dev_name = "leaf node"
+    assert input.mccs_mln_dev_name == "leaf node"
+    input.mccs_master_dev_name = "master node"
+    assert input.mccs_master_dev_name == "master node"
     input.csp_subarray_dev_names = ("3", "4")
     assert input.csp_subarray_dev_names == ("3", "4")
     input.sdp_subarray_dev_names = "6"

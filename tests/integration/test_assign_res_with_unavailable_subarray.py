@@ -68,6 +68,9 @@ def assign_resources(
 
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
+    # Teardown
+    result, unique_id = central_node_proxy.TelescopeOff()
+
 
 @pytest.mark.skip(
     reason="This functionality is not present in the current version"

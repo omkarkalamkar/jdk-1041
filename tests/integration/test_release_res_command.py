@@ -44,7 +44,7 @@ def release_resources(
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id_on[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -78,6 +78,9 @@ def release_resources(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
+
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -139,7 +142,7 @@ def release_resources_without_subarray_id(
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id_on[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -188,6 +191,9 @@ def release_resources_without_subarray_id(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
+
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -240,7 +246,7 @@ def test_release_resources_error_propagation(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=5,
     )
 
     result, unique_id = central_node.AssignResources(
@@ -263,7 +269,7 @@ def test_release_resources_error_propagation(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
     tmc_subarray.SetDefective(ERROR_PROPAGATION_DEFECT)
@@ -293,6 +299,8 @@ def test_release_resources_error_propagation(
     tmc_subarray.SetDefective(RESET_DEFECT)
     # Tear Down
     tmc_subarray.ReleaseAllResources()
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -350,7 +358,7 @@ def test_release_resources_mid_timeout(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
@@ -380,3 +388,5 @@ def test_release_resources_mid_timeout(
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()

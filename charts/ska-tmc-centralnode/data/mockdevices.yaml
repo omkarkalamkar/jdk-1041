@@ -4,6 +4,8 @@ domain: mocks
 instances: ["01"]
 entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_base_device.HelperBaseDevice"
+  - name: "ska_tmc_common.test_helpers.helper_mccs_controller_device.HelperMCCSController"
+  - name: "ska_tmc_common.test_helpers.helper_mccs_master_leaf_node_device.HelperMCCSMasterLeafNode"
   - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
   - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
   - name: "ska_tmc_common.test_helpers.helper_csp_master_device.HelperCspMasterDevice"
@@ -30,17 +32,18 @@ server:
         devices:
         - name: "ska_mid/tm_subarray_node/1"
         - name: "ska_low/tm_subarray_node/1"
-      # - name: "HelperMCCSStateDevice"
-      #   devices:
-      #   - name: "ska_low/tm_leaf_node/mccs_master"
-      #   - name: "low-mccs/control/control"
+      - name: "HelperMCCSMasterLeafNode"
+        devices:
+        - name: "ska_low/tm_leaf_node/mccs_master"
+      - name: "HelperMCCSController"
+        devices:
+        - name: "low-mccs/control/control"
       - name: "HelperSubarrayLeafDevice"
         devices:
         - name: "ska_mid/tm_leaf_node/csp_subarray01"
         - name: "ska_mid/tm_leaf_node/sdp_subarray01"
         - name: "ska_low/tm_leaf_node/csp_subarray01"
         - name: "ska_low/tm_leaf_node/sdp_subarray01"
-        # - name: "ska_low/tm_leaf_node/mccs_subarray01"
       - name: "HelperDishDevice"
         devices:
         - name: "ska001/dish/master"

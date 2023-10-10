@@ -81,7 +81,7 @@ class TelescopeStateAggregatorLow(Aggregator):
 
     def aggregate(self):
         telescopeStateList = []
-        #  mccs_master = False
+        mccs_master = False
         csp_master = False
         sdp_master = False
 
@@ -89,13 +89,12 @@ class TelescopeStateAggregatorLow(Aggregator):
             name = dev.dev_name.lower()
             if dev.unresponsive:
                 continue
-            # TODO: Enable this block when MCCS is integrated.
-            # elif (
-            #     name
-            #     == self._component_manager.input_parameter.mccs_master_dev_name
-            # ):
-            #     telescopeStateList.append(dev.state)
-            #     mccs_master = True
+            elif (
+                name
+                == self._component_manager.input_parameter.mccs_master_dev_name
+            ):
+                telescopeStateList.append(dev.state)
+                mccs_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
@@ -111,17 +110,17 @@ class TelescopeStateAggregatorLow(Aggregator):
 
         telescopeSetStateList = set(telescopeStateList)
         self._logger.info(f"Telescope state list is : {telescopeStateList}")
-        if not sdp_master and not csp_master:
+        if not sdp_master and not csp_master and not mccs_master:
             self._logger.info(
-                "missing devices: %s=%s %s=%s",
+                "missing devices: %s=%s %s=%s %s=%s",
                 self._component_manager.input_parameter.sdp_master_dev_name,
                 sdp_master,
                 self._component_manager.input_parameter.csp_master_dev_name,
                 csp_master,
+                self._component_manager.input_parameter.mccs_master_dev_name,
+                mccs_master,
             )
             return DevState.UNKNOWN
-        # if not mccs_master:
-        #     return DevState.UNKNOWN
         elif telescopeSetStateList == set([DevState.ON]):
             return DevState.ON
         elif telescopeSetStateList == set([DevState.OFF]):
@@ -205,9 +204,8 @@ class HealthStateAggregatorLow(Aggregator):
         subarray_count = 0
         csp_master = False
         sdp_master = False
-        # mccs_master = False
-        # get health states of sdp and csp master devices
-        # TODO: Add MCCS once it is integrated
+        mccs_master = False
+        # get health states of sdp, csp and mccs master devices
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
             if dev.unresponsive:
@@ -230,20 +228,18 @@ class HealthStateAggregatorLow(Aggregator):
             ):
                 healthStateList.append(dev.health_state)
                 subarray_count += 1
-            # elif (
-            #     name
-            #     in self._component_manager.input_parameter.mccs_master_dev_name
-            # ):
-            #     healthStateList.append(dev.health_state)
-            #     mccs_master = True
+            elif (
+                name
+                in self._component_manager.input_parameter.mccs_master_dev_name
+            ):
+                healthStateList.append(dev.health_state)
+                mccs_master = True
 
         healthStateSetList = set(healthStateList)
         self._logger.info("Health state list : %s", healthStateList)
-        # if not mccs_master:
-        #     return HealthState.UNKNOWN
         if subarray_count == 0:
             return HealthState.UNKNOWN
-        elif not sdp_master and not csp_master:
+        elif not sdp_master and not csp_master and not mccs_master:
             return HealthState.UNKNOWN
         elif healthStateSetList == set([HealthState.OK]):
             return HealthState.OK
@@ -325,9 +321,6 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
             self._component_manager.set_telescope_availability = (
                 telescope_availability
             )
-            # self.logger.debug(
-            #     f"self._component_manager.set_telescope_availability: {self._component_manager.set_telescope_availability}"
-            # )
 
 
 class TelescopeAvailabilityAggregatorLow(Aggregator):

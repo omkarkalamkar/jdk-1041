@@ -3,7 +3,9 @@ from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import CentralNodeCommand
+from ska_tmc_centralnode.commands.central_node_command import (
+    CentralNodeCommand,
+)
 
 
 class StowAntennas(CentralNodeCommand):

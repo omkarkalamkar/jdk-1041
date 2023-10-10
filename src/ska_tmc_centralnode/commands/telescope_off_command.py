@@ -7,12 +7,10 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import (
-    AbstractTelescopeOnOff,
-)
+from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 
 
-class TelescopeOff(AbstractTelescopeOnOff):
+class TelescopeOff(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOff() command. Sets the CentralNode into telescopestate to OFF.
     """
@@ -262,7 +260,7 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
-            # self.turn_off_mccs_mln(),
+            self.turn_off_mccs(),
             self.turn_off_csp(),
             self.turn_off_sdp(),
         ]:
@@ -288,9 +286,12 @@ class TelescopeOff(AbstractTelescopeOnOff):
 
         return (ResultCode.OK, "")
 
-    # def turn_off_mccs_mln(self):
-    #     return self.send_command(
-    #         [self.tm_leaf_mccs_master_adapter],
-    #         f"Error in calling TelescopeOff() for {self.tm_leaf_mccs_master_adapter}",
-    #         "Off",
-    #     )
+    def turn_off_mccs(self):
+        self.logger.info(
+            f"Invoking Off command for {self.mccs_mln_adapter.dev_name} device"
+        )
+        return self.send_command(
+            [self.mccs_mln_adapter],
+            f"Error in calling Off command for {self.mccs_mln_adapter.dev_name}",
+            "Off",
+        )

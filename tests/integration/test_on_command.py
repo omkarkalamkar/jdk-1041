@@ -56,6 +56,8 @@ def test_on_command_mid(
         "telescopeState", tango._tango.DevState.ON, lookahead=4
     )
     assert central_node.telescopeState == tango.DevState.ON
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -86,8 +88,8 @@ def test_on_command_low(
         lookahead=2,
     )
 
-    # mccs_master = dev_factory.get_device("low-mccs/control/control")
-    # mccs_master.SetDirectState(tango.DevState.ON)
+    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master.SetDirectState(tango.DevState.ON)
 
     csp_master = dev_factory.get_device("low-csp/control/0")
     csp_master.SetDirectState(tango.DevState.ON)
@@ -105,3 +107,6 @@ def test_on_command_low(
         "telescopeState", tango._tango.DevState.ON, lookahead=2
     )
     assert central_node.telescopeState == tango.DevState.ON
+
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()

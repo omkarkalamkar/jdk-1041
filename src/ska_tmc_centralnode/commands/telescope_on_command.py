@@ -5,12 +5,10 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import (
-    AbstractTelescopeOnOff,
-)
+from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 
 
-class TelescopeOn(AbstractTelescopeOnOff):
+class TelescopeOn(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOn() command.
 
@@ -189,7 +187,7 @@ class TelescopeOn(AbstractTelescopeOnOff):
         # import debugpy; debugpy.debug_this_thread()
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
-            # self.turn_on_mccs_master(),
+            self.turn_on_mccs(),
             self.turn_on_subarrays(),
             self.turn_on_csp(),
             self.turn_on_sdp(),
@@ -216,9 +214,12 @@ class TelescopeOn(AbstractTelescopeOnOff):
 
         return (ResultCode.OK, "")
 
-    # def turn_on_mccs_master(self):
-    #     return self.send_command(
-    #         [self.tm_leaf_mccs_master_adapter],
-    #         f"Error in calling On() command on {self.tm_leaf_mccs_master_adapter.dev_name}",
-    #         "On",
-    #     )
+    def turn_on_mccs(self):
+        self.logger.info(
+            f"Invoking On command for {self.mccs_mln_adapter.dev_name} device"
+        )
+        return self.send_command(
+            [self.mccs_mln_adapter],
+            f"Error in calling On command for {self.mccs_mln_adapter.dev_name}",
+            "On",
+        )

@@ -151,8 +151,9 @@ def assign_resources(
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
+    result, unique_id = central_node.TelescopeOff()
 
-@pytest.mark.assign
+
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -229,7 +230,7 @@ def assign_resources_with_invalid_json(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -241,6 +242,9 @@ def assign_resources_with_invalid_json(
         "subarray_id key is not present in the input json argument."
     ] == message
     assert result[0] == ResultCode.REJECTED
+
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -294,7 +298,7 @@ def assign_resources_without_subarray_id(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -409,6 +413,8 @@ def test_assign_resources_exception_propagation(
         lookahead=4,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -443,7 +449,7 @@ def test_assign_resources_mid_timeout(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
@@ -473,3 +479,6 @@ def test_assign_resources_mid_timeout(
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
