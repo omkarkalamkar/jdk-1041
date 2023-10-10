@@ -436,39 +436,50 @@ class AssignResources(AssignReleaseResources):
                     False,
                     f"{key} key is not present in the input json argument.",
                 )
-        interface = json_argument["mccs"]["interface"]
-        subarray_beam_id = json_argument["mccs"]["subarray_beams"][0][
-            "subarray_beam_id"
-        ]
-        apertures = json_argument["mccs"]["subarray_beams"][0]["apertures"]
-        number_of_channels = json_argument["mccs"]["subarray_beams"][0][
-            "number_of_channels"
-        ]
-        if not interface:
+
+        try:
+            json_argument["mccs"]["interface"]
+        except KeyError:
             return (
                 False,
-                "interface key is not present in the input json arguement.",
+                "JSON Error: Missing 'interface' key in input json arguement",
             )
-        elif not subarray_beam_id:
+        try:
+            subarray_beams = json_argument["mccs"]["subarray_beams"]
+        except KeyError:
             return (
                 False,
-                "subarray_beam_id key is not present in the input json arguement.",
+                "JSON Error: Missing 'subarray_beams' key in input json arguement",
             )
-        elif not apertures:
-            return (
-                False,
-                "apertures key is not present in the input json arguement.",
-            )
-        elif not number_of_channels:
-            return (
-                False,
-                "number_of_channels key is not present in the input json arguement.",
-            )
-        else:
-            return (
-                True,
-                "The json argument has all the required keys. Validation successful.",
-            )
+
+        for subarray_beam in subarray_beams:
+            try:
+                subarray_beam["subarray_beam_id"]
+            except KeyError:
+                return (
+                    False,
+                    "JSON Error: Missing 'subarray_beam_id' key in input json arguement.",
+                )
+
+            try:
+                subarray_beam["apertures"]
+            except KeyError:
+                return (
+                    False,
+                    "JSON Error: Missing 'apertures' key in input json arguement.",
+                )
+
+            try:
+                subarray_beam["number_of_channels"]
+            except KeyError:
+                return (
+                    False,
+                    "JSON Error: Missing 'number_of_channels' key in input json arguement",
+                )
+        return (
+            True,
+            "The json argument has all the required keys. Validation successful.",
+        )
 
     def _validate_and_update_resource_config(self, json_argument):
         """Validate if eb_id present in sdp schema.

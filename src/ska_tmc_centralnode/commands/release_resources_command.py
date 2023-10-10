@@ -245,7 +245,7 @@ class ReleaseResources(AssignReleaseResources):
         if json_argument["release_all"] is True:
             for return_codes, message_or_unique_ids in (
                 self.release_all_resources(self.subarray_adapter),
-                self.release_resources_mccs(self.mccs_mln_adapter),
+                self.release_all_resources(self.mccs_mln_adapter),
             ):
                 for return_code, message_or_unique_id in zip(
                     return_codes, message_or_unique_ids
@@ -264,15 +264,8 @@ class ReleaseResources(AssignReleaseResources):
     def release_all_resources(self, adapter):
         return self.send_command(
             [adapter],
-            "Error in calling ReleaseAllResources() on TMC Device",
+            f"Error in calling ReleaseAllResources() on TMC Device {adapter.dev_name}",
             "ReleaseAllResources",
-        )
-
-    def release_resources_mccs(self, adapter):
-        return self.send_command(
-            [adapter],
-            "Error in calling ReleaseResources() on MCCS Master Leaf Node",
-            "ReleaseResources",
         )
 
     def _validate_low_json(self, json_argument: dict, req_keys: list):
