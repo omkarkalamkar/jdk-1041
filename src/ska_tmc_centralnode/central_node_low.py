@@ -166,7 +166,7 @@ class CentralNodeLow(AbstractCentralNode):
         cm.input_parameter.mccs_mln_dev_name = (
             self.MCCSMasterLeafNodeFQDN or ""
         )
-        cm.input_parameter.mccs_master_dev_name = self.MCCSMasterNodeFQDN or ""
+        cm.input_parameter.mccs_master_dev_name = self.MCCSMasterFQDN or ""
         cm.update_input_parameter()
         return cm
 
