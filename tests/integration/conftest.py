@@ -6,6 +6,7 @@ import pytest
 from ska_tmc_common import (
     HelperBaseDevice,
     HelperDishDevice,
+    HelperMCCSController,
     HelperMCCSMasterLeafNode,
     HelperSubArrayDevice,
 )
@@ -57,13 +58,18 @@ def devices_to_load():
                 {"name": "low-csp/control/0"},
                 {"name": "ska_low/tm_leaf_node/sdp_master"},
                 {"name": "low-sdp/control/0"},
-                {"name": "low-mccs/control/control"},
             ],
         },
         {
             "class": HelperMCCSMasterLeafNode,
             "devices": [
                 {"name": "ska_low/tm_leaf_node/mccs_master"},
+            ],
+        },
+        {
+            "class": HelperMCCSController,
+            "devices": [
+                {"name": "low-mccs/control/control"},
             ],
         },
         {
