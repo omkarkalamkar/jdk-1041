@@ -79,7 +79,7 @@ deviceServers:
       SdpMasterLeafNodeFQDN: "ska_low/tm_leaf_node/sdp_master"
       SdpMasterFQDN: "low-sdp/control/0"
       MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
-      MCCSMasterNodeFQDN: "low-mccs/control/control"
+      MCCSMasterFQDN: "low-mccs/control/control"
 
 
 nodeSelector: {}

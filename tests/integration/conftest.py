@@ -110,7 +110,7 @@ def devices_to_load():
                         "MCCSMasterLeafNodeFQDN": [
                             "ska_low/tm_leaf_node/mccs_master"
                         ],
-                        "MCCSMasterNodeFQDN": ["low-mccs/control/control"],
+                        "MCCSMasterFQDN": ["low-mccs/control/control"],
                         "TMCLowSubarrayNodes": ["ska_low/tm_subarray_node/1"],
                         "TMCLowCspSubarrayLeafNodes": [
                             "ska_low/tm_leaf_node/csp_subarray01"

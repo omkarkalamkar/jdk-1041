@@ -28,7 +28,7 @@ class CentralNodeLow(AbstractCentralNode):
     # -----------------
     MCCSMasterLeafNodeFQDN = device_property(dtype="str")
 
-    MCCSMasterNodeFQDN = device_property(dtype="str")
+    MCCSMasterFQDN = device_property(dtype="str")
     # ----------
     # Attributes
     # ----------
@@ -57,7 +57,7 @@ class CentralNodeLow(AbstractCentralNode):
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
-    mccsMasterNodeName = attribute(
+    mccsMasterName = attribute(
         dtype="DevString",
         access=AttrWriteType.READ_WRITE,
     )
@@ -96,12 +96,12 @@ class CentralNodeLow(AbstractCentralNode):
         self.component_manager.input_parameter.mccs_mln_dev_name = value
         self.component_manager.update_input_parameter()
 
-    def read_mccsMasterNodeName(self):
-        """Return the mccsMasterNodeName attribute."""
+    def read_mccsMasterName(self):
+        """Return the mccsMasterName attribute."""
         return self.component_manager.input_parameter.mccs_master_dev_name
 
-    def write_mccsMasterNodeName(self, value):
-        """Set the mccsMasterNodeName attribute."""
+    def write_mccsMasterName(self, value):
+        """Set the mccsMasterName attribute."""
         self.component_manager.input_parameter.mccs_master_dev_name = value
         self.component_manager.update_input_parameter()
 

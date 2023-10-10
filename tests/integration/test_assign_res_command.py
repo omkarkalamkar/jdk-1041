@@ -151,7 +151,6 @@ def assign_resources(
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
-    # Teardown
     result, unique_id = central_node.TelescopeOff()
 
 

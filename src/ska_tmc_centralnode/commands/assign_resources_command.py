@@ -403,7 +403,7 @@ class AssignResources(AssignReleaseResources):
             ),
             self.send_command(
                 [self.mccs_mln_adapter],
-                "Error in calling AssignResource command on MCCS Master Leaf Node",
+                "Error in calling AssignResources command on MCCS Master Leaf Node",
                 "AssignResources",
                 json.dumps(input_mccs_master),
             ),
@@ -501,8 +501,10 @@ class AssignResources(AssignReleaseResources):
         except Exception as e:
             return False, f"Error while updating SDP schema: {e}"
 
-    def create_mccs_cmd_data(self, json_argument):
+    def create_mccs_cmd_data(self, json_argument: dict) -> dict:
         """
+        Method to prepare the input json_argument required while invoking AssignResources()
+        command on MCCS Master Leaf Node.
         :param json_argument: The string in JSON format.
 
         :return: The string in JSON format.

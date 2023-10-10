@@ -30,9 +30,9 @@ server:
         - name: "MCCSMasterLeafNodeFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.low.MCCSMasterLeafNodeFQDN}}"
-        - name: "MCCSMasterNodeFQDN"
+        - name: "MCCSMasterFQDN"
           values:
-          - "{{.Values.deviceServers.centralnode.low.MCCSMasterNodeFQDN}}"
+          - "{{.Values.deviceServers.centralnode.low.MCCSMasterFQDN}}"
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
