@@ -88,7 +88,7 @@ class CentralNodeCommand(TMCCommand):
         return ResultCode.FAILED, message
 
 
-class AbstractTelescopeOnOff(CentralNodeCommand):
+class TelescopeOnOff(CentralNodeCommand):
     def __init__(
         self,
         component_manager,
@@ -271,7 +271,7 @@ class AbstractTelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
 
-class AbstractAssignReleaseResources(CentralNodeCommand):
+class AssignReleaseResources(CentralNodeCommand):
     def __init__(
         self,
         component_manager,

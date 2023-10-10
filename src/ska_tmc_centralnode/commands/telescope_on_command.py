@@ -5,12 +5,10 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import (
-    AbstractTelescopeOnOff,
-)
+from ska_tmc_centralnode.commands.abstract_command import TelescopeOnOff
 
 
-class TelescopeOn(AbstractTelescopeOnOff):
+class TelescopeOn(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOn() command.
 

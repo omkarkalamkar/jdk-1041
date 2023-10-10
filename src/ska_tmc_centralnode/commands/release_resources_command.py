@@ -10,11 +10,11 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 
 from ska_tmc_centralnode.commands.abstract_command import (
-    AbstractAssignReleaseResources,
+    AssignReleaseResources,
 )
 
 
-class ReleaseResources(AbstractAssignReleaseResources):
+class ReleaseResources(AssignReleaseResources):
     """
     A class for CentralNode's ReleaseResources() command.
 
@@ -135,24 +135,24 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         try:
             if type(argin) != dict:
-                jsonArgument = json.loads(argin)
+                json_argument = json.loads(argin)
             else:
-                jsonArgument = argin
+                json_argument = argin
         except Exception as e:
             return (
                 ResultCode.FAILED,
                 f"Problem in loading the JSON string: {e}",
             )
-        if "transaction_id" in jsonArgument:
-            del jsonArgument["transaction_id"]
+        if "transaction_id" in json_argument:
+            del json_argument["transaction_id"]
 
-        if "subarray_id" not in jsonArgument:
+        if "subarray_id" not in json_argument:
             return (
                 ResultCode.FAILED,
                 "subarray_id key is not present in the input json argument.",
             )
 
-        subarray_id = jsonArgument["subarray_id"]
+        subarray_id = json_argument["subarray_id"]
 
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
@@ -165,7 +165,7 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 f"Subarray Id {subarray_id} doesn't exit!",
             )
 
-        if jsonArgument["release_all"] is True:
+        if json_argument["release_all"] is True:
             return_codes, message_or_unique_ids = self.release_all_resources(
                 self.subarray_adapter
             )
@@ -222,25 +222,25 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
         try:
             if type(argin) != dict:
-                jsonArgument = json.loads(argin)
+                json_argument = json.loads(argin)
             else:
-                jsonArgument = argin
+                json_argument = argin
         except Exception as e:
             return (
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", e),
             )
 
-        if "transaction_id" in jsonArgument:
-            del jsonArgument["transaction_id"]
+        if "transaction_id" in json_argument:
+            del json_argument["transaction_id"]
 
-        if "subarray_id" not in jsonArgument:
+        if "subarray_id" not in json_argument:
             return (
                 ResultCode.FAILED,
                 "subarray_id key is not present in the input json argument.",
             )
 
-        subarray_id = jsonArgument["subarray_id"]
+        subarray_id = json_argument["subarray_id"]
 
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
@@ -253,42 +253,26 @@ class ReleaseResources(AbstractAssignReleaseResources):
                 f"Subarray Id {subarray_id} doesn't exit!",
             )
 
-        self.logger.info(jsonArgument)
+        self.logger.info(json_argument)
 
-        if jsonArgument["release_all"] is True:
-            return_codes, message_or_unique_ids = self.release_all_resources(
-                self.subarray_adapter
-            )
-            for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
+        if json_argument["release_all"] is True:
+            for return_codes, message_or_unique_ids in (
+                self.release_all_resources(self.subarray_adapter),
+                self.release_resources_mccs(json.dumps(json_argument)),
             ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return (
-                        ResultCode.FAILED,
-                        message_or_unique_id,
-                    )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-                elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                    self.component_manager.command_mapping[
-                        self.command_id
-                    ] = message_or_unique_id
-            return (ResultCode.OK, "")
-
-        # TODO Uncomment below code during integration of MCCS
-        # Invoke ReleaseAllResources on MCCS Master Leaf Node
-        # Send updated input string with inteface key to MCCS Master for ReleaseResource Command
-        # jsonArgument[
-        #     "interface"
-        # ] = "https://schema.skao.int/ska-low-mccs-releaseresources/1.0"
-        # if "transaction_id" in jsonArgument:
-        #     del jsonArgument["transaction_id"]
-
-        #     return_code, message_or_unique_id = self.release_resources_mccs(
-        #         json.dumps(jsonArgument)
-        #     )
-        # if return_code in [ResultCode.FAILED,ResultCode.REJECTED]:
-        #     return ResultCode.FAILED, message_or_unique_id # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-        # elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
-        #     self.component_manager.command_mapping[self.command_id] = message_or_unique_id
+                for return_code, message_or_unique_id in zip(
+                    return_codes, message_or_unique_ids
+                ):
+                    if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                        return (
+                            ResultCode.FAILED,
+                            message_or_unique_id,
+                        )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
+                    elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                        self.component_manager.command_mapping[
+                            self.command_id
+                        ] = message_or_unique_id
+                return (ResultCode.OK, "")
 
     def release_all_resources(self, adapter):
         return self.send_command(
@@ -299,8 +283,8 @@ class ReleaseResources(AbstractAssignReleaseResources):
 
     def release_resources_mccs(self, arg):
         return self.send_command(
-            [self.tm_leaf_mccs_master_adapter],
-            "Error in calling ReleaseResources() on TMC Device",
+            [self.mccs_mln_adapter],
+            "Error in calling ReleaseResources() on MCCS Master Leaf Node",
             "ReleaseResources",
             arg,
         )

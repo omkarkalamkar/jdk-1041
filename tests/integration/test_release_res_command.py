@@ -246,7 +246,7 @@ def test_release_resources_error_propagation(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=5,
     )
 
     result, unique_id = central_node.AssignResources(
@@ -269,7 +269,7 @@ def test_release_resources_error_propagation(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
     tmc_subarray.SetDefective(ERROR_PROPAGATION_DEFECT)
@@ -358,7 +358,7 @@ def test_release_resources_mid_timeout(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)

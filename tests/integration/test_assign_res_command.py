@@ -299,7 +299,7 @@ def assign_resources_without_subarray_id(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -450,7 +450,7 @@ def test_assign_resources_mid_timeout(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=8,
+        lookahead=4,
     )
 
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)

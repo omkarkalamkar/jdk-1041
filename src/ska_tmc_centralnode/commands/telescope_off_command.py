@@ -7,12 +7,10 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
-from ska_tmc_centralnode.commands.abstract_command import (
-    AbstractTelescopeOnOff,
-)
+from ska_tmc_centralnode.commands.abstract_command import TelescopeOnOff
 
 
-class TelescopeOff(AbstractTelescopeOnOff):
+class TelescopeOff(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOff() command. Sets the CentralNode into telescopestate to OFF.
     """

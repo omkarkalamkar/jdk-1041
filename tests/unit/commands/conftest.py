@@ -84,11 +84,4 @@ def devices_to_load():
                 {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
-        # {
-        #     "class": HelperSubArrayDevice,
-        #     "devices": [
-        #         {"name": MID_CSP_SLN_DEVICE},
-        #         {"name": MID_SDP_SLN_DEVICE},
-        #     ],
-        # },
     )

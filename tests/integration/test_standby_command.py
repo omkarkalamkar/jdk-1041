@@ -48,7 +48,7 @@ def test_standby_command_mid(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=3,
+        lookahead=4,
     )
     logger.info(
         f"longRunningCommandResult: {central_node.longRunningCommandResult}"
@@ -65,7 +65,7 @@ def test_standby_command_mid(
 
     # Check whether the telescopeState is STANDBY
     change_event_callbacks.assert_change_event(
-        "telescopeState", DevState.STANDBY, lookahead=2
+        "telescopeState", DevState.STANDBY, lookahead=4
     )
     logger.info(f"telescopeState: {central_node.telescopeState}")
 

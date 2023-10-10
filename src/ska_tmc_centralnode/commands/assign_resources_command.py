@@ -12,11 +12,11 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import SubArrayAdapter
 
 from ska_tmc_centralnode.commands.abstract_command import (
-    AbstractAssignReleaseResources,
+    AssignReleaseResources,
 )
 
 
-class AssignResources(AbstractAssignReleaseResources):
+class AssignResources(AssignReleaseResources):
     """
     A class for CentralNode's AssignResources() command.
 
