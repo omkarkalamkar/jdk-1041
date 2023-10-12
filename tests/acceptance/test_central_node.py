@@ -13,6 +13,7 @@ from tests.settings import (
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
     check_subarray_availability,
+    event_remover,
     logger,
 )
 
@@ -182,6 +183,11 @@ def check_command(central_node, command_name, change_event_callbacks):
         "longRunningCommandsInQueue",
         None,
         lookahead=3,
+    )
+
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult", "longRunningCommandsInQueue"],
     )
 
     if command_name == "AssignResources":

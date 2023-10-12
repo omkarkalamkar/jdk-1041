@@ -4,7 +4,7 @@ from ska_tmc_common.dev_factory import DevFactory
 from tango import DevState
 
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import logger
+from tests.settings import event_remover, logger
 
 
 @pytest.mark.post_deployment
@@ -40,6 +40,10 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
         DevState.FAULT, lookahead=2
     )
     assert central_node.tmOpState == DevState.FAULT
+    event_remover(
+        change_event_callbacks,
+        ["tmOpState"],
+    )
 
 
 @pytest.mark.post_deployment
@@ -74,3 +78,7 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
         DevState.FAULT, lookahead=2
     )
     assert central_node.tmOpState == DevState.FAULT
+    event_remover(
+        change_event_callbacks,
+        ["tmOpState"],
+    )
