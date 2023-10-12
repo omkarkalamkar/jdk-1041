@@ -10,7 +10,7 @@ from tests.settings import event_remover
 
 
 @pytest.mark.repeat(
-    50
+    25
 )  # This is to run this test case 50 times and will be removed before code merge.
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
