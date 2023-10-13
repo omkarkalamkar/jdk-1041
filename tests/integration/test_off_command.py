@@ -146,5 +146,5 @@ def test_off_command_low(
 
     event_remover(
         change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
+        ["longRunningCommandResult", "telescopeState", "State"],
     )

@@ -9,9 +9,6 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import event_remover
 
 
-@pytest.mark.repeat(
-    25
-)  # This is to run this test case 50 times and will be removed before code merge.
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_on_command_mid(
