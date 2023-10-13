@@ -105,6 +105,7 @@ K8S_TEST_TEST_COMMAND = $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
 -include .make/release.mk
 -include .make/make.mk
 -include .make/help.mk
+-include .make/raw.mk
 -include PrivateRules.mak
 
 # flag this up for the oneshot /Dockerfile
