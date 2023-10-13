@@ -6,7 +6,7 @@ from ska_tango_base.control_model import HealthState
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import logger
+from tests.settings import event_remover, logger
 
 
 @pytest.mark.post_deployment
@@ -42,6 +42,10 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     time.sleep(0.1)
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
+    event_remover(
+        change_event_callbacks,
+        ["telescopeHealthState"],
+    )
 
 
 @pytest.mark.post_deployment
@@ -76,3 +80,7 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     time.sleep(0.1)
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
+    event_remover(
+        change_event_callbacks,
+        ["telescopeHealthState"],
+    )

@@ -5,7 +5,7 @@ from ska_tmc_common.dev_factory import DevFactory
 from tango import DevState
 
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import logger
+from tests.settings import event_remover, logger
 
 
 @pytest.mark.post_deployment
@@ -70,6 +70,11 @@ def test_standby_command_mid(
     logger.info(f"telescopeState: {central_node.telescopeState}")
 
     assert central_node.telescopeState == DevState.STANDBY
+
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult", "telescopeState"],
+    )
 
 
 @pytest.mark.post_deployment
@@ -136,3 +141,8 @@ def test_standby_command_low(
     logger.info(f"telescopeState: {central_node.telescopeState}")
 
     assert central_node.telescopeState == DevState.STANDBY
+
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult", "telescopeState"],
+    )

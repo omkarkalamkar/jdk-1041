@@ -6,6 +6,7 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode, PointingState
 
 from tests.integration.conftest import ensure_checked_devices
+from tests.settings import event_remover
 
 
 @pytest.mark.post_deployment
@@ -33,7 +34,7 @@ def test_on_command_mid(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     csp_master = dev_factory.get_device("mid-csp/control/0")
@@ -58,6 +59,15 @@ def test_on_command_mid(
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown
     result, unique_id = central_node.TelescopeOff()
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=2,
+    )
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult", "telescopeState"],
+    )
 
 
 @pytest.mark.post_deployment
@@ -110,3 +120,12 @@ def test_on_command_low(
 
     # Teardown
     result, unique_id = central_node.TelescopeOff()
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=2,
+    )
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult", "telescopeState"],
+    )
