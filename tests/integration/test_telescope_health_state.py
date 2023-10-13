@@ -44,7 +44,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     assert central_node.telescopeHealthState == HealthState.OK
     event_remover(
         change_event_callbacks,
-        ["longRunningCommandResult"],
+        ["telescopeHealthState"],
     )
 
 
@@ -82,5 +82,5 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     assert central_node.telescopeHealthState == HealthState.OK
     event_remover(
         change_event_callbacks,
-        ["longRunningCommandResult"],
+        ["telescopeHealthState"],
     )
