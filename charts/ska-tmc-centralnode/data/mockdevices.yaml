@@ -20,9 +20,9 @@ server:
         devices:
         - name: "mid-csp/control/0"
         - name: "low-csp/control/0"
+        - name: "ska_mid/tm_leaf_node/csp_master"
       - name: "HelperBaseDevice"
         devices:
-        - name: "ska_mid/tm_leaf_node/csp_master"
         - name: "ska_mid/tm_leaf_node/sdp_master"
         - name: "ska_low/tm_leaf_node/csp_master"
         - name: "ska_low/tm_leaf_node/sdp_master"

@@ -28,6 +28,7 @@ from tango import DevState
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
+from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
@@ -623,6 +624,23 @@ class CNComponentManager(TmcComponentManager):
         task_status, response = self.submit_task(
             telescopestandby_command.telescope_standby,
             args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
+    def load_dish_cfg(self, argin: str, task_callback: Callable = None):
+        """
+        Load Dish Cfg command for Dish-VCC map.
+
+        :return: a result code and message
+        """
+        loadishcfg_command = LoadDishCfg(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        task_status, response = self.submit_task(
+            loadishcfg_command.load_dish_cfg,
+            args=[argin, self.logger],
             task_callback=task_callback,
         )
         return task_status, response

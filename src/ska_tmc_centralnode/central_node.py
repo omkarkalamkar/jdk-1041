@@ -371,6 +371,29 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         return self.component_manager.is_command_allowed("ReleaseResources")
 
+    def is_LoadDishCfg_allowed(self):
+        """
+        Checks whether LoadDishCfg command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return True
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def LoadDishCfg(self, argin):
+        """
+        LoadDishCfg command to load dishID-vcc map config.
+        """
+        handler = self.get_command_object("LoadDishCfg")
+        result_code, unique_id = handler(argin)
+        return [[result_code], [str(unique_id)]]
+
     @command(
         dtype_in="str",
         doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
@@ -469,6 +492,7 @@ class AbstractCentralNode(TMCBaseDevice):
             ("TelescopeOff", "telescope_off"),
             ("AssignResources", "assign_resources"),
             ("ReleaseResources", "release_resources"),
+            ("LoadDishCfg", "load_dish_cfg"),
         ]:
             self.register_command_object(
                 command_name,
