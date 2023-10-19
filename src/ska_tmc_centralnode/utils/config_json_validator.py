@@ -18,22 +18,21 @@ class DishConfigValidator:
             k_values.append(k_value)
         return vcc_ids, k_values
 
-    def _is_valid_k_values(self, k_values: list):
+    def _is_valid_k_values(self, k_values: list) -> bool:
         """
-        params:
-        k_values(list): List of k values to validate
+        :params k_values: List of k values to validate
         """
         k_value_range = range(1, 2223)
         return all(k_value in k_value_range for k_value in k_values)
 
-    def _is_valid_vcc_ids(self, vcc_ids: list):
+    def _is_valid_vcc_ids(self, vcc_ids: list) -> bool:
         """
         params:
         vcc_ids(list): List of VCC ids
         """
         return len(vcc_ids) == len(set(vcc_ids))
 
-    def _is_valid_dish_ids(self, dish_id_list):
+    def _is_valid_dish_ids(self, dish_id_list: list) -> bool:
         """Validate Dish Ids are unique and validate
         Dish Id are within valid range
         """
@@ -55,7 +54,7 @@ class DishConfigValidator:
                 return False
         return True
 
-    def is_json_valid(self):
+    def is_json_valid(self) -> bool:
         """This methid validate json as per following rules
         1. DishIDs are valid dishIDs (SKA001-133, MKT000-063)
         2. DishIDs are unique

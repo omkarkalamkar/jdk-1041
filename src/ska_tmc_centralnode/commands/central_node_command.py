@@ -111,7 +111,8 @@ class TelescopeOnOff(CentralNodeCommand):
         self.dish_adapters = []
         try:
             self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.csp_mln_dev_name
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                AdapterType.CSPMASTER,
             )
             self.logger.debug(
                 f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
@@ -423,7 +424,8 @@ class LoadDishCfgCommand(CentralNodeCommand):
         self.dish_adapters = []
         try:
             self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.csp_mln_dev_name
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                AdapterType.CSPMASTER,
             )
             self.logger.debug(
                 f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"

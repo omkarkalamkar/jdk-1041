@@ -57,7 +57,7 @@ def load_dish_cfg(
 
     # Validate sysParams are set on Csp Master Device
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
-    assert json.dumps(csp_master_ln_device.sourceSysParam) == json.dumps(
+    assert json.loads(csp_master_ln_device.sourceSysParam) == json.loads(
         config_str
     )
 
@@ -66,9 +66,6 @@ def load_dish_cfg(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.xfail(
-    reason="Update in helper csp master leaf node required to pass"
-)
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
