@@ -1,6 +1,9 @@
 import pytest
 from ska_tmc_common import HelperMCCSController, HelperMCCSMasterLeafNode
 from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
+from ska_tmc_common.test_helpers.helper_csp_master_leaf_node import (
+    HelperCspMasterLeafDevice,
+)
 from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
 from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
@@ -61,13 +64,18 @@ def devices_to_load():
             ],
         },
         {
+            "class": HelperCspMasterLeafDevice,
+            "devices": [
+                {"name": MID_CSP_MLN_DEVICE},
+            ],
+        },
+        {
             "class": HelperBaseDevice,
             "devices": [
                 {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_CSP_MASTER_DEVICE},
                 {"name": LOW_SDP_MLN_DEVICE},
                 {"name": LOW_SDP_MASTER_DEVICE},
-                {"name": MID_CSP_MLN_DEVICE},
                 {"name": MID_CSP_MASTER_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},
                 {"name": MID_SDP_MASTER_DEVICE},
