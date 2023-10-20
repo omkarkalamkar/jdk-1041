@@ -647,9 +647,14 @@ class CNComponentManager(TmcComponentManager):
                 f"The JSON string is malformed. Error: {str(e)}"
             )
         else:
-            dishid_vcc_map_json = loadishcfg_command.get_dishid_vcc_map_json(
+            (
+                dishid_vcc_map_json,
+                error_message,
+            ) = loadishcfg_command.get_dishid_vcc_map_json(
                 dishid_vcc_map_params
             )
+            if error_message:
+                return loadishcfg_command.reject_command(error_message)
             self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
             config_json_validator = DishConfigValidator(dishid_vcc_map_json)
             if not config_json_validator.is_json_valid():
