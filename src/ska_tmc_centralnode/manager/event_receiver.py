@@ -57,7 +57,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_obs_state_event,
                         stateless=True,
                     )
-                if "dish/master" in dev_info.dev_name:
+                if "elt/master" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "dishMode",
                         tango.EventType.CHANGE_EVENT,

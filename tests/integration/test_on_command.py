@@ -43,7 +43,7 @@ def test_on_command_mid(
     sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectState(tango.DevState.ON)
 
-    dish_master = dev_factory.get_device("ska001/dish/master")
+    dish_master = dev_factory.get_device("ska001/elt/master")
     dish_master.SetDirectDishMode(DishMode.STANDBY_FP)
     dish_master.SetDirectPointingState(PointingState.READY)
 

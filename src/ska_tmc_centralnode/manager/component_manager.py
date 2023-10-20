@@ -312,7 +312,7 @@ class CNComponentManager(TmcComponentManager):
         """
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
-        elif "dish/master" in dev_name.lower():
+        elif "elt/master" in dev_name.lower():
             devInfo = DishDeviceInfo(dev_name, False)
         else:
             devInfo = DeviceInfo(dev_name, False)

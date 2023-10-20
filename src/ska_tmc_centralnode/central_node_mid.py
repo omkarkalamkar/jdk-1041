@@ -282,7 +282,7 @@ class CentralNodeMid(AbstractCentralNode):
                 self.DishLeafNodePrefix + dish_id
             )
             cm.input_parameter.dish_dev_names.append(
-                f"{'ska'}{dish_id}{'/dish/master'}"
+                f"{'ska'}{dish_id}{'/elt/master'}"
             )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
