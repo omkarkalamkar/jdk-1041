@@ -46,7 +46,9 @@ server:
         - name: "ska_low/tm_leaf_node/sdp_subarray01"
       - name: "HelperDishDevice"
         devices:
-        - name: "ska001/elt/master"
+          {{- range .Values.deviceServers.mocks.dishNames }}
+        - name: "{{ . }}"
+          {{- end }}
         - name: "ska_mid/tm_leaf_node/d0001"
 depends_on:
   - device: sys/database/2

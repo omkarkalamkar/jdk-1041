@@ -58,6 +58,8 @@ deviceServers:
     enabled: false
     instances: ["01"]
     file: "data/mockdevices.yaml"
+    dishNames:
+      - "ska001/elt/master"
 
   centralnode:
     enabled: true
