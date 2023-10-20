@@ -50,7 +50,6 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
-
         ret_code, message = self.do(argin)
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
@@ -157,9 +156,12 @@ class LoadDishCfg(LoadDishCfgCommand):
         message_or_unique_ids = []
         try:
             for dish_id, vcc_k_map in dish_parameters.items():
-                # TODO filter dish adapter for dish id
+                # Get Dish Number from dish id to get dish adapter
+                dish_number = dish_id[-3:]
                 dish_adapter = [
-                    dish_adapter for dish_adapter in self.dish_adapters
+                    dish_adapter
+                    for dish_adapter in self.dish_adapters
+                    if dish_adapter.dev_name[-3:] == dish_number
                 ]
                 if dish_adapter:
                     dish_adapter = dish_adapter[0]
@@ -181,8 +183,6 @@ class LoadDishCfg(LoadDishCfgCommand):
                         f"Dish adapter not found for dish id {dish_id}"
                     )
                     self.logger.info(error_message)
-                    return_codes.append(ResultCode.FAILED)
-                    message_or_unique_ids.append(error_message)
         except Exception as e:
             self.logger.info(
                 "Error in Calling setKvalue command on dish adapter %s", e
