@@ -632,7 +632,7 @@ class CNComponentManager(TmcComponentManager):
     def load_dish_cfg(self, argin: str, task_callback: Callable = None):
         """
         Load Dish Cfg command for Dish-VCC map.
-
+        :param argin: Dish Id Vcc map initial params
         :return: a result code and message
         """
         loadishcfg_command = LoadDishCfg(

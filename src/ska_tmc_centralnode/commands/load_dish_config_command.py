@@ -36,8 +36,8 @@ class LoadDishCfg(LoadDishCfgCommand):
 
     def load_dish_cfg(
         self,
-        argin,
-        logger,
+        argin: str,
+        logger=None,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ) -> None:
@@ -99,7 +99,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         dish_parameters = dishid_vcc_map_json.get("dish_parameters")
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
-            self._invoke_command_to_csp_master_ln(dishid_vcc_map_params),
+            self._invoke_load_dish_cfg_on_csp_master_ln(dishid_vcc_map_params),
             self._set_k_numbers_to_dish(dish_parameters),
         ]:
             for return_code, message_or_unique_id in zip(
@@ -129,7 +129,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
         return (ResultCode.OK, "")
 
-    def _invoke_command_to_csp_master_ln(
+    def _invoke_load_dish_cfg_on_csp_master_ln(
         self, dishid_vcc_map_params: str
     ) -> Tuple[ResultCode, list]:
         """Invoke LoadDishCfg command on Csp Master with vcc_map_params argument

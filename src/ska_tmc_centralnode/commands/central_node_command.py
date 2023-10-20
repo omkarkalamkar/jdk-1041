@@ -453,7 +453,7 @@ class LoadDishCfgCommand(CentralNodeCommand):
                         f"Adapter is created for DishLeafNode {dev_name}"
                     )
                 except Exception as e:
-                    self.logger.warning(
+                    self.logger.exception(
                         "Error in creating adapter for %s: %s", dev_name, e
                     )
                     error_dev_names.append(dev_name)
