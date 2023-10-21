@@ -292,7 +292,7 @@ def test_release_resources_error_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occured, command failed.",
+            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occurred, command failed.",
         ),
         lookahead=6,
     )
@@ -382,7 +382,7 @@ def test_release_resources_mid_timeout(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Timeout has occured, command failed",
+            "Timeout has occurred, command failed",
         ),
         lookahead=6,
     )

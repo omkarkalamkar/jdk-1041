@@ -447,7 +447,7 @@ class CNComponentManager(TmcComponentManager):
         """Updates the LRCR callback with received event.
 
         Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
-        Whenever there is exception occured , (unique_id,exception_msg) event is first raised
+        Whenever there is exception occurred , (unique_id,exception_msg) event is first raised
         and catched in ValueError.The exception_msg and command_id is then passed to long_running_result_callback.
         Command_mapping contains {centralnode_command_id:unique_id} , all events are verified with respect to this mapping.
         If there is no command_mapping present the event might be of old command.

@@ -9,7 +9,7 @@ USER root
 
 ENV SETUPTOOLS_USE_DISTUTILS=stdlib
 
-RUN apt-get update && apt-get install git -y
+RUN sudo apt-get update && apt-get install git -y
 
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     poetry config virtualenvs.create false
