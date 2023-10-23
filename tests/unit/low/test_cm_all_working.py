@@ -45,6 +45,7 @@ def devices_to_load():
     )
 
 
+@pytest.mark.aki
 @pytest.mark.SKA_low
 def test_all_working(tango_context):
     logger.info("%s", tango_context)
@@ -56,5 +57,8 @@ def test_all_working(tango_context):
     logger.info("checked %s devices in %s", num_faulty, elapsed_time)
     for devInfo in cm.devices:
         assert not devInfo.unresponsive
-        if "subarray" in devInfo.dev_name.lower():
+        if all(
+            dev_name.lower() in devInfo.dev_name.lower()
+            for dev_name in cm.input_parameter.subarray_dev_names
+        ) and isinstance(devInfo, SubArrayDeviceInfo):
             assert isinstance(devInfo, SubArrayDeviceInfo)
