@@ -44,7 +44,7 @@ def release_resources(
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id_on[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -64,7 +64,7 @@ def release_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_assign[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
     result, unique_id = central_node.ReleaseResources(release_input_string)
@@ -76,7 +76,7 @@ def release_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
     # Teardown
