@@ -389,6 +389,14 @@ class AbstractCentralNode(TMCBaseDevice):
     def LoadDishCfg(self, argin):
         """
         LoadDishCfg command to load dishID-vcc map config.
+        This command get dishid-vcc map json from Telmodel
+        based on tm data sources provided in argin
+        Example:
+        {
+            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "tm_data_sources": ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"],
+            "tm_data_filepath": "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
+        }
         """
         handler = self.get_command_object("LoadDishCfg")
         result_code, unique_id = handler(argin)

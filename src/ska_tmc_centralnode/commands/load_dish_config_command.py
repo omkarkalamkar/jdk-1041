@@ -36,7 +36,7 @@ class LoadDishCfg(LoadDishCfgCommand):
 
     def load_dish_cfg(
         self,
-        argin: str,
+        dish_cfg_params: str,
         logger=None,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
@@ -50,7 +50,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
-        ret_code, message = self.do(argin)
+        ret_code, message = self.do(dish_cfg_params)
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
@@ -79,7 +79,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             return data[tm_data_filepath].get_dict(), error_message
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
-    def do(self, argin: str) -> Tuple[ResultCode, str]:
+    def do(self, dish_cfg_params: str) -> Tuple[ResultCode, str]:
         """This command does following
         1. Load content of DishId-VCC mapping file from CAR URI
         2. Validate Json
@@ -93,7 +93,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        dishid_vcc_map_params = json.loads(argin)
+        dishid_vcc_map_params = json.loads(dish_cfg_params)
         self.logger.info("DishId Vcc Map Params %s", dishid_vcc_map_params)
 
         dishid_vcc_map_json, _ = self.get_dishid_vcc_map_json(

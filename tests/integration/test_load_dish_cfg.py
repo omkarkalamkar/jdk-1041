@@ -6,7 +6,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import MID_CSP_MLN_DEVICE, logger
+from tests.settings import DISH_LEAF_NODE_DEVICE, MID_CSP_MLN_DEVICE, logger
 
 
 def load_dish_cfg(
@@ -18,6 +18,8 @@ def load_dish_cfg(
     logger.info("%s", config_str)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
 
     ensure_checked_devices(central_node)
 
@@ -56,16 +58,18 @@ def load_dish_cfg(
     )
 
     # Validate sysParams are set on Csp Master Device
-    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     assert json.loads(csp_master_ln_device.sourceSysParam) == json.loads(
         config_str
     )
+    # Validate kValue is set on dish
+    assert dish_ln_device.kValue == 11
 
     result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.test
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
