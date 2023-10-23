@@ -89,6 +89,7 @@ def test_telescope_off_command_fail_subarray(tango_context):
     assert task_callback.result == ResultCode.FAILED
 
 
+@pytest.mark.aki
 def test_telescope_off_command_task_completed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()

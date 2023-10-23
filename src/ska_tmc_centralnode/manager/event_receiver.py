@@ -62,7 +62,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     self._component_manager.input_parameter, InputParameterMid
                 ):
                     if (
-                        self._component_manager.input_paramerter.dish_dev_names
+                        self._component_manager.input_parameter.dish_dev_names
                         in dev_info.dev_name
                     ):
                         proxy.subscribe_event(
