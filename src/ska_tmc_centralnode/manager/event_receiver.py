@@ -61,18 +61,18 @@ class CentralNodeEventReceiver(EventReceiver):
                 if isinstance(
                     self._component_manager.input_parameter, InputParameterMid
                 ):
-                    if (
-                        self._component_manager.input_parameter.dish_dev_names[
-                            0
-                        ]
-                        in dev_info.dev_name
+                    for (
+                        dish_dev_name
+                    ) in (
+                        self._component_manager.input_parameter.dish_dev_names
                     ):
-                        proxy.subscribe_event(
-                            "dishMode",
-                            tango.EventType.CHANGE_EVENT,
-                            self.handle_dish_mode_event,
-                            stateless=True,
-                        )
+                        if dish_dev_name in dev_info.dev_name:
+                            proxy.subscribe_event(
+                                "dishMode",
+                                tango.EventType.CHANGE_EVENT,
+                                self.handle_dish_mode_event,
+                                stateless=True,
+                            )
                 if "subarray_node" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
