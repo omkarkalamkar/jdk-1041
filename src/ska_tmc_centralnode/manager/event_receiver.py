@@ -35,6 +35,10 @@ class CentralNodeEventReceiver(EventReceiver):
 
     def subscribe_events(self, dev_info):
         super().subscribe_events(dev_info)
+        self._logger.info(f"My dev info is >>{dev_info.dev_name}")
+        self._logger.info(
+            f"My dish dev info >>>>> {self._component_manager.input_parameter.dish_dev_names}"
+        )
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
@@ -58,21 +62,20 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_obs_state_event,
                         stateless=True,
                     )
-                if isinstance(
-                    self._component_manager.input_parameter, InputParameterMid
+                if (
+                    isinstance(
+                        self._component_manager.input_parameter,
+                        InputParameterMid,
+                    )
+                    and dev_info.dev_name
+                    in self._component_manager.input_parameter.dish_dev_names
                 ):
-                    for (
-                        dish_dev_name
-                    ) in (
-                        self._component_manager.input_parameter.dish_dev_names
-                    ):
-                        if dish_dev_name in dev_info.dev_name:
-                            proxy.subscribe_event(
-                                "dishMode",
-                                tango.EventType.CHANGE_EVENT,
-                                self.handle_dish_mode_event,
-                                stateless=True,
-                            )
+                    proxy.subscribe_event(
+                        "dishMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_dish_mode_event,
+                        stateless=True,
+                    )
                 if "subarray_node" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
