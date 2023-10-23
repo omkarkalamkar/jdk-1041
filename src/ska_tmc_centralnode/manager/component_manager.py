@@ -310,10 +310,11 @@ class CNComponentManager(TmcComponentManager):
         :param dev_name: device name
         :type dev_name: str
         """
-        if "subarray" in dev_name.lower():
+        if dev_name.lower() in self.input_parameter.subarray_dev_names:
             devInfo = SubArrayDeviceInfo(dev_name, False)
-        elif "elt/master" in dev_name.lower():
-            devInfo = DishDeviceInfo(dev_name, False)
+        elif isinstance(self.input_parameter, InputParameterMid):
+            if dev_name.lower() in self.input_parameter.dish_dev_names:
+                devInfo = DishDeviceInfo(dev_name, False)
         else:
             devInfo = DeviceInfo(dev_name, False)
         self.component.update_device(devInfo)
