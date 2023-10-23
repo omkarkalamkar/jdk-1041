@@ -1,6 +1,7 @@
 import tango
 from ska_tmc_common.event_receiver import EventReceiver
 
+from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
@@ -57,13 +58,19 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_obs_state_event,
                         stateless=True,
                     )
-                if "elt/master" in dev_info.dev_name:
-                    proxy.subscribe_event(
-                        "dishMode",
-                        tango.EventType.CHANGE_EVENT,
-                        self.handle_dish_mode_event,
-                        stateless=True,
-                    )
+                if isinstance(
+                    self._component_manager.input_parameter, InputParameterMid
+                ):
+                    if (
+                        self._component_manager.input_paramerter.dish_dev_names
+                        in dev_info.dev_name
+                    ):
+                        proxy.subscribe_event(
+                            "dishMode",
+                            tango.EventType.CHANGE_EVENT,
+                            self.handle_dish_mode_event,
+                            stateless=True,
+                        )
                 if "subarray_node" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
