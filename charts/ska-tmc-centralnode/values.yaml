@@ -58,8 +58,6 @@ deviceServers:
     enabled: false
     instances: ["01"]
     file: "data/mockdevices.yaml"
-    dishNames:
-      - "ska001/elt/master"
 
   centralnode:
     enabled: true
@@ -74,6 +72,8 @@ deviceServers:
       SdpMasterFQDN: "mid-sdp/control/0"
       DishLeafNodePrefix: "ska_mid/tm_leaf_node/d0"
       DishIDs: ["SKA001", "MKT001"]
+      DishMasterPrefix: "elt"
+      DishMasterPostfix: "master"
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"

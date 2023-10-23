@@ -2,6 +2,8 @@ name: "mocks-{{.Release.Name}}"
 function: testing
 domain: mocks
 instances: ["01"]
+{{- $DishMasterPrefix := .Values.deviceServers.centralnode.mid.DishMasterPrefix }}
+{{- $DishMasterPostfix := .Values.deviceServers.centralnode.mid.DishMasterPostfix }}
 entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_base_device.HelperBaseDevice"
   - name: "ska_tmc_common.test_helpers.helper_mccs_controller_device.HelperMCCSController"
@@ -46,9 +48,9 @@ server:
         - name: "ska_low/tm_leaf_node/sdp_subarray01"
       - name: "HelperDishDevice"
         devices:
-          {{- range .Values.deviceServers.mocks.dishNames }}
-        - name: "{{ . }}"
-          {{- end }}
+        {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
+        - name: "{{ . | lower }}/{{ $DishMasterPrefix }}/{{ $DishMasterPostfix }}"
+        {{- end }}
         - name: "ska_mid/tm_leaf_node/d0001"
 depends_on:
   - device: sys/database/2
