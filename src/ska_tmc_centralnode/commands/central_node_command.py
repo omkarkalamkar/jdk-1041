@@ -111,7 +111,8 @@ class TelescopeOnOff(CentralNodeCommand):
         self.dish_adapters = []
         try:
             self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(
-                self.component_manager.input_parameter.csp_mln_dev_name
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
                 f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
@@ -391,6 +392,76 @@ class AssignReleaseResources(CentralNodeCommand):
             return (
                 ResultCode.FAILED,
                 f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
+            )
+
+        return (ResultCode.OK, "")
+
+
+class LoadDishCfgCommand(CentralNodeCommand):
+    """This command class for LoadDishConfig command which
+    load dishid-vcc map json from CAR and pass it to CSP Master
+    """
+
+    def __init__(
+        self,
+        component_manager,
+        adapter_factory=None,
+        *args,
+        logger=None,
+        **kwargs,
+    ):
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
+        self._adapter_factory = adapter_factory or AdapterFactory()
+        self.csp_mln_adapter = None
+        self.sdp_mln_adapter = None
+        self.subarray_adapters = []
+        self.dish_adapters = []
+
+    def init_adapters_mid(self) -> Tuple[ResultCode, str]:
+        self.csp_mln_adapter = None
+        self.sdp_mln_adapter = None
+        self.subarray_adapters = []
+        self.dish_adapters = []
+        try:
+            self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                AdapterType.CSP_MASTER_LEAF_NODE,
+            )
+            self.logger.debug(
+                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
+            )
+        except Exception as e:
+            return self.adapter_error_message(
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                e,
+            )
+        error_dev_names = []
+        num_working = 0
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
+            if not devInfo.unresponsive:
+                try:
+                    self.dish_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.DISH
+                        )
+                    )
+                    num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for DishLeafNode {dev_name}"
+                    )
+                except Exception as e:
+                    self.logger.exception(
+                        "Error in creating adapter for %s: %s", dev_name, e
+                    )
+                    error_dev_names.append(dev_name)
+
+        if num_working == 0:
+            return (
+                ResultCode.FAILED,
+                f"Error in creating dish adapters {'.'.join(error_dev_names)}",
             )
 
         return (ResultCode.OK, "")

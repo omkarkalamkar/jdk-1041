@@ -28,12 +28,20 @@ class CentralNodeEventReceiver(EventReceiver):
         sleep_time=1,
     ):
         super().__init__(
-            component_manager, logger, max_workers, proxy_timeout, sleep_time
+            component_manager=component_manager,
+            logger=logger,
+            max_workers=max_workers,
+            proxy_timeout=proxy_timeout,
+            sleep_time=sleep_time,
         )
         self._component_manager = component_manager
+        self.attribute_dictionary = {
+            "state": self.handle_state_event,
+            "healthState": self.handle_health_state_event,
+        }
 
-    def subscribe_events(self, dev_info):
-        super().subscribe_events(dev_info)
+    def subscribe_events(self, dev_info, attribute_dictionary=None):
+        super().subscribe_events(dev_info, self.attribute_dictionary)
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
@@ -181,7 +189,6 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.device.dev_name()
             )
             return
-        self._logger.info(str(event_data))
         new_value = event_data.attr_value.value
         self._component_manager.update_telescope_availability(
             event_data.device.dev_name(), new_value
@@ -207,7 +214,6 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.device.dev_name()
             )
             return
-        self._logger.info(str(event_data))
         new_value = event_data.attr_value.value
         self._component_manager.update_telescope_availability(
             event_data.device.dev_name(), new_value
