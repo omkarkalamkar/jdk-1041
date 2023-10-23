@@ -45,7 +45,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.aki
 @pytest.mark.SKA_low
 def test_all_working(tango_context):
     logger.info("%s", tango_context)

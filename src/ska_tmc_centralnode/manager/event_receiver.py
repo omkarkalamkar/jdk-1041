@@ -35,10 +35,6 @@ class CentralNodeEventReceiver(EventReceiver):
 
     def subscribe_events(self, dev_info):
         super().subscribe_events(dev_info)
-        self._logger.info(f"My dev info is >>{dev_info.dev_name}")
-        self._logger.info(
-            f"My dish dev info >>>>> {self._component_manager.input_parameter.dish_dev_names}"
-        )
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:

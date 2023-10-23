@@ -22,7 +22,7 @@ from ska_tmc_centralnode.model.input import (
 
 logger = logging.getLogger(__name__)
 SLEEP_TIME = 0.5
-TIMEOUT = 20
+TIMEOUT = 25
 DISH_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d0"
 NUM_DISHES = 10
 MID_CSP_MLN_DEVICE = "ska_mid/tm_leaf_node/csp_master"
