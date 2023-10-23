@@ -42,6 +42,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         task_abort_event: Optional[threading.Event] = None,
     ) -> None:
         """:param logger: logger
+        :param dish_cfg_params: dishid vcc map params
         :type logger: logging.Logger
         :param task_callback: Update task state, defaults to None
         :type task_callback: Callable, optional
@@ -86,7 +87,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         3. Invoke command on csp master leaf node
         4. Invoke SetKValue command on Dish Leaf Node for each dish id
         provided in dishid_vcc map
-        :param argin: dishid vcc map params
+        :param dish_cfg_params: dishid vcc map params
         """
 
         result_code, message = self.init_adapters()
