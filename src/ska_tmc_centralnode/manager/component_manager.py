@@ -28,6 +28,7 @@ from tango import DevState
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
+from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
@@ -48,6 +49,7 @@ from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
+from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 from ska_tmc_centralnode.utils.constants import (
     REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
     REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
@@ -448,7 +450,7 @@ class CNComponentManager(TmcComponentManager):
         """Updates the LRCR callback with received event.
 
         Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
-        Whenever there is exception occured , (unique_id,exception_msg) event is first raised
+        Whenever there is exception occurred , (unique_id,exception_msg) event is first raised
         and catched in ValueError.The exception_msg and command_id is then passed to long_running_result_callback.
         Command_mapping contains {centralnode_command_id:unique_id} , all events are verified with respect to this mapping.
         If there is no command_mapping present the event might be of old command.
@@ -626,6 +628,46 @@ class CNComponentManager(TmcComponentManager):
         task_status, response = self.submit_task(
             telescopestandby_command.telescope_standby,
             args=[self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
+    def load_dish_cfg(self, argin: str, task_callback: Callable = None):
+        """
+        Load Dish Cfg command for Dish-VCC map.
+        :param argin: Dish Id Vcc map initial params
+        :return: a result code and message
+        """
+        loadishcfg_command = LoadDishCfg(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        try:
+            dishid_vcc_map_params = json.loads(argin)
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
+            return loadishcfg_command.reject_command(
+                f"The JSON string is malformed. Error: {str(e)}"
+            )
+        else:
+            (
+                dishid_vcc_map_json,
+                error_message,
+            ) = loadishcfg_command.get_dishid_vcc_map_json(
+                dishid_vcc_map_params
+            )
+            if error_message:
+                return loadishcfg_command.reject_command(error_message)
+            self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
+            config_json_validator = DishConfigValidator(dishid_vcc_map_json)
+            if not config_json_validator.is_json_valid():
+                return loadishcfg_command.reject_command(
+                    "Validation Failed for Dish Id Vcc map json"
+                )
+
+        task_status, response = self.submit_task(
+            loadishcfg_command.load_dish_cfg,
+            args=[argin, self.logger],
             task_callback=task_callback,
         )
         return task_status, response

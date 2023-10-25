@@ -11,6 +11,7 @@ entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
   - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
   - name: "ska_tmc_common.test_helpers.helper_csp_master_device.HelperCspMasterDevice"
+  - name: "ska_tmc_common.test_helpers.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
   - name: "cn_helper_subarray_device.CNHelperSubArrayDevice"
     path: "/app/tests/helpers/cn_helper_subarray_device.py"
 server:
@@ -18,13 +19,15 @@ server:
   instances:
     - name: "01"
       classes:
+      - name: "HelperCspMasterLeafDevice"
+        devices:
+        - name: "ska_mid/tm_leaf_node/csp_master"
       - name: "HelperCspMasterDevice"
         devices:
         - name: "mid-csp/control/0"
         - name: "low-csp/control/0"
       - name: "HelperBaseDevice"
         devices:
-        - name: "ska_mid/tm_leaf_node/csp_master"
         - name: "ska_mid/tm_leaf_node/sdp_master"
         - name: "ska_low/tm_leaf_node/csp_master"
         - name: "ska_low/tm_leaf_node/sdp_master"

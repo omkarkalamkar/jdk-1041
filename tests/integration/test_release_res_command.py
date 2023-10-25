@@ -292,7 +292,7 @@ def test_release_resources_error_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occured, command failed.",
+            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occurred, command failed.",
         ),
         lookahead=6,
     )
@@ -315,7 +315,7 @@ def test_release_resources_mid_timeout(
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-
+    subarray_proxy.SetisSubarrayAvailable(True)
     ensure_checked_devices(central_node)
 
     result, unique_id = central_node.TelescopeOn()
@@ -363,8 +363,6 @@ def test_release_resources_mid_timeout(
 
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
     tmc_subarray.SetDefective(TIMEOUT_DEFECT)
-
-    subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id = central_node.ReleaseResources(
@@ -382,7 +380,7 @@ def test_release_resources_mid_timeout(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Timeout has occured, command failed",
+            "Timeout has occurred, command failed",
         ),
         lookahead=6,
     )

@@ -41,7 +41,8 @@ autodoc_mock_imports = [
     "ska_ser_skuid",
     "transitions",
     "ska_tmc_common",
-    "ska_ser_log_transactions"
+    "ska_ser_log_transactions",
+    "load_dish_config_command"
 ]
 
 import os
