@@ -60,7 +60,7 @@ class CentralNodeMid(AbstractCentralNode):
 
     SdpMasterFQDN = device_property(dtype="str")
 
-    DishMasterFQDN = device_property(dtype="str")
+    DishMasterFQDN = device_property(dtype=("str",))
 
     # ----------
     # Attributes
@@ -283,8 +283,8 @@ class CentralNodeMid(AbstractCentralNode):
             cm.input_parameter.dish_leaf_node_dev_names.append(
                 self.DishLeafNodePrefix + dish_id
             )
-            cm.input_parameter.dish_dev_names.append(self.DishMasterFQDN)
 
+        cm.input_parameter.dish_dev_names = self.DishMasterFQDN
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
         cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
