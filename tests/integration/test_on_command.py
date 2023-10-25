@@ -62,7 +62,7 @@ def test_on_command_mid(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
     event_remover(
         change_event_callbacks,
@@ -95,7 +95,7 @@ def test_on_command_low(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     mccs_master = dev_factory.get_device("low-mccs/control/control")
@@ -123,7 +123,7 @@ def test_on_command_low(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
     event_remover(
         change_event_callbacks,

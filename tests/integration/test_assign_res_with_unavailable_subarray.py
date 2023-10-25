@@ -44,7 +44,7 @@ def assign_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(False)

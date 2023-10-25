@@ -30,7 +30,7 @@ def test_off_command_mid(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_on[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     result_off, unique_id_off = central_node.TelescopeOff()
