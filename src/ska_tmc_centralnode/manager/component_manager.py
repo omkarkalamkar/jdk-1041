@@ -310,7 +310,7 @@ class CNComponentManager(TmcComponentManager):
         :param dev_name: device name
         :type dev_name: str
         """
-        if dev_name.lower() in self.input_parameter.subarray_dev_names:
+        if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterMid)
