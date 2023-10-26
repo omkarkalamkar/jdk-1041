@@ -409,7 +409,7 @@ def test_assign_resources_exception_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occured, command failed.",
+            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occurred, command failed.",
         ),
         lookahead=4,
     )
