@@ -287,8 +287,11 @@ class CentralNodeMid(AbstractCentralNode):
             cm.input_parameter.dish_leaf_node_dev_names.append(
                 self.DishLeafNodePrefix + dish_id
             )
+        for dish_name in self.DishMasterFQDN:
+            if "ska" in dish_name:
+                cm.input_parameter.dish_dev_names.append(dish_name)
+                break
 
-        cm.input_parameter.dish_dev_names = self.DishMasterFQDN
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
         cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
