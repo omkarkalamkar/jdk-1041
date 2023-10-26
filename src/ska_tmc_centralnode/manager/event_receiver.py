@@ -4,6 +4,7 @@ from ska_tmc_common.event_receiver import EventReceiver
 from ska_tmc_centralnode.utils.constants import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
+    MCCS_MLN_DEVICE,
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
 )
@@ -28,12 +29,16 @@ class CentralNodeEventReceiver(EventReceiver):
         sleep_time=1,
     ):
         super().__init__(
-            component_manager, logger, max_workers, proxy_timeout, sleep_time
+            component_manager=component_manager,
+            logger=logger,
+            max_workers=max_workers,
+            proxy_timeout=proxy_timeout,
+            sleep_time=sleep_time,
         )
         self._component_manager = component_manager
 
-    def subscribe_events(self, dev_info):
-        super().subscribe_events(dev_info)
+    def subscribe_events(self, dev_info, attribute_dictionary=None):
+        super().subscribe_events(dev_info, self.attribute_dictionary)
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
@@ -89,6 +94,12 @@ class CentralNodeEventReceiver(EventReceiver):
                         tango.EventType.CHANGE_EVENT,
                         self.handle_masterln_availability_event,
                         stateless=True,
+                    )
+                if dev_info.dev_name is MCCS_MLN_DEVICE:
+                    proxy.subscribe_event(
+                        "longRunningCommandResult",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_lrcr_event,
                     )
 
             except Exception as e:

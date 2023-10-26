@@ -154,6 +154,7 @@ def assign_resources(
     result, unique_id = central_node.TelescopeOff()
 
 
+@pytest.mark.kk
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -473,7 +474,7 @@ def test_assign_resources_mid_timeout(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Timeout has occured, command failed",
+            "Timeout has occurred, command failed",
         ),
         lookahead=4,
     )
