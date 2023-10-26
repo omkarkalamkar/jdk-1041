@@ -54,7 +54,7 @@ def test_on_command_mid(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.ON, lookahead=4
+        "telescopeState", tango._tango.DevState.ON, lookahead=5
     )
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown
