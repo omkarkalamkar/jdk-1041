@@ -60,7 +60,11 @@ class CentralNodeMid(AbstractCentralNode):
 
     SdpMasterFQDN = device_property(dtype="str")
 
-    DishMasterFQDN = device_property(dtype=("str",))
+    DishMasterFQDN = device_property(
+        dtype=("str",),
+        doc="List of Dish Master devices",
+        default_value=tuple(),
+    )
 
     # ----------
     # Attributes
