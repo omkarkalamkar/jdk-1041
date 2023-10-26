@@ -37,7 +37,7 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
     sdp_subarray_ln.SetDirectState(DevState.ON)
     dish_ln.SetDirectState(DevState.ON)
     change_event_callbacks["tmOpState"].assert_change_event(
-        DevState.FAULT, lookahead=2
+        DevState.FAULT, lookahead=4
     )
     assert central_node.tmOpState == DevState.FAULT
     event_remover(
@@ -75,7 +75,7 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
     sdp_subarray_ln.SetDirectState(DevState.ON)
 
     change_event_callbacks["tmOpState"].assert_change_event(
-        DevState.FAULT, lookahead=2
+        DevState.FAULT, lookahead=4
     )
     assert central_node.tmOpState == DevState.FAULT
     event_remover(

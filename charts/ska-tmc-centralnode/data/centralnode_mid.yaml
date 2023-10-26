@@ -2,6 +2,8 @@ name: "centralnode-test"
 function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
+{{- $DishMasterPrefix := .Values.deviceServers.centralnode.mid.DishMasterPrefix }}
+{{- $DishMasterPostfix := .Values.deviceServers.centralnode.mid.DishMasterPostfix }}
 entrypoints:
   - name: "ska_tmc_centralnode.central_node_mid.CentralNodeMid"
 server:
@@ -32,6 +34,11 @@ server:
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
           - "{{ . }}"
+          {{- end }}
+        - name: "DishMasterFQDN"
+          values:
+          {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
+          - "{{ . | lower }}/{{ $DishMasterPrefix }}/{{ $DishMasterPostfix }}"
           {{- end }}
         - name: "SkuidService"
           values:

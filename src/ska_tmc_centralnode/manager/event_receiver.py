@@ -1,6 +1,7 @@
 import tango
 from ska_tmc_common.event_receiver import EventReceiver
 
+from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
@@ -65,7 +66,14 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_obs_state_event,
                         stateless=True,
                     )
-                if "dish/master" in dev_info.dev_name:
+                if (
+                    isinstance(
+                        self._component_manager.input_parameter,
+                        InputParameterMid,
+                    )
+                    and dev_info.dev_name
+                    in self._component_manager.input_parameter.dish_dev_names
+                ):
                     proxy.subscribe_event(
                         "dishMode",
                         tango.EventType.CHANGE_EVENT,

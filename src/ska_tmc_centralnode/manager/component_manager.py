@@ -314,7 +314,10 @@ class CNComponentManager(TmcComponentManager):
         """
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
-        elif "dish/master" in dev_name.lower():
+        elif (
+            isinstance(self.input_parameter, InputParameterMid)
+            and dev_name.lower() in self.input_parameter.dish_dev_names
+        ):
             devInfo = DishDeviceInfo(dev_name, False)
         else:
             devInfo = DeviceInfo(dev_name, False)

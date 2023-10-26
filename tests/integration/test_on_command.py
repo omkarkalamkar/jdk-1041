@@ -43,7 +43,7 @@ def test_on_command_mid(
     sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectState(tango.DevState.ON)
 
-    dish_master = dev_factory.get_device("ska001/dish/master")
+    dish_master = dev_factory.get_device("ska001/elt/master")
     dish_master.SetDirectDishMode(DishMode.STANDBY_FP)
     dish_master.SetDirectPointingState(PointingState.READY)
 
@@ -54,7 +54,7 @@ def test_on_command_mid(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.ON, lookahead=4
+        "telescopeState", tango._tango.DevState.ON, lookahead=5
     )
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown
@@ -62,7 +62,7 @@ def test_on_command_mid(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
     event_remover(
         change_event_callbacks,
@@ -95,7 +95,7 @@ def test_on_command_low(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     mccs_master = dev_factory.get_device("low-mccs/control/control")
@@ -123,7 +123,7 @@ def test_on_command_low(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
     event_remover(
         change_event_callbacks,
