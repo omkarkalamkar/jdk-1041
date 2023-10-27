@@ -8,7 +8,7 @@ def reset_command(central_node_fqdn):
     central_node = dev_factory.get_device(central_node_fqdn)
     result_code, message = central_node.Reset()
     assert result_code == ResultCode.REJECTED
-    assert message == "Reset command is not implemented"
+    assert message == ["Reset command is not implemented"]
 
 
 @pytest.mark.post_deployment
