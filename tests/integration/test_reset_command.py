@@ -20,4 +20,4 @@ def test_reset_command_mid():
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_reset_command_low():
-    reset_command("ska_mid/tm_central/central_node")
+    reset_command("ska_low/tm_central/central_node")
