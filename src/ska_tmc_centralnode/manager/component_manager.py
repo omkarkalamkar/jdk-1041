@@ -171,7 +171,10 @@ class CNComponentManager(TmcComponentManager):
     ) -> tuple[TaskStatus, str]:
         """
         Placeholder method for reset command.
-        :param task_callback:
+        :param task_callback: Update task status, defaults to None
+        :type task_callback: Callable, optional
+        :return: task_status, message
+        :rtype: tuple
         """
         return TaskStatus.REJECTED, "Reset command is not implemented"
 
