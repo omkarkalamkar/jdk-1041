@@ -44,7 +44,10 @@ from ska_tmc_centralnode.input_validator import (
     AssignResourceValidator,
     ReleaseResourceValidator,
 )
-from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
+from ska_tmc_centralnode.manager.aggregators import (
+    LoadDishCfgCommandResultAggregator,
+    TMCOpStateAggregator,
+)
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
@@ -156,6 +159,11 @@ class CNComponentManager(TmcComponentManager):
         self.command_in_progress: str = ""
         self.subarray_devname: str = ""
         self.command_mapping = {}
+        self.result_codes_mapping = {}
+        self.dish_names_for_k_value = []
+        self.no_of_events_for_command = 0
+        self.load_dish_cfg_aggregated_result = None
+        self.load_dish_cfg_command_id = None
         self.supported_commands = (
             "AssignResources",
             "ReleaseResources",
@@ -240,6 +248,10 @@ class CNComponentManager(TmcComponentManager):
                 result.append(dev)
                 continue
         return result
+
+    def get_load_disg_cfg_resultcode(self):
+        """Return Aggregated command result for"""
+        return self.load_dish_cfg_aggregated_result
 
     def get_subarray_obsstate(self) -> Optional[ObsState]:
         """
@@ -519,6 +531,70 @@ class CNComponentManager(TmcComponentManager):
                         ResultCode.FAILED,
                         exception_msg=exception_message,
                     )
+
+    def update_load_dish_cfg_results(
+        self, dev_name: str, value: tuple, is_async_result=False
+    ):
+        """This method used to update the result return from Csp Master Leaf Node
+        and updated results returned from Dish Leaf Nodes for SetKValue command
+        :param dev_name: name of the device who's event has been captured in this method
+        :type dev_name: str
+        :param value: longRunningCommandResult attribute event.
+        :type value: tuple
+        """
+        self.logger.info(
+            "Received longRunningCommandResult event for device: %s, with value: %s",
+            dev_name,
+            value,
+        )
+        if is_async_result:
+            result_code_or_exception_or_task_status = value
+        else:
+            _, result_code_or_exception_or_task_status = value
+        if result_code_or_exception_or_task_status:
+            self.result_codes_mapping[
+                dev_name
+            ] = result_code_or_exception_or_task_status
+            self.logger.info(
+                "Dish names for k values %s and result_codes_mapping are %s",
+                self.dish_names_for_k_value,
+                self.result_codes_mapping,
+            )
+
+        # When all events received from dish then aggregate the result
+        if len(self.dish_names_for_k_value) == len(self.result_codes_mapping):
+            # Aggregate the result
+            self.aggregate_load_dish_cfg_results()
+
+    def aggregate_load_dish_cfg_results(self):
+        """This method aggregate load dish cfg command result based on
+        generated data
+        """
+        load_dish_cfg_aggregator = LoadDishCfgCommandResultAggregator(
+            self, self.logger
+        )
+        (
+            load_dish_cfg_aggregated_result,
+            message,
+        ) = load_dish_cfg_aggregator.aggregate()
+        self.load_dish_cfg_aggregated_result = load_dish_cfg_aggregated_result
+        if (
+            self.load_dish_cfg_aggregated_result == ResultCode.FAILED
+            and self.load_dish_cfg_command_id
+        ):
+            exception_message = f"Exception occurred on device: {message}"
+            self.long_running_result_callback(
+                self.load_dish_cfg_command_id,
+                ResultCode.FAILED,
+                exception_msg=exception_message,
+            )
+
+    def reset_load_dish_cfg_data(self):
+        """Reset all data which is set for aggregating LoadDisgCfg command"""
+        self.load_dish_cfg_aggregated_result = ""
+        self.dish_names_for_k_value = []
+        self.result_codes_mapping = {}
+        self.load_dish_cfg_command_id = None
 
     def _aggregate_state(self):
         """

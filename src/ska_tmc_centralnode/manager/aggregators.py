@@ -1,4 +1,5 @@
 from ska_control_model import HealthState
+from ska_tango_base.commands import ResultCode
 from ska_tmc_common.aggregators import Aggregator
 from ska_tmc_common.enum import DishMode
 from tango import DevState
@@ -363,3 +364,48 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
             self._component_manager.set_telescope_availability = (
                 telescope_availability
             )
+
+
+class LoadDishCfgCommandResultAggregator:
+    """This Class Aggregate LoadDishCfg command results
+    from Csp Master Leaf Nodes and Dish Leaf Nodes
+    """
+
+    def __init__(self, cm, logger) -> None:
+        """
+        :param cm: Central Node Component Manager
+        :param type: component manager
+        :param logger: Logger
+        """
+        self._component_manager = cm
+        self.logger = logger
+
+    def _get_result_codes(self) -> list:
+        """Get Result codes list from command result"""
+        return [
+            result_code[0][0]
+            for result_code in self._component_manager.result_codes_mapping.values()
+        ]
+
+    def aggregate(self) -> tuple:
+        """Aggregate the results and return Final Result code
+        :retrun: result code and message
+        :return type: tuple
+        """
+        result_code = ""
+        message = ""
+        self.logger.info(
+            "Aggrgating result for LDC with values %s",
+            self._component_manager.result_codes_mapping.values(),
+        )
+        result_codes = self._get_result_codes()
+        self.logger.info("Result codes are %s", result_codes)
+
+        if ResultCode.FAILED in result_codes:
+            result_code = ResultCode.FAILED
+            message = "Failed Result"
+
+        result_codes_set = set(result_codes)
+        if result_codes_set == set([ResultCode.OK]):
+            result_code = ResultCode.OK
+        return result_code, message

@@ -106,6 +106,13 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_masterln_availability_event,
                         stateless=True,
                     )
+                    if dev_info.dev_name == MID_CSP_MLN_DEVICE:
+                        proxy.subscribe_event(
+                            "longRunningCommandResult",
+                            tango.EventType.CHANGE_EVENT,
+                            self.handle_load_dish_cfg_result_callback,
+                            stateless=True,
+                        )
 
             except Exception as e:
                 self._logger.error(
@@ -176,6 +183,43 @@ class CentralNodeEventReceiver(EventReceiver):
         self._component_manager.update_long_running_command_result(
             event_data.device.dev_name(), new_value
         )
+
+    def handle_load_dish_cfg_result_callback(
+        self, event_data: tango.EventData
+    ) -> None:
+        """This callback is called in following two scenario
+        1. LongrunningResult returned from CspMasterLeafNode for LoadDishCfg command
+        2. SetKValue command result returned from DishLeafNodes
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        if event_data.err:
+            errors = event_data.errors
+            for error in errors:
+                error_msg = f"{error.reason},{error.desc}"
+                self._logger.error(error_msg)
+            self._component_manager.update_event_failure(
+                event_data.device.dev_name()
+            )
+            return
+        if getattr(event_data, "attr_value", False):
+            self._logger.debug(
+                f"In handle_csp_mln_lrcr event_data.attr_value.value is: {event_data.attr_value.value}"
+            )
+            new_value = event_data.attr_value.value
+            self._component_manager.update_load_dish_cfg_results(
+                event_data.device.dev_name(), new_value
+            )
+        # In case of Async callback get command result from argout
+        elif getattr(event_data, "argout", False):
+            self._logger.debug(
+                f"In handle_load_dish_cfg_result_callback event_data.argout is: {event_data.argout}"
+            )
+            new_value = event_data.argout
+            self._component_manager.update_load_dish_cfg_results(
+                event_data.device.dev_name(), new_value, is_async_result=True
+            )
 
     def handle_masterln_availability_event(
         self, event_data: tango.EventData

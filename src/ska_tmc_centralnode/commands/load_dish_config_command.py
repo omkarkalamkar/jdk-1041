@@ -50,7 +50,15 @@ class LoadDishCfg(LoadDishCfgCommand):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
-        task_callback(status=TaskStatus.IN_PROGRESS)
+        self.task_callback = task_callback
+        self.task_callback(status=TaskStatus.IN_PROGRESS)
+        self.component_manager.command_in_progress = "LoadDishCfg"
+        self.component_manager.command_result = ResultCode.STARTED
+        self.component_manager.start_timer(
+            self.timeout_id,
+            self.component_manager.command_timeout,
+            self.timeout_callback,
+        )
         ret_code, message = self.do(dish_cfg_params)
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
@@ -60,10 +68,29 @@ class LoadDishCfg(LoadDishCfgCommand):
                 exception=message,
             )
         else:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.OK,
+            self.start_tracker_thread(
+                self.component_manager.get_load_disg_cfg_resultcode,
+                [ResultCode.OK],
+                task_abort_event,
+                timeout_id=self.timeout_id,
+                timeout_callback=self.timeout_callback,
+                command_id=self.command_id,
+                lrcr_callback=self.component_manager.long_running_result_callback,
             )
+        self.component_manager.load_dish_cfg_command_id = self.command_id
+
+    def update_task_status(self, result: ResultCode, message: str = ""):
+        """Updates the task status for command"""
+        if result == ResultCode.FAILED:
+            self.task_callback(
+                result=result, status=TaskStatus.COMPLETED, exception=message
+            )
+        else:
+            self.task_callback(result=result, status=TaskStatus.COMPLETED)
+        self.component_manager.command_in_progress = ""
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
+        self.component_manager.reset_load_dish_cfg_data()
 
     def get_dishid_vcc_map_json(
         self, initial_params: dict
@@ -176,14 +203,15 @@ class LoadDishCfg(LoadDishCfgCommand):
                         "Invoking SetKValue on dish adapter %s",
                         dish_adapter.dev_name,
                     )
-                    return_code, message_or_unique_id = self.send_command(
-                        [dish_adapter],
-                        f"Error in calling SetKValue command on dish adapter {dish_adapter.dev_name}",
+                    dish_adapter.proxy.command_inout_asynch(
                         "SetKValue",
                         k_value,
+                        self.component_manager.event_receiver_object.handle_load_dish_cfg_result_callback,
                     )
-                    return_codes.append(return_code[0])
-                    message_or_unique_ids.append(message_or_unique_id[0])
+                    # Append dish dev names to track on which dish SetKValue is invoked
+                    self.component_manager.dish_names_for_k_value.append(
+                        dish_adapter.dev_name
+                    )
                 else:
                     error_message = (
                         f"Dish adapter not found for dish id {dish_id}"
