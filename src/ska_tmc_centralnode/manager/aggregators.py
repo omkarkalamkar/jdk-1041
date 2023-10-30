@@ -380,12 +380,19 @@ class LoadDishCfgCommandResultAggregator:
         self._component_manager = cm
         self.logger = logger
 
-    def _get_result_codes(self) -> list:
-        """Get Result codes list from command result"""
-        return [
-            int(result_code[0])
-            for result_code in self._component_manager.result_codes_mapping.values()
-        ]
+    def _get_result_codes_and_failed_msg(self) -> tuple:
+        """Get Result codes list and failed message list from command result"""
+        result_codes = []
+        failed_messages = []
+        for (
+            dev_name,
+            result_code_message_list,
+        ) in self._component_manager.result_codes_mapping.items():
+            result_codes.append(int(result_code_message_list[0]))
+            if int(result_code_message_list[0]) == ResultCode.FAILED:
+                failed_message = f"{dev_name}: {result_code_message_list[1]}"
+                failed_messages.append(failed_message)
+        return result_codes, failed_messages
 
     def aggregate(self) -> tuple:
         """Aggregate the results and return Final Result code
@@ -398,12 +405,17 @@ class LoadDishCfgCommandResultAggregator:
             "Aggrgating result for LDC with values %s",
             self._component_manager.result_codes_mapping.values(),
         )
-        result_codes = self._get_result_codes()
-        self.logger.info("Result codes are %s", result_codes)
+        result_codes, failed_messages = self._get_result_codes_and_failed_msg()
+        self.logger.info(
+            "Result codes are %s and failed messages are %s",
+            result_codes,
+            failed_messages,
+        )
 
         if ResultCode.FAILED in result_codes:
             result_code = ResultCode.FAILED
-            message = "Failed Result"
+            failed_message_join = ",".join(failed_messages)
+            message = f"Command failed on device {failed_message_join}"
 
         result_codes_set = set(result_codes)
         if result_codes_set == set([ResultCode.OK]):
