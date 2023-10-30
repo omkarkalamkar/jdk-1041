@@ -105,6 +105,7 @@ class CNComponentManagerLow(CNComponentManager):
         )
         self.subarray_mccsmln_event = {}
         self.error_dict = {}
+        self.command_mapping = {}
 
     def check_if_mccs_mln_is_responsive(self):
         self.logger.info("Checking if MCCSMasterLeafNode is responsive")
@@ -136,10 +137,14 @@ class CNComponentManagerLow(CNComponentManager):
             dev_name,
             value,
         )
+        self.logger.info(
+            "The command mapping dictionary is: %s", self.command_mapping
+        )
         if not self.subarray_mccsmln_event.get(self.command_id):
             self.subarray_mccsmln_event[self.command_id] = {}
 
         unique_id, result_code_or_exception_or_task_status = value
+
         if unique_id.endswith(
             self.supported_commands
         ):  # ignoring other command events
@@ -148,14 +153,24 @@ class CNComponentManagerLow(CNComponentManager):
                     f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
                 )
 
-                if not result_code_or_exception_or_task_status:
-                    # This is in case an empty event is received.
-                    pass
-                elif (
+                # if not result_code_or_exception_or_task_status:
+                #     # This is in case an empty event is received.
+                #     pass
+                if (
                     int(result_code_or_exception_or_task_status)
                     == ResultCode.OK
                 ):
-                    if unique_id in self.command_mapping[self.command_id]:
+                    self.logger.info(
+                        "The command mapping dictionary is: %s",
+                        self.command_mapping,
+                    )
+                    self.logger.info(
+                        "The subarray_mccsmln_event dictionary is: %s",
+                        self.subarray_mccsmln_event,
+                    )
+                    if unique_id in self.command_mapping.get(
+                        self.command_id, []
+                    ):
                         self.subarray_mccsmln_event[self.command_id][
                             dev_name
                         ] = ResultCode.OK
