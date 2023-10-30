@@ -81,6 +81,11 @@ class LoadDishCfg(LoadDishCfgCommand):
 
     def update_task_status(self, result: ResultCode, message: str = ""):
         """Updates the task status for command"""
+        self.logger.info(
+            "Calling task callback for LoadDishCfg with result %s and message %s",
+            result,
+            message,
+        )
         if result == ResultCode.FAILED:
             self.task_callback(
                 result=result, status=TaskStatus.COMPLETED, exception=message
@@ -177,6 +182,9 @@ class LoadDishCfg(LoadDishCfgCommand):
             "LoadDishCfg",
             json.dumps(dishid_vcc_map_params),
         )
+        self.component_manager.dev_names_for_load_dish_cfg.append(
+            self.csp_mln_adapter.dev_name
+        )
         return return_codes, message_or_unique_ids
 
     def _set_k_numbers_to_dish(
@@ -209,7 +217,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                         self.component_manager.event_receiver_object.handle_load_dish_cfg_result_callback,
                     )
                     # Append dish dev names to track on which dish SetKValue is invoked
-                    self.component_manager.dish_names_for_k_value.append(
+                    self.component_manager.dev_names_for_load_dish_cfg.append(
                         dish_adapter.dev_name
                     )
                 else:

@@ -383,7 +383,7 @@ class LoadDishCfgCommandResultAggregator:
     def _get_result_codes(self) -> list:
         """Get Result codes list from command result"""
         return [
-            result_code[0][0]
+            int(result_code[0])
             for result_code in self._component_manager.result_codes_mapping.values()
         ]
 
@@ -408,4 +408,7 @@ class LoadDishCfgCommandResultAggregator:
         result_codes_set = set(result_codes)
         if result_codes_set == set([ResultCode.OK]):
             result_code = ResultCode.OK
+        self.logger.info(
+            "Returning result code %s and message %s", result_code, message
+        )
         return result_code, message
