@@ -551,42 +551,43 @@ class CNComponentManager(TmcComponentManager):
             dev_name,
             value,
         )
-        result_code_or_exception = []
-        if is_async_result:
-            # Set result code and message
-            self.logger.info("Got Value %s", value)
-            self.logger.info("Result code %s", value[0][0])
-            self.logger.info("Message %s", value[1][0])
-            result_code_or_exception = [value[0][0], value[1][0]]
-        else:
-            _, result_code_or_exception_or_task_status = value
-            if result_code_or_exception_or_task_status.isdigit():
-                result_code_or_exception = [
-                    result_code_or_exception_or_task_status,
-                    "",
-                ]
-            elif result_code_or_exception_or_task_status:
-                result_code_or_exception = [
-                    ResultCode.FAILED,
-                    result_code_or_exception_or_task_status,
-                ]
-        if result_code_or_exception:
-            self.result_codes_mapping[dev_name] = result_code_or_exception
-            self.logger.info(
-                "Dev names names for load_dish_cfg values %s and result_codes_mapping are %s",
-                self.dev_names_for_load_dish_cfg,
-                self.result_codes_mapping,
-            )
+        with self.lock:
+            result_code_or_exception = []
+            if is_async_result:
+                # Set result code and message
+                self.logger.info("Got Value %s", value)
+                self.logger.info("Result code %s", value[0][0])
+                self.logger.info("Message %s", value[1][0])
+                result_code_or_exception = [value[0][0], value[1][0]]
+            else:
+                _, result_code_or_exception_or_task_status = value
+                if result_code_or_exception_or_task_status.isdigit():
+                    result_code_or_exception = [
+                        result_code_or_exception_or_task_status,
+                        "",
+                    ]
+                elif result_code_or_exception_or_task_status:
+                    result_code_or_exception = [
+                        ResultCode.FAILED,
+                        result_code_or_exception_or_task_status,
+                    ]
+            if result_code_or_exception:
+                self.result_codes_mapping[dev_name] = result_code_or_exception
+                self.logger.info(
+                    "Dev names names for load_dish_cfg values %s and result_codes_mapping are %s",
+                    self.dev_names_for_load_dish_cfg,
+                    self.result_codes_mapping,
+                )
 
-        # When all events received from dishes and Csp master leaf node then aggregate the result
-        if len(self.dev_names_for_load_dish_cfg) == len(
-            self.result_codes_mapping
-        ):
-            # Aggregate the result
-            self.logger.info(
-                "All Events received for load dish cfg. Aggregating results"
-            )
-            self.aggregate_load_dish_cfg_results()
+            # When all events received from dishes and Csp master leaf node then aggregate the result
+            if len(self.dev_names_for_load_dish_cfg) == len(
+                self.result_codes_mapping
+            ):
+                # Aggregate the result
+                self.logger.info(
+                    "All Events received for load dish cfg. Aggregating results"
+                )
+                self.aggregate_load_dish_cfg_results()
 
     def aggregate_load_dish_cfg_results(self):
         """This method aggregate load dish cfg command result based on

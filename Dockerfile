@@ -14,6 +14,8 @@ RUN curl -sSL https://install.python-poetry.org | python3 - && \
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install git -y
+
 COPY --chown=tango:tango . /app
 
 # Install runtime dependencies and the app
