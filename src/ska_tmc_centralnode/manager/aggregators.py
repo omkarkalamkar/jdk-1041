@@ -414,7 +414,7 @@ class LoadDishCfgCommandResultAggregator:
 
         if ResultCode.FAILED in result_codes:
             result_code = ResultCode.FAILED
-            failed_message_join = ",".join(failed_messages)
+            failed_message_join = " ".join(failed_messages)
             message = f"Command failed on device {failed_message_join}"
 
         result_codes_set = set(result_codes)

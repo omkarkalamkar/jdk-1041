@@ -1,9 +1,6 @@
-import pytest
-
 from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 
 
-@pytest.mark.validate
 class TestDishConfigValidator:
     """Implement test cases to validate Dish Config
     Json

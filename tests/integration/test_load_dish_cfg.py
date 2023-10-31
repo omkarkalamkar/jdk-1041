@@ -117,9 +117,13 @@ def load_dish_cfg_when_csp_is_defective(
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
 
+    EXPECTED_FAILED_MESSAGE = f"Exception occurred on device:" \
+    f" Command failed on device {MID_CSP_MLN_DEVICE}: " \
+    "Exception occurred, command failed."
+
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.FAILED))),
+        (unique_id[0], EXPECTED_FAILED_MESSAGE),
         lookahead=4,
     )
 

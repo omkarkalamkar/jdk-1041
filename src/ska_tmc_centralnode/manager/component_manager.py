@@ -562,10 +562,13 @@ class CNComponentManager(TmcComponentManager):
             else:
                 _, result_code_or_exception_or_task_status = value
                 if result_code_or_exception_or_task_status.isdigit():
-                    result_code_or_exception = [
-                        result_code_or_exception_or_task_status,
-                        "",
-                    ]
+                    # Failed event is called twice one with error message and other with result code
+                    # in case of second Failed event just ignore it as Failed Message already updated in first event call
+                    if dev_name not in self.result_codes_mapping:
+                        result_code_or_exception = [
+                            result_code_or_exception_or_task_status,
+                            "",
+                        ]
                 elif result_code_or_exception_or_task_status:
                     result_code_or_exception = [
                         ResultCode.FAILED,
