@@ -775,10 +775,9 @@ class CNComponentManager(TmcComponentManager):
                 return loadishcfg_command.reject_command(error_message)
             self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
             config_json_validator = DishConfigValidator(dishid_vcc_map_json)
-            if not config_json_validator.is_json_valid():
-                return loadishcfg_command.reject_command(
-                    "Validation Failed for Dish Id Vcc map json"
-                )
+            is_valid_dish_cfg, message = config_json_validator.is_json_valid()
+            if not is_valid_dish_cfg:
+                return loadishcfg_command.reject_command(message)
 
         task_status, response = self.submit_task(
             loadishcfg_command.load_dish_cfg,
