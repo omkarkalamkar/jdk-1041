@@ -60,6 +60,12 @@ class CentralNodeMid(AbstractCentralNode):
 
     SdpMasterFQDN = device_property(dtype="str")
 
+    DishMasterFQDN = device_property(
+        dtype=("str",),
+        doc="List of Dish Master devices",
+        default_value=tuple(),
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -276,14 +282,15 @@ class CentralNodeMid(AbstractCentralNode):
             if "MKT" in dish:
                 continue
 
-            # For now generate FQDNs for SKA dishes only
+            # For now get FQDNs for SKA dishes only
             dish_id = dish[3:]
             cm.input_parameter.dish_leaf_node_dev_names.append(
                 self.DishLeafNodePrefix + dish_id
             )
-            cm.input_parameter.dish_dev_names.append(
-                f"{'ska'}{dish_id}{'/dish/master'}"
-            )
+        for dish_name in self.DishMasterFQDN:
+            if "ska" in dish_name:
+                cm.input_parameter.dish_dev_names.append(dish_name)
+
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
         cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""

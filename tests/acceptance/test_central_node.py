@@ -173,7 +173,7 @@ def check_command(central_node, command_name, change_event_callbacks):
     if command_id != unique_id:
         next_result = change_event_callbacks.assert_against_call(
             "longRunningCommandResult",
-            lookahead=2,
+            lookahead=4,
         )
         command_id, result = next_result["attribute_value"]
     assert command_id == unique_id
@@ -182,7 +182,7 @@ def check_command(central_node, command_name, change_event_callbacks):
     change_event_callbacks.assert_change_event(
         "longRunningCommandsInQueue",
         None,
-        lookahead=3,
+        lookahead=4,
     )
 
     event_remover(

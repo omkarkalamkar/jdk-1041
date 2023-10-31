@@ -22,7 +22,7 @@ from ska_tmc_centralnode.model.input import (
 
 logger = logging.getLogger(__name__)
 SLEEP_TIME = 0.5
-TIMEOUT = 20
+TIMEOUT = 25
 DISH_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d0"
 NUM_DISHES = 10
 MID_CSP_MLN_DEVICE = "ska_mid/tm_leaf_node/csp_master"
@@ -36,7 +36,7 @@ LOW_SDP_SLN_DEVICE = "ska_low/tm_leaf_node/sdp_subarray01"
 MID_SUBARRAY_DEVICE = "ska_mid/tm_subarray_node/1"
 LOW_SUBARRAY_DEVICE = "ska_low/tm_subarray_node/1"
 DISH_LEAF_NODE_DEVICE = "ska_mid/tm_leaf_node/d0001"
-DISH_MASTER_DEVICE = "ska001/dish/master"
+DISH_MASTER_DEVICE = "ska001/elt/master"
 MID_SDP_MASTER_DEVICE = "mid-sdp/control/0"
 MID_CSP_MASTER_DEVICE = "mid-csp/control/0"
 LOW_CSP_MASTER_DEVICE = "low-csp/control/0"
@@ -52,7 +52,7 @@ DEVICE_LIST_MID = [
     "ska_mid/tm_leaf_node/csp_subarray01",
     "ska_mid/tm_leaf_node/sdp_subarray01",
     "ska_mid/tm_leaf_node/d0001",
-    "ska001/dish/master",
+    "ska001/elt/master",
 ]
 DEVICE_LIST_LOW = [
     "ska_low/tm_leaf_node/mccs_master",

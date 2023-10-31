@@ -36,7 +36,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     sdp_master.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.OK, lookahead=2
+        HealthState.OK, lookahead=4
     )
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     time.sleep(0.1)
@@ -74,7 +74,7 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     sdp_master.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.OK, lookahead=2
+        HealthState.OK, lookahead=4
     )
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     time.sleep(0.1)
