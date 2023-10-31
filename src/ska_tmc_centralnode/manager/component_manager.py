@@ -250,7 +250,7 @@ class CNComponentManager(TmcComponentManager):
         return result
 
     def get_load_disg_cfg_resultcode(self):
-        """Return Aggregated command result for"""
+        """Return Aggregated command result for Load Dish Cfg command"""
         return self.load_dish_cfg_aggregated_result
 
     def get_subarray_obsstate(self) -> Optional[ObsState]:
@@ -535,10 +535,11 @@ class CNComponentManager(TmcComponentManager):
     def update_load_dish_cfg_results(
         self, dev_name: str, value: tuple, is_async_result: bool = False
     ):
-        """This method used to update the result return from Csp Master Leaf Node
+        """This method is used to update the result returned from Csp Master Leaf Node
         and returned from Dish Leaf Nodes for SetKValue command.
         Update result_codes_mapping with dev name as a key and command result as a value
         If all events are received from all device then aggregate the result
+        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
         :param dev_name: name of the device who's event has been captured in this method
         :type dev_name: str
         :param value: longRunningCommandResult attribute event.
@@ -577,7 +578,7 @@ class CNComponentManager(TmcComponentManager):
             if result_code_or_exception:
                 self.result_codes_mapping[dev_name] = result_code_or_exception
                 self.logger.info(
-                    "Dev names names for load_dish_cfg values %s and result_codes_mapping are %s",
+                    "Dev names for load_dish_cfg values %s and result_codes_mapping are %s",
                     self.dev_names_for_load_dish_cfg,
                     self.result_codes_mapping,
                 )

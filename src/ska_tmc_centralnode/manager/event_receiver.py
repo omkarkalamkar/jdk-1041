@@ -205,7 +205,8 @@ class CentralNodeEventReceiver(EventReceiver):
             return
         if getattr(event_data, "attr_value", False):
             self._logger.debug(
-                f"In handle_csp_mln_lrcr event_data.attr_value.value is: {event_data.attr_value.value}"
+                f"In long running command result callback for csp master leaf node  "
+                f"with event_data.attr_value.value is: {event_data.attr_value.value}"
             )
             new_value = event_data.attr_value.value
             self._component_manager.update_load_dish_cfg_results(
@@ -214,7 +215,7 @@ class CentralNodeEventReceiver(EventReceiver):
         # In case of Async callback get command result from argout
         elif getattr(event_data, "argout", False):
             self._logger.debug(
-                f"In handle_load_dish_cfg_result_callback event_data.argout is: {event_data.argout}"
+                f"Received Async callback event with event_data.argout is: {event_data.argout}"
             )
             new_value = event_data.argout
             self._component_manager.update_load_dish_cfg_results(

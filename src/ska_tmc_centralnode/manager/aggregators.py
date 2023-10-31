@@ -402,7 +402,7 @@ class LoadDishCfgCommandResultAggregator:
         result_code = ""
         message = ""
         self.logger.info(
-            "Aggrgating result for LDC with values %s",
+            "Aggregating result for longRunningCommandResult attribute with values %s",
             self._component_manager.result_codes_mapping.values(),
         )
         result_codes, failed_messages = self._get_result_codes_and_failed_msg()
