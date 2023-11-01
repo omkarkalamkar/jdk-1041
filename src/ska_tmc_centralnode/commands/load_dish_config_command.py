@@ -80,7 +80,12 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.component_manager.load_dish_cfg_command_id = self.command_id
 
     def update_task_status(self, result: ResultCode, message: str = ""):
-        """Updates the task status for command"""
+        """Updates the task status for command
+        :param result: Result code of command
+        :type: ResultCode enum
+        :param message: any message returned as a part of command
+        :type message: str
+        """
         self.logger.info(
             "Calling task callback for LoadDishCfg with result %s and message %s",
             result,
