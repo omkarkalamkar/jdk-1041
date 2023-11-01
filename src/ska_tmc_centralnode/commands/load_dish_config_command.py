@@ -140,7 +140,6 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
         dish_parameters = dishid_vcc_map_json.get("dish_parameters")
-        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self._invoke_load_dish_cfg_on_csp_master_ln(dishid_vcc_map_params),
             self._set_k_numbers_to_dish(dish_parameters),
@@ -155,18 +154,6 @@ class LoadDishCfg(LoadDishCfgCommand):
                         message_or_unique_id,
                     )
                     return ResultCode.FAILED, message_or_unique_id
-                # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
-                    # return ResultCode.FAILED, message_or_unique_id
-                    unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
-        if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
         self.logger.info(
             f"Successfully Invoked LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
         )
