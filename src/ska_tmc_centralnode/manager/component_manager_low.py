@@ -104,8 +104,6 @@ class CNComponentManagerLow(CNComponentManager):
             TelescopeAvailabilityAggregatorLow(self, self.logger)
         )
         self.subarray_mccsmln_event = {}
-        self.error_dict = {}
-        self.command_mapping = {}
 
     def check_if_mccs_mln_is_responsive(self):
         self.logger.info("Checking if MCCSMasterLeafNode is responsive")
@@ -144,7 +142,11 @@ class CNComponentManagerLow(CNComponentManager):
             self.subarray_mccsmln_event[self.command_id] = {}
 
         unique_id, result_code_or_exception_or_task_status = value
-
+        self.logger.info(
+            "The Unique_id and Result_code : %s and %s",
+            unique_id,
+            result_code_or_exception_or_task_status,
+        )
         if unique_id.endswith(
             self.supported_commands
         ):  # ignoring other command events
@@ -152,10 +154,6 @@ class CNComponentManagerLow(CNComponentManager):
                 self.logger.info(
                     f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
                 )
-
-                # if not result_code_or_exception_or_task_status:
-                #     # This is in case an empty event is received.
-                #     pass
                 if (
                     int(result_code_or_exception_or_task_status)
                     == ResultCode.OK
@@ -168,12 +166,20 @@ class CNComponentManagerLow(CNComponentManager):
                         "The subarray_mccsmln_event dictionary is: %s",
                         self.subarray_mccsmln_event,
                     )
+                    self.logger.info(
+                        "The length of dict is %s",
+                        len(self.subarray_mccsmln_event[self.command_id]),
+                    )
                     if unique_id in self.command_mapping.get(
                         self.command_id, []
                     ):
                         self.subarray_mccsmln_event[self.command_id][
                             dev_name
                         ] = ResultCode.OK
+                        self.logger.info(
+                            "The length of dict is %s",
+                            len(self.subarray_mccsmln_event[self.command_id]),
+                        )
                         self.command_mapping[self.command_id].remove(unique_id)
 
             except ValueError:
@@ -194,17 +200,21 @@ class CNComponentManagerLow(CNComponentManager):
                         self.command_id,
                         dev_name,
                     )
+                    self.logger.error(
+                        "The length of dict is %s",
+                        len(self.subarray_mccsmln_event[self.command_id]),
+                    )
 
             if len(self.subarray_mccsmln_event[self.command_id]) == 2:
                 # modify below message to include value from error_dict
                 exception_message = (
-                    "Exception occurred on the following devices:\n"
+                    "Exception occurred on the following devices: "
                 )
                 for devname, error_or_result in self.subarray_mccsmln_event[
                     self.command_id
                 ].items():
                     if isinstance(error_or_result, str):
-                        exception_message += f"{devname}: {error_or_result}\n"
+                        exception_message += f"{devname}: {error_or_result}"
                 self.logger.info(exception_message)
                 self.long_running_result_callback(
                     self.command_id,

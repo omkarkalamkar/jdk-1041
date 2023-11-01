@@ -1,8 +1,6 @@
 """
 This module provided an implementation of the Central Node ComponentManager.
 """
-from __future__ import annotations
-
 import json
 import time
 from typing import Callable, Optional
@@ -10,7 +8,6 @@ from typing import Callable, Optional
 import pandas as pd
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import (
     AdapterFactory,
     CommandNotAllowed,
@@ -45,7 +42,10 @@ from ska_tmc_centralnode.input_validator import (
 )
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
-from ska_tmc_centralnode.model.component import CentralComponent
+from ska_tmc_centralnode.model.component import (
+    CentralComponent,
+    MCCSDeviceInfo,
+)
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
@@ -165,17 +165,8 @@ class CNComponentManager(TmcComponentManager):
         if self.event_receiver:
             self.event_receiver_object.stop()
 
-    def reset(
-        self: CNComponentManager, task_callback: Optional[Callable] = None
-    ) -> tuple[TaskStatus, str]:
-        """
-        Placeholder method for reset command.
-        :param task_callback: Update task status, defaults to None
-        :type task_callback: Callable, optional
-        :return: task_status, message
-        :rtype: tuple
-        """
-        return TaskStatus.REJECTED, "Reset command is not implemented"
+    def reset(self):
+        pass
 
     def set_aggregators(
         self,
@@ -325,11 +316,10 @@ class CNComponentManager(TmcComponentManager):
         """
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
-        elif (
-            isinstance(self.input_parameter, InputParameterMid)
-            and dev_name.lower() in self.input_parameter.dish_dev_names
-        ):
+        elif "dish/master" in dev_name.lower():
             devInfo = DishDeviceInfo(dev_name, False)
+        elif "mccs_master" in dev_name.lower():
+            devInfo = MCCSDeviceInfo(dev_name, False)
         else:
             devInfo = DeviceInfo(dev_name, False)
         self.component.update_device(devInfo)

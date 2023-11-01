@@ -53,7 +53,7 @@ def assign_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=2,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -551,7 +551,8 @@ def test_assign_resources_low_timeout(
     result, unique_id = central_node.TelescopeOff()
 
 
-@pytest.mark.skip(reason="This will be updated soon.")
+# @pytest.mark.skip(reason="This will be updated soon.")
+@pytest.mark.kk
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_assign_resources_low_error_aggregation(
@@ -589,8 +590,7 @@ def test_assign_resources_low_error_aggregation(
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
 
-    mccs_mln = DevFactory().get_device(LOW_SUBARRAY_DEVICE)
-    mccs_mln.SetDefective(ERROR_PROPAGATION_DEFECT)
+    subarray_proxy.SetDefective(ERROR_PROPAGATION_DEFECT)
 
     result, unique_id = central_node.AssignResources(
         json_factory("command_assign_resource_low")
@@ -607,11 +607,11 @@ def test_assign_resources_low_error_aggregation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Exception occurred on the following devices:",
+            f"Exception occurred on the following devices: {LOW_SUBARRAY_DEVICE}: Exception occurred, command failed.",
         ),
         lookahead=4,
     )
-    mccs_mln.SetDefective(RESET_DEFECT)
+    subarray_proxy.SetDefective(RESET_DEFECT)
 
     # Teardown
     result, unique_id = central_node.TelescopeOff()
