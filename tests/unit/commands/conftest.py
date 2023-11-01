@@ -4,7 +4,7 @@ from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
 from ska_tmc_common.test_helpers.helper_csp_master_leaf_node import (
     HelperCspMasterLeafDevice,
 )
-from ska_tmc_common.test_helpers.helper_dish_device import HelperDishLNDevice
+from ska_tmc_common.test_helpers.helper_dish_device import HelperDishLNDevice, HelperDishDevice
 from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
 )
@@ -82,9 +82,14 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperDishLNDevice,
+            "class": HelperDishDevice,
             "devices": [
                 {"name": DISH_MASTER_DEVICE},
+            ],
+        },
+        {
+            "class": HelperDishLNDevice,
+            "devices": [
                 {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
