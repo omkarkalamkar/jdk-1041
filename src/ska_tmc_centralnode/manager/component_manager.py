@@ -546,6 +546,10 @@ class CNComponentManager(TmcComponentManager):
         :type value: tuple
         :param is_async_result: Whether this callback is called from Async command result call or
         longRunningCommandResult attribute callback
+        Examples of value
+        Async callback value: [array([0], dtype=int32), ['']]
+        LongRunningCommandResultCallBack value:
+        ('1698838234.9087641-LoadDishCfg', 'Exception occurred, command failed.')
         """
         self.logger.info(
             "Received longRunningCommandResult event for device: %s, with value: %s",
