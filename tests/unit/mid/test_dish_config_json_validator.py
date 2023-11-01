@@ -1,9 +1,6 @@
-import pytest
-
 from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 
 
-@pytest.mark.validate
 class TestDishConfigValidator:
     """Implement test cases to validate Dish Config
     Json
@@ -21,7 +18,8 @@ class TestDishConfigValidator:
             },
         }
         dish_config_validator = DishConfigValidator(dish_config_json)
-        assert dish_config_validator.is_json_valid() is True
+        is_valid, msg = dish_config_validator.is_json_valid()
+        assert is_valid is True
 
     def test_dish_config_validator_for_invalid_dishids(self):
         """Validate Dish Config Json validator when dish ids are invalid"""
@@ -35,7 +33,9 @@ class TestDishConfigValidator:
             },
         }
         dish_config_validator = DishConfigValidator(dish_config_json)
-        assert dish_config_validator.is_json_valid() is False
+        is_valid, msg = dish_config_validator.is_json_valid()
+        assert is_valid is False
+        assert msg == "Invalid Dish id ABC001 provided in Json"
 
     def test_dish_config_validator_for_invalid_dishids_range(self):
         """Validate Dish Config Json validator when dish ids are not within range"""
@@ -49,7 +49,9 @@ class TestDishConfigValidator:
             },
         }
         dish_config_validator = DishConfigValidator(dish_config_json)
-        assert dish_config_validator.is_json_valid() is False
+        is_valid, msg = dish_config_validator.is_json_valid()
+        assert is_valid is False
+        assert msg == "Dish id SKA187 not in range (1,133)"
 
     def test_dish_config_validator_for_duplicate_vcc_ids(self):
         """Validate Dish Config Json validator when vcc ids are not unique"""
@@ -63,4 +65,6 @@ class TestDishConfigValidator:
             },
         }
         dish_config_validator = DishConfigValidator(dish_config_json)
-        assert dish_config_validator.is_json_valid() is False
+        is_valid, msg = dish_config_validator.is_json_valid()
+        assert is_valid is False
+        assert msg == "Duplicate Vcc ids found in json"

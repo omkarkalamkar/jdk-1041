@@ -44,7 +44,10 @@ from ska_tmc_centralnode.input_validator import (
     AssignResourceValidator,
     ReleaseResourceValidator,
 )
-from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
+from ska_tmc_centralnode.manager.aggregators import (
+    LoadDishCfgCommandResultAggregator,
+    TMCOpStateAggregator,
+)
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import ModesAvailability
@@ -156,6 +159,11 @@ class CNComponentManager(TmcComponentManager):
         self.command_in_progress: str = ""
         self.subarray_devname: str = ""
         self.command_mapping = {}
+        self.result_codes_mapping = {}
+        self.dev_names_for_load_dish_cfg = []
+        self.no_of_events_for_command = 0
+        self.load_dish_cfg_aggregated_result = None
+        self.load_dish_cfg_command_id = None
         self.supported_commands = (
             "AssignResources",
             "ReleaseResources",
@@ -240,6 +248,10 @@ class CNComponentManager(TmcComponentManager):
                 result.append(dev)
                 continue
         return result
+
+    def get_load_disg_cfg_resultcode(self):
+        """Return Aggregated command result for Load Dish Cfg command"""
+        return self.load_dish_cfg_aggregated_result
 
     def get_subarray_obsstate(self) -> Optional[ObsState]:
         """
@@ -520,6 +532,102 @@ class CNComponentManager(TmcComponentManager):
                         exception_msg=exception_message,
                     )
 
+    def update_load_dish_cfg_results(
+        self, dev_name: str, value: tuple, is_async_result: bool = False
+    ):
+        """This method is used to update the result returned from Csp Master Leaf Node
+        and returned from Dish Leaf Nodes for SetKValue command.
+        Update result_codes_mapping with dev name as a key and command result as a value
+        If all events are received from all device then aggregate the result
+        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
+        :param dev_name: name of the device who's event has been captured in this method
+        :type dev_name: str
+        :param value: longRunningCommandResult attribute event.
+        :type value: tuple
+        :param is_async_result: Whether this callback is called from Async command result call or
+        longRunningCommandResult attribute callback
+        Examples of value
+        Async callback value: [array([0], dtype=int32), ['']]
+        LongRunningCommandResultCallBack value:
+        ('1698838234.9087641-LoadDishCfg', 'Exception occurred, command failed.')
+        """
+        self.logger.info(
+            "Received longRunningCommandResult event for device: %s, with value: %s",
+            dev_name,
+            value,
+        )
+        with self.lock:
+            result_code_or_exception = []
+            if is_async_result:
+                # Set result code and message
+                self.logger.info("Got Value %s", value)
+                self.logger.info("Result code %s", value[0][0])
+                self.logger.info("Message %s", value[1][0])
+                result_code_or_exception = [value[0][0], value[1][0]]
+            else:
+                _, result_code_or_exception_or_task_status = value
+                if result_code_or_exception_or_task_status.isdigit():
+                    # Failed event is called twice one with error message and other with result code
+                    # in case of second Failed event just ignore it as Failed Message already updated in first event call
+                    if dev_name not in self.result_codes_mapping:
+                        result_code_or_exception = [
+                            result_code_or_exception_or_task_status,
+                            "",
+                        ]
+                elif result_code_or_exception_or_task_status:
+                    result_code_or_exception = [
+                        ResultCode.FAILED,
+                        result_code_or_exception_or_task_status,
+                    ]
+            if result_code_or_exception:
+                self.result_codes_mapping[dev_name] = result_code_or_exception
+                self.logger.info(
+                    "Dev names for load_dish_cfg values %s and result_codes_mapping are %s",
+                    self.dev_names_for_load_dish_cfg,
+                    self.result_codes_mapping,
+                )
+
+            # When all events received from dishes and Csp master leaf node then aggregate the result
+            if len(self.dev_names_for_load_dish_cfg) == len(
+                self.result_codes_mapping
+            ):
+                # Aggregate the result
+                self.logger.info(
+                    "All Events received for load dish cfg. Aggregating results"
+                )
+                self.aggregate_load_dish_cfg_results()
+
+    def aggregate_load_dish_cfg_results(self):
+        """This method aggregate load dish cfg command result based on
+        generated data
+        """
+        load_dish_cfg_aggregator = LoadDishCfgCommandResultAggregator(
+            self, self.logger
+        )
+        (
+            load_dish_cfg_aggregated_result,
+            message,
+        ) = load_dish_cfg_aggregator.aggregate()
+        self.load_dish_cfg_aggregated_result = load_dish_cfg_aggregated_result
+        if (
+            self.load_dish_cfg_aggregated_result == ResultCode.FAILED
+            and self.load_dish_cfg_command_id
+        ):
+            exception_message = f"Exception occurred on device: {message}"
+            self.long_running_result_callback(
+                self.load_dish_cfg_command_id,
+                ResultCode.FAILED,
+                exception_msg=exception_message,
+            )
+
+    def reset_load_dish_cfg_data(self):
+        """Reset all data which is set for aggregating LoadDisgCfg command"""
+        self.logger.info("Resetting LoadDishCfg aggregated data")
+        self.load_dish_cfg_aggregated_result = ""
+        self.dev_names_for_load_dish_cfg = []
+        self.result_codes_mapping = {}
+        self.load_dish_cfg_command_id = None
+
     def _aggregate_state(self):
         """
         Aggregates both telescope state and tmc op state
@@ -672,10 +780,9 @@ class CNComponentManager(TmcComponentManager):
                 return loadishcfg_command.reject_command(error_message)
             self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
             config_json_validator = DishConfigValidator(dishid_vcc_map_json)
-            if not config_json_validator.is_json_valid():
-                return loadishcfg_command.reject_command(
-                    "Validation Failed for Dish Id Vcc map json"
-                )
+            is_valid_dish_cfg, message = config_json_validator.is_json_valid()
+            if not is_valid_dish_cfg:
+                return loadishcfg_command.reject_command(message)
 
         task_status, response = self.submit_task(
             loadishcfg_command.load_dish_cfg,
