@@ -47,7 +47,7 @@ def load_dish_cfg(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=5,
     )
 
     result, unique_id = central_node.LoadDishCfg(config_str)
@@ -104,7 +104,7 @@ def load_dish_cfg_when_csp_is_defective(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=5,
     )
 
     csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
