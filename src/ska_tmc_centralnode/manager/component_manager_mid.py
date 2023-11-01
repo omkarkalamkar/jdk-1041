@@ -102,7 +102,6 @@ class CNComponentManagerMid(CNComponentManager):
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorMid(self, self.logger)
         )
-        self.set_k_values_result_codes = []
 
     def check_if_dishes_are_responsive(self):
         self.logger.info("Checking if dishes are responsive")
