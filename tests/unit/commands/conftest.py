@@ -4,7 +4,10 @@ from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
 from ska_tmc_common.test_helpers.helper_csp_master_leaf_node import (
     HelperCspMasterLeafDevice,
 )
-from ska_tmc_common.test_helpers.helper_dish_device import HelperDishLNDevice, HelperDishDevice
+from ska_tmc_common.test_helpers.helper_dish_device import (
+    HelperDishDevice,
+    HelperDishLNDevice,
+)
 from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
 )
