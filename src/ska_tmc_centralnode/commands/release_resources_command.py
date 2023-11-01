@@ -12,6 +12,7 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
 )
+from ska_tmc_centralnode.utils.constants import mccs_release_interface
 
 
 class ReleaseResources(AssignReleaseResources):
@@ -246,11 +247,19 @@ class ReleaseResources(AssignReleaseResources):
                 ResultCode.FAILED,
                 f"Subarray Id {subarray_id} doesn't exit!",
             )
-
+        try:
+            input_mccs_master = self.create_mccs_input_data(json_argument)
+        except Exception as e:
+            return (
+                ResultCode.FAILED,
+                ("Errors in input json argument: %s", e),
+            )
         if json_argument["release_all"] is True:
             for return_codes, message_or_unique_ids in (
                 self.release_all_resources(self.subarray_adapter),
-                self.release_all_resources(self.mccs_mln_adapter),
+                self.release_all_resources(
+                    self.mccs_mln_adapter, input_mccs_master
+                ),
             ):
                 for return_code, message_or_unique_id in zip(
                     return_codes, message_or_unique_ids
@@ -273,12 +282,22 @@ class ReleaseResources(AssignReleaseResources):
                             ] = [message_or_unique_id]
                 return (ResultCode.OK, "")
 
-    def release_all_resources(self, adapter):
+    def release_all_resources(self, adapter, argin=None):
         return self.send_command(
             [adapter],
             f"Error in calling ReleaseAllResources() on TMC Device {adapter.dev_name}",
             "ReleaseAllResources",
+            argin,
         )
+
+    def create_mccs_input_data(self, json_argument: dict) -> dict:
+        try:
+            if "interface" in json_argument:
+                del json_argument["interface"]
+            json_argument["interface"] = mccs_release_interface
+            return json_argument
+        except Exception as e:
+            raise Exception("Error while creating MCCS input json") from e
 
     def _validate_low_json(self, json_argument: dict, req_keys: list):
         """To validate the low json for release resources command before erterning the queue
