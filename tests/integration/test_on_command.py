@@ -70,6 +70,7 @@ def test_on_command_mid(
     )
 
 
+@pytest.mark.test1
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_on_command_low(

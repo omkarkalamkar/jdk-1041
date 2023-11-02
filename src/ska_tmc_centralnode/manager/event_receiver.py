@@ -5,6 +5,7 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
+    MCCS_MLN_DEVICE,
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
 )
@@ -99,6 +100,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     MID_SDP_MLN_DEVICE,
                     LOW_CSP_MLN_DEVICE,
                     LOW_SDP_MLN_DEVICE,
+                    MCCS_MLN_DEVICE,
                 ]:
                     proxy.subscribe_event(
                         "isSubsystemAvailable",

@@ -360,6 +360,14 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                         "sdp_master_leaf_node"
                     ] = self._component_manager.sdp_mln_availability
 
+            elif "tm_leaf_node/mccs_master" in dev.dev_name:
+                if dev.unresponsive:
+                    telescope_availability["mccs_master_leaf_node"] = False
+                else:
+                    telescope_availability[
+                        "mccs_master_leaf_node"
+                    ] = self._component_manager.mccs_mln_availability
+
             self._component_manager.set_telescope_availability = (
                 telescope_availability
             )

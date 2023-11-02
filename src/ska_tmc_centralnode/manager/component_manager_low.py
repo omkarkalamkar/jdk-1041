@@ -94,6 +94,7 @@ class CNComponentManagerLow(CNComponentManager):
         }
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
+        self.mccs_mln_availability = False
 
         telescope_availability = self.get_telescope_availability()
         telescope_availability["tmc_subarrays"] = self.subarray_availability
@@ -204,4 +205,6 @@ class CNComponentManagerLow(CNComponentManager):
                 self.csp_mln_availability = event_value
             elif "tm_leaf_node/sdp_master" in device_name:
                 self.sdp_mln_availability = event_value
+            elif "tm_leaf_node/mccs_master" in device_name:
+                self.mccs_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()

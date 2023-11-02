@@ -218,6 +218,12 @@ class TelescopeOn(TelescopeOnOff):
         self.logger.info(
             f"Invoking On command for {self.mccs_mln_adapter.dev_name} device"
         )
+        if self.component_manager.check_if_mccs_mln_is_available() is True:
+            return self.send_command(
+                [self.sdp_mln_adapter],
+                f"Error in calling On command for {self.mccs_mln_adapter.dev_name}",
+                "On",
+            )
         return self.send_command(
             [self.mccs_mln_adapter],
             f"Error in calling On command for {self.mccs_mln_adapter.dev_name}",
