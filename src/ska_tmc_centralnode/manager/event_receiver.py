@@ -74,10 +74,6 @@ class CentralNodeEventReceiver(EventReceiver):
                         stateless=True,
                     )
                 if "subarray_node" in dev_info.dev_name:
-                    self._logger.debug(
-                        "Received longRunningCommandResult event for : %s",
-                        dev_info.dev_name,
-                    )
                     proxy.subscribe_event(
                         "longRunningCommandResult",
                         tango.EventType.CHANGE_EVENT,
@@ -113,10 +109,6 @@ class CentralNodeEventReceiver(EventReceiver):
                         )
 
                 if dev_info.dev_name == MCCS_MLN_DEVICE:
-                    self._logger.debug(
-                        "Received longRunningCommandResult event for : %s",
-                        MCCS_MLN_DEVICE,
-                    )
                     proxy.subscribe_event(
                         "longRunningCommandResult",
                         tango.EventType.CHANGE_EVENT,

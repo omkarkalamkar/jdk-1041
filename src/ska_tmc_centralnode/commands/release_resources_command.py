@@ -79,7 +79,7 @@ class ReleaseResources(AssignReleaseResources):
         if result_code == ResultCode.FAILED:
             self.update_task_status(result_code, message)
             self.component_manager.stop_timer()
-            self.component_manager.command_mapping.pop(self.command_id)
+            # self.component_manager.command_mapping.pop(self.command_id)
         else:
             self.start_tracker_thread(
                 self.component_manager.get_subarray_obsstate,
@@ -257,7 +257,7 @@ class ReleaseResources(AssignReleaseResources):
         if json_argument["release_all"] is True:
             for return_codes, message_or_unique_ids in (
                 self.release_all_resources(self.subarray_adapter),
-                self.release_all_resources(
+                self.release_all_resources_mccs(
                     self.mccs_mln_adapter, input_mccs_master
                 ),
             ):
@@ -276,18 +276,33 @@ class ReleaseResources(AssignReleaseResources):
                             self.component_manager.command_mapping[
                                 self.component_manager.command_id
                             ].append(message_or_unique_id)
+                            self.logger.info(
+                                "The command mapping dictionary is %s",
+                                self.component_manager.command_mapping,
+                            )
                         else:
                             self.component_manager.command_mapping[
                                 self.component_manager.command_id
                             ] = [message_or_unique_id]
-                return (ResultCode.OK, "")
+                            self.logger.info(
+                                "The command mapping dictionary is %s",
+                                self.component_manager.command_mapping,
+                            )
+        return (ResultCode.OK, "")
 
-    def release_all_resources(self, adapter, argin=None):
+    def release_all_resources(self, adapter):
         return self.send_command(
             [adapter],
             f"Error in calling ReleaseAllResources() on TMC Device {adapter.dev_name}",
             "ReleaseAllResources",
-            argin,
+        )
+
+    def release_all_resources_mccs(self, adapter, argin):
+        return self.send_command(
+            [adapter],
+            f"Error in calling ReleaseAllResources() on TMC Device {adapter.dev_name}",
+            "ReleaseAllResources",
+            json.dumps(argin),
         )
 
     def create_mccs_input_data(self, json_argument: dict) -> dict:

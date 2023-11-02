@@ -104,6 +104,8 @@ class CNComponentManagerLow(CNComponentManager):
             TelescopeAvailabilityAggregatorLow(self, self.logger)
         )
         self.subarray_mccsmln_event = {}
+        self.error_event = {}
+        self.error_count = 0
 
     def check_if_mccs_mln_is_responsive(self):
         self.logger.info("Checking if MCCSMasterLeafNode is responsive")
@@ -114,6 +116,8 @@ class CNComponentManagerLow(CNComponentManager):
     def reset_subarray_mccsmln_event_count(self, command_id: str):
         """reset count function to reset sdp and csp events count and error dictionary"""
         self.subarray_mccsmln_event.clear()
+        self.error_event.clear()
+        self.error_count = 0
         del self.command_mapping[self.command_id]
 
     def update_long_running_command_result(self, dev_name: str, value: tuple):
@@ -140,6 +144,9 @@ class CNComponentManagerLow(CNComponentManager):
         )
         if not self.subarray_mccsmln_event.get(self.command_id):
             self.subarray_mccsmln_event[self.command_id] = {}
+
+        if not self.error_event.get(self.command_id):
+            self.error_event[self.command_id] = {}
 
         unique_id, result_code_or_exception_or_task_status = value
         self.logger.info(
@@ -194,6 +201,10 @@ class CNComponentManagerLow(CNComponentManager):
                     self.subarray_mccsmln_event[self.command_id][
                         dev_name
                     ] = result_code_or_exception_or_task_status
+                    self.error_event[self.command_id][
+                        dev_name
+                    ] = result_code_or_exception_or_task_status
+                    self.error_count += 1
                     self.logger.error(
                         "Exception occurred with value: %s for %s command_id for device: %s",
                         value,
@@ -206,25 +217,29 @@ class CNComponentManagerLow(CNComponentManager):
                     )
 
             if len(self.subarray_mccsmln_event[self.command_id]) == 2:
-                # modify below message to include value from error_dict
-                exception_message = (
-                    "Exception occurred on the following devices: "
-                )
-                for devname, error_or_result in self.subarray_mccsmln_event[
-                    self.command_id
-                ].items():
-                    if isinstance(error_or_result, str):
-                        exception_message += f"{devname}: {error_or_result}"
-                self.logger.info(exception_message)
-                self.long_running_result_callback(
-                    self.command_id,
-                    ResultCode.FAILED,
-                    exception_msg=exception_message,
-                )
-                self.logger.debug(
-                    "The updated subarray mccsmmln events dictionary is: %s",
-                    self.subarray_mccsmln_event,
-                )
+                if self.error_count > 0:
+                    # modify below message to include value from error_dict
+                    exception_message = (
+                        "Exception occurred on the following devices: "
+                    )
+                    for devname, error_or_result in self.error_event[
+                        self.command_id
+                    ].items():
+                        if isinstance(error_or_result, str):
+                            exception_message += (
+                                f"{devname}: {error_or_result}"
+                            )
+                    self.logger.info(exception_message)
+                    self.long_running_result_callback(
+                        self.command_id,
+                        ResultCode.FAILED,
+                        exception_msg=exception_message,
+                    )
+                    self.logger.debug(
+                        "The updated subarray mccsmmln events dictionary is: %s",
+                        self.subarray_mccsmln_event,
+                    )
+                    self.reset_subarray_mccsmln_event_count(self.command_id)
                 self.reset_subarray_mccsmln_event_count(self.command_id)
 
     def update_device_state(self, dev_name, state):
