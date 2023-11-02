@@ -1281,7 +1281,7 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.8.5"
+version = "0.9.0"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
@@ -1306,7 +1306,7 @@ ska-telmodel = "1.9.0"
 type = "git"
 url = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git"
 reference = "sah-1415"
-resolved_reference = "2178e74d9267f28be696c43b5df560a299b4440a"
+resolved_reference = "9f7226f994c8f69d84599eca13f24354b222503f"
 
 [[package]]
 name = "snowballstemmer"
