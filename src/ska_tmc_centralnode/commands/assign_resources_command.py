@@ -388,18 +388,10 @@ class AssignResources(AssignReleaseResources):
                         self.component_manager.command_mapping[
                             self.component_manager.command_id
                         ].append(message_or_unique_id)
-                        self.logger.info(
-                            "The command mapping dictionary is %s",
-                            self.component_manager.command_mapping,
-                        )
                     else:
                         self.component_manager.command_mapping[
                             self.component_manager.command_id
                         ] = [message_or_unique_id]
-                        self.logger.info(
-                            "The command mapping dictionary is %s",
-                            self.component_manager.command_mapping,
-                        )
 
         return (ResultCode.OK, "")
 

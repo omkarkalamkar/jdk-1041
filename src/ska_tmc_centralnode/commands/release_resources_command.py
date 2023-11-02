@@ -79,7 +79,6 @@ class ReleaseResources(AssignReleaseResources):
         if result_code == ResultCode.FAILED:
             self.update_task_status(result_code, message)
             self.component_manager.stop_timer()
-            # self.component_manager.command_mapping.pop(self.command_id)
         else:
             self.start_tracker_thread(
                 self.component_manager.get_subarray_obsstate,
@@ -276,18 +275,10 @@ class ReleaseResources(AssignReleaseResources):
                             self.component_manager.command_mapping[
                                 self.component_manager.command_id
                             ].append(message_or_unique_id)
-                            self.logger.info(
-                                "The command mapping dictionary is %s",
-                                self.component_manager.command_mapping,
-                            )
                         else:
                             self.component_manager.command_mapping[
                                 self.component_manager.command_id
                             ] = [message_or_unique_id]
-                            self.logger.info(
-                                "The command mapping dictionary is %s",
-                                self.component_manager.command_mapping,
-                            )
         return (ResultCode.OK, "")
 
     def release_all_resources(self, adapter):

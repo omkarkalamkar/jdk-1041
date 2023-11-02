@@ -139,11 +139,11 @@ class CNComponentManagerLow(CNComponentManager):
             dev_name,
             value,
         )
-        self.logger.info(
-            "The command mapping dictionary is: %s", self.command_mapping
-        )
         if not self.subarray_mccsmln_event.get(self.command_id):
             self.subarray_mccsmln_event[self.command_id] = {}
+
+        if not self.error_event.get(self.command_id):
+            self.error_event[self.command_id] = {}
 
         if not self.error_event.get(self.command_id):
             self.error_event[self.command_id] = {}
@@ -165,28 +165,12 @@ class CNComponentManagerLow(CNComponentManager):
                     int(result_code_or_exception_or_task_status)
                     == ResultCode.OK
                 ):
-                    self.logger.info(
-                        "The command mapping dictionary is: %s",
-                        self.command_mapping,
-                    )
-                    self.logger.info(
-                        "The subarray_mccsmln_event dictionary is: %s",
-                        self.subarray_mccsmln_event,
-                    )
-                    self.logger.info(
-                        "The length of dict is %s",
-                        len(self.subarray_mccsmln_event[self.command_id]),
-                    )
                     if unique_id in self.command_mapping.get(
                         self.command_id, []
                     ):
                         self.subarray_mccsmln_event[self.command_id][
                             dev_name
                         ] = ResultCode.OK
-                        self.logger.info(
-                            "The length of dict is %s",
-                            len(self.subarray_mccsmln_event[self.command_id]),
-                        )
                         self.command_mapping[self.command_id].remove(unique_id)
 
             except ValueError:
@@ -211,10 +195,6 @@ class CNComponentManagerLow(CNComponentManager):
                         self.command_id,
                         dev_name,
                     )
-                    self.logger.error(
-                        "The length of dict is %s",
-                        len(self.subarray_mccsmln_event[self.command_id]),
-                    )
 
             if len(self.subarray_mccsmln_event[self.command_id]) == 2:
                 if self.error_count > 0:
@@ -235,11 +215,6 @@ class CNComponentManagerLow(CNComponentManager):
                         ResultCode.FAILED,
                         exception_msg=exception_message,
                     )
-                    self.logger.debug(
-                        "The updated subarray mccsmmln events dictionary is: %s",
-                        self.subarray_mccsmln_event,
-                    )
-                    self.reset_subarray_mccsmln_event_count(self.command_id)
                 self.reset_subarray_mccsmln_event_count(self.command_id)
 
     def update_device_state(self, dev_name, state):

@@ -477,7 +477,6 @@ def test_release_resources_low_timeout(
     result, unique_id = central_node.TelescopeOff()
 
 
-@pytest.mark.skip(reason="Test needs update")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_resources_error_aggregation(
@@ -555,7 +554,7 @@ def test_release_resources_error_aggregation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on device: {LOW_SUBARRAY_DEVICE}: Exception occurred, command failed.",
+            f"Exception occurred on the following devices: {LOW_SUBARRAY_DEVICE}: Exception occurred, command failed.",
         ),
         lookahead=6,
     )

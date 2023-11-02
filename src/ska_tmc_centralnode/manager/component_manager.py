@@ -11,6 +11,7 @@ import pandas as pd
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import (
     AdapterFactory,
     CommandNotAllowed,
@@ -176,8 +177,17 @@ class CNComponentManager(TmcComponentManager):
         if self.event_receiver:
             self.event_receiver_object.stop()
 
-    def reset(self):
-        pass
+    def reset(
+        self: CNComponentManager, task_callback: Optional[Callable] = None
+    ) -> tuple[TaskStatus, str]:
+        """
+        Placeholder method for reset command.
+        :param task_callback: Update task status, defaults to None
+        :type task_callback: Callable, optional
+        :return: task_status, message
+        :rtype: tuple
+        """
+        return TaskStatus.REJECTED, "Reset command is not implemented"
 
     def set_aggregators(
         self,
@@ -331,7 +341,10 @@ class CNComponentManager(TmcComponentManager):
         """
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
-        elif "dish/master" in dev_name.lower():
+        elif (
+            isinstance(self.input_parameter, InputParameterMid)
+            and dev_name.lower() in self.input_parameter.dish_dev_names
+        ):
             devInfo = DishDeviceInfo(dev_name, False)
         elif "mccs_master" in dev_name.lower():
             devInfo = MCCSDeviceInfo(dev_name, False)
