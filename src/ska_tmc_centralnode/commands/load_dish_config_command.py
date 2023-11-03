@@ -74,10 +74,12 @@ class LoadDishCfg(LoadDishCfgCommand):
                 task_abort_event,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
-                command_id=self.command_id,
+                command_id=self.component_manager.command_id,
                 lrcr_callback=self.component_manager.long_running_result_callback,
             )
-        self.component_manager.load_dish_cfg_command_id = self.command_id
+        self.component_manager.load_dish_cfg_command_id = (
+            self.component_manager.command_id
+        )
 
     def update_task_status(self, result: ResultCode, message: str = ""):
         """Updates the task status for command
@@ -98,8 +100,12 @@ class LoadDishCfg(LoadDishCfgCommand):
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.component_manager.command_in_progress = ""
-        if self.component_manager.command_mapping.get(self.command_id):
-            self.component_manager.command_mapping.pop(self.command_id)
+        if self.component_manager.command_mapping.get(
+            self.component_manager.command_id
+        ):
+            self.component_manager.command_mapping.pop(
+                self.component_manager.command_id
+            )
         self.component_manager.reset_load_dish_cfg_data()
 
     def get_dishid_vcc_map_json(

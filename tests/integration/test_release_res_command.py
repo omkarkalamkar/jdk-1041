@@ -7,6 +7,7 @@ from ska_tmc_common.dev_factory import DevFactory
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
+    LOW_CENTRAL_NODE,
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
     RESET_DEFECT,
@@ -400,7 +401,7 @@ def test_release_resources_low_timeout(
 ):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
     subarray_proxy.SetisSubarrayAvailable(True)
     ensure_checked_devices(central_node)
@@ -487,7 +488,7 @@ def test_release_resources_error_aggregation(
 ):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)

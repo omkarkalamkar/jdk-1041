@@ -103,9 +103,9 @@ class CNComponentManagerLow(CNComponentManager):
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorLow(self, self.logger)
         )
-        self.subarray_mccsmln_event = {}
-        self.error_event = {}
-        self.error_count = 0
+        self.subarray_mccsmln_event: dict = {}
+        self.error_event: dict = {}
+        self.error_count: int = 0
 
     def check_if_mccs_mln_is_responsive(self):
         self.logger.info("Checking if MCCSMasterLeafNode is responsive")
