@@ -108,6 +108,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_masterln_availability_event,
                         stateless=True,
                     )
+                    proxy.poll_attribute("isSubsystemAvailable", 1000)
 
             except Exception as e:
                 self._logger.error(
