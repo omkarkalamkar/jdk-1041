@@ -81,8 +81,6 @@ class CentralNodeLow(AbstractCentralNode):
             """
             super().do()
 
-            self._device.set_change_event("imaging", True, False)
-
             return (ResultCode.OK, "")
 
     # ------------------
