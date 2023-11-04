@@ -123,11 +123,15 @@ class CNComponentManagerLow(CNComponentManager):
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.
 
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
-        Whenever there is exception occured , (unique_id,exception_msg) event is first raised
-        and catched in ValueError.The exception_msg and command_id is then passed to long_running_result_callback.
-        Command_mapping contains {centralnode_command_id:unique_id} , all events are verified with respect to this mapping.
-        If there is no command_mapping present the event might be of old command.
+        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or
+        (unique_id,TaskStatus)Whenever there is exception occured on any
+        device,(unique_id,exception_msg) event is first raised and catched in
+        ValueError.The events on longRunningCommandResult from both the
+        devices are aggregated and then exception_msg and command_id along
+        with the device name is then passed to long_running_result_callback.
+        Command_mapping contains {centralnode_command_id:unique_id} , all
+        events are verified with respect to this mapping.If there is no
+        command_mapping present the event might be of old command.
 
         :param dev_name: name of the device who's event has been captured in this method
         :type dev_name: str
