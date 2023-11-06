@@ -5,6 +5,7 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
+    MCCS_MLN_DEVICE,
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
 )
@@ -106,6 +107,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_masterln_availability_event,
                         stateless=True,
                     )
+
                     if dev_info.dev_name == MID_CSP_MLN_DEVICE:
                         proxy.subscribe_event(
                             "longRunningCommandResult",
@@ -113,6 +115,14 @@ class CentralNodeEventReceiver(EventReceiver):
                             self.handle_load_dish_cfg_result_callback,
                             stateless=True,
                         )
+
+                if dev_info.dev_name == MCCS_MLN_DEVICE:
+                    proxy.subscribe_event(
+                        "longRunningCommandResult",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_lrcr_event,
+                        stateless=True,
+                    )
 
             except Exception as e:
                 self._logger.error(

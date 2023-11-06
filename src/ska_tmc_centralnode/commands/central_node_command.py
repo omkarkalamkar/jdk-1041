@@ -14,7 +14,6 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 class CentralNodeCommand(TMCCommand):
     def __init__(self, component_manager, *args, logger=None, **kwargs):
         super().__init__(component_manager, *args, logger=logger, **kwargs)
-        self.command_id = f"{time.time()}_{self.__class__.__name__}"
         self.timeout_id = f"{time.time()}_{self.__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
         self.task_callback: Callable | None = None

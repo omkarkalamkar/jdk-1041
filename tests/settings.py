@@ -25,6 +25,7 @@ SLEEP_TIME = 0.5
 TIMEOUT = 25
 DISH_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d0"
 NUM_DISHES = 10
+LOW_CENTRAL_NODE = "ska_low/tm_central/central_node"
 MID_CSP_MLN_DEVICE = "ska_mid/tm_leaf_node/csp_master"
 LOW_CSP_MLN_DEVICE = "ska_low/tm_leaf_node/csp_master"
 MID_SDP_MLN_DEVICE = "ska_mid/tm_leaf_node/sdp_master"

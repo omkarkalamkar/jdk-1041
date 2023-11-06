@@ -49,7 +49,10 @@ from ska_tmc_centralnode.manager.aggregators import (
     TMCOpStateAggregator,
 )
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
-from ska_tmc_centralnode.model.component import CentralComponent
+from ska_tmc_centralnode.model.component import (
+    CentralComponent,
+    MCCSDeviceInfo,
+)
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
@@ -343,6 +346,11 @@ class CNComponentManager(TmcComponentManager):
             and dev_name.lower() in self.input_parameter.dish_dev_names
         ):
             devInfo = DishDeviceInfo(dev_name, False)
+        elif (
+            isinstance(self.input_parameter, InputParameterLow)
+            and dev_name.lower() in self.input_parameter.mccs_mln_dev_name
+        ):
+            devInfo = MCCSDeviceInfo(dev_name, False)
         else:
             devInfo = DeviceInfo(dev_name, False)
         self.component.update_device(devInfo)
@@ -469,68 +477,6 @@ class CNComponentManager(TmcComponentManager):
 
     def set_telescope_availability(self, telescope_availability):
         self.component.telescope_availability = telescope_availability
-
-    def update_long_running_command_result(self, dev_name: str, value: tuple):
-        """Updates the LRCR callback with received event.
-
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
-        Whenever there is exception occurred , (unique_id,exception_msg) event is first raised
-        and catched in ValueError.The exception_msg and command_id is then passed to long_running_result_callback.
-        Command_mapping contains {centralnode_command_id:unique_id} , all events are verified with respect to this mapping.
-        If there is no command_mapping present the event might be of old command.
-
-        :param dev_name: name of the device who's event has been captured in this method
-        :type dev_name: str
-        :param value: longRunningCommandResult attribute event.
-        :type value: tuple
-        """
-        self.logger.info(
-            "Received longRunningCommandResult event for device: %s, with value: %s",
-            dev_name,
-            value,
-        )
-        unique_id, result_code_or_exception_or_task_status = value
-        if unique_id.endswith(
-            self.supported_commands
-        ):  # ignoring other command events
-            try:
-                self.logger.info(
-                    f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
-                )
-
-                if not result_code_or_exception_or_task_status:
-                    # This is in case an empty event is received.
-                    pass
-                elif (
-                    int(result_code_or_exception_or_task_status)
-                    == ResultCode.OK
-                    and unique_id in self.command_mapping.values()
-                ):
-                    # Update the command_result only if it's "AssignResources" or "ReleaseResources" and successful.
-                    self.command_result = ResultCode.OK
-
-            except ValueError:
-                if unique_id in self.command_mapping.values():
-                    self.logger.info(
-                        "Updating LRCRCallback with value: %s for %s for device: %s",
-                        unique_id,
-                        value,
-                        dev_name,
-                    )
-                    exception_message = f"Exception occurred on device: {dev_name}: {result_code_or_exception_or_task_status}"
-                    index_of_unique_id = list(
-                        self.command_mapping.values()
-                    ).index(
-                        unique_id
-                    )  # get index location of unique_id received in event
-                    command_id = list(self.command_mapping.keys())[
-                        index_of_unique_id
-                    ]  # command id mapped to unique id
-                    self.long_running_result_callback(
-                        command_id,
-                        ResultCode.FAILED,
-                        exception_msg=exception_message,
-                    )
 
     def update_load_dish_cfg_results(
         self, dev_name: str, value: tuple, is_async_result: bool = False

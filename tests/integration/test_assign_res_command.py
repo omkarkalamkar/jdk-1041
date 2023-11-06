@@ -10,6 +10,7 @@ from ska_tmc_common.dev_factory import DevFactory
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
+    LOW_CENTRAL_NODE,
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
     RESET_DEFECT,
@@ -479,6 +480,137 @@ def test_assign_resources_mid_timeout(
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_assign_resources_low_timeout(
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_low_sdp_csp_mln_availability_for_aggregation,
+):
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
+    subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+
+    ensure_checked_devices(central_node)
+
+    result, unique_id = central_node.TelescopeOn()
+    logger.info(
+        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
+    tmc_subarray = DevFactory().get_device(LOW_SUBARRAY_DEVICE)
+    tmc_subarray.SetDefective(TIMEOUT_DEFECT)
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+
+    result, unique_id = central_node.AssignResources(
+        json_factory("command_assign_resource_low")
+    )
+
+    logger.info(
+        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("AssignResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            "Timeout has occurred, command failed",
+        ),
+        lookahead=4,
+    )
+    tmc_subarray.SetDefective(RESET_DEFECT)
+    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_assign_resources_low_error_aggregation(
+    tango_context,
+    change_event_callbacks,
+    json_factory,
+    set_low_sdp_csp_mln_availability_for_aggregation,
+):
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
+    subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+
+    ensure_checked_devices(central_node)
+
+    result, unique_id = central_node.TelescopeOn()
+    logger.info(
+        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+
+    subarray_proxy.SetDefective(ERROR_PROPAGATION_DEFECT)
+
+    result, unique_id = central_node.AssignResources(
+        json_factory("command_assign_resource_low")
+    )
+
+    logger.info(
+        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+    )
+
+    assert unique_id[0].endswith("AssignResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            f"Exception occurred on the following devices: {LOW_SUBARRAY_DEVICE}: Exception occurred, command failed.",
+        ),
+        lookahead=4,
+    )
+    subarray_proxy.SetDefective(RESET_DEFECT)
 
     # Teardown
     result, unique_id = central_node.TelescopeOff()

@@ -12,6 +12,7 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
 )
+from ska_tmc_centralnode.utils.constants import mccs_release_interface
 
 
 class ReleaseResources(AssignReleaseResources):
@@ -59,6 +60,7 @@ class ReleaseResources(AssignReleaseResources):
         """
         # Indicate that the task has started
         self.task_callback = task_callback
+        self.set_command_id(__class__.__name__)
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "ReleaseResources"
         self.component_manager.command_result = ResultCode.STARTED
@@ -77,7 +79,9 @@ class ReleaseResources(AssignReleaseResources):
         if result_code == ResultCode.FAILED:
             self.update_task_status(result_code, message)
             self.component_manager.stop_timer()
-            self.component_manager.command_mapping.pop(self.command_id)
+            self.component_manager.command_mapping.pop(
+                self.component_manager.command_id
+            )
         else:
             self.start_tracker_thread(
                 self.component_manager.get_subarray_obsstate,
@@ -85,7 +89,7 @@ class ReleaseResources(AssignReleaseResources):
                 task_abort_event,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
-                command_id=self.command_id,
+                command_id=self.component_manager.command_id,
                 lrcr_callback=self.component_manager.long_running_result_callback,
             )
 
@@ -98,8 +102,12 @@ class ReleaseResources(AssignReleaseResources):
             self.component_manager.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
-        if self.component_manager.command_mapping.get(self.command_id):
-            self.component_manager.command_mapping.pop(self.command_id)
+        if self.component_manager.command_mapping.get(
+            self.component_manager.command_id
+        ):
+            self.component_manager.command_mapping.pop(
+                self.component_manager.command_id
+            )
         self.component_manager.command_in_progress = ""
 
     def do_mid(self, argin) -> Tuple[ResultCode, str]:
@@ -173,7 +181,7 @@ class ReleaseResources(AssignReleaseResources):
                     )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
                 elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
                     self.component_manager.command_mapping[
-                        self.command_id
+                        self.component_manager.command_id
                     ] = message_or_unique_id
             return (ResultCode.OK, "")
         else:
@@ -241,11 +249,19 @@ class ReleaseResources(AssignReleaseResources):
                 ResultCode.FAILED,
                 f"Subarray Id {subarray_id} doesn't exit!",
             )
-
+        try:
+            input_mccs_master = self.create_mccs_input_data(json_argument)
+        except Exception as e:
+            return (
+                ResultCode.FAILED,
+                ("Errors in input json argument: %s", e),
+            )
         if json_argument["release_all"] is True:
             for return_codes, message_or_unique_ids in (
                 self.release_all_resources(self.subarray_adapter),
-                self.release_all_resources(self.mccs_mln_adapter),
+                self.release_all_resources_mccs(
+                    self.mccs_mln_adapter, input_mccs_master
+                ),
             ):
                 for return_code, message_or_unique_id in zip(
                     return_codes, message_or_unique_ids
@@ -256,17 +272,41 @@ class ReleaseResources(AssignReleaseResources):
                             message_or_unique_id,
                         )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
                     elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                        self.component_manager.command_mapping[
-                            self.command_id
-                        ] = message_or_unique_id
-                return (ResultCode.OK, "")
+                        if self.component_manager.command_mapping.get(
+                            self.component_manager.command_id
+                        ):
+                            self.component_manager.command_mapping[
+                                self.component_manager.command_id
+                            ].append(message_or_unique_id)
+                        else:
+                            self.component_manager.command_mapping[
+                                self.component_manager.command_id
+                            ] = [message_or_unique_id]
+        return (ResultCode.OK, "")
 
     def release_all_resources(self, adapter):
         return self.send_command(
             [adapter],
-            f"Error in calling ReleaseAllResources() on TMC Device {adapter.dev_name}",
+            f"Error in calling ReleaseAllResources() on {adapter.dev_name} device",
             "ReleaseAllResources",
         )
+
+    def release_all_resources_mccs(self, adapter, argin):
+        return self.send_command(
+            [adapter],
+            f"Error in calling ReleaseAllResources() on {adapter.dev_name} device",
+            "ReleaseAllResources",
+            json.dumps(argin),
+        )
+
+    def create_mccs_input_data(self, json_argument: dict) -> dict:
+        try:
+            if "interface" in json_argument:
+                del json_argument["interface"]
+            json_argument["interface"] = mccs_release_interface
+            return json_argument
+        except Exception as e:
+            raise Exception("Error while creating MCCS input json") from e
 
     def _validate_low_json(self, json_argument: dict, req_keys: list):
         """To validate the low json for release resources command before erterning the queue
