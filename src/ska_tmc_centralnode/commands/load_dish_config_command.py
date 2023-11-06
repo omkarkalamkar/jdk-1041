@@ -51,6 +51,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         # Indicate that the task has started
         self.task_callback = task_callback
+        self.set_command_id(__class__.__name__)
         self.task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "LoadDishCfg"
         self.component_manager.command_result = ResultCode.STARTED
