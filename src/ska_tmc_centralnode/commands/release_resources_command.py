@@ -60,7 +60,6 @@ class ReleaseResources(AssignReleaseResources):
         """
         # Indicate that the task has started
         self.task_callback = task_callback
-        self.set_command_id(__class__.__name__)
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "ReleaseResources"
         self.component_manager.command_result = ResultCode.STARTED
@@ -287,14 +286,14 @@ class ReleaseResources(AssignReleaseResources):
     def release_all_resources(self, adapter):
         return self.send_command(
             [adapter],
-            f"Error in calling ReleaseAllResources() on TMC Device {adapter.dev_name}",
+            f"Error in calling ReleaseAllResources() on {adapter.dev_name} device",
             "ReleaseAllResources",
         )
 
     def release_all_resources_mccs(self, adapter, argin):
         return self.send_command(
             [adapter],
-            f"Error in calling ReleaseAllResources() on TMC Device {adapter.dev_name}",
+            f"Error in calling ReleaseAllResources() on {adapter.dev_name} device",
             "ReleaseAllResources",
             json.dumps(argin),
         )
