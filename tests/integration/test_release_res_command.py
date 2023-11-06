@@ -106,7 +106,7 @@ def test_release_res_command_low(
     tango_context,
     change_event_callbacks,
     json_factory,
-    set_low_sdp_csp_mln_availability_for_aggregation,
+    set_low_sdp_csp_mccs_mln_availability_for_aggregation,
 ):
     return release_resources(
         tango_context,

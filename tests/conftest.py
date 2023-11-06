@@ -14,6 +14,7 @@ from tango.test_context import MultiDeviceTestContext
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
+    MCCS_MLN_DEVICE,
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
 )
@@ -137,7 +138,7 @@ def set_mid_sdp_csp_mln_availability_for_aggregation():
 
 
 @pytest.fixture
-def set_low_sdp_csp_mln_availability_for_aggregation():
+def set_low_sdp_csp_mccs_mln_availability_for_aggregation():
     """
     Setting low Csp subarray leaf node and Sdp subarray leaf node availabilty
     attribute isSubsystemAvailable as True for aggregation
@@ -149,6 +150,9 @@ def set_low_sdp_csp_mln_availability_for_aggregation():
     proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
     proxy_sdp_mln.SetisSubsystemAvailable(True)
 
+    proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+    proxy_mccs_mln.SetisSubsystemAvailable(True)
+
     logging.debug(
         "CspSubarrayLeafNode availability is: %s",
         proxy_csp_mln.isSubsystemAvailable,
@@ -156,4 +160,8 @@ def set_low_sdp_csp_mln_availability_for_aggregation():
     logging.debug(
         "SdpSubarrayLeafNode availability is: %s",
         proxy_sdp_mln.isSubsystemAvailable,
+    )
+    logging.debug(
+        "MccsSubarrayLeafNode availability is: %s",
+        proxy_mccs_mln.isSubsystemAvailable,
     )

@@ -188,7 +188,7 @@ def test_assign_res_command_low(
     central_node_name,
     change_event_callbacks,
     json_factory,
-    set_low_sdp_csp_mln_availability_for_aggregation,
+    set_low_sdp_csp_mccs_mln_availability_for_aggregation,
 ):
     return assign_resources(
         tango_context,
@@ -258,7 +258,7 @@ def test_assign_res_command_low_invalid_json(
     central_node_name,
     change_event_callbacks,
     json_factory,
-    set_low_sdp_csp_mln_availability_for_aggregation,
+    set_low_sdp_csp_mccs_mln_availability_for_aggregation,
 ):
     return assign_resources_with_invalid_json(
         tango_context,

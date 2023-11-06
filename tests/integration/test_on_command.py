@@ -70,13 +70,12 @@ def test_on_command_mid(
     )
 
 
-@pytest.mark.test1
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_on_command_low(
     tango_context,
     change_event_callbacks,
-    set_low_sdp_csp_mln_availability_for_aggregation,
+    set_low_sdp_csp_mccs_mln_availability_for_aggregation,
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")
