@@ -72,9 +72,6 @@ def assign_resources(
     result, unique_id = central_node_proxy.TelescopeOff()
 
 
-@pytest.mark.skip(
-    reason="This functionality is not present in the current version"
-)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -93,9 +90,6 @@ def test_assign_res_command_mid(
     )
 
 
-@pytest.mark.skip(
-    reason="This functionality is not present in the current version"
-)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
