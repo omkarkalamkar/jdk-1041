@@ -87,7 +87,9 @@ def test_telescope_on_command_unavailability(tango_context):
     assert (cm.component.telescope_availability)[
         "sdp_master_leaf_node"
     ] is False
-    assert (cm.component.telescope_availability)["_master_leaf_node"] is False
+    assert (cm.component.telescope_availability)[
+        "mccs_master_leaf_node"
+    ] is False
     cm.is_command_allowed("TelescopeOn")
 
     cm.telescope_on(task_callback=task_callback)
