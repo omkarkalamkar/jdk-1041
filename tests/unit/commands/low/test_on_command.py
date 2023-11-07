@@ -59,7 +59,6 @@ def test_low_telescope_on_command(tango_context, task_callback):
     )
 
 
-@pytest.mark.test1
 @pytest.mark.SKA_low
 def test_telescope_on_command_unavailability(tango_context):
     logger.info("%s", tango_context)
