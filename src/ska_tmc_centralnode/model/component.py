@@ -75,6 +75,7 @@ class CentralComponent(TmcComponent):
             "tmc_subarrays": {},
             "csp_master_leaf_node": False,
             "sdp_master_leaf_node": False,
+            "mccs_master_leaf_node": False,
         }
         self.lock = threading.Lock()
         self._desired_telescope_state = DevState.ON
