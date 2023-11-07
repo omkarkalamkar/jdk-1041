@@ -305,7 +305,7 @@ class CNComponentManager(TmcComponentManager):
     def check_if_mccs_mln_is_available(self) -> bool:
         """
         Returns boolean value based on availability of MccsMasterLeafNode,
-        which ultimately indicated availability of MccsMasterNode
+        which indicated availability of Mccs Master.
         """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["mccs_master_leaf_node"] is True:

@@ -62,7 +62,7 @@ def test_internal_model_events_mid(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_internal_model_events_low(
-    tango_context, set_low_sdp_csp_mccs_mln_availability_for_aggregation
+    tango_context, set_low_devices_availability_for_aggregation
 ):
     pytest.num_events_arrived = 0
 

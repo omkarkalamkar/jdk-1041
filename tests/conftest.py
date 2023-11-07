@@ -138,7 +138,7 @@ def set_mid_sdp_csp_mln_availability_for_aggregation():
 
 
 @pytest.fixture
-def set_low_sdp_csp_mccs_mln_availability_for_aggregation():
+def set_low_devices_availability_for_aggregation():
     """
     Setting low Csp subarray leaf node and Sdp subarray leaf node availabilty
     attribute isSubsystemAvailable as True for aggregation

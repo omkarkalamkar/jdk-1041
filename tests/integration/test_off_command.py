@@ -77,7 +77,7 @@ def test_off_command_mid(
 def test_off_command_low(
     tango_context,
     change_event_callbacks,
-    set_low_sdp_csp_mccs_mln_availability_for_aggregation,
+    set_low_devices_availability_for_aggregation,
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")
