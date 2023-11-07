@@ -149,7 +149,12 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
             command_result = (command_id, exception)
             self.push_change_event("longRunningCommandResult", command_result)
         command_result = (command_id, json.dumps(result))
-        self.push_change_event("longRunningCommandResult", command_result)
+        thread = threading.Timer(
+            self._delay,
+            function=self.push_change_event,
+            args=["longRunningCommandResult", command_result],
+        )
+        thread.start()
 
     @command(
         dtype_in=str,

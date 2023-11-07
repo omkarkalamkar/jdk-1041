@@ -1,4 +1,5 @@
 from ska_control_model import HealthState
+from ska_tango_base.commands import ResultCode
 from ska_tmc_common.aggregators import Aggregator
 from ska_tmc_common.enum import DishMode
 from tango import DevState
@@ -371,3 +372,63 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
             self._component_manager.set_telescope_availability = (
                 telescope_availability
             )
+
+
+class LoadDishCfgCommandResultAggregator:
+    """This Class Aggregate LoadDishCfg command results
+    from Csp Master Leaf Nodes and Dish Leaf Nodes
+    """
+
+    def __init__(self, cm, logger) -> None:
+        """
+        :param cm: Central Node Component Manager
+        :param type: component manager
+        :param logger: Logger
+        """
+        self._component_manager = cm
+        self.logger = logger
+
+    def _get_result_codes_and_failed_msg(self) -> tuple:
+        """Get Result codes list and failed message list from command result"""
+        result_codes = []
+        failed_messages = []
+        for (
+            dev_name,
+            result_code_message_list,
+        ) in self._component_manager.result_codes_mapping.items():
+            result_codes.append(int(result_code_message_list[0]))
+            if int(result_code_message_list[0]) == ResultCode.FAILED:
+                failed_message = f"{dev_name}: {result_code_message_list[1]}"
+                failed_messages.append(failed_message)
+        return result_codes, failed_messages
+
+    def aggregate(self) -> tuple:
+        """Aggregate the results and return Final Result code
+        :retrun: result code and message
+        :return type: tuple
+        """
+        result_code = ""
+        message = ""
+        self.logger.info(
+            "Aggregating result for longRunningCommandResult attribute with values %s",
+            self._component_manager.result_codes_mapping.values(),
+        )
+        result_codes, failed_messages = self._get_result_codes_and_failed_msg()
+        self.logger.info(
+            "Result codes are %s and failed messages are %s",
+            result_codes,
+            failed_messages,
+        )
+
+        if ResultCode.FAILED in result_codes:
+            result_code = ResultCode.FAILED
+            failed_message_join = " ".join(failed_messages)
+            message = f"Command failed on device {failed_message_join}"
+
+        result_codes_set = set(result_codes)
+        if result_codes_set == set([ResultCode.OK]):
+            result_code = ResultCode.OK
+        self.logger.info(
+            "Returning result code %s and message %s", result_code, message
+        )
+        return result_code, message

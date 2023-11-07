@@ -8,7 +8,7 @@ class DishConfigValidator:
         """
         self.dish_config_json = dish_config_json
 
-    def _get_vcc_k_values(self):
+    def _get_vcc_k_values(self) -> tuple:
         """Extract vcc and k values from dish config"""
         vcc_ids, k_values = [], []
         for _, vcc_k_map in self.dish_config_json["dish_parameters"].items():
@@ -18,43 +18,49 @@ class DishConfigValidator:
             k_values.append(k_value)
         return vcc_ids, k_values
 
-    def _is_valid_k_values(self, k_values: list) -> bool:
+    def _is_valid_k_values(self, k_values: list) -> tuple:
         """Check if k values are within 1, 2223 range
         :params k_values: List of k values to validate
         """
         k_value_range = range(1, 2223)
-        return all(k_value in k_value_range for k_value in k_values)
+        if all(k_value in k_value_range for k_value in k_values):
+            return True, ""
+        else:
+            return False, "K values are not in range (1 to 2222)"
 
     def _is_valid_vcc_ids(self, vcc_ids: list) -> bool:
         """
         params:
         vcc_ids(list): List of VCC ids
         """
-        return len(vcc_ids) == len(set(vcc_ids))
+        if len(vcc_ids) == len(set(vcc_ids)):
+            return True, ""
+        else:
+            return False, "Duplicate Vcc ids found in json"
 
-    def _is_valid_dish_ids(self, dish_id_list: list) -> bool:
+    def _is_valid_dish_ids(self, dish_id_list: list) -> tuple:
         """Validate Dish Ids are unique and validate
         Dish Id are within valid range
         """
         # Check if values are unique
         if len(dish_id_list) != len(set(dish_id_list)):
-            return False
+            return False, "Duplicate dish ids found in Json"
 
         # Check if dish id are within valid range
         for dish_id in dish_id_list:
             if dish_id.startswith("SKA"):
                 dish_suffix = int(dish_id[3:])
                 if dish_suffix not in range(1, 134):
-                    return False
+                    return False, f"Dish id {dish_id} not in range (1,133)"
             elif dish_id.startswith("MKT"):
                 dish_suffix = int(dish_id[3:])
                 if dish_suffix not in range(1, 64):
-                    return False
+                    return False, f"MKT id {dish_id} not in range (1,63)"
             else:
-                return False
-        return True
+                return False, f"Invalid Dish id {dish_id} provided in Json"
+        return True, ""
 
-    def is_json_valid(self) -> bool:
+    def is_json_valid(self) -> tuple:
         """This methid validate json as per following rules
         1. DishIDs are valid dishIDs (SKA001-133, MKT000-063)
         2. DishIDs are unique
@@ -84,10 +90,17 @@ class DishConfigValidator:
         dish_parameters = self.dish_config_json.get("dish_parameters")
         dish_ids = dish_parameters.keys()
         vcc_ids, k_values = self._get_vcc_k_values()
-        if (
-            not self._is_valid_dish_ids(dish_ids)
-            or not self._is_valid_vcc_ids(vcc_ids)
-            or not self._is_valid_k_values(k_values)
-        ):
-            return False
-        return True
+
+        is_valid_dish_id, message = self._is_valid_dish_ids(dish_ids)
+        if not is_valid_dish_id:
+            return is_valid_dish_id, message
+
+        is_valid_vcc_ids, message = self._is_valid_vcc_ids(vcc_ids)
+        if not is_valid_vcc_ids:
+            return is_valid_vcc_ids, message
+
+        is_valid_k_values, message = self._is_valid_k_values(k_values)
+        if not is_valid_k_values:
+            return is_valid_k_values, message
+
+        return True, ""

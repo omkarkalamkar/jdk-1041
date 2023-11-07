@@ -50,7 +50,16 @@ class LoadDishCfg(LoadDishCfgCommand):
         :type task_abort_event: Event, optional
         """
         # Indicate that the task has started
-        task_callback(status=TaskStatus.IN_PROGRESS)
+        self.task_callback = task_callback
+        self.set_command_id(__class__.__name__)
+        self.task_callback(status=TaskStatus.IN_PROGRESS)
+        self.component_manager.command_in_progress = "LoadDishCfg"
+        self.component_manager.command_result = ResultCode.STARTED
+        self.component_manager.start_timer(
+            self.timeout_id,
+            self.component_manager.command_timeout,
+            self.timeout_callback,
+        )
         ret_code, message = self.do(dish_cfg_params)
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
@@ -60,10 +69,45 @@ class LoadDishCfg(LoadDishCfgCommand):
                 exception=message,
             )
         else:
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=ResultCode.OK,
+            self.start_tracker_thread(
+                self.component_manager.get_load_disg_cfg_resultcode,
+                [ResultCode.OK],
+                task_abort_event,
+                timeout_id=self.timeout_id,
+                timeout_callback=self.timeout_callback,
+                command_id=self.component_manager.command_id,
+                lrcr_callback=self.component_manager.long_running_result_callback,
             )
+        self.component_manager.load_dish_cfg_command_id = (
+            self.component_manager.command_id
+        )
+
+    def update_task_status(self, result: ResultCode, message: str = ""):
+        """Updates the task status for command
+        :param result: Result code of command
+        :type: ResultCode enum
+        :param message: any message returned as a part of command
+        :type message: str
+        """
+        self.logger.info(
+            "Calling task callback for LoadDishCfg with result %s and message %s",
+            result,
+            message,
+        )
+        if result == ResultCode.FAILED:
+            self.task_callback(
+                result=result, status=TaskStatus.COMPLETED, exception=message
+            )
+        else:
+            self.task_callback(result=result, status=TaskStatus.COMPLETED)
+        self.component_manager.command_in_progress = ""
+        if self.component_manager.command_mapping.get(
+            self.component_manager.command_id
+        ):
+            self.component_manager.command_mapping.pop(
+                self.component_manager.command_id
+            )
+        self.component_manager.reset_load_dish_cfg_data()
 
     def get_dishid_vcc_map_json(
         self, initial_params: dict
@@ -103,7 +147,6 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
         dish_parameters = dishid_vcc_map_json.get("dish_parameters")
-        unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self._invoke_load_dish_cfg_on_csp_master_ln(dishid_vcc_map_params),
             self._set_k_numbers_to_dish(dish_parameters),
@@ -118,18 +161,6 @@ class LoadDishCfg(LoadDishCfgCommand):
                         message_or_unique_id,
                     )
                     return ResultCode.FAILED, message_or_unique_id
-                # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
-                    # return ResultCode.FAILED, message_or_unique_id
-                    unavailable_devices.append(
-                        message_or_unique_id.split(" ")[0]
-                    )
-        if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
         self.logger.info(
             f"Successfully Invoked LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
         )
@@ -149,6 +180,9 @@ class LoadDishCfg(LoadDishCfgCommand):
             "Error in calling LoadDishCfg command on Csp Master Leaf Node",
             "LoadDishCfg",
             json.dumps(dishid_vcc_map_params),
+        )
+        self.component_manager.dev_names_for_load_dish_cfg.append(
+            self.csp_mln_adapter.dev_name
         )
         return return_codes, message_or_unique_ids
 
@@ -176,14 +210,15 @@ class LoadDishCfg(LoadDishCfgCommand):
                         "Invoking SetKValue on dish adapter %s",
                         dish_adapter.dev_name,
                     )
-                    return_code, message_or_unique_id = self.send_command(
-                        [dish_adapter],
-                        f"Error in calling SetKValue command on dish adapter {dish_adapter.dev_name}",
+                    dish_adapter.proxy.command_inout_asynch(
                         "SetKValue",
                         k_value,
+                        self.component_manager.event_receiver_object.handle_load_dish_cfg_result_callback,
                     )
-                    return_codes.append(return_code[0])
-                    message_or_unique_ids.append(message_or_unique_id[0])
+                    # Append dish dev names to track on which dish SetKValue is invoked
+                    self.component_manager.dev_names_for_load_dish_cfg.append(
+                        dish_adapter.dev_name
+                    )
                 else:
                     error_message = (
                         f"Dish adapter not found for dish id {dish_id}"

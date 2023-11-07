@@ -8,6 +8,7 @@ package.
 """
 import time
 
+from ska_tango_base.commands import ResultCode
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
@@ -103,12 +104,123 @@ class CNComponentManagerLow(CNComponentManager):
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorLow(self, self.logger)
         )
+        self.subarray_mccsmln_event: dict = {}
+        self.error_event: dict = {}
+        self.error_count: int = 0
 
     def check_if_mccs_mln_is_responsive(self):
         self.logger.info("Checking if MCCSMasterLeafNode is responsive")
         return self._check_if_device_is_responsive(
             [self.input_parameter.mccs_mln_dev_name]
         )
+
+    def reset_subarray_mccsmln_event_count(self, command_id: str):
+        """Reset count function to reset sdp and csp events count and error dictionary"""
+        self.subarray_mccsmln_event.clear()
+        self.error_event.clear()
+        self.error_count = 0
+        del self.command_mapping[self.command_id]
+
+    def update_long_running_command_result(self, dev_name: str, value: tuple):
+        """Updates the LRCR callback with received event.
+
+        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or
+        (unique_id,TaskStatus)Whenever there is exception occured on any
+        device,(unique_id,exception_msg) event is first raised and catched in
+        ValueError.The events on longRunningCommandResult from both the
+        devices are aggregated and then exception_msg and command_id along
+        with the device name is then passed to long_running_result_callback.
+        Command_mapping contains {centralnode_command_id:unique_id} , all
+        events are verified with respect to this mapping.If there is no
+        command_mapping present the event might be of old command.
+
+        :param dev_name: name of the device who's event has been captured in this method
+        :type dev_name: str
+        :param value: longRunningCommandResult attribute event.
+        :type value: tuple
+        """
+        self.logger.info(
+            "Received longRunningCommandResult event for device: %s, with value: %s",
+            dev_name,
+            value,
+        )
+        if not self.subarray_mccsmln_event.get(self.command_id):
+            self.subarray_mccsmln_event[self.command_id] = {}
+
+        if not self.error_event.get(self.command_id):
+            self.error_event[self.command_id] = {}
+
+        if not self.error_event.get(self.command_id):
+            self.error_event[self.command_id] = {}
+
+        unique_id, result_code_or_exception_or_task_status = value
+        self.logger.info(
+            "The Unique_id and Result_code : %s and %s",
+            unique_id,
+            result_code_or_exception_or_task_status,
+        )
+        if unique_id.endswith(
+            self.supported_commands
+        ):  # ignoring other command events
+            try:
+                self.logger.info(
+                    f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
+                )
+                if (
+                    int(result_code_or_exception_or_task_status)
+                    == ResultCode.OK
+                ):
+                    if unique_id in self.command_mapping.get(
+                        self.command_id, []
+                    ):
+                        self.subarray_mccsmln_event[self.command_id][
+                            dev_name
+                        ] = ResultCode.OK
+                        self.command_mapping[self.command_id].remove(unique_id)
+
+            except ValueError:
+                if unique_id in self.command_mapping[self.command_id]:
+                    self.logger.info(
+                        "Updating LRCRCallback with value: %s for %s for device: %s",
+                        unique_id,
+                        value,
+                        dev_name,
+                    )
+
+                    self.subarray_mccsmln_event[self.command_id][
+                        dev_name
+                    ] = result_code_or_exception_or_task_status
+                    self.error_event[self.command_id][
+                        dev_name
+                    ] = result_code_or_exception_or_task_status
+                    self.error_count += 1
+                    self.logger.error(
+                        "Exception occurred with value: %s for %s command_id for device: %s",
+                        value,
+                        self.command_id,
+                        dev_name,
+                    )
+
+            if len(self.subarray_mccsmln_event[self.command_id]) == 2:
+                if self.error_count > 0:
+                    # modify below message to include value from error_dict
+                    exception_message = (
+                        "Exception occurred on the following devices: "
+                    )
+                    for devname, error_or_result in self.error_event[
+                        self.command_id
+                    ].items():
+                        if isinstance(error_or_result, str):
+                            exception_message += (
+                                f"{devname}: {error_or_result}"
+                            )
+                    self.logger.info(exception_message)
+                    self.long_running_result_callback(
+                        self.command_id,
+                        ResultCode.FAILED,
+                        exception_msg=exception_message,
+                    )
+                self.reset_subarray_mccsmln_event_count(self.command_id)
 
     def update_device_state(self, dev_name, state):
         """
