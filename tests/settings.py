@@ -259,6 +259,20 @@ def check_sdpmln_availability(cm, expected_status):
             )
 
 
+# def check_mccsmln_availability(cm, expected_status):
+#     start_time = time.time()
+#     elapsed_time = 0
+#     while (cm.component.telescope_availability)[
+#         "mccs_master_leaf_node"
+#     ] != expected_status:
+#         elapsed_time = time.time() - start_time
+#         time.sleep(0.1)
+#         if elapsed_time > TIMEOUT:
+#             pytest.fail(
+#                 "Timeout occurred while checking the MccsMasterLeafNode availability."
+#             )
+
+
 def event_remover(group_callback, attributes: List[str]) -> None:
     """Removes residual events from the queue."""
     for attribute in attributes:
