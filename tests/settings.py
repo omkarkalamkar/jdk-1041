@@ -258,6 +258,7 @@ def check_sdpmln_availability(cm, expected_status):
                 "Timeout occurred while checking the SdpMasterLeafNode availability."
             )
 
+
 def check_mccsmln_availability(cm, expected_status):
     start_time = time.time()
     elapsed_time = 0
@@ -270,6 +271,7 @@ def check_mccsmln_availability(cm, expected_status):
             pytest.fail(
                 "Timeout occurred while checking the MccsMasterLeafNode availability."
             )
+
 
 def event_remover(group_callback, attributes: List[str]) -> None:
     """Removes residual events from the queue."""
