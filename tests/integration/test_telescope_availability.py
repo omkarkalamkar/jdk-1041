@@ -79,6 +79,7 @@ def telescope_availability(
 ):
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
+    mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
     if "ska_mid" in central_node_fqdn:
         csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
         sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
@@ -86,7 +87,6 @@ def telescope_availability(
     else:
         csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
         sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
-        mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
         subarray_node = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
 
     subarray_node.SetisSubarrayAvailable(False)
@@ -98,17 +98,16 @@ def telescope_availability(
     sdp_mln.SetisSubsystemAvailable(False)
     assert sdp_mln.isSubsystemAvailable is False
 
-    mccs_mln.SetisSubsystemAvailable(False)
-    assert mccs_mln.isSubsystemAvailable is False
-
     if "ska_mid" in central_node_fqdn:
         check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, False)
     else:
         check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, False)
+        mccs_mln.SetisSubsystemAvailable(False)
+        assert mccs_mln.isSubsystemAvailable is False
+        check_mccsmln_availability(central_node, False)
 
     check_cspmln_availability(central_node, False)
     check_sdpmln_availability(central_node, False)
-    check_mccsmln_availability(central_node, False)
 
     logger.info(
         f"telescopeAvailability attribute value: {central_node.telescopeAvailability}"
@@ -123,21 +122,20 @@ def telescope_availability(
     sdp_mln.SetisSubsystemAvailable(True)
     assert sdp_mln.isSubsystemAvailable is True
 
-    mccs_mln.SetisSubsystemAvailable(True)
-    assert mccs_mln.isSubsystemAvailable is True
+    if "ska_mid" in central_node_fqdn:
+        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    else:
+        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
+        mccs_mln.SetisSubsystemAvailable(True)
+        assert mccs_mln.isSubsystemAvailable is True
+        check_mccsmln_availability(central_node, True)
 
     logger.info(
         f"telescopeAvailability attribute value: {central_node.telescopeAvailability}"
     )
 
-    if "ska_mid" in central_node_fqdn:
-        check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
-    else:
-        check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
-
     check_cspmln_availability(central_node, True)
     check_sdpmln_availability(central_node, True)
-    check_mccsmln_availability(central_node, True)
 
 
 @pytest.mark.post_deployment
