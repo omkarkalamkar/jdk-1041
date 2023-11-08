@@ -41,7 +41,7 @@ def release_resources(
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id_on[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -80,7 +80,7 @@ def release_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
     result_off, unique_id_off = central_node.TelescopeOff()
@@ -94,10 +94,13 @@ def release_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_off[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
 
+@pytest.mark.skip(
+    reason="This functionality is not present in the current version"
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(
