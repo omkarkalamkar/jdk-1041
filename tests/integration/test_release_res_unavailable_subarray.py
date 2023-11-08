@@ -98,9 +98,6 @@ def release_resources(
     )
 
 
-@pytest.mark.skip(
-    reason="This functionality is not present in the current version"
-)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(
