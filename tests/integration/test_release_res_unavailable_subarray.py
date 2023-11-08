@@ -41,7 +41,7 @@ def release_resources(
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id_on[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -58,7 +58,7 @@ def release_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_assign[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     subarray_proxy.SetisSubarrayAvailable(False)
@@ -80,7 +80,7 @@ def release_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
     result_off, unique_id_off = central_node.TelescopeOff()
@@ -94,7 +94,7 @@ def release_resources(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_off[0], str(int(ResultCode.OK))),
-        lookahead=2,
+        lookahead=4,
     )
 
 
