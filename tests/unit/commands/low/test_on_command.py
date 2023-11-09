@@ -15,7 +15,9 @@ from tests.mock_callable import MockCallable
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
+    MCCS_MLN_DEVICE,
     check_cspmln_availability,
+    check_mccsmln_availability,
     check_sdpmln_availability,
     create_cm,
     logger,
@@ -71,15 +73,21 @@ def test_telescope_on_command_unavailability(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
     csp_mln.SetisSubsystemAvailable(False)
     sdp_mln.SetisSubsystemAvailable(False)
+    mccs_mln.SetisSubsystemAvailable(False)
     check_cspmln_availability(cm, False)
     check_sdpmln_availability(cm, False)
+    check_mccsmln_availability(cm, False)
     assert (cm.component.telescope_availability)[
         "csp_master_leaf_node"
     ] is False
     assert (cm.component.telescope_availability)[
         "sdp_master_leaf_node"
+    ] is False
+    assert (cm.component.telescope_availability)[
+        "mccs_master_leaf_node"
     ] is False
     cm.is_command_allowed("TelescopeOn")
 

@@ -4,6 +4,8 @@ from ska_tmc_common.aggregators import Aggregator
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
+from ska_tmc_centralnode.utils.constants import MCCS_MLN_SUFIX
+
 
 class TelescopeStateAggregatorMid(Aggregator):
     def __init__(self, cm, logger) -> None:
@@ -360,6 +362,14 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                     telescope_availability[
                         "sdp_master_leaf_node"
                     ] = self._component_manager.sdp_mln_availability
+
+            elif MCCS_MLN_SUFIX in dev.dev_name:
+                if dev.unresponsive:
+                    telescope_availability["mccs_master_leaf_node"] = False
+                else:
+                    telescope_availability[
+                        "mccs_master_leaf_node"
+                    ] = self._component_manager.mccs_mln_availability
 
             self._component_manager.set_telescope_availability = (
                 telescope_availability

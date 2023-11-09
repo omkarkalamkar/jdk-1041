@@ -82,7 +82,7 @@ def test_standby_command_mid(
 def test_standby_command_low(
     tango_context,
     change_event_callbacks,
-    set_low_sdp_csp_mln_availability_for_aggregation,
+    set_low_devices_availability_for_aggregation,
 ):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()

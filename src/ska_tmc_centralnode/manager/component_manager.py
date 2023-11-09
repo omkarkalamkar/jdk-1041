@@ -302,6 +302,20 @@ class CNComponentManager(TmcComponentManager):
         else:
             return True
 
+    def check_if_mccs_mln_is_available(self) -> bool:
+        """
+        Returns boolean value based on availability of MccsMasterLeafNode,
+        which indicated availability of Mccs Master.
+        """
+        telescope_availability = self.get_telescope_availability()
+        if not telescope_availability["mccs_master_leaf_node"] is True:
+            self.logger.info(
+                "MccsMasterLeafNode is not available to receive command"
+            )
+            return False
+        else:
+            return True
+
     def check_if_subarrays_are_responsive(self):
         self.logger.info("Checking if subarrays are responsive")
         return self._check_if_device_is_responsive(

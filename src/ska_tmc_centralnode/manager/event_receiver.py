@@ -100,6 +100,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     MID_SDP_MLN_DEVICE,
                     LOW_CSP_MLN_DEVICE,
                     LOW_SDP_MLN_DEVICE,
+                    MCCS_MLN_DEVICE,
                 ]:
                     proxy.subscribe_event(
                         "isSubsystemAvailable",
