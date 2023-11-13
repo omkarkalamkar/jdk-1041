@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.11.4"
+version="0.11.5"
 version_info=version.split(".")
 description="""Central Node"""
 author="Team SAHYADRI & HIMALAYA"
@@ -10,5 +10,5 @@ license="""BSD-3-Clause"""
 url="""https://www.skaobservatory.org/"""
 copyright=""""""
 
-release=0.11.4
-tag=0.11.4
+release=0.11.5
+tag=0.11.5
