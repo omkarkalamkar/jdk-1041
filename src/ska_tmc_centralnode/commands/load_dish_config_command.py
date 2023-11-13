@@ -116,12 +116,17 @@ class LoadDishCfg(LoadDishCfgCommand):
         :param initial_param: this param containg tm data source uri
         and file path which is used for extracting vcc_map json file
         """
-        error_message = ""
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
         if data_sources and tm_data_filepath:
-            data = TMData(data_sources)
-            return data[tm_data_filepath].get_dict(), error_message
+            try:
+                data = TMData(data_sources)
+                return data[tm_data_filepath].get_dict(), ""
+            except Exception as e:
+                self.logger.exception(
+                    "Error in Loading Dish VCC map json file %s", e
+                )
+                return {}, f"Error in Loading Dish VCC map json file {e}"
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
     def do(self, dish_cfg_params: str) -> Tuple[ResultCode, str]:
