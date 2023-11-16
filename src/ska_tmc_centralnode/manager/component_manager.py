@@ -524,7 +524,7 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.info("Result code %s", value[0][0])
                 self.logger.info("Message %s", value[1][0])
                 result_code_or_exception = [value[0][0], value[1][0]]
-                
+
             else:
                 unique_id, result_code_or_exception_or_task_status = value
                 if unique_id.endswith("LoadDishCfg"):
