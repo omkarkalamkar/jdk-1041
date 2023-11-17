@@ -520,9 +520,10 @@ class CNComponentManager(TmcComponentManager):
             result_code_or_exception = []
             if is_async_result:
                 # Set result code and message
-                self.logger.info("Got Value %s", value)
-                self.logger.info("Result code %s", value[0][0])
-                self.logger.info("Message %s", value[1][0])
+                self.logger.debug(
+                    "Received event from asynchronous command result callback %s",
+                    value,
+                )
                 result_code_or_exception = [value[0][0], value[1][0]]
 
             else:
