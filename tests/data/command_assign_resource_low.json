@@ -1,118 +1,64 @@
 {
-    "interface": "https://schema.skao.int/ska-low-tmc-assignresources/3.0",
+    "interface": "https://schema.skao.int/ska-low-tmc-assignresources/3.2",
     "transaction_id": "txn-....-00001",
     "subarray_id": 1,
     "mccs": {
         "interface": "https://schema.skao.int/ska-low-mccs-controller-allocate/3.0",
-          "subarray_beams": [
+        "subarray_beams": [
             {
-              "subarray_beam_id": 1,
-              "apertures": [
-                {
-                  "station_id": 1,
-                  "aperture_id": "AP001.01" 
-                },
-                {
-                  "station_id": 1,
-                  "aperture_id": "AP001.02"
-                },
-                {
-                  "station_id": 2,
-                  "aperture_id": "AP002.01"
-                },
-                {
-                  "station_id": 2,
-                  "aperture_id": "AP002.02"
-                },
-                {
-                  "station_id": 3,
-                  "aperture_id": "AP003.01"
-                }
-              ],
-              "number_of_channels": 32
+                "subarray_beam_id": 1,
+                "apertures": [
+                    {
+                        "station_id": 1,
+                        "aperture_id": "AP001.01"
+                    },
+                    {
+                        "station_id": 1,
+                        "aperture_id": "AP001.02"
+                    },
+                    {
+                        "station_id": 2,
+                        "aperture_id": "AP002.01"
+                    },
+                    {
+                        "station_id": 2,
+                        "aperture_id": "AP002.02"
+                    },
+                    {
+                        "station_id": 3,
+                        "aperture_id": "AP003.01"
+                    }
+                ],
+                "number_of_channels": 32
             }
         ]
-      },   
-    "sdp":
-    {
+    },
+    "sdp": {
         "interface": "https://schema.skao.int/ska-sdp-assignres/0.4",
-        "execution_block":
-        {
-            "eb_id": "eb-mvp01-20200325-00001",
-            "max_length": 100,
-            "context":
-            {},
-            "beams":
-            [
+        "resources": {
+            "receptors": [
+                "SKA001",
+                "SKA002",
+                "SKA003",
+                "SKA004"
+            ]
+        },
+        "execution_block": {
+            "eb_id": "eb-test-20220916-00000",
+            "context": {},
+            "max_length": 3600.0,
+            "beams": [
                 {
                     "beam_id": "vis0",
                     "function": "visibilities"
-                },
-                {
-                    "beam_id": "pss1",
-                    "search_beam_id": 1,
-                    "function": "pulsar search"
-                },
-                {
-                    "beam_id": "pss2",
-                    "search_beam_id": 2,
-                    "function": "pulsar search"
-                },
-                {
-                    "beam_id": "pst1",
-                    "timing_beam_id": 1,
-                    "function": "pulsar timing"
-                },
-                {
-                    "beam_id": "pst2",
-                    "timing_beam_id": 2,
-                    "function": "pulsar timing"
-                },
-                {
-                    "beam_id": "vlbi1",
-                    "vlbi_beam_id": 1,
-                    "function": "vlbi"
                 }
             ],
-            "scan_types":
-            [
+            "scan_types": [
                 {
                     "scan_type_id": ".default",
-                    "beams":
-                    {
-                        "vis0":
-                        {
+                    "beams": {
+                        "vis0": {
                             "channels_id": "vis_channels",
-                            "polarisations_id": "all"
-                        },
-                        "pss1":
-                        {
-                            "field_id": "pss_field_0",
-                            "channels_id": "pulsar_channels",
-                            "polarisations_id": "all"
-                        },
-                        "pss2":
-                        {
-                            "field_id": "pss_field_1",
-                            "channels_id": "pulsar_channels",
-                            "polarisations_id": "all"
-                        },
-                        "pst1":
-                        {
-                            "field_id": "pst_field_0",
-                            "channels_id": "pulsar_channels",
-                            "polarisations_id": "all"
-                        },
-                        "pst2":
-                        {
-                            "field_id": "pst_field_1",
-                            "channels_id": "pulsar_channels",
-                            "polarisations_id": "all"
-                        },
-                        "vlbi":
-                        {
-                            "field_id": "vlbi_field",
-                            "channels_id": "vlbi_channels",
                             "polarisations_id": "all"
                         }
                     }
@@ -120,196 +66,83 @@
                 {
                     "scan_type_id": "target:a",
                     "derive_from": ".default",
-                    "beams":
-                    {
-                        "vis0":
-                        {
+                    "beams": {
+                        "vis0": {
                             "field_id": "field_a"
+                        }
+                    }
+                },
+                {
+                    "scan_type_id": "calibration:b",
+                    "derive_from": ".default",
+                    "beams": {
+                        "vis0": {
+                            "field_id": "field_b"
                         }
                     }
                 }
             ],
-            "channels":
-            [
+            "channels": [
                 {
                     "channels_id": "vis_channels",
-                    "spectral_windows":
-                    [
+                    "spectral_windows": [
                         {
                             "spectral_window_id": "fsp_1_channels",
-                            "count": 744,
+                            "count": 4,
                             "start": 0,
                             "stride": 2,
-                            "freq_min": 350000000,
-                            "freq_max": 368000000,
-                            "link_map":
-                            [
-                                [
-                                    0,
-                                    0
-                                ],
-                                [
-                                    200,
-                                    1
-                                ],
-                                [
-                                    744,
-                                    2
-                                ],
-                                [
-                                    944,
-                                    3
-                                ]
+                            "freq_min": 350000000.0,
+                            "freq_max": 368000000.0,
+                            "link_map": [
+                                [0, 0],
+                                [200, 1],
+                                [744, 2],
+                                [944, 3]
                             ]
-                        },
-                        {
-                            "spectral_window_id": "fsp_2_channels",
-                            "count": 744,
-                            "start": 2000,
-                            "stride": 1,
-                            "freq_min": 360000000,
-                            "freq_max": 368000000,
-                            "link_map":
-                            [
-                                [
-                                    2000,
-                                    4
-                                ],
-                                [
-                                    2200,
-                                    5
-                                ]
-                            ]
-                        },
-                        {
-                            "spectral_window_id": "zoom_window_1",
-                            "count": 744,
-                            "start": 4000,
-                            "stride": 1,
-                            "freq_min": 360000000,
-                            "freq_max": 361000000,
-                            "link_map":
-                            [
-                                [
-                                    4000,
-                                    6
-                                ],
-                                [
-                                    4200,
-                                    7
-                                ]
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "channels_id": "pulsar_channels",
-                    "spectral_windows":
-                    [
-                        {
-                            "spectral_window_id": "pulsar_fsp_channels",
-                            "count": 744,
-                            "start": 0,
-                            "freq_min": 350000000,
-                            "freq_max": 368000000
                         }
                     ]
                 }
             ],
-            "polarisations":
-            [
+            "polarisations": [
                 {
                     "polarisations_id": "all",
-                    "corr_type":
-                    [
-                        "XX",
-                        "XY",
-                        "YY",
-                        "YX"
-                    ]
+                    "corr_type": ["XX", "XY", "YX", "YY"]
                 }
             ],
-            "fields":
-            [
+            "fields": [
                 {
                     "field_id": "field_a",
-                    "phase_dir":
-                    {
-                        "ra":
-                        [
-                            123,
-                            0.1
-                        ],
-                        "dec":
-                        [
-                            123,
-                            0.1
-                        ],
+                    "phase_dir": {
+                        "ra": [123.0],
+                        "dec": [-60.0],
                         "reference_time": "...",
                         "reference_frame": "ICRF3"
                     },
-                    "pointing_fqdn": "low-tmc/telstate/0/pointing"
+                    "pointing_fqdn": "..."
+                },
+                {
+                    "field_id": "field_b",
+                    "phase_dir": {
+                        "ra": [123.0],
+                        "dec": [-60.0],
+                        "reference_time": "...",
+                        "reference_frame": "ICRF3"
+                    },
+                    "pointing_fqdn": "..."
+                }
+            ],
+            "processing_blocks": [
+                {
+                    "pb_id": "pb-test-20220916-00000",
+                    "script": {
+                        "kind": "realtime",
+                        "name": "test-receive-addresses",
+                        "version": "0.5.0"
+                    },
+                    "sbi_ids": ["sbi-test-20220916-00000"],
+                    "parameters": {}
                 }
             ]
-        },
-        "processing_blocks":
-        [
-            {
-                "pb_id": "pb-mvp01-20200325-00001",
-                "sbi_ids":
-                [
-                    "sbi-mvp01-20200325-00001"
-                ],
-                "script":
-                {},
-                "parameters":
-                {},
-                "dependencies":
-                {}
-            },
-            {
-                "pb_id": "pb-mvp01-20200325-00002",
-                "sbi_ids":
-                [
-                    "sbi-mvp01-20200325-00002"
-                ],
-                "script":
-                {},
-                "parameters":
-                {},
-                "dependencies":
-                {}
-            },
-            {
-                "pb_id": "pb-mvp01-20200325-00003",
-                "sbi_ids":
-                [
-                    "sbi-mvp01-20200325-00001",
-                    "sbi-mvp01-20200325-00002"
-                ],
-                "script":
-                {},
-                "parameters":
-                {},
-                "dependencies":
-                {}
-            }
-        ],
-        "resources":
-        {
-            "csp_links":
-            [
-                1,
-                2,
-                3,
-                4
-            ],
-            "receptors":
-            [
-                "FS4",
-                "FS8"
-            ],
-            "receive_nodes": 10
         }
     }
 }
