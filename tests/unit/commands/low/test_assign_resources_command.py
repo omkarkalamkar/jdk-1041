@@ -52,7 +52,7 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
-    del json_argument["sdp"]["processing_blocks"]
+    del json_argument["sdp"]["execution_block"]["processing_blocks"]
     (res_code, _) = cm.assign_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
     with pytest.raises(Exception) as e:
