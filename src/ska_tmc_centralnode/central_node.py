@@ -51,7 +51,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     ProxyTimeout = device_property(dtype="DevUShort", default_value=500)
 
-    CommandTimeout = device_property(dtype="DevUShort", default_value=30)
+    CommandTimeout = device_property(dtype="DevUShort", default_value=40)
     # ----------
     # Attributes
     # ----------
