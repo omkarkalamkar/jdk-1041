@@ -520,25 +520,28 @@ class CNComponentManager(TmcComponentManager):
             result_code_or_exception = []
             if is_async_result:
                 # Set result code and message
-                self.logger.info("Got Value %s", value)
-                self.logger.info("Result code %s", value[0][0])
-                self.logger.info("Message %s", value[1][0])
+                self.logger.debug(
+                    "Received event from asynchronous command result callback %s",
+                    value,
+                )
                 result_code_or_exception = [value[0][0], value[1][0]]
+
             else:
-                _, result_code_or_exception_or_task_status = value
-                if result_code_or_exception_or_task_status.isdigit():
-                    # Failed event is called twice one with error message and other with result code
-                    # in case of second Failed event just ignore it as Failed Message already updated in first event call
-                    if dev_name not in self.result_codes_mapping:
+                unique_id, result_code_or_exception_or_task_status = value
+                if unique_id.endswith("LoadDishCfg"):
+                    if result_code_or_exception_or_task_status.isdigit():
+                        # Failed event is called twice one with error message and other with result code
+                        # in case of second Failed event just ignore it as Failed Message already updated in first event call
+                        if dev_name not in self.result_codes_mapping:
+                            result_code_or_exception = [
+                                result_code_or_exception_or_task_status,
+                                "",
+                            ]
+                    elif result_code_or_exception_or_task_status:
                         result_code_or_exception = [
+                            ResultCode.FAILED,
                             result_code_or_exception_or_task_status,
-                            "",
                         ]
-                elif result_code_or_exception_or_task_status:
-                    result_code_or_exception = [
-                        ResultCode.FAILED,
-                        result_code_or_exception_or_task_status,
-                    ]
             if result_code_or_exception:
                 self.result_codes_mapping[dev_name] = result_code_or_exception
                 self.logger.info(
