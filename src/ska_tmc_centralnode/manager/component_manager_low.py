@@ -85,7 +85,7 @@ class CNComponentManagerLow(CNComponentManager):
             proxy_timeout,
             sleep_time,
             skuid_service="",
-            command_timeout=30,
+            command_timeout=command_timeout,
             *args,
             **kwargs,
         )
