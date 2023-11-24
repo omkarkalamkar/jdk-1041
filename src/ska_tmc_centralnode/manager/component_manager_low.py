@@ -174,6 +174,10 @@ class CNComponentManagerLow(CNComponentManager):
                             dev_name
                         ] = ResultCode.OK
                         self.command_mapping[self.command_id].remove(unique_id)
+                        self.logger.info(
+                            "Updated command mapping dictionary is: %s",
+                            self.command_mapping,
+                        )
 
             except ValueError:
                 if unique_id in self.command_mapping[self.command_id]:
@@ -185,6 +189,10 @@ class CNComponentManagerLow(CNComponentManager):
                     ] = result_code_or_exception_or_task_status
                     self.error_count += 1
                     self.command_mapping[self.command_id].remove(unique_id)
+                    self.logger.info(
+                        "Updated command mapping dictionary is: %s",
+                        self.command_mapping,
+                    )
                     self.logger.error(
                         "Exception occurred with value: %s for %s command_id for device: %s",
                         value,

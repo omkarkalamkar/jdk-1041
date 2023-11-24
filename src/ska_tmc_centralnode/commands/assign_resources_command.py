@@ -385,10 +385,20 @@ class AssignResources(AssignReleaseResources):
                     if self.component_manager.command_mapping.get(
                         self.component_manager.command_id
                     ):
+                        self.logger.info(
+                            "Adding the id %s to the command mapping dictionary under command_id: %s",
+                            message_or_unique_id,
+                            self.component_manager.command_id,
+                        )
                         self.component_manager.command_mapping[
                             self.component_manager.command_id
                         ].append(message_or_unique_id)
                     else:
+                        self.logger.info(
+                            "Creating a command mapping dictionary for id: %s, with unique_id: %s",
+                            self.component_manager.command_id,
+                            message_or_unique_id,
+                        )
                         self.component_manager.command_mapping[
                             self.component_manager.command_id
                         ] = [message_or_unique_id]
