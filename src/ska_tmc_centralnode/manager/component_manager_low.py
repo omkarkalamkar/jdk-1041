@@ -120,7 +120,10 @@ class CNComponentManagerLow(CNComponentManager):
         self.subarray_mccsmln_event.clear()
         self.error_event.clear()
         self.error_count = 0
-        del self.command_mapping[self.command_id]
+        del self.command_mapping[command_id]
+        self.logger.info(
+            "Updated command mapping dictionary is: %s", self.command_mapping
+        )
 
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.
@@ -151,21 +154,14 @@ class CNComponentManagerLow(CNComponentManager):
         if not self.error_event.get(self.command_id):
             self.error_event[self.command_id] = {}
 
-        if not self.error_event.get(self.command_id):
-            self.error_event[self.command_id] = {}
-
         unique_id, result_code_or_exception_or_task_status = value
-        self.logger.info(
-            "The Unique_id and Result_code : %s and %s",
-            unique_id,
-            result_code_or_exception_or_task_status,
-        )
         if unique_id.endswith(
             self.supported_commands
         ):  # ignoring other command events
             try:
                 self.logger.info(
-                    f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
+                    "LongRunningCommandResult event occurred: %s",
+                    result_code_or_exception_or_task_status,
                 )
                 if (
                     int(result_code_or_exception_or_task_status)
@@ -181,13 +177,6 @@ class CNComponentManagerLow(CNComponentManager):
 
             except ValueError:
                 if unique_id in self.command_mapping[self.command_id]:
-                    self.logger.info(
-                        "Updating LRCRCallback with value: %s for %s for device: %s",
-                        unique_id,
-                        value,
-                        dev_name,
-                    )
-
                     self.subarray_mccsmln_event[self.command_id][
                         dev_name
                     ] = result_code_or_exception_or_task_status
@@ -195,6 +184,7 @@ class CNComponentManagerLow(CNComponentManager):
                         dev_name
                     ] = result_code_or_exception_or_task_status
                     self.error_count += 1
+                    self.command_mapping[self.command_id].remove(unique_id)
                     self.logger.error(
                         "Exception occurred with value: %s for %s command_id for device: %s",
                         value,
@@ -215,7 +205,13 @@ class CNComponentManagerLow(CNComponentManager):
                             exception_message += (
                                 f"{devname}: {error_or_result}"
                             )
-                    self.logger.info(exception_message)
+                    self.logger.info(
+                        "Updating LRCRCallback with following values: "
+                        + "command_id: %s, resultcode: %s, message: %s",
+                        self.command_id,
+                        ResultCode.FAILED,
+                        exception_message,
+                    )
                     self.long_running_result_callback(
                         self.command_id,
                         ResultCode.FAILED,
