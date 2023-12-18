@@ -187,11 +187,27 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.info(
                 f"State event callback for device {dev_name}: {state}"
             )
+            sdp_master_dev_name = self.get_sdp_master_dev_name()
+            if dev_name in sdp_master_dev_name:
+                dev_name = sdp_master_dev_name
+
+            # TODO: Enable this fix when real CSP and real DISH 
+            # exposes full FQDN, in integration
+            # csp_master_dev_name = self.get_csp_master_dev_name()
+            # dish_master_dev_names = self.get_dish_device_names()
+            # if dev_name in csp_master_dev_name:
+            #     dev_name = csp_master_dev_name
+
+            # for dish in dish_master_dev_names:
+            #     if dev_name in dish:
+            #         dev_name = dish
+
             devInfo = self.component.get_device(dev_name)
-            devInfo.state = state
-            devInfo.last_event_arrived = time.time()
-            devInfo.update_unresponsive(False)
-            self.component._invoke_device_callback(devInfo)
+            if devInfo is not None:
+                devInfo.state = state
+                devInfo.last_event_arrived = time.time()
+                devInfo.update_unresponsive(False)
+                self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
         self._update_imaging()

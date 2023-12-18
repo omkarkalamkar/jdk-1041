@@ -274,6 +274,36 @@ class CNComponentManager(TmcComponentManager):
         """
         return self.component.get_device(dev_name)
 
+    def get_sdp_subarray_dev_names(self) -> list:
+        """
+        Return Sdp Subarray device names
+        """
+        return self.input_parameter.sdp_subarray_dev_names
+
+    def get_csp_subarray_dev_names(self) -> list:
+        """
+        Return Csp Subarray device names
+        """
+        return self.input_parameter.csp_subarray_dev_names
+    
+    def get_sdp_master_dev_name(self) -> str:
+        """
+        Return Sdp Master device name
+        """
+        return self.input_parameter.sdp_master_dev_name
+
+    def get_csp_master_dev_name(self) -> str:
+        """
+        Return Csp Master device name
+        """
+        return self.input_parameter.csp_master_dev_name
+
+    def get_dish_device_names(self) -> tuple:
+        """
+        Return Dish Master device names
+        """
+        return self.input_parameter.dish_dev_names
+
     def check_if_csp_mln_is_available(self) -> bool:
         """
         Returns boolean value based on availability of CspMasterLeafNode,
@@ -421,11 +451,30 @@ class CNComponentManager(TmcComponentManager):
         :type health_state: HealthState
         """
         with self.lock:
+            self.logger.info(
+                f"State event callback for device {dev_name}: {health_state}"
+            )
+            sdp_master_dev_name = self.get_sdp_master_dev_name()
+            if dev_name in sdp_master_dev_name:
+                dev_name = sdp_master_dev_name
+        
+            # TODO: Enable this fix when real CSP and real DISH 
+            # exposes full FQDN, in integration
+            # csp_master_dev_name = self.get_csp_master_dev_name()
+            # dish_master_dev_names = self.get_dish_device_names()
+            # if dev_name in csp_master_dev_name:
+            #     dev_name = csp_master_dev_name
+
+            # for dish in dish_master_dev_names:
+            #     if dev_name in dish:
+            #         dev_name = dish
+
             devInfo = self.component.get_device(dev_name)
-            devInfo.health_state = health_state
-            devInfo.last_event_arrived = time.time()
-            devInfo.update_unresponsive(False)
-            self.component._invoke_device_callback(devInfo)
+            if devInfo is not None:
+                devInfo.health_state = health_state
+                devInfo.last_event_arrived = time.time()
+                devInfo.update_unresponsive(False)
+                self.component._invoke_device_callback(devInfo)
 
         self._aggregate_health_state()
 
@@ -440,11 +489,28 @@ class CNComponentManager(TmcComponentManager):
         :type obs_state: ObsState
         """
         with self.lock:
+            self.logger.info(
+                f"ObsState event callback for device {dev_name}: {obs_state}"
+            )
+            sdp_subarray_dev_name = self.get_sdp_subarray_dev_names()
+            for sdp_subarray in sdp_subarray_dev_name:
+                if dev_name in sdp_subarray:
+                    dev_name = sdp_subarray
+        
+            # TODO: Enable this fix when real CSP and real DISH 
+            # exposes full FQDN, in integration
+            # csp_master_dev_name = self.get_csp_master_dev_name()
+            # dish_master_dev_names = self.get_dish_device_names()
+            # if dev_name in csp_master_dev_name:
+            #     dev_name = csp_master_dev_name
+
             devInfo = self.component.get_device(dev_name)
-            devInfo.obs_state = obs_state
-            devInfo.last_event_arrived = time.time()
-            devInfo.update_unresponsive(False)
-            self.component._invoke_device_callback(devInfo)
+
+            if devInfo is not None:
+                devInfo.obs_state = obs_state
+                devInfo.last_event_arrived = time.time()
+                devInfo.update_unresponsive(False)
+                self.component._invoke_device_callback(devInfo)
 
     def update_device_assigned_resource(self, dev_name, assign_resources):
         """
@@ -456,11 +522,19 @@ class CNComponentManager(TmcComponentManager):
         :type assign_resources: str
         """
         with self.lock:
+            self.logger.info(
+                f"assignedResources event callback for device {dev_name}: {assign_resources}"
+            )
+            sdp_subarray_dev_name = self.get_sdp_subarray_dev_names()
+            for sdp_subarray in sdp_subarray_dev_name:
+                if dev_name in sdp_subarray:
+                    dev_name = sdp_subarray
             dev_info = self.component.get_device(dev_name)
-            dev_info.resources = assign_resources
-            dev_info.last_event_arrived = time.time()
-            dev_info.update_unresponsive(False)
-            self.component._invoke_device_callback(dev_info)
+            if dev_info is not None:
+                dev_info.resources = assign_resources
+                dev_info.last_event_arrived = time.time()
+                dev_info.update_unresponsive(False)
+                self.component._invoke_device_callback(dev_info)
 
     def is_already_assigned(self, dish_id):
         """
