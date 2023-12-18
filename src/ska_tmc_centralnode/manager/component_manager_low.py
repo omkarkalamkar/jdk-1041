@@ -242,11 +242,22 @@ class CNComponentManagerLow(CNComponentManager):
             self.logger.debug(
                 f"State event callback for device {dev_name}: {state}"
             )
+
+            # TODO: Enable this fix when low real SDP and real CSP
+            # exposes full FQDN, in integration
+            # sdp_master_dev_name = self.get_sdp_master_dev_name()
+            # if dev_name in sdp_master_dev_name:
+            #     dev_name = sdp_master_dev_name
+            # csp_master_dev_name = self.get_csp_master_dev_name()
+            # if dev_name in csp_master_dev_name:
+            #     dev_name = csp_master_dev_name
+
             devInfo = self.component.get_device(dev_name)
-            devInfo.state = state
-            devInfo.last_event_arrived = time.time()
-            devInfo.update_unresponsive(False)
-            self.component._invoke_device_callback(devInfo)
+            if devInfo is not None:
+                devInfo.state = state
+                devInfo.last_event_arrived = time.time()
+                devInfo.update_unresponsive(False)
+                self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
 
