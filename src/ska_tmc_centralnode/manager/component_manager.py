@@ -458,8 +458,8 @@ class CNComponentManager(TmcComponentManager):
             if dev_name in sdp_master_dev_name:
                 dev_name = sdp_master_dev_name
 
-            # TODO: Enable this fix when real CSP and real DISH
-            # exposes full FQDN, in integration
+            # TODO: Enable this fix when real CSP controller, CSP subarray
+            # and real DISH master exposes full FQDN, in integration
             # csp_master_dev_name = self.get_csp_master_dev_name()
             # dish_master_dev_names = self.get_dish_device_names()
             # if dev_name in csp_master_dev_name:
@@ -492,20 +492,19 @@ class CNComponentManager(TmcComponentManager):
             self.logger.info(
                 f"ObsState event callback for device {dev_name}: {obs_state}"
             )
-            sdp_subarray_dev_name = self.get_sdp_subarray_dev_names()
-            for sdp_subarray in sdp_subarray_dev_name:
+            sdp_subarray_dev_names = self.get_sdp_subarray_dev_names()
+            for sdp_subarray in sdp_subarray_dev_names:
                 if dev_name in sdp_subarray:
                     dev_name = sdp_subarray
 
-            # TODO: Enable this fix when real CSP and real DISH
+            # TODO: Enable this fix when real CSP controller and CSP Subarray
             # exposes full FQDN, in integration
-            # csp_master_dev_name = self.get_csp_master_dev_name()
-            # dish_master_dev_names = self.get_dish_device_names()
-            # if dev_name in csp_master_dev_name:
-            #     dev_name = csp_master_dev_name
+            # csp_subarray_dev_names = self.get_csp_subarray_dev_names()
+            # for csp_subarray in csp_subarray_dev_names:
+            #     if dev_name in csp_subarray:
+            #         dev_name = csp_subarray
 
             devInfo = self.component.get_device(dev_name)
-
             if devInfo is not None:
                 devInfo.obs_state = obs_state
                 devInfo.last_event_arrived = time.time()
@@ -529,6 +528,12 @@ class CNComponentManager(TmcComponentManager):
             for sdp_subarray in sdp_subarray_dev_name:
                 if dev_name in sdp_subarray:
                     dev_name = sdp_subarray
+            # TODO: Enable this fix when real CSP controller and CSP Subarray
+            # exposes full FQDN, in integration
+            # csp_subarray_dev_names = self.get_csp_subarray_dev_names()
+            # for csp_subarray in csp_subarray_dev_names:
+            #     if dev_name in csp_subarray:
+            #         dev_name = csp_subarray
             dev_info = self.component.get_device(dev_name)
             if dev_info is not None:
                 dev_info.resources = assign_resources

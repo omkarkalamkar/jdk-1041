@@ -242,12 +242,12 @@ class CNComponentManagerLow(CNComponentManager):
             self.logger.debug(
                 f"State event callback for device {dev_name}: {state}"
             )
-            sdp_master_dev_name = self.get_sdp_master_dev_name()
-            if dev_name in sdp_master_dev_name:
-                dev_name = sdp_master_dev_name
 
-            # TODO: Enable this fix when real CSP and real DISH
+            # TODO: Enable this fix when low real SDP, real CSP and real DISH
             # exposes full FQDN, in integration
+            # sdp_master_dev_name = self.get_sdp_master_dev_name()
+            # if dev_name in sdp_master_dev_name:
+            #     dev_name = sdp_master_dev_name
             # csp_master_dev_name = self.get_csp_master_dev_name()
             # dish_master_dev_names = self.get_dish_device_names()
             # if dev_name in csp_master_dev_name:
