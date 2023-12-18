@@ -37,6 +37,19 @@ class CentralNodeLow(AbstractCentralNode):
     SdpMasterLeafNodeFQDN = device_property(dtype="str")
 
     SdpMasterFQDN = device_property(dtype="str")
+
+    TMCMidCspSubarrayLeafNodes = device_property(
+        dtype=("str",),
+        doc="List of TM Mid CspSubarrayLeafNode devices",
+        default_value=tuple(),
+    )
+
+    TMCMidSdpSubarrayLeafNodes = device_property(
+        dtype=("str",),
+        doc="List of TM Mid SdpSubarrayLeafNode devices",
+        default_value=tuple(),
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -179,6 +192,12 @@ class CentralNodeLow(AbstractCentralNode):
         cm.input_parameter.sdp_mln_dev_name = self.SdpMasterLeafNodeFQDN or ""
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
         cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
+        cm.input_parameter.csp_subarray_dev_names = (
+            self.TMCMidCspSubarrayLeafNodes
+        )
+        cm.input_parameter.sdp_subarray_dev_names = (
+            self.TMCMidSdpSubarrayLeafNodes
+        )
         cm.update_input_parameter()
         return cm
 
