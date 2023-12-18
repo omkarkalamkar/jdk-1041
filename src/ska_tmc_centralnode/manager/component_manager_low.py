@@ -243,7 +243,7 @@ class CNComponentManagerLow(CNComponentManager):
                 f"State event callback for device {dev_name}: {state}"
             )
 
-            # TODO: Enable this fix when low real SDP, real CSP and real DISH
+            # TODO: Enable this fix when low real SDP and real CSP
             # exposes full FQDN, in integration
             # sdp_master_dev_name = self.get_sdp_master_dev_name()
             # if dev_name in sdp_master_dev_name:
