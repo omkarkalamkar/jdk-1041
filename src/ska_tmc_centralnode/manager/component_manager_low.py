@@ -246,7 +246,7 @@ class CNComponentManagerLow(CNComponentManager):
             if dev_name in sdp_master_dev_name:
                 dev_name = sdp_master_dev_name
 
-            # TODO: Enable this fix when real CSP and real DISH 
+            # TODO: Enable this fix when real CSP and real DISH
             # exposes full FQDN, in integration
             # csp_master_dev_name = self.get_csp_master_dev_name()
             # dish_master_dev_names = self.get_dish_device_names()

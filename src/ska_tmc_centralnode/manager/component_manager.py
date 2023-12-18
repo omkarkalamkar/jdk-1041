@@ -285,7 +285,7 @@ class CNComponentManager(TmcComponentManager):
         Return Csp Subarray device names
         """
         return self.input_parameter.csp_subarray_dev_names
-    
+
     def get_sdp_master_dev_name(self) -> str:
         """
         Return Sdp Master device name
@@ -457,8 +457,8 @@ class CNComponentManager(TmcComponentManager):
             sdp_master_dev_name = self.get_sdp_master_dev_name()
             if dev_name in sdp_master_dev_name:
                 dev_name = sdp_master_dev_name
-        
-            # TODO: Enable this fix when real CSP and real DISH 
+
+            # TODO: Enable this fix when real CSP and real DISH
             # exposes full FQDN, in integration
             # csp_master_dev_name = self.get_csp_master_dev_name()
             # dish_master_dev_names = self.get_dish_device_names()
@@ -496,8 +496,8 @@ class CNComponentManager(TmcComponentManager):
             for sdp_subarray in sdp_subarray_dev_name:
                 if dev_name in sdp_subarray:
                     dev_name = sdp_subarray
-        
-            # TODO: Enable this fix when real CSP and real DISH 
+
+            # TODO: Enable this fix when real CSP and real DISH
             # exposes full FQDN, in integration
             # csp_master_dev_name = self.get_csp_master_dev_name()
             # dish_master_dev_names = self.get_dish_device_names()
