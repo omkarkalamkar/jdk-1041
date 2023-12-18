@@ -29,6 +29,14 @@ class CentralNodeLow(AbstractCentralNode):
     MCCSMasterLeafNodeFQDN = device_property(dtype="str")
 
     MCCSMasterFQDN = device_property(dtype="str")
+
+    CspMasterLeafNodeFQDN = device_property(dtype="str")
+
+    CspMasterFQDN = device_property(dtype="str")
+
+    SdpMasterLeafNodeFQDN = device_property(dtype="str")
+
+    SdpMasterFQDN = device_property(dtype="str")
     # ----------
     # Attributes
     # ----------
@@ -167,14 +175,10 @@ class CentralNodeLow(AbstractCentralNode):
             self.MCCSMasterLeafNodeFQDN or ""
         )
         cm.input_parameter.mccs_master_dev_name = self.MCCSMasterFQDN or ""
-        cm.input_parameter.sdp_master_dev_name = self.sdpMasterDevName or ""
-        cm.input_parameter.sdp_mln_dev_name = (
-            self.SdpMasterLeafNodeDevName or ""
-        )
-        cm.input_parameter.csp_master_dev_name = self.cspMasterDevName or ""
-        cm.input_parameter.csp_mln_dev_name = (
-            self.CspMasterLeafNodeDevName or ""
-        )
+        cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
+        cm.input_parameter.sdp_mln_dev_name = self.SdpMasterLeafNodeFQDN or ""
+        cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
+        cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
         cm.update_input_parameter()
         return cm
 
