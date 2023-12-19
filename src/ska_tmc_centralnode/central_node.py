@@ -76,6 +76,26 @@ class AbstractCentralNode(TMCBaseDevice):
     # Attributes
     # ----------
 
+    cspMasterDevName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    sdpMasterDevName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    CspMasterLeafNodeDevName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
+    SdpMasterLeafNodeDevName = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+    )
+
     telescopeHealthState = attribute(
         dtype=HealthState,
         doc="Health state of Telescope",
