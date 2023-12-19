@@ -40,13 +40,13 @@ class CentralNodeLow(AbstractCentralNode):
 
     TMCLowCspSubarrayLeafNodes = device_property(
         dtype=("str",),
-        doc="List of TM Low CspSubarrayLeafNode devices",
+        doc="List of Low CspSubarrayLeafNode devices",
         default_value=tuple(),
     )
 
     TMCLowSdpSubarrayLeafNodes = device_property(
         dtype=("str",),
-        doc="List of TM Low SdpSubarrayLeafNode devices",
+        doc="List of Low SdpSubarrayLeafNode devices",
         default_value=tuple(),
     )
 
