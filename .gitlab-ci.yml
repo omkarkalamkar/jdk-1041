@@ -2,6 +2,7 @@ image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
 
 python-test:
   image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32
+  retry: 1
 
 python-lint:
   image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32 

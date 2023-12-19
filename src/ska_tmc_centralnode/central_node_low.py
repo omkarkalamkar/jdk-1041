@@ -29,29 +29,10 @@ class CentralNodeLow(AbstractCentralNode):
     MCCSMasterLeafNodeFQDN = device_property(dtype="str")
 
     MCCSMasterFQDN = device_property(dtype="str")
+
     # ----------
     # Attributes
     # ----------
-
-    cspMasterDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    sdpMasterDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    CspMasterLeafNodeDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    SdpMasterLeafNodeDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
 
     mccsMasterLeafNodeName = attribute(
         dtype="DevString",
@@ -105,42 +86,6 @@ class CentralNodeLow(AbstractCentralNode):
         self.component_manager.input_parameter.mccs_master_dev_name = value
         self.component_manager.update_input_parameter()
 
-    def read_cspMasterDevName(self):
-        """Return the cspMasterDevName attribute."""
-        return self.component_manager.input_parameter.csp_master_dev_name
-
-    def write_cspMasterDevName(self, value):
-        """Set the cspMasterDevName attribute."""
-        self.component_manager.input_parameter.csp_master_dev_name = value
-        self.component_manager.update_input_parameter()
-
-    def read_sdpMasterDevName(self):
-        """Return the sdpMasterDevName attribute."""
-        return self.component_manager.input_parameter.sdp_master_dev_name
-
-    def write_sdpMasterDevName(self, value):
-        """Set the sdpMasterDevName attribute."""
-        self.component_manager.input_parameter.sdp_master_dev_name = value
-        self.component_manager.update_input_parameter()
-
-    def read_CspMasterLeafNodeDevName(self):
-        """Return the cspMasterLeafNodeDevName attribute."""
-        return self.component_manager.input_parameter.csp_mln_dev_name
-
-    def write_CspMasterLeafNodeDevName(self, value):
-        """Set the cspMasterLeafNodeDevName attribute."""
-        self.component_manager.input_parameter.csp_mln_dev_name = value
-        self.component_manager.update_input_parameter()
-
-    def read_SdpMasterLeafNodeDevName(self):
-        """Return the sdpMasterLeafNodeDevName attribute."""
-        return self.component_manager.input_parameter.sdp_mln_dev_name
-
-    def write_SdpMasterLeafNodeDevName(self, value):
-        """Set the sdpMasterLeafNodeDevName attribute."""
-        self.component_manager.input_parameter.sdp_mln_dev_name = value
-        self.component_manager.update_input_parameter()
-
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
@@ -167,6 +112,12 @@ class CentralNodeLow(AbstractCentralNode):
             self.MCCSMasterLeafNodeFQDN or ""
         )
         cm.input_parameter.mccs_master_dev_name = self.MCCSMasterFQDN or ""
+        cm.input_parameter.sdp_master_dev_name = self.SdpMasterFQDN or ""
+        cm.input_parameter.sdp_mln_dev_name = self.SdpMasterLeafNodeFQDN or ""
+        cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
+        cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
+        cm.input_parameter.csp_subarray_dev_names = self.CspSubarrayLeafNodes
+        cm.input_parameter.sdp_subarray_dev_names = self.SdpSubarrayLeafNodes
         cm.update_input_parameter()
         return cm
 
