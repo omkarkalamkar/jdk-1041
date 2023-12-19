@@ -42,6 +42,26 @@ class AbstractCentralNode(TMCBaseDevice):
         default_value=tuple(),
     )
 
+    CspMasterLeafNodeFQDN = device_property(dtype="str")
+
+    CspMasterFQDN = device_property(dtype="str")
+
+    SdpMasterLeafNodeFQDN = device_property(dtype="str")
+
+    SdpMasterFQDN = device_property(dtype="str")
+
+    CspSubarrayLeafNodes = device_property(
+        dtype=("str",),
+        doc="List of Low CspSubarrayLeafNode devices",
+        default_value=tuple(),
+    )
+
+    SdpSubarrayLeafNodes = device_property(
+        dtype=("str",),
+        doc="List of Low SdpSubarrayLeafNode devices",
+        default_value=tuple(),
+    )
+
     SkuidService = device_property(
         dtype="DevString",
         default_value="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
@@ -155,6 +175,41 @@ class AbstractCentralNode(TMCBaseDevice):
     # ------------------
     # Attributes methods
     # ------------------
+    def read_cspMasterDevName(self):
+        """Return the cspMasterDevName attribute."""
+        return self.component_manager.input_parameter.csp_master_dev_name
+
+    def write_cspMasterDevName(self, value):
+        """Set the cspMasterDevName attribute."""
+        self.component_manager.input_parameter.csp_master_dev_name = value
+        self.component_manager.update_input_parameter()
+
+    def read_sdpMasterDevName(self):
+        """Return the sdpMasterDevName attribute."""
+        return self.component_manager.input_parameter.sdp_master_dev_name
+
+    def write_sdpMasterDevName(self, value):
+        """Set the sdpMasterDevName attribute."""
+        self.component_manager.input_parameter.sdp_master_dev_name = value
+        self.component_manager.update_input_parameter()
+
+    def read_CspMasterLeafNodeDevName(self):
+        """Return the cspMasterLeafNodeDevName attribute."""
+        return self.component_manager.input_parameter.csp_mln_dev_name
+
+    def write_CspMasterLeafNodeDevName(self, value):
+        """Set the cspMasterLeafNodeDevName attribute."""
+        self.component_manager.input_parameter.csp_mln_dev_name = value
+        self.component_manager.update_input_parameter()
+
+    def read_SdpMasterLeafNodeDevName(self):
+        """Return the sdpMasterLeafNodeDevName attribute."""
+        return self.component_manager.input_parameter.sdp_mln_dev_name
+
+    def write_SdpMasterLeafNodeDevName(self, value):
+        """Set the sdpMasterLeafNodeDevName attribute."""
+        self.component_manager.input_parameter.sdp_mln_dev_name = value
+        self.component_manager.update_input_parameter()
 
     def read_telescopeHealthState(self):
         return self.component_manager.component.telescope_health_state
