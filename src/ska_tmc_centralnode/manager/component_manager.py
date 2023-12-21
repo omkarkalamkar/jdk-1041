@@ -390,6 +390,9 @@ class CNComponentManager(TmcComponentManager):
             and dev_name.lower() in self.input_parameter.dish_dev_names
         ):
             devInfo = DishDeviceInfo(dev_name, False)
+            self.logger.info(
+                "Adding DishDeviceInfo for %s: %s", dev_name, devInfo
+            )
         elif (
             isinstance(self.input_parameter, InputParameterLow)
             and dev_name.lower() in self.input_parameter.mccs_mln_dev_name

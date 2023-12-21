@@ -1,3 +1,8 @@
+import logging
+
+module_logger = logging.getLogger(__name__)
+
+
 class InputParameter:
     def __init__(self, changed_callback) -> None:
         self._changed_callback = changed_callback
@@ -399,11 +404,17 @@ class InputParameterMid(InputParameter):
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
 
+        module_logger.info("list_dev_names is: %s", list_dev_names)
+
         for dev_name in self.dish_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
 
+        module_logger.info("list_dev_names is: %s", list_dev_names)
+
         for devInfo in component_manager.devices:
             if devInfo.dev_name not in list_dev_names:
                 component_manager.component.remove_device(devInfo.dev_name)
+
+        module_logger.info("list_dev_names is: %s", list_dev_names)
