@@ -61,6 +61,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.timeout_callback,
         )
         ret_code, message = self.do(dish_cfg_params)
+        self.dish_cfg_params = dish_cfg_params
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
             task_callback(
@@ -99,6 +100,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 result=result, status=TaskStatus.COMPLETED, exception=message
             )
         else:
+            self.update_memorized_attribute()
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.component_manager.command_in_progress = ""
         if self.component_manager.command_mapping.get(
@@ -108,6 +110,13 @@ class LoadDishCfg(LoadDishCfgCommand):
                 self.component_manager.command_id
             )
         self.component_manager.reset_load_dish_cfg_data()
+
+    def update_memorized_attribute(self):
+        """Update memorized attribute so after restart this
+        attribute used to get dish map vcc version set before
+        restart
+        """
+        self.csp_mln_adapter.memorizedDishVccMap = self.dish_cfg_params
 
     def get_dishid_vcc_map_json(
         self, initial_params: dict
@@ -186,6 +195,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             "LoadDishCfg",
             json.dumps(dishid_vcc_map_params),
         )
+        # self.csp_mln_adapter.proxy.memorizedDishVccMap = json.dumps(dishid_vcc_map_params)
         self.component_manager.dev_names_for_load_dish_cfg.append(
             self.csp_mln_adapter.dev_name
         )
