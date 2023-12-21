@@ -73,7 +73,7 @@ def load_dish_cfg(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
-
+    
     # Validate dishVccConfigs are set on Csp Master Device
     assert json.loads(csp_master_ln_device.sourceDishVccConfig) == json.loads(
         config_str
