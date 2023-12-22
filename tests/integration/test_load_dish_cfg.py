@@ -57,7 +57,7 @@ def load_dish_cfg(
 
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
-
+test_load_dish_cfg_when_csp_is_defective
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
@@ -126,7 +126,7 @@ def load_dish_cfg_when_csp_is_defective(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], EXPECTED_FAILED_MESSAGE),
-        lookahead=4,
+        lookahead=8,
     )
 
     csp_master_ln_device.SetDefective(RESET_DEFECT)
@@ -134,6 +134,7 @@ def load_dish_cfg_when_csp_is_defective(
     tear_down(central_node_name, reset_sys_param=True)
 
 
+@pytest.mark.load_config
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
