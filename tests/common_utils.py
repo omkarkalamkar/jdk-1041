@@ -27,8 +27,11 @@ def wait_for_device_to_up(device_name, timeout=20):
     dev_factory = DevFactory()
     cnt = 0
     device_proxy = dev_factory.get_device(device_name)
-    while device_proxy.ping() < 0:
-        cnt += 1
-        time.sleep(1)
-        if cnt == timeout:
-            break
+    try:
+        while device_proxy.ping() < 0:
+            cnt += 1
+            time.sleep(1)
+            if cnt == timeout:
+                break
+    except Exception:
+        pass
