@@ -134,7 +134,6 @@ def load_dish_cfg_when_csp_is_defective(
     tear_down(central_node_name, reset_sys_param=True)
 
 
-@pytest.mark.load_config
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(

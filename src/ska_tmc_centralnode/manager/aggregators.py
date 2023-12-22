@@ -69,9 +69,11 @@ class TelescopeStateAggregatorMid(Aggregator):
             or dish_modes == {DishMode.OPERATE, DishMode.CONFIG}
         ):
             return DevState.ON
-        elif subsystem_states == {DevState.OFF} and dish_modes == {
-            DishMode.STANDBY_LP
-        }:
+        elif (
+            subsystem_states == {DevState.OFF}
+            and dish_modes == {DishMode.STANDBY_LP}
+            or dish_modes == {DishMode.SHUTDOWN}
+        ):
             return DevState.OFF
         elif DevState.INIT in subsystem_states:
             return DevState.INIT
