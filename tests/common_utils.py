@@ -1,3 +1,4 @@
+import logging
 import time
 
 from ska_tmc_common.dev_factory import DevFactory
@@ -18,20 +19,35 @@ def tear_down(central_node_name, reset_sys_param=False):
 
     if reset_sys_param:
         csp_master_ln_device.ResetSysParams()
-
         dish_ln_device.SetKValue(0)
 
 
-def wait_for_device_to_up(device_name, timeout=20):
+def is_device_up(device_name, attribute_name, timeout=20):
     """Wait for device to up"""
     dev_factory = DevFactory()
     cnt = 0
-    device_proxy = dev_factory.get_device(device_name)
-    try:
-        while device_proxy.ping() < 0:
-            cnt += 1
-            time.sleep(1)
-            if cnt == timeout:
-                break
-    except Exception:
-        pass
+    # Wait for device to up within provided timeout
+    while True:
+        try:
+            device_proxy = dev_factory.get_device(device_name)
+            attr_value = device_proxy.read_attribute(attribute_name).value
+            if attr_value == "":
+                # if attribute is read successfully then
+                # device is up and running
+                return True
+            logging.info(
+                "Sleeping for 1 sec and cnt is %s and attribute value %s",
+                cnt,
+                attr_value,
+            )
+        except Exception as e:
+            # if device is not started the exception is thrown
+            logging.info(
+                "Exception occurred while reading attribute %s and cnt is %s",
+                e,
+                cnt,
+            )
+        time.sleep(2)
+        cnt += 1
+        if cnt == timeout:
+            return False

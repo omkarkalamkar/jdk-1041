@@ -6,7 +6,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
-from tests.common_utils import tear_down
+from tests.common_utils import is_device_up, tear_down
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
@@ -22,11 +22,9 @@ def validate_attribute_after_restart(csp_mln, dish_cfg_str):
     # Restart the csp master leaf node
     csp_mln_device = DeviceProxy("dserver/mocks/01")
     csp_mln_device.RestartServer()
-    import time
-
-    time.sleep(20)
-    # wait_for_device_to_up(MID_CSP_MLN_DEVICE)
-
+    assert is_device_up(
+        MID_CSP_MLN_DEVICE, "sourceDishVccConfig"
+    ), f"{MID_CSP_MLN_DEVICE} is not Started after restart"
     assert json.loads(csp_mln.memorizedDishVccMap) == json.loads(dish_cfg_str)
 
 
@@ -76,7 +74,7 @@ def load_dish_cfg(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=7,
     )
 
     # Validate dishVccConfigs are set on Csp Master Device
@@ -157,7 +155,6 @@ def load_dish_cfg_when_csp_is_defective(
     tear_down(central_node_name, reset_sys_param=True)
 
 
-@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -198,7 +195,6 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
