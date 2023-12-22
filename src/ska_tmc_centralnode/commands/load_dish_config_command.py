@@ -195,7 +195,6 @@ class LoadDishCfg(LoadDishCfgCommand):
             "LoadDishCfg",
             json.dumps(dishid_vcc_map_params),
         )
-        # self.csp_mln_adapter.proxy.memorizedDishVccMap = json.dumps(dishid_vcc_map_params)
         self.component_manager.dev_names_for_load_dish_cfg.append(
             self.csp_mln_adapter.dev_name
         )
