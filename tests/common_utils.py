@@ -22,8 +22,12 @@ def tear_down(central_node_name, reset_sys_param=False):
         dish_ln_device.SetKValue(0)
 
 
-def is_device_up(device_name, attribute_name, timeout=20):
-    """Wait for device to up"""
+def is_device_ready(device_name, attribute_name, timeout=20):
+    """Wait for device to be ready
+    Method read the atrribute value provided in argument and
+    once device able to read attribute successfully then consider
+    device is ready
+    """
     dev_factory = DevFactory()
     cnt = 0
     # Wait for device to up within provided timeout

@@ -6,8 +6,11 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
-from tests.common_utils import is_device_up, tear_down
-from tests.integration.conftest import ensure_checked_devices
+from tests.common_utils import is_device_ready, tear_down
+from tests.integration.conftest import (
+    CURRENT_TEST_DISH_VCC_KVALUE,
+    ensure_checked_devices,
+)
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     ERROR_PROPAGATION_DEFECT,
@@ -22,7 +25,7 @@ def validate_attribute_after_restart(csp_mln, dish_cfg_str):
     # Restart the csp master leaf node
     csp_mln_device = DeviceProxy("dserver/mocks/01")
     csp_mln_device.RestartServer()
-    assert is_device_up(
+    assert is_device_ready(
         MID_CSP_MLN_DEVICE, "sourceDishVccConfig"
     ), f"{MID_CSP_MLN_DEVICE} is not Started after restart"
     assert json.loads(csp_mln.memorizedDishVccMap) == json.loads(dish_cfg_str)
@@ -82,7 +85,7 @@ def load_dish_cfg(
         config_str
     )
     # Validate kValue is set on dish
-    assert dish_ln_device.kValue == 11
+    assert dish_ln_device.kValue == CURRENT_TEST_DISH_VCC_KVALUE
 
     assert json.loads(csp_master_ln_device.memorizedDishVccMap) == json.loads(
         config_str
