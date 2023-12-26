@@ -231,6 +231,7 @@ class CentralNodeMid(AbstractCentralNode):
             cm.input_parameter.dish_leaf_node_dev_names.append(
                 self.DishLeafNodePrefix + dish_id
             )
+
         for dish_name in self.DishMasterFQDN:
             if "ska" in dish_name:
                 cm.input_parameter.dish_dev_names.append(dish_name)

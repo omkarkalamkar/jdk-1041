@@ -57,13 +57,23 @@ class TelescopeStateAggregatorMid(Aggregator):
         elif dish_count == 0:
             self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
-        elif subsystem_states == {DevState.ON} and dish_modes == {
-            DishMode.STANDBY_FP
-        }:
+        elif (
+            subsystem_states == {DevState.ON}
+            and dish_modes == {DishMode.STANDBY_FP}
+            or dish_modes == {DishMode.OPERATE}
+            or dish_modes == {DishMode.CONFIG}
+            or dish_modes == {DishMode.STANDBY_FP, DishMode.OPERATE}
+            or dish_modes == {DishMode.STANDBY_FP, DishMode.CONFIG}
+            or dish_modes
+            == {DishMode.STANDBY_FP, DishMode.OPERATE, DishMode.CONFIG}
+            or dish_modes == {DishMode.OPERATE, DishMode.CONFIG}
+        ):
             return DevState.ON
-        elif subsystem_states == {DevState.OFF} and dish_modes == {
-            DishMode.STANDBY_LP
-        }:
+        elif (
+            subsystem_states == {DevState.OFF}
+            and dish_modes == {DishMode.STANDBY_LP}
+            or dish_modes == {DishMode.SHUTDOWN}
+        ):
             return DevState.OFF
         elif DevState.INIT in subsystem_states:
             return DevState.INIT

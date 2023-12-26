@@ -454,20 +454,22 @@ class CNComponentManager(TmcComponentManager):
             self.logger.info(
                 f"State event callback for device {dev_name}: {health_state}"
             )
-            sdp_master_dev_name = self.get_sdp_master_dev_name()
-            if dev_name in sdp_master_dev_name:
-                dev_name = sdp_master_dev_name
-
-            # TODO: Enable this fix when real CSP controller, CSP subarray
-            # and real DISH master exposes full FQDN, in integration
-            # csp_master_dev_name = self.get_csp_master_dev_name()
-            # dish_master_dev_names = self.get_dish_device_names()
-            # if dev_name in csp_master_dev_name:
-            #     dev_name = csp_master_dev_name
-
-            # for dish in dish_master_dev_names:
-            #     if dev_name in dish:
-            #         dev_name = dish
+            if "sdp" in dev_name:
+                # Update SDP Master device name with full FQDN in case of real SDP
+                sdp_master_dev_name = self.get_sdp_master_dev_name()
+                if dev_name in sdp_master_dev_name:
+                    dev_name = sdp_master_dev_name
+            if "csp" in dev_name:
+                # Update CSP Master device name with full FQDN in case of real CSP
+                csp_master_dev_name = self.get_csp_master_dev_name()
+                if dev_name in csp_master_dev_name:
+                    dev_name = csp_master_dev_name
+            if "elt/master" in dev_name:
+                # Update Dish Master device name with full FQDN in case of real Dish
+                dish_master_dev_names = self.get_dish_device_names()
+                for dish in dish_master_dev_names:
+                    if dev_name in dish:
+                        dev_name = dish
 
             devInfo = self.component.get_device(dev_name)
             if devInfo is not None:

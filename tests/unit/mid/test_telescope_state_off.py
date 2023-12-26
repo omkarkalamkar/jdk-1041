@@ -54,7 +54,7 @@ def devices_to_load():
     )
 
 
-def test_telescope_state_off(tango_context):
+def test_telescope_state_off_with_dishmode_standbylp(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
         devices=[
@@ -67,6 +67,24 @@ def test_telescope_state_off(tango_context):
 
     dish_master = DevFactory().get_device(DISH_MASTER_DEVICE)
     dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
+    # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
+    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=12)
+    assert cm.component.telescope_state == tango.DevState.OFF
+
+
+def test_telescope_state_off_with_dishmode_shutdown(tango_context):
+    cm = create_cm_no_faulty_devices(tango_context, True, True)
+    set_devices_state(
+        devices=[
+            "mid-csp/control/0",
+            "mid-sdp/control/0",
+        ],
+        state=tango.DevState.OFF,
+        devFactory=DevFactory(),
+    )
+
+    dish_master = DevFactory().get_device(DISH_MASTER_DEVICE)
+    dish_master.SetDirectDishMode(DishMode.SHUTDOWN)
     # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
     ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=12)
     assert cm.component.telescope_state == tango.DevState.OFF
