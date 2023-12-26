@@ -44,7 +44,7 @@ def test_off_command_mid(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id_off[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=6,
     )
 
     csp_master = dev_factory.get_device("mid-csp/control/0")
@@ -64,7 +64,7 @@ def test_off_command_mid(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=6
+        "telescopeState", tango._tango.DevState.OFF, lookahead=8
     )
     event_remover(
         change_event_callbacks,

@@ -1,6 +1,5 @@
 import json
 
-import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
