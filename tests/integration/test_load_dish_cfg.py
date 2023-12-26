@@ -29,9 +29,10 @@ def validate_attribute_after_restart(csp_mln, dish_cfg_str):
         MID_CSP_MLN_DEVICE, "sourceDishVccConfig"
     ), f"{MID_CSP_MLN_DEVICE} is not Started after restart"
     assert json.loads(csp_mln.memorizedDishVccMap) == json.loads(dish_cfg_str)
-    # import time
+    # Will remove before merge
+    import time
 
-    # time.sleep(20)
+    time.sleep(20)
 
 
 def load_dish_cfg(
