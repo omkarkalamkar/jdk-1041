@@ -16,6 +16,7 @@ from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
+    event_remover,
     logger,
 )
 
@@ -99,7 +100,21 @@ def load_dish_cfg(
         # Validate when csp mln restart memorizedDishVccMap remains same
         validate_attribute_after_restart(csp_master_ln_device, config_str)
 
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
     tear_down(central_node_name, reset_sys_param=True)
+
+    change_event_callbacks.assert_change_event(
+        "telescopeState", tango._tango.DevState.OFF, lookahead=6
+    )
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult", "telescopeState"],
+    )
 
 
 def load_dish_cfg_when_csp_is_defective(
@@ -202,7 +217,6 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-@pytest.mark.skip
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
