@@ -64,8 +64,8 @@ def load_dish_cfg(
         lookahead=4,
     )
 
-    # Validate sysParams are set on Csp Master Device
-    assert json.loads(csp_master_ln_device.sourceSysParam) == json.loads(
+    # Validate dishVccConfigs are set on Csp Master Device
+    assert json.loads(csp_master_ln_device.sourceDishVccConfig) == json.loads(
         config_str
     )
     # Validate kValue is set on dish
