@@ -26,8 +26,10 @@ def validate_attribute_after_restart(
 ):
     """Restart csp mln and validate memorized attribute"""
     # Restart the csp master leaf node
-    csp_mln_device = DeviceProxy("dserver/mocks/01")
-    csp_mln_device.Kill()
+    # csp_mln_device = DeviceProxy("dserver/mocks/01")
+    # csp_mln_device.Kill()
+    csp_mln_device = DeviceProxy(MID_CSP_MLN_DEVICE)
+    csp_mln_device.init()
     assert is_device_ready(
         MID_CSP_MLN_DEVICE, "sourceDishVccConfig"
     ), f"{MID_CSP_MLN_DEVICE} is not Started after restart"
@@ -251,7 +253,7 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-@pytest.mark.test1
+@pytest.mark.test123
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
