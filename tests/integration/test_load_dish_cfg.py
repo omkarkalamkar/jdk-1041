@@ -21,7 +21,9 @@ from tests.settings import (
 )
 
 
-def validate_attribute_after_restart(csp_mln, dish_cfg_str):
+def validate_attribute_after_restart(
+    csp_mln, dish_cfg_str, central_node, change_event_callbacks
+):
     """Restart csp mln and validate memorized attribute"""
     # Restart the csp master leaf node
     csp_mln_device = DeviceProxy("dserver/mocks/01")
@@ -30,6 +32,29 @@ def validate_attribute_after_restart(csp_mln, dish_cfg_str):
         MID_CSP_MLN_DEVICE, "sourceDishVccConfig"
     ), f"{MID_CSP_MLN_DEVICE} is not Started after restart"
     assert json.loads(csp_mln.memorizedDishVccMap) == json.loads(dish_cfg_str)
+
+    ensure_checked_devices(central_node)
+
+    dev_factory = DevFactory()
+    csp_master = dev_factory.get_device("mid-csp/control/0")
+    csp_master.SetDirectState(tango.DevState.ON)
+
+    sdp_master = dev_factory.get_device("mid-sdp/control/0")
+    sdp_master.SetDirectState(tango.DevState.ON)
+
+    dish_master = dev_factory.get_device("ska001/elt/master")
+    dish_master.SetDirectDishMode(DishMode.STANDBY_FP)
+    dish_master.SetDirectPointingState(PointingState.READY)
+
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "telescopeState", tango._tango.DevState.ON, lookahead=7
+    )
 
 
 def load_dish_cfg(
@@ -94,7 +119,12 @@ def load_dish_cfg(
 
     if test_csp_mln_restart:
         # Validate when csp mln restart memorizedDishVccMap remains same
-        validate_attribute_after_restart(csp_master_ln_device, config_str)
+        validate_attribute_after_restart(
+            csp_master_ln_device,
+            config_str,
+            central_node,
+            change_event_callbacks,
+        )
 
     ensure_checked_devices(central_node)
 
