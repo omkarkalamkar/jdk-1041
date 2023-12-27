@@ -24,14 +24,11 @@ def validate_attribute_after_restart(csp_mln, dish_cfg_str):
     """Restart csp mln and validate memorized attribute"""
     # Restart the csp master leaf node
     csp_mln_device = DeviceProxy("dserver/mocks/01")
-    csp_mln_device.RestartServer()
+    csp_mln_device.Kill()
     assert is_device_ready(
         MID_CSP_MLN_DEVICE, "sourceDishVccConfig"
     ), f"{MID_CSP_MLN_DEVICE} is not Started after restart"
     assert json.loads(csp_mln.memorizedDishVccMap) == json.loads(dish_cfg_str)
-    import time
-
-    time.sleep(20)
 
 
 def load_dish_cfg(
