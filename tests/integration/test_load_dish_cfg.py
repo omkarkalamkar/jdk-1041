@@ -27,7 +27,7 @@ def validate_attribute_after_restart(
     """Restart csp mln and validate memorized attribute"""
     # Restart the csp master leaf node
     csp_mln_device = DeviceProxy("dserver/mocks/01")
-    csp_mln_device.RestartServer()
+    csp_mln_device.Kill()
     assert is_device_ready(
         MID_CSP_MLN_DEVICE, "sourceDishVccConfig"
     ), f"{MID_CSP_MLN_DEVICE} is not Started after restart"
