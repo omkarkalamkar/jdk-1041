@@ -3,9 +3,10 @@ import json
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import DevFactory
 from tango import ApiUtil
 
-from tests.settings import create_cm, logger
+from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 
 
 def test_load_dish_cfg_command(tango_context, task_callback, json_factory):
@@ -29,6 +30,10 @@ def test_load_dish_cfg_command(tango_context, task_callback, json_factory):
         call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
         lookahead=5,
     )
+    # Validate memorizedDishVccMap attribute set
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    assert csp_mln.memorizedDishVccMap == dish_cfg_input_str
 
 
 def test_load_dish_cfg_command_invalid_json(

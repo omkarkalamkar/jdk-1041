@@ -4,10 +4,12 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
+from tango import DeviceProxy
 
-from tests.common_utils import tear_down
+from tests.common_utils import is_device_ready, tear_down
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
+    CURRENT_TEST_DISH_VCC_KVALUE,
     DISH_LEAF_NODE_DEVICE,
     ERROR_PROPAGATION_DEFECT,
     MID_CSP_MLN_DEVICE,
@@ -16,11 +18,20 @@ from tests.settings import (
 )
 
 
+def validate_attribute_after_restart(
+    csp_mln: DeviceProxy, dish_cfg_str: str
+) -> None:
+    """Restart csp mln and validate memorized attribute"""
+    # Restart the csp master leaf node
+    csp_mln.init()
+    assert is_device_ready(
+        MID_CSP_MLN_DEVICE, "sourceDishVccConfig"
+    ), f"{MID_CSP_MLN_DEVICE} is not Started after restart"
+    assert json.loads(csp_mln.memorizedDishVccMap) == json.loads(dish_cfg_str)
+
+
 def load_dish_cfg(
-    tango_context,
-    central_node_name,
-    config_str,
-    change_event_callbacks,
+    tango_context, central_node_name, config_str, change_event_callbacks
 ):
     logger.info("%s", config_str)
     dev_factory = DevFactory()
@@ -69,7 +80,17 @@ def load_dish_cfg(
         config_str
     )
     # Validate kValue is set on dish
-    assert dish_ln_device.kValue == 11
+    assert dish_ln_device.kValue == CURRENT_TEST_DISH_VCC_KVALUE
+
+    assert json.loads(csp_master_ln_device.memorizedDishVccMap) == json.loads(
+        config_str
+    )
+
+    # Validate when csp mln restart memorizedDishVccMap remains same
+    validate_attribute_after_restart(
+        csp_master_ln_device,
+        config_str,
+    )
 
     tear_down(central_node_name, reset_sys_param=True)
 
