@@ -179,6 +179,3 @@ def assert_event_arrived():
             pytest.fail("Timeout occurred while executing the test")
 
     assert pytest.event_arrived
-
-
-CURRENT_TEST_DISH_VCC_KVALUE = 11

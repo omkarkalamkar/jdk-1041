@@ -95,6 +95,8 @@ RESET_DEFECT = json.dumps(
     }
 )
 
+CURRENT_TEST_DISH_VCC_KVALUE = 11
+
 
 def count_faulty_devices(cm):
     result = 0
