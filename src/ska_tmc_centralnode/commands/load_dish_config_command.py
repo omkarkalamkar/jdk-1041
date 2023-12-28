@@ -111,7 +111,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             )
         self.component_manager.reset_load_dish_cfg_data()
 
-    def update_memorized_attribute(self):
+    def update_memorized_attribute(self) -> None:
         """Update memorized attribute so after restart this
         attribute used to get dish map vcc version set before
         restart

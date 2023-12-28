@@ -19,8 +19,8 @@ from tests.settings import (
 
 
 def validate_attribute_after_restart(
-    csp_mln, dish_cfg_str, central_node, change_event_callbacks
-):
+    csp_mln: DeviceProxy, dish_cfg_str: str
+) -> None:
     """Restart csp mln and validate memorized attribute"""
     # Restart the csp master leaf node
     csp_mln_device = DeviceProxy(MID_CSP_MLN_DEVICE)
@@ -73,7 +73,7 @@ def load_dish_cfg(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=7,
+        lookahead=4,
     )
 
     # Validate dishVccConfigs are set on Csp Master Device
@@ -91,8 +91,6 @@ def load_dish_cfg(
     validate_attribute_after_restart(
         csp_master_ln_device,
         config_str,
-        central_node,
-        change_event_callbacks,
     )
 
     tear_down(central_node_name, reset_sys_param=True)

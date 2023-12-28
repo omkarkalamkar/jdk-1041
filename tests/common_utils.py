@@ -22,14 +22,16 @@ def tear_down(central_node_name, reset_sys_param=False):
         dish_ln_device.SetKValue(0)
 
 
-def is_device_ready(device_name, attribute_name, timeout=20):
+def is_device_ready(
+    device_name: str, attribute_name: str, timeout: int = 20
+) -> bool:
     """Wait for device to be ready
     Method read the atrribute value provided in argument and
     once device able to read attribute successfully then consider
     device is ready
     """
     dev_factory = DevFactory()
-    cnt = 0
+    count = 0
     # Wait for device to up within provided timeout
     while True:
         try:
@@ -41,7 +43,7 @@ def is_device_ready(device_name, attribute_name, timeout=20):
                 return True
             logging.info(
                 "Sleeping for 1 sec and cnt is %s and attribute value %s",
-                cnt,
+                count,
                 attr_value,
             )
         except Exception as e:
@@ -49,9 +51,9 @@ def is_device_ready(device_name, attribute_name, timeout=20):
             logging.info(
                 "Exception occurred while reading attribute %s and cnt is %s",
                 e,
-                cnt,
+                count,
             )
         time.sleep(2)
-        cnt += 1
-        if cnt == timeout:
+        count += 1
+        if count == timeout:
             return False
