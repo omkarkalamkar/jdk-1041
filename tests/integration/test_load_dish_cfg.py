@@ -34,11 +34,7 @@ def validate_attribute_after_restart(
 
 
 def load_dish_cfg(
-    tango_context,
-    central_node_name,
-    config_str,
-    change_event_callbacks,
-    test_csp_mln_restart=False,
+    tango_context, central_node_name, config_str, change_event_callbacks
 ):
     logger.info("%s", config_str)
     dev_factory = DevFactory()
@@ -93,14 +89,13 @@ def load_dish_cfg(
         config_str
     )
 
-    if test_csp_mln_restart:
-        # Validate when csp mln restart memorizedDishVccMap remains same
-        validate_attribute_after_restart(
-            csp_master_ln_device,
-            config_str,
-            central_node,
-            change_event_callbacks,
-        )
+    # Validate when csp mln restart memorizedDishVccMap remains same
+    validate_attribute_after_restart(
+        csp_master_ln_device,
+        config_str,
+        central_node,
+        change_event_callbacks,
+    )
 
     tear_down(central_node_name, reset_sys_param=True)
 
@@ -202,25 +197,4 @@ def test_load_dish_cfg_when_csp_is_defective(
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
-    )
-
-
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-@pytest.mark.parametrize(
-    "central_node_name",
-    [("ska_mid/tm_central/central_node")],
-)
-def test_memorized_dish_vcc_map_version(
-    tango_context,
-    central_node_name,
-    change_event_callbacks,
-    json_factory,
-):
-    return load_dish_cfg(
-        tango_context,
-        central_node_name,
-        json_factory("command_load_dish_cfg"),
-        change_event_callbacks,
-        test_csp_mln_restart=True,
     )
