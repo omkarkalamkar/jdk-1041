@@ -63,12 +63,6 @@ class CentralNodeMid(AbstractCentralNode):
         default_value="",
     )
 
-    DishVccConfig = device_property(
-        dtype=("str",),
-        doc="Default DishVccConfig version",
-        default_value="",
-    )
-
     # ----------
     # Attributes
     # ----------
