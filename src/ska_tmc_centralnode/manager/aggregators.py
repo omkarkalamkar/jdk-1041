@@ -79,10 +79,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             return DevState.INIT
         elif DevState.FAULT in subsystem_states:
             return DevState.FAULT
-        elif (
-            DevState.STANDBY in subsystem_states
-            or DishMode.STANDBY_LP in dish_modes
-        ):
+        elif DevState.STANDBY in subsystem_states:
             return DevState.STANDBY
         else:
             return DevState.UNKNOWN
