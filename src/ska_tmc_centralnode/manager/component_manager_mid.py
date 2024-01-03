@@ -110,6 +110,28 @@ class CNComponentManagerMid(CNComponentManager):
             self.input_parameter.dish_leaf_node_dev_names
         )
 
+    def is_loaddishcfg_allowed(self):
+        self.logger.info(
+            "Is LoadDishCfg Allowed %s", self.input_parameter.csp_mln_dev_name
+        )
+        devices_to_check = [self.input_parameter.csp_mln_dev_name]
+        devices_to_check.extend(self.input_parameter.dish_leaf_node_dev_names)
+        self.logger.info("Devices %s", devices_to_check)
+        cnt = 0
+        while True:
+            try:
+                for device_name in devices_to_check:
+                    self._check_if_device_is_responsive([device_name])
+            except Exception as e:
+                self.logger.error("Error while checking device %s", e)
+            else:
+                self.logger.info("All Devices are Up so break the loop")
+                return True
+            cnt += 1
+            time.sleep(1)
+            if cnt == 10:
+                return False
+
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.
 

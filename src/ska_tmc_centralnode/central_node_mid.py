@@ -4,16 +4,13 @@ Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
 import json
-import time
 
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common import AdapterFactory
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType
 from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
-from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
@@ -278,64 +275,23 @@ class CentralNodeMid(AbstractCentralNode):
         """ """
         self.logger.info("Inside Initialize Load Dish Cfg")
 
-        def is_devices_init_completed(**kwargs):
+        def start_load_dish_cfg_command(**kwargs):
             self.logger.info("Loading Dish Cfg")
-            loadishcfg_command = LoadDishCfg(
-                self.component_manager,
-                adapter_factory=AdapterFactory(),
-                logger=self.logger,
-            )
-            count = 1
-            _, message = loadishcfg_command.init_adapters()
-            while message:
-                _, message = loadishcfg_command.init_adapters()
-                count += 1
-                time.sleep(1)
-                if count == 20:
-                    self.logger.error(
-                        "Error in Initializing dish cfg %s", message
-                    )
-            self.logger.info("Kwargs are %s", kwargs)
-            handler = self.get_command_object("LoadDishCfg")
-            dish_cfg_json = json.dumps(
-                {
-                    "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
-                    "tm_data_sources": [self.DishVccURI[0]],
-                    "tm_data_filepath": self.DishVccFilePath[0],
-                }
-            )
-            handler(dish_cfg_json)
+            if self.component_manager.is_loaddishcfg_allowed():
+                self.logger.info("Kwargs are %s", kwargs)
+                handler = self.get_command_object("LoadDishCfg")
+                dish_cfg_json = json.dumps(
+                    {
+                        "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+                        "tm_data_sources": [self.DishVccURI[0]],
+                        "tm_data_filepath": self.DishVccFilePath[0],
+                    }
+                )
+                handler(dish_cfg_json)
+            else:
+                self.logger.info("Timeout while waiting for devices to up")
 
-        self.component_manager.submit_task(is_devices_init_completed)
-
-        # slow_command = SubmittedSlowCommand(
-        #     "LoadDishCfg",
-        #     self._command_tracker,
-        #     self.component_manager,
-        #     "load_dish_cfg",
-        #     logger=None,
-        # )
-        # self.logger.info("Dish VCC URI %s", self.DishVccURI)
-        # dish_cfg_json = json.dumps({
-        #     "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
-        #     "tm_data_sources": [self.DishVccURI[0]],
-        #     "tm_data_filepath": self.DishVccFilePath[0]
-        # })
-        # self.logger.info("Load Dish Cfg json %s", dish_cfg_json)
-        # slow_command(dish_cfg_json)
-        # task_status, response = self.component_manager.submit_task(
-        #     loadishcfg_command.load_dish_cfg,
-        #     args=[load_dish_cfg_str, self.logger],
-        #     task_callback=SubmittedSlowCommand(
-        #             "LoadDishCfg",
-        #             self._command_tracker,
-        #             self.component_manager,
-        #             "load_dish_cfg",
-        #             logger=None,
-        #         ),
-        #     )
-        # self.logger.info("Task Status %s and response %s", task_status, response)
-        # return task_status, response
+        self.component_manager.submit_task(start_load_dish_cfg_command)
 
 
 # ----------
