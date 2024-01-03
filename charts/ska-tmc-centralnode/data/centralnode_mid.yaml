@@ -30,6 +30,12 @@ server:
         - name: "DishLeafNodePrefix"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
+        - name: "DishVccURI"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishVccConfig.DishVccURI}}"
+        - name: "DishVccFilePath"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishVccConfig.DishVccFilePath}}"
         - name: "DishIDs"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
