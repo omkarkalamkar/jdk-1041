@@ -277,7 +277,7 @@ class CentralNodeMid(AbstractCentralNode):
 
         def start_load_dish_cfg_command(**kwargs):
             self.logger.info("Loading Dish Cfg")
-            if self.component_manager.is_loaddishcfg_allowed():
+            if self.component_manager.is_csp_dish_ready():
                 self.logger.info("Kwargs are %s", kwargs)
                 handler = self.get_command_object("LoadDishCfg")
                 dish_cfg_json = json.dumps(
