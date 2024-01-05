@@ -110,10 +110,10 @@ class CNComponentManagerMid(CNComponentManager):
             self.input_parameter.dish_leaf_node_dev_names
         )
 
-    def is_csp_dish_ready(self):
-        self.logger.info(
-            "Is LoadDishCfg Allowed %s", self.input_parameter.csp_mln_dev_name
-        )
+    def is_csp_dish_ready(self) -> bool:
+        """This method wait for csp master leaf node and
+        dish leaf nodes to become ready to accept request
+        """
         devices_to_check_list = [self.input_parameter.csp_mln_dev_name]
         devices_to_check_list.extend(
             self.input_parameter.dish_leaf_node_dev_names
