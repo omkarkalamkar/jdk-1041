@@ -5,10 +5,10 @@ of state and mode attributes defined by the SKA Control Model.
 """
 import json
 
-from ska_tango_base.commands import ResultCode
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tmc_common.op_state_model import TMCOpStateModel
-from tango import AttrWriteType
-from tango.server import attribute, device_property, run
+from tango import AttrWriteType, DebugIt
+from tango.server import attribute, command, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_mid import (
@@ -270,6 +270,17 @@ class CentralNodeMid(AbstractCentralNode):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
+        # Register Mid related extra commands
+        self.register_command_object(
+            "LoadDishCfg",
+            SubmittedSlowCommand(
+                "LoadDishCfg",
+                self._command_tracker,
+                self.component_manager,
+                "load_dish_cfg",
+                logger=None,
+            ),
+        )
 
     def initialize_load_dish_cfg(self):
         """ """
@@ -292,6 +303,37 @@ class CentralNodeMid(AbstractCentralNode):
                 self.logger.info("Timeout while waiting for devices to up")
 
         self.component_manager.submit_task(start_load_dish_cfg_command)
+
+    def is_LoadDishCfg_allowed(self):
+        """
+        Checks whether LoadDishCfg command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return True
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def LoadDishCfg(self, argin):
+        """
+        LoadDishCfg command to load dishID-vcc map config.
+        This command get dishid-vcc map json from Telmodel
+        based on tm data sources provided in argin
+        Example:
+        {
+            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "tm_data_sources": ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"],
+            "tm_data_filepath": "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
+        }
+        """
+        handler = self.get_command_object("LoadDishCfg")
+        result_code, unique_id = handler(argin)
+        return [[result_code], [str(unique_id)]]
 
 
 # ----------

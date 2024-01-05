@@ -150,9 +150,39 @@ def load_dish_cfg_when_csp_is_defective(
         lookahead=8,
     )
 
+    assert central_node.telescopeState == tango.DevState.UNKNOWN
+
     csp_master_ln_device.SetDefective(RESET_DEFECT)
 
+    result, unique_id = central_node.LoadDishCfg(config_str)
+    logger.info(
+        f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
     tear_down(central_node_name, reset_sys_param=True)
+
+
+# def load_dish_cfg_after_central_node_init(
+#     tango_context, central_node_name, config_str, change_event_callbacks
+# ):
+#     dev_factory = DevFactory()
+#     central_node = dev_factory.get_device(central_node_name)
+#     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+#     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+
+#     # set memorized attribute to empty
+#     csp_master_ln_device.memorizedDishVccMap = ""
+
+#     # Initialize Central Node, CSP Master Leaf Node, Dish Leaf Node
+#     dish_ln_device.init()
+#     csp_master_ln_device.init()
+#     central_node.init()
 
 
 @pytest.mark.post_deployment
@@ -193,3 +223,23 @@ def test_load_dish_cfg_when_csp_is_defective(
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
     )
+
+
+# @pytest.mark.post_deployment
+# @pytest.mark.SKA_mid
+# @pytest.mark.parametrize(
+#     "central_node_name",
+#     [("ska_mid/tm_central/central_node")],
+# )
+# def test_load_dish_cfg_after_central_node_init(
+#     tango_context,
+#     central_node_name,
+#     change_event_callbacks,
+#     json_factory,
+# ):
+#     return load_dish_cfg_after_central_node_init(
+#         tango_context,
+#         central_node_name,
+#         json_factory("command_load_dish_cfg"),
+#         change_event_callbacks,
+#     )

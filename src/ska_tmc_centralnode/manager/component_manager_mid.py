@@ -104,11 +104,21 @@ class CNComponentManagerMid(CNComponentManager):
             TelescopeAvailabilityAggregatorMid(self, self.logger)
         )
 
+        self._is_dish_vcc_config_set = False
+
     def check_if_dishes_are_responsive(self):
         self.logger.info("Checking if dishes are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )
+
+    @property
+    def is_dish_vcc_config_set(self):
+        return self._is_dish_vcc_config_set
+
+    @is_dish_vcc_config_set.setter
+    def is_dish_vcc_config_set(self, value):
+        self._is_dish_vcc_config_set = value
 
     def is_csp_dish_ready(self) -> bool:
         """This method wait for csp master leaf node and
@@ -321,6 +331,14 @@ class CNComponentManagerMid(CNComponentManager):
 
         :rtype: boolean
         """
+        if not self.is_dish_vcc_config_set and command_name not in [
+            "TelescopeOff",
+            "TelescopeStandby",
+        ]:
+            raise CommandNotAllowed(
+                "Command is not allowed in current state %s and dish vcc config not set",
+                str(self.op_state_model.op_state),
+            )
         if self.op_state_model.op_state in [
             DevState.FAULT,
             DevState.UNKNOWN,
@@ -335,6 +353,11 @@ class CNComponentManagerMid(CNComponentManager):
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
+            if self.component.telescope_state != DevState.ON:
+                raise CommandNotAllowed(
+                    "Command is not allowed in current telescope state %s",
+                    str(self.component.telescope_state),
+                )
             self.logger.info(f"Checking mid devices for {command_name}")
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
@@ -350,3 +373,11 @@ class CNComponentManagerMid(CNComponentManager):
             elif "tm_leaf_node/sdp_master" in device_name:
                 self.sdp_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()
+
+    def update_dish_vcc_flag(self, value):
+        """Update dish vcc flag and call telescope state
+        aggregator
+        """
+        self.logger.info("Updating dish vcc config set flag to %s", value)
+        self.is_dish_vcc_config_set = value
+        self._aggregate_telescope_state()
