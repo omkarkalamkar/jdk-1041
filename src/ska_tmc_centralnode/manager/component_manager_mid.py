@@ -334,6 +334,7 @@ class CNComponentManagerMid(CNComponentManager):
         if not self.is_dish_vcc_config_set and command_name not in [
             "TelescopeOff",
             "TelescopeStandby",
+            "LoadDishCfg",
         ]:
             raise CommandNotAllowed(
                 "Command is not allowed in current state %s and dish vcc config not set",
@@ -353,11 +354,6 @@ class CNComponentManagerMid(CNComponentManager):
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
         elif command_name in ["AssignResources", "ReleaseResources"]:
-            if self.component.telescope_state != DevState.ON:
-                raise CommandNotAllowed(
-                    "Command is not allowed in current telescope state %s",
-                    str(self.component.telescope_state),
-                )
             self.logger.info(f"Checking mid devices for {command_name}")
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()

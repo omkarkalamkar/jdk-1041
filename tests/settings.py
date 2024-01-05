@@ -121,6 +121,7 @@ def create_cm(
             logger=logger,
             _event_receiver=p_event_receiver,
         )
+        cm.is_dish_vcc_config_set = True
         DEVICE_LIST = DEVICE_LIST_MID
     else:
         cm = CNComponentManagerLow(
@@ -157,6 +158,7 @@ def create_cm_no_faulty_devices(
         cm, start_time = create_cm(
             p_liveliness_probe, p_event_receiver, _input_parameter
         )
+        cm.is_dish_vcc_config_set = True
     else:
         _input_parameter = InputParameterLow(None)
         cm, start_time = create_cm(
