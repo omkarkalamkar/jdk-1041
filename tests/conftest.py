@@ -88,6 +88,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "telescopeHealthState",
         "tmOpState",
         "lastDeviceInfoChanged",
+        "sourceDishVccConfig",
         timeout=50.0,
     )
 
