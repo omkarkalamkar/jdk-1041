@@ -66,7 +66,7 @@ PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:./src \
 MARK ?= -x## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= tests## A specific test file to pass to pytest
-ADD_ARGS ?= ## Additional args to pass to pytest
+ADD_ARGS ?= -x  ## Additional args to pass to pytest
 
 
 CI_REGISTRY ?= gitlab.com
@@ -89,6 +89,7 @@ ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context
 MARK = $(shell echo $(TELESCOPE) | sed s/-/_/) and (post_deployment or acceptance)
 endif
+MARK = test_feature
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
 
