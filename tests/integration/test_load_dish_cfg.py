@@ -221,7 +221,7 @@ def load_dish_cfg_after_central_node_init(
         change_event_callbacks["longRunningCommandResult"],
     )
     # Validate LoadDishCfg command called after initialization
-    check_lrcr_events(change_event_callbacks, central_node, "LoadDishCfg")
+    check_lrcr_events(change_event_callbacks, "LoadDishCfg")
 
     assert json.loads(csp_master_ln_device.sourceDishVccConfig) == json.loads(
         config_str
@@ -268,6 +268,7 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
+@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
