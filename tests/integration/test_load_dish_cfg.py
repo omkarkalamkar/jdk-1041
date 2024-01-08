@@ -6,7 +6,11 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
-from tests.common_utils import is_device_ready, tear_down
+from tests.common_utils import (
+    is_device_ready,
+    tear_down,
+    wait_and_validate_device_attribute_value,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     CURRENT_TEST_DISH_VCC_KVALUE,
@@ -14,7 +18,6 @@ from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
-    check_lrcr_events,
     logger,
 )
 
@@ -185,17 +188,11 @@ def load_dish_cfg_after_central_node_init(
     csp_master_ln_device.init()
     central_node.init()
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
     # Validate LoadDishCfg command called after initialization
-    check_lrcr_events(change_event_callbacks, "LoadDishCfg")
 
-    assert json.loads(csp_master_ln_device.sourceDishVccConfig) == json.loads(
-        config_str
-    )
+    assert wait_and_validate_device_attribute_value(
+        csp_master_ln_device, "sourceDishVccConfig", config_str
+    ), "Timeout while waiting for validating attribute value"
 
 
 @pytest.mark.post_deployment
@@ -238,6 +235,7 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
+@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(

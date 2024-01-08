@@ -1,7 +1,9 @@
+import json
 import logging
 import time
 
 from ska_tmc_common.dev_factory import DevFactory
+from tango import DeviceProxy
 
 from tests.settings import DISH_LEAF_NODE_DEVICE, MID_CSP_MLN_DEVICE
 
@@ -57,3 +59,29 @@ def is_device_ready(
         count += 1
         if count == timeout:
             return False
+
+
+def wait_and_validate_device_attribute_value(
+    device: DeviceProxy,
+    attribute_name: str,
+    expected_value: str,
+    timeout: int = 10,
+):
+    """This method wait and validate if attribute value is equal to provided
+    expected value
+    """
+    count = 0
+    while count <= timeout:
+        try:
+            attribute_value = device.read_attribute(attribute_name).value
+            if json.loads(attribute_value) == json.loads(expected_value):
+                return True
+        except Exception as e:
+            logging.info(
+                "Exception occurred while reading attribute %s and cnt is %s",
+                e,
+                count,
+            )
+        count += 1
+        time.sleep(1)
+    return False
