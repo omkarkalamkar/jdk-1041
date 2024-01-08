@@ -168,21 +168,39 @@ def load_dish_cfg_when_csp_is_defective(
     tear_down(central_node_name, reset_sys_param=True)
 
 
-# def load_dish_cfg_after_central_node_init(
-#     tango_context, central_node_name, config_str, change_event_callbacks
-# ):
-#     dev_factory = DevFactory()
-#     central_node = dev_factory.get_device(central_node_name)
-#     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
-#     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+def load_dish_cfg_after_central_node_init(
+    tango_context, central_node_name, config_str, change_event_callbacks
+):
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
 
-#     # set memorized attribute to empty
-#     csp_master_ln_device.memorizedDishVccMap = ""
+    # set memorized attribute to empty
+    csp_master_ln_device.memorizedDishVccMap = ""
 
-#     # Initialize Central Node, CSP Master Leaf Node, Dish Leaf Node
-#     dish_ln_device.init()
-#     csp_master_ln_device.init()
-#     central_node.init()
+    # Initialize Central Node, CSP Master Leaf Node, Dish Leaf Node
+    dish_ln_device.init()
+    csp_master_ln_device.init()
+    central_node.init()
+
+    # After Restart sourceDishVccConfig is re-initialized
+    csp_master_ln_device.subscribe_event(
+        "sourceDishVccConfig",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["sourceDishVccConfig"],
+    )
+
+    # Modify Config string to remove extra space
+    config_str = " ".join(config_str.replace("\n", "").split())
+    config_str = config_str.replace("{ ", "{")
+
+    # Validate after restart sourceDishVccConfig is re-initialized
+    change_event_callbacks.assert_change_event(
+        "sourceDishVccConfig",
+        config_str,
+        lookahead=5,
+    )
 
 
 @pytest.mark.post_deployment
@@ -225,21 +243,21 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-# @pytest.mark.post_deployment
-# @pytest.mark.SKA_mid
-# @pytest.mark.parametrize(
-#     "central_node_name",
-#     [("ska_mid/tm_central/central_node")],
-# )
-# def test_load_dish_cfg_after_central_node_init(
-#     tango_context,
-#     central_node_name,
-#     change_event_callbacks,
-#     json_factory,
-# ):
-#     return load_dish_cfg_after_central_node_init(
-#         tango_context,
-#         central_node_name,
-#         json_factory("command_load_dish_cfg"),
-#         change_event_callbacks,
-#     )
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_load_dish_cfg_after_central_node_init(
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+):
+    return load_dish_cfg_after_central_node_init(
+        tango_context,
+        central_node_name,
+        json_factory("command_load_dish_cfg"),
+        change_event_callbacks,
+    )
