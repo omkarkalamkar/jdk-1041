@@ -219,6 +219,12 @@ def set_device_state(device, state, devFactory):
     assert proxy.State() == state
 
 
+def set_dish_mode(device, dishmode, devFactory):
+    proxy = devFactory.get_device(device)
+    proxy.SetDirectDishMode(dishmode)
+    assert proxy.dishmode == dishmode
+
+
 def check_subarray_availability(central_node, subarray_fqdn, expected_status):
     start_time = time.time()
     elapsed_time = 0

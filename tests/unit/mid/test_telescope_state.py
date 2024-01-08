@@ -2,6 +2,8 @@ import pytest
 import tango
 from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_common.enum import DishMode
+from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
@@ -19,6 +21,7 @@ from tests.settings import (
     create_cm_no_faulty_devices,
     ensure_telescope_state,
     set_device_state,
+    set_dish_mode,
 )
 
 
@@ -40,8 +43,13 @@ def devices_to_load():
                 {"name": MID_CSP_MASTER_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},
                 {"name": MID_SDP_MASTER_DEVICE},
-                {"name": DISH_MASTER_DEVICE},
                 {"name": DISH_LEAF_NODE_DEVICE},
+            ],
+        },
+        {
+            "class": HelperDishDevice,
+            "devices": [
+                {"name": DISH_MASTER_DEVICE},
             ],
         },
     )
@@ -80,7 +88,7 @@ def test_telescope_state_fault_over_standby(tango_context):
 def set_device_standby(devFactory, cm, expected_elapsed_time):
     set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.STANDBY, devFactory)
     set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.ON, devFactory)
-    set_device_state(DISH_MASTER_DEVICE, tango.DevState.OFF, devFactory)
+    set_dish_mode(DISH_MASTER_DEVICE, DishMode.STANDBY_LP, devFactory)
     ensure_telescope_state(cm, tango.DevState.STANDBY, expected_elapsed_time)
 
 

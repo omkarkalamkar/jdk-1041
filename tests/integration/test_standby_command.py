@@ -2,6 +2,7 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_common.enum import DishMode
 from tango import DevState
 
 from tests.integration.conftest import ensure_checked_devices
@@ -56,6 +57,9 @@ def test_standby_command_mid(
 
     csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(DevState.STANDBY)
+
+    dish_master = dev_factory.get_device("ska001/elt/master")
+    dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
 
     central_node.subscribe_event(
         "telescopeState",
