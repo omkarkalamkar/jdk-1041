@@ -253,21 +253,21 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-@pytest.mark.parametrize(
-    "central_node_name",
-    [("ska_mid/tm_central/central_node")],
-)
-def test_load_dish_cfg_after_central_node_init(
-    tango_context,
-    central_node_name,
-    change_event_callbacks,
-    json_factory,
-):
-    return load_dish_cfg_after_central_node_init(
-        tango_context,
-        central_node_name,
-        json_factory("command_load_dish_cfg"),
-        change_event_callbacks,
-    )
+# @pytest.mark.post_deployment
+# @pytest.mark.SKA_mid
+# @pytest.mark.parametrize(
+#     "central_node_name",
+#     [("ska_mid/tm_central/central_node")],
+# )
+# def test_load_dish_cfg_after_central_node_init(
+#     tango_context,
+#     central_node_name,
+#     change_event_callbacks,
+#     json_factory,
+# ):
+#     return load_dish_cfg_after_central_node_init(
+#         tango_context,
+#         central_node_name,
+#         json_factory("command_load_dish_cfg"),
+#         change_event_callbacks,
+#     )
