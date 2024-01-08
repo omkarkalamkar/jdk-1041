@@ -337,7 +337,8 @@ class CNComponentManagerMid(CNComponentManager):
             "LoadDishCfg",
         ]:
             raise CommandNotAllowed(
-                "Command is not allowed in current state %s and dish vcc config not set",
+                "Dish Vcc Config not Set. Please set using LoadDishCfg command. "
+                "Current Telescope State is %s",
                 str(self.op_state_model.op_state),
             )
         if self.op_state_model.op_state in [
@@ -370,7 +371,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self.sdp_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()
 
-    def update_dish_vcc_flag(self, value):
+    def update_dish_vcc_flag(self, value: bool) -> None:
         """Update dish vcc flag and call telescope state
         aggregator
         """

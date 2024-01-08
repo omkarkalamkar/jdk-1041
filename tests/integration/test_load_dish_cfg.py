@@ -202,6 +202,16 @@ def load_dish_cfg_after_central_node_init(
         lookahead=5,
     )
 
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "telescopeState", tango._tango.DevState.OFF, lookahead=6
+    )
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid

@@ -270,7 +270,7 @@ class CentralNodeMid(AbstractCentralNode):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
-        # Register Mid related extra commands
+        # LoadDishCfg command is specific to Mid so register it in Mid only
         self.register_command_object(
             "LoadDishCfg",
             SubmittedSlowCommand(
@@ -283,10 +283,15 @@ class CentralNodeMid(AbstractCentralNode):
         )
 
     def initialize_load_dish_cfg(self):
-        """ """
-        self.logger.info("Inside Initialize Load Dish Cfg")
+        """This method called during Central Node Initialization.
+        It submit the task in thread pool executor and the task
+        will start loading dish vcc config on csp master.
+        """
 
         def start_load_dish_cfg_command(**kwargs):
+            """This fucntion check if CSP Master and Dish leaf Node device
+            is ready and once it is ready call LoadDishCfg command
+            """
             self.logger.info("Loading Dish Cfg")
             if self.component_manager.is_csp_dish_ready():
                 self.logger.info("Kwargs are %s", kwargs)
