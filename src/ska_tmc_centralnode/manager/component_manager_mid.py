@@ -139,7 +139,7 @@ class CNComponentManagerMid(CNComponentManager):
                 for device in devices_to_check_list
             ]
             self.logger.info("Device State List %s", dev_state_list)
-            time.sleep(1)
+            time.sleep(0.5)
 
         self.logger.info("Device State List %s", dev_state_list)
         return True
