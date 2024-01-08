@@ -48,7 +48,7 @@ class CentralNodeMid(AbstractCentralNode):
         default_value=tuple(),
     )
 
-    DishVccURI = device_property(
+    DishVccUri = device_property(
         dtype=("str",),
         doc="Default DishVccConfig URI",
         default_value="",
@@ -299,7 +299,7 @@ class CentralNodeMid(AbstractCentralNode):
                 dish_cfg_json = json.dumps(
                     {
                         "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
-                        "tm_data_sources": [self.DishVccURI[0]],
+                        "tm_data_sources": [self.DishVccUri[0]],
                         "tm_data_filepath": self.DishVccFilePath[0],
                     }
                 )

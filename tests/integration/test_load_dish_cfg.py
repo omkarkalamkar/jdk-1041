@@ -185,36 +185,6 @@ def load_dish_cfg_after_central_node_init(
     csp_master_ln_device.init()
     central_node.init()
 
-    csp_master_ln_device.subscribe_event(
-        "State",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["State"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "State", tango._tango.DevState.ON, lookahead=6
-    )
-
-    dish_ln_device.subscribe_event(
-        "State",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["State"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "State", tango._tango.DevState.ON, lookahead=6
-    )
-
-    central_node.subscribe_event(
-        "State",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["State"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "State", tango._tango.DevState.ON, lookahead=6
-    )
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,

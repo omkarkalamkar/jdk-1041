@@ -75,7 +75,7 @@ deviceServers:
       DishMasterPrefix: "elt"
       DishMasterPostfix: "master"
       DishVccConfig:
-        DishVccURI: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
+        DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
         DishVccFilePath: "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
     low:
       file: "data/centralnode_low.yaml"
