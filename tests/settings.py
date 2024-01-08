@@ -6,6 +6,10 @@ from typing import List
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_testing.mock.placeholders import Anything
+from ska_tango_testing.mock.tango.event_callback import (
+    MockTangoEventCallbackGroup,
+)
 from ska_tmc_common import FaultType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
@@ -295,3 +299,36 @@ def event_remover(group_callback, attributes: List[str]) -> None:
                 node.drop()
         except KeyError:
             pass
+
+
+def check_lrcr_events(
+    change_event_callback: MockTangoEventCallbackGroup,
+    command_name: str,
+    result_code: ResultCode = ResultCode.OK,
+    retries: int = 10,
+):
+    """Used to assert command name and result code in
+       longRunningCommandResult event callbacks.
+
+    Args:
+        change_event_callback: MockTangoEventCallbackGroup
+        command_name (str): command name to check
+        result_code (ResultCode): result_code to check.
+        Defaults to ResultCode.OK.
+        retries (int):number of events to check. Defaults to 10.
+    """
+    COUNT = 0
+    while COUNT <= retries:
+        assertion_data = change_event_callback.assert_change_event(
+            "longRunningCommandResult",
+            Anything,
+            lookahead=1,
+        )
+        unique_id, result = assertion_data["attribute_value"]
+        if unique_id.endswith(command_name):
+            if result == str(result_code.value):
+                logger.debug("%s_UID: %s", command_name, unique_id)
+                break
+        COUNT = COUNT + 1
+        if COUNT >= retries:
+            pytest.fail("Assertion Failed")

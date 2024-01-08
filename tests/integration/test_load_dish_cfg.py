@@ -14,6 +14,7 @@ from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
+    check_lrcr_events,
     logger,
 )
 
@@ -184,32 +185,46 @@ def load_dish_cfg_after_central_node_init(
     csp_master_ln_device.init()
     central_node.init()
 
-    # After Restart sourceDishVccConfig is re-initialized
     csp_master_ln_device.subscribe_event(
-        "sourceDishVccConfig",
+        "State",
         tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["sourceDishVccConfig"],
+        change_event_callbacks["State"],
     )
 
-    # Modify Config string to remove extra space
-    config_str = " ".join(config_str.replace("\n", "").split())
-    config_str = config_str.replace("{ ", "{")
-
-    # Validate after restart sourceDishVccConfig is re-initialized
     change_event_callbacks.assert_change_event(
-        "sourceDishVccConfig",
-        config_str,
-        lookahead=5,
+        "State", tango._tango.DevState.ON, lookahead=6
+    )
+
+    dish_ln_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "State", tango._tango.DevState.ON, lookahead=6
     )
 
     central_node.subscribe_event(
-        "telescopeState",
+        "State",
         tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["telescopeState"],
+        change_event_callbacks["State"],
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=6
+        "State", tango._tango.DevState.ON, lookahead=6
+    )
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    # Validate LoadDishCfg command called after initialization
+    check_lrcr_events(change_event_callbacks, central_node, "LoadDishCfg")
+
+    assert json.loads(csp_master_ln_device.sourceDishVccConfig) == json.loads(
+        config_str
     )
 
 
@@ -253,21 +268,21 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-# @pytest.mark.post_deployment
-# @pytest.mark.SKA_mid
-# @pytest.mark.parametrize(
-#     "central_node_name",
-#     [("ska_mid/tm_central/central_node")],
-# )
-# def test_load_dish_cfg_after_central_node_init(
-#     tango_context,
-#     central_node_name,
-#     change_event_callbacks,
-#     json_factory,
-# ):
-#     return load_dish_cfg_after_central_node_init(
-#         tango_context,
-#         central_node_name,
-#         json_factory("command_load_dish_cfg"),
-#         change_event_callbacks,
-#     )
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_load_dish_cfg_after_central_node_init(
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+):
+    return load_dish_cfg_after_central_node_init(
+        tango_context,
+        central_node_name,
+        json_factory("command_load_dish_cfg"),
+        change_event_callbacks,
+    )
