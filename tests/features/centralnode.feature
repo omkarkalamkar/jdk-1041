@@ -11,7 +11,7 @@ Feature: Central Node acceptance
 
 
 	#Test the ability to generically run a a set of commands and that the execution is completed.
-	@XTP-3612 @XTP-3614 @post_deployment @acceptance @SKA_mid @SKA_low @test_feature
+	@XTP-3612 @XTP-3614 @post_deployment @acceptance @SKA_mid @SKA_low
 	Scenario: Ability to run commands on central node
 		Given a CentralNode device
 		When I call the command <command_name>
