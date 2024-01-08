@@ -43,6 +43,8 @@ class CNComponentManagerMid(CNComponentManager):
         sleep_time=1,
         skuid_service="",
         command_timeout=30,
+        dish_vcc_uri=None,
+        dish_vcc_file_path=None,
         *args,
         **kwargs,
     ):
@@ -105,6 +107,8 @@ class CNComponentManagerMid(CNComponentManager):
         )
 
         self._is_dish_vcc_config_set = False
+        self.dish_vcc_uri = dish_vcc_uri
+        self.dish_vcc_file_path = dish_vcc_file_path
 
     def check_if_dishes_are_responsive(self):
         self.logger.info("Checking if dishes are responsive")
@@ -378,3 +382,11 @@ class CNComponentManagerMid(CNComponentManager):
         self.logger.info("Updating dish vcc config set flag to %s", value)
         self.is_dish_vcc_config_set = value
         self._aggregate_telescope_state()
+
+    def get_default_dish_vcc_config_params(self):
+        """Return default dish vcc config json"""
+        return {
+            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "tm_data_sources": [self.dish_vcc_uri],
+            "tm_data_filepath": self.dish_vcc_file_path,
+        }

@@ -236,6 +236,8 @@ class CentralNodeMid(AbstractCentralNode):
             proxy_timeout=self.ProxyTimeout,
             sleep_time=self.SleepTime,
             skuid_service=self.SkuidService,
+            dish_vcc_uri=self.DishVccUri[0],
+            dish_vcc_file_path=self.DishVccFilePath[0],
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
@@ -297,11 +299,7 @@ class CentralNodeMid(AbstractCentralNode):
                 self.logger.info("Kwargs are %s", kwargs)
                 handler = self.get_command_object("LoadDishCfg")
                 dish_cfg_json = json.dumps(
-                    {
-                        "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
-                        "tm_data_sources": [self.DishVccUri[0]],
-                        "tm_data_filepath": self.DishVccFilePath[0],
-                    }
+                    self.component_manager.get_default_dish_vcc_config_params()
                 )
                 handler(dish_cfg_json)
             else:
@@ -327,7 +325,7 @@ class CentralNodeMid(AbstractCentralNode):
     def LoadDishCfg(self, argin):
         """
         LoadDishCfg command to load dishID-vcc map config.
-        This command get dishid-vcc map json from Telmodel
+        This command get dishid-vcc map json string from Telmodel
         based on tm data sources provided in argin
         Example:
         {
