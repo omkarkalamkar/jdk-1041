@@ -236,8 +236,10 @@ class CentralNodeMid(AbstractCentralNode):
             proxy_timeout=self.ProxyTimeout,
             sleep_time=self.SleepTime,
             skuid_service=self.SkuidService,
-            dish_vcc_uri=self.DishVccUri[0],
-            dish_vcc_file_path=self.DishVccFilePath[0],
+            dish_vcc_uri=self.DishVccUri[0] if self.DishVccUri else "",
+            dish_vcc_file_path=self.DishVccFilePath[0]
+            if self.DishVccFilePath
+            else "",
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
