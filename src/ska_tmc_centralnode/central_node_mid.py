@@ -116,6 +116,11 @@ class CentralNodeMid(AbstractCentralNode):
         max_dim_x=100,
     )
 
+    isDishVccConfigSet = attribute(
+        dtype=bool,
+        access=AttrWriteType.READ,
+    )
+
     def update_imaging_callback(self, imaging):
         self.logger.info("imaging %s", imaging)
         self.push_change_event("imaging", imaging)
@@ -165,6 +170,10 @@ class CentralNodeMid(AbstractCentralNode):
     def read_dishDevNames(self):
         """Return the dishdevnames attribute."""
         return self.component_manager.input_parameter.dish_dev_names
+
+    def read_isDishVccConfigSet(self):
+        """Return the isDishVccConfigSet attribute."""
+        return self.component_manager.is_dish_vcc_config_set
 
     def write_dishDevNames(self, value):
         """Set the dishdevnames attribute."""

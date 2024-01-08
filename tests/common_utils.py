@@ -1,4 +1,3 @@
-import json
 import logging
 import time
 
@@ -74,7 +73,7 @@ def wait_and_validate_device_attribute_value(
     while count <= timeout:
         try:
             attribute_value = device.read_attribute(attribute_name).value
-            if json.loads(attribute_value) == json.loads(expected_value):
+            if attribute_value == expected_value:
                 return True
         except Exception as e:
             logging.info(

@@ -191,7 +191,11 @@ def load_dish_cfg_after_central_node_init(
     # Validate LoadDishCfg command called after initialization
 
     assert wait_and_validate_device_attribute_value(
-        csp_master_ln_device, "sourceDishVccConfig", config_str
+        central_node, "isDishVccConfigSet", False
+    ), "Timeout while waiting for validating attribute value"
+
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", True
     ), "Timeout while waiting for validating attribute value"
 
 
@@ -235,7 +239,6 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
