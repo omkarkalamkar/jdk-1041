@@ -9,8 +9,6 @@ package.
 import time
 
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import ObsState
-from ska_tango_base.faults import StateModelError
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
@@ -111,23 +109,6 @@ class CNComponentManagerMid(CNComponentManager):
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )
-
-    def check_subarray_obsstate(self, command):
-        subarray_obstate = self.get_subarray_obsstate()
-        self.logger.info(f"Obstates:{subarray_obstate}")
-        if command == "AssignResources":
-            if subarray_obstate not in [ObsState.EMPTY, ObsState.IDLE, None]:
-                raise StateModelError(
-                    "AssignResources command not permitted in observation state "
-                    f"{subarray_obstate}"
-                )
-        elif command == "ReleaseResources":
-            if subarray_obstate not in [ObsState.IDLE]:
-                raise StateModelError(
-                    "ReleaseResources command not permitted in observation state "
-                    f"{subarray_obstate}"
-                )
-        return True
 
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.
@@ -333,7 +314,6 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.info(f"Checking mid devices for {command_name}")
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
-            self.check_subarray_obsstate(command_name)
 
         return True
 

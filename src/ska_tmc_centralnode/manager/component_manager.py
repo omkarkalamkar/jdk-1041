@@ -4,6 +4,7 @@ This module provided an implementation of the Central Node ComponentManager.
 from __future__ import annotations
 
 import json
+import re
 import time
 from typing import Callable, Optional
 
@@ -12,6 +13,7 @@ from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tango_base.faults import StateModelError
 from ska_tmc_common import (
     AdapterFactory,
     CommandNotAllowed,
@@ -848,6 +850,19 @@ class CNComponentManager(TmcComponentManager):
         :return: task_status
         :rtype: tuple
         """
+        json_argument = json.loads(argin)
+        subarray_id = json_argument["subarray_id"]
+        subarray_devices = self.input_parameter.subarray_dev_names
+        for device in subarray_devices:
+            subarray_device_id = re.findall(r"\d+", device)
+            if subarray_id == int(subarray_device_id[0]):
+                subarray_obstate = self.get_device(device).obs_state
+                if subarray_obstate not in [ObsState.EMPTY, ObsState.IDLE]:
+                    raise StateModelError(
+                        "AssignResources command not permitted in observation state "
+                        f"{subarray_obstate}"
+                    )
+
         # Execute the command if the input JSON is valid
         self.logger.info("Calling component manager assign_resources method")
         assign_resources_command = AssignResources(
@@ -954,6 +969,19 @@ class CNComponentManager(TmcComponentManager):
         :return: task_status
         :rtype: tuple
         """
+        json_argument = json.loads(argin)
+        subarray_id = json_argument["subarray_id"]
+        subarray_devices = self.input_parameter.subarray_dev_names
+        for device in subarray_devices:
+            subarray_device_id = re.findall(r"\d+", device)
+            if subarray_id == int(subarray_device_id[0]):
+                subarray_obstate = self.get_device(device).obs_state
+                if subarray_obstate not in [ObsState.IDLE]:
+                    raise StateModelError(
+                        "ReleaseResources command not permitted in observation state "
+                        f"{subarray_obstate}"
+                    )
+
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
