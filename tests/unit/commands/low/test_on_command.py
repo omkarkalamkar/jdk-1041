@@ -63,7 +63,7 @@ def test_low_telescope_on_command(tango_context, task_callback):
 def test_telescope_on_command_unavailability(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
-    cm, start_time = create_cm()
+    cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time

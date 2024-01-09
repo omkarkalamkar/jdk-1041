@@ -41,10 +41,15 @@ class TelescopeStateAggregatorMid(Aggregator):
                 sdp_master = True
 
         self._logger.info(
-            "telescopeSetStateset : %s , dishmodeset : %s ",
+            "telescopeSetStateset : %s , dishmodeset : %s dish_vcc_config_set: %s",
             subsystem_states,
             dish_modes,
+            self._component_manager.is_dish_vcc_config_set,
         )
+        # If Dish VCC config is not set then set telescope state to UNKNOWN
+        if not self._component_manager.is_dish_vcc_config_set:
+            return DevState.UNKNOWN
+
         if not sdp_master and not csp_master:
             self._logger.info(
                 "missing devices: %s=%s %s=%s",

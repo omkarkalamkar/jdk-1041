@@ -3,10 +3,12 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
-from ska_tango_base.commands import ResultCode
+import json
+
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tmc_common.op_state_model import TMCOpStateModel
-from tango import AttrWriteType
-from tango.server import attribute, device_property, run
+from tango import AttrWriteType, DebugIt
+from tango.server import attribute, command, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_mid import (
@@ -45,6 +47,20 @@ class CentralNodeMid(AbstractCentralNode):
         doc="List of Dish Master devices",
         default_value=tuple(),
     )
+
+    DishVccUri = device_property(
+        dtype=("str",),
+        doc="Default DishVccConfig URI",
+        default_value="",
+    )
+
+    DishVccFilePath = device_property(
+        dtype=("str",),
+        doc="Default DishVccConfig File Path",
+        default_value="",
+    )
+
+    DishVccInitTimeout = device_property(dtype="DevUShort", default_value=120)
 
     # ----------
     # Attributes
@@ -102,6 +118,11 @@ class CentralNodeMid(AbstractCentralNode):
         max_dim_x=100,
     )
 
+    isDishVccConfigSet = attribute(
+        dtype=bool,
+        access=AttrWriteType.READ,
+    )
+
     def update_imaging_callback(self, imaging):
         self.logger.info("imaging %s", imaging)
         self.push_change_event("imaging", imaging)
@@ -127,6 +148,9 @@ class CentralNodeMid(AbstractCentralNode):
 
             self._device.set_change_event("imaging", True, False)
 
+            # Load Default Dish VCC config
+            self._device.initialize_load_dish_cfg()
+
             return (ResultCode.OK, "")
 
     # ------------------
@@ -148,6 +172,10 @@ class CentralNodeMid(AbstractCentralNode):
     def read_dishDevNames(self):
         """Return the dishdevnames attribute."""
         return self.component_manager.input_parameter.dish_dev_names
+
+    def read_isDishVccConfigSet(self):
+        """Return the isDishVccConfigSet attribute."""
+        return self.component_manager.is_dish_vcc_config_set
 
     def write_dishDevNames(self, value):
         """Set the dishdevnames attribute."""
@@ -219,6 +247,11 @@ class CentralNodeMid(AbstractCentralNode):
             proxy_timeout=self.ProxyTimeout,
             sleep_time=self.SleepTime,
             skuid_service=self.SkuidService,
+            dish_vcc_uri=self.DishVccUri[0] if self.DishVccUri else "",
+            dish_vcc_file_path=self.DishVccFilePath[0]
+            if self.DishVccFilePath
+            else "",
+            dish_vcc_init_timeout=self.DishVccInitTimeout,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
@@ -253,6 +286,71 @@ class CentralNodeMid(AbstractCentralNode):
         Initialises the command handlers for commands supported by this device.
         """
         super().init_command_objects()
+        # LoadDishCfg command is specific to Mid so register it in Mid only
+        self.register_command_object(
+            "LoadDishCfg",
+            SubmittedSlowCommand(
+                "LoadDishCfg",
+                self._command_tracker,
+                self.component_manager,
+                "load_dish_cfg",
+                logger=None,
+            ),
+        )
+
+    def initialize_load_dish_cfg(self):
+        """This method called during Central Node Initialization.
+        It submit the task in thread pool executor and the task
+        will start loading dish vcc config on csp master.
+        """
+
+        def start_load_dish_cfg_command(**kwargs):
+            """This fucntion check if CSP Master and Dish leaf Node device
+            is ready and once it is ready call LoadDishCfg command
+            """
+            self.logger.info("Loading Dish Cfg")
+            if self.component_manager.is_csp_dish_ready():
+                self.logger.info("Kwargs are %s", kwargs)
+                handler = self.get_command_object("LoadDishCfg")
+                dish_cfg_json = json.dumps(
+                    self.component_manager.get_default_dish_vcc_config_params()
+                )
+                handler(dish_cfg_json)
+            else:
+                self.logger.info("Timeout while waiting for devices to up")
+
+        self.component_manager.submit_task(start_load_dish_cfg_command)
+
+    def is_LoadDishCfg_allowed(self):
+        """
+        Checks whether LoadDishCfg command is allowed to be run in current device state.
+
+        :rtype: boolean
+        """
+        return True
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def LoadDishCfg(self, argin):
+        """
+        LoadDishCfg command to load dishID-vcc map config.
+        This command get dishid-vcc map json string from Telmodel
+        based on tm data sources provided in argin
+        Example:
+        {
+            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "tm_data_sources": ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"],
+            "tm_data_filepath": "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
+        }
+        """
+        handler = self.get_command_object("LoadDishCfg")
+        result_code, unique_id = handler(argin)
+        return [[result_code], [str(unique_id)]]
 
 
 # ----------

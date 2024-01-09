@@ -383,10 +383,10 @@ def test_release_resources_mid_timeout(
             unique_id[0],
             "Timeout has occurred, command failed",
         ),
-        lookahead=6,
+        lookahead=8,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    tmc_subarray.ReleaseAllResources()
     # Teardown
     result, unique_id = central_node.TelescopeOff()
 

@@ -6,6 +6,10 @@ from typing import List
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_testing.mock.placeholders import Anything
+from ska_tango_testing.mock.tango.event_callback import (
+    MockTangoEventCallbackGroup,
+)
 from ska_tmc_common import FaultType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
@@ -26,6 +30,7 @@ TIMEOUT = 25
 DISH_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d0"
 NUM_DISHES = 10
 LOW_CENTRAL_NODE = "ska_low/tm_central/central_node"
+MID_CENTRAL_NODE = "ska_mid/tm_central/central_node"
 MID_CSP_MLN_DEVICE = "ska_mid/tm_leaf_node/csp_master"
 LOW_CSP_MLN_DEVICE = "ska_low/tm_leaf_node/csp_master"
 MID_SDP_MLN_DEVICE = "ska_mid/tm_leaf_node/sdp_master"
@@ -121,6 +126,7 @@ def create_cm(
             logger=logger,
             _event_receiver=p_event_receiver,
         )
+        cm.is_dish_vcc_config_set = True
         DEVICE_LIST = DEVICE_LIST_MID
     else:
         cm = CNComponentManagerLow(
@@ -157,6 +163,7 @@ def create_cm_no_faulty_devices(
         cm, start_time = create_cm(
             p_liveliness_probe, p_event_receiver, _input_parameter
         )
+        cm.is_dish_vcc_config_set = True
     else:
         _input_parameter = InputParameterLow(None)
         cm, start_time = create_cm(
@@ -293,3 +300,36 @@ def event_remover(group_callback, attributes: List[str]) -> None:
                 node.drop()
         except KeyError:
             pass
+
+
+def check_lrcr_events(
+    change_event_callback: MockTangoEventCallbackGroup,
+    command_name: str,
+    result_code: ResultCode = ResultCode.OK,
+    retries: int = 10,
+):
+    """Used to assert command name and result code in
+       longRunningCommandResult event callbacks.
+
+    Args:
+        change_event_callback: MockTangoEventCallbackGroup
+        command_name (str): command name to check
+        result_code (ResultCode): result_code to check.
+        Defaults to ResultCode.OK.
+        retries (int):number of events to check. Defaults to 10.
+    """
+    COUNT = 0
+    while COUNT <= retries:
+        assertion_data = change_event_callback.assert_change_event(
+            "longRunningCommandResult",
+            Anything,
+            lookahead=1,
+        )
+        unique_id, result = assertion_data["attribute_value"]
+        if unique_id.endswith(command_name):
+            if result == str(result_code.value):
+                logger.debug("%s_UID: %s", command_name, unique_id)
+                break
+        COUNT = COUNT + 1
+        if COUNT >= retries:
+            pytest.fail("Assertion Failed")

@@ -11,10 +11,12 @@ from ska_tango_testing.mock.tango.event_callback import (
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
 
+from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     MCCS_MLN_DEVICE,
+    MID_CENTRAL_NODE,
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
 )
@@ -88,6 +90,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "telescopeHealthState",
         "tmOpState",
         "lastDeviceInfoChanged",
+        "sourceDishVccConfig",
         timeout=50.0,
     )
 
@@ -165,3 +168,17 @@ def set_low_devices_availability_for_aggregation():
         "MccsSubarrayLeafNode availability is: %s",
         proxy_mccs_mln.isSubsystemAvailable,
     )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def is_dish_vcc_set(request):
+    # Validate dish vcc config set
+    marker = request.node.get_closest_marker("SKA_mid")
+    logging.debug("Checking Dish Config set or not for marker %s", marker)
+    if marker:
+        dev_factory = DevFactory()
+        assert wait_and_validate_device_attribute_value(
+            dev_factory.get_device(MID_CENTRAL_NODE),
+            "isDishVccConfigSet",
+            True,
+        ), "Timeout while waiting for validating attribute value"

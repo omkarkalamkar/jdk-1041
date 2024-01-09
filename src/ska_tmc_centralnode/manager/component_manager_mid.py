@@ -43,6 +43,9 @@ class CNComponentManagerMid(CNComponentManager):
         sleep_time=1,
         skuid_service="",
         command_timeout=30,
+        dish_vcc_uri=None,
+        dish_vcc_file_path=None,
+        dish_vcc_init_timeout=120,
         *args,
         **kwargs,
     ):
@@ -104,11 +107,51 @@ class CNComponentManagerMid(CNComponentManager):
             TelescopeAvailabilityAggregatorMid(self, self.logger)
         )
 
+        self._is_dish_vcc_config_set = False
+        self.dish_vcc_uri = dish_vcc_uri
+        self.dish_vcc_file_path = dish_vcc_file_path
+        self.dish_vcc_init_timeout = dish_vcc_init_timeout
+
     def check_if_dishes_are_responsive(self):
         self.logger.info("Checking if dishes are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )
+
+    @property
+    def is_dish_vcc_config_set(self):
+        return self._is_dish_vcc_config_set
+
+    @is_dish_vcc_config_set.setter
+    def is_dish_vcc_config_set(self, value):
+        self._is_dish_vcc_config_set = value
+
+    def is_csp_dish_ready(self) -> bool:
+        """This method wait for csp master leaf node and
+        dish leaf nodes to become ready to accept request
+        """
+        count = 0
+        devices_to_check_list = [self.input_parameter.csp_mln_dev_name]
+        devices_to_check_list.extend(
+            self.input_parameter.dish_leaf_node_dev_names
+        )
+
+        dev_state_list = [
+            self.get_device(device).state for device in devices_to_check_list
+        ]
+        while True:
+            if set(dev_state_list) == set([DevState.ON]):
+                return True
+            time.sleep(1)
+            dev_state_list = [
+                self.get_device(device).state
+                for device in devices_to_check_list
+            ]
+            self.logger.info("Device State List %s", dev_state_list)
+            count += 1
+            if count == self.dish_vcc_init_timeout:
+                break
+        return False
 
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.
@@ -297,6 +340,16 @@ class CNComponentManagerMid(CNComponentManager):
 
         :rtype: boolean
         """
+        if not self.is_dish_vcc_config_set and command_name not in [
+            "TelescopeOff",
+            "TelescopeStandby",
+            "LoadDishCfg",
+        ]:
+            raise CommandNotAllowed(
+                "Dish Vcc Config not Set. Please set using LoadDishCfg command. "
+                "Current Telescope State is %s",
+                str(self.op_state_model.op_state),
+            )
         if self.op_state_model.op_state in [
             DevState.FAULT,
             DevState.UNKNOWN,
@@ -326,3 +379,19 @@ class CNComponentManagerMid(CNComponentManager):
             elif "tm_leaf_node/sdp_master" in device_name:
                 self.sdp_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()
+
+    def update_dish_vcc_flag(self, value: bool) -> None:
+        """Update dish vcc flag and call telescope state
+        aggregator
+        """
+        self.logger.info("Updating dish vcc config set flag to %s", value)
+        self.is_dish_vcc_config_set = value
+        self._aggregate_telescope_state()
+
+    def get_default_dish_vcc_config_params(self):
+        """Return default dish vcc config json"""
+        return {
+            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "tm_data_sources": [self.dish_vcc_uri],
+            "tm_data_filepath": self.dish_vcc_file_path,
+        }
