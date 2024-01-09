@@ -8,7 +8,6 @@ from tango import DeviceProxy
 
 from tests.common_utils import (
     is_device_ready,
-    tear_down,
     wait_and_validate_device_attribute_value,
 )
 from tests.integration.conftest import ensure_checked_devices
@@ -18,6 +17,7 @@ from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
+    event_remover,
     logger,
 )
 
@@ -96,7 +96,10 @@ def load_dish_cfg(
         config_str,
     )
 
-    tear_down(central_node_name, reset_sys_param=True)
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult"],
+    )
 
 
 def load_dish_cfg_when_csp_is_defective(
@@ -169,7 +172,10 @@ def load_dish_cfg_when_csp_is_defective(
         lookahead=4,
     )
 
-    tear_down(central_node_name, reset_sys_param=True)
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult"],
+    )
 
 
 def load_dish_cfg_after_central_node_init(

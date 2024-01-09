@@ -386,7 +386,7 @@ def test_release_resources_mid_timeout(
         lookahead=6,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    tmc_subarray.ReleaseAllResources()
     # Teardown
     result, unique_id = central_node.TelescopeOff()
 
