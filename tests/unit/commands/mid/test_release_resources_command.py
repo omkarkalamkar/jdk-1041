@@ -35,6 +35,7 @@ def test_mid_release_resources_command_with_ok(tango_context, task_callback):
     cm.is_command_allowed("ReleaseResources")
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDirectObsState(ObsState.IDLE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     release_input_str = get_release_input_str()
@@ -59,6 +60,9 @@ def test_mid_release_resources_command_fail_subarray(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDirectObsState(ObsState.IDLE)
     adapter_factory = HelperAdapterFactory()
     attrs = {"ReleaseAllResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
@@ -128,6 +132,7 @@ def test_release_resources_command_timeout(tango_context, task_callback):
         "intermediate_state": ObsState.RESOURCING,
     }
     subarray_device = DevFactory().get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDirectObsState(ObsState.IDLE)
     subarray_device.SetDefective(json.dumps(defect))
 
     release_input_str = get_release_input_str()
@@ -166,6 +171,7 @@ def test_release_resources_exception_on_sn(tango_context, task_callback):
         "result": ResultCode.FAILED,
     }
     subarray_device = DevFactory().get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDirectObsState(ObsState.IDLE)
     subarray_device.SetDefective(json.dumps(defect))
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)

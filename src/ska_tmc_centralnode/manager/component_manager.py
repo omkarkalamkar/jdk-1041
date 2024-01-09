@@ -852,19 +852,29 @@ class CNComponentManager(TmcComponentManager):
         """
         try:
             json_argument = json.loads(argin)
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
+            return (
+                TaskStatus.REJECTED,
+                f"Problem in loading the JSON string: {e}",
+            )
+        try:
             subarray_id = json_argument["subarray_id"]
-            subarray_devices = self.input_parameter.subarray_dev_names
-            for device in subarray_devices:
-                subarray_device_id = re.findall(r"\d+", device)
-                if subarray_id == int(subarray_device_id[0]):
-                    subarray_obstate = self.get_device(device).obs_state
-                    if subarray_obstate not in [ObsState.EMPTY, ObsState.IDLE]:
-                        raise StateModelError(
-                            "AssignResources command not permitted in observation state "
-                            f"{subarray_obstate}"
-                        )
-        except Exception:
-            raise Exception
+        except Exception as e:
+            return (
+                TaskStatus.REJECTED,
+                f"subarray_id key is not present in the input json argument: {e}",
+            )
+        subarray_devices = self.input_parameter.subarray_dev_names
+        for device in subarray_devices:
+            subarray_device_id = re.findall(r"\d+", device)
+            if subarray_id == int(subarray_device_id[0]):
+                subarray_obstate = self.get_device(device).obs_state
+                if subarray_obstate not in [ObsState.EMPTY, ObsState.IDLE]:
+                    raise StateModelError(
+                        "AssignResources command not permitted in observation state "
+                        f"{subarray_obstate}"
+                    )
 
         # Execute the command if the input JSON is valid
         self.logger.info("Calling component manager assign_resources method")
@@ -875,13 +885,13 @@ class CNComponentManager(TmcComponentManager):
             logger=self.logger,
         )
 
-        try:
-            json_argument = json.loads(argin)
-            self.logger.debug("JSON argin is in correct format.")
-        except json.JSONDecodeError as e:
-            return assign_resources_command.reject_command(
-                f"The JSON string is malformed. Error: {str(e)}"
-            )
+        # try:
+        #     json_argument = json.loads(argin)
+        #     self.logger.debug("JSON argin is in correct format.")
+        # except json.JSONDecodeError as e:
+        #     return assign_resources_command.reject_command(
+        #         f"The JSON string is malformed. Error: {str(e)}"
+        #     )
 
         if isinstance(self.input_parameter, InputParameterLow):
             (
@@ -974,19 +984,30 @@ class CNComponentManager(TmcComponentManager):
         """
         try:
             json_argument = json.loads(argin)
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
+            return (
+                TaskStatus.REJECTED,
+                f"Problem in loading the JSON string: {e}",
+            )
+
+        try:
             subarray_id = json_argument["subarray_id"]
-            subarray_devices = self.input_parameter.subarray_dev_names
-            for device in subarray_devices:
-                subarray_device_id = re.findall(r"\d+", device)
-                if subarray_id == int(subarray_device_id[0]):
-                    subarray_obstate = self.get_device(device).obs_state
-                    if subarray_obstate not in [ObsState.IDLE]:
-                        raise StateModelError(
-                            "ReleaseResources command not permitted in observation state "
-                            f"{subarray_obstate}"
-                        )
-        except Exception:
-            raise Exception
+        except Exception as e:
+            return (
+                TaskStatus.REJECTED,
+                f"subarray_id key is not present in the input json argument: {e}",
+            )
+        subarray_devices = self.input_parameter.subarray_dev_names
+        for device in subarray_devices:
+            subarray_device_id = re.findall(r"\d+", device)
+            if subarray_id == int(subarray_device_id[0]):
+                subarray_obstate = self.get_device(device).obs_state
+                if subarray_obstate not in [ObsState.IDLE]:
+                    raise StateModelError(
+                        "ReleaseResources command not permitted in observation state "
+                        f"{subarray_obstate}"
+                    )
 
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
