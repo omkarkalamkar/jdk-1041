@@ -185,7 +185,14 @@ def load_dish_cfg_after_central_node_init(
 
     # Initialize Central Node, CSP Master Leaf Node, Dish Leaf Node
     dish_ln_device.init()
+    assert wait_and_validate_device_attribute_value(
+        dish_ln_device, "State", tango.DevState.ON
+    )
     csp_master_ln_device.init()
+    assert wait_and_validate_device_attribute_value(
+        csp_master_ln_device, "State", tango.DevState.ON
+    )
+
     central_node.init()
 
     # Validate LoadDishCfg command called after initialization

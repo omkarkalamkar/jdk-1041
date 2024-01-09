@@ -60,6 +60,8 @@ class CentralNodeMid(AbstractCentralNode):
         default_value="",
     )
 
+    DishVccInitTimeout = device_property(dtype="DevUShort", default_value=120)
+
     # ----------
     # Attributes
     # ----------
@@ -249,6 +251,7 @@ class CentralNodeMid(AbstractCentralNode):
             dish_vcc_file_path=self.DishVccFilePath[0]
             if self.DishVccFilePath
             else "",
+            dish_vcc_init_timeout=self.DishVccInitTimeout,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []

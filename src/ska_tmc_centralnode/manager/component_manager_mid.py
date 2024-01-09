@@ -45,6 +45,7 @@ class CNComponentManagerMid(CNComponentManager):
         command_timeout=30,
         dish_vcc_uri=None,
         dish_vcc_file_path=None,
+        dish_vcc_init_timeout=120,
         *args,
         **kwargs,
     ):
@@ -109,6 +110,7 @@ class CNComponentManagerMid(CNComponentManager):
         self._is_dish_vcc_config_set = False
         self.dish_vcc_uri = dish_vcc_uri
         self.dish_vcc_file_path = dish_vcc_file_path
+        self.dish_vcc_init_timeout = dish_vcc_init_timeout
 
     def check_if_dishes_are_responsive(self):
         self.logger.info("Checking if dishes are responsive")
@@ -128,6 +130,7 @@ class CNComponentManagerMid(CNComponentManager):
         """This method wait for csp master leaf node and
         dish leaf nodes to become ready to accept request
         """
+        count = 0
         devices_to_check_list = [self.input_parameter.csp_mln_dev_name]
         devices_to_check_list.extend(
             self.input_parameter.dish_leaf_node_dev_names
@@ -136,17 +139,19 @@ class CNComponentManagerMid(CNComponentManager):
         dev_state_list = [
             self.get_device(device).state for device in devices_to_check_list
         ]
-
-        while set(dev_state_list) != set([DevState.ON]):
+        while True:
+            if set(dev_state_list) == set([DevState.ON]):
+                return True
+            time.sleep(1)
             dev_state_list = [
                 self.get_device(device).state
                 for device in devices_to_check_list
             ]
             self.logger.info("Device State List %s", dev_state_list)
-            time.sleep(0.5)
-
-        self.logger.info("Device State List %s", dev_state_list)
-        return True
+            count += 1
+            if count == self.dish_vcc_init_timeout:
+                break
+        return False
 
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.

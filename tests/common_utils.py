@@ -64,7 +64,7 @@ def wait_and_validate_device_attribute_value(
     device: DeviceProxy,
     attribute_name: str,
     expected_value: str,
-    timeout: int = 10,
+    timeout: int = 20,
 ):
     """This method wait and validate if attribute value is equal to provided
     expected value
