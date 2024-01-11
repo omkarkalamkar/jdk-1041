@@ -241,7 +241,7 @@ def assign_resources_with_invalid_json(
 
     assert [
         "subarray_id key is not present in the input json argument."
-    ] == message
+    ] in message
     assert result[0] == ResultCode.REJECTED
 
     # Teardown
