@@ -240,7 +240,7 @@ def assign_resources_with_invalid_json(
     result, message = central_node.AssignResources(assign_input_str)
 
     assert [
-        "subarray_id key is not present in the input json argument."
+        "subarray_id key is not present in the input json argument"
     ] in message
     assert result[0] == ResultCode.REJECTED
 
