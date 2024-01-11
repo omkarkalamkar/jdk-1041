@@ -3,7 +3,6 @@ import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
-from tango import DeviceProxy
 
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
