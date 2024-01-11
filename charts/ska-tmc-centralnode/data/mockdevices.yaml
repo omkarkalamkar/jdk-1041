@@ -10,6 +10,7 @@ entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_mccs_master_leaf_node_device.HelperMCCSMasterLeafNode"
   - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
   - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
+  - name: "ska_tmc_common.test_helpers.helper_dish_ln_device.HelperDishLNDevice"
   - name: "ska_tmc_common.test_helpers.helper_csp_master_device.HelperCspMasterDevice"
   - name: "ska_tmc_common.test_helpers.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
   - name: "cn_helper_subarray_device.CNHelperSubArrayDevice"
@@ -54,6 +55,8 @@ server:
         {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
         - name: "{{ . | lower }}/{{ $DishMasterPrefix }}/{{ $DishMasterPostfix }}"
         {{- end }}
+      - name: "HelperDishLNDevice"
+        devices:
         - name: "ska_mid/tm_leaf_node/d0001"
 depends_on:
   - device: sys/database/2

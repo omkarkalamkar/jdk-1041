@@ -96,11 +96,13 @@ class LoadDishCfg(LoadDishCfgCommand):
             message,
         )
         if result == ResultCode.FAILED:
+            self.component_manager.update_dish_vcc_flag(False)
             self.task_callback(
                 result=result, status=TaskStatus.COMPLETED, exception=message
             )
         else:
             self.update_memorized_attribute()
+            self.component_manager.update_dish_vcc_flag(True)
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.component_manager.command_in_progress = ""
         if self.component_manager.command_mapping.get(

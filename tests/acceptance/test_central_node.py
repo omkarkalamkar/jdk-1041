@@ -9,8 +9,10 @@ from ska_tango_base.control_model import HealthState, ObsState
 from ska_tmc_common.dev_factory import DevFactory
 from tango import Database, DeviceProxy
 
+from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.settings import (
     LOW_SUBARRAY_DEVICE,
+    MID_CENTRAL_NODE,
     MID_SUBARRAY_DEVICE,
     check_subarray_availability,
     event_remover,
@@ -38,6 +40,12 @@ def central_node():
         return DeviceProxy(instance)
     instance_list = database.get_device_exported_for_class("CentralNodeMid")
     for instance in instance_list.value_string:
+        dev_factory = DevFactory()
+        assert wait_and_validate_device_attribute_value(
+            dev_factory.get_device(MID_CENTRAL_NODE),
+            "isDishVccConfigSet",
+            True,
+        ), "Timeout while waiting for validating attribute value"
         return DeviceProxy(instance)
 
 
