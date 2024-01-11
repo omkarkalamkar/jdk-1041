@@ -3,6 +3,7 @@ import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
+from tango import DeviceProxy
 
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
@@ -162,7 +163,7 @@ def release_resources_without_subarray_id(
     )
 
     assert (
-        "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-releaseresources"
+        "subarray_id key is not present in the input json argument"
         in message[0]
     )
     assert result[0] == ResultCode.REJECTED
@@ -183,7 +184,6 @@ def release_resources_without_subarray_id(
     logger.info(
         f"TelescopeOff Command ID: {unique_id} Returned result: {result}"
     )
-
     assert unique_id[0].endswith("TelescopeOff")
     assert result[0] == ResultCode.QUEUED
 
@@ -192,9 +192,6 @@ def release_resources_without_subarray_id(
         (unique_id[0], str(int(ResultCode.OK))),
         lookahead=4,
     )
-
-    # Teardown
-    result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
@@ -300,6 +297,7 @@ def test_release_resources_error_propagation(
     tmc_subarray.SetDefective(RESET_DEFECT)
     # Tear Down
     tmc_subarray.ReleaseAllResources()
+    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
 
@@ -386,6 +384,7 @@ def test_release_resources_mid_timeout(
         lookahead=6,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
+    tmc_subarray.ReleaseAllResources()
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
