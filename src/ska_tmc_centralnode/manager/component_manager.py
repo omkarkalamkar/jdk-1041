@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
 from ska_ser_skuid.client import SkuidClient
@@ -865,7 +865,7 @@ class CNComponentManager(TmcComponentManager):
                     )
         return True
 
-    def is_input_json_is_valid(self, argin: str):
+    def is_input_json_valid(self, argin: str) -> Tuple[bool, str]:
         """
         Checks inputs json.
 
@@ -879,7 +879,9 @@ class CNComponentManager(TmcComponentManager):
         except json.JSONDecodeError as e:
             return False, f"Problem in loading the JSON string: {e}"
 
-    def check_subarray_id_in_json(self, json_argument: str):
+    def check_subarray_id_in_json(
+        self, json_argument: str
+    ) -> Tuple[bool, str]:
         """
         Checks subarray id is present in json or not.
 
@@ -909,9 +911,7 @@ class CNComponentManager(TmcComponentManager):
         :rtype: tuple
         """
 
-        is_json_valid, input_json_or_message = self.is_input_json_is_valid(
-            argin
-        )
+        is_json_valid, input_json_or_message = self.is_input_json_valid(argin)
         if not is_json_valid:
             return TaskStatus.REJECTED, input_json_or_message
 
@@ -1026,9 +1026,7 @@ class CNComponentManager(TmcComponentManager):
         :return: task_status
         :rtype: tuple
         """
-        is_json_valid, input_json_or_message = self.is_input_json_is_valid(
-            argin
-        )
+        is_json_valid, input_json_or_message = self.is_input_json_valid(argin)
         if not is_json_valid:
             return TaskStatus.REJECTED, input_json_or_message
 
