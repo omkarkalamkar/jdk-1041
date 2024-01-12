@@ -560,4 +560,5 @@ def test_release_resources_error_aggregation(
     subarray_proxy.SetDefective(RESET_DEFECT)
     # Teardown
     subarray_proxy.ReleaseAllResources()
+    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     result, unique_id = central_node.TelescopeOff()
