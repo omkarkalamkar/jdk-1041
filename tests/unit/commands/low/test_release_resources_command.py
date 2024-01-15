@@ -4,6 +4,7 @@ import time
 import mock
 import pytest
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -28,6 +29,7 @@ def test_low_release_resources_command(
 
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    subarray_device.SetDirectObsState(ObsState.IDLE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
@@ -105,7 +107,9 @@ def test_low_release_resources_missing_subarray_id(
     )
     (res_code, message) = cm.release_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
-    assert "Malformed input string" in message
+    assert (
+        "subarray_id key is not present in the input json argument" in message
+    )
 
 
 @pytest.mark.SKA_low

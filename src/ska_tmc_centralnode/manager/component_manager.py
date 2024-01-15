@@ -4,14 +4,16 @@ This module provided an implementation of the Central Node ComponentManager.
 from __future__ import annotations
 
 import json
+import re
 import time
-from typing import Callable, Optional
+from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tango_base.faults import StateModelError
 from ska_tmc_common import (
     AdapterFactory,
     CommandNotAllowed,
@@ -835,6 +837,66 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
+    def is_subarray_in_right_obs_state(
+        self, subarray_id: int, desired_obsstate: List, command_name: str
+    ) -> bool:
+        """
+        Checks subarray obsstate before invoking command
+
+        :param subarray_id: subarray id on which command invoke
+        :type subarray_id: int
+        :param desired_obsstate: list of obs states which are allowed
+        :type desired_obsstate: List
+        :param command_name: name of command for obstate check
+        :type: str
+
+        :return: return boolean value if command in valid obstate else
+            return exception.
+        """
+        subarray_devices = self.input_parameter.subarray_dev_names
+        for device in subarray_devices:
+            subarray_device_id = re.findall(r"\d+", device)
+            if subarray_id == int(subarray_device_id[0]):
+                subarray_obstate = self.get_device(device).obs_state
+                if subarray_obstate not in desired_obsstate:
+                    raise StateModelError(
+                        f"{command_name} command not permitted in observation "
+                        + f"state {subarray_obstate}"
+                    )
+        return True
+
+    def is_input_json_valid(self, argin: str) -> Tuple[bool, str]:
+        """
+        Checks inputs json.
+
+        param argin: input json string
+        :type argin: str
+        """
+        try:
+            json_argument = json.loads(argin)
+            self.logger.debug("JSON argin is in correct format.")
+            return True, json_argument
+        except json.JSONDecodeError as e:
+            return False, f"Problem in loading the JSON string: {e}"
+
+    def check_subarray_id_in_json(
+        self, json_argument: str
+    ) -> Tuple[bool, str]:
+        """
+        Checks subarray id is present in json or not.
+
+        param json_argument: input json string
+        :type json_argument: str
+        """
+        try:
+            subarray_id = json_argument["subarray_id"]
+            return True, subarray_id
+        except Exception as e:
+            return (
+                False,
+                f"subarray_id key is not present in the input json argument: str{e}",
+            )
+
     def assign_resources(
         self, argin: str, task_callback: Optional[Callable] = None
     ):
@@ -848,6 +910,24 @@ class CNComponentManager(TmcComponentManager):
         :return: task_status
         :rtype: tuple
         """
+
+        is_json_valid, input_json_or_message = self.is_input_json_valid(argin)
+        if not is_json_valid:
+            return TaskStatus.REJECTED, input_json_or_message
+
+        result, subarray_id_or_message = self.check_subarray_id_in_json(
+            input_json_or_message
+        )
+        if not result:
+            return TaskStatus.REJECTED, subarray_id_or_message
+
+        # check whether subarray is in proper obstate or not.
+        self.is_subarray_in_right_obs_state(
+            subarray_id_or_message,
+            [ObsState.EMPTY, ObsState.IDLE],
+            "AssignResources",
+        )
+
         # Execute the command if the input JSON is valid
         self.logger.info("Calling component manager assign_resources method")
         assign_resources_command = AssignResources(
@@ -857,20 +937,12 @@ class CNComponentManager(TmcComponentManager):
             logger=self.logger,
         )
 
-        try:
-            json_argument = json.loads(argin)
-            self.logger.debug("JSON argin is in correct format.")
-        except json.JSONDecodeError as e:
-            return assign_resources_command.reject_command(
-                f"The JSON string is malformed. Error: {str(e)}"
-            )
-
         if isinstance(self.input_parameter, InputParameterLow):
             (
                 is_valid,
                 invalid_json_error_msg,
             ) = assign_resources_command._validate_low_json(
-                json_argument, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
+                input_json_or_message, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
             )
             if not is_valid:
                 return assign_resources_command.reject_command(
@@ -954,16 +1026,24 @@ class CNComponentManager(TmcComponentManager):
         :return: task_status
         :rtype: tuple
         """
+        is_json_valid, input_json_or_message = self.is_input_json_valid(argin)
+        if not is_json_valid:
+            return TaskStatus.REJECTED, input_json_or_message
+
+        result, subarray_id_or_message = self.check_subarray_id_in_json(
+            input_json_or_message
+        )
+        if not result:
+            return TaskStatus.REJECTED, subarray_id_or_message
+
+        # check whether subarray is in proper obstate or not.
+        self.is_subarray_in_right_obs_state(
+            subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"
+        )
+
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        try:
-            json_argument = json.loads(argin)
-            self.logger.debug("JSON argin is in correct format.")
-        except json.JSONDecodeError as e:
-            return release_resources_command.reject_command(
-                f"The JSON string is malformed. Error: {str(e)}"
-            )
 
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
@@ -971,7 +1051,7 @@ class CNComponentManager(TmcComponentManager):
                 is_valid,
                 invalid_json_error_msg,
             ) = release_resources_command._validate_low_json(
-                json_argument,
+                input_json_or_message,
                 REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
             )
             if not is_valid:
@@ -979,15 +1059,15 @@ class CNComponentManager(TmcComponentManager):
                     invalid_json_error_msg
                 )
         elif isinstance(self.input_parameter, InputParameterMid):
-            self.logger.info(f"Json argument::{json_argument}")
+            self.logger.info(f"Json argument::{input_json_or_message}")
             # Utilize CDM to validate json.
             try:
                 release_validator = ReleaseResourceValidator(self.logger)
-                json_argument = release_validator.loads(argin)
+                input_json_or_message = release_validator.loads(argin)
             except InvalidJSONError as e:
                 return release_resources_command.reject_command(str(e))
         # Reject command if Subarray is not available
-        subarray_id = json_argument["subarray_id"]
+        subarray_id = subarray_id_or_message
         subarray_suffics = "/" + str(subarray_id)
         subarrays_list = list(
             self._component.telescope_availability["tmc_subarrays"].keys()
@@ -1004,7 +1084,7 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
-            args=[json_argument, self.logger],
+            args=[input_json_or_message, self.logger],
             task_callback=task_callback,
         )
         return task_status, response

@@ -239,9 +239,10 @@ def assign_resources_with_invalid_json(
 
     result, message = central_node.AssignResources(assign_input_str)
 
-    assert [
-        "subarray_id key is not present in the input json argument."
-    ] == message
+    assert (
+        "subarray_id key is not present in the input json argument"
+        in message[0]
+    )
     assert result[0] == ResultCode.REJECTED
 
     # Teardown
@@ -312,7 +313,7 @@ def assign_resources_without_subarray_id(
     )
 
     assert (
-        "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-assignresources"
+        "subarray_id key is not present in the input json argument"
         in message[0]
     )
     assert result[0] == ResultCode.REJECTED
