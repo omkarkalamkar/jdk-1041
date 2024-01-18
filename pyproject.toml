@@ -28,7 +28,7 @@ pytango = "9.3.3"
 ska-ser-logging = "^0.4.1"
 ska-tango-base = "0.18.1"
 ska-tmc-cdm = "7.3.1"
-ska-tmc-common = "0.11.3"
+ska-tmc-common = { git = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git", branch = "hm-397-csp-helper" }
 ska-tango-testing = "0.6.0"
 ska-ser-log-transactions = "*"
 ska-ser-skuid = "*"
