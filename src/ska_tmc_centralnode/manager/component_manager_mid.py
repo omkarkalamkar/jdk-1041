@@ -391,7 +391,7 @@ class CNComponentManagerMid(CNComponentManager):
     def get_default_dish_vcc_config_params(self):
         """Return default dish vcc config json"""
         return {
-            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "interface": "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0",
             "tm_data_sources": [self.dish_vcc_uri],
             "tm_data_filepath": self.dish_vcc_file_path,
         }
