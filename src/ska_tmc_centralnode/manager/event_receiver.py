@@ -116,6 +116,12 @@ class CentralNodeEventReceiver(EventReceiver):
                             self.handle_load_dish_cfg_result_callback,
                             stateless=True,
                         )
+                        proxy.subscribe_event(
+                            "DishVccMapValidationResult",
+                            tango.EventType.CHANGE_EVENT,
+                            self.handle_dish_vcc_k_value_validation_event,
+                            stateless=True,
+                        )
 
                 if dev_info.dev_name == MCCS_MLN_DEVICE:
                     proxy.subscribe_event(
@@ -232,11 +238,10 @@ class CentralNodeEventReceiver(EventReceiver):
             self._component_manager.update_load_dish_cfg_results(
                 event_data.device.dev_name(), new_value, is_async_result=True
             )
-    
+
     def handle_dish_vcc_k_value_validation_event(self, event_data):
-        """Handle DishVccValidationResult change event.
-        
-        """
+        """Handle DishVccValidationResult change event."""
+        self._logger.info("Got Dish Vcc Event Data %s", event_data)
         if event_data.err:
             errors = event_data.errors
             for error in errors:
@@ -248,7 +253,7 @@ class CentralNodeEventReceiver(EventReceiver):
             )
             return
         new_value = event_data.attr_value.value
-        self._component_manager.update_is_dish_vcc_config_set(
+        self._component_manager.handle_dish_vcc_validation_result(
             event_data.device.dev_name(), new_value
         )
 

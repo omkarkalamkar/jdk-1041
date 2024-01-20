@@ -1,5 +1,7 @@
 """Common constant used in centralnode
 """
+from ska_control_model.result_code import ResultCode
+
 REQUIRED_LOW_ASSIGN_RESOURCE_KEYS = ["subarray_id", "sdp"]
 REQUIRED_LOW_RELEASE_RESOURCE_KEYS = ["subarray_id"]
 MCCS_REQUIRED_KEYS = ["subarray_beam_ids", "station_ids", "channel_blocks"]
@@ -12,3 +14,9 @@ MCCS_MLN_SUFIX = "tm_leaf_node/mccs_master"
 mccs_release_interface = (
     "https://schema.skatelescope.org/ska-low-mccs-controller-release/2.0"
 )
+
+DISH_VCC_VALIDATION_RESULT_STATUS = {
+    ResultCode.FAILED: "TMC and CSP Master Dish VCC version is Different",
+    ResultCode.NOT_ALLOWED: "CSP Master device is unavailable",
+    ResultCode.OK: "TMC and CSP Master Dish Vcc Version is Same",
+}

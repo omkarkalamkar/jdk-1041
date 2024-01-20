@@ -123,6 +123,11 @@ class CentralNodeMid(AbstractCentralNode):
         access=AttrWriteType.READ,
     )
 
+    dishVccValidationStatus = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ,
+    )
+
     def update_imaging_callback(self, imaging):
         self.logger.info("imaging %s", imaging)
         self.push_change_event("imaging", imaging)
@@ -176,6 +181,10 @@ class CentralNodeMid(AbstractCentralNode):
     def read_isDishVccConfigSet(self):
         """Return the isDishVccConfigSet attribute."""
         return self.component_manager.is_dish_vcc_config_set
+
+    def read_dishVccValidationStatus(self):
+        """Return the dishVccValidationStatus"""
+        return self.component_manager.dish_vcc_validation_status
 
     def write_dishDevNames(self, value):
         """Set the dishdevnames attribute."""
@@ -252,6 +261,7 @@ class CentralNodeMid(AbstractCentralNode):
             if self.DishVccFilePath
             else "",
             dish_vcc_init_timeout=self.DishVccInitTimeout,
+            invoke_load_dish_cfg_command_callback=self.invoke_load_dish_cfg_command_callback,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
@@ -298,6 +308,16 @@ class CentralNodeMid(AbstractCentralNode):
             ),
         )
 
+    def invoke_load_dish_cfg_command_callback(self):
+        """This callback is called when dishVccValidationResult is Unknown
+        and Central Node needs to load dish cfg on csp
+        """
+        handler = self.get_command_object("LoadDishCfg")
+        dish_cfg_json = json.dumps(
+            self.component_manager.get_default_dish_vcc_config_params()
+        )
+        handler(dish_cfg_json)
+
     def initialize_load_dish_cfg(self):
         """This method called during Central Node Initialization.
         It submit the task in thread pool executor and the task
@@ -311,11 +331,11 @@ class CentralNodeMid(AbstractCentralNode):
             self.logger.info("Loading Dish Cfg")
             if self.component_manager.is_csp_dish_ready():
                 self.logger.info("Kwargs are %s", kwargs)
-                handler = self.get_command_object("LoadDishCfg")
-                dish_cfg_json = json.dumps(
-                    self.component_manager.get_default_dish_vcc_config_params()
-                )
-                handler(dish_cfg_json)
+                # handler = self.get_command_object("LoadDishCfg")
+                # dish_cfg_json = json.dumps(
+                #     self.component_manager.get_default_dish_vcc_config_params()
+                # )
+                # handler(dish_cfg_json)
             else:
                 self.logger.info("Timeout while waiting for devices to up")
 

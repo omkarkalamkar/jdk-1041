@@ -185,21 +185,23 @@ def load_dish_cfg_after_central_node_init(
     central_node = dev_factory.get_device(central_node_name)
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+    # Central Node and Csp Master Leaf Node Device Server
+    central_node_ds = DeviceProxy("dserver/central_node_mid/01")
+    csp_master_ds = DeviceProxy("dserver/mocks/01")
 
     # set memorized attribute to empty
     csp_master_ln_device.memorizedDishVccMap = ""
 
-    # Initialize Central Node, CSP Master Leaf Node, Dish Leaf Node
-    dish_ln_device.init()
+    # Restart Central Node, CSP Master Leaf Node, Dish Leaf Node
+    central_node_ds.RestartServer()
     assert wait_and_validate_device_attribute_value(
         dish_ln_device, "State", tango.DevState.ON
     )
-    csp_master_ln_device.init()
     assert wait_and_validate_device_attribute_value(
         csp_master_ln_device, "State", tango.DevState.ON
     )
 
-    central_node.init()
+    csp_master_ds.RestartServer()
 
     # Validate LoadDishCfg command called after initialization
 

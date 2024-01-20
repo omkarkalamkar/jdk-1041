@@ -6,6 +6,7 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+import threading
 import time
 
 from ska_tango_base.commands import ResultCode
@@ -19,6 +20,9 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.utils.constants import (
+    DISH_VCC_VALIDATION_RESULT_STATUS,
+)
 
 
 class CNComponentManagerMid(CNComponentManager):
@@ -46,6 +50,7 @@ class CNComponentManagerMid(CNComponentManager):
         dish_vcc_uri=None,
         dish_vcc_file_path=None,
         dish_vcc_init_timeout=120,
+        invoke_load_dish_cfg_command_callback=None,
         *args,
         **kwargs,
     ):
@@ -111,6 +116,11 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_uri = dish_vcc_uri
         self.dish_vcc_file_path = dish_vcc_file_path
         self.dish_vcc_init_timeout = dish_vcc_init_timeout
+        self.invoke_load_dish_cfg_command_callback = (
+            invoke_load_dish_cfg_command_callback
+        )
+        self.dish_vcc_validation_status = ""
+        self.dish_vcc_validation_attr_lock = threading.Lock()
 
     def check_if_dishes_are_responsive(self):
         self.logger.info("Checking if dishes are responsive")
@@ -395,3 +405,36 @@ class CNComponentManagerMid(CNComponentManager):
             "tm_data_sources": [self.dish_vcc_uri],
             "tm_data_filepath": self.dish_vcc_file_path,
         }
+
+    def handle_dish_vcc_validation_result(self, dev_name, result):
+        """Handle Dish Vcc Validation Result"""
+        self.logger.info(
+            "Dish Vcc Validation Event called with dev %s and result %s",
+            dev_name,
+            result,
+        )
+        with self.dish_vcc_validation_attr_lock:
+            if "csp_master" in dev_name:
+                # Handle Csp Master Leaf Node event
+                csp_validation_result = int(result)
+                self.logger.info(
+                    "Csp Validation Result is %s", csp_validation_result
+                )
+                if csp_validation_result == ResultCode.UNKNOWN:
+                    """Unknown Result code sent when no dish vcc set
+                    so invoke LoadDishCfg
+                    """
+                    self.invoke_load_dish_cfg_command_callback()
+                elif (
+                    csp_validation_result
+                    in DISH_VCC_VALIDATION_RESULT_STATUS.keys()
+                ):
+                    if csp_validation_result == ResultCode.OK:
+                        self.is_dish_vcc_config_set = True
+                    else:
+                        self.is_dish_vcc_config_set = False
+                    self.dish_vcc_validation_status = (
+                        DISH_VCC_VALIDATION_RESULT_STATUS[
+                            csp_validation_result
+                        ]
+                    )
