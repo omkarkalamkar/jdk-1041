@@ -154,7 +154,7 @@ class CentralNodeMid(AbstractCentralNode):
             self._device.set_change_event("imaging", True, False)
 
             # Load Default Dish VCC config
-            self._device.initialize_load_dish_cfg()
+            # self._device.initialize_load_dish_cfg()
 
             return (ResultCode.OK, "")
 
