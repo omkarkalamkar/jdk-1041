@@ -193,7 +193,7 @@ def load_dish_cfg_after_central_node_init(
     csp_master_ln_device.memorizedDishVccMap = ""
 
     # Restart Central Node, CSP Master Leaf Node, Dish Leaf Node
-    central_node_ds.RestartServer()
+    csp_master_ds.RestartServer()
     assert wait_and_validate_device_attribute_value(
         dish_ln_device, "State", tango.DevState.ON
     )
@@ -201,7 +201,7 @@ def load_dish_cfg_after_central_node_init(
         csp_master_ln_device, "State", tango.DevState.ON
     )
 
-    csp_master_ds.RestartServer()
+    central_node_ds.RestartServer()
 
     # Validate LoadDishCfg command called after initialization
 
