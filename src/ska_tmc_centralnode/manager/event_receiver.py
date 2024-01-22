@@ -239,7 +239,9 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.device.dev_name(), new_value, is_async_result=True
             )
 
-    def handle_dish_vcc_k_value_validation_event(self, event_data):
+    def handle_dish_vcc_k_value_validation_event(
+        self, event_data: tango.EventData
+    ):
         """Handle DishVccValidationResult change event."""
         self._logger.info(
             "Event for DishVccValidationResult attribute: %s", event_data
@@ -254,10 +256,11 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.device.dev_name()
             )
             return
-        new_value = event_data.attr_value.value
-        self._component_manager.handle_dish_vcc_validation_result(
-            event_data.device.dev_name(), new_value
-        )
+        if self._component_manager.enable_dish_vcc_init:
+            new_value = event_data.attr_value.value
+            self._component_manager.handle_dish_vcc_validation_result(
+                event_data.device.dev_name(), new_value
+            )
 
     def handle_masterln_availability_event(
         self, event_data: tango.EventData

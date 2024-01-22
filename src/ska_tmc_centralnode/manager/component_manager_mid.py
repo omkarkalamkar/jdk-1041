@@ -410,7 +410,9 @@ class CNComponentManagerMid(CNComponentManager):
             "tm_data_filepath": self.dish_vcc_file_path,
         }
 
-    def handle_dish_vcc_validation_result(self, dev_name, result):
+    def handle_dish_vcc_validation_result(
+        self, dev_name: str, result: ResultCode
+    ) -> None:
         """Handle Dish Vcc Validation Result
         Based on following table Result codes handled and attributes updated
 

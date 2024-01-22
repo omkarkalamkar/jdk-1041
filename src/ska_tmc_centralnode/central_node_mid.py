@@ -159,9 +159,6 @@ class CentralNodeMid(AbstractCentralNode):
 
             self._device.set_change_event("imaging", True, False)
 
-            # Load Default Dish VCC config
-            # self._device.initialize_load_dish_cfg()
-
             return (ResultCode.OK, "")
 
     # ------------------
@@ -324,33 +321,6 @@ class CentralNodeMid(AbstractCentralNode):
             self.component_manager.get_default_dish_vcc_config_params()
         )
         handler(dish_cfg_json)
-
-    def initialize_load_dish_cfg(self):
-        """This method called during Central Node Initialization.
-        It submit the task in thread pool executor and the task
-        will start loading dish vcc config on csp master.
-        """
-
-        def start_load_dish_cfg_command(**kwargs):
-            """This fucntion check if CSP Master and Dish leaf Node device
-            is ready and once it is ready call LoadDishCfg command
-            """
-            self.logger.info("Loading Dish Cfg")
-            if self.component_manager.is_csp_dish_ready():
-                self.logger.info("Kwargs are %s", kwargs)
-                # handler = self.get_command_object("LoadDishCfg")
-                # dish_cfg_json = json.dumps(
-                #     self.component_manager.get_default_dish_vcc_config_params()
-                # )
-                # handler(dish_cfg_json)
-            else:
-                self.logger.info("Timeout while waiting for devices to up")
-
-        # This is temporary solution to disable loading dish vcc during initialization
-        # once this functionality is verfied with real csp and real dish
-        # then this property will be removed.
-        if self.component_manager.enable_dish_vcc_init:
-            self.component_manager.submit_task(start_load_dish_cfg_command)
 
     def is_LoadDishCfg_allowed(self):
         """
