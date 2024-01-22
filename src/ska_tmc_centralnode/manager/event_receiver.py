@@ -241,7 +241,9 @@ class CentralNodeEventReceiver(EventReceiver):
 
     def handle_dish_vcc_k_value_validation_event(self, event_data):
         """Handle DishVccValidationResult change event."""
-        self._logger.info("Got Dish Vcc Event Data %s", event_data)
+        self._logger.info(
+            "Event for DishVccValidationResult attribute: %s", event_data
+        )
         if event_data.err:
             errors = event_data.errors
             for error in errors:

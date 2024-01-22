@@ -214,6 +214,84 @@ def load_dish_cfg_after_central_node_init(
     ), "Timeout while waiting for validating attribute value"
 
 
+def central_node_dish_vcc_after_csp_master_dish_ln_restart(
+    tango_context, central_node_name, config_str, change_event_callbacks
+):
+    """Validate When only CSP master leaf node and dish leaf node restart
+    then Central Node update it's dishVccValidationResult properly
+    """
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+    csp_master_ln_device.subscribe_event(
+        "DishVccMapValidationResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["DishVccMapValidationResult"],
+    )
+    # Csp Master Leaf Node and Dish Leaf Node Device Server
+    csp_master_ds = DeviceProxy("dserver/mocks/01")
+
+    # Validate before restart memorizedDishVccMap is set
+    assert json.loads(csp_master_ln_device.memorizedDishVccMap) == json.loads(
+        config_str
+    )
+
+    # Restart CSP Master Leaf Node, Dish Leaf Node
+    csp_master_ds.RestartServer()
+    assert wait_and_validate_device_attribute_value(
+        dish_ln_device, "State", tango.DevState.ON
+    )
+    assert wait_and_validate_device_attribute_value(
+        csp_master_ln_device, "State", tango.DevState.ON
+    )
+
+    # Validate DishVccValidationResult return OK
+    change_event_callbacks.assert_change_event(
+        "DishVccMapValidationResult",
+        str(int(ResultCode.OK)),
+        lookahead=4,
+    )
+
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", True
+    ), "Timeout while waiting for validating attribute value"
+
+
+def dish_vcc_validation_result_failed(tango_context, central_node_name):
+    """Validate Central Node update dish vcc validation result to Failed
+    after dishVccValidationResult event is returned as Failed
+    """
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+
+    assert (
+        central_node.DishVccValidationStatus
+        == "TMC and CSP Master Dish Vcc Version is Same"
+    )
+
+    assert central_node.isDishVccConfigSet
+
+    csp_master_ln_device.SetDishVccValidationResult("3")
+
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", False
+    ), "Timeout while waiting for validating attribute value"
+
+    assert (
+        central_node.DishVccValidationStatus
+        == "TMC and CSP Master Dish VCC version is Different"
+    )
+
+    # Set it back to OK
+    csp_master_ln_device.SetDishVccValidationResult("0")
+
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", True
+    ), "Timeout while waiting for validating attribute value"
+
+
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -271,4 +349,40 @@ def test_load_dish_cfg_after_central_node_init(
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+):
+    return central_node_dish_vcc_after_csp_master_dish_ln_restart(
+        tango_context,
+        central_node_name,
+        json_factory("command_load_dish_cfg"),
+        change_event_callbacks,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_dish_vcc_validation_result_failed(
+    tango_context,
+    central_node_name,
+):
+    return dish_vcc_validation_result_failed(
+        tango_context,
+        central_node_name,
     )

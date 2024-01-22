@@ -408,14 +408,28 @@ class CNComponentManagerMid(CNComponentManager):
         }
 
     def handle_dish_vcc_validation_result(self, dev_name, result):
-        """Handle Dish Vcc Validation Result"""
+        """Handle Dish Vcc Validation Result
+        Based on following table Result codes handled and attributes updated
+
+        Result Code | Meaning
+        UNKNOWN     | Dish Vcc Config not set on CSP
+        OK          | Dish Vcc Config on CSP LN and CSP match
+        FAILED      | Mismatch in dish vcc version on CSP LN and CSP Master
+        NOT_ALLOWED | CSP master is not available
+
+        Result Code | Action
+        UNKNOWN     | Load Dish Config using LoadDishCfg command
+        OK          | Dish Vcc already set so set is_dish_vcc_config_set to True
+        FAILED      | Dish Vcc is mismatch so set set is_dish_vcc_config_set to False
+        NOT_ALLOWED | Set is_dish_vcc_config_set to False
+        """
         self.logger.info(
             "Dish Vcc Validation Event called with dev %s and result %s",
             dev_name,
             result,
         )
         with self.dish_vcc_validation_attr_lock:
-            if "csp_master" in dev_name:
+            if "tm_leaf_node/csp_master" in dev_name:
                 # Handle Csp Master Leaf Node event
                 csp_validation_result = int(result)
                 self.logger.info(

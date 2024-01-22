@@ -123,7 +123,7 @@ class CentralNodeMid(AbstractCentralNode):
         access=AttrWriteType.READ,
     )
 
-    dishVccValidationStatus = attribute(
+    DishVccValidationStatus = attribute(
         dtype="DevString",
         access=AttrWriteType.READ,
     )
@@ -182,8 +182,8 @@ class CentralNodeMid(AbstractCentralNode):
         """Return the isDishVccConfigSet attribute."""
         return self.component_manager.is_dish_vcc_config_set
 
-    def read_dishVccValidationStatus(self):
-        """Return the dishVccValidationStatus"""
+    def read_DishVccValidationStatus(self):
+        """Return the DishVccValidationStatus"""
         return self.component_manager.dish_vcc_validation_status
 
     def write_dishDevNames(self, value):
