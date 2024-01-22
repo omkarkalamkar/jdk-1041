@@ -47,8 +47,9 @@ class TelescopeStateAggregatorMid(Aggregator):
             self._component_manager.is_dish_vcc_config_set,
         )
         # If Dish VCC config is not set then set telescope state to UNKNOWN
-        if not self._component_manager.is_dish_vcc_config_set:
-            return DevState.UNKNOWN
+        if self.component_manager.enable_dish_vcc_init:
+            if not self._component_manager.is_dish_vcc_config_set:
+                return DevState.UNKNOWN
 
         if not sdp_master and not csp_master:
             self._logger.info(
