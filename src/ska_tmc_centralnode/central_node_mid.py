@@ -60,6 +60,12 @@ class CentralNodeMid(AbstractCentralNode):
         default_value="",
     )
 
+    EnableDishVccInit = device_property(
+        dtype=bool,
+        doc="If true then only load dish vcc during initialization",
+        default_value=True,
+    )
+
     DishVccInitTimeout = device_property(dtype="DevUShort", default_value=120)
 
     # ----------
@@ -262,6 +268,7 @@ class CentralNodeMid(AbstractCentralNode):
             else "",
             dish_vcc_init_timeout=self.DishVccInitTimeout,
             invoke_load_dish_cfg_command_callback=self.invoke_load_dish_cfg_command_callback,
+            enable_dish_vcc_init=self.EnableDishVccInit,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
@@ -339,7 +346,11 @@ class CentralNodeMid(AbstractCentralNode):
             else:
                 self.logger.info("Timeout while waiting for devices to up")
 
-        self.component_manager.submit_task(start_load_dish_cfg_command)
+        # This is temporary solution to disable loading dish vcc during initialization
+        # once this functionality is verfied with real csp and real dish
+        # then this property will be removed.
+        if self.component_manager.enable_dish_vcc_init:
+            self.component_manager.submit_task(start_load_dish_cfg_command)
 
     def is_LoadDishCfg_allowed(self):
         """

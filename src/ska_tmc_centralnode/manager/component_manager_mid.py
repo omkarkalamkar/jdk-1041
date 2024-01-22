@@ -52,6 +52,7 @@ class CNComponentManagerMid(CNComponentManager):
         dish_vcc_file_path=None,
         dish_vcc_init_timeout=120,
         invoke_load_dish_cfg_command_callback=None,
+        enable_dish_vcc_init=True,
         *args,
         **kwargs,
     ):
@@ -122,6 +123,7 @@ class CNComponentManagerMid(CNComponentManager):
         )
         self.dish_vcc_validation_status = ""
         self.dish_vcc_validation_attr_lock = threading.Lock()
+        self.enable_dish_vcc_init = enable_dish_vcc_init
 
     def check_if_dishes_are_responsive(self):
         self.logger.info("Checking if dishes are responsive")
@@ -351,16 +353,17 @@ class CNComponentManagerMid(CNComponentManager):
 
         :rtype: boolean
         """
-        if not self.is_dish_vcc_config_set and command_name not in [
-            "TelescopeOff",
-            "TelescopeStandby",
-            "LoadDishCfg",
-        ]:
-            raise CommandNotAllowed(
-                "Dish Vcc Config not Set. Please set using LoadDishCfg command. "
-                "Current Telescope State is %s",
-                str(self.op_state_model.op_state),
-            )
+        if self.enable_dish_vcc_init:
+            if not self.is_dish_vcc_config_set and command_name not in [
+                "TelescopeOff",
+                "TelescopeStandby",
+                "LoadDishCfg",
+            ]:
+                raise CommandNotAllowed(
+                    "Dish Vcc Config not Set. Please set using LoadDishCfg command. "
+                    "Current Telescope State is %s",
+                    str(self.op_state_model.op_state),
+                )
         if self.op_state_model.op_state in [
             DevState.FAULT,
             DevState.UNKNOWN,
