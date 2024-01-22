@@ -20,3 +20,7 @@ DISH_VCC_VALIDATION_RESULT_STATUS = {
     ResultCode.NOT_ALLOWED: "CSP Master device is unavailable",
     ResultCode.OK: "TMC and CSP Master Dish Vcc Version is Same",
 }
+
+DISH_VCC_CONFIG_INTERFACE_VERSION = (
+    "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0"
+)

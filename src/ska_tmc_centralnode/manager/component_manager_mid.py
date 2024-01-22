@@ -21,6 +21,7 @@ from ska_tmc_centralnode.manager.aggregators import (
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.utils.constants import (
+    DISH_VCC_CONFIG_INTERFACE_VERSION,
     DISH_VCC_VALIDATION_RESULT_STATUS,
 )
 
@@ -401,7 +402,7 @@ class CNComponentManagerMid(CNComponentManager):
     def get_default_dish_vcc_config_params(self):
         """Return default dish vcc config json"""
         return {
-            "interface": "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0",
+            "interface": DISH_VCC_CONFIG_INTERFACE_VERSION,
             "tm_data_sources": [self.dish_vcc_uri],
             "tm_data_filepath": self.dish_vcc_file_path,
         }
