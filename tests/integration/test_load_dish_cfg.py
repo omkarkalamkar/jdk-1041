@@ -213,6 +213,10 @@ def load_dish_cfg_after_central_node_init(
         central_node, "isDishVccConfigSet", True
     ), "Timeout while waiting for validating attribute value"
 
+    assert wait_and_validate_device_attribute_value(
+        csp_master_ln_device, "memorizedDishVccMap", config_str, is_json=True
+    )
+
 
 def central_node_dish_vcc_after_csp_master_dish_ln_restart(
     tango_context, central_node_name, config_str, change_event_callbacks
