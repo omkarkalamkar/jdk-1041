@@ -497,11 +497,11 @@ class DishkValueValidationResultAggregator:
         """
         flag = set(self.dln_kvalue_validation_results.values()) == set(
             ["k-value identical"]
-        )        
+        )
         if not flag:
             self._component_manager.is_dish_vcc_config_set = False
-            self._component_manager.dish_vcc_validation_status = (
-                json.dumps(self.dln_kvalue_validation_results)
+            self._component_manager.dish_vcc_validation_status = json.dumps(
+                self.dln_kvalue_validation_results
             )
         else:
             self._component_manager.is_dish_vcc_config_set = True

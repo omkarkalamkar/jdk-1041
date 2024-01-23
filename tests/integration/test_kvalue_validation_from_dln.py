@@ -10,7 +10,7 @@ from tests.integration.conftest import ensure_checked_devices
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid1
+@pytest.mark.SKA_mid
 def test_dln_kvalue_validation_result(tango_context):
     dev_factory = DevFactory()
     central_node = DeviceProxy("ska_mid/tm_central/central_node")
