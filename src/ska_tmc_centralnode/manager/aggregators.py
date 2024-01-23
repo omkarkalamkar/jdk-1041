@@ -500,8 +500,13 @@ class DishkValueValidationResultAggregator:
         )
         if not flag:
             self._component_manager.is_dish_vcc_config_set = False
+            # Report dish leaf nodes with error to
             self._component_manager.dish_vcc_validation_status = json.dumps(
-                self.dln_kvalue_validation_results
+                {
+                    key: value
+                    for key, value in self.dln_kvalue_validation_results.items()
+                    if value != "k-value identical"
+                }
             )
         else:
             self._component_manager.is_dish_vcc_config_set = True
