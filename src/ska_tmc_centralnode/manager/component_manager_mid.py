@@ -15,6 +15,7 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
+    DishkValueValidationResultAggregator,
     HealthStateAggregatorMid,
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
@@ -51,6 +52,7 @@ class CNComponentManagerMid(CNComponentManager):
         dish_vcc_uri=None,
         dish_vcc_file_path=None,
         dish_vcc_init_timeout=120,
+        dishKvalueAggregationAllowedPercent=100.0,
         invoke_load_dish_cfg_command_callback=None,
         enable_dish_vcc_init=True,
         *args,
@@ -120,6 +122,12 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_init_timeout = dish_vcc_init_timeout
         self.invoke_load_dish_cfg_command_callback = (
             invoke_load_dish_cfg_command_callback
+        )
+        self.dishKvalueAggregationAllowedPercent = (
+            dishKvalueAggregationAllowedPercent
+        )
+        self.dish_kvalue_validation_aggregator = (
+            DishkValueValidationResultAggregator(self, self.logger)
         )
         self.dish_vcc_validation_status = ""
         self.dish_vcc_validation_attr_lock = threading.Lock()

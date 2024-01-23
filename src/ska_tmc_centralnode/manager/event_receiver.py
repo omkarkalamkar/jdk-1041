@@ -81,6 +81,20 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_dish_mode_event,
                         stateless=True,
                     )
+                if (
+                    isinstance(
+                        self._component_manager.input_parameter,
+                        InputParameterMid,
+                    )
+                    and dev_info.dev_name
+                    in self._component_manager.input_parameter.dish_leaf_node_dev_names
+                ):
+                    proxy.subscribe_event(
+                        "kValueValidationResult",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_dln_kvalue_validation_result,
+                        stateless=True,
+                    )
                 if "subarray_node" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
@@ -237,6 +251,27 @@ class CentralNodeEventReceiver(EventReceiver):
             new_value = event_data.argout
             self._component_manager.update_load_dish_cfg_results(
                 event_data.device.dev_name(), new_value, is_async_result=True
+            )
+
+    def handle_dln_kvalue_validation_result(self, event_data: tango.EventData):
+        """Method to handle kValueValidationResult from dish
+        leaf node.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        if not event_data.errors:
+            new_value = event_data.attr_value.value
+            self._component_manager.dish_kvalue_validation_aggregator.aggregate(
+                event_data.device.dev_name(), new_value
+            )
+        else:
+            errors = event_data.errors
+            for error in errors:
+                error_msg = f"{error.reason},{error.desc}"
+                self._logger.error(error_msg)
+            self._component_manager.update_event_failure(
+                event_data.device.dev_name()
             )
 
     def handle_dish_vcc_k_value_validation_event(

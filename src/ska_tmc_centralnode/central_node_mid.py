@@ -68,6 +68,10 @@ class CentralNodeMid(AbstractCentralNode):
 
     DishVccInitTimeout = device_property(dtype="DevUShort", default_value=120)
 
+    DishKvalueAggregationAllowedPercent = device_property(
+        dtype="DevDouble", default_value=100.0
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -130,7 +134,7 @@ class CentralNodeMid(AbstractCentralNode):
     )
 
     DishVccValidationStatus = attribute(
-        dtype="DevString",
+        dtype=str,
         access=AttrWriteType.READ,
     )
 
@@ -264,6 +268,7 @@ class CentralNodeMid(AbstractCentralNode):
             if self.DishVccFilePath
             else "",
             dish_vcc_init_timeout=self.DishVccInitTimeout,
+            dishKvalueAggregationAllowedPercent=self.DishKvalueAggregationAllowedPercent,
             invoke_load_dish_cfg_command_callback=self.invoke_load_dish_cfg_command_callback,
             enable_dish_vcc_init=self.EnableDishVccInit,
         )

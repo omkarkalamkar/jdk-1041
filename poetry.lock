@@ -488,7 +488,7 @@ python-versions = ">=3.8"
 
 [[package]]
 name = "Mako"
-version = "1.3.0"
+version = "1.3.1"
 description = "A super-fast templating language that borrows the best ideas from the existing templating languages."
 category = "dev"
 optional = false
@@ -1296,32 +1296,34 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.11.5"
+version = "0.11.6"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
-python-versions = ">=3.10,<3.11"
+python-versions = "~3.10"
+develop = false
 
 [package.dependencies]
-black = ">=23.3.0,<24.0.0"
-fire = ">=0.4.0,<0.5.0"
-jsonschema = ">=4.0.1,<5.0.0"
+black = "^23.3.0"
+fire = "^0.4.0"
+jsonschema = "^4.0.1"
 katpoint = "1.0a2"
-marshmallow = ">=3.14.1,<4.0.0"
-mock = ">=4.0.3,<5.0.0"
+marshmallow = "^3.14.1"
+mock = "^4.0.3"
 msgpack = "1.0.7"
 msgpack_numpy = "0.4.8"
-numpy = ">=1.23.0,<2.0.0"
+numpy = "^1.23.0"
 pytango = "9.3.3"
-ska-ser-logging = ">=0.4.1,<0.5.0"
+ska-ser-logging = "^0.4.1"
 ska-tango-base = "0.18.1"
 ska-tango-testing = "0.6.0"
 ska-telmodel = "1.9.0"
 
 [package.source]
-type = "legacy"
-url = "https://artefact.skao.int/repository/pypi-internal/simple"
-reference = 'ska-nexus'
+type = "git"
+url = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git"
+reference = "hm-389-test"
+resolved_reference = "66631251f31888034101ca41bc798ba9459c5aa1"
 
 [[package]]
 name = "snowballstemmer"
@@ -1613,7 +1615,7 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "3ccece60c89830add9ec1b4d123602323aecc97746c6603cac0af1cff4c0ea0b"
+content-hash = "8c57660ef635f6e41ccf8e5a9d1893aaaf8a0681626202c1bcbf8a2edb1b9676"
 
 [metadata.files]
 alabaster = [
@@ -2017,8 +2019,8 @@ lazy-object-proxy = [
     {file = "lazy_object_proxy-1.10.0-pp310.pp311.pp312.pp38.pp39-none-any.whl", hash = "sha256:80fa48bd89c8f2f456fc0765c11c23bf5af827febacd2f523ca5bc1893fcc09d"},
 ]
 Mako = [
-    {file = "Mako-1.3.0-py3-none-any.whl", hash = "sha256:57d4e997349f1a92035aa25c17ace371a4213f2ca42f99bee9a602500cfd54d9"},
-    {file = "Mako-1.3.0.tar.gz", hash = "sha256:e3a9d388fd00e87043edbe8792f45880ac0114e9c4adc69f6e9bfb2c55e3b11b"},
+    {file = "Mako-1.3.1-py3-none-any.whl", hash = "sha256:463f03e04559689adaee25e0967778d6ad41285ed607dc1e7df0dd4e4df81f9e"},
+    {file = "Mako-1.3.1.tar.gz", hash = "sha256:baee30b9c61718e093130298e678abed0dbfa1b411fcc4c1ab4df87cd631a0f2"},
 ]
 MarkupSafe = [
     {file = "MarkupSafe-2.1.4-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:de8153a7aae3835484ac168a9a9bdaa0c5eee4e0bc595503c95d53b942879c84"},
@@ -2625,10 +2627,7 @@ ska-tmc-cdm = [
     {file = "ska_tmc_cdm-7.3.1-py3-none-any.whl", hash = "sha256:6096dfd4d7c0211dad2ac58cfe0c3cc88b3d5448f20405c5cb7864ec44f28757"},
     {file = "ska_tmc_cdm-7.3.1.tar.gz", hash = "sha256:3129cd4ec33b207f80669f521ba80fd221a42041c841f6c2f44eb8225ed8c363"},
 ]
-ska-tmc-common = [
-    {file = "ska_tmc_common-0.11.5-py3-none-any.whl", hash = "sha256:a0121763709e748d18beefa1ad8a481e9d636606b315e49b3b46416bb63bf811"},
-    {file = "ska_tmc_common-0.11.5.tar.gz", hash = "sha256:42484003292e405d52eccfc8f09d78a7723af03b8cc4f2911f9f1defd5ab125c"},
-]
+ska-tmc-common = []
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
     {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
