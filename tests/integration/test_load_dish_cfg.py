@@ -185,27 +185,77 @@ def load_dish_cfg_after_central_node_init(
     central_node = dev_factory.get_device(central_node_name)
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+    # Central Node and Csp Master Leaf Node Device Server
+    central_node_ds = DeviceProxy("dserver/central_node_mid/01")
+    csp_master_ds = DeviceProxy("dserver/mocks/01")
 
     # set memorized attribute to empty
     csp_master_ln_device.memorizedDishVccMap = ""
 
-    # Initialize Central Node, CSP Master Leaf Node, Dish Leaf Node
-    dish_ln_device.init()
+    # Restart Central Node, CSP Master Leaf Node, Dish Leaf Node
+    csp_master_ds.RestartServer()
     assert wait_and_validate_device_attribute_value(
         dish_ln_device, "State", tango.DevState.ON
     )
-    csp_master_ln_device.init()
     assert wait_and_validate_device_attribute_value(
         csp_master_ln_device, "State", tango.DevState.ON
     )
 
-    central_node.init()
+    central_node_ds.RestartServer()
 
     # Validate LoadDishCfg command called after initialization
 
     assert wait_and_validate_device_attribute_value(
         central_node, "isDishVccConfigSet", False
     ), "Timeout while waiting for validating attribute value"
+
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", True
+    ), "Timeout while waiting for validating attribute value"
+
+    assert wait_and_validate_device_attribute_value(
+        csp_master_ln_device, "memorizedDishVccMap", config_str, is_json=True
+    )
+
+
+def central_node_dish_vcc_after_csp_master_dish_ln_restart(
+    tango_context, central_node_name, config_str, change_event_callbacks
+):
+    """Validate When only CSP master leaf node and dish leaf node restart
+    then Central Node update it's dishVccValidationResult properly
+    """
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+    csp_master_ln_device.subscribe_event(
+        "DishVccMapValidationResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["DishVccMapValidationResult"],
+    )
+    # Csp Master Leaf Node and Dish Leaf Node Device Server
+    csp_master_ds = DeviceProxy("dserver/mocks/01")
+
+    # Validate before restart memorizedDishVccMap is set
+    assert json.loads(csp_master_ln_device.memorizedDishVccMap) == json.loads(
+        config_str
+    )
+
+    # Restart CSP Master Leaf Node, Dish Leaf Node
+    csp_master_ds.RestartServer()
+    assert wait_and_validate_device_attribute_value(
+        dish_ln_device, "State", tango.DevState.ON
+    )
+    assert wait_and_validate_device_attribute_value(
+        csp_master_ln_device, "State", tango.DevState.ON
+    )
+
+    # Validate DishVccValidationResult return OK
+    change_event_callbacks.assert_change_event(
+        "DishVccMapValidationResult",
+        str(int(ResultCode.OK)),
+        lookahead=4,
+    )
 
     assert wait_and_validate_device_attribute_value(
         central_node, "isDishVccConfigSet", True
@@ -265,6 +315,26 @@ def test_load_dish_cfg_after_central_node_init(
     json_factory,
 ):
     return load_dish_cfg_after_central_node_init(
+        tango_context,
+        central_node_name,
+        json_factory("command_load_dish_cfg"),
+        change_event_callbacks,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+):
+    return central_node_dish_vcc_after_csp_master_dish_ln_restart(
         tango_context,
         central_node_name,
         json_factory("command_load_dish_cfg"),

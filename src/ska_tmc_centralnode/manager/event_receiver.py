@@ -116,6 +116,12 @@ class CentralNodeEventReceiver(EventReceiver):
                             self.handle_load_dish_cfg_result_callback,
                             stateless=True,
                         )
+                        proxy.subscribe_event(
+                            "DishVccMapValidationResult",
+                            tango.EventType.CHANGE_EVENT,
+                            self.handle_dish_vcc_k_value_validation_event,
+                            stateless=True,
+                        )
 
                 if dev_info.dev_name == MCCS_MLN_DEVICE:
                     proxy.subscribe_event(
@@ -231,6 +237,29 @@ class CentralNodeEventReceiver(EventReceiver):
             new_value = event_data.argout
             self._component_manager.update_load_dish_cfg_results(
                 event_data.device.dev_name(), new_value, is_async_result=True
+            )
+
+    def handle_dish_vcc_k_value_validation_event(
+        self, event_data: tango.EventData
+    ):
+        """Handle DishVccValidationResult change event."""
+        self._logger.info(
+            "Event for DishVccValidationResult attribute: %s", event_data
+        )
+        if event_data.err:
+            errors = event_data.errors
+            for error in errors:
+                error_msg = f"{error.reason},{error.desc}"
+                self._logger.error(error_msg)
+                self._logger.error(str(event_data))
+            self._component_manager.update_event_failure(
+                event_data.device.dev_name()
+            )
+            return
+        if self._component_manager.enable_dish_vcc_init:
+            new_value = event_data.attr_value.value
+            self._component_manager.handle_dish_vcc_validation_result(
+                event_data.device.dev_name(), new_value
             )
 
     def handle_masterln_availability_event(

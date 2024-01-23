@@ -69,3 +69,27 @@ def test_load_dish_cfg_command_invalid_file_name(
         json.dumps(dish_cfg_input), task_callback=task_callback
     )
     assert result_code == TaskStatus.REJECTED
+
+
+def test_dish_vcc_validation_status(
+    tango_context, task_callback, json_factory
+):
+    """Test dish vcc validation result of component manager"""
+    logger.info("%s", tango_context)
+    cm, _ = create_cm()
+    cm.handle_dish_vcc_validation_result(MID_CSP_MLN_DEVICE, ResultCode.OK)
+    assert (
+        cm.dish_vcc_validation_status
+        == "TMC and CSP Master Dish Vcc Version is Same"
+    )
+
+    cm.handle_dish_vcc_validation_result(MID_CSP_MLN_DEVICE, ResultCode.FAILED)
+    assert (
+        cm.dish_vcc_validation_status
+        == "TMC and CSP Master Dish VCC version is Different"
+    )
+
+    cm.handle_dish_vcc_validation_result(
+        MID_CSP_MLN_DEVICE, ResultCode.NOT_ALLOWED
+    )
+    assert cm.dish_vcc_validation_status == "CSP Master device is unavailable"

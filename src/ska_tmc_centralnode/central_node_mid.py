@@ -129,6 +129,11 @@ class CentralNodeMid(AbstractCentralNode):
         access=AttrWriteType.READ,
     )
 
+    DishVccValidationStatus = attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ,
+    )
+
     def update_imaging_callback(self, imaging):
         self.logger.info("imaging %s", imaging)
         self.push_change_event("imaging", imaging)
@@ -153,9 +158,6 @@ class CentralNodeMid(AbstractCentralNode):
             super().do()
 
             self._device.set_change_event("imaging", True, False)
-
-            # Load Default Dish VCC config
-            self._device.initialize_load_dish_cfg()
 
             return (ResultCode.OK, "")
 
@@ -182,6 +184,10 @@ class CentralNodeMid(AbstractCentralNode):
     def read_isDishVccConfigSet(self):
         """Return the isDishVccConfigSet attribute."""
         return self.component_manager.is_dish_vcc_config_set
+
+    def read_DishVccValidationStatus(self):
+        """Return the DishVccValidationStatus"""
+        return self.component_manager.dish_vcc_validation_status
 
     def write_dishDevNames(self, value):
         """Set the dishdevnames attribute."""
@@ -258,6 +264,7 @@ class CentralNodeMid(AbstractCentralNode):
             if self.DishVccFilePath
             else "",
             dish_vcc_init_timeout=self.DishVccInitTimeout,
+            invoke_load_dish_cfg_command_callback=self.invoke_load_dish_cfg_command_callback,
             enable_dish_vcc_init=self.EnableDishVccInit,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
@@ -305,32 +312,15 @@ class CentralNodeMid(AbstractCentralNode):
             ),
         )
 
-    def initialize_load_dish_cfg(self):
-        """This method called during Central Node Initialization.
-        It submit the task in thread pool executor and the task
-        will start loading dish vcc config on csp master.
+    def invoke_load_dish_cfg_command_callback(self):
+        """This callback is called when dishVccValidationResult is Unknown
+        and Central Node needs to load dish cfg on csp
         """
-
-        def start_load_dish_cfg_command(**kwargs):
-            """This fucntion check if CSP Master and Dish leaf Node device
-            is ready and once it is ready call LoadDishCfg command
-            """
-            self.logger.info("Loading Dish Cfg")
-            if self.component_manager.is_csp_dish_ready():
-                self.logger.info("Kwargs are %s", kwargs)
-                handler = self.get_command_object("LoadDishCfg")
-                dish_cfg_json = json.dumps(
-                    self.component_manager.get_default_dish_vcc_config_params()
-                )
-                handler(dish_cfg_json)
-            else:
-                self.logger.info("Timeout while waiting for devices to up")
-
-        # This is temporary solution to disable loading dish vcc during initialization
-        # once this functionality is verfied with real csp and real dish
-        # then this property will be removed.
-        if self.component_manager.enable_dish_vcc_init:
-            self.component_manager.submit_task(start_load_dish_cfg_command)
+        handler = self.get_command_object("LoadDishCfg")
+        dish_cfg_json = json.dumps(
+            self.component_manager.get_default_dish_vcc_config_params()
+        )
+        handler(dish_cfg_json)
 
     def is_LoadDishCfg_allowed(self):
         """
