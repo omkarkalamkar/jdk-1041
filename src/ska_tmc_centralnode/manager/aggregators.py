@@ -511,7 +511,7 @@ class DishkValueValidationResultAggregator:
         else:
             self._component_manager.is_dish_vcc_config_set = True
             self._component_manager.dish_vcc_validation_status = (
-                "TMC and CSP Master Dish Vcc Version is Same"
+                '{"dish": "ALL DISH OK"}'
             )
 
     def aggregate(

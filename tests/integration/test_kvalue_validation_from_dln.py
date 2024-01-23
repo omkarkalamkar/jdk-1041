@@ -28,10 +28,11 @@ def test_dln_kvalue_validation_result(tango_context):
 
     # Match the below values on dishVccValidationStatus
     dict_to_compare = {
+        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish Vcc Version is Same",
         "d0001": "k-value not identical",
     }
     assert wait_and_validate_device_attribute_value(
-        central_node, "dishVccValidationStatus", json.dumps(dict_to_compare)
+        central_node, "DishVccValidationStatus", json.dumps(dict_to_compare)
     ), "Timeout while waiting for validating attribute value"
 
     # Verify if all dish leaf node gives k-value validation result as ResultCode.Ok
@@ -41,8 +42,13 @@ def test_dln_kvalue_validation_result(tango_context):
         central_node, "isdishvccconfigset", True
     ), "Timeout while waiting for validating attribute value"
 
-    result_string_to_match = "TMC and CSP Master Dish Vcc Version is Same"
+    result_string_to_match = {
+        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish Vcc Version is Same",
+        "dish": "ALL DISH OK",
+    }
 
     assert wait_and_validate_device_attribute_value(
-        central_node, "dishVccValidationStatus", result_string_to_match
+        central_node,
+        "DishVccValidationStatus",
+        json.dumps(result_string_to_match),
     ), "Timeout while waiting for validating attribute value"
