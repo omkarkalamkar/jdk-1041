@@ -517,9 +517,9 @@ class DishkValueValidationResultAggregator:
     def aggregate(
         self, dish_leaf_node_fqdn, kvalue_validation_result: str
     ) -> None:
-        """Aggregate the kValueValidation result received from
-        Dish leaf node and provide the result to Central Node to
-        decide further.
+        """Aggregate the k-value validation result received from
+        Dish leaf nodes and provide the aggregated k-value report result
+        to Central Node.
         :param dish_leaf_node_fqdn: dish leaf node fqdn
         :type dish_leaf_node_fqdn: str
         :param kvalue_validation_result: kvalue validation result code

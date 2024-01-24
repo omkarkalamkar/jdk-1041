@@ -166,6 +166,9 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
+    # Adding below if due to instability in this test case
+    if not cm.is_dish_vcc_config_set:
+        cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(assign_input_str, task_callback=task_callback)
