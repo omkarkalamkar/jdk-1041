@@ -130,14 +130,13 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
 def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):
-    logger.info("%s", tango_context)
-    cm, _ = create_cm()
-
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
+    cm, _ = create_cm()
     check_if_subarray_is_available(cm)
-
+    # Test case is not getting is_dish_vcc_config_set true
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
@@ -154,21 +153,12 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     assert res_code == TaskStatus.REJECTED
 
 
+@pytest.mark.test
 def test_assign_resources_command_with_ok(tango_context, task_callback):
-    logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
     cm, _ = create_cm()
-    dev_factory = DevFactory()
-    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-    subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
-    # Adding below if due to instability in this test case
-    if not cm.is_dish_vcc_config_set:
-        cm.is_dish_vcc_config_set = True
+    # Test case is not getting is_dish_vcc_config_set true
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(assign_input_str, task_callback=task_callback)

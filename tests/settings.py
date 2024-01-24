@@ -126,8 +126,9 @@ def create_cm(
             logger=logger,
             _event_receiver=p_event_receiver,
         )
-        cm.is_dish_vcc_config_set = True
         DEVICE_LIST = DEVICE_LIST_MID
+        if not cm.is_dish_vcc_config_set:
+            cm.is_dish_vcc_config_set = True
     else:
         cm = CNComponentManagerLow(
             op_state_model,
