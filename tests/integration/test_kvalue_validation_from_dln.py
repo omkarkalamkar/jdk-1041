@@ -16,12 +16,11 @@ def test_dln_kvalue_validation_result(tango_context):
     central_node = DeviceProxy("ska_mid/tm_central/central_node")
     ensure_checked_devices(central_node)
     dish_leaf_node_01 = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
-
+    # invoke the dish leaf node kValueValidationResult as FAILED
     dish_leaf_node_01.SetDirectkValueValidationResult(
         str(int(ResultCode.FAILED))
     )
 
-    # invoke the dish leaf node kValueValidationResult as FAILED
     assert wait_and_validate_device_attribute_value(
         central_node, "isdishvccconfigset", False
     ), "Timeout while waiting for validating attribute value"
