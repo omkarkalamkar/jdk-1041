@@ -1,5 +1,6 @@
 import json
 import time
+
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -136,8 +137,8 @@ def load_dish_cfg_when_csp_is_defective(
     )
 
     csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
-    # A temporary fix to fix the test case, the error propagation is
-    # taking time.
+    # A temporary solution to fix the test case issue.
+    # The error propagation is taking time to propagate the error.
     time.sleep(5)
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
