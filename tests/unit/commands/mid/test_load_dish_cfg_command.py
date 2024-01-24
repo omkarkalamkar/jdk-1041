@@ -17,6 +17,7 @@ def test_load_dish_cfg_command(tango_context, task_callback, json_factory):
     )
     logger.info("%s", tango_context)
     cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
     cm.load_dish_cfg(dish_cfg_input_str, task_callback=task_callback)
@@ -42,6 +43,7 @@ def test_load_dish_cfg_command_invalid_json(
     """Test LoadDishCfg command rejected when invalid json provided"""
     logger.info("%s", tango_context)
     cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
 
@@ -60,6 +62,7 @@ def test_load_dish_cfg_command_invalid_file_name(
     """Test LoadDishCfg command rejected when invalid json provided"""
     logger.info("%s", tango_context)
     cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg_invalid")
 
