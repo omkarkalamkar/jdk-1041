@@ -258,6 +258,10 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
     )
 
     assert wait_and_validate_device_attribute_value(
+        dish_ln_device, "kValueValidationResult", str(int(ResultCode.OK))
+    ), "Timeout while waiting for validating attribute value"
+
+    assert wait_and_validate_device_attribute_value(
         central_node, "isDishVccConfigSet", True
     ), "Timeout while waiting for validating attribute value"
 
