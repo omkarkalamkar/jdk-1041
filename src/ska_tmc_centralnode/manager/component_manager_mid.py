@@ -6,6 +6,7 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+import json
 import threading
 import time
 
@@ -15,6 +16,7 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
+    DishkValueValidationResultAggregator,
     HealthStateAggregatorMid,
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
@@ -23,6 +25,7 @@ from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.utils.constants import (
     DISH_VCC_CONFIG_INTERFACE_VERSION,
     DISH_VCC_VALIDATION_RESULT_STATUS,
+    MID_CSP_MLN_DEVICE,
 )
 
 
@@ -51,6 +54,7 @@ class CNComponentManagerMid(CNComponentManager):
         dish_vcc_uri=None,
         dish_vcc_file_path=None,
         dish_vcc_init_timeout=120,
+        dishKvalueAggregationAllowedPercent=100.0,
         invoke_load_dish_cfg_command_callback=None,
         enable_dish_vcc_init=True,
         *args,
@@ -121,7 +125,13 @@ class CNComponentManagerMid(CNComponentManager):
         self.invoke_load_dish_cfg_command_callback = (
             invoke_load_dish_cfg_command_callback
         )
-        self.dish_vcc_validation_status = ""
+        self.dishKvalueAggregationAllowedPercent = (
+            dishKvalueAggregationAllowedPercent
+        )
+        self.dish_kvalue_validation_aggregator = (
+            DishkValueValidationResultAggregator(self, self.logger)
+        )
+        self._dish_vcc_validation_status = "{}"
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.enable_dish_vcc_init = enable_dish_vcc_init
 
@@ -138,6 +148,30 @@ class CNComponentManagerMid(CNComponentManager):
     @is_dish_vcc_config_set.setter
     def is_dish_vcc_config_set(self, value):
         self._is_dish_vcc_config_set = value
+
+    @property
+    def dish_vcc_validation_status(self):
+        return self._dish_vcc_validation_status
+
+    @dish_vcc_validation_status.setter
+    def dish_vcc_validation_status(self, value):
+        """ """
+        existing_value = json.loads(self._dish_vcc_validation_status)
+        new_value = json.loads(value)
+        if "dish" in new_value:
+            # Get Only CSP Value
+            if MID_CSP_MLN_DEVICE in existing_value:
+                existing_value = {
+                    MID_CSP_MLN_DEVICE: existing_value[MID_CSP_MLN_DEVICE]
+                }
+            else:
+                existing_value = new_value
+        elif MID_CSP_MLN_DEVICE not in new_value:
+            # Remove dish value from existing value
+            existing_value.pop("dish", None)
+        # Append both values
+        existing_value.update(new_value)
+        self._dish_vcc_validation_status = json.dumps(existing_value)
 
     def is_csp_dish_ready(self) -> bool:
         """This method wait for csp master leaf node and
@@ -453,8 +487,10 @@ class CNComponentManagerMid(CNComponentManager):
                         self.update_dish_vcc_flag(True)
                     else:
                         self.update_dish_vcc_flag(False)
-                    self.dish_vcc_validation_status = (
-                        DISH_VCC_VALIDATION_RESULT_STATUS[
-                            csp_validation_result
-                        ]
+                    self.dish_vcc_validation_status = json.dumps(
+                        {
+                            MID_CSP_MLN_DEVICE: DISH_VCC_VALIDATION_RESULT_STATUS[
+                                csp_validation_result
+                            ]
+                        }
                     )

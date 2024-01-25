@@ -35,6 +35,7 @@ def test_assign_resources_command_completed(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_dish_vcc_config_set = True
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
 
@@ -68,6 +69,7 @@ def test_assign_resources_command_with_mkt_ids_completed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_dish_vcc_config_set = True
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
     assign_input_str = get_assign_input_str()
@@ -101,6 +103,7 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     defect = {
         "enabled": True,
@@ -138,6 +141,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
@@ -155,17 +159,12 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
 
 
 def test_assign_resources_command_with_ok(tango_context, task_callback):
-    logger.info("%s", tango_context)
-    cm, start_time = create_cm()
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-    )
     cm, _ = create_cm()
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(assign_input_str, task_callback=task_callback)
@@ -187,6 +186,7 @@ def test_assign_resources_command_with_mkt_ids_ok(
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -248,6 +248,7 @@ def test_telescope_assign_resources_command_empty_input_json(
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     cm.assign_resources("", task_callback=task_callback)
     (res_code, _) = cm.assign_resources(" ")
@@ -263,6 +264,7 @@ def test_assign_resources_fail_check_allowed(tango_context):
     )
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
+        cm.is_dish_vcc_config_set = True
         cm.is_command_allowed("AssignResources")
 
 
@@ -274,6 +276,7 @@ def test_assign_resources_command_timeout(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_dish_vcc_config_set = True
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
 
@@ -318,6 +321,7 @@ def test_assign_resources_command_already_assigned(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
 
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     adapter_factory = HelperAdapterFactory()
 

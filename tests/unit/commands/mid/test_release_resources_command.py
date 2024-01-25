@@ -32,6 +32,7 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
 
 def test_mid_release_resources_command_with_ok(tango_context, task_callback):
     cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("ReleaseResources")
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -79,6 +80,7 @@ def test_mid_release_resources_command_empty_input_json(
     tango_context, task_callback
 ):
     cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("ReleaseResources")
     cm.release_resources("", task_callback=task_callback)
     (res_code, _) = cm.release_resources("")
@@ -93,6 +95,7 @@ def test_telescope_release_resources_fail_check_allowed(tango_context):
     )
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
+        cm.is_dish_vcc_config_set = True
         cm.is_command_allowed("ReleaseResources")
 
 
@@ -121,6 +124,7 @@ def test_release_resources_command_timeout(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_dish_vcc_config_set = True
     result = cm.is_command_allowed("ReleaseResources")
     logger.info(f"Command allowed result is: {result}")
 
@@ -163,6 +167,7 @@ def test_release_resources_exception_on_sn(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("ReleaseResources")
     defect = {
         "enabled": True,

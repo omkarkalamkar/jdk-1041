@@ -21,6 +21,15 @@ DISH_VCC_VALIDATION_RESULT_STATUS = {
     ResultCode.OK: "TMC and CSP Master Dish Vcc Version is Same",
 }
 
+DISH_KVALUE_VALIDATION_RESULT_STATUS = {
+    ResultCode.FAILED: "k-value not identical",
+    ResultCode.NOT_ALLOWED: "Dish Unavailable",
+    ResultCode.OK: "k-value identical",
+    ResultCode.UNKNOWN: "k-value not set",
+    ResultCode.STARTED: "Dish leaf node initializing",
+}
+
+
 DISH_VCC_CONFIG_INTERFACE_VERSION = (
     "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0"
 )

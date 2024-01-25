@@ -56,6 +56,7 @@ def test_telescope_standby_command(tango_context):
         "sdp_master_leaf_node"
     ] is True
 
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("TelescopeStandby")
     cm.telescope_standby(task_callback=task_callback)
     assert task_callback.status == TaskStatus.QUEUED
@@ -83,6 +84,7 @@ def test_telescope_standby_command_task_completed(tango_context):
         "sdp_master_leaf_node"
     ] is True
 
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("TelescopeStandby")
     my_adapter_factory = HelperAdapterFactory()
 
@@ -119,6 +121,7 @@ def test_telescope_standby_command_fail_subarray(tango_context):
         "sdp_master_leaf_node"
     ] is True
 
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("TelescopeStandby")
     my_adapter_factory = HelperAdapterFactory()
 
@@ -162,6 +165,7 @@ def test_telescope_standby_command_fail_dish(tango_context):
         "sdp_master_leaf_node"
     ] is True
 
+    cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("TelescopeStandby")
     my_adapter_factory = HelperAdapterFactory()
 
@@ -195,4 +199,5 @@ def test_telescope_standby_fail_check_allowed(tango_context):
     cm.op_state_model._op_state = DevState.FAULT
 
     with pytest.raises(CommandNotAllowed):
+        cm.is_dish_vcc_config_set = True
         cm.is_command_allowed("TelescopeStandby")

@@ -17,6 +17,7 @@ from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
+    check_lrcr_events,
     event_remover,
     logger,
 )
@@ -136,7 +137,6 @@ def load_dish_cfg_when_csp_is_defective(
     )
 
     csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
-
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
         f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
@@ -151,10 +151,10 @@ def load_dish_cfg_when_csp_is_defective(
         "Exception occurred, command failed."
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], EXPECTED_FAILED_MESSAGE),
-        lookahead=8,
+    assert check_lrcr_events(
+        change_event_callback=change_event_callbacks,
+        command_name="LoadDishCfg",
+        result_to_check=EXPECTED_FAILED_MESSAGE,
     )
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
@@ -256,6 +256,10 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
         str(int(ResultCode.OK)),
         lookahead=4,
     )
+
+    assert wait_and_validate_device_attribute_value(
+        dish_ln_device, "kValueValidationResult", str(int(ResultCode.OK))
+    ), "Timeout while waiting for validating attribute value"
 
     assert wait_and_validate_device_attribute_value(
         central_node, "isDishVccConfigSet", True

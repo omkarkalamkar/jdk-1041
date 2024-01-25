@@ -27,6 +27,7 @@ from ska_tmc_centralnode.model.input import (
 logger = logging.getLogger(__name__)
 SLEEP_TIME = 0.5
 TIMEOUT = 25
+KVALUE = 9
 DISH_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d0"
 NUM_DISHES = 10
 LOW_CENTRAL_NODE = "ska_low/tm_central/central_node"
@@ -126,8 +127,8 @@ def create_cm(
             logger=logger,
             _event_receiver=p_event_receiver,
         )
-        cm.is_dish_vcc_config_set = True
         DEVICE_LIST = DEVICE_LIST_MID
+        cm.is_dish_vcc_config_set = True
     else:
         cm = CNComponentManagerLow(
             op_state_model,
@@ -305,8 +306,8 @@ def event_remover(group_callback, attributes: List[str]) -> None:
 def check_lrcr_events(
     change_event_callback: MockTangoEventCallbackGroup,
     command_name: str,
-    result_code: ResultCode = ResultCode.OK,
-    retries: int = 10,
+    result_to_check: ResultCode = ResultCode.OK,
+    retries: int = 20,
 ):
     """Used to assert command name and result code in
        longRunningCommandResult event callbacks.
@@ -319,17 +320,20 @@ def check_lrcr_events(
         retries (int):number of events to check. Defaults to 10.
     """
     COUNT = 0
-    while COUNT <= retries:
+    flag = False
+    while not flag and COUNT <= retries:
         assertion_data = change_event_callback.assert_change_event(
             "longRunningCommandResult",
             Anything,
-            lookahead=1,
+            lookahead=10,
         )
         unique_id, result = assertion_data["attribute_value"]
         if unique_id.endswith(command_name):
-            if result == str(result_code.value):
+            if result == str(result_to_check):
                 logger.debug("%s_UID: %s", command_name, unique_id)
-                break
+                flag = True
         COUNT = COUNT + 1
-        if COUNT >= retries:
-            pytest.fail("Assertion Failed")
+        time.sleep(0.5)
+    if flag:
+        return True
+    return False

@@ -1,10 +1,15 @@
+import json
+
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.aggregators import Aggregator
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
-from ska_tmc_centralnode.utils.constants import MCCS_MLN_SUFIX
+from ska_tmc_centralnode.utils.constants import (
+    DISH_KVALUE_VALIDATION_RESULT_STATUS,
+    MCCS_MLN_SUFIX,
+)
 
 
 class TelescopeStateAggregatorMid(Aggregator):
@@ -449,3 +454,92 @@ class LoadDishCfgCommandResultAggregator:
             "Returning result code %s and message %s", result_code, message
         )
         return result_code, message
+
+
+class DishkValueValidationResultAggregator:
+    """This Class Aggregate k-value validation results
+    received from Dish Leaf Nodes.
+    """
+
+    def __init__(self, cm, logger) -> None:
+        """
+        :param cm: Central Node Component Manager
+        :param type: component manager
+        :param logger: Logger
+        """
+        self._component_manager = cm
+        self.logger = logger
+        self.dln_kvalue_validation_results = {}
+
+    def is_events_received_percentage_valid(self) -> bool:
+        """Verify the percent of kvalue validation result event received
+        as specified by DishKvalueAggregationAllowedPercent property.
+        :rtype: bool
+        """
+        if self.dln_kvalue_validation_results:
+            total_events = len(self.dln_kvalue_validation_results.values())
+            percent_event_received = (
+                total_events
+                / len(
+                    self._component_manager.input_parameter.dish_leaf_node_dev_names
+                )
+            ) * 100
+            if (
+                percent_event_received
+                >= self._component_manager.dishKvalueAggregationAllowedPercent
+            ):
+                return True
+        return False
+
+    def update_central_node_with_result(self) -> None:
+        """This method updates the DishVccValidationStatus of Central Node.
+        :rtype: None
+        """
+        flag = set(self.dln_kvalue_validation_results.values()) == set(
+            ["k-value identical"]
+        )
+        if not flag:
+            self._component_manager.is_dish_vcc_config_set = False
+            # Report dish leaf nodes with error.
+            self._component_manager.dish_vcc_validation_status = json.dumps(
+                {
+                    key: value
+                    for key, value in self.dln_kvalue_validation_results.items()
+                    if value != "k-value identical"
+                }
+            )
+        else:
+            self._component_manager.is_dish_vcc_config_set = True
+            self._component_manager.dish_vcc_validation_status = (
+                '{"dish": "ALL DISH OK"}'
+            )
+
+    def aggregate(
+        self, dish_leaf_node_fqdn, kvalue_validation_result: str
+    ) -> None:
+        """Aggregate the k-value validation result received from
+        Dish leaf nodes and provide the aggregated k-value report result
+        to Central Node.
+        :param dish_leaf_node_fqdn: dish leaf node fqdn
+        :type dish_leaf_node_fqdn: str
+        :param kvalue_validation_result: kvalue validation result code
+        :type kvalue_validation_result: str
+        :return: : None
+        :rtype: None
+        """
+        with self._component_manager.dish_vcc_validation_attr_lock:
+            dish_leaf_node_name = dish_leaf_node_fqdn.split("/")[-1]
+            dish_kvalue_validation_result = ResultCode(
+                int(kvalue_validation_result)
+            )
+            self.dln_kvalue_validation_results[
+                dish_leaf_node_name
+            ] = DISH_KVALUE_VALIDATION_RESULT_STATUS[
+                dish_kvalue_validation_result
+            ]
+            self.logger.info(
+                "kvaluvalidation dict: %s", self.dln_kvalue_validation_results
+            )
+            # Update the Central Node result attribute.
+            if self.is_events_received_percentage_valid():
+                self.update_central_node_with_result()
