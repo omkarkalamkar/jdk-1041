@@ -18,6 +18,7 @@ from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
+    check_lrcr_events,
     event_remover,
     logger,
 )
@@ -154,10 +155,10 @@ def load_dish_cfg_when_csp_is_defective(
         "Exception occurred, command failed."
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], EXPECTED_FAILED_MESSAGE),
-        lookahead=8,
+    assert check_lrcr_events(
+        change_event_callback=change_event_callbacks,
+        command_name="LoadDishCfg",
+        result_to_check=EXPECTED_FAILED_MESSAGE,
     )
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
