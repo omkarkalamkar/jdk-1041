@@ -1,5 +1,4 @@
 import json
-import time
 
 import pytest
 import tango
@@ -138,9 +137,6 @@ def load_dish_cfg_when_csp_is_defective(
     )
 
     csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
-    # A temporary solution to fix the test case issue.
-    # The error propagation is taking time to propagate the error.
-    time.sleep(5)
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
         f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
