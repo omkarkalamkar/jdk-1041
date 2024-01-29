@@ -7,6 +7,7 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import TimeoutCallback
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.tmc_command import TMCCommand
+from tango import ConnectionFailed, DevFailed
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 
@@ -457,6 +458,83 @@ class LoadDishCfgCommand(CentralNodeCommand):
                     )
                     error_dev_names.append(dev_name)
 
+        if num_working == 0:
+            return (
+                ResultCode.FAILED,
+                f"Error in creating dish adapters {'.'.join(error_dev_names)}",
+            )
+
+        return (ResultCode.OK, "")
+
+    def get_or_create_adapter_with_retry(self, dev_name, adapter_type):
+        """Get Adapter"""
+        timeout = 15
+        elapsed_time = 0
+        start_time = time.time()
+
+        adapter = None
+
+        while adapter is None and elapsed_time <= timeout:
+            try:
+                adapter = self._adapter_factory.get_or_create_adapter(
+                    dev_name,
+                    adapter_type,
+                )
+                self.logger.debug(
+                    f"Adapter is created for  {dev_name}: {adapter}"
+                )
+                return adapter, ""
+            except ConnectionFailed as cf:
+                elapsed_time = time.time() - start_time
+                if elapsed_time > timeout:
+                    message = (
+                        f"Error in creating adapter for " f"{dev_name}: {cf}"
+                    )
+                    return None, message
+            except DevFailed as df:
+                elapsed_time = time.time() - start_time
+                if elapsed_time > timeout:
+                    message = (
+                        f"Error in creating adapter for " f"{dev_name}: {df}"
+                    )
+                    return None, message
+            except Exception as e:
+                message = f"Error in creating adapter for " f"{dev_name}: {e}"
+                return None, message
+
+    def init_adapters_with_retry(self):
+        """Create Adapter for CSP Master Leaf Node and Dish leaf node with retry"""
+        self.csp_mln_adapter = None
+        self.dish_adapters = []
+        # Create Adapter for Csp Master Leaf Node
+        adapter, message = self.get_or_create_adapter_with_retry(
+            self.component_manager.input_parameter.csp_mln_dev_name,
+            AdapterType.CSP_MASTER_LEAF_NODE,
+        )
+        if message:
+            return ResultCode.FAILED, message
+        else:
+            self.csp_mln_adapter = adapter
+
+        # create adapter for all dish
+        error_dev_names = []
+        num_working = 0
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
+            if not devInfo.unresponsive:
+                adapter, message = self.get_or_create_adapter_with_retry(
+                    dev_name, AdapterType.DISH
+                )
+                if message:
+                    error_dev_names.append(dev_name)
+                else:
+                    self.dish_adapters.append(adapter)
+                    num_working += 1
+                    self.logger.debug(
+                        f"Adapter is created for DishLeafNode {dev_name}"
+                    )
         if num_working == 0:
             return (
                 ResultCode.FAILED,
