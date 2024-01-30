@@ -1,5 +1,3 @@
-import json
-
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.aggregators import Aggregator
@@ -501,18 +499,13 @@ class DishkValueValidationResultAggregator:
         if not flag:
             self._component_manager.is_dish_vcc_config_set = False
             # Report dish leaf nodes with error.
-            self._component_manager.dish_vcc_validation_status = json.dumps(
-                {
-                    key: value
-                    for key, value in self.dln_kvalue_validation_results.items()
-                    if value != "k-value identical"
-                }
+            self._component_manager.dish_vcc_validation_status = (
+                self.dln_kvalue_validation_results
             )
         else:
-            self._component_manager.is_dish_vcc_config_set = True
-            self._component_manager.dish_vcc_validation_status = (
-                '{"dish": "ALL DISH OK"}'
-            )
+            self._component_manager.dish_vcc_validation_status = {
+                "dish": "ALL DISH OK"
+            }
 
     def aggregate(
         self, dish_leaf_node_fqdn, kvalue_validation_result: str
@@ -538,7 +531,8 @@ class DishkValueValidationResultAggregator:
                 dish_kvalue_validation_result
             ]
             self.logger.info(
-                "kvaluvalidation dict: %s", self.dln_kvalue_validation_results
+                "kValueValidationResult dictionary: %s",
+                self.dln_kvalue_validation_results,
             )
             # Update the Central Node result attribute.
             if self.is_events_received_percentage_valid():
