@@ -1,4 +1,7 @@
+from concurrent import futures
+
 import tango
+from ska_tmc_common.device_info import DeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
 
 from ska_tmc_centralnode.model.input import InputParameterMid
@@ -41,6 +44,32 @@ class CentralNodeEventReceiver(EventReceiver):
             "state": self.handle_state_event,
             "healthState": self.handle_health_state_event,
         }
+        self.device_subscribed = {}
+
+    def submit_task(
+        self, executor: futures.ThreadPoolExecutor, device_info: DeviceInfo
+    ) -> None:
+        """Submits the task to the executor for the given device info object.
+
+        :param executor: Threadpoolexecutor object
+
+        :param device_info: DeviceInfo object for the device on which events
+            are to be subscribed.
+        :type device_info: DeviceInfo class object.
+
+        :rtype: None
+        """
+        if device_info.dev_name not in self.device_subscribed:
+            self._logger.info(
+                "Subscribed events device_info.dev_name %s and %s",
+                device_info.dev_name,
+                self.device_subscribed,
+            )
+            executor.submit(
+                self.subscribe_events,
+                dev_info=device_info,
+                attribute_dictionary=(self.attribute_dictionary),
+            )
 
     def subscribe_events(self, dev_info, attribute_dictionary=None):
         super().subscribe_events(dev_info, self.attribute_dictionary)
@@ -149,6 +178,10 @@ class CentralNodeEventReceiver(EventReceiver):
                 self._logger.error(
                     "Event not working for device %s: %s", proxy.dev_name, e
                 )
+            else:
+                # Add device info in subscribed device
+                self._logger.info("Subscribing device %s", dev_info.dev_name)
+                self.device_subscribed[dev_info.dev_name] = True
 
     def handle_assigned_resource_event(self, evt):
         if evt.err:
@@ -260,6 +293,9 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
+        self._logger.info(
+            "Event for kValueValidationResult attribute: %s", event_data
+        )
         if not event_data.errors:
             new_value = event_data.attr_value.value
             self._component_manager.dish_kvalue_validation_aggregator.aggregate(

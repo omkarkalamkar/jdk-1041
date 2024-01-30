@@ -150,7 +150,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         :param dish_cfg_params: dishid vcc map params
         """
 
-        result_code, message = self.init_adapters_with_retry()
+        result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 

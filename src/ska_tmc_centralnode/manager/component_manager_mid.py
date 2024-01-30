@@ -11,6 +11,7 @@ import threading
 import time
 
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
@@ -472,6 +473,28 @@ class CNComponentManagerMid(CNComponentManager):
             "tm_data_filepath": self.dish_vcc_file_path,
         }
 
+    def check_if_csp_all_dish_ready(self):
+        """Check and validate all dish and csp master is ready"""
+        count = 0
+        while count <= self.dish_vcc_init_timeout:
+            try:
+                num_of_values = []
+                for dish_name in self.input_parameter.dish_leaf_node_dev_names:
+                    adapter = self.adapter_factory.get_or_create_adapter(
+                        dish_name, adapter_type=AdapterType.DISH
+                    )
+                    num_of_values.append(adapter._proxy.kValueValidationResult)
+                if len(num_of_values) == len(
+                    self.input_parameter.dish_leaf_node_dev_names
+                ):
+                    self.logger.info("All Dish Available")
+                    return True
+            except Exception as e:
+                self.logger.exception("Error %s", e)
+            count += 1
+            time.sleep(1)
+        return False
+
     def handle_dish_vcc_validation_result(
         self, dev_name: str, result: ResultCode
     ) -> None:
@@ -502,11 +525,18 @@ class CNComponentManagerMid(CNComponentManager):
                 self.logger.info(
                     "Csp Validation Result is %s", csp_validation_result
                 )
-                if csp_validation_result == ResultCode.UNKNOWN:
+                if (
+                    csp_validation_result == ResultCode.UNKNOWN
+                    and self.command_in_progress != "LoadDishCfg"
+                ):
                     """Unknown Result code sent when no dish vcc set
                     so invoke LoadDishCfg
                     """
-                    self.invoke_load_dish_cfg_command_callback()
+                    self.command_in_progress = "LoadDishCfg"
+                    if self.check_if_csp_all_dish_ready():
+                        self.invoke_load_dish_cfg_command_callback()
+                    else:
+                        self.command_in_progress = ""
                 elif (
                     csp_validation_result
                     in DISH_VCC_VALIDATION_RESULT_STATUS.keys()
