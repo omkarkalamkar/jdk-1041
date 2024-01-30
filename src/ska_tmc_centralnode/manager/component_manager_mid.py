@@ -154,24 +154,52 @@ class CNComponentManagerMid(CNComponentManager):
         return self._dish_vcc_validation_status
 
     @dish_vcc_validation_status.setter
-    def dish_vcc_validation_status(self, value):
+    def dish_vcc_validation_status(self, temp_dict):
         """ """
+        csp_value = ""
+        new_value = temp_dict.copy()
         existing_value = json.loads(self._dish_vcc_validation_status)
-        new_value = json.loads(value)
+        # Extract existing CSPMLN result
+        if MID_CSP_MLN_DEVICE in existing_value:
+            csp_value = {
+                MID_CSP_MLN_DEVICE: existing_value[MID_CSP_MLN_DEVICE]
+            }
+
+        # If all Dish are set, remove all other instances
         if "dish" in new_value:
-            # Get Only CSP Value
-            if MID_CSP_MLN_DEVICE in existing_value:
-                existing_value = {
-                    MID_CSP_MLN_DEVICE: existing_value[MID_CSP_MLN_DEVICE]
-                }
-            else:
+            # Overwrite the results
+            existing_value = new_value
+            self.is_dish_vcc_config_set = True
+            if csp_value:
+                if (
+                    csp_value[MID_CSP_MLN_DEVICE]
+                    != DISH_VCC_VALIDATION_RESULT_STATUS[ResultCode.OK]
+                ):
+                    self.is_dish_vcc_config_set = False
+
+                existing_value.update(csp_value)
+        else:
+            # If the event from dish only
+            if MID_CSP_MLN_DEVICE not in new_value:
+                # Remove dish value from existing value
+                existing_value.pop("dish", None)
+                # Overwrite the results
                 existing_value = new_value
-        elif MID_CSP_MLN_DEVICE not in new_value:
-            # Remove dish value from existing value
-            existing_value.pop("dish", None)
-        # Append both values
-        existing_value.update(new_value)
-        self._dish_vcc_validation_status = json.dumps(existing_value)
+                if csp_value:
+                    existing_value.update(csp_value)
+            else:
+                # If the event from CSPMLN only
+                existing_value.update(new_value)
+        self._dish_vcc_validation_status = json.dumps(
+            {
+                key: value
+                for key, value in existing_value.items()
+                if value != "k-value identical"
+            }
+        )
+        # empty the dictionaries
+        existing_value = {}
+        new_value = {}
 
     def is_csp_dish_ready(self) -> bool:
         """This method wait for csp master leaf node and
@@ -487,10 +515,8 @@ class CNComponentManagerMid(CNComponentManager):
                         self.update_dish_vcc_flag(True)
                     else:
                         self.update_dish_vcc_flag(False)
-                    self.dish_vcc_validation_status = json.dumps(
-                        {
-                            MID_CSP_MLN_DEVICE: DISH_VCC_VALIDATION_RESULT_STATUS[
-                                csp_validation_result
-                            ]
-                        }
-                    )
+                    self.dish_vcc_validation_status = {
+                        MID_CSP_MLN_DEVICE: DISH_VCC_VALIDATION_RESULT_STATUS[
+                            csp_validation_result
+                        ]
+                    }
