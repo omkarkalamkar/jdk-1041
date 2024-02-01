@@ -11,6 +11,7 @@ import threading
 import time
 
 from ska_tango_base.commands import ResultCode
+from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
@@ -477,27 +478,24 @@ class CNComponentManagerMid(CNComponentManager):
         count = 0
         while count <= self.dish_vcc_init_timeout:
             try:
-                # num_of_values = []
-                # for dish_name in self.input_parameter.dish_leaf_node_dev_names:
-                #     adapter = self.adapter_factory.get_or_create_adapter(
-                #         dish_name, adapter_type=AdapterType.DISH
-                #     )
-                #     num_of_values.append(adapter._proxy.kValueValidationResult)
-                k_value_validation_results = (
-                    self.dish_kvalue_validation_aggregator.dln_kvalue_validation_results
-                )
-                dish_list_without_init_msg = [
-                    dish_name
-                    for dish_name, value in k_value_validation_results.items()
-                    if value != "Dish leaf node initializing"
-                ]
-                if len(dish_list_without_init_msg) == len(
+                num_of_values = []
+                for dish_name in self.input_parameter.dish_leaf_node_dev_names:
+                    adapter = self.adapter_factory.get_or_create_adapter(
+                        dish_name, adapter_type=AdapterType.DISH
+                    )
+                    num_of_values.append(adapter._proxy.kValueValidationResult)
+                # k_value_validation_results = (
+                #     self.dish_kvalue_validation_aggregator.dln_kvalue_validation_results
+                # )
+                # dish_list_without_init_msg = [
+                #     dish_name
+                #     for dish_name, value in k_value_validation_results.items()
+                #     if value != "Dish leaf node initializing"
+                # ]
+                if len(num_of_values) == len(
                     self.input_parameter.dish_leaf_node_dev_names
                 ):
-                    self.logger.info(
-                        "All Dish Available %s",
-                        dish_list_without_init_msg,
-                    )
+                    self.logger.info("All Dish Available")
                     return True
             except Exception as e:
                 self.logger.exception("Error %s", e)
