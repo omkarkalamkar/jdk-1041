@@ -155,52 +155,97 @@ class CNComponentManagerMid(CNComponentManager):
         return self._dish_vcc_validation_status
 
     @dish_vcc_validation_status.setter
-    def dish_vcc_validation_status(self, temp_dict):
-        """ """
-        csp_value = ""
-        new_value = temp_dict.copy()
-        existing_value = json.loads(self._dish_vcc_validation_status)
+    def dish_vcc_validation_status(self, validation_status: dict):
+        """This method does the aggregation from Dish and CSPMLN
+         and sets the updated validation result.
+         Ex1:
+         current_dish_vcc_validation_status = '{
+                "d0001": "k-value not set",
+                "d0036": "k-value not set",
+                "d0063": "k-value not set",
+                "d0100": "k-value not set",
+                "ska_mid/tm_leaf_node/csp_master":
+                "TMC and CSP Master Dish Vcc Version is Same",
+            }'
+         validation_status = {
+                "d0001": "k-value identical",
+                "d0036": "k-value identical",
+                "d0063": "k-value not set",
+                "d0100": "k-value not set",
+         }
+         if validation_status received and current validation status is
+         as above then this method will aggregate like below:
+         self._dish_vcc_validation_status = '{
+                "d0001": "k-value identical",
+                "d0036": "k-value identical",
+                "d0063": "k-value not set",
+                "d0100": "k-value not set",
+                "ska_mid/tm_leaf_node/csp_master":
+                "TMC and CSP Master Dish Vcc Version is Same",
+            }'
+        or Ex2:
+         if validation_status = {"dish":"ALL DISH OK"}
+         then:
+         self._dish_vcc_validation_status = '{
+                "dish":"ALL DISH OK",
+                "TMC and CSP Master Dish Vcc Version is Same",
+            }'
+        """
+        csp_validation_status = ""
+        # Copying here as dictionary is getting passed by reference.
+        updated_validation_status = validation_status.copy()
+        current_dish_vcc_validation_status = json.loads(
+            self._dish_vcc_validation_status
+        )
         # Extract existing CSPMLN result
-        if MID_CSP_MLN_DEVICE in existing_value:
-            csp_value = {
-                MID_CSP_MLN_DEVICE: existing_value[MID_CSP_MLN_DEVICE]
+        if MID_CSP_MLN_DEVICE in current_dish_vcc_validation_status:
+            csp_validation_status = {
+                MID_CSP_MLN_DEVICE: current_dish_vcc_validation_status[
+                    MID_CSP_MLN_DEVICE
+                ]
             }
 
         # If all Dish are set, remove all other instances
-        if "dish" in new_value:
+        if "dish" in updated_validation_status:
             # Overwrite the results
-            existing_value = new_value
+            current_dish_vcc_validation_status = updated_validation_status
             self.is_dish_vcc_config_set = True
-            if csp_value:
+            if csp_validation_status:
                 if (
-                    csp_value[MID_CSP_MLN_DEVICE]
+                    csp_validation_status[MID_CSP_MLN_DEVICE]
                     != DISH_VCC_VALIDATION_RESULT_STATUS[ResultCode.OK]
                 ):
                     self.is_dish_vcc_config_set = False
 
-                existing_value.update(csp_value)
+                current_dish_vcc_validation_status.update(
+                    csp_validation_status
+                )
         else:
             # If the event from dish only
-            if MID_CSP_MLN_DEVICE not in new_value:
+            if MID_CSP_MLN_DEVICE not in updated_validation_status:
                 # Remove dish value from existing value
-                existing_value.pop("dish", None)
+                current_dish_vcc_validation_status.pop("dish", None)
                 # Overwrite the results
-                existing_value = new_value
-                if csp_value:
-                    existing_value.update(csp_value)
+                current_dish_vcc_validation_status = updated_validation_status
+                if csp_validation_status:
+                    current_dish_vcc_validation_status.update(
+                        csp_validation_status
+                    )
             else:
                 # If the event from CSPMLN only
-                existing_value.update(new_value)
+                current_dish_vcc_validation_status.update(
+                    updated_validation_status
+                )
         self._dish_vcc_validation_status = json.dumps(
             {
                 key: value
-                for key, value in existing_value.items()
+                for key, value in current_dish_vcc_validation_status.items()
                 if value != "k-value identical"
             }
         )
         # empty the dictionaries
-        existing_value = {}
-        new_value = {}
+        current_dish_vcc_validation_status = {}
+        updated_validation_status = {}
 
     def is_csp_dish_ready(self) -> bool:
         """This method wait for csp master leaf node and
@@ -476,23 +521,21 @@ class CNComponentManagerMid(CNComponentManager):
     def check_if_csp_all_dish_ready(self):
         """Check and validate all dish and csp master is ready"""
         count = 0
+        num_of_dish_values = {}
+        # This loop keep checking for kvalueValidationResult values
+        # from all dishes which confirm that event is received from
+        # all dishes
         while count <= self.dish_vcc_init_timeout:
             try:
-                num_of_values = []
                 for dish_name in self.input_parameter.dish_leaf_node_dev_names:
-                    adapter = self.adapter_factory.get_or_create_adapter(
-                        dish_name, adapter_type=AdapterType.DISH
-                    )
-                    num_of_values.append(adapter._proxy.kValueValidationResult)
-                # k_value_validation_results = (
-                #     self.dish_kvalue_validation_aggregator.dln_kvalue_validation_results
-                # )
-                # dish_list_without_init_msg = [
-                #     dish_name
-                #     for dish_name, value in k_value_validation_results.items()
-                #     if value != "Dish leaf node initializing"
-                # ]
-                if len(num_of_values) == len(
+                    if dish_name not in num_of_dish_values:
+                        adapter = self.adapter_factory.get_or_create_adapter(
+                            dish_name, adapter_type=AdapterType.DISH
+                        )
+                        k_val_result = adapter._proxy.kValueValidationResult
+                        if k_val_result != "1":
+                            num_of_dish_values[dish_name] = k_val_result
+                if len(num_of_dish_values) == len(
                     self.input_parameter.dish_leaf_node_dev_names
                 ):
                     self.logger.info("All Dish Available")
@@ -544,6 +587,9 @@ class CNComponentManagerMid(CNComponentManager):
                     if self.check_if_csp_all_dish_ready():
                         self.invoke_load_dish_cfg_command_callback()
                     else:
+                        self.logger.info(
+                            "Time Out while waiting for Dishes to be ready"
+                        )
                         self.command_in_progress = ""
                 elif (
                     csp_validation_result
