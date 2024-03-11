@@ -9,7 +9,7 @@ from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import SubArrayAdapter
+from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
@@ -40,7 +40,7 @@ class AssignResources(AssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.tm_subarray_adapter: Optional[SubArrayAdapter] = None
+        self.tm_subarray_adapter: Optional[AdapterFactory] = None
         self._skuid = skuid
 
     def assign_resources(
