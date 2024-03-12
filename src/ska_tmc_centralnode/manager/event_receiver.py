@@ -1,5 +1,3 @@
-from concurrent import futures
-
 import tango
 from ska_tmc_common.device_info import DeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
@@ -46,9 +44,7 @@ class CentralNodeEventReceiver(EventReceiver):
         }
         self.device_subscribed = {}
 
-    def submit_task(
-        self, executor: futures.ThreadPoolExecutor, device_info: DeviceInfo
-    ) -> None:
+    def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
 
         :param executor: Threadpoolexecutor object
@@ -65,8 +61,8 @@ class CentralNodeEventReceiver(EventReceiver):
                 device_info.dev_name,
                 self.device_subscribed,
             )
-            executor.submit(
-                self.subscribe_events,
+
+            self.subscribe_events(
                 dev_info=device_info,
                 attribute_dictionary=(self.attribute_dictionary),
             )
