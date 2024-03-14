@@ -103,7 +103,6 @@ class CNComponentManagerMid(CNComponentManager):
             *args,
             **kwargs,
         )
-
         self.subarray_availability = {
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names

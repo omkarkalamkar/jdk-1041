@@ -133,6 +133,7 @@ class CNComponentManager(TmcComponentManager):
             *args,
             **kwargs,
         )
+        self._liveliness_probe = _liveliness_probe
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
         self.event_receiver = True
@@ -400,6 +401,7 @@ class CNComponentManager(TmcComponentManager):
         else:
             devInfo = DeviceInfo(dev_name, False)
         self.component.update_device(devInfo)
+        self._liveliness_probe.add_device(dev_name)
 
     def update_input_parameter(self):
         with self.lock:
