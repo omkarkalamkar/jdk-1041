@@ -400,6 +400,7 @@ class CNComponentManager(TmcComponentManager):
         else:
             devInfo = DeviceInfo(dev_name, False)
         self.component.update_device(devInfo)
+        self.liveliness_probe_object.add_device(dev_name)
 
     def update_input_parameter(self):
         with self.lock:
