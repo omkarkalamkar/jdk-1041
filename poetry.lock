@@ -1164,11 +1164,11 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-ser-logging"
-version = "0.4.2"
+version = "0.4.3"
 description = "Square Kilometre Array logging configuration library"
 category = "main"
 optional = false
-python-versions = ">=3.10,<3.11"
+python-versions = ">=3.10,<4.0"
 
 [package.source]
 type = "legacy"
@@ -1250,7 +1250,7 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-telmodel"
-version = "1.11.2"
+version = "1.14.0"
 description = "SKA telescope model library"
 category = "main"
 optional = false
@@ -1294,32 +1294,34 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.12.10"
+version = "0.14.0"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
-python-versions = ">=3.10,<3.11"
+python-versions = "~3.10"
+develop = false
 
 [package.dependencies]
-black = ">=23.3.0,<24.0.0"
-fire = ">=0.4.0,<0.5.0"
-jsonschema = ">=4.0.1,<5.0.0"
+black = "^23.3.0"
+fire = "^0.4.0"
+jsonschema = "^4.0.1"
 katpoint = "1.0a2"
-marshmallow = ">=3.14.1,<4.0.0"
-mock = ">=4.0.3,<5.0.0"
+marshmallow = "^3.14.1"
+mock = "^4.0.3"
 msgpack = "1.0.7"
 msgpack_numpy = "0.4.8"
-numpy = ">=1.23.0,<2.0.0"
+numpy = "^1.23.0"
 pytango = "9.4.2"
-ska-ser-logging = ">=0.4.1,<0.5.0"
+ska-ser-logging = "^0.4.1"
 ska-tango-base = "0.19.1"
 ska-tango-testing = "0.6.0"
-ska-telmodel = "1.11.2"
+ska-telmodel = "1.14.0"
 
 [package.source]
-type = "legacy"
-url = "https://artefact.skao.int/repository/pypi-internal/simple"
-reference = 'ska-nexus'
+type = "git"
+url = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git"
+reference = "hm-432"
+resolved_reference = "b0ffdf5192e06fa2e7a499a0b0aa91755afecea5"
 
 [[package]]
 name = "snowballstemmer"
@@ -1604,7 +1606,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "b256e9491306d907043fa6245f852eaeb105c40401f505fe62547d262d50cadd"
+content-hash = "1d111645f8febfb3eff19430d7d89f8a61ecbe3ec79e34d2ec5e1a0c49608f60"
 
 [metadata.files]
 alabaster = [
@@ -2594,8 +2596,8 @@ ska-ser-log-transactions = [
     {file = "ska_ser_log_transactions-0.2.2+ae0f5c92.tar.gz", hash = "sha256:383fb54f9d5c5a2c7f5a9e6747d7b6feec7631c8dbc580444a48c782967ff7e4"},
 ]
 ska-ser-logging = [
-    {file = "ska_ser_logging-0.4.2-py3-none-any.whl", hash = "sha256:86c66cbbe0ccc5b35e13704ce3e3121ef4fa2c0f35423635b77ffce80da70578"},
-    {file = "ska_ser_logging-0.4.2.tar.gz", hash = "sha256:3626b5f04ff32e547100bc771549544a8efda3730ff7b96c9b3e05e1d16adc16"},
+    {file = "ska_ser_logging-0.4.3-py3-none-any.whl", hash = "sha256:06a337e4e726f36d24b86087ec106fbb9e65be4566fe328eb56f56f2310322f8"},
+    {file = "ska_ser_logging-0.4.3.tar.gz", hash = "sha256:a94aa51db54ad2a88af4c320c850c766c1733d9f8534381dd67f993e8e4f5d11"},
 ]
 ska-ser-skuid = [
     {file = "ska-ser-skuid-3.3.3.tar.gz", hash = "sha256:91ad1dda3e3a397e39dbb362046888f5a80e4f5ef022628cde7ccc93c4d9b057"},
@@ -2614,17 +2616,14 @@ ska-tango-testing = [
     {file = "ska_tango_testing-0.6.0.tar.gz", hash = "sha256:fdc1d807dc1cad2ddc1d754cb5ee9debe846db667de12e412474388c3fff97d6"},
 ]
 ska-telmodel = [
-    {file = "ska_telmodel-1.11.2-py3-none-any.whl", hash = "sha256:7c1762c7d2eea9a739c1dd6266f7209c5ec3eccbf8673fe1bf56a81fd761f70b"},
-    {file = "ska_telmodel-1.11.2.tar.gz", hash = "sha256:e432604f84d6209de96d7ae52808991d4263b44e28aebf09f77598fb17d1f97f"},
+    {file = "ska_telmodel-1.14.0-py3-none-any.whl", hash = "sha256:bd249a3b426f0163d05888cc648d3957a38b1b86f31f6555d47fcba7ef6f0e23"},
+    {file = "ska_telmodel-1.14.0.tar.gz", hash = "sha256:fcb38de7d69b9ac54e1b0bf6f974238064e1a2068faab66f46d34a67bb63d966"},
 ]
 ska-tmc-cdm = [
     {file = "ska_tmc_cdm-7.3.1-py3-none-any.whl", hash = "sha256:6096dfd4d7c0211dad2ac58cfe0c3cc88b3d5448f20405c5cb7864ec44f28757"},
     {file = "ska_tmc_cdm-7.3.1.tar.gz", hash = "sha256:3129cd4ec33b207f80669f521ba80fd221a42041c841f6c2f44eb8225ed8c363"},
 ]
-ska-tmc-common = [
-    {file = "ska_tmc_common-0.12.10-py3-none-any.whl", hash = "sha256:a61763c3b21cc24909fa0985fe182aaa96199937fcf638bf15d4b6aea0d91368"},
-    {file = "ska_tmc_common-0.12.10.tar.gz", hash = "sha256:aaa2ed67fb04c5c190374dae273be3b17378dbd4797473531eb20d33fa5d76d3"},
-]
+ska-tmc-common = []
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
     {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
