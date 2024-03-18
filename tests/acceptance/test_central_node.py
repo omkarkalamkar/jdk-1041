@@ -139,9 +139,9 @@ def check_internal_model(device_list):
             if running_dev.assignedResources is None:
                 assert dev["resources"] == []
             else:
-                assert (
-                    np.asarray(running_dev.assignedResources)
-                    == dev["resources"]
+                assert np.array_equal(
+                    np.asarray(running_dev.assignedResources),
+                    np.array(dev["resources"]),
                 )
 
 
