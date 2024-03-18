@@ -66,14 +66,11 @@ class TelescopeStateAggregatorMid(Aggregator):
             return DevState.UNKNOWN
         elif (
             subsystem_states == {DevState.ON}
-            and dish_modes == {DishMode.STANDBY_FP}
-            or dish_modes == {DishMode.OPERATE}
-            or dish_modes == {DishMode.CONFIG}
-            or dish_modes == {DishMode.STANDBY_FP, DishMode.OPERATE}
-            or dish_modes == {DishMode.STANDBY_FP, DishMode.CONFIG}
-            or dish_modes
-            == {DishMode.STANDBY_FP, DishMode.OPERATE, DishMode.CONFIG}
-            or dish_modes == {DishMode.OPERATE, DishMode.CONFIG}
+            and any(mode in dish_modes for mode in {DishMode.STANDBY_FP})
+            or any(
+                mode in dish_modes
+                for mode in {DishMode.OPERATE, DishMode.CONFIG}
+            )
         ):
             return DevState.ON
         elif (
