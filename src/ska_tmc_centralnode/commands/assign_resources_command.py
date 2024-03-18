@@ -201,10 +201,9 @@ class AssignResources(AssignReleaseResources):
                     ResultCode.FAILED,
                     f"Dish {receptor_id} is already allocated",
                 )
-            else:
-                self.logger.info(
-                    f"Dish {receptor_id} is available for assignment."
-                )
+            self.logger.info(
+                f"Dish {receptor_id} is available for assignment."
+            )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
@@ -225,7 +224,7 @@ class AssignResources(AssignReleaseResources):
             if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                 return ResultCode.FAILED, message_or_unique_id
 
-            elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+            if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                 self.component_manager.command_mapping[
                     self.component_manager.command_id
                 ] = message_or_unique_id
@@ -381,7 +380,7 @@ class AssignResources(AssignReleaseResources):
                         ResultCode.FAILED,
                         message_or_unique_id,
                     )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-                elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                     if self.component_manager.command_mapping.get(
                         self.component_manager.command_id
                     ):

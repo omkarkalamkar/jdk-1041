@@ -79,7 +79,7 @@ def wait_and_validate_device_attribute_value(
                 expected_value
             ):
                 return True
-            elif attribute_value == expected_value:
+            if attribute_value == expected_value:
                 return True
         except Exception as e:
             logging.info(

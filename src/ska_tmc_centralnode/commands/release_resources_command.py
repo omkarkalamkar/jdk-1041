@@ -179,16 +179,15 @@ class ReleaseResources(AssignReleaseResources):
                         ResultCode.FAILED,
                         message_or_unique_id,
                     )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-                elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                     self.component_manager.command_mapping[
                         self.component_manager.command_id
                     ] = message_or_unique_id
             return (ResultCode.OK, "")
-        else:
-            return (
-                ResultCode.FAILED,
-                "Partial release resources not supported!",
-            )
+        return (
+            ResultCode.FAILED,
+            "Partial release resources not supported!",
+        )
 
     def do_low(self, argin):
         """
@@ -271,7 +270,7 @@ class ReleaseResources(AssignReleaseResources):
                             ResultCode.FAILED,
                             message_or_unique_id,
                         )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-                    elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                    if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                         if self.component_manager.command_mapping.get(
                             self.component_manager.command_id
                         ):

@@ -408,8 +408,7 @@ class MCCSDeviceInfo(DeviceInfo):
     def __eq__(self, other):
         if isinstance(other, (MCCSDeviceInfo, DeviceInfo)):
             return self.dev_name == other.dev_name
-        else:
-            return False
+        return False
 
     def to_json(self):
         return json.dumps(self.to_dict())

@@ -61,10 +61,10 @@ class TelescopeStateAggregatorMid(Aggregator):
                 csp_master,
             )
             return DevState.UNKNOWN
-        elif dish_count == 0:
+        if dish_count == 0:
             self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
-        elif (
+        if (
             subsystem_states == {DevState.ON}
             and any(mode in dish_modes for mode in {DishMode.STANDBY_FP})
             or any(
@@ -73,22 +73,21 @@ class TelescopeStateAggregatorMid(Aggregator):
             )
         ):
             return DevState.ON
-        elif (
+        if (
             subsystem_states == {DevState.OFF}
             and dish_modes == {DishMode.STANDBY_LP}
             or dish_modes == {DishMode.SHUTDOWN}
         ):
             return DevState.OFF
-        elif DevState.INIT in subsystem_states:
+        if DevState.INIT in subsystem_states:
             return DevState.INIT
-        elif DevState.FAULT in subsystem_states:
+        if DevState.FAULT in subsystem_states:
             return DevState.FAULT
-        elif DevState.STANDBY in subsystem_states and dish_modes == {
+        if DevState.STANDBY in subsystem_states and dish_modes == {
             DishMode.STANDBY_LP
         }:
             return DevState.STANDBY
-        else:
-            return DevState.UNKNOWN
+        return DevState.UNKNOWN
 
 
 class TelescopeStateAggregatorLow(Aggregator):
@@ -137,18 +136,17 @@ class TelescopeStateAggregatorLow(Aggregator):
                 mccs_master,
             )
             return DevState.UNKNOWN
-        elif telescopeSetStateList == set([DevState.ON]):
+        if telescopeSetStateList == set([DevState.ON]):
             return DevState.ON
-        elif telescopeSetStateList == set([DevState.OFF]):
+        if telescopeSetStateList == set([DevState.OFF]):
             return DevState.OFF
-        elif DevState.INIT in telescopeSetStateList:
+        if DevState.INIT in telescopeSetStateList:
             return DevState.INIT
-        elif DevState.FAULT in telescopeSetStateList:
+        if DevState.FAULT in telescopeSetStateList:
             return DevState.FAULT
-        elif DevState.STANDBY in telescopeSetStateList:
+        if DevState.STANDBY in telescopeSetStateList:
             return DevState.STANDBY
-        else:
-            return DevState.UNKNOWN
+        return DevState.UNKNOWN
 
 
 class HealthStateAggregatorMid(Aggregator):
@@ -196,18 +194,17 @@ class HealthStateAggregatorMid(Aggregator):
         healthStateSetList = set(healthStateList)
         if not sdp_master and not csp_master:
             return HealthState.UNKNOWN
-        elif subarray_count == 0:
+        if subarray_count == 0:
             return HealthState.UNKNOWN
-        elif dish_count == 0:
+        if dish_count == 0:
             return HealthState.UNKNOWN
-        elif healthStateSetList == set([HealthState.OK]):
+        if healthStateSetList == set([HealthState.OK]):
             return HealthState.OK
-        elif HealthState.FAILED in healthStateSetList:
+        if HealthState.FAILED in healthStateSetList:
             return HealthState.FAILED
-        elif HealthState.DEGRADED in healthStateSetList:
+        if HealthState.DEGRADED in healthStateSetList:
             return HealthState.DEGRADED
-        else:
-            return HealthState.UNKNOWN
+        return HealthState.UNKNOWN
 
 
 class HealthStateAggregatorLow(Aggregator):
@@ -255,16 +252,15 @@ class HealthStateAggregatorLow(Aggregator):
         self._logger.info("Health state list : %s", healthStateList)
         if subarray_count == 0:
             return HealthState.UNKNOWN
-        elif not sdp_master and not csp_master and not mccs_master:
+        if not sdp_master and not csp_master and not mccs_master:
             return HealthState.UNKNOWN
-        elif healthStateSetList == set([HealthState.OK]):
+        if healthStateSetList == set([HealthState.OK]):
             return HealthState.OK
-        elif HealthState.FAILED in healthStateSetList:
+        if HealthState.FAILED in healthStateSetList:
             return HealthState.FAILED
-        elif HealthState.DEGRADED in healthStateSetList:
+        if HealthState.DEGRADED in healthStateSetList:
             return HealthState.DEGRADED
-        else:
-            return HealthState.UNKNOWN
+        return HealthState.UNKNOWN
 
 
 class TMCOpStateAggregator(Aggregator):
@@ -286,15 +282,14 @@ class TMCOpStateAggregator(Aggregator):
         tmcSetStateList = set(tmcStateList)
         if tmcSetStateList == set([DevState.ON]):
             return DevState.ON
-        elif tmcSetStateList == set([DevState.OFF]):
+        if tmcSetStateList == set([DevState.OFF]):
             #  Untill all TMC devices are refactored, devices report Off state.
             return DevState.OFF
-        elif DevState.INIT in tmcSetStateList:
+        if DevState.INIT in tmcSetStateList:
             return DevState.INIT
-        elif DevState.FAULT in tmcSetStateList:
+        if DevState.FAULT in tmcSetStateList:
             return DevState.FAULT
-        else:
-            return DevState.UNKNOWN
+        return DevState.UNKNOWN
 
 
 class TelescopeAvailabilityAggregatorMid(Aggregator):

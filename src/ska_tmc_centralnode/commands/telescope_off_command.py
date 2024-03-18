@@ -132,7 +132,7 @@ class TelescopeOff(TelescopeOnOff):
                 if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
+                if return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -157,13 +157,12 @@ class TelescopeOff(TelescopeOnOff):
                 f"Error in calling Off command for {self.csp_mln_adapter.dev_name}",
                 "Off",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.csp_mln_adapter.dev_name} is not available to receive Off command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.csp_mln_adapter.dev_name} is not available to receive Off command"
+            ],
+        )
 
     def turn_off_sdp(self):
         self.logger.info(
@@ -175,13 +174,13 @@ class TelescopeOff(TelescopeOnOff):
                 f"Error in calling Off command for {self.sdp_mln_adapter.dev_name}",
                 "Off",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.sdp_mln_adapter.dev_name} is not available to receive Off command"
-                ],
-            )
+
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.sdp_mln_adapter.dev_name} is not available to receive Off command"
+            ],
+        )
 
     def turn_off_subarrays(self):
         self.logger.info(
@@ -271,7 +270,7 @@ class TelescopeOff(TelescopeOnOff):
                 if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
+                if return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -296,10 +295,9 @@ class TelescopeOff(TelescopeOnOff):
                 f"Error in calling Off command for {self.mccs_mln_adapter.dev_name}",
                 "Off",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.mccs_mln_adapter.dev_name} is not available to receive Off command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.mccs_mln_adapter.dev_name} is not available to receive Off command"
+            ],
+        )

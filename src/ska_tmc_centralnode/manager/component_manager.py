@@ -322,8 +322,8 @@ class CNComponentManager(TmcComponentManager):
                 "CspMasterLeafNode is not available to receive command"
             )
             return False
-        else:
-            return True
+
+        return True
 
     def check_if_sdp_mln_is_available(self) -> bool:
         """
@@ -336,8 +336,8 @@ class CNComponentManager(TmcComponentManager):
                 "SdpMasterLeafNode is not available to receive command"
             )
             return False
-        else:
-            return True
+
+        return True
 
     def check_if_mccs_mln_is_available(self) -> bool:
         """
@@ -350,8 +350,7 @@ class CNComponentManager(TmcComponentManager):
                 "MccsMasterLeafNode is not available to receive command"
             )
             return False
-        else:
-            return True
+        return True
 
     def check_if_subarrays_are_responsive(self):
         self.logger.info("Checking if subarrays are responsive")
@@ -568,7 +567,7 @@ class CNComponentManager(TmcComponentManager):
                 )
                 if devInfo.resources is None:
                     return False
-                elif dish_id in devInfo.resources:
+                if dish_id in devInfo.resources:
                     return True
         return False
 
@@ -821,20 +820,18 @@ class CNComponentManager(TmcComponentManager):
             return loadishcfg_command.reject_command(
                 f"The JSON string is malformed. Error: {str(e)}"
             )
-        else:
-            (
-                dishid_vcc_map_json,
-                error_message,
-            ) = loadishcfg_command.get_dishid_vcc_map_json(
-                dishid_vcc_map_params
-            )
-            if error_message:
-                return loadishcfg_command.reject_command(error_message)
-            self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
-            config_json_validator = DishConfigValidator(dishid_vcc_map_json)
-            is_valid_dish_cfg, message = config_json_validator.is_json_valid()
-            if not is_valid_dish_cfg:
-                return loadishcfg_command.reject_command(message)
+
+        (
+            dishid_vcc_map_json,
+            error_message,
+        ) = loadishcfg_command.get_dishid_vcc_map_json(dishid_vcc_map_params)
+        if error_message:
+            return loadishcfg_command.reject_command(error_message)
+        self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
+        config_json_validator = DishConfigValidator(dishid_vcc_map_json)
+        is_valid_dish_cfg, message = config_json_validator.is_json_valid()
+        if not is_valid_dish_cfg:
+            return loadishcfg_command.reject_command(message)
 
         task_status, response = self.submit_task(
             loadishcfg_command.load_dish_cfg,
