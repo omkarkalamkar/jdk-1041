@@ -25,9 +25,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             name = dev.dev_name.lower()
             if dev.unresponsive:
                 continue
-            elif (
-                name in self._component_manager.input_parameter.dish_dev_names
-            ):
+            if name in self._component_manager.input_parameter.dish_dev_names:
                 dish_modes.add(dev.dish_mode)
                 dish_count += 1
             elif (
@@ -110,7 +108,7 @@ class TelescopeStateAggregatorLow(Aggregator):
             name = dev.dev_name.lower()
             if dev.unresponsive:
                 continue
-            elif (
+            if (
                 name
                 == self._component_manager.input_parameter.mccs_master_dev_name
             ):
@@ -174,7 +172,7 @@ class HealthStateAggregatorMid(Aggregator):
             name = dev.dev_name.lower()
             if dev.unresponsive:
                 continue
-            elif (
+            if (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
@@ -231,7 +229,7 @@ class HealthStateAggregatorLow(Aggregator):
             name = dev.dev_name.lower()
             if dev.unresponsive:
                 continue
-            elif (
+            if (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
