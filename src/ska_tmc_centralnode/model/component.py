@@ -409,7 +409,7 @@ class CentralComponent(TmcComponent):
 
 class MCCSDeviceInfo(DeviceInfo):
     def __init__(self, dev_name, _unresponsive=False):
-        super(MCCSDeviceInfo, self).__init__(dev_name, _unresponsive)
+        super().__init__(dev_name, _unresponsive)
         self.resources = {}
 
     def from_dev_info(self, mccsdev_info):
@@ -418,7 +418,7 @@ class MCCSDeviceInfo(DeviceInfo):
             self.resources = mccsdev_info.resources
 
     def __eq__(self, other):
-        if isinstance(other, MCCSDeviceInfo) or isinstance(other, DeviceInfo):
+        if isinstance(other, (MCCSDeviceInfo, DeviceInfo)):
             return self.dev_name == other.dev_name
         else:
             return False

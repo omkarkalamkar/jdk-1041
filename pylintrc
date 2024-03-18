@@ -64,7 +64,6 @@ disable=C,
         W,
         R0801,
         R1705,
-        R0902,
         R0904,
         R0911,
         R0914,
@@ -73,9 +72,6 @@ disable=C,
         R1724,
         R1710,
         R0916,
-        R1725,
-        R1701,
-        R0913,
         I,
         no-member,
         E,
@@ -412,10 +408,10 @@ spelling-store-unknown-words=no
 [DESIGN]
 
 # Maximum number of arguments for function / method.
-max-args=5
+max-args=25
 
 # Maximum number of attributes for a class (see R0902).
-max-attributes=7
+max-attributes=25
 
 # Maximum number of boolean expressions in an if statement.
 max-bool-expr=5
