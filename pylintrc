@@ -64,9 +64,7 @@ disable=C,
         W,
         R0801,
         R1705,
-        R0904,
         R0912,
-        R1710,
         I,
         no-member,
 
@@ -420,7 +418,7 @@ max-locals=25
 max-parents=7
 
 # Maximum number of public methods for a class (see R0904).
-max-public-methods=20
+max-public-methods=50
 
 # Maximum number of return / yield for function / method body.
 max-returns=10

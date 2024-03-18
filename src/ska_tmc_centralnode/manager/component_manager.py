@@ -268,6 +268,8 @@ class CNComponentManager(TmcComponentManager):
         if self.subarray_devname:
             return self.get_device(self.subarray_devname).obs_state
 
+        return self.get_device(self.subarray_devname).obs_state
+
     def get_device(self, dev_name):
         """
         Return the device info with device name dev_name
