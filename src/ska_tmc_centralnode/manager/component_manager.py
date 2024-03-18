@@ -261,6 +261,9 @@ class CNComponentManager(TmcComponentManager):
     def get_subarray_obsstate(self) -> Optional[ObsState]:
         """
         Get Current device obsState
+
+        :return: current obsstate
+        :rtype: ObsState
         """
         if self.subarray_devname:
             return self.get_device(self.subarray_devname).obs_state

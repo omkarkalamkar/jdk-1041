@@ -1,9 +1,5 @@
 from typing import Callable, List
 
-from src.ska_tmc_centralnode.manager.component_manager import (
-    CNComponentManager,
-)
-
 
 class InputParameter:
     """Class for Input parameter this class is used to distinguish between
@@ -194,7 +190,7 @@ class InputParameter:
         if self._changed_callback is not None:
             self._changed_callback()
 
-    def update(self, component_manager: CNComponentManager) -> List[str]:
+    def update(self, component_manager) -> List[str]:
         list_dev_names: List[str] = []
         for dev_name in self.subarray_dev_names:
             if component_manager.get_device(dev_name) is None:
