@@ -1,27 +1,37 @@
+from typing import Callable, List
+
+from src.ska_tmc_centralnode.manager.component_manager import (
+    CNComponentManager,
+)
+
+
 class InputParameter:
-    def __init__(self, changed_callback) -> None:
-        self._changed_callback = changed_callback
-        self._subarray_dev_names = []
-        self._csp_subarray_dev_names = []
-        self._sdp_subarray_dev_names = []
-        self._csp_master_dev_name = ""
-        self._sdp_master_dev_name = ""
-        self._sdp_mln_dev_name = ""
-        self._csp_mln_dev_name = ""
+    """Class for Input parameter this class is used to distinguish between
+    between low and mid telescope"""
+
+    def __init__(self, changed_callback: Callable) -> None:
+        self._changed_callback: Callable = changed_callback
+        self._subarray_dev_names: List[str] = []
+        self._csp_subarray_dev_names: List[str] = []
+        self._sdp_subarray_dev_names: List[str] = []
+        self._csp_master_dev_name: str = ""
+        self._sdp_master_dev_name: str = ""
+        self._sdp_mln_dev_name: str = ""
+        self._csp_mln_dev_name: str = ""
 
     @property
-    def csp_subarray_dev_names(self):
+    def csp_subarray_dev_names(self) -> List[str]:
         """
         Input parameter
         Return the CSP Subarray device names
 
         :return: the CSP Subarray device names
-        :rtype: tuple
+        :rtype: list
         """
         return self._csp_subarray_dev_names
 
     @csp_subarray_dev_names.setter
-    def csp_subarray_dev_names(self, value):
+    def csp_subarray_dev_names(self, value: List[str]) -> None:
         """
         Input parameter
         Set the CSP Subarray device names to be
@@ -35,7 +45,7 @@ class InputParameter:
             self._changed_callback()
 
     @property
-    def sdp_subarray_dev_names(self):
+    def sdp_subarray_dev_names(self) -> List[str]:
         """
         Input parameter
         Return the SDP Subarray device names
@@ -46,7 +56,7 @@ class InputParameter:
         return self._sdp_subarray_dev_names
 
     @sdp_subarray_dev_names.setter
-    def sdp_subarray_dev_names(self, value):
+    def sdp_subarray_dev_names(self, value: List[str]):
         """
         Input parameter
         Set the SDP Subarray device names to be
@@ -60,7 +70,7 @@ class InputParameter:
             self._changed_callback()
 
     @property
-    def csp_master_dev_name(self):
+    def csp_master_dev_name(self) -> str:
         """
         Input parameter
         Return the CSP Master device name
@@ -71,7 +81,7 @@ class InputParameter:
         return self._csp_master_dev_name
 
     @csp_master_dev_name.setter
-    def csp_master_dev_name(self, value):
+    def csp_master_dev_name(self, value: str) -> None:
         """
         Input parameter
         Set the CSP Master device name to be
@@ -85,7 +95,7 @@ class InputParameter:
             self._changed_callback()
 
     @property
-    def sdp_master_dev_name(self):
+    def sdp_master_dev_name(self) -> str:
         """
         Input parameter
         Return the SDP Master device name
@@ -96,7 +106,7 @@ class InputParameter:
         return self._sdp_master_dev_name
 
     @sdp_master_dev_name.setter
-    def sdp_master_dev_name(self, value):
+    def sdp_master_dev_name(self, value: str) -> None:
         """
         Input parameter
         Set the SDP Master device name to be
@@ -110,7 +120,7 @@ class InputParameter:
             self._changed_callback()
 
     @property
-    def csp_mln_dev_name(self):
+    def csp_mln_dev_name(self) -> str:
         """
         Input parameter
         Return the CSP Master device name
@@ -121,7 +131,7 @@ class InputParameter:
         return self._csp_mln_dev_name
 
     @csp_mln_dev_name.setter
-    def csp_mln_dev_name(self, value):
+    def csp_mln_dev_name(self, value: str) -> None:
         """
         Input parameter
         Set the CSP Master device name to be
@@ -135,7 +145,7 @@ class InputParameter:
             self._changed_callback()
 
     @property
-    def sdp_mln_dev_name(self):
+    def sdp_mln_dev_name(self) -> str:
         """
         Input parameter
         Return the SDP Master device name
@@ -146,7 +156,7 @@ class InputParameter:
         return self._sdp_mln_dev_name
 
     @sdp_mln_dev_name.setter
-    def sdp_mln_dev_name(self, value):
+    def sdp_mln_dev_name(self, value: str) -> None:
         """
         Input parameter
         Set the SDP Master device name to be
@@ -160,7 +170,7 @@ class InputParameter:
             self._changed_callback()
 
     @property
-    def subarray_dev_names(self):
+    def subarray_dev_names(self) -> List[str]:
         """
         Input parameter
         Return the SubarrayNode device names
@@ -171,21 +181,21 @@ class InputParameter:
         return self._subarray_dev_names
 
     @subarray_dev_names.setter
-    def subarray_dev_names(self, value):
+    def subarray_dev_names(self, value: List[str]) -> None:
         """
         Input parameter
         Set the SubarrayNode device names to be
         managed by the CentralNode
 
         :param value: the SubarrayNode device names
-        :type value: tuple
+        :type value: List
         """
         self._subarray_dev_names = value
         if self._changed_callback is not None:
             self._changed_callback()
 
-    def update(self, component_manager):
-        list_dev_names = []
+    def update(self, component_manager: CNComponentManager) -> List[str]:
+        list_dev_names: List[str] = []
         for dev_name in self.subarray_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
@@ -224,7 +234,9 @@ class InputParameter:
 
 
 class InputParameterLow(InputParameter):
-    def __init__(self, changed_callback) -> None:
+    """Class for input parameter for low."""
+
+    def __init__(self, changed_callback: Callable) -> None:
         self._subarray_dev_names = ["ska_low/tm_subarray_node/1"]
         self._csp_subarray_dev_names = ["ska_low/tm_leaf_node/csp_subarray01"]
         self._sdp_subarray_dev_names = ["ska_low/tm_leaf_node/sdp_subarray01"]
@@ -304,64 +316,70 @@ class InputParameterLow(InputParameter):
 
 
 class InputParameterMid(InputParameter):
-    def __init__(self, changed_callback) -> None:
-        self._subarray_dev_names = ["ska_mid/tm_subarray_node/1"]
-        self._csp_subarray_dev_names = ["ska_mid/tm_leaf_node/csp_subarray01"]
-        self._dish_leaf_node_dev_names = ["ska_mid/tm_leaf_node/d0001"]
-        self._dish_dev_names = ["ska001/elt/master"]
-        self._sdp_subarray_dev_names = ["ska_mid/tm_leaf_node/sdp_subarray01"]
-        self._csp_master_dev_name = "mid-csp/control/0"
-        self._sdp_master_dev_name = "mid-sdp/control/0"
-        self._sdp_mln_dev_name = "ska_mid/tm_leaf_node/sdp_master"
-        self._csp_mln_dev_name = "ska_mid/tm_leaf_node/csp_master"
-        self._dish_leaf_node_prefix = "ska_mid/tm_leaf_node/d0"
-        self._changed_callback = changed_callback
+    def __init__(self, changed_callback: Callable) -> None:
+        self._subarray_dev_names: List[str] = ["ska_mid/tm_subarray_node/1"]
+        self._csp_subarray_dev_names: List[str] = [
+            "ska_mid/tm_leaf_node/csp_subarray01"
+        ]
+        self._dish_leaf_node_dev_names: List[str] = [
+            "ska_mid/tm_leaf_node/d0001"
+        ]
+        self._dish_dev_names: List[str] = ["ska001/elt/master"]
+        self._sdp_subarray_dev_names: List[str] = [
+            "ska_mid/tm_leaf_node/sdp_subarray01"
+        ]
+        self._csp_master_dev_name: str = "mid-csp/control/0"
+        self._sdp_master_dev_name: str = "mid-sdp/control/0"
+        self._sdp_mln_dev_name: str = "ska_mid/tm_leaf_node/sdp_master"
+        self._csp_mln_dev_name: str = "ska_mid/tm_leaf_node/csp_master"
+        self._dish_leaf_node_prefix: str = "ska_mid/tm_leaf_node/d0"
+        self._changed_callback: Callable = changed_callback
 
     @property
-    def dish_leaf_node_prefix(self):
+    def dish_leaf_node_prefix(self) -> str:
         """
         Input parameter
         Return the TM dish prefix
 
         :return: the TM dish prefix
-        :rtype: tuple
+        :rtype: str
         """
         return self._dish_leaf_node_prefix
 
     @dish_leaf_node_prefix.setter
-    def dish_leaf_node_prefix(self, value):
+    def dish_leaf_node_prefix(self, value: str):
         """
         Input parameter
         Set the TM dish prefix to be
         managed by the CentralNode
 
         :param value: the TM dish prefix
-        :type value: tuple
+        :type value: str
         """
         self._dish_leaf_node_prefix = value
         if self._changed_callback is not None:
             self._changed_callback()
 
     @property
-    def dish_leaf_node_dev_names(self):
+    def dish_leaf_node_dev_names(self) -> List[str]:
         """
         Input parameter
         Return the TM dish device names
 
         :return: the TM dish device names
-        :rtype: tuple
+        :rtype: List
         """
         return self._dish_leaf_node_dev_names
 
     @dish_leaf_node_dev_names.setter
-    def dish_leaf_node_dev_names(self, value):
+    def dish_leaf_node_dev_names(self, value: List[str]):
         """
         Input parameter
         Set the TM dish device names to be
         managed by the CentralNode
 
         :param value: the TM dish device names
-        :type value: tuple
+        :type value: list
         """
         self._dish_leaf_node_dev_names = value
         if self._changed_callback is not None:
