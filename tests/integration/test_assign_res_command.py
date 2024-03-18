@@ -155,7 +155,6 @@ def assign_resources(
     result, unique_id = central_node.TelescopeOff()
 
 
-@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(

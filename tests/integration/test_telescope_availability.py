@@ -92,17 +92,17 @@ def telescope_availability(
     subarray_node.SetisSubarrayAvailable(False)
     assert subarray_node.isSubarrayAvailable is False
 
-    csp_mln.SetisSubsystemAvailable(False)
+    csp_mln.SetSubsystemAvailable(False)
     assert csp_mln.isSubsystemAvailable is False
 
-    sdp_mln.SetisSubsystemAvailable(False)
+    sdp_mln.SetSubsystemAvailable(False)
     assert sdp_mln.isSubsystemAvailable is False
 
     if "ska_mid" in central_node_fqdn:
         check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, False)
     else:
         check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, False)
-        mccs_mln.SetisSubsystemAvailable(False)
+        mccs_mln.SetSubsystemAvailable(False)
         assert mccs_mln.isSubsystemAvailable is False
         check_mccsmln_availability(central_node, False)
 
@@ -116,17 +116,17 @@ def telescope_availability(
     subarray_node.SetisSubarrayAvailable(True)
     assert subarray_node.isSubarrayAvailable is True
 
-    csp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
     assert csp_mln.isSubsystemAvailable is True
 
-    sdp_mln.SetisSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
     assert sdp_mln.isSubsystemAvailable is True
 
     if "ska_mid" in central_node_fqdn:
         check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
     else:
         check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
-        mccs_mln.SetisSubsystemAvailable(True)
+        mccs_mln.SetSubsystemAvailable(True)
         assert mccs_mln.isSubsystemAvailable is True
         check_mccsmln_availability(central_node, True)
 

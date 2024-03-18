@@ -126,10 +126,10 @@ def set_mid_sdp_csp_mln_availability_for_aggregation():
     """
     dev_factory = DevFactory()
     proxy_csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
-    proxy_csp_mln.SetisSubsystemAvailable(True)
+    proxy_csp_mln.SetSubsystemAvailable(True)
 
     proxy_sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    proxy_sdp_mln.SetisSubsystemAvailable(True)
+    proxy_sdp_mln.SetSubsystemAvailable(True)
 
     logging.debug(
         "CspSubarrayLeafNode availability is: %s",
@@ -149,13 +149,13 @@ def set_low_devices_availability_for_aggregation():
     """
     dev_factory = DevFactory()
     proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
-    proxy_csp_mln.SetisSubsystemAvailable(True)
+    proxy_csp_mln.SetSubsystemAvailable(True)
 
     proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
-    proxy_sdp_mln.SetisSubsystemAvailable(True)
+    proxy_sdp_mln.SetSubsystemAvailable(True)
 
     proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
-    proxy_mccs_mln.SetisSubsystemAvailable(True)
+    proxy_mccs_mln.SetSubsystemAvailable(True)
 
     logging.debug(
         "CspSubarrayLeafNode availability is: %s",
