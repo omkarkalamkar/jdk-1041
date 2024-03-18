@@ -81,7 +81,7 @@ def assign_resources(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
 )
-def test_assign_res_command_mid(
+def test_assign_res_command_mid_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory
 ):
     return assign_resources(
@@ -99,7 +99,7 @@ def test_assign_res_command_mid(
     "central_node_name",
     [("ska_low/tm_central/central_node")],
 )
-def test_assign_res_command_low(
+def test_assign_res_command_low_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory
 ):
     return assign_resources(

@@ -65,9 +65,7 @@ disable=C,
         R0801,
         R1705,
         R0904,
-        R0911,
         R0914,
-        R0903,
         R0912,
         R0916,
         R1710,
@@ -428,13 +426,13 @@ max-parents=7
 max-public-methods=20
 
 # Maximum number of return / yield for function / method body.
-max-returns=6
+max-returns=10
 
 # Maximum number of statements in function / method body.
 max-statements=50
 
 # Minimum number of public methods for a class (see R0903).
-min-public-methods=2
+min-public-methods=1
 
 
 [CLASSES]

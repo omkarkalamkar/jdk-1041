@@ -9,35 +9,23 @@ from tango import DevState
 from ska_tmc_centralnode.model.enum import ModesAvailability
 
 
-def dev_state_2_str(value):
-    if value == DevState.ON:
-        return "DevState.ON"
-    elif value == DevState.OFF:
-        return "DevState.OFF"
-    elif value == DevState.CLOSE:
-        return "DevState.CLOSE"
-    elif value == DevState.OPEN:
-        return "DevState.OPEN"
-    elif value == DevState.INSERT:
-        return "DevState.INSERT"
-    elif value == DevState.EXTRACT:
-        return "DevState.EXTRACT"
-    elif value == DevState.MOVING:
-        return "DevState.MOVING"
-    elif value == DevState.STANDBY:
-        return "DevState.STANDBY"
-    elif value == DevState.FAULT:
-        return "DevState.FAULT"
-    elif value == DevState.INIT:
-        return "DevState.INIT"
-    elif value == DevState.RUNNING:
-        return "DevState.RUNNING"
-    elif value == DevState.ALARM:
-        return "DevState.ALARM"
-    elif value == DevState.DISABLE:
-        return "DevState.DISABLE"
-    else:
-        return "DevState.UNKNOWN"
+def dev_state_2_str(value: DevState):
+    dev_state_map = {
+        DevState.ON: "DevState.ON",
+        DevState.OFF: "DevState.OFF",
+        DevState.CLOSE: "DevState.CLOSE",
+        DevState.OPEN: "DevState.OPEN",
+        DevState.INSERT: "DevState.INSERT",
+        DevState.EXTRACT: "DevState.EXTRACT",
+        DevState.MOVING: "DevState.MOVING",
+        DevState.STANDBY: "DevState.STANDBY",
+        DevState.FAULT: "DevState.FAULT",
+        DevState.INIT: "DevState.INIT",
+        DevState.RUNNING: "DevState.RUNNING",
+        DevState.ALARM: "DevState.ALARM",
+        DevState.DISABLE: "DevState.DISABLE",
+    }
+    return dev_state_map.get(value, "DevState.UNKNOWN")
 
 
 class CentralComponent(TmcComponent):
