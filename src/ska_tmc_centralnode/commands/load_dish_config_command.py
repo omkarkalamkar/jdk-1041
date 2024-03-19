@@ -77,7 +77,9 @@ class LoadDishCfg(LoadDishCfgCommand):
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
                 command_id=self.component_manager.command_id,
-                lrcr_callback=self.component_manager.long_running_result_callback,
+                lrcr_callback=(
+                    self.component_manager.long_running_result_callback
+                ),
             )
         self.component_manager.load_dish_cfg_command_id = (
             self.component_manager.command_id
@@ -173,7 +175,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 # condition for exception raised during invoking command
                 if return_code in [ResultCode.FAILED]:
                     self.logger.info(
-                        "Invocation of command LoadDishCfg failed with error %s",
+                        "command LoadDishCfg failed with error %s",
                         message_or_unique_id,
                     )
                     return ResultCode.FAILED, message_or_unique_id
@@ -185,8 +187,10 @@ class LoadDishCfg(LoadDishCfgCommand):
     def _invoke_load_dish_cfg_on_csp_master_ln(
         self, dishid_vcc_map_params: str
     ) -> Tuple[ResultCode, list]:
-        """Invoke LoadDishCfg command on Csp Master with vcc_map_params argument
-        :param dishid_vcc_map_params: vcc_map_params info containing vcc_dish mapping
+        """Invoke LoadDishCfg command on Csp Master with
+         vcc_map_params argument
+        :param dishid_vcc_map_params:
+        vcc_map_params info containing vcc_dish mapping
         """
         self.logger.debug(
             f"Invoking LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
@@ -231,7 +235,8 @@ class LoadDishCfg(LoadDishCfgCommand):
                         k_value,
                         self.component_manager.event_receiver_object.handle_load_dish_cfg_result_callback,
                     )
-                    # Append dish dev names to track on which dish SetKValue is invoked
+                    # Append dish dev names to track on which dish
+                    # SetKValue is invoked
                     self.component_manager.dev_names_for_load_dish_cfg.append(
                         dish_adapter.dev_name
                     )

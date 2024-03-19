@@ -235,6 +235,7 @@ class TelescopeStandby(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_standby_subarrays(self):
+        """Turns subarrays to standby"""
         self.logger.info(
             f"Invoking Standby command for {self.subarray_adapters} devices"
         )
@@ -245,6 +246,7 @@ class TelescopeStandby(TelescopeOnOff):
         )
 
     def turn_standby_sdp(self):
+        """Turns sdp to standby"""
         self.logger.info(
             f"Invoking Standby command for {self.sdp_mln_adapter.dev_name} devices"
         )
@@ -262,6 +264,7 @@ class TelescopeStandby(TelescopeOnOff):
         )
 
     def turn_standby_csp(self):
+        """Turns csp to standby"""
         self.logger.info(
             f"Invoking Standby command for {self.csp_mln_adapter.dev_name} devices"
         )
@@ -279,6 +282,7 @@ class TelescopeStandby(TelescopeOnOff):
         )
 
     def turn_standby_mccs(self):
+        """Turns MCCS into standby"""
         self.logger.info(
             f"Standby command on  {self.mccs_mln_adapter.dev_name}"
         )
@@ -296,6 +300,7 @@ class TelescopeStandby(TelescopeOnOff):
         )
 
     def turn_off_dishes(self):
+        """Turns off the dishes"""
         self.logger.info(
             f"Off command on Dish Leaf Nodes: {self.dish_adapters}"
         )

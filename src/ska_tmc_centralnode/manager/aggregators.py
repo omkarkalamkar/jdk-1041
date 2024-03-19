@@ -11,6 +11,8 @@ from ska_tmc_centralnode.utils.constants import (
 
 
 class TelescopeStateAggregatorMid(Aggregator):
+    """Class for TelescopeStateAggregation for Mid Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -91,10 +93,13 @@ class TelescopeStateAggregatorMid(Aggregator):
 
 
 class TelescopeStateAggregatorLow(Aggregator):
+    """Class for TelescopeStateAggregation for low Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """Aggregate method for TelescopeStateAggregatorLow"""
         telescopeStateList = []
         mccs_master = False
         csp_master = False
@@ -150,10 +155,13 @@ class TelescopeStateAggregatorLow(Aggregator):
 
 
 class HealthStateAggregatorMid(Aggregator):
+    """Class for HealthStateAggregation for Mid Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """Aggregation method for HealthState for Mid Telescope"""
         # import debugpy; debugpy.debug_this_thread()
         healthStateList = []
         subarray_count = 0
@@ -161,7 +169,8 @@ class HealthStateAggregatorMid(Aggregator):
         csp_master = False
         sdp_master = False
         # get states of CspMaster, SdpMaster and DishMaster devices
-        # what if one of them is not working (i.e. faulty flag)? i.e. Csp, Sdp or dishes
+        # what if one of them is not working (i.e. faulty flag)? i.e.
+        # Csp, Sdp or dishes
         # number of dishes is also variable
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name.lower()
@@ -208,6 +217,8 @@ class HealthStateAggregatorMid(Aggregator):
 
 
 class HealthStateAggregatorLow(Aggregator):
+    """Class for TelescopeStateAggregation for low Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
@@ -264,10 +275,13 @@ class HealthStateAggregatorLow(Aggregator):
 
 
 class TMCOpStateAggregator(Aggregator):
+    """Class for TelescopeOpStateAggregation for low Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """Aggregate method for TMC Op State"""
         tmcStateList = []
         # get states of all TM devices
         # what if one of them is not working? i.e. tm subarray
@@ -293,11 +307,14 @@ class TMCOpStateAggregator(Aggregator):
 
 
 class TelescopeAvailabilityAggregatorMid(Aggregator):
+    """Class for TelescopeAvailablity for Mid Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
         self.logger = logger
 
     def aggregate(self):
+        """Aggregate method for Mid Telescope Availability"""
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
@@ -335,11 +352,14 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
 
 
 class TelescopeAvailabilityAggregatorLow(Aggregator):
+    """Class for TelescopeAvailablity for low Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
         self.logger = logger
 
     def aggregate(self):
+        """Aggregate method for Low Telescope Availability"""
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )

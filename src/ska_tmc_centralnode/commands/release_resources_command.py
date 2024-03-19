@@ -269,7 +269,8 @@ class ReleaseResources(AssignReleaseResources):
                         return (
                             ResultCode.FAILED,
                             message_or_unique_id,
-                        )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
+                        )  # even if command is rejected by subarraynode ,
+                        # it will be resultcode failed for centralnode
                     if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                         if self.component_manager.command_mapping.get(
                             self.component_manager.command_id
@@ -308,7 +309,8 @@ class ReleaseResources(AssignReleaseResources):
             raise Exception("Error while creating MCCS input json") from e
 
     def _validate_low_json(self, json_argument: dict, req_keys: list):
-        """To validate the low json for release resources command before erterning the queue
+        """To validate the low json for release resources command before
+        erterning the queue
         Args:
             json_argument (dict): Json Argument
             req_keys (list): Required key list to check in json argument

@@ -116,7 +116,8 @@ class CNComponentManagerLow(CNComponentManager):
         )
 
     def reset_subarray_mccsmln_event_count(self, command_id: str):
-        """Reset count function to reset sdp and csp events count and error dictionary"""
+        """Reset count function to reset sdp and csp events count and
+        error dictionary"""
         self.subarray_mccsmln_event.clear()
         self.error_event.clear()
         self.error_count = 0
@@ -138,7 +139,7 @@ class CNComponentManagerLow(CNComponentManager):
         events are verified with respect to this mapping.If there is no
         command_mapping present the event might be of old command.
 
-        :param dev_name: name of the device who's event has been captured in this method
+        :param dev_name: name of the device who's event has been captured
         :type dev_name: str
         :param value: longRunningCommandResult attribute event.
         :type value: tuple

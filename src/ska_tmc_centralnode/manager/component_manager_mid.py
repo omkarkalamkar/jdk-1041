@@ -276,19 +276,25 @@ class CNComponentManagerMid(CNComponentManager):
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.
 
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
-        Whenever there is exception occured , (unique_id,exception_msg) event is first raised
-        and catched in ValueError.The exception_msg and command_id is then passed to long_running_result_callback.
-        Command_mapping contains {centralnode_command_id:unique_id} , all events are verified with respect to this mapping.
-        If there is no command_mapping present the event might be of old command.
+        Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
+        or (unique_id,TaskStatus)
+        Whenever there is exception occured , (unique_id,exception_msg)
+        event is first raised
+        and catched in ValueError.The exception_msg and command_id is then
+        passed to long_running_result_callback.
+        Command_mapping contains {centralnode_command_id:unique_id} ,
+          all events are verified with respect to this mapping.
+        If there is no command_mapping present the event
+          might be of old command.
 
-        :param dev_name: name of the device who's event has been captured in this method
+        :param dev_name: name of the device who's event has been
+          captured in this method
         :type dev_name: str
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
         """
         self.logger.info(
-            "Received longRunningCommandResult event for device: %s, with value: %s",
+            "longRunningCommandResult event for device: %s, with value: %s",
             dev_name,
             value,
         )
@@ -298,7 +304,8 @@ class CNComponentManagerMid(CNComponentManager):
         ):  # ignoring other command events
             try:
                 self.logger.info(
-                    f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
+                    "LongRunningCommandResult event occurred:%s",
+                    result_code_or_exception_or_task_status,
                 )
 
                 if not result_code_or_exception_or_task_status:
@@ -309,18 +316,24 @@ class CNComponentManagerMid(CNComponentManager):
                     == ResultCode.OK
                     and unique_id in self.command_mapping.values()
                 ):
-                    # Update the command_result only if it's "AssignResources" or "ReleaseResources" and successful.
+                    # Update the command_result only if it's
+                    # "AssignResources" or "ReleaseResources" and successful.
                     self.command_result = ResultCode.OK
 
             except ValueError:
                 if unique_id in self.command_mapping.values():
                     self.logger.info(
-                        "Updating LRCRCallback with value: %s for %s for device: %s",
+                        "Updating LRCRCallback with value: %s for %s for"
+                        + " device: %s",
                         unique_id,
                         value,
                         dev_name,
                     )
-                    exception_message = f"Exception occurred on device: {dev_name}: {result_code_or_exception_or_task_status}"
+                    exp_string = (
+                        "Exception occurred on device:"
+                        + str(dev_name)
+                        + str(result_code_or_exception_or_task_status)
+                    )
                     index_of_unique_id = list(
                         self.command_mapping.values()
                     ).index(
@@ -332,7 +345,7 @@ class CNComponentManagerMid(CNComponentManager):
                     self.long_running_result_callback(
                         command_id,
                         ResultCode.FAILED,
-                        exception_msg=exception_message,
+                        exception_msg=exp_string,
                     )
 
     def update_device_state(self, dev_name, state):
@@ -351,17 +364,17 @@ class CNComponentManagerMid(CNComponentManager):
                 f"State event callback for device {dev_name}: {state}"
             )
             if "sdp" in dev_name:
-                # Update SDP Master device name with full FQDN in case of real SDP
+                # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
                 if dev_name in sdp_master_dev_name:
                     dev_name = sdp_master_dev_name
             if "csp" in dev_name:
-                # Update CSP Master device name with full FQDN in case of real CSP
+                # Update CSP Master device name with full FQDN for real CSP
                 csp_master_dev_name = self.get_csp_master_dev_name()
                 if dev_name in csp_master_dev_name:
                     dev_name = csp_master_dev_name
             if "elt/master" in dev_name:
-                # Update Dish Master device name with full FQDN in case of real Dish
+                # Update Dish Master device name with full FQDN for real Dish
                 dish_master_dev_names = self.get_dish_device_names()
                 for dish in dish_master_dev_names:
                     if dev_name in dish:
@@ -390,7 +403,7 @@ class CNComponentManagerMid(CNComponentManager):
                 f"Dish event callback for device {dev_name}: {dish_mode}"
             )
 
-            # Update Dish Master device name with full FQDN in case of real Dish
+            # Update Dish Master device name with full FQDN for real Dish
             dish_master_dev_names = self.get_dish_device_names()
             for dish in dish_master_dev_names:
                 if dev_name in dish:
@@ -467,7 +480,8 @@ class CNComponentManagerMid(CNComponentManager):
                 "LoadDishCfg",
             ]:
                 raise CommandNotAllowed(
-                    "Dish Vcc Config not Set. Please set using LoadDishCfg command. "
+                    "Dish Vcc Config not Set. Please set using LoadDishCfg"
+                    " command. "
                     "Current Telescope State is %s",
                     str(self.op_state_model.op_state),
                 )
@@ -492,6 +506,7 @@ class CNComponentManagerMid(CNComponentManager):
         return True
 
     def update_telescope_availability(self, device_name, event_value):
+        """Updates telescope availablity status"""
         with self.lock:
             if "tm_subarray_node" in device_name:
                 self.subarray_availability[device_name] = event_value
@@ -559,8 +574,10 @@ class CNComponentManagerMid(CNComponentManager):
 
         Result Code | Action
         UNKNOWN     | Load Dish Config using LoadDishCfg command
-        OK          | Dish Vcc already set so set is_dish_vcc_config_set to True
-        FAILED      | Dish Vcc is mismatch so set set is_dish_vcc_config_set to False
+        OK          | Dish Vcc already set so set is_dish_vcc_config_set
+        to True
+        FAILED      | Dish Vcc is mismatch so set set is_dish_vcc_config_set
+        to False
         NOT_ALLOWED | Set is_dish_vcc_config_set to False
         """
         self.logger.info(

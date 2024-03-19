@@ -12,7 +12,8 @@ from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 
 class TelescopeOff(TelescopeOnOff):
     """
-    A class for CentralNode's TelescopeOff() command. Sets the CentralNode into telescopestate to OFF.
+    A class for CentralNode's TelescopeOff() command. Sets the
+      CentralNode into telescopestate to OFF.
     """
 
     def __init__(
@@ -148,6 +149,7 @@ class TelescopeOff(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_off_csp(self):
+        """Turns off the csp Devices"""
         self.logger.info(
             f"Invoking Off command for {self.csp_mln_adapter.dev_name} devices"
         )
@@ -165,6 +167,7 @@ class TelescopeOff(TelescopeOnOff):
         )
 
     def turn_off_sdp(self):
+        """Turn off sdp"""
         self.logger.info(
             f"Invoking Off command for {self.sdp_mln_adapter.dev_name} devices"
         )
@@ -183,6 +186,7 @@ class TelescopeOff(TelescopeOnOff):
         )
 
     def turn_off_subarrays(self):
+        """Turn off the subarrays"""
         self.logger.info(
             f"Invoking Off command for {self.subarray_adapters} devices"
         )
@@ -286,6 +290,7 @@ class TelescopeOff(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_off_mccs(self):
+        """Turn off the mccs"""
         self.logger.info(
             f"Invoking Off command for {self.mccs_mln_adapter.dev_name} device"
         )

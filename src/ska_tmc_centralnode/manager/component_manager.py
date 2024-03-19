@@ -99,7 +99,9 @@ class CNComponentManager(TmcComponentManager):
         max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
-        skuid_service="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
+        skuid_service=(
+            "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
+        ),
         command_timeout=30,
         *args,
         **kwargs,
@@ -107,14 +109,18 @@ class CNComponentManager(TmcComponentManager):
         """
         Initialise a new ComponentManager instance.
 
-        :param op_state_model: the operational state model used by this component
+        :param op_state_model: the operational state model used
+          by this component
             manager
-        :param _input_parameter: allows to specify InputParameter class for TMC Mid or Low
+        :param _input_parameter: allows to specify InputParameter
+          class for TMC Mid or Low
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
-        :param _liveliness_probe: allows to enable/disable LivelinessProbe usage
-        :param _event_receiver: allows to enable/disable EventReceiver usage
+        :param _liveliness_probe: allows to enable/disable
+          LivelinessProbe usage
+        :param _event_receiver: allows to enable/disable
+          EventReceiver usage
         """
 
         self._component = _component or CentralComponent(logger)
@@ -176,6 +182,7 @@ class CNComponentManager(TmcComponentManager):
         )
 
     def stop_event_receiver(self):
+        """Stops the event receiver."""
         if self.event_receiver:
             self.event_receiver_object.stop()
 
@@ -359,12 +366,14 @@ class CNComponentManager(TmcComponentManager):
         )
 
     def _check_if_device_is_responsive(self, dev_names):
+        """checks if the device is responsive"""
         count = 0
         for dev_name in dev_names:
             dev_info = self.get_device(dev_name)
             if dev_info is not None and not dev_info.unresponsive:
                 self.logger.debug(
-                    f"Device {dev_name} dev_info.unresponsive: {dev_info.unresponsive} "
+                    f"Device {dev_name} dev_info.unresponsive:"
+                    + " {dev_info.unresponsive} "
                 )
                 count += 1
         if count == 0:
@@ -407,6 +416,7 @@ class CNComponentManager(TmcComponentManager):
         self.liveliness_probe_object.add_device(dev_name)
 
     def update_input_parameter(self):
+        """updates the input parameter"""
         with self.lock:
             self.input_parameter.update(self)
 
@@ -441,6 +451,7 @@ class CNComponentManager(TmcComponentManager):
             self._telescope_availability_aggregator.aggregate()
 
     def update_event_failure(self, dev_name):
+        """updates event failures"""
         with self.lock:
             devInfo = self.component.get_device(dev_name)
             devInfo.last_event_arrived = time.time()
@@ -462,17 +473,17 @@ class CNComponentManager(TmcComponentManager):
                 f"State event callback for device {dev_name}: {health_state}"
             )
             if "sdp" in dev_name:
-                # Update SDP Master device name with full FQDN in case of real SDP
+                # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
                 if dev_name in sdp_master_dev_name:
                     dev_name = sdp_master_dev_name
             if "csp" in dev_name:
-                # Update CSP Master device name with full FQDN in case of real CSP
+                # Update CSP Master device name with full FQDN for real CSP
                 csp_master_dev_name = self.get_csp_master_dev_name()
                 if dev_name in csp_master_dev_name:
                     dev_name = csp_master_dev_name
             if "elt/master" in dev_name:
-                # Update Dish Master device name with full FQDN in case of real Dish
+                # Update Dish Master device name with full FQDN for real Dish
                 dish_master_dev_names = self.get_dish_device_names()
                 for dish in dish_master_dev_names:
                     if dev_name in dish:
@@ -531,7 +542,9 @@ class CNComponentManager(TmcComponentManager):
         """
         with self.lock:
             self.logger.info(
-                f"assignedResources event callback for device {dev_name}: {assign_resources}"
+                "assignedResources event callback for device %s : %s",
+                dev_name,
+                assign_resources,
             )
             sdp_subarray_dev_name = self.get_sdp_subarray_dev_names()
             for sdp_subarray in sdp_subarray_dev_name:
@@ -583,24 +596,31 @@ class CNComponentManager(TmcComponentManager):
     def update_load_dish_cfg_results(
         self, dev_name: str, value: tuple, is_async_result: bool = False
     ):
-        """This method is used to update the result returned from Csp Master Leaf Node
+        """This method is used to update the result returned
+        from Csp Master Leaf Node
         and returned from Dish Leaf Nodes for SetKValue command.
-        Update result_codes_mapping with dev name as a key and command result as a value
-        If all events are received from all device then aggregate the result
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
-        :param dev_name: name of the device who's event has been captured in this method
+        Update result_codes_mapping with dev name as a key and
+        command result as a value
+        If all events are received from all device then aggregate
+        the result
+        Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
+        or (unique_id,TaskStatus)
+        :param dev_name: name of the device who's event has been
+        captured in this method
         :type dev_name: str
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
-        :param is_async_result: Whether this callback is called from Async command result call or
+        :param is_async_result: Whether this callback is called
+        from Async command result call or
         longRunningCommandResult attribute callback
         Examples of value
         Async callback value: [array([0], dtype=int32), ['']]
         LongRunningCommandResultCallBack value:
-        ('1698838234.9087641-LoadDishCfg', 'Exception occurred, command failed.')
+        ('1698838234.9087641-LoadDishCfg',
+        'Exception occurred, command failed.')
         """
         self.logger.info(
-            "Received longRunningCommandResult event for device: %s, with value: %s",
+            "longRunningCommandResult event for device: %s, with value: %s",
             dev_name,
             value,
         )
@@ -609,7 +629,7 @@ class CNComponentManager(TmcComponentManager):
             if is_async_result:
                 # Set result code and message
                 self.logger.debug(
-                    "Received event from asynchronous command result callback %s",
+                    "event from asynchronous command result callback %s",
                     value,
                 )
                 result_code_or_exception = [value[0][0], value[1][0]]
@@ -618,8 +638,11 @@ class CNComponentManager(TmcComponentManager):
                 unique_id, result_code_or_exception_or_task_status = value
                 if unique_id.endswith("LoadDishCfg"):
                     if result_code_or_exception_or_task_status.isdigit():
-                        # Failed event is called twice one with error message and other with result code
-                        # in case of second Failed event just ignore it as Failed Message already updated in first event call
+                        # Failed event is called twice one with error message
+                        # and other with result code
+                        # in case of second Failed event just ignore
+                        # it as Failed Message already updated in
+                        # first event call
                         if dev_name not in self.result_codes_mapping:
                             result_code_or_exception = [
                                 result_code_or_exception_or_task_status,
@@ -633,18 +656,20 @@ class CNComponentManager(TmcComponentManager):
             if result_code_or_exception:
                 self.result_codes_mapping[dev_name] = result_code_or_exception
                 self.logger.info(
-                    "Dev names for load_dish_cfg values %s and result_codes_mapping are %s",
+                    "Dev names for load_dish_cfg values %s "
+                    + "and result_codes_mapping are %s",
                     self.dev_names_for_load_dish_cfg,
                     self.result_codes_mapping,
                 )
 
-            # When all events received from dishes and Csp master leaf node then aggregate the result
+            # When all events received from dishes and Csp master leaf node
+            # then aggregate the result
             if len(self.dev_names_for_load_dish_cfg) == len(
                 self.result_codes_mapping
             ):
                 # Aggregate the result
                 self.logger.info(
-                    "All Events received for load dish cfg. Aggregating results"
+                    "All Events received for load dish cfg Aggregating results"
                 )
                 self.aggregate_load_dish_cfg_results()
 
@@ -722,7 +747,8 @@ class CNComponentManager(TmcComponentManager):
 
     def _update_imaging(self):
         """
-        Checks if CSP is ON and if atleast one Dish is ON. If both the conditions are true,
+        Checks if CSP is ON and if atleast one Dish is ON. If both
+        the conditions are true,
         it sets imaging to be available.
         """
         dish_on = False
@@ -897,7 +923,10 @@ class CNComponentManager(TmcComponentManager):
         except Exception as e:
             return (
                 False,
-                f"subarray_id key is not present in the input json argument: str{e}",
+                (
+                    "subarray_id key is not present in the input json argument:"
+                    + e
+                ),
             )
 
     def assign_resources(

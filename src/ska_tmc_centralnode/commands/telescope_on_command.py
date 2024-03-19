@@ -113,6 +113,7 @@ class TelescopeOn(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
+        """Turns on the SDP"""
         self.logger.info(
             f"Invoking On command for {self.sdp_mln_adapter.dev_name} devices"
         )
@@ -131,6 +132,7 @@ class TelescopeOn(TelescopeOnOff):
         )
 
     def turn_on_csp(self):
+        """Turns on the csp"""
         self.logger.info(
             f"Invoking On command for {self.csp_mln_adapter.dev_name} devices"
         )
@@ -148,6 +150,7 @@ class TelescopeOn(TelescopeOnOff):
         )
 
     def turn_on_subarrays(self):
+        """Turns on the subarrays"""
         self.logger.info(
             f"Invoking On command for {self.subarray_adapters} devices"
         )
@@ -214,6 +217,7 @@ class TelescopeOn(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_on_mccs(self):
+        """Turns on the MCCS"""
         self.logger.info(
             f"Invoking On command for {self.mccs_mln_adapter.dev_name} device"
         )

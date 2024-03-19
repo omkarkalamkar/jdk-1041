@@ -118,6 +118,7 @@ class StowAntennas(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def set_stow_mode_dishes(self, adapters):
+        """Method for set stow mode for dish"""
         return self.send_command(
             [adapters],
             "Error in calling StowAntennasCommand() on TMC Dish leaf node",
