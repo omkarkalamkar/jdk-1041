@@ -114,7 +114,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
+                "Adapter is created for CSP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -127,7 +129,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
+                "Adapter is created for SDP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.sdp_mln_dev_name,
+                self.sdp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -160,8 +164,12 @@ class TelescopeOnOff(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            message = f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}"
-            return (ResultCode.FAILED, message)
+            faulty_dev = ".".join(error_dev_names)
+            message = f"Error in creating tm subarray adapters {faulty_dev},"
+            return (
+                ResultCode.FAILED,
+                message,
+            )
 
         error_dev_names = []
         num_working = 0
@@ -206,7 +214,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.csp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
+                "Adapter is created for CSP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -222,8 +232,11 @@ class TelescopeOnOff(CentralNodeCommand):
                 )
             )
             self.logger.debug(
-                f"Adapter is created for MCCS Master Leaf Node {self.component_manager.input_parameter.mccs_mln_dev_name}: {self.mccs_mln_adapter}"
+                "Adapter is created for MCCS Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.mccs_mln_dev_name,
+                self.mccs_mln_adapter,
             )
+
         except Exception as e:
             return (
                 self.component_manager.input_parameter.mccs_mln_dev_name,
@@ -235,7 +248,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
+                "Adapter is created for SDP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.sdp_mln_dev_name,
+                self.sdp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -265,8 +280,12 @@ class TelescopeOnOff(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            message = f"Error in creating tm subarray low adapters {'.'.join(error_dev_names)}"
-            return (ResultCode.FAILED, message)
+            faulty_dev = ".".join(error_dev_names)
+            message = f"Error in creating tm subarray adapters {faulty_dev},"
+            return (
+                ResultCode.FAILED,
+                message,
+            )
 
         return ResultCode.OK, ""
 
@@ -313,9 +332,11 @@ class AssignReleaseResources(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
+            faulty_dev = ".".join(error_dev_names)
+            message = f"Error in creating tm subarray adapters {faulty_dev},"
             return (
                 ResultCode.FAILED,
-                f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
+                message,
             )
 
         error_dev_names = []
@@ -388,10 +409,9 @@ class AssignReleaseResources(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            return (
-                ResultCode.FAILED,
-                f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
-            )
+            faulty_dev = ".".join(error_dev_names)
+            message = f"Error in creating tm subarray adapters {faulty_dev},"
+            return (ResultCode.FAILED, message)
 
         return (ResultCode.OK, "")
 
@@ -427,7 +447,9 @@ class LoadDishCfgCommand(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
+                "Adapter is created for CSP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -462,5 +484,4 @@ class LoadDishCfgCommand(CentralNodeCommand):
                 ResultCode.FAILED,
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}",
             )
-
         return (ResultCode.OK, "")
