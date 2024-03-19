@@ -19,12 +19,17 @@ class ReleaseResources(AssignReleaseResources):
     """
     A class for CentralNode's ReleaseResources() command.
 
-    Release all the resources assigned to the given Subarray. It accepts the subarray id, releaseALL flag and
-    receptorIDList in JSON string format. When the releaseALL flag is True, ReleaseAllResources command
-    is invoked on the respective SubarrayNode. In this case, the receptorIDList tag is empty as all
+    Release all the resources assigned to the given Subarray. It accepts the
+    subarray id, releaseALL flag and
+    receptorIDList in JSON string format. When the releaseALL flag is True,
+      ReleaseAllResources command
+    is invoked on the respective SubarrayNode. In this case,
+    the receptorIDList tag is empty as all
     the resources of the Subarray are to be released.
-    When releaseALL is False, ReleaseResources will be invoked on the SubarrayNode and the resources provided
-    in receptorIDList tag, are to be released from the Subarray. The selective release of the resources when
+    When releaseALL is False, ReleaseResources will be invoked on
+      the SubarrayNode and the resources provided
+    in receptorIDList tag, are to be released from the Subarray.
+    The selective release of the resources when
     releaseALL Flag is False is not yet supported.
     """
 
@@ -48,7 +53,8 @@ class ReleaseResources(AssignReleaseResources):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-        """This is a long running method for ReleaseResources command, it executes do hook,
+        """This is a long running method for ReleaseResources command,
+          it executes do hook,
         invokes ReleaseResources command on lower level devices.
 
         :param logger: logger
@@ -90,7 +96,9 @@ class ReleaseResources(AssignReleaseResources):
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
                 command_id=self.component_manager.command_id,
-                lrcr_callback=self.component_manager.long_running_result_callback,
+                lrcr_callback=(
+                    self.component_manager.long_running_result_callback
+                ),
             )
 
     def update_task_status(self, result: ResultCode, message: str = ""):
@@ -121,7 +129,8 @@ class ReleaseResources(AssignReleaseResources):
             .. code-block::
 
                 {
-                    "interface": "https://schema.skao.int/ska-tmc-releaseresources/2.0",
+                    "interface":
+                    "https://schema.skao.int/ska-tmc-releaseresources/2.0",
                     "transaction_id": "txn-....-00001",
                     "subarray_id": 1,
                     "release_all": true,
@@ -178,7 +187,8 @@ class ReleaseResources(AssignReleaseResources):
                     return (
                         ResultCode.FAILED,
                         message_or_unique_id,
-                    )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
+                    )  # even if command is rejected by subarraynode ,
+                    # it will be resultcode failed for centralnode
                 if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                     self.component_manager.command_mapping[
                         self.component_manager.command_id
@@ -199,7 +209,10 @@ class ReleaseResources(AssignReleaseResources):
 
             .. code-block::
 
-                {"interface":"https://schema.skao.int/ska-low-tmc-releaseresources/2.0","transaction_id":"txn-....-00001","subarray_id":1,"release_all":true}
+                {"interface":
+                "https://schema.skao.int/ska-low-tmc-releaseresources/2.0",
+                "transaction_id":"txn-....-00001","subarray_id":1,
+                "release_all":true}
 
         return:
             None
@@ -209,7 +222,8 @@ class ReleaseResources(AssignReleaseResources):
 
             KeyError if input argument json string contains invalid key
 
-            DevFailed if the command execution or command invocation on SubarrayNode is not successful
+            DevFailed if the command execution or command invocation on
+              SubarrayNode is not successful
 
         """
         ret_code, message = self.init_adapters()
@@ -287,14 +301,16 @@ class ReleaseResources(AssignReleaseResources):
     def release_all_resources(self, adapter):
         return self.send_command(
             [adapter],
-            f"Error in calling ReleaseAllResources() on {adapter.dev_name} device",
+            f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
+            + " device",
             "ReleaseAllResources",
         )
 
     def release_all_resources_mccs(self, adapter, argin):
         return self.send_command(
             [adapter],
-            f"Error in calling ReleaseAllResources() on {adapter.dev_name} device",
+            f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
+            + "device",
             "ReleaseAllResources",
             json.dumps(argin),
         )
@@ -324,5 +340,6 @@ class ReleaseResources(AssignReleaseResources):
                 )
         return (
             True,
-            "The json argument has all the required keys. Validation successful.",
+            "The json argument has all the required keys. Validation"
+            + " successful.",
         )

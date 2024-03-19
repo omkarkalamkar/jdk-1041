@@ -37,7 +37,8 @@ class TelescopeStandby(TelescopeOnOff):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-        """This is a long running method for TelescopeStandby command, it executes do hook,
+        """This is a long running method for TelescopeStandby command,
+        it executes do hook,
         invokes TelescopeStandby command on lower level devices.
 
         :param logger: logger
@@ -248,36 +249,43 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_sdp(self):
         """Turns sdp to standby"""
         self.logger.info(
-            f"Invoking Standby command for {self.sdp_mln_adapter.dev_name} devices"
+            f"Invoking Standby command for {self.sdp_mln_adapter.dev_name}"
+            + "devices"
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling Standby command for {self.sdp_mln_adapter.dev_name}",
+                "Error in calling Standby command for"
+                + self.sdp_mln_adapter.dev_name,
                 "Standby",
             )
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.sdp_mln_adapter.dev_name} is not available to receive Standby command"
+                self.sdp_mln_adapter.dev_name
+                + " is not available to receive Standby command"
             ],
         )
 
     def turn_standby_csp(self):
         """Turns csp to standby"""
         self.logger.info(
-            f"Invoking Standby command for {self.csp_mln_adapter.dev_name} devices"
+            "Invoking Standby command for"
+            + +self.csp_mln_adapter.dev_name
+            + "devices"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling Standby command for {self.csp_mln_adapter.dev_name}",
+                "Error in calling Standby command for "
+                + self.csp_mln_adapter.dev_name,
                 "Standby",
             )
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.csp_mln_adapter.dev_name} is not available to receive Standby command"
+                f"{self.csp_mln_adapter.dev_name} is not available to receive"
+                + " Standby command"
             ],
         )
 
@@ -289,13 +297,15 @@ class TelescopeStandby(TelescopeOnOff):
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(
                 [self.mccs_mln_adapter],
-                f"Error in calling Standby command for {self.mccs_mln_adapter.dev_name}",
+                "Error in calling Standby command for"
+                + self.mccs_mln_adapter.dev_name,
                 "Standby",
             )
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.mccs_mln_adapter.dev_name} is not available to receive Standby command"
+                f"{self.mccs_mln_adapter.dev_name} is not available to receive"
+                + " Standby command"
             ],
         )
 

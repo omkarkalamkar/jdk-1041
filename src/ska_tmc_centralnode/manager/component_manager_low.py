@@ -291,7 +291,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self._health_state_aggregator.aggregate()
             )
 
-    def is_command_allowed(self, command_name=None):
+    def is_command_allowed(self, command_name=None) -> bool:
         """
         Checks whether this command is allowed
         It checks that the device is in a state

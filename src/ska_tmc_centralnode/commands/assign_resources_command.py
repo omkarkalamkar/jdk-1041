@@ -3,7 +3,7 @@ AssignResources class for CentralNode.
 """
 import json
 import threading
-from typing import Callable, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
@@ -112,7 +112,7 @@ class AssignResources(AssignReleaseResources):
                 self.component_manager.command_id
             )
 
-    def do_mid(self, argin) -> Tuple[ResultCode, str]:
+    def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
         """
             Method to invoke AssignResources command on Subarray.
 
@@ -285,7 +285,9 @@ class AssignResources(AssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def update_resource_config_file(self, json_argument, id):
+    def update_resource_config_file(
+        self, json_argument: dict, id: str
+    ) -> None:
         """This method utilizes SKUID service to generate unique sb_id
         / eb_id and pb_id"""
         # New type of id "eb_id" is used to distinguish between real
@@ -325,7 +327,7 @@ class AssignResources(AssignReleaseResources):
                 "processing_blocks key not present in the input json argument"
             )
 
-    def do_low(self, argin: str):
+    def do_low(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -490,7 +492,9 @@ class AssignResources(AssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def _validate_low_json(self, json_argument, req_keys):
+    def _validate_low_json(
+        self, json_argument: dict, req_keys: List
+    ) -> Tuple[bool, str]:
         """To validate the low json for assign resources command before
           entering the queue
         Args:

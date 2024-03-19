@@ -12,7 +12,8 @@ class TelescopeOn(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOn() command.
 
-    TelescopeOn command on Central node enables the telescope to perform further operations
+    TelescopeOn command on Central node enables the telescope to perform
+    further operations
     and observations. It Invokes On command on lower level devices.
     """
 
@@ -36,7 +37,8 @@ class TelescopeOn(TelescopeOnOff):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-        """This is a long running method for TelescopeOn command, it executes do hook,
+        """This is a long running method for TelescopeOn command, it executes
+        do hook,
         invokes TelescopeOn command on lowe level devices.
 
         :param logger: logger
@@ -127,7 +129,8 @@ class TelescopeOn(TelescopeOnOff):
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.sdp_mln_adapter.dev_name} is not available to receive On command"
+                self.sdp_mln_adapter.dev_name
+                + " is not available to receive On command"
             ],
         )
 
@@ -139,13 +142,15 @@ class TelescopeOn(TelescopeOnOff):
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling On command for {self.csp_mln_adapter.dev_name}",
+                "Error in calling On command for"
+                + self.csp_mln_adapter.dev_name,
                 "On",
             )
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.csp_mln_adapter.dev_name} is not available to receive On command"
+                f"{self.csp_mln_adapter.dev_name} is not available to receive"
+                + " On command"
             ],
         )
 
@@ -164,7 +169,8 @@ class TelescopeOn(TelescopeOnOff):
     def set_standby_fp_mode_dishes(self):
         return self.send_command(
             self.dish_adapters,
-            f"Error in calling SetStandbyFPMode() command on {self.dish_adapters}",
+            "Error in calling SetStandbyFPMode() command on"
+            + self.dish_adapters,
             "SetStandbyFPMode",
         )
 
@@ -224,12 +230,14 @@ class TelescopeOn(TelescopeOnOff):
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(
                 [self.mccs_mln_adapter],
-                f"Error in calling On command for {self.mccs_mln_adapter.dev_name}",
+                "Error in calling On command for"
+                + self.mccs_mln_adapter.dev_name,
                 "On",
             )
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.mccs_mln_adapter.dev_name} is not available to receive On command"
+                self.mccs_mln_adapter.dev_name
+                + "is not available to receive On command"
             ],
         )

@@ -18,8 +18,9 @@ from ska_tmc_centralnode import release
 class AbstractCentralNode(TMCBaseDevice):
     """
     Central Node is a coordinator of the complete Telescope system.
-    Central Node is inherited from TMCBaseDevice class which is further inherited
-    from SKABaseDevice class. TMCBaseDevice class contains attributes common
+    Central Node is inherited from TMCBaseDevice class which is further
+    inherited from SKABaseDevice class. TMCBaseDevice class contains
+    attributes common
     to CentralNode and SubarrayNode.
     """
 
@@ -64,7 +65,8 @@ class AbstractCentralNode(TMCBaseDevice):
 
     SkuidService = device_property(
         dtype="DevString",
-        default_value="ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870",
+        default_value="ska-ser-skuid-test-svc.ska-tmc-centralnode"
+        + ".svc.cluster.local:9870",
     )
 
     MaxWorker = device_property(dtype="DevUShort", default_value=1)
@@ -159,7 +161,8 @@ class AbstractCentralNode(TMCBaseDevice):
             """
             Initializes the attributes and properties of the Central Node.
 
-            :return: A tuple containing a return code and a string message indicating status.
+            :return: A tuple containing a return code and a string message
+              indicating status.
              The message is for information purpose only.
 
             :rtype: (ReturnCode, str)
@@ -276,9 +279,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def is_TelescopeOn_allowed(self):
         """
-        Checks whether this command is allowed to be run in current device state.
+        Checks whether this command is allowed to be run in current device
+          state.
 
-        :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device
+          state.
 
         :rtype: boolean
         """
@@ -288,7 +293,8 @@ class AbstractCentralNode(TMCBaseDevice):
     @DebugIt()
     def TelescopeOn(self):
         """
-        This command invokes TelescopeOn() command on DishLeadNode, CspMasterLeafNode,
+        This command invokes TelescopeOn() command on DishLeadNode,
+        CspMasterLeafNode,
         SdpMasterLeafNode.
         """
         handler = self.get_command_object("TelescopeOn")
@@ -297,9 +303,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def is_TelescopeStandby_allowed(self):
         """
-        Checks whether this command is allowed to be run in current device state.
+        Checks whether this command is allowed to be run in current device
+        state.
 
-        :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device
+        state.
 
         :rtype: boolean
         """
@@ -321,9 +329,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def is_TelescopeOff_allowed(self):
         """
-        Checks whether this command is allowed to be run in current device state.
+        Checks whether this command is allowed to be run in current
+        device state.
 
-        :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current
+        device state.
 
         :rtype: boolean
         """
@@ -332,7 +342,8 @@ class AbstractCentralNode(TMCBaseDevice):
     @command(dtype_out="DevVarLongStringArray")
     def TelescopeOff(self):
         """
-        This command invokes SetStandbyLPMode() command on DishLeafNode, Off() command
+        This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
+        command
         on CspMasterLeafNode and SdpMasterLeafNode.
 
         """
@@ -342,9 +353,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def is_On_allowed(self):
         """
-        Checks whether this command is allowed to be run in current device state.
+        Checks whether this command is allowed to be run in current device
+        state.
 
-        :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device
+          state.
 
         :rtype: boolean
 
@@ -357,7 +370,8 @@ class AbstractCentralNode(TMCBaseDevice):
     @DebugIt()
     def On(self):
         """
-        This command invokes On command on DishLeadNode, TelescopeOn() command on CspMasterLeafNode,
+        This command invokes On command on DishLeadNode, TelescopeOn()
+          command on CspMasterLeafNode,
         SdpMasterLeafNode.
         """
         handler = self.get_command_object("On")
@@ -366,9 +380,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def is_Off_allowed(self):
         """
-        Checks whether this command is allowed to be run in current device state.
+        Checks whether this command is allowed to be run in current device
+        state.
 
-        :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device
+        state.
 
         :rtype: boolean
         """
@@ -390,9 +406,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def is_Standby_allowed(self):
         """
-        Checks whether this command is allowed to be run in current device state.
+        Checks whether this command is allowed to be run in current device
+        state.
 
-        :return: True if this command is allowed to be run in current device state.
+        :return: True if this command is allowed to be run in current device
+          state.
 
         :rtype: boolean
         """
@@ -414,9 +432,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def is_AssignResources_allowed(self):
         """
-        Checks whether this command is allowed to be run in current device state.
+        Checks whether this command is allowed to be run in current device
+        state.
 
-        :return: True if this command is allowed to be run in current device state
+        :return: True if this command is allowed to be run in current device
+        state
 
         :rtype: boolean
         """
@@ -424,9 +444,12 @@ class AbstractCentralNode(TMCBaseDevice):
 
     @command(
         dtype_in="str",
-        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
-        "DevShort\ndish: JSON object consisting\n- receptor_ids: DevVarStringArray. "
-        "The individual string should contain dish numbers in string format with "
+        doc_in="The string in JSON format. The JSON contains following values:"
+        "nsubarrayID: "
+        "DevShort\ndish: JSON object consisting\n- receptor_ids:"
+        " DevVarStringArray. "
+        "The individual string should contain dish numbers in string"
+        " format with "
         "preceding zeroes upto 3 digits. E.g. SKA001, SKA002",
         dtype_out="DevVarLongStringArray",
         doc_out="information-only string",
@@ -434,7 +457,8 @@ class AbstractCentralNode(TMCBaseDevice):
     @DebugIt()
     def AssignResources(self, argin):
         """
-        AssignResources command invokes the AssignResources command on lower level devices.
+        AssignResources command invokes the AssignResources command on
+         lower level devices.
         """
         handler = self.get_command_object("AssignResources")
         result_code, unique_id = handler(argin)
@@ -442,9 +466,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def is_ReleaseResources_allowed(self):
         """
-        Checks whether ReleaseResources command is allowed to be run in current device state.
+        Checks whether ReleaseResources command is allowed to be run in
+         current device state.
 
-        :return: True if ReleaseResources command is allowed to be run in current device state.
+        :return: True if ReleaseResources command is allowed to be
+        run in current device state.
 
         :rtype: boolean
         """
@@ -452,7 +478,8 @@ class AbstractCentralNode(TMCBaseDevice):
 
     @command(
         dtype_in="str",
-        doc_in="The string in JSON format. The JSON contains following values:\nsubarrayID: "
+        doc_in="The string in JSON format. The JSON contains following values:"
+        "\nsubarrayID: "
         "releaseALL boolean as true and receptor_ids.",
         dtype_out="DevVarLongStringArray",
         doc_out="information-only string",
@@ -469,9 +496,11 @@ class AbstractCentralNode(TMCBaseDevice):
     # TODO: Check with OET if these commands are required, else can be removed
     # def is_StartUpTelescope_allowed(self):
     #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    #     Checks whether this command is allowed to be run in current
+    #     device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+    #     :return: True if this command is allowed to be run in
+    #       current device state.
 
     #     :rtype: boolean
     #     """
@@ -486,7 +515,8 @@ class AbstractCentralNode(TMCBaseDevice):
     # def StartUpTelescope(self):
     #     """
     #     This command invokes SetOperateMode() command on DishLeadNode,
-    #     TelescopeOn() command on CspMasterLeafNode, SdpMasterLeafNode and SubarrayNode
+    #     TelescopeOn() command on CspMasterLeafNode, SdpMasterLeafNode
+    #      and SubarrayNode
     #     """
     #     self.log_state(
     #         "Device states before executing Telescope StartUp command"
@@ -504,9 +534,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     # def is_StandByTelescope_allowed(self):
     #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    #     Checks whether this command is allowed to be run in current
+    #     device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+    #     :return: True if this command is allowed to be run in current
+    #     device state.
 
     #     :rtype: boolean
     #     """
@@ -519,8 +551,9 @@ class AbstractCentralNode(TMCBaseDevice):
     # )
     # def StandByTelescope(self):
     #     """
-    #     This command invokes SetStandbyLPMode() command on DishLeafNode, TelescopeStandBy() command
-    #     on CspMasterLeafNode and SdpMasterLeafNode and TelescopeOff() command
+    #     This command invokes SetStandbyLPMode() command on DishLeafNode,
+    #      TelescopeStandBy() command
+    #     on CspMasterLeafNode and SdpMasterLeafNode and TelescopeOff command
     #     on SubarrayNode.
     #     """
     #     self.log_state(
