@@ -306,7 +306,8 @@ class TestAssignResourceValidator:
     ]
 
     def test_validate_good_json(self):
-        """This function tests the validate method when good formatted json is provided"""
+        """This function tests the validate method when good
+        formatted json is provided"""
 
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
@@ -339,7 +340,8 @@ class TestAssignResourceValidator:
 
     def test_validate_incorrect_receptor_id_length(self):
         """
-        Tests that InvalidReceptorIdError is raised when a receptor id given is not of correct length.
+        Tests that InvalidReceptorIdError is raised when a receptor
+        id given is not of correct length.
         """
 
         input_json = sample_assign_resources_request
@@ -356,7 +358,8 @@ class TestAssignResourceValidator:
 
     def test_validate_receptor_ids_with_no_digits(self):
         """
-        Tests that InvalidReceptorIdError is raised when last 3 characters in the receptor id are not digits.
+        Tests that InvalidReceptorIdError is raised when last 3
+        characters in the receptor id are not digits.
         """
 
         input_json = sample_assign_resources_request
@@ -374,7 +377,8 @@ class TestAssignResourceValidator:
 
     def test_validate_receptor_ids_with_incorrect_prefix(self):
         """
-        Tests that InvalidReceptorIdError is raised when last 3 characters in the receptor id are not digits.
+        Tests that InvalidReceptorIdError is raised when last 3
+          characters in the receptor id are not digits.
         """
 
         input_json = sample_assign_resources_request
@@ -392,7 +396,8 @@ class TestAssignResourceValidator:
 
     def test_validate_receptor_ids_with_incorrect_ska_dish_id(self):
         """
-        Tests that InvalidReceptorIdError is raised when SKA dish id is invalid.
+        Tests that InvalidReceptorIdError is raised when
+          SKA dish id is invalid.
         """
 
         input_json = sample_assign_resources_request
@@ -410,7 +415,8 @@ class TestAssignResourceValidator:
 
     def test_validate_receptor_ids_with_incorrect_mkt_dish_id(self):
         """
-        Tests that InvalidReceptorIdError is raised when MeerKAT dish id is invalid.
+        Tests that InvalidReceptorIdError is raised when
+          MeerKAT dish id is invalid.
         """
 
         input_json = sample_assign_resources_request
@@ -428,7 +434,8 @@ class TestAssignResourceValidator:
 
     def test_validate_receptor_not_present(self):
         """
-        Tests that ResourceNotPresentError is raised when a receptor is not available.
+        Tests that ResourceNotPresentError is raised when a
+        receptor is not available.
         """
 
         input_json = sample_assign_resources_request

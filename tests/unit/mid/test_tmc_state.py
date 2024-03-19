@@ -48,6 +48,7 @@ def devices_to_load():
 
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
+    """initialise device"""
     set_device_state(
         "ska_mid/tm_subarray_node/1", tango.DevState.INIT, devFactory
     )
@@ -55,6 +56,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
 
 
 def test_tmc_state_init(tango_context):
+    """tests tmc state initialisation"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_init(devFactory, cm, 15)
@@ -81,6 +83,7 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
 
 
 def test_tmc_state_fault_over_standby(tango_context):
+    """tests for tmc state fault over standby"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_one_device_fault(devFactory, cm, 15)
@@ -88,6 +91,7 @@ def test_tmc_state_fault_over_standby(tango_context):
 
 
 def set_device_standby(devFactory, cm, expected_elapsed_time):
+    """sets device to standby"""
     set_device_state(
         "ska_mid/tm_subarray_node/1", tango.DevState.STANDBY, devFactory
     )

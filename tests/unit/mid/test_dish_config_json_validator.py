@@ -9,7 +9,9 @@ class TestDishConfigValidator:
     def test_valid_dish_config_json(self):
         """Validate Correct Dish Config json"""
         dish_config_json = {
-            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "interface": (
+                "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
+            ),
             "dish_parameters": {
                 "SKA001": {"vcc": 1, "k": 11},
                 "SKA100": {"vcc": 2, "k": 101},
@@ -24,7 +26,9 @@ class TestDishConfigValidator:
     def test_dish_config_validator_for_invalid_dishids(self):
         """Validate Dish Config Json validator when dish ids are invalid"""
         dish_config_json = {
-            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "interface": (
+                "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
+            ),
             "dish_parameters": {
                 "ABC001": {"vcc": 1, "k": 11},
                 "SKA100": {"vcc": 2, "k": 101},
@@ -38,9 +42,12 @@ class TestDishConfigValidator:
         assert msg == "Invalid Dish id ABC001 provided in Json"
 
     def test_dish_config_validator_for_invalid_dishids_range(self):
-        """Validate Dish Config Json validator when dish ids are not within range"""
+        """Validate Dish Config Json validator when dish ids
+        are not within range"""
         dish_config_json = {
-            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "interface": (
+                "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
+            ),
             "dish_parameters": {
                 "SKA187": {"vcc": 1, "k": 11},
                 "SKA100": {"vcc": 2, "k": 101},
@@ -56,7 +63,9 @@ class TestDishConfigValidator:
     def test_dish_config_validator_for_duplicate_vcc_ids(self):
         """Validate Dish Config Json validator when vcc ids are not unique"""
         dish_config_json = {
-            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "interface": (
+                "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
+            ),
             "dish_parameters": {
                 "SKA001": {"vcc": 1, "k": 11},
                 "SKA100": {"vcc": 2, "k": 101},

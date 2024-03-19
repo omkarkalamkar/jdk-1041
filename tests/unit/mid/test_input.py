@@ -2,6 +2,7 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 def test_properties():
+    """Test for testing properties"""
     input = InputParameterMid(None)
     input.subarray_dev_names = ("1", "2")
     assert input.subarray_dev_names == ("1", "2")

@@ -24,6 +24,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices which needs to be loaded"""
     return (
         {
             "class": HelperSubArrayDevice,
@@ -48,6 +49,7 @@ def devices_to_load():
 
 
 def set_devices_on(cm, devFactory, expected_elapsed_time):
+    """sets the given devices to ON"""
     set_devices_state(
         devices=[
             "ska_mid/tm_subarray_node/1",
@@ -65,9 +67,11 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
 
 @pytest.mark.skip(reason="behaviour for this test case is not stable")
 def test_tmc_state_on(tango_context):
+    """Tests tmc stats is on"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_on(
         cm, devFactory, 20
-    )  # Here expected elapsed time is set to 20 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
+    )  # Here expected elapsed time is set to 20 since  set_state()
+    # API is taking more time to set the state and hence actual elapsed time is increasing
     assert cm.component.tmc_op_state == tango.DevState.ON
