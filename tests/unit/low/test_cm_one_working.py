@@ -23,6 +23,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invocation"""
     return (
         {
             "class": SKABaseDevice,
@@ -41,6 +42,7 @@ def devices_to_load():
 def test_low_one_working_other_faulty(
     tango_context,
 ):
+    """Test low one working other faulty devices"""
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerLow(

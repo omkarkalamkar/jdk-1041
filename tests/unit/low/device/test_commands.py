@@ -24,6 +24,7 @@ def central_node_device(request):
 
 @pytest.mark.SKA_low
 def test_commands(central_node_device):
+    """Test Command for low telescope"""
     try:
         central_node_device.TelescopeOn()
         central_node_device.TelescopeOff()

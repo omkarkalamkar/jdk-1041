@@ -40,6 +40,7 @@ def devices_to_load():
 
 
 def test_one_working_other_faulty(tango_context):
+    """Test with one working and other faulty devices"""
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(

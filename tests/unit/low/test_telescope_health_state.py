@@ -30,6 +30,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invocation."""
     return (
         {
             "class": HelperSubArrayDevice,
@@ -65,6 +66,7 @@ def devices_to_load():
 
 @pytest.mark.SKA_low
 def test_set_health_state_ok(tango_context):
+    """Test set healthstate ok"""
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, _input_parameter=InputParameterLow(None)
     )

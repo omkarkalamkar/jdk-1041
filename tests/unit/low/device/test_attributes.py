@@ -30,6 +30,7 @@ def central_node_device(request):
 
 @pytest.mark.SKA_low
 def test_attributes(central_node_device):
+    """Test attributes for low"""
     assert central_node_device.State() in [DevState.UNKNOWN, DevState.ON]
     assert central_node_device.HealthState == HealthState.OK
     assert central_node_device.telescopeHealthState == HealthState.UNKNOWN

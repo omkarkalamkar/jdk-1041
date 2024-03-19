@@ -32,6 +32,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invocation."""
     return (
         {
             "class": CNHelperSubArrayDevice,

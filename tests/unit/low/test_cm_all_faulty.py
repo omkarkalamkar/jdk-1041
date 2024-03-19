@@ -29,6 +29,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invokation"""
     return (
         {
             "class": HelperBaseDevice,
@@ -52,6 +53,7 @@ def devices_to_load():
 
 @pytest.mark.SKA_low
 def test_all_low_devices_faulty():
+    """Test all low devices faulty"""
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerLow(
         op_state_model,

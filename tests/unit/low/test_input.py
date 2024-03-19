@@ -5,6 +5,7 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 
 @pytest.mark.SKA_low
 def test_properties():
+    """Test properties for telescope low."""
     input = InputParameterLow(None)
     input.subarray_dev_names = ("1", "2")
     assert input.subarray_dev_names == ("1", "2")
