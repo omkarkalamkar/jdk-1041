@@ -13,7 +13,7 @@
 CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
 PROJECT = ska-tmc-centralnode
 KUBE_APP = ska-tmc-centralnode
-TELESCOPE ?= SKA-mid
+TELESCOPE ?= SKA-low
 
 # KUBE_NAMESPACE defines the Kubernetes Namespace that will be deployed to
 # using Helm.  If this does not already exist it will be created
