@@ -37,7 +37,7 @@ def test_dln_kvalue_validation_result(tango_context):
         is_json=True,
     ), "Timeout while waiting for validating attribute value"
 
-    # Verify if all dish leaf node gives k-value validation result as ResultCode.Ok
+    # Verify if all dish leaf node gives k-value validation ResultCode.Ok
     dish_leaf_node_01.SetDirectkValueValidationResult(str(int(ResultCode.OK)))
 
     assert wait_and_validate_device_attribute_value(

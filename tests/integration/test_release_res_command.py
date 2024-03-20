@@ -289,7 +289,8 @@ def test_release_resources_error_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occurred, command failed.",
+            "Exception occurred on device: {MID_SUBARRAY_DEVICE}:"
+            + "Exception occurred, command failed.",
         ),
         lookahead=6,
     )
@@ -553,7 +554,9 @@ def test_release_resources_error_aggregation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on the following devices: {LOW_SUBARRAY_DEVICE}: Exception occurred, command failed.",
+            "Exception occurred on the following devices:"
+            + LOW_SUBARRAY_DEVICE
+            + ": Exception occurred, command failed.",
         ),
         lookahead=6,
     )

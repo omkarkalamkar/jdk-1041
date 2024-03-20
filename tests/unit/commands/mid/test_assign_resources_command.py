@@ -158,7 +158,8 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
         json_argument, task_callback=task_callback
     )
     assert (
-        "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-assignresources/2.1"
+        "JSON validation error: data is not compliant with"
+        + " https://schema.skao.int/ska-tmc-assignresources/2.1"
         in message
     )
     assert res_code == TaskStatus.REJECTED

@@ -122,7 +122,8 @@ class TelescopeOn(TelescopeOnOff):
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling On command for {self.sdp_mln_adapter.dev_name}",
+                f"Error in calling On command for\
+                      {self.sdp_mln_adapter.dev_name}",
                 "On",
             )
 

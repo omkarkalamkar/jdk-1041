@@ -12,6 +12,8 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 
 
 class CentralNodeCommand(TMCCommand):
+    """Central node abstract command class"""
+
     def __init__(self, component_manager, *args, logger=None, **kwargs):
         super().__init__(component_manager, *args, logger=logger, **kwargs)
         self.timeout_id = f"{time.time()}_{self.__class__.__name__}"
@@ -19,6 +21,7 @@ class CentralNodeCommand(TMCCommand):
         self.task_callback: Callable | None = None
 
     def init_adapters(self) -> Tuple[ResultCode, str]:
+        """Initialises adapters"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
         ):
@@ -29,6 +32,7 @@ class CentralNodeCommand(TMCCommand):
         return result, message
 
     def do(self, argin=None):
+        """Do method for abstract command class"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
         ):
@@ -45,6 +49,7 @@ class CentralNodeCommand(TMCCommand):
         err_msg: str,
         command_name: str,
     ):
+        """Invokes command on adapter"""
         return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
         message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
         try:
@@ -64,6 +69,7 @@ class CentralNodeCommand(TMCCommand):
         return return_codes, message_or_unique_ids
 
     def send_command(self, adapters, description, command, argin=None):
+        """Submit command in progress"""
         if argin is None:
             return self.invoke_command(
                 adapters, operator.methodcaller(command), description, command
@@ -76,18 +82,22 @@ class CentralNodeCommand(TMCCommand):
         )
 
     def reject_command(self, message):
+        """Rejects commands"""
         self.logger.error(message)
         return TaskStatus.REJECTED, message
 
     def adapter_error_message(
         self, dev_name: str, error
     ) -> Tuple[ResultCode, str]:
+        """Adapter Error message"""
         message = f"Adapter creation failed for {dev_name}: {str(error)}"
         self.logger.error(message)
         return ResultCode.FAILED, message
 
 
 class TelescopeOnOff(CentralNodeCommand):
+    """Central node abstract command class"""
+
     def __init__(
         self,
         component_manager,
@@ -104,6 +114,7 @@ class TelescopeOnOff(CentralNodeCommand):
         self.dish_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
+        """Initialises adapters for mid"""
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         self.subarray_adapters = []
@@ -204,6 +215,7 @@ class TelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
+        """Initialises adapter low"""
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         self.mccs_mln_adapter = None
@@ -291,6 +303,8 @@ class TelescopeOnOff(CentralNodeCommand):
 
 
 class AssignReleaseResources(CentralNodeCommand):
+    """AssignResources command class"""
+
     def __init__(
         self,
         component_manager,
@@ -305,6 +319,7 @@ class AssignReleaseResources(CentralNodeCommand):
         self.subarray_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
+        """Initialises adapter for mid"""
         self.dish_adapters = []
         self.subarray_adapters = []
         error_dev_names = []
@@ -371,6 +386,7 @@ class AssignReleaseResources(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
+        """Initia"""
         self.mccs_mln_adapter = None
         self.subarray_adapters = []
 

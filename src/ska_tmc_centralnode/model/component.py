@@ -77,6 +77,7 @@ class CentralComponent(TmcComponent):
         _update_imaging_callback=None,
         _telescope_availability_callback=None,
     ):
+        """Sets Op state callback"""
         self._update_device_callback = _update_device_callback
         self._update_telescope_state_callback = (
             _update_telescope_state_callback
@@ -91,28 +92,34 @@ class CentralComponent(TmcComponent):
         )
 
     def _invoke_device_callback(self, dev_info):
+        """invokes device callback"""
         if self._update_device_callback is not None:
             self._update_device_callback(dev_info)
 
     def _invoke_telescope_state_callback(self):
+        """invokes telescope state callback"""
         if self._update_telescope_state_callback is not None:
             self._update_telescope_state_callback(self.telescope_state)
 
     def _invoke_telescope_health_state_callback(self):
+        """invokes telescope health state callback"""
         if self._update_telescope_health_state_callback is not None:
             self._update_telescope_health_state_callback(
                 self.telescope_health_state
             )
 
     def _invoke_tmc_op_state_callback(self):
+        """Invokes tmc op_state callback"""
         if self._update_tmc_op_state_callback is not None:
             self._update_tmc_op_state_callback(self.tmc_op_state)
 
     def _invoke_imaging_callback(self):
+        """Invokes imaging callback"""
         if self._update_imaging_callback is not None:
             self._update_imaging_callback(self.imaging)
 
     def _invoke_telescope_availability_callback(self):
+        """Invokes telescope availablity callback"""
         if self._telescope_availability_callback is not None:
             self._telescope_availability_callback(self.telescope_availability)
 
@@ -172,7 +179,8 @@ class CentralComponent(TmcComponent):
 
     def update_device(self, dev_info):
         """
-        Update (or add if missing) Device Information into the list of the component.
+        Update (or add if missing) Device Information into the list of the
+        component.
 
         :param dev_info: a DeviceInfo object
         """
@@ -185,7 +193,8 @@ class CentralComponent(TmcComponent):
 
     def update_device_exception(self, dev_info, exception):
         """
-        Update (or add if missing) Device Information into the list of the component.
+        Update (or add if missing) Device Information into the list of the
+          component.
 
         :param dev_info: a DeviceInfo object
         """
@@ -375,9 +384,11 @@ class CentralComponent(TmcComponent):
             self._pst = value
 
     def to_json(self):
+        """Converts dictionary to json"""
         return json.dumps(self.to_dict())
 
     def to_dict(self):
+        """Converts devinfo to dict"""
         devices = []
         for dev in self.devices:
             devices.append(dev.to_dict())
@@ -396,6 +407,8 @@ class CentralComponent(TmcComponent):
 
 
 class MCCSDeviceInfo(DeviceInfo):
+    """Class for MCCS DeviceInfo"""
+
     def __init__(self, dev_name, _unresponsive=False):
         super().__init__(dev_name, _unresponsive)
         self.resources = {}

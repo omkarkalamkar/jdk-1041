@@ -18,7 +18,8 @@ from tests.settings import (
 )
 
 # TODO: For future reference.
-# def check_subarray_availability(central_node, subarray_fqdn, expected_status):
+# def check_subarray_availability(central_node, subarray_fqdn,
+# expected_status):
 #     start_time = time.time()
 #     elapsed_time = 0
 #     while (json.loads(central_node.telescopeAvailability))["tmc_subarrays"][
@@ -28,11 +29,12 @@ from tests.settings import (
 #         time.sleep(0.1)
 #         if elapsed_time > TIMEOUT:
 #             pytest.fail(
-#                 "Timeout occurred while checking the SubarrayNode availability."
+#             "Timeout occurred while checking the SubarrayNode availability."
 #             )
 
 
 def check_cspmln_availability(central_node, expected_status):
+    """checks cspmln availablity"""
     start_time = time.time()
     elapsed_time = 0
     while (json.loads(central_node.telescopeAvailability))[
@@ -42,11 +44,13 @@ def check_cspmln_availability(central_node, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the CspMasterLeafNode availability."
+                "Timeout occurred while checking \
+                    the CspMasterLeafNode availability."
             )
 
 
 def check_sdpmln_availability(central_node, expected_status):
+    """checks sdpmln availablity"""
     start_time = time.time()
     elapsed_time = 0
     while (json.loads(central_node.telescopeAvailability))[
@@ -56,11 +60,13 @@ def check_sdpmln_availability(central_node, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the SdpMasterLeafNode availability."
+                "Timeout occurred while checking \
+                the SdpMasterLeafNode availability."
             )
 
 
 def check_mccsmln_availability(central_node, expected_status):
+    """Checks mccsmln availability"""
     start_time = time.time()
     elapsed_time = 0
     while (json.loads(central_node.telescopeAvailability))[
@@ -70,13 +76,15 @@ def check_mccsmln_availability(central_node, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the MccsMasterLeafNode availability."
+                "Timeout occurred while checking the\
+              MccsMasterLeafNode availability."
             )
 
 
 def telescope_availability(
     tango_context, central_node_fqdn, change_event_callbacks
 ):
+    """Checks telescope availability"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
     mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
@@ -110,7 +118,8 @@ def telescope_availability(
     check_sdpmln_availability(central_node, False)
 
     logger.info(
-        f"telescopeAvailability attribute value: {central_node.telescopeAvailability}"
+        f"telescopeAvailability attribute value:\
+              {central_node.telescopeAvailability}"
     )
 
     subarray_node.SetisSubarrayAvailable(True)
@@ -131,7 +140,8 @@ def telescope_availability(
         check_mccsmln_availability(central_node, True)
 
     logger.info(
-        f"telescopeAvailability attribute value: {central_node.telescopeAvailability}"
+        f"telescopeAvailability attribute value:\
+              {central_node.telescopeAvailability}"
     )
 
     check_cspmln_availability(central_node, True)
@@ -141,6 +151,7 @@ def telescope_availability(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_telescope_availability_mid(tango_context, change_event_callbacks):
+    """Tests telescope availability mid"""
     telescope_availability(
         tango_context,
         "ska_mid/tm_central/central_node",
@@ -151,6 +162,7 @@ def test_telescope_availability_mid(tango_context, change_event_callbacks):
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_telescope_availability_low(tango_context, change_event_callbacks):
+    """Tests telescope availability mid"""
     telescope_availability(
         tango_context,
         "ska_low/tm_central/central_node",

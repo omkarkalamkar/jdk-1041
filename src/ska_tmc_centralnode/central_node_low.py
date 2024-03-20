@@ -55,7 +55,8 @@ class CentralNodeLow(AbstractCentralNode):
             """
             Initializes the attributes and properties of the Central Node.
 
-            :return: A tuple containing a return code and a string message indicating status.
+            :return: A tuple containing a return code and a string
+            message indicating status.
              The message is for information purpose only.
 
             :rtype: (ReturnCode, str)
@@ -94,11 +95,17 @@ class CentralNodeLow(AbstractCentralNode):
             self.op_state_model,
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
-            _update_telescope_state_callback=self.update_telescope_state_callback,
-            _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
+            _update_telescope_state_callback=(
+                self.update_telescope_state_callback
+            ),
+            _update_telescope_health_state_callback=(
+                self.update_telescope_health_state_callback
+            ),
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=None,
-            _telescope_availability_callback=self.update_telescope_availability_callback,
+            _telescope_availability_callback=(
+                self.update_telescope_availability_callback
+            ),
             communication_state_callback=None,
             component_state_callback=None,
             command_timeout=self.CommandTimeout,

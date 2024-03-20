@@ -191,6 +191,7 @@ class InputParameter:
             self._changed_callback()
 
     def update(self, component_manager) -> List[str]:
+        """Update method for input parameter"""
         list_dev_names: List[str] = []
         for dev_name in self.subarray_dev_names:
             if component_manager.get_device(dev_name) is None:
@@ -295,6 +296,7 @@ class InputParameterLow(InputParameter):
             self._changed_callback()
 
     def update(self, component_manager):
+        """Update method for input parameter"""
         list_dev_names = super().update(component_manager)
         dev_name = self.mccs_mln_dev_name
         if dev_name and component_manager.get_device(dev_name) is None:
@@ -312,6 +314,9 @@ class InputParameterLow(InputParameter):
 
 
 class InputParameterMid(InputParameter):
+    """Class for Input parameter Mid this class is used to distinguish between
+    between low and mid telescope"""
+
     def __init__(self, changed_callback: Callable) -> None:
         self._subarray_dev_names: List[str] = ["ska_mid/tm_subarray_node/1"]
         self._csp_subarray_dev_names: List[str] = [
@@ -407,6 +412,7 @@ class InputParameterMid(InputParameter):
             self._changed_callback()
 
     def update(self, component_manager):
+        """Update method for input parameters"""
         list_dev_names = super().update(component_manager)
         for dev_name in self.dish_leaf_node_dev_names:
             if component_manager.get_device(dev_name) is None:

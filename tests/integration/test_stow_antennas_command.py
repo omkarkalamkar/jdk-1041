@@ -9,7 +9,8 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
 @pytest.mark.skip(
-    reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
+    reason="Test needs update as per v0.13. Can be done as a part of \
+        further commands refactoring."
 )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid

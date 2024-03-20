@@ -23,6 +23,7 @@ from tests.settings import (
 
 
 def test_telescope_on_command(tango_context):
+    """Test telescope On Command"""
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()

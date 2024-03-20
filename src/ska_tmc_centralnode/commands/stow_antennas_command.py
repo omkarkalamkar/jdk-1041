@@ -1,3 +1,5 @@
+from typing import List
+
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -91,7 +93,7 @@ class StowAntennas(CentralNodeCommand):
 
         return ResultCode.OK, ""
 
-    def do(self, argin):
+    def do(self, argin: List[str]):
         """
         Method to invoke StowAntennas command.
 
@@ -100,9 +102,9 @@ class StowAntennas(CentralNodeCommand):
 
         """
 
-        for i in range(0, len(argin)):
+        for arg in argin:
             for adapter in self.dish_adapters:
-                if argin[i] not in adapter.dev_name:
+                if arg not in adapter.dev_name:
                     continue
 
                 self.logger.debug("Set stow mode command invoked")

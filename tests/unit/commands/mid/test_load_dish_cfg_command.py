@@ -11,7 +11,8 @@ from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 
 
-# Helper Dish LN device is using Database API and in Unit test Database API is not callable
+# Helper Dish LN device is using Database API and in Unit test Database API
+# is not callable
 # Patch this particular method which mock return value from SetKValue command
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
 def test_load_dish_cfg_command(

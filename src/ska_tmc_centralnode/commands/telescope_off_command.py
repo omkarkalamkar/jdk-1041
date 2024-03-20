@@ -71,7 +71,8 @@ class TelescopeOff(TelescopeOnOff):
         None
 
         return:
-            A tuple containing a return code and a string message indicating status.
+            A tuple containing a return code and a string message indicating
+            status.
 
         rtype:
             (ResultCode, str)
@@ -156,13 +157,15 @@ class TelescopeOff(TelescopeOnOff):
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling Off command for {self.csp_mln_adapter.dev_name}",
+                f"Error in calling Off command for\
+                  {self.csp_mln_adapter.dev_name}",
                 "Off",
             )
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.csp_mln_adapter.dev_name} is not available to receive Off command"
+                f"{self.csp_mln_adapter.dev_name} is not available to receive\
+                      Off command"
             ],
         )
 
@@ -174,14 +177,16 @@ class TelescopeOff(TelescopeOnOff):
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling Off command for {self.sdp_mln_adapter.dev_name}",
+                f"Error in calling Off command for\
+                      {self.sdp_mln_adapter.dev_name}",
                 "Off",
             )
 
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.sdp_mln_adapter.dev_name} is not available to receive Off command"
+                f"{self.sdp_mln_adapter.dev_name} is not available to \
+                    receive Off command"
             ],
         )
 
@@ -210,7 +215,8 @@ class TelescopeOff(TelescopeOnOff):
         None
 
         return:
-            A tuple containing a return code and a string message indicating status.
+            A tuple containing a return code and a string message indicating
+            status.
 
         rtype:
             (ResultCode, str)
@@ -297,12 +303,14 @@ class TelescopeOff(TelescopeOnOff):
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(
                 [self.mccs_mln_adapter],
-                f"Error in calling Off command for {self.mccs_mln_adapter.dev_name}",
+                f"Error in calling Off command for \
+                    {self.mccs_mln_adapter.dev_name}",
                 "Off",
             )
         return (
             [ResultCode.REJECTED],
             [
-                f"{self.mccs_mln_adapter.dev_name} is not available to receive Off command"
+                f"{self.mccs_mln_adapter.dev_name} is not available to \
+                    receive Off command"
             ],
         )

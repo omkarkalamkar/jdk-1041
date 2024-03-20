@@ -66,7 +66,7 @@ PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:./src \
 MARK ?= -x## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= tests## A specific test file to pass to pytest
-ADD_ARGS ?=  ## Additional args to pass to pytest
+ADD_ARGS ?= -x  ## Additional args to pass to pytest
 
 
 CI_REGISTRY ?= gitlab.com
@@ -82,7 +82,7 @@ endif
 
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
-ADD_ARGS +=  --forked
+ADD_ARGS +=  --forked -x
 MARK = not post_deployment and not acceptance
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)
@@ -122,7 +122,7 @@ PYTHON_BUILD_TYPE = non_tag_setup
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set global.tango_host=$(TANGO_HOST) \
 	--set global.exposeAllDS=false \
-	--set global.operator=true \
+	--set global.operator=false \
 	--set ska-tango-base.display=$(DISPLAY) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
