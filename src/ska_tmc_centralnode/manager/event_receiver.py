@@ -43,9 +43,7 @@ class CentralNodeEventReceiver(EventReceiver):
             "healthState": self.handle_health_state_event,
         }
         self.device_subscribed = {}
-        self.dish_name=(
-            self._component_manager.input_parameter.dish_leaf_node_dev_names
-        )
+        self.dish_name = ""
 
     def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
@@ -72,6 +70,7 @@ class CentralNodeEventReceiver(EventReceiver):
 
     def subscribe_events(self, dev_info, attribute_dictionary=None):
         super().subscribe_events(dev_info, self.attribute_dictionary)
+
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
@@ -115,7 +114,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         InputParameterMid,
                     )
                     and dev_info.dev_name
-                    in self.dish_name
+                    in self._component_manager.input_parameter.dish_leaf_node_dev_names
                 ):
                     proxy.subscribe_event(
                         "kValueValidationResult",
