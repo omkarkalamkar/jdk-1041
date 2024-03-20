@@ -1,3 +1,4 @@
+"""Test cases file for component manager faulty"""
 import time
 
 import pytest

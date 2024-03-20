@@ -1,15 +1,13 @@
 # pylint: disable=unused-variable,W0612
 # flake8: noqa
 # standard python imports
+"""This module is for validating input arguments """
 import json
-from os.path import dirname, join
 
 import pytest
 from ska_tmc_common.exceptions import (
-    InvalidJSONError,
     InvalidReceptorIdError,
     ResourceNotPresentError,
-    ResourceReassignmentError,
     SubarrayNotPresentError,
 )
 

@@ -1,3 +1,4 @@
+"""Test case for cm all faulty"""
 import time
 
 import pytest

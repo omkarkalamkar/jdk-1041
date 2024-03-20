@@ -1,3 +1,4 @@
+"""Test cases file"""
 import pytest
 import tango
 from ska_tmc_common import HelperBaseDevice
@@ -24,6 +25,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load list for command invocation"""
     return (
         {
             "class": HelperSubArrayDevice,
@@ -64,6 +66,7 @@ def test_tmc_state_init(tango_context):
 
 
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
+    """sets one device fault"""
     set_device_state(
         "ska_mid/tm_subarray_node/1", tango.DevState.FAULT, devFactory
     )

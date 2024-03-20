@@ -1,3 +1,4 @@
+"""Test cases file"""
 import pytest
 import tango
 from ska_tmc_common import HelperBaseDevice
@@ -57,6 +58,7 @@ def devices_to_load():
 
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
+    """initialises devices"""
     set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.INIT, devFactory)
     set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.DISABLE, devFactory)
     set_device_state(DISH_MASTER_DEVICE, tango.DevState.OFF, devFactory)
@@ -64,6 +66,7 @@ def set_device_init(devFactory, cm, expected_elapsed_time):
 
 
 def test_telescope_state_init(tango_context):
+    """Test telescope state initialisation."""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_init(
@@ -75,6 +78,7 @@ def test_telescope_state_init(tango_context):
 
 
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
+    """Sets one device faulty"""
     set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.FAULT, devFactory)
     set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.STANDBY, devFactory)
     set_device_state(DISH_MASTER_DEVICE, tango.DevState.OFF, devFactory)
@@ -82,6 +86,7 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
 
 
 def test_telescope_state_fault_over_standby(tango_context):
+    """Test telescope state fault over standby"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_one_device_fault(devFactory, cm, 15)
@@ -89,6 +94,7 @@ def test_telescope_state_fault_over_standby(tango_context):
 
 
 def set_device_standby(devFactory, cm, expected_elapsed_time):
+    """Sets device to standby"""
     set_device_state(MID_CSP_MASTER_DEVICE, tango.DevState.STANDBY, devFactory)
     set_device_state(MID_SDP_MASTER_DEVICE, tango.DevState.ON, devFactory)
     set_dish_mode(DISH_MASTER_DEVICE, DishMode.STANDBY_LP, devFactory)
@@ -96,10 +102,12 @@ def set_device_standby(devFactory, cm, expected_elapsed_time):
 
 
 def test_telescope_state_standby(tango_context):
+    """Tests telescope state standby"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_standby(
         devFactory, cm, 15
     )  # Here expected elapsed time is set to 15 since  set_state()
-    # API is taking more time to set the state and hence actual elapsed time is increasing
+    # API is taking more time to set the state and hence actual elapsed
+    # time is increasing
     assert cm.component.telescope_state == tango.DevState.STANDBY

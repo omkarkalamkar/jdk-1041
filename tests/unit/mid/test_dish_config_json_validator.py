@@ -1,3 +1,4 @@
+"""Test cases file"""
 from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 
 

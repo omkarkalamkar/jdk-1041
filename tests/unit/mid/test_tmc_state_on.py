@@ -1,3 +1,4 @@
+"""Test cases file"""
 import pytest
 import tango
 from ska_tmc_common import HelperBaseDevice
@@ -73,5 +74,6 @@ def test_tmc_state_on(tango_context):
     set_devices_on(
         cm, devFactory, 20
     )  # Here expected elapsed time is set to 20 since  set_state()
-    # API is taking more time to set the state and hence actual elapsed time is increasing
+    # API is taking more time to set the state and hence actual elapsed
+    # time is increasing
     assert cm.component.tmc_op_state == tango.DevState.ON

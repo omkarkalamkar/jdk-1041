@@ -1,3 +1,4 @@
+"""Test cases file"""
 # pylint: disable=unused-argument
 import logging
 from os.path import dirname, join
