@@ -31,6 +31,8 @@ from ska_tmc_centralnode.utils.constants import (
 
 
 class CNComponentManagerMid(CNComponentManager):
+    """Component manager class for central node mid"""
+
     def __init__(
         self,
         op_state_model,
@@ -136,6 +138,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.enable_dish_vcc_init = enable_dish_vcc_init
 
     def check_if_dishes_are_responsive(self):
+        """Checks whether dishes are responsive"""
         self.logger.info("Checking if dishes are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
@@ -143,14 +146,17 @@ class CNComponentManagerMid(CNComponentManager):
 
     @property
     def is_dish_vcc_config_set(self):
+        """Getter method for is_dish_vcc_config_set"""
         return self._is_dish_vcc_config_set
 
     @is_dish_vcc_config_set.setter
     def is_dish_vcc_config_set(self, value):
+        """Setter method for is_dish_vcc_config_set"""
         self._is_dish_vcc_config_set = value
 
     @property
     def dish_vcc_validation_status(self):
+        """Getter method for dish vcc validation status"""
         return self._dish_vcc_validation_status
 
     @dish_vcc_validation_status.setter
@@ -428,8 +434,8 @@ class CNComponentManagerMid(CNComponentManager):
         """
         result = []
         for dish in range(1, (num_dishes + 1)):
-            self.add_device(dln_prefix + "{:03d}".format(dish))
-            result.append(dln_prefix + "{:03d}".format(dish))
+            self.add_device(f"{dln_prefix}{dish:03d}")
+            result.append(f"{dln_prefix}{dish:03d}")
         return result
 
     def _aggregate_telescope_state(self):
@@ -608,8 +614,7 @@ class CNComponentManagerMid(CNComponentManager):
                         )
                         self.command_in_progress = ""
                 elif (
-                    csp_validation_result
-                    in DISH_VCC_VALIDATION_RESULT_STATUS.keys()
+                    csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
                 ):
                     if csp_validation_result == ResultCode.OK:
                         self.update_dish_vcc_flag(True)

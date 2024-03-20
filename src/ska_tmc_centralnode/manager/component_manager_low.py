@@ -23,6 +23,8 @@ from ska_tmc_centralnode.utils.constants import MCCS_MLN_SUFIX
 
 
 class CNComponentManagerLow(CNComponentManager):
+    """Component Manager class for low central node"""
+
     def __init__(
         self,
         op_state_model,
@@ -110,6 +112,7 @@ class CNComponentManagerLow(CNComponentManager):
         self.error_count: int = 0
 
     def check_if_mccs_mln_is_responsive(self):
+        """Checks whether mccs mln is responsive"""
         self.logger.info("Checking if MCCSMasterLeafNode is responsive")
         return self._check_if_device_is_responsive(
             [self.input_parameter.mccs_mln_dev_name]
@@ -145,7 +148,8 @@ class CNComponentManagerLow(CNComponentManager):
         :type value: tuple
         """
         self.logger.info(
-            "Received longRunningCommandResult event for device: %s, with value: %s",
+            "Received longRunningCommandResult event for device: \
+                %s, with value: %s",
             dev_name,
             value,
         )
@@ -195,7 +199,8 @@ class CNComponentManagerLow(CNComponentManager):
                         self.command_mapping,
                     )
                     self.logger.error(
-                        "Exception occurred with value: %s for %s command_id for device: %s",
+                        "Exception occurred with value: %s for %s \
+                            command_id for device: %s",
                         value,
                         self.command_id,
                         dev_name,
@@ -244,12 +249,14 @@ class CNComponentManagerLow(CNComponentManager):
                 f"State event callback for device {dev_name}: {state}"
             )
             if "sdp" in dev_name:
-                # Update SDP Master device name with full FQDN in case of real SDP
+                # Update SDP Master device name with full FQDN in case of
+                # real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
                 if dev_name in sdp_master_dev_name:
                     dev_name = sdp_master_dev_name
             if "csp" in dev_name:
-                # Update CSP Master device name with full FQDN in case of real CSP
+                # Update CSP Master device name with full FQDN in case of
+                # real CSP
                 csp_master_dev_name = self.get_csp_master_dev_name()
                 if dev_name in csp_master_dev_name:
                     dev_name = csp_master_dev_name
@@ -325,6 +332,7 @@ class CNComponentManagerLow(CNComponentManager):
         return True
 
     def update_telescope_availability(self, device_name, event_value):
+        """Updates telescope availability"""
         with self.lock:
             self.logger.debug(f"device_name is: {device_name}")
             self.logger.debug(f"event_value is: {event_value}")

@@ -316,7 +316,6 @@ class TelescopeStandby(TelescopeOnOff):
         )
         return self.send_command(
             self.dish_adapters,
-            "Error in calling Off() on Dish Leaf Nodes:"
-            + "{}".format(self.dish_adapters),
+            f"Error in calling Off() on Dish Leaf Nodes:{self.dish_adapters}",
             "Off",
         )

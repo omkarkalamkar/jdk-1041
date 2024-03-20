@@ -33,6 +33,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
+        self.dish_cfg = self.component_manager.event_receiver_object
 
     def load_dish_cfg(
         self,
@@ -93,7 +94,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         :type message: str
         """
         self.logger.info(
-            "Calling task callback for LoadDishCfg with result %s and message %s",
+            "Calling task callback for LoadDishCfg with result \
+                %s and message %s",
             result,
             message,
         )
@@ -180,7 +182,8 @@ class LoadDishCfg(LoadDishCfgCommand):
                     )
                     return ResultCode.FAILED, message_or_unique_id
         self.logger.info(
-            f"Successfully Invoked LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
+            f"Successfully Invoked LoadDishCfg command on:\
+                {self.csp_mln_adapter.dev_name}"
         )
         return (ResultCode.OK, "")
 
@@ -233,7 +236,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter.proxy.command_inout_asynch(
                         "SetKValue",
                         k_value,
-                        self.component_manager.event_receiver_object.handle_load_dish_cfg_result_callback,
+                        self.dish_cfg.handle_load_dish_cfg_result_callback,
                     )
                     # Append dish dev names to track on which dish
                     # SetKValue is invoked

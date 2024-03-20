@@ -254,7 +254,8 @@ def check_subarray_availability(central_node, subarray_fqdn, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the SubarrayNode availability."
+                "Timeout occurred while checking the SubarrayNode\
+                      availability."
             )
 
 

@@ -67,7 +67,6 @@ disable=W,
         no-member,
         C0114,
         C0116,
-        C,
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -360,7 +359,7 @@ indent-string='    '
 max-line-length=100
 
 # Maximum number of lines in a module.
-max-module-lines=1000
+max-module-lines=1200
 
 # List of optional constructs for which whitespace checking is disabled. `dict-
 # separator` is used to allow tabulation in dicts, etc.: {1  : 1,\n222: 2}.
@@ -407,7 +406,7 @@ max-args=25
 max-attributes=25
 
 # Maximum number of boolean expressions in an if statement.
-max-bool-expr=5
+max-bool-expr=8
 
 # Maximum number of branch for function / method body.
 max-branches=20

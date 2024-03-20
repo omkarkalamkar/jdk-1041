@@ -309,7 +309,7 @@ def assign_resources_without_subarray_id(
     result, message = central_node.AssignResources(assign_input_str)
 
     logger.info(
-        f"AssignResources returned message: {message} Returned result: {result}"
+        f"AssignResources returned message: {message} result: {result}"
     )
 
     assert (

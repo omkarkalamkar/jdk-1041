@@ -44,7 +44,8 @@ class TelescopeStateAggregatorMid(Aggregator):
                 sdp_master = True
 
         self._logger.info(
-            "telescopeSetStateset : %s , dishmodeset : %s dish_vcc_config_set: %s",
+            "telescopeSetStateset : %s , dishmodeset :\
+                  %s dish_vcc_config_set: %s",
             subsystem_states,
             dish_modes,
             self._component_manager.is_dish_vcc_config_set,
@@ -68,11 +69,14 @@ class TelescopeStateAggregatorMid(Aggregator):
             return DevState.UNKNOWN
         if (
             subsystem_states == {DevState.ON}
-            and any(mode in dish_modes for mode in {DishMode.STANDBY_FP})
-            or any(
-                mode in dish_modes
-                for mode in {DishMode.OPERATE, DishMode.CONFIG}
-            )
+            and dish_modes == {DishMode.STANDBY_FP}
+            or dish_modes == {DishMode.OPERATE}
+            or dish_modes == {DishMode.CONFIG}
+            or dish_modes == {DishMode.STANDBY_FP, DishMode.OPERATE}
+            or dish_modes == {DishMode.STANDBY_FP, DishMode.CONFIG}
+            or dish_modes
+            == {DishMode.STANDBY_FP, DishMode.OPERATE, DishMode.CONFIG}
+            or dish_modes == {DishMode.OPERATE, DishMode.CONFIG}
         ):
             return DevState.ON
         if (
@@ -440,7 +444,8 @@ class LoadDishCfgCommandResultAggregator:
         result_code = ""
         message = ""
         self.logger.info(
-            "Aggregating result for longRunningCommandResult attribute with values %s",
+            "Aggregating result for longRunningCommandResult attribute\
+                  with values %s",
             self._component_manager.result_codes_mapping.values(),
         )
         result_codes, failed_messages = self._get_result_codes_and_failed_msg()
@@ -478,6 +483,7 @@ class DishkValueValidationResultAggregator:
         self._component_manager = cm
         self.logger = logger
         self.dln_kvalue_validation_results = {}
+        self.input_parameter_obj = self._component_manager.input_parameter
 
     def is_events_received_percentage_valid(self) -> bool:
         """Verify the percent of kvalue validation result event received
@@ -488,9 +494,7 @@ class DishkValueValidationResultAggregator:
             total_events = len(self.dln_kvalue_validation_results.values())
             percent_event_received = (
                 total_events
-                / len(
-                    self._component_manager.input_parameter.dish_leaf_node_dev_names
-                )
+                / len(self.input_parameter_obj.dish_leaf_node_dev_names)
             ) * 100
             if (
                 percent_event_received

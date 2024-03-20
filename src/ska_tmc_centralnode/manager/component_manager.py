@@ -585,6 +585,7 @@ class CNComponentManager(TmcComponentManager):
         return False
 
     def get_telescope_health_state(self):
+        """Getter method for telescope health state"""
         return self.component.telescope_health_state
 
     def get_telescope_availability(self):
@@ -712,6 +713,7 @@ class CNComponentManager(TmcComponentManager):
         self._aggregate_tm_op_state()
 
     def get_telescope_state(self):
+        """Getter method for telescope state"""
         return self.component.telescope_state
 
     def _aggregate_tm_op_state(self):
@@ -924,7 +926,8 @@ class CNComponentManager(TmcComponentManager):
             return (
                 False,
                 (
-                    "subarray_id key is not present in the input json argument:"
+                    "subarray_id key is not present in the input json \
+                        argument:"
                     + e
                 ),
             )

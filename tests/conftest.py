@@ -77,7 +77,8 @@ def task_callback() -> MockCallable:
 @pytest.fixture
 def change_event_callbacks() -> MockTangoEventCallbackGroup:
     """
-    Return a dictionary of Tango device change event callbacks with asynchrony support.
+    Return a dictionary of Tango device change event callbacks \
+        with asynchrony support.
 
     :return: a collections.defaultdict that returns change event
         callbacks by name.

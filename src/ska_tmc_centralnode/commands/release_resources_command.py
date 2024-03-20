@@ -145,7 +145,7 @@ class ReleaseResources(AssignReleaseResources):
             return ret_code, message
 
         try:
-            if type(argin) != dict:
+            if isinstance(argin, dict):
                 json_argument = json.loads(argin)
             else:
                 json_argument = argin
@@ -231,7 +231,7 @@ class ReleaseResources(AssignReleaseResources):
             return ret_code, message
 
         try:
-            if type(argin) != dict:
+            if isinstance(argin, dict):
                 json_argument = json.loads(argin)
             else:
                 json_argument = argin
