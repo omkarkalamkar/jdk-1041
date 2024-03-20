@@ -43,7 +43,7 @@ class CentralNodeEventReceiver(EventReceiver):
             "healthState": self.handle_health_state_event,
         }
         self.device_subscribed = {}
-        self.dish_dev_name = (
+        self.dish_name=(
             self._component_manager.input_parameter.dish_leaf_node_dev_names
         )
 
@@ -114,7 +114,8 @@ class CentralNodeEventReceiver(EventReceiver):
                         self._component_manager.input_parameter,
                         InputParameterMid,
                     )
-                    and dev_info.dev_name in self.dish_dev_name
+                    and dev_info.dev_name
+                    in self.dish_name
                 ):
                     proxy.subscribe_event(
                         "kValueValidationResult",
