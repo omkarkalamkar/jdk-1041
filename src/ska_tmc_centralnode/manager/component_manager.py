@@ -926,9 +926,7 @@ class CNComponentManager(TmcComponentManager):
             return (
                 False,
                 (
-                    "subarray_id key is not present in the input json \
-                        argument:"
-                    + e
+                    f"subarray_id key is not present in the input json argument:{e}"
                 ),
             )
 
