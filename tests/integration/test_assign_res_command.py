@@ -354,7 +354,6 @@ def test_assign_res_command_mid_without_subarray_id(
     )
 
 
-@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_assign_resources_exception_propagation(
