@@ -169,8 +169,10 @@ class AbstractCentralNode(TMCBaseDevice):
             """
             super().do()
 
-            self._device._build_state = f"{release.name},{release.version}\
-                ,{release.description}"
+            self._device._build_state = (
+                f"{release.name},{release.version},{release.description}"
+            )
+
             self._device._version_id = release.version
             self._device.last_device_info_changed = ""
             self._device.set_change_event("telescopeHealthState", True, False)
