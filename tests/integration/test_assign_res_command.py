@@ -333,7 +333,6 @@ def assign_resources_without_subarray_id(
     )
 
 
-@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -355,6 +354,7 @@ def test_assign_res_command_mid_without_subarray_id(
     )
 
 
+@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_assign_resources_exception_propagation(
@@ -411,7 +411,7 @@ def test_assign_resources_exception_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Exception occurred on device: {MID_SUBARRAY_DEVICE}:"
+            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}"
             + " Exception occurred, command failed.",
         ),
         lookahead=4,

@@ -335,11 +335,8 @@ class CNComponentManagerMid(CNComponentManager):
                         value,
                         dev_name,
                     )
-                    exp_string = (
-                        "Exception occurred on device:"
-                        + str(dev_name)
-                        + str(result_code_or_exception_or_task_status)
-                    )
+                    exp_string = "Exception occurred on device:"
+                    f"{dev_name}: {result_code_or_exception_or_task_status}"
                     index_of_unique_id = list(
                         self.command_mapping.values()
                     ).index(
