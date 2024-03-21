@@ -337,7 +337,7 @@ class CNComponentManagerMid(CNComponentManager):
                     )
                     exp_string = (
                         "Exception occurred on device: "
-                        + f"{dev_name}"
+                        + f"{dev_name}:"
                         + f" {result_code_or_exception_or_task_status}"
                     )
                     index_of_unique_id = list(
