@@ -1119,7 +1119,7 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
-            args=[input_json_or_message, self.logger],
+            args=[json.dumps(input_json_or_message), self.logger],
             task_callback=task_callback,
         )
         return task_status, response

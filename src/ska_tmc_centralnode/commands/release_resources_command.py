@@ -76,7 +76,7 @@ class ReleaseResources(AssignReleaseResources):
             self.timeout_callback,
         )
 
-        result_code, message = self.do(argin=json.dumps(argin))
+        result_code, message = self.do(argin=argin)
         self.logger.info(
             "ReleaseResources command execution result: %s, message: %s",
             result_code,
@@ -231,10 +231,7 @@ class ReleaseResources(AssignReleaseResources):
             return ret_code, message
 
         try:
-            if isinstance(argin, dict):
-                json_argument = json.loads(argin)
-            else:
-                json_argument = argin
+            json_argument = json.loads(argin)
         except Exception as e:
             return (
                 ResultCode.FAILED,
