@@ -1,6 +1,6 @@
 import operator
 import time
-from typing import Callable, Tuple
+from typing import Callable, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
@@ -31,7 +31,7 @@ class CentralNodeCommand(TMCCommand):
 
         return result, message
 
-    def do(self, argin=None):
+    def do(self, argin: Optional[str] = None) -> ResultCode:
         """Do method for abstract command class"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
@@ -68,7 +68,9 @@ class CentralNodeCommand(TMCCommand):
             )
         return return_codes, message_or_unique_ids
 
-    def send_command(self, adapters, description, command, argin=None):
+    def send_command(
+        self, adapters, description: str, command: str, argin=None
+    ):
         """Submit command in progress"""
         if argin is None:
             return self.invoke_command(
@@ -81,7 +83,7 @@ class CentralNodeCommand(TMCCommand):
             command,
         )
 
-    def reject_command(self, message):
+    def reject_command(self, message: str) -> Tuple[ResultCode, str]:
         """Rejects commands"""
         self.logger.error(message)
         return TaskStatus.REJECTED, message
@@ -386,7 +388,7 @@ class AssignReleaseResources(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
-        """Initia"""
+        """Initialises adapter for low"""
         self.mccs_mln_adapter = None
         self.subarray_adapters = []
 
@@ -453,6 +455,7 @@ class LoadDishCfgCommand(CentralNodeCommand):
         self.dish_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
+        """Initialises Adapters for mid"""
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         self.subarray_adapters = []

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
@@ -93,7 +93,7 @@ class StowAntennas(CentralNodeCommand):
 
         return ResultCode.OK, ""
 
-    def do(self, argin: List[str]):
+    def do(self, argin: List[str]) -> Tuple[ResultCode, str]:
         """
         Method to invoke StowAntennas command.
 

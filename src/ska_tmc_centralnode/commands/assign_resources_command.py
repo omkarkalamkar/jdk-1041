@@ -288,8 +288,12 @@ class AssignResources(AssignReleaseResources):
     def update_resource_config_file(
         self, json_argument: dict, id: str
     ) -> None:
-        """This method utilizes SKUID service to generate unique sb_id
-        / eb_id and pb_id"""
+        """Updates the resource configuration file.
+
+        :param json_argument: A dictionary containing the JSON argument for the update.
+        :param id: A string representing the ID for the resource configuration file.
+        :return: None
+        """
         # New type of id "eb_id" is used to distinguish between real
         # SB and id used during testing
         unique_id = self._skuid.fetch_skuid("eb")
@@ -495,11 +499,16 @@ class AssignResources(AssignReleaseResources):
     def _validate_low_json(
         self, json_argument: dict, req_keys: List
     ) -> Tuple[bool, str]:
-        """To validate the low json for assign resources command before
-          entering the queue
-        Args:
-            json_argument (dict): Json Argument
-            req_keys (list): Required key list to check in json argument
+        """Validates the JSON argument for the assign resources command before
+            entering the queue.
+
+        :param json_argument: A dictionary
+        representing the JSON argument to be validated.
+        :param req_keys: A list containing the
+        required keys to check in the JSON argument.
+
+        :return: A tuple containing a boolean indicating
+        validation success and a string message.
         """
         json_keys = json_argument.keys()
         for key in req_keys:
@@ -595,7 +604,13 @@ class AssignResources(AssignReleaseResources):
         except Exception as e:
             raise Exception("Error while creating MCCS input json") from e
 
-    def get_subarray_adapter(self, subarray_id):
+    def get_subarray_adapter(self, subarray_id: int) -> Tuple[ResultCode, str]:
+        """Method for obtaining the adapter for a subarray.
+
+        :param subarray_id: An integer representing the subarray ID.
+        :return: A tuple containing a ResultCode enum value and a
+        string message.
+        """
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.tm_subarray_adapter = adapter
