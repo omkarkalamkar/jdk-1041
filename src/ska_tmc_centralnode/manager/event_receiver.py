@@ -6,6 +6,7 @@ from ska_tmc_common.event_receiver import EventReceiver
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
+    DISH_LEAF_NODE,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     MCCS_MLN_DEVICE,
@@ -96,20 +97,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_obs_state_event,
                         stateless=True,
                     )
-                if (
-                    isinstance(
-                        self._component_manager.input_parameter,
-                        InputParameterMid,
-                    )
-                    and dev_info.dev_name
-                    in self._component_manager.input_parameter.dish_dev_names
-                ):
-                    proxy.subscribe_event(
-                        "dishMode",
-                        tango.EventType.CHANGE_EVENT,
-                        self.handle_dish_mode_event,
-                        stateless=True,
-                    )
+
                 if (
                     isinstance(
                         self._component_manager.input_parameter,
@@ -144,6 +132,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     LOW_CSP_MLN_DEVICE,
                     LOW_SDP_MLN_DEVICE,
                     MCCS_MLN_DEVICE,
+                    DISH_LEAF_NODE,
                 ]:
                     proxy.subscribe_event(
                         "isSubsystemAvailable",
@@ -163,6 +152,13 @@ class CentralNodeEventReceiver(EventReceiver):
                             "DishVccMapValidationResult",
                             tango.EventType.CHANGE_EVENT,
                             self.handle_dish_vcc_k_value_validation_event,
+                            stateless=True,
+                        )
+                    if "ska_mid/tm_leaf_node/d" in dev_info.dev_name:
+                        proxy.subscribe_event(
+                            "dishMode",
+                            tango.EventType.CHANGE_EVENT,
+                            self.handle_dish_mode_event,
                             stateless=True,
                         )
 
