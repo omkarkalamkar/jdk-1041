@@ -271,7 +271,7 @@ class TelescopeStandby(TelescopeOnOff):
         """Turns csp to standby"""
         self.logger.info(
             "Invoking Standby command for"
-            + +self.csp_mln_adapter.dev_name
+            + self.csp_mln_adapter.dev_name
             + "devices"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
