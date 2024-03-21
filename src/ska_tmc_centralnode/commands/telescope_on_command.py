@@ -1,5 +1,5 @@
 import threading
-from typing import Callable, Optional
+from typing import Callable, List, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
@@ -155,7 +155,7 @@ class TelescopeOn(TelescopeOnOff):
             ],
         )
 
-    def turn_on_subarrays(self):
+    def turn_on_subarrays(self) -> None:
         """Turns on the subarrays"""
         self.logger.info(
             f"Invoking On command for {self.subarray_adapters} devices"
@@ -167,11 +167,12 @@ class TelescopeOn(TelescopeOnOff):
             "On",
         )
 
-    def set_standby_fp_mode_dishes(self):
+    def set_standby_fp_mode_dishes(self) -> Tuple[List[ResultCode], List[str]]:
+        """Sets standby fb mode in dishes"""
         return self.send_command(
             self.dish_adapters,
-            "Error in calling SetStandbyFPMode() command on"
-            + self.dish_adapters,
+            "Error in calling SetStandbyFPMode()"
+            f" command on {self.dish_adapters}",
             "SetStandbyFPMode",
         )
 
@@ -231,14 +232,14 @@ class TelescopeOn(TelescopeOnOff):
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(
                 [self.mccs_mln_adapter],
-                "Error in calling On command for"
-                + self.mccs_mln_adapter.dev_name,
+                "Error in calling On command for "
+                f"{self.mccs_mln_adapter.dev_name}",
                 "On",
             )
         return (
             [ResultCode.REJECTED],
             [
-                self.mccs_mln_adapter.dev_name
-                + "is not available to receive On command"
+                f"{self.mccs_mln_adapter.dev_name} is not available to "
+                "receive On command"
             ],
         )
