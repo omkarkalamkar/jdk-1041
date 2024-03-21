@@ -72,7 +72,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             )
         else:
             self.start_tracker_thread(
-                self.component_manager.get_load_disg_cfg_resultcode,
+                "get_load_disg_cfg_resultcode",
                 [ResultCode.OK],
                 task_abort_event,
                 timeout_id=self.timeout_id,

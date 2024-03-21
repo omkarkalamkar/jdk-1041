@@ -84,7 +84,7 @@ class AssignResources(AssignReleaseResources):
             self.component_manager.stop_timer()
         else:
             self.start_tracker_thread(
-                self.component_manager.get_subarray_obsstate,
+                "get_subarray_obsstate",
                 [ObsState.RESOURCING, ObsState.IDLE],
                 task_abort_event,
                 timeout_id=self.timeout_id,
