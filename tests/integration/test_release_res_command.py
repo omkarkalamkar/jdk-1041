@@ -554,7 +554,7 @@ def test_release_resources_error_aggregation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Exception occurred on the following devices:"
+            "Exception occurred on the following devices: "
             + LOW_SUBARRAY_DEVICE
             + ": Exception occurred, command failed.",
         ),
