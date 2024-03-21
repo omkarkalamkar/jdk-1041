@@ -301,8 +301,9 @@ class CentralNodeEventReceiver(EventReceiver):
         )
         if not event_data.errors:
             new_value = event_data.attr_value.value
-            self._component_manager.dish_kvalue_validation_aggregator.aggregate
-            (event_data.device.dev_name(), new_value)
+            self._component_manager.dish_kvalue_validation_aggregator.aggregate(
+                event_data.device.dev_name(), new_value
+            )
         else:
             errors = event_data.errors
             for error in errors:
