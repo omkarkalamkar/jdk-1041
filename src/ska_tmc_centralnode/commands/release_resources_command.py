@@ -145,10 +145,7 @@ class ReleaseResources(AssignReleaseResources):
             return ret_code, message
 
         try:
-            if isinstance(argin, dict):
-                json_argument = json.loads(argin)
-            else:
-                json_argument = argin
+            json_argument = json.loads(argin)
         except Exception as e:
             return (
                 ResultCode.FAILED,
