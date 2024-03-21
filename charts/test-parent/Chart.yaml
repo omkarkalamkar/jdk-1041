@@ -10,7 +10,7 @@ maintainers:
     email: telmgt-internal@googlegroups.com
 dependencies:
   - name: ska-tango-base
-    version: 0.4.8
+    version: 0.4.9
     repository: https://artefact.skao.int/repository/helm-internal
   - name: ska-tango-util
     version: 0.4.10
@@ -20,7 +20,7 @@ dependencies:
     repository: file://../ska-tmc-centralnode
     alias: central_node
   - name: ska-ser-skuid
-    version: 0.3.0
+    version: 0.3.3
     repository: https://artefact.skao.int/repository/helm-internal
   - name: ska-taranta
     version: 1.0.29
