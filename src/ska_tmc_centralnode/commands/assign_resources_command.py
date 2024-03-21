@@ -446,7 +446,7 @@ class AssignResources(AssignReleaseResources):
             self.send_command(
                 [self.tm_subarray_adapter],
                 "Error in calling AssignResources on subarray:"
-                + " {self.tm_subarray_adapter.dev_name}",
+                + self.tm_subarray_adapter.dev_name,
                 "AssignResources",
                 json.dumps(json_argument),
             ),
