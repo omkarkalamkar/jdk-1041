@@ -3,6 +3,7 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
+# pylint : disable = attribute-defined-outside-init
 import json
 
 import tango
@@ -194,7 +195,6 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def always_executed_hook(self):
         """always executed hook method"""
-        pass
 
     def delete_device(self):
         # if the init is called more than once
@@ -503,6 +503,9 @@ class AbstractCentralNode(TMCBaseDevice):
         handler = self.get_command_object("ReleaseResources")
         result_code, unique_id = handler(argin)
         return [[result_code], [str(unique_id)]]
+
+    def create_component_manager(self):
+        """Create component manager object for command invocation."""
 
     # TODO: Check with OET if these commands are required, else can be removed
     # def is_StartUpTelescope_allowed(self):
