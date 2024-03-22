@@ -65,7 +65,8 @@ disable=W,
         invalid-name,
         c-extension-no-member,
         no-member,
-        C
+        line-too-long
+        
 
 
 # Enable the message, report, category or checker with the given id(s). You can

@@ -494,6 +494,7 @@ def test_release_resources_error_aggregation(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test Release Resources error propagation."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)

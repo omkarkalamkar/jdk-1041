@@ -1,3 +1,4 @@
+"""Test module for AssignResources command."""
 import json
 import time
 
@@ -30,6 +31,7 @@ def assign_resources(
     change_event_callbacks,
     subarray_device,
 ):
+    """AssignResources Test method."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -168,6 +170,7 @@ def test_assign_res_command_mid(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test assign Resources command for mid"""
     return assign_resources(
         tango_context,
         central_node_name,
@@ -191,6 +194,7 @@ def test_assign_res_command_low(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test assign Resources command for low"""
     return assign_resources(
         tango_context,
         central_node_name,
@@ -208,6 +212,7 @@ def assign_resources_with_invalid_json(
     change_event_callbacks,
     subarray_device,
 ):
+    """Test assign resources with invalid json."""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(subarray_device)
@@ -262,6 +267,7 @@ def test_assign_res_command_low_invalid_json(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test assign resources for low invalid json"""
     return assign_resources_with_invalid_json(
         tango_context,
         central_node_name,
@@ -277,6 +283,7 @@ def assign_resources_without_subarray_id(
     assign_input_str,
     change_event_callbacks,
 ):
+    """Test Assign Resources without subarray id"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -346,6 +353,7 @@ def test_assign_res_command_mid_without_subarray_id(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test assign Resources command mid without subarray id"""
     return assign_resources_without_subarray_id(
         tango_context,
         central_node_name,
@@ -362,6 +370,7 @@ def test_assign_resources_exception_propagation(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test Assign Resources exception propagation"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -428,6 +437,7 @@ def test_assign_resources_mid_timeout(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test Assign Resources mid timeout"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -495,6 +505,7 @@ def test_assign_resources_low_timeout(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test Assign Resources low timeout"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
@@ -562,6 +573,7 @@ def test_assign_resources_low_error_aggregation(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test Assign Resources low error aggregation"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)

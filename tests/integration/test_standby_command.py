@@ -17,6 +17,7 @@ def test_standby_command_mid(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test standby command for mid"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -89,6 +90,7 @@ def test_standby_command_low(
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test standby command for low"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")

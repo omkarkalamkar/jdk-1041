@@ -1,3 +1,4 @@
+"""Test Events on centralnode"""
 import time
 
 import pytest
@@ -16,6 +17,7 @@ def test_internal_model_events_mid(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test internal model events for mid."""
     pytest.num_events_arrived = 0
 
     def event_callback(evt):
@@ -64,6 +66,7 @@ def test_internal_model_events_mid(
 def test_internal_model_events_low(
     tango_context, set_low_devices_availability_for_aggregation
 ):
+    """Test internal model events for low"""
     pytest.num_events_arrived = 0
 
     def event_callback(evt):
@@ -111,6 +114,7 @@ def test_internal_model_events_low(
 def commands_result_events(
     tango_context, change_event_callbacks, central_node_name
 ):
+    """Test case for command result events"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -139,6 +143,7 @@ def test_command_result_events_mid(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test command result events for mid."""
     commands_result_events(
         tango_context,
         change_event_callbacks,
@@ -154,6 +159,7 @@ def test_command_result_events_low(
     change_event_callbacks,
     set_low_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test command results event low"""
     commands_result_events(
         tango_context,
         change_event_callbacks,

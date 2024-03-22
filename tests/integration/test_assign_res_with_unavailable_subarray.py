@@ -1,3 +1,4 @@
+"""Test module for assign resources unavailability"""
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -20,6 +21,7 @@ def assign_resources(
     change_event_callbacks,
     subarray_fqdn,
 ):
+    """Assign Resources command method."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node_proxy = dev_factory.get_device(central_node_fqdn)
@@ -84,6 +86,7 @@ def assign_resources(
 def test_assign_res_command_mid_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory
 ):
+    """Test Assign Resources command for low unavailable subarray for mid"""
     return assign_resources(
         tango_context,
         central_node_name,
@@ -102,6 +105,7 @@ def test_assign_res_command_mid_unavailable_subarray(
 def test_assign_res_command_low_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory
 ):
+    """Test Assign Resources command for low unavailable subarray"""
     return assign_resources(
         tango_context,
         central_node_name,

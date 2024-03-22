@@ -1,3 +1,4 @@
+"""Test module for command load dish cfg """
 import json
 from unittest.mock import patch
 

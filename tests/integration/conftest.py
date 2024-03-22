@@ -1,3 +1,4 @@
+"""Conf test module for integration tests"""
 import json
 import logging
 import time
@@ -23,6 +24,7 @@ pytest.event_arrived = False
 
 @pytest.fixture
 def devices_to_load():
+    """Devices to load for command invocations."""
     return (
         {
             "class": CNHelperSubArrayDevice,
@@ -133,6 +135,7 @@ def devices_to_load():
 
 @pytest.fixture
 def tango_context(devices_to_load, request):
+    """Tango context method"""
     true_context = request.config.getoption("--true-context")
     logging.info("true context: %s", true_context)
     if not true_context:
@@ -144,7 +147,8 @@ def tango_context(devices_to_load, request):
         yield None
 
 
-def checked_devices(json_model):
+def checked_devices(json_model: dict) -> int:
+    """Checked devices for availability"""
     result = 0
     for dev in json_model["devices"]:
         if int(dev["ping"]) > 0 and dev["unresponsive"] == "False":
@@ -153,6 +157,7 @@ def checked_devices(json_model):
 
 
 def ensure_checked_devices(central_node):
+    """Ensures checked devices"""
     json_model = json.loads(central_node.internalModel)
     start_time = time.time()
     checked_devs = checked_devices(json_model)
@@ -171,6 +176,7 @@ def ensure_checked_devices(central_node):
 
 
 def assert_event_arrived():
+    """Assert whether event arrived"""
     start_time = time.time()
     while not pytest.event_arrived:
         time.sleep(SLEEP_TIME)

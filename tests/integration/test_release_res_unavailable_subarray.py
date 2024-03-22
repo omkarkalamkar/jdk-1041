@@ -20,6 +20,7 @@ def release_resources(
     release_input_string,
     change_event_callbacks,
 ):
+    """Release Resources method for command invocation."""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
     if "ska_mid" in central_node_fqdn:
@@ -107,6 +108,7 @@ def release_resources(
 def test_release_res_command_mid(
     tango_context, change_event_callbacks, json_factory
 ):
+    """Test release resources command mid"""
     return release_resources(
         tango_context,
         "ska_mid/tm_central/central_node",
@@ -121,6 +123,7 @@ def test_release_res_command_mid(
 def test_release_res_command_low(
     tango_context, change_event_callbacks, json_factory
 ):
+    """Test release resources command for low"""
     return release_resources(
         tango_context,
         "ska_low/tm_central/central_node",
