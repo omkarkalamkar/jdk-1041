@@ -1,4 +1,5 @@
 """Abstract Command class for central node"""
+# pylint:disable =abstract-method
 import operator
 import time
 from typing import Callable, Optional, Tuple

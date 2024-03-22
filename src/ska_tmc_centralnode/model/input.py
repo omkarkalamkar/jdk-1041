@@ -235,6 +235,7 @@ class InputParameterLow(InputParameter):
     """Class for input parameter for low."""
 
     def __init__(self, changed_callback: Callable) -> None:
+        super().__init__(changed_callback=changed_callback)
         self._subarray_dev_names = ["ska_low/tm_subarray_node/1"]
         self._csp_subarray_dev_names = ["ska_low/tm_leaf_node/csp_subarray01"]
         self._sdp_subarray_dev_names = ["ska_low/tm_leaf_node/sdp_subarray01"]
@@ -319,6 +320,7 @@ class InputParameterMid(InputParameter):
     between low and mid telescope"""
 
     def __init__(self, changed_callback: Callable) -> None:
+        super().__init__(changed_callback=changed_callback)
         self._subarray_dev_names: List[str] = ["ska_mid/tm_subarray_node/1"]
         self._csp_subarray_dev_names: List[str] = [
             "ska_mid/tm_leaf_node/csp_subarray01"

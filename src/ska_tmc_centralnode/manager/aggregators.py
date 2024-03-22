@@ -15,9 +15,11 @@ class TelescopeStateAggregatorMid(Aggregator):
     """Class for TelescopeStateAggregation for Mid Telescope"""
 
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """Aggregate method for TelescopeStateAggregateMid"""
         # import debugpy; debugpy.debug_this_thread()
         subsystem_states = set()
         dish_modes = set()
@@ -101,6 +103,7 @@ class TelescopeStateAggregatorLow(Aggregator):
     """Class for TelescopeStateAggregation for low Telescope"""
 
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
@@ -163,6 +166,7 @@ class HealthStateAggregatorMid(Aggregator):
     """Class for HealthStateAggregation for Mid Telescope"""
 
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
@@ -225,9 +229,11 @@ class HealthStateAggregatorLow(Aggregator):
     """Class for TelescopeStateAggregation for low Telescope"""
 
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """aggregate method for HealthStateAggregation"""
         # import debugpy; debugpy.debug_this_thread()
         healthStateList = []
         subarray_count = 0
@@ -283,6 +289,7 @@ class TMCOpStateAggregator(Aggregator):
     """Class for TelescopeOpStateAggregation for low Telescope"""
 
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):

@@ -12,6 +12,7 @@ from ska_tmc_centralnode.commands.central_node_command import (
 )
 
 
+# pylint:disable =abstract-method
 class LoadDishCfg(LoadDishCfgCommand):
     """
     A class for CentralNode's LoadDishConfig command.

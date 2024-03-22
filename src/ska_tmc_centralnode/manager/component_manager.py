@@ -279,7 +279,7 @@ class CNComponentManager(TmcComponentManager):
 
         return self.get_device(self.subarray_devname).obs_state
 
-    def get_device(self, dev_name):
+    def get_device(self, device_name):
         """
         Return the device info with device name dev_name
 
@@ -288,7 +288,7 @@ class CNComponentManager(TmcComponentManager):
         :return: a device info
         :rtype: DeviceInfo
         """
-        return self.component.get_device(dev_name)
+        return self.component.get_device(device_name)
 
     def get_sdp_subarray_dev_names(self) -> list:
         """
@@ -395,35 +395,35 @@ class CNComponentManager(TmcComponentManager):
             result.append(dev_name)
         return result
 
-    def add_device(self, dev_name: str) -> None:
+    def add_device(self, device_name: str) -> None:
         """
         Add device to the liveliness probe function
         :param dev_name: device name
         :type dev_name: str
         """
-        if "subarray" in dev_name.lower():
-            devInfo = SubArrayDeviceInfo(dev_name, False)
+        if "subarray" in device_name.lower():
+            devInfo = SubArrayDeviceInfo(device_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterMid)
-            and dev_name.lower() in self.input_parameter.dish_dev_names
+            and device_name.lower() in self.input_parameter.dish_dev_names
         ):
-            devInfo = DishDeviceInfo(dev_name, False)
+            devInfo = DishDeviceInfo(device_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterLow)
-            and dev_name.lower() in self.input_parameter.mccs_mln_dev_name
+            and device_name.lower() in self.input_parameter.mccs_mln_dev_name
         ):
-            devInfo = MCCSDeviceInfo(dev_name, False)
+            devInfo = MCCSDeviceInfo(device_name, False)
         else:
-            devInfo = DeviceInfo(dev_name, False)
+            devInfo = DeviceInfo(device_name, False)
         self.component.update_device(devInfo)
-        self.liveliness_probe_object.add_device(dev_name)
+        self.liveliness_probe_object.add_device(device_name)
 
     def update_input_parameter(self):
         """updates the input parameter"""
         with self.lock:
             self.input_parameter.update(self)
 
-    def update_ping_info(self, ping, dev_name):
+    def update_ping_info(self, ping, device_name):
         """
         Update a device with correct ping information.
 
@@ -433,7 +433,7 @@ class CNComponentManager(TmcComponentManager):
         :type ping: int
         """
         with self.lock:
-            dev_info = self.get_device(dev_name)
+            dev_info = self.get_device(device_name)
             dev_info.ping = ping
             dev_info.update_unresponsive(False)
             self._telescope_availability_aggregator.aggregate()
@@ -453,10 +453,10 @@ class CNComponentManager(TmcComponentManager):
             self.component.update_device_exception(device_info, exception)
             self._telescope_availability_aggregator.aggregate()
 
-    def update_event_failure(self, dev_name):
+    def update_event_failure(self, device_name):
         """updates event failures"""
         with self.lock:
-            devInfo = self.component.get_device(dev_name)
+            devInfo = self.component.get_device(device_name)
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
             self.component._invoke_device_callback(devInfo)
@@ -1141,3 +1141,18 @@ class CNComponentManager(TmcComponentManager):
             {"Devices": device_names, "STATE": dev_states}
         )
         self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
+
+    def is_command_allowed(self):
+        """blank method for resolving pylint errors"""
+
+    def off(self):
+        """blank method for resolving pylint errors"""
+
+    def on(self):
+        """blank method for resolving pylint errors"""
+
+    def start_communicating(self):
+        """blank method for resolving pylint errors"""
+
+    def stop_communicating(self):
+        """blank method for resolving pylint errors"""

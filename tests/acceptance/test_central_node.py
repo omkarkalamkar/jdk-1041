@@ -1,4 +1,5 @@
 """Test cases for centralnode command"""
+# pylint:disable=redefined-outer-name
 import json
 
 import numpy as np
