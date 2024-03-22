@@ -365,13 +365,16 @@ class CNComponentManagerMid(CNComponentManager):
                 # Update Dish Master device name with full FQDN in case of real Dish
                 dish_master_dev_names = self.get_dish_device_names()
                 for dish in dish_master_dev_names:
-                    if dev_name in dish:
+                    if dev_name in dish.lower():
                         dev_name = dish
 
             devInfo = self.component.get_device(dev_name)
             if devInfo is not None:
                 devInfo.state = state
                 devInfo.last_event_arrived = time.time()
+                self.logger.info(
+                    "dev_info: %s, %s", devInfo.dev_name, devInfo.state
+                )
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
@@ -397,12 +400,18 @@ class CNComponentManagerMid(CNComponentManager):
                 "dish_master_dev_names: %s", dish_master_dev_names
             )
             for dish in dish_master_dev_names:
-                if dev_name in dish:
+                # device name received in event is always in lower case for
+                # example. mid-dish/dish-manager/ska001 for dish manager 001.
+                # Therefore need to compare device name with dish name in lower case
+                if dev_name in dish.lower():
                     dev_name = dish
 
             dev_info = self.component.get_device(dev_name)
             dev_info.dish_mode = dish_mode
             dev_info.last_event_arrived = time.time()
+            self.logger.info(
+                "dish dev_info: %s, %s", dev_info.dev_name, dev_info.dish_mode
+            )
             dev_info.update_unresponsive(False)
 
         self._aggregate_state()
