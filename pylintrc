@@ -69,7 +69,8 @@ disable=R0801,
         protected-access,
         arguments-differ,
         signature-differs,
-        W,
+        W
+        
         
 
 

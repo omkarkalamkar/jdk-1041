@@ -16,7 +16,7 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 
 __all__ = ["CentralNodeLow", "main"]
 
-# pylint : disable = attribute-defined-outside-init
+# pylint:disable = attribute-defined-outside-init
 
 
 class CentralNodeLow(AbstractCentralNode):

@@ -146,7 +146,7 @@ class AssignResourceValidator:
                 + "Full exception info: "
                 + str(json_error)
             )
-            raise InvalidJSONError(exception_message)
+            raise InvalidJSONError(exception_message) from json_error
 
         # Validate subarray ID
         # TODO: Use the object returned by cdm library instead of parsing
@@ -259,6 +259,6 @@ class ReleaseResourceValidator:
                 + "Full exception info: "
                 + str(json_error)
             )
-            raise InvalidJSONError(exception_message)
+            raise InvalidJSONError(exception_message) from json_error
         release_request = json.loads(release_json)
         return release_request
