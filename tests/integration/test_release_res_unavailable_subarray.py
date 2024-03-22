@@ -75,7 +75,7 @@ def release_resources(
 
     result, unique_id = central_node.ReleaseResources(release_input_string)
 
-    logger.info(f"Unique id:{unique_id[0]}")
+    logger.info("Unique id:%s", unique_id[0])
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
 

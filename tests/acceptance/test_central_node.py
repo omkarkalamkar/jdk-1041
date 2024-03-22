@@ -64,7 +64,7 @@ def call_command(central_node, command_name, json_factory):
     try:
         dev_factory = DevFactory()
         if command_name == "AssignResources":
-            logger.info(f"central_node: {central_node.dev_name()}")
+            logger.info("central_node:%s", central_node.dev_name())
             if "ska_mid" in central_node.dev_name():
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
                 subarray_proxy.SetisSubarrayAvailable(True)
@@ -90,7 +90,7 @@ def call_command(central_node, command_name, json_factory):
                     command_name, assign_res_string
                 )
         elif command_name == "ReleaseResources":
-            logger.info(f"central_node: {central_node.dev_name()}")
+            logger.info("central_node: %s", central_node.dev_name())
             if "ska_mid" in central_node.dev_name():
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
                 subarray_proxy.SetisSubarrayAvailable(True)
@@ -126,7 +126,7 @@ def call_command(central_node, command_name, json_factory):
 def check_internal_model(device_list):
     """checks internal model"""
     json_model = json.loads(pytest.internal_model)
-    logger.info(f"Json model is{json_model}")
+    logger.info("Json model is %s", json_model)
     for dev in json_model["devices"]:
         running_dev = None
         for exported_dev in device_list.value_string:

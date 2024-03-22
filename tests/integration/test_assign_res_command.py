@@ -41,7 +41,9 @@ def assign_resources(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "Telscope On Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -67,7 +69,9 @@ def assign_resources(
     else:
         result, unique_id = central_node.AssignResources(assign_input_str)
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -102,7 +106,7 @@ def assign_resources(
     #     return len_subarray_beam_ids + len_station_ids + len_channel_blocks
 
     device = get_subarray_device(json.loads(central_node.internalModel))
-    logger.debug(f"InternalModel attribute value is:{device}")
+    logger.debug("InternalModel attribute value is:%s", device)
     start_time = time.time()
     while len(device["resources"]) == 0:
         time.sleep(SLEEP_TIME)
@@ -221,7 +225,9 @@ def assign_resources_with_invalid_json(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -292,7 +298,7 @@ def assign_resources_without_subarray_id(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -316,7 +322,9 @@ def assign_resources_without_subarray_id(
     result, message = central_node.AssignResources(assign_input_str)
 
     logger.info(
-        f"AssignResources returned message: {message} result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert (
@@ -327,7 +335,9 @@ def assign_resources_without_subarray_id(
 
     result, unique_id = central_node.TelescopeOff()
     logger.info(
-        "TelescopeOff Command ID: %s Returned result: %s", unique_id, result
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOff")
@@ -380,7 +390,9 @@ def test_assign_resources_exception_propagation(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -409,7 +421,9 @@ def test_assign_resources_exception_propagation(
     )
 
     logger.info(
-        "AssignResources Command ID: %s Returned result: %s", unique_id, result
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -447,7 +461,9 @@ def test_assign_resources_mid_timeout(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        "AssignResources Command ID: %s Returned result: %s", unique_id, result
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -476,7 +492,9 @@ def test_assign_resources_mid_timeout(
     )
 
     logger.info(
-        "AssignResources Command ID: %s Returned result: %s", unique_id, result
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -544,7 +562,9 @@ def test_assign_resources_low_timeout(
     )
 
     logger.info(
-        "AssignResources Command ID: %s Returned result: %s", unique_id, result
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -610,7 +630,9 @@ def test_assign_resources_low_error_aggregation(
     )
 
     logger.info(
-        "AssignResources Command ID: %s Returned result: %s", unique_id, result
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")

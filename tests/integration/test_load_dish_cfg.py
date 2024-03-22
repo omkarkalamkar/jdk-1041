@@ -50,7 +50,9 @@ def load_dish_cfg(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -70,7 +72,9 @@ def load_dish_cfg(
 
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
-        f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -121,7 +125,9 @@ def load_dish_cfg_when_csp_is_defective(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelscopeOn Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -142,7 +148,9 @@ def load_dish_cfg_when_csp_is_defective(
     csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
-        f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -166,7 +174,9 @@ def load_dish_cfg_when_csp_is_defective(
 
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
-        f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     change_event_callbacks.assert_change_event(
