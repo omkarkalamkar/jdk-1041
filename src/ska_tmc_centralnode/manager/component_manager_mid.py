@@ -361,7 +361,7 @@ class CNComponentManagerMid(CNComponentManager):
                 csp_master_dev_name = self.get_csp_master_dev_name()
                 if dev_name in csp_master_dev_name:
                     dev_name = csp_master_dev_name
-            if "elt/master" in dev_name:
+            if ("elt/master" in dev_name) or ("dish-manager" in dev_name):
                 # Update Dish Master device name with full FQDN in case of real Dish
                 dish_master_dev_names = self.get_dish_device_names()
                 for dish in dish_master_dev_names:
@@ -393,6 +393,9 @@ class CNComponentManagerMid(CNComponentManager):
 
             # Update Dish Master device name with full FQDN in case of real Dish
             dish_master_dev_names = self.get_dish_device_names()
+            self.logger.info(
+                "dish_master_dev_names: %s", dish_master_dev_names
+            )
             for dish in dish_master_dev_names:
                 if dev_name in dish:
                     dev_name = dish
