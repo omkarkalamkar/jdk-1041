@@ -128,7 +128,7 @@ def commands_result_events(
 
     _, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+        "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], str(int(ResultCode.OK))),

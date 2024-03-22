@@ -119,8 +119,8 @@ def telescope_availability(
     check_sdpmln_availability(central_node, False)
 
     logger.info(
-        f"telescopeAvailability attribute value:\
-              {central_node.telescopeAvailability}"
+        "telescopeAvailability attribute value:%s",
+        central_node.telescopeAvailability,
     )
 
     subarray_node.SetisSubarrayAvailable(True)
@@ -141,8 +141,8 @@ def telescope_availability(
         check_mccsmln_availability(central_node, True)
 
     logger.info(
-        f"telescopeAvailability attribute value:\
-              {central_node.telescopeAvailability}"
+        "telescopeAvailability attribute value:%s",
+        central_node.telescopeAvailability,
     )
 
     check_cspmln_availability(central_node, True)

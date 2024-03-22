@@ -31,7 +31,7 @@ def assign_resources(
 
     result, unique_id = central_node_proxy.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -62,7 +62,7 @@ def assign_resources(
             assign_input_str
         )
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s", unique_id, result
     )
 
     # assert unique_id[0].endswith("AssignResources")

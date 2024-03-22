@@ -327,7 +327,7 @@ def assign_resources_without_subarray_id(
 
     result, unique_id = central_node.TelescopeOff()
     logger.info(
-        f"TelescopeOff Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOff Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOff")
@@ -409,7 +409,7 @@ def test_assign_resources_exception_propagation(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -447,7 +447,7 @@ def test_assign_resources_mid_timeout(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -476,7 +476,7 @@ def test_assign_resources_mid_timeout(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -515,7 +515,7 @@ def test_assign_resources_low_timeout(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "Telescope On Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -544,7 +544,7 @@ def test_assign_resources_low_timeout(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -583,7 +583,7 @@ def test_assign_resources_low_error_aggregation(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -610,7 +610,7 @@ def test_assign_resources_low_error_aggregation(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("AssignResources")
