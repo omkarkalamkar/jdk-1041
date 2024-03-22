@@ -168,7 +168,7 @@ class CentralComponent(TmcComponent):
         :rtype: DeviceInfo
         """
         for dev_info in self.devices:
-            if dev_info.dev_name == dev_name:
+            if dev_name in dev_info.dev_name:
                 return dev_info
         return None
 
