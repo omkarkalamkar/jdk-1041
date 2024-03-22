@@ -385,13 +385,15 @@ class CNComponentManager(TmcComponentManager):
         :param dev_name: device name
         :type dev_name: str
         """
+        self.logger.info("dev_name: %s", dev_name)
         if "subarray" in dev_name.lower():
             devInfo = SubArrayDeviceInfo(dev_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterMid)
-            and dev_name.lower() in self.input_parameter.dish_dev_names
+            and dev_name in self.input_parameter.dish_dev_names
         ):
             devInfo = DishDeviceInfo(dev_name, False)
+            self.logger.info("DishDeviceInfo created: %s", devInfo)
         elif (
             isinstance(self.input_parameter, InputParameterLow)
             and dev_name.lower() in self.input_parameter.mccs_mln_dev_name
