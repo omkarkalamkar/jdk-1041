@@ -1,3 +1,4 @@
+"""Command class for StowAntennas()"""
 from typing import List, Tuple
 
 from ska_tango_base.commands import ResultCode

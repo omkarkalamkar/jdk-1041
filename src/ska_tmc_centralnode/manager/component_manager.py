@@ -203,12 +203,14 @@ class CNComponentManager(TmcComponentManager):
         _telescope_state_aggregator,
         _health_state_aggregator,
         _op_state_aggregator,
-    ):
+    ) -> None:
+        """Sets Aggregators callback"""
         self._telescope_state_aggregator = _telescope_state_aggregator
         self._health_state_aggregator = _health_state_aggregator
         self._op_state_aggregator = _op_state_aggregator
 
-    def stop(self):
+    def stop(self) -> None:
+        """stops liveliness probe"""
         self.stop_liveliness_probe()
         self.stop_event_receiver()
 
@@ -265,7 +267,7 @@ class CNComponentManager(TmcComponentManager):
         """Return Aggregated command result for Load Dish Cfg command"""
         return self.load_dish_cfg_aggregated_result
 
-    def get_subarray_obsstate(self) -> Optional[ObsState]:
+    def get_subarray_obsstate(self) -> ObsState:
         """
         Get Current device obsState
 
@@ -359,13 +361,14 @@ class CNComponentManager(TmcComponentManager):
             return False
         return True
 
-    def check_if_subarrays_are_responsive(self):
+    def check_if_subarrays_are_responsive(self) -> bool:
+        """Checks if subarray are responsive"""
         self.logger.info("Checking if subarrays are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.subarray_dev_names
         )
 
-    def _check_if_device_is_responsive(self, dev_names):
+    def _check_if_device_is_responsive(self, dev_names: List[str]):
         """checks if the device is responsive"""
         count = 0
         for dev_name in dev_names:
@@ -589,9 +592,11 @@ class CNComponentManager(TmcComponentManager):
         return self.component.telescope_health_state
 
     def get_telescope_availability(self):
+        """Getter method for Telescope Availability"""
         return self.component.telescope_availability
 
     def set_telescope_availability(self, telescope_availability):
+        """Setter method for telescope availability"""
         self.component.telescope_availability = telescope_availability
 
     def update_load_dish_cfg_results(
@@ -727,6 +732,7 @@ class CNComponentManager(TmcComponentManager):
             self.component.tmc_op_state = self._op_state_aggregator.aggregate()
 
     def get_tmc_op_state(self):
+        """Getter method for TMC Op State Model"""
         return self.component.tmc_op_state
 
     # TODO: Kept it for reference. Not getting called anywhere.
@@ -1122,7 +1128,8 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
-    def log_state(self, msg="Device States"):
+    def log_state(self, msg: str = "Device States") -> None:
+        """Log state method for"""
         device_names = []
         dev_states = []
 

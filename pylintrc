@@ -65,9 +65,8 @@ disable=W,
         invalid-name,
         c-extension-no-member,
         no-member,
-        C0114,
-        C0116,
-        C,
+        C
+
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -489,5 +488,5 @@ known-third-party=enchant
 [EXCEPTIONS]
 
 # Exceptions that will emit a warning when being caught. Defaults to
-# "Exception".
-overgeneral-exceptions=builtins.Exception
+# "BaseException"
+overgeneral-exceptions=builtins.BaseException

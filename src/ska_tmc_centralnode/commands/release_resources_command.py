@@ -293,6 +293,7 @@ class ReleaseResources(AssignReleaseResources):
         return (ResultCode.OK, "")
 
     def release_all_resources(self, adapter):
+        """Releases all resources"""
         return self.send_command(
             [adapter],
             f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
@@ -301,6 +302,7 @@ class ReleaseResources(AssignReleaseResources):
         )
 
     def release_all_resources_mccs(self, adapter, argin):
+        """Releases all resources mccs"""
         return self.send_command(
             [adapter],
             f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
@@ -310,6 +312,7 @@ class ReleaseResources(AssignReleaseResources):
         )
 
     def create_mccs_input_data(self, json_argument: dict) -> dict:
+        """Creates mccs input strings"""
         try:
             if "interface" in json_argument:
                 del json_argument["interface"]

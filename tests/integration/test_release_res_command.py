@@ -1,3 +1,4 @@
+"""Test cases for rlease resources command"""
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -24,6 +25,7 @@ def release_resources(
     release_input_string,
     change_event_callbacks,
 ):
+    """Method for rlease resources command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     if "ska_mid" in central_node_name:
@@ -92,6 +94,7 @@ def test_release_res_command_mid(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for rlease resources command for low"""
     return release_resources(
         tango_context,
         "ska_mid/tm_central/central_node",
@@ -109,6 +112,7 @@ def test_release_res_command_low(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test cases for release resources command"""
     return release_resources(
         tango_context,
         "ska_low/tm_central/central_node",
@@ -126,6 +130,7 @@ def release_resources_without_subarray_id(
     release_input_string,
     change_event_callbacks,
 ):
+    """Invokes release resources command without subarray id"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -201,6 +206,7 @@ def test_release_res_command_mid_without_subarray_id(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for release resources command without subarray id in string"""
     return release_resources_without_subarray_id(
         tango_context,
         "ska_mid/tm_central/central_node",
@@ -219,6 +225,7 @@ def test_release_resources_error_propagation(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for release resources error propagation command."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -310,6 +317,7 @@ def test_release_resources_mid_timeout(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for release resources command for mid timeout."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -398,6 +406,7 @@ def test_release_resources_low_timeout(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test cases for release resources command for low timeout."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)

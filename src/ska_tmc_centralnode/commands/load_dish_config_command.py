@@ -1,3 +1,4 @@
+"""Commad class for Load_dish_config_command"""
 import json
 import threading
 from typing import Callable, Optional, Tuple

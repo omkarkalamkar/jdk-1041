@@ -53,6 +53,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def tango_context(devices_to_load, request):
+    """Tango context fixture"""
     true_context = request.config.getoption("--true-context")
     logging.info("true context: %s", true_context)
     if not true_context:
@@ -175,7 +176,7 @@ def set_low_devices_availability_for_aggregation():
 
 @pytest.fixture(scope="session", autouse=True)
 def is_dish_vcc_set(request):
-    # Validate dish vcc config set
+    """Validate dish vcc config set"""
     marker = request.node.get_closest_marker("SKA_mid")
     logging.debug("Checking Dish Config set or not for marker %s", marker)
     if marker:

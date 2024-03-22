@@ -1,3 +1,4 @@
+"""Abstract Command class for central node"""
 import operator
 import time
 from typing import Callable, Optional, Tuple

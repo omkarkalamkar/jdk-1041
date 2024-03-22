@@ -1,3 +1,4 @@
+"""Test cases for Off command"""
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -15,6 +16,7 @@ def test_off_command_mid(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for Off command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
     ensure_checked_devices(central_node)
@@ -79,6 +81,7 @@ def test_off_command_low(
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test cases for off command for low"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")
     ensure_checked_devices(central_node)

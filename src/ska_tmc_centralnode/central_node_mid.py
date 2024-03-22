@@ -139,6 +139,7 @@ class CentralNodeMid(AbstractCentralNode):
     )
 
     def update_imaging_callback(self, imaging):
+        """Callback for Update imaging"""
         self.logger.info("imaging %s", imaging)
         self.push_change_event("imaging", imaging)
 
@@ -171,15 +172,19 @@ class CentralNodeMid(AbstractCentralNode):
     # ------------------
 
     def read_imaging(self):
+        """Read Attribute for imaging"""
         return self.component_manager.component.imaging
 
     def read_pss(self):
+        """Read attribute for pss"""
         return self.component_manager.component.pss
 
     def read_pst(self):
+        """Read attribute value of pst"""
         return self.component_manager.component.pst
 
     def read_vlbi(self):
+        """Read attribute value of vlbi"""
         return self.component_manager.component.vlbi
 
     def read_dishDevNames(self):

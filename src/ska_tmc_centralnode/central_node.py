@@ -131,20 +131,25 @@ class AbstractCentralNode(TMCBaseDevice):
     )
 
     def update_device_callback(self, devInfo):
+        """Update device callabacks"""
         self.last_device_info_changed = devInfo.to_json()
         self.push_change_event("lastDeviceInfoChanged", devInfo.to_json())
 
     def update_telescope_state_callback(self, telescope_state):
+        """Update telescope state callback"""
         self.logger.info("telescopeState %s", telescope_state)
         self.push_change_event("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
+        """Update Telescope health state callabacks"""
         self.push_change_event("telescopeHealthState", telescope_health_state)
 
     def update_tmc_op_state_callback(self, tmc_op_state):
+        """Update tmc operational state callabacks"""
         self.push_change_event("tmOpState", tmc_op_state)
 
     def update_telescope_availability_callback(self, telescope_availability):
+        """Update device availabililty callabacks"""
         self.push_change_event(
             "telescopeAvailability", json.dumps(telescope_availability)
         )
@@ -188,6 +193,7 @@ class AbstractCentralNode(TMCBaseDevice):
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
+        """always executed hook method"""
         pass
 
     def delete_device(self):
@@ -236,15 +242,19 @@ class AbstractCentralNode(TMCBaseDevice):
         self.component_manager.update_input_parameter()
 
     def read_telescopeHealthState(self):
+        """Read value of telescopeHealthState"""
         return self.component_manager.component.telescope_health_state
 
     def read_telescopeState(self):
+        """Reads telescopeState"""
         return self.component_manager.component.telescope_state
 
     def read_desiredTelescopeState(self):
+        """Read Desired TelescopeState"""
         return self.component_manager.component.desired_telescope_state
 
     def transformedInternalModel_read(self):
+        """Tranformed InternalModelRead"""
         result = json.loads(super().transformedInternalModel_read())
         result[
             "telescope_state"

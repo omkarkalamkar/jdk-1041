@@ -1,3 +1,4 @@
+"""Command class for TelescopeOff()"""
 import threading
 import time
 from typing import Callable, Optional
@@ -202,6 +203,7 @@ class TelescopeOff(TelescopeOnOff):
         )
 
     def turn_off_dishes(self):
+        """Turns off the dishes"""
         return self.send_command(
             self.dish_adapters,
             "Error in calling Off() on TMC Dish leaf node",

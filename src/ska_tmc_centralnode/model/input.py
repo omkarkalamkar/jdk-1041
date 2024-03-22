@@ -1,3 +1,4 @@
+"""Input Parameter class for central node"""
 from typing import Callable, List
 
 

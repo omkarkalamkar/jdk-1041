@@ -1,3 +1,4 @@
+"""Input Validator class for central node"""
 # -*- coding: utf-8 -*-
 #
 # This file is part of the centralnode project

@@ -1,3 +1,4 @@
+"""Test cases for centralnode command"""
 import json
 
 import numpy as np
@@ -25,6 +26,7 @@ from tests.settings import (
     target_fixture="device_list",
 )
 def device_list():
+    """Returns device list"""
     db = Database()
     return db.get_device_exported("*")
 
@@ -34,6 +36,7 @@ def device_list():
     target_fixture="central_node",
 )
 def central_node():
+    """Central node device"""
     database = Database()
     instance_list = database.get_device_exported_for_class("CentralNodeLow")
     for instance in instance_list.value_string:
@@ -51,11 +54,13 @@ def central_node():
 
 @when("I get the attribute InternalModel of the CentralNode device")
 def internal_model(central_node):
+    """Internal model method"""
     pytest.internal_model = central_node.internalModel
 
 
 @when(parsers.parse("I call the command {command_name}"))
 def call_command(central_node, command_name, json_factory):
+    """Calls command on central node"""
     try:
         dev_factory = DevFactory()
         if command_name == "AssignResources":
@@ -119,6 +124,7 @@ def call_command(central_node, command_name, json_factory):
 
 @then("it correctly reports the failed and working devices")
 def check_internal_model(device_list):
+    """checks internal model"""
     json_model = json.loads(pytest.internal_model)
     logger.info(f"Json model is{json_model}")
     for dev in json_model["devices"]:
@@ -152,6 +158,7 @@ def check_internal_model(device_list):
     )
 )
 def check_command(central_node, command_name, change_event_callbacks):
+    """Checks command for change event callback"""
     if pytest.command_result == "CommandNotAllowed":
         return
 

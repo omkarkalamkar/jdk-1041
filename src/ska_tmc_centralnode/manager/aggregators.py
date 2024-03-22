@@ -1,3 +1,4 @@
+"""Aggregation method for telescope state Aggregating for Mid"""
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.aggregators import Aggregator

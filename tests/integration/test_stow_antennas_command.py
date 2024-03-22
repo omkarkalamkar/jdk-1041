@@ -1,3 +1,4 @@
+"""Test cases for stow antennas command"""
 import time
 
 import pytest
@@ -15,6 +16,7 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_stow_antennas_command(tango_context):
+    """Tests stow antennas command"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")

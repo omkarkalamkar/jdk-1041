@@ -1,3 +1,6 @@
+"""Event Receiver class for central node"""
+from typing import Optional
+
 import tango
 from ska_tmc_common.device_info import DeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
@@ -68,7 +71,10 @@ class CentralNodeEventReceiver(EventReceiver):
                 attribute_dictionary=(self.attribute_dictionary),
             )
 
-    def subscribe_events(self, dev_info, attribute_dictionary=None):
+    def subscribe_events(
+        self, dev_info: DeviceInfo, attribute_dictionary: Optional[dict] = None
+    ) -> None:
+        """Subscribe events for central node event receiver"""
         super().subscribe_events(dev_info, self.attribute_dictionary)
 
         try:
@@ -181,7 +187,12 @@ class CentralNodeEventReceiver(EventReceiver):
                 self._logger.info("Subscribing device %s", dev_info.dev_name)
                 self.device_subscribed[dev_info.dev_name] = True
 
-    def handle_assigned_resource_event(self, evt):
+    def handle_assigned_resource_event(self, evt: tango.EventData) -> None:
+        """Handles assigned Resources event
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
         if evt.err:
             error = evt.errors[0]
             self._logger.error(

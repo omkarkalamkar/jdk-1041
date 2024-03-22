@@ -1,3 +1,4 @@
+"""Enum class for central node"""
 from enum import IntEnum, unique
 
 

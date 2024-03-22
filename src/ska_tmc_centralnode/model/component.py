@@ -1,3 +1,4 @@
+""" Component class for central node"""
 import json
 import threading
 
@@ -9,7 +10,8 @@ from tango import DevState
 from ska_tmc_centralnode.model.enum import ModesAvailability
 
 
-def dev_state_2_str(value: DevState):
+def dev_state_2_str(value: DevState) -> str:
+    """Converts DevState to strings"""
     dev_state_map = {
         DevState.ON: "DevState.ON",
         DevState.OFF: "DevState.OFF",
