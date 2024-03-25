@@ -95,8 +95,8 @@ class CNComponentManagerMid(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             communication_state_callback,
-            component_state_callback,
             _telescope_availability_callback,
+            component_state_callback,
             max_workers,
             proxy_timeout,
             sleep_time,
@@ -355,7 +355,7 @@ class CNComponentManagerMid(CNComponentManager):
                         exception_msg=exp_string,
                     )
 
-    def update_device_state(self, dev_name, state):
+    def update_device_state(self, device_name, state):
         """
         Update a monitored device state,
         aggregate the states available
@@ -368,26 +368,26 @@ class CNComponentManagerMid(CNComponentManager):
         """
         with self.lock:
             self.logger.info(
-                f"State event callback for device {dev_name}: {state}"
+                f"State event callback for device {device_name}: {state}"
             )
-            if "sdp" in dev_name:
+            if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
-                if dev_name in sdp_master_dev_name:
-                    dev_name = sdp_master_dev_name
-            if "csp" in dev_name:
+                if device_name in sdp_master_dev_name:
+                    device_name = sdp_master_dev_name
+            if "csp" in device_name:
                 # Update CSP Master device name with full FQDN for real CSP
                 csp_master_dev_name = self.get_csp_master_dev_name()
-                if dev_name in csp_master_dev_name:
-                    dev_name = csp_master_dev_name
-            if "elt/master" in dev_name:
+                if device_name in csp_master_dev_name:
+                    device_name = csp_master_dev_name
+            if "elt/master" in device_name:
                 # Update Dish Master device name with full FQDN for real Dish
                 dish_master_dev_names = self.get_dish_device_names()
                 for dish in dish_master_dev_names:
-                    if dev_name in dish:
-                        dev_name = dish
+                    if device_name in dish:
+                        device_name = dish
 
-            devInfo = self.component.get_device(dev_name)
+            devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.state = state
                 devInfo.last_event_arrived = time.time()
@@ -489,8 +489,8 @@ class CNComponentManagerMid(CNComponentManager):
                 raise CommandNotAllowed(
                     "Dish Vcc Config not Set. Please set using LoadDishCfg"
                     " command. "
-                    "Current Telescope State is %s",
-                    str(self.op_state_model.op_state),
+                    "Current Telescope State is :"
+                    + f"{str(self.op_state_model.op_state)}",
                 )
         if self.op_state_model.op_state in [
             DevState.FAULT,
@@ -498,8 +498,8 @@ class CNComponentManagerMid(CNComponentManager):
             DevState.DISABLE,
         ]:
             raise CommandNotAllowed(
-                "Command is not allowed in current state %s",
-                str(self.op_state_model.op_state),
+                "Command is not allowed in current state :"
+                + f"{str(self.op_state_model.op_state)}",
             )
         if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
             self.logger.debug(f"Checking mid devices for {command_name}")
@@ -603,9 +603,9 @@ class CNComponentManagerMid(CNComponentManager):
                     csp_validation_result == ResultCode.UNKNOWN
                     and self.command_in_progress != "LoadDishCfg"
                 ):
-                    """Unknown Result code sent when no dish vcc set
-                    so invoke LoadDishCfg
-                    """
+                    # Unknown Result code sent when no dish vcc set
+                    # so invoke LoadDishCfg
+
                     self.command_in_progress = "LoadDishCfg"
                     if self.check_if_csp_all_dish_ready():
                         self.invoke_load_dish_cfg_command_callback()

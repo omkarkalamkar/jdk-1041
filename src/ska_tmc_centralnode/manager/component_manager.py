@@ -93,8 +93,8 @@ class CNComponentManager(TmcComponentManager):
         _update_telescope_health_state_callback=None,
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
-        _telescope_availability_callback=None,
         communication_state_callback=None,
+        _telescope_availability_callback=None,
         component_state_callback=None,
         max_workers=5,
         proxy_timeout=500,
@@ -461,7 +461,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo.update_unresponsive(False)
             self.component._invoke_device_callback(devInfo)
 
-    def update_device_health_state(self, dev_name, health_state):
+    def update_device_health_state(self, device_name, health_state):
         """
         Update a monitored device health state
         aggregate the health states available
@@ -473,26 +473,26 @@ class CNComponentManager(TmcComponentManager):
         """
         with self.lock:
             self.logger.info(
-                f"State event callback for device {dev_name}: {health_state}"
+                f"State event callback for device {device_name}: {health_state}"
             )
-            if "sdp" in dev_name:
+            if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
-                if dev_name in sdp_master_dev_name:
-                    dev_name = sdp_master_dev_name
-            if "csp" in dev_name:
+                if device_name in sdp_master_dev_name:
+                    device_name = sdp_master_dev_name
+            if "csp" in device_name:
                 # Update CSP Master device name with full FQDN for real CSP
                 csp_master_dev_name = self.get_csp_master_dev_name()
-                if dev_name in csp_master_dev_name:
-                    dev_name = csp_master_dev_name
-            if "elt/master" in dev_name:
+                if device_name in csp_master_dev_name:
+                    device_name = csp_master_dev_name
+            if "elt/master" in device_name:
                 # Update Dish Master device name with full FQDN for real Dish
                 dish_master_dev_names = self.get_dish_device_names()
                 for dish in dish_master_dev_names:
-                    if dev_name in dish:
-                        dev_name = dish
+                    if device_name in dish:
+                        device_name = dish
 
-            devInfo = self.component.get_device(dev_name)
+            devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.health_state = health_state
                 devInfo.last_event_arrived = time.time()

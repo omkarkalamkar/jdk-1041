@@ -1,5 +1,6 @@
-"""Test cases file"""
+"""Conftest test case file for unit testing"""
 # pylint: disable=unused-argument
+# pylint: disable=redefined-outer-name
 import logging
 from os.path import dirname, join
 

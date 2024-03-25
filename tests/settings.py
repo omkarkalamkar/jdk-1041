@@ -122,7 +122,7 @@ def create_cm(
     """Creates component manager instance"""
     op_state_model = TMCOpStateModel(logger)
 
-    """Creating component manager"""
+    # Creating component manager
     if isinstance(_input_parameter, InputParameterMid):
         cm = CNComponentManagerMid(
             op_state_model,
