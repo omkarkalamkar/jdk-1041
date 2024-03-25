@@ -45,6 +45,7 @@ class ReleaseResources(AssignReleaseResources):
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
         self.my_subarray_adapter = None
+        self.subarray_adapter = None
 
     def release_resources(
         self,

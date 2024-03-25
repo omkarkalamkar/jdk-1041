@@ -72,7 +72,8 @@ disable=R0801,
         keyword-arg-before-vararg,
         abstract-method,
         redefined-builtin,
-        W,
+        W
+        
 
         
         

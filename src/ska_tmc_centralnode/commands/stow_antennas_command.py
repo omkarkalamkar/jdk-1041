@@ -52,8 +52,8 @@ class StowAntennas(CentralNodeCommand):
             DevState.DISABLE,
         ]:
             raise CommandNotAllowed(
-                "StowAntennas() is not allowed in current state %s",
-                self.op_state_model.op_state,
+                "StowAntennas() is not allowed in current state :"
+                f"{self.op_state_model.op_state}",
             )
 
         # for this command I need a number of sub-devices

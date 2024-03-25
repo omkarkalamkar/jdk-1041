@@ -233,35 +233,35 @@ class CNComponentManagerLow(CNComponentManager):
                     )
                 self.reset_subarray_mccsmln_event_count(self.command_id)
 
-    def update_device_state(self, dev_name, state):
+    def update_device_state(self, device_name, state):
         """
         Update a monitored device state,
         aggregate the states available
         and call the relative callbacks if available
 
-        :param dev_name: name of the device
-        :type dev_name: str
+        :param device_name: name of the device
+        :type device_name: str
         :param state: state of the device
         :type state: DevState
         """
         with self.lock:
             self.logger.debug(
-                f"State event callback for device {dev_name}: {state}"
+                f"State event callback for device {device_name}: {state}"
             )
-            if "sdp" in dev_name:
+            if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN in case of
                 # real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
-                if dev_name in sdp_master_dev_name:
-                    dev_name = sdp_master_dev_name
-            if "csp" in dev_name:
+                if device_name in sdp_master_dev_name:
+                    device_name = sdp_master_dev_name
+            if "csp" in device_name:
                 # Update CSP Master device name with full FQDN in case of
                 # real CSP
                 csp_master_dev_name = self.get_csp_master_dev_name()
-                if dev_name in csp_master_dev_name:
-                    dev_name = csp_master_dev_name
+                if device_name in csp_master_dev_name:
+                    device_name = csp_master_dev_name
 
-            devInfo = self.component.get_device(dev_name)
+            devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.state = state
                 devInfo.last_event_arrived = time.time()
@@ -317,8 +317,8 @@ class CNComponentManagerLow(CNComponentManager):
             DevState.DISABLE,
         ]:
             raise CommandNotAllowed(
-                "Command is not allowed in current state %s",
-                str(self.op_state_model.op_state),
+                "Command is not allowed in current state :",
+                f"{str(self.op_state_model.op_state)}",
             )
         if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
             self.logger.debug(f"Checking low devices for {command_name}")

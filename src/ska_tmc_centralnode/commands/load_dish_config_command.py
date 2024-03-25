@@ -36,6 +36,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
         self.dish_cfg = self.component_manager.event_receiver_object
+        self.dish_cfg_params: str = ""
 
     def load_dish_cfg(
         self,
@@ -146,21 +147,21 @@ class LoadDishCfg(LoadDishCfgCommand):
                 return {}, f"Error in Loading Dish VCC map json file {e}"
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
-    def do(self, dish_cfg_params: str) -> Tuple[ResultCode, str]:
+    def do(self, argin: str) -> Tuple[ResultCode, str]:
         """This command does following
         1. Load content of DishId-VCC mapping file from CAR URI
         2. Validate Json
         3. Invoke command on csp master leaf node
         4. Invoke SetKValue command on Dish Leaf Node for each dish id
         provided in dishid_vcc map
-        :param dish_cfg_params: dishid vcc map params
+        :param argin: dishid vcc map params
         """
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        dishid_vcc_map_params = json.loads(dish_cfg_params)
+        dishid_vcc_map_params = json.loads(argin)
         self.logger.info("DishId Vcc Map Params %s", dishid_vcc_map_params)
 
         dishid_vcc_map_json, _ = self.get_dishid_vcc_map_json(

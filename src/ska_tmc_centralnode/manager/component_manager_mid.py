@@ -136,6 +136,7 @@ class CNComponentManagerMid(CNComponentManager):
         self._dish_vcc_validation_status = "{}"
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.enable_dish_vcc_init = enable_dish_vcc_init
+        self.command_result = None
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""

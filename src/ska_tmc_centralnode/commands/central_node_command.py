@@ -21,6 +21,7 @@ class CentralNodeCommand(TMCCommand):
         self.timeout_id = f"{time.time()}_{self.__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
         self.task_callback: Callable | None = None
+        self.mccs_mln_adapter = None
 
     def init_adapters(self) -> Tuple[ResultCode, str]:
         """Initialises adapters"""
