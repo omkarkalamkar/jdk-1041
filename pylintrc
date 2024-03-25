@@ -69,7 +69,12 @@ disable=R0801,
         protected-access,
         arguments-differ,
         signature-differs,
-        W
+        keyword-arg-before-vararg,
+        abstract-method,
+        redefined-builtin,
+        W,
+
+        
         
         
 

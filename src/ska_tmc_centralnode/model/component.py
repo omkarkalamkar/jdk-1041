@@ -60,7 +60,7 @@ class CentralComponent(TmcComponent):
         self._update_telescope_health_state_callback = None
         self._update_tmc_op_state_callback = None
         self._telescope_availability_callback = None
-
+        self._update_imaging_callback = None
         self._telescope_availability = {
             "tmc_subarrays": {},
             "csp_master_leaf_node": False,
@@ -156,7 +156,7 @@ class CentralComponent(TmcComponent):
         """
         return self._devices
 
-    def get_device(self, dev_name):
+    def get_device(self, device_name):
         """
         Return the monitored device info by name.
 
@@ -165,7 +165,7 @@ class CentralComponent(TmcComponent):
         :rtype: DeviceInfo
         """
         for dev_info in self.devices:
-            if dev_info.dev_name == dev_name:
+            if dev_info.dev_name == device_name:
                 return dev_info
         return None
 
@@ -193,19 +193,19 @@ class CentralComponent(TmcComponent):
             self._devices[index] = dev_info
         self._invoke_device_callback(dev_info)
 
-    def update_device_exception(self, dev_info, exception):
+    def update_device_exception(self, device_info, exception):
         """
         Update (or add if missing) Device Information into the list of the
           component.
 
         :param dev_info: a DeviceInfo object
         """
-        if dev_info not in self._devices:
-            dev_info.update_unresponsive(True, exception)
-            self._devices.append(dev_info)
-            self._invoke_device_callback(dev_info)
+        if device_info not in self._devices:
+            device_info.update_unresponsive(True, exception)
+            self._devices.append(device_info)
+            self._invoke_device_callback(device_info)
         else:
-            index = self._devices.index(dev_info)
+            index = self._devices.index(device_info)
             intdev_info = self._devices[index]
             intdev_info.state = DevState.UNKNOWN
             intdev_info.update_unresponsive(True, exception)
@@ -415,20 +415,24 @@ class MCCSDeviceInfo(DeviceInfo):
         super().__init__(dev_name, _unresponsive)
         self.resources = {}
 
-    def from_dev_info(self, mccsdev_info):
-        super().from_dev_info(mccsdev_info)
-        if isinstance(mccsdev_info, MCCSDeviceInfo):
-            self.resources = mccsdev_info.resources
+    def from_dev_info(self, dev_info):
+        """Device info to MCCSDeviceInfo"""
+        super().from_dev_info(dev_info)
+        if isinstance(dev_info, MCCSDeviceInfo):
+            self.resources = dev_info.resources
 
     def __eq__(self, other):
+        """__eq__ method for MCCS DeviceInfo"""
         if isinstance(other, (MCCSDeviceInfo, DeviceInfo)):
             return self.dev_name == other.dev_name
         return False
 
     def to_json(self):
+        """DevInfo to Json"""
         return json.dumps(self.to_dict())
 
     def to_dict(self):
+        """Converts Devinfo to Dict"""
         super_dict = super().to_dict()
         super_dict["resources"] = self.resources
         return super_dict

@@ -290,8 +290,10 @@ class AssignResources(AssignReleaseResources):
     ) -> None:
         """Updates the resource configuration file.
 
-        :param json_argument: A dictionary containing the JSON argument for the update.
-        :param id: A string representing the ID for the resource configuration file.
+        :param json_argument: A dictionary containing the JSON argument for
+        the update.
+        :param id: A string representing the ID for the resource configuration
+        file.
         :return: None
         """
         # New type of id "eb_id" is used to distinguish between real

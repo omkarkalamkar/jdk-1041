@@ -316,3 +316,6 @@ class TelescopeOff(TelescopeOnOff):
                     receive Off command"
             ],
         )
+
+    def update_task_status(self):
+        """Updates task status implemented to"""

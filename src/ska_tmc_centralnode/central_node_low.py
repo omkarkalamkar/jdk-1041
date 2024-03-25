@@ -130,12 +130,6 @@ class CentralNodeLow(AbstractCentralNode):
         cm.update_input_parameter()
         return cm
 
-    def init_command_objects(self):
-        """
-        Initialises the command handlers for commands supported by this device.
-        """
-        super().init_command_objects()
-
 
 # ----------
 # Run server
