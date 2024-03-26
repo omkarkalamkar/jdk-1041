@@ -105,8 +105,8 @@ K8S_TEST_TEST_COMMAND = $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
 -include .make/release.mk
 -include .make/make.mk
 -include .make/help.mk
--include PrivateRules.mak
 -include .make/base.mk
+-include PrivateRules.mak
 
 # flag this up for the oneshot /Dockerfile
 OCI_IMAGES=ska-tmc-centralnode
@@ -117,10 +117,6 @@ clean:
 			tests/.pytest_cache
 
 unit-test: python-test
-
-cred:
-	make k8s-namespace
-	make k8s-namespace-credentials
 
 PYTHON_BUILD_TYPE = non_tag_setup
 
@@ -149,3 +145,6 @@ requirements: ## Install Dependencies
 # .PHONY is additive
 .PHONY: unit-test
 
+cred:
+    make k8s-namespace
+    curl -s https://gitlab.com/ska-telescope/templates-repository/-/raw/master/scripts/namespace_auth.sh | bash -s $(SERVICE_ACCOUNT) $(KUBE_NAMESPACE) || true
