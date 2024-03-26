@@ -118,6 +118,10 @@ clean:
 
 unit-test: python-test
 
+cred:
+	make k8s-namespace
+	make k8s-namespace-credentials
+
 PYTHON_BUILD_TYPE = non_tag_setup
 
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
@@ -145,6 +149,3 @@ requirements: ## Install Dependencies
 # .PHONY is additive
 .PHONY: unit-test
 
-cred:
-    make k8s-namespace
-    make k8s-namespace-credentials
