@@ -186,6 +186,7 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_availability_aggregator = Aggregator(
             self, logger=logger
         )
+        self._liveliness_probe = None
 
     def stop_event_receiver(self):
         """Stops the event receiver."""
@@ -1172,3 +1173,14 @@ class CNComponentManager(TmcComponentManager):
 
     def standby(self):
         """blank method for resolving pylint errors"""
+
+    def _aggregate_health_state(self):
+        """
+        Aggregates all health states
+        and call the relative callback if available
+        """
+
+    def _aggregate_telescope_state(self):
+        """
+        Aggregates telescope state
+        """
