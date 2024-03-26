@@ -3,11 +3,13 @@ ReleaseResources class for CentralNode.
 """
 import json
 import threading
+from logging import Logger
 from typing import Callable, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
@@ -36,7 +38,7 @@ class ReleaseResources(AssignReleaseResources):
     def __init__(
         self,
         component_manager,
-        adapter_factory=None,
+        adapter_factory: Optional[AdapterFactory] = None,
         *args,
         logger=None,
         **kwargs,
@@ -49,8 +51,8 @@ class ReleaseResources(AssignReleaseResources):
 
     def release_resources(
         self,
-        argin,
-        logger,
+        argin: str,
+        logger: Logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
@@ -119,7 +121,7 @@ class ReleaseResources(AssignReleaseResources):
             )
         self.component_manager.command_in_progress = ""
 
-    def do_mid(self, argin) -> Tuple[ResultCode, str]:
+    def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke ReleaseResources command on Subarray.
 

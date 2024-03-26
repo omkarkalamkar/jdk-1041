@@ -24,7 +24,7 @@ class CentralNodeCommand(TMCCommand):
         self.mccs_mln_adapter = None
 
     def init_adapters(self) -> Tuple[ResultCode, str]:
-        """Initialises adapters"""
+        """Initialises adapters for central node command class"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
         ):
@@ -35,7 +35,7 @@ class CentralNodeCommand(TMCCommand):
         return result, message
 
     def do(self, argin: Optional[str] = None) -> ResultCode:
-        """Do method for abstract command class"""
+        """Do method for central node command class"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
         ):
@@ -51,7 +51,7 @@ class CentralNodeCommand(TMCCommand):
         command_caller,
         err_msg: str,
         command_name: str,
-    ):
+    ) -> Tuple[ResultCode, str]:
         """Invokes command on adapter"""
         return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
         message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
@@ -72,7 +72,11 @@ class CentralNodeCommand(TMCCommand):
         return return_codes, message_or_unique_ids
 
     def send_command(
-        self, adapters, description: str, command: str, argin=None
+        self,
+        adapters: Optional[AdapterFactory],
+        description: str,
+        command: str,
+        argin=None,
     ):
         """Submit command in progress"""
         if argin is None:
@@ -87,7 +91,7 @@ class CentralNodeCommand(TMCCommand):
         )
 
     def reject_command(self, message: str) -> Tuple[ResultCode, str]:
-        """Rejects commands"""
+        """Rejects command method for logs error message."""
         self.logger.error(message)
         return TaskStatus.REJECTED, message
 
@@ -391,7 +395,7 @@ class AssignReleaseResources(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
-        """Initialises adapter for low"""
+        """Initialises adapter for central node low"""
         self.mccs_mln_adapter = None
         self.subarray_adapters = []
 
@@ -445,7 +449,7 @@ class LoadDishCfgCommand(CentralNodeCommand):
     def __init__(
         self,
         component_manager,
-        adapter_factory=None,
+        adapter_factory: Optional[AdapterFactory] = None,
         *args,
         logger=None,
         **kwargs,
@@ -459,9 +463,9 @@ class LoadDishCfgCommand(CentralNodeCommand):
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
         """Initialises Adapters for mid"""
-        self.csp_mln_adapter = None
-        self.sdp_mln_adapter = None
-        self.subarray_adapters = []
+        self.csp_mln_adapter: Optional[AdapterFactory] = None
+        self.sdp_mln_adapter: Optional[AdapterFactory] = None
+        self.subarray_adapters: Optional[AdapterFactory] = []
         self.dish_adapters = []
         try:
             self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(

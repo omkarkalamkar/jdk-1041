@@ -3,6 +3,7 @@ AssignResources class for CentralNode.
 """
 import json
 import threading
+from logging import Logger
 from typing import Callable, List, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
@@ -44,12 +45,12 @@ class AssignResources(AssignReleaseResources):
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
         self.tm_subarray_adapter: Optional[AdapterFactory] = None
-        self._skuid = skuid
+        self._skuid: SkuidClient = skuid
 
     def assign_resources(
         self,
-        argin,
-        logger,
+        argin: str,
+        logger: Logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
@@ -95,7 +96,9 @@ class AssignResources(AssignReleaseResources):
                 ),
             )
 
-    def update_task_status(self, result: ResultCode, message: str = ""):
+    def update_task_status(
+        self, result: ResultCode, message: str = ""
+    ) -> None:
         """Updates the task status for command"""
         if result == ResultCode.FAILED:
             self.task_callback(
@@ -569,7 +572,9 @@ class AssignResources(AssignReleaseResources):
             + " successful.",
         )
 
-    def _validate_and_update_resource_config(self, json_argument: dict):
+    def _validate_and_update_resource_config(
+        self, json_argument: dict
+    ) -> Tuple[bool, str]:
         """Validate if eb_id present in sdp schema.
         Args:
             json_argument (dict): low json
