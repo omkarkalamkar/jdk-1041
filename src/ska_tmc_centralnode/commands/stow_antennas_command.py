@@ -96,6 +96,7 @@ class StowAntennas(CentralNodeCommand):
 
         return ResultCode.OK, ""
 
+    # pylint:disable=signature-differs
     def do(self, argin: List[str]) -> Tuple[ResultCode, str]:
         """
         Method to invoke StowAntennas command.

@@ -147,6 +147,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 return {}, f"Error in Loading Dish VCC map json file {e}"
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
+    # pylint:disable=signature-differs
     def do(self, argin: str) -> Tuple[ResultCode, str]:
         """This command does following
         1. Load content of DishId-VCC mapping file from CAR URI

@@ -121,6 +121,7 @@ class ReleaseResources(AssignReleaseResources):
             )
         self.component_manager.command_in_progress = ""
 
+    # pylint:disable=signature-differs
     def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke ReleaseResources command on Subarray.
@@ -199,6 +200,7 @@ class ReleaseResources(AssignReleaseResources):
             "Partial release resources not supported!",
         )
 
+    # pylint:disable=signature-differs
     def do_low(self, argin):
         """
         Method to invoke ReleaseResources command on Subarray Node.

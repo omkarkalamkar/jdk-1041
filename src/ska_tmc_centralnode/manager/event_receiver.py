@@ -47,9 +47,6 @@ class CentralNodeEventReceiver(EventReceiver):
         }
         self.device_subscribed = {}
         self.dish_name = ""
-        self.kvalue_aggregator = (
-            self._component_manager.dish_kvalue_validation_aggregator
-        )
         self.input_param = self._component_manager.input_parameter
 
     def submit_task(self, device_info: DeviceInfo) -> None:
@@ -316,7 +313,8 @@ class CentralNodeEventReceiver(EventReceiver):
         )
         if not event_data.errors:
             new_value = event_data.attr_value.value
-            self.kvalue_aggregator.aggregate(
+            cm = self._component_manager
+            cm.dish_kvalue_validation_aggregator.aggregate(
                 event_data.device.dev_name(), new_value
             )
         else:

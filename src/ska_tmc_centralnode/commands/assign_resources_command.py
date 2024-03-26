@@ -115,6 +115,7 @@ class AssignResources(AssignReleaseResources):
                 self.component_manager.command_id
             )
 
+    # pylint:disable=signature-differs
     def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
         """
             Method to invoke AssignResources command on Subarray.
@@ -336,6 +337,7 @@ class AssignResources(AssignReleaseResources):
                 "processing_blocks key not present in the input json argument"
             )
 
+    # pylint:disable=signature-differs
     def do_low(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke AssignResources command on Subarray.
