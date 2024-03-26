@@ -10,6 +10,8 @@ from ska_tmc_centralnode.commands.central_node_command import (
     CentralNodeCommand,
 )
 
+# pylint:disable=abstract-method
+
 
 class StowAntennas(CentralNodeCommand):
     """

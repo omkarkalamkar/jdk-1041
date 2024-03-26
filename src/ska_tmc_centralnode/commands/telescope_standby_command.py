@@ -320,3 +320,6 @@ class TelescopeStandby(TelescopeOnOff):
             f"Error in calling Off() on Dish Leaf Nodes:{self.dish_adapters}",
             "Off",
         )
+
+    def update_task_status(self):
+        """blank method for resolving pylint errors"""

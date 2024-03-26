@@ -286,7 +286,7 @@ class AssignResources(AssignReleaseResources):
         return (ResultCode.OK, "")
 
     def update_resource_config_file(
-        self, json_argument: dict, id: str
+        self, json_argument: dict, sdp_id: str
     ) -> None:
         """Updates the resource configuration file.
 
@@ -299,7 +299,7 @@ class AssignResources(AssignReleaseResources):
         # New type of id "eb_id" is used to distinguish between real
         # SB and id used during testing
         unique_id = self._skuid.fetch_skuid("eb")
-        json_argument["sdp"]["execution_block"][id] = unique_id
+        json_argument["sdp"]["execution_block"][sdp_id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
             for i in range(len(json_argument["sdp"]["processing_blocks"])):
                 pb_id = self._skuid.fetch_skuid("pb")

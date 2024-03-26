@@ -9,7 +9,9 @@ import time
 from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
+from ska_control_model import HealthState
 from ska_ser_skuid.client import SkuidClient
+from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
@@ -382,12 +384,12 @@ class CNComponentManager(TmcComponentManager):
         if count == 0:
             raise CommandNotAllowed(f"{dev_names} not available")
 
-    def add_multiple_devices(self, device_list):
+    def add_multiple_devices(self, device_list: List[str]):
         """
         Add multiple devices to the liveliness probe function
 
         :param device_list: list of device names
-        :type list: list[str]
+        :type device_list: list[str]
         """
         result = []
         for dev_name in device_list:
@@ -418,12 +420,12 @@ class CNComponentManager(TmcComponentManager):
         self.component.update_device(devInfo)
         self.liveliness_probe_object.add_device(device_name)
 
-    def update_input_parameter(self):
-        """updates the input parameter"""
+    def update_input_parameter(self) -> None:
+        """updates the input parameter for component manager instance"""
         with self.lock:
             self.input_parameter.update(self)
 
-    def update_ping_info(self, ping, device_name):
+    def update_ping_info(self, ping: int, device_name: str) -> None:
         """
         Update a device with correct ping information.
 
@@ -438,7 +440,9 @@ class CNComponentManager(TmcComponentManager):
             dev_info.update_unresponsive(False)
             self._telescope_availability_aggregator.aggregate()
 
-    def update_device_ping_failure(self, device_info, exception):
+    def update_device_ping_failure(
+        self, device_info: DeviceInfo, exception: str
+    ) -> None:
         """
         Set a device to failed and call the relative callback if available
 
@@ -453,15 +457,17 @@ class CNComponentManager(TmcComponentManager):
             self.component.update_device_exception(device_info, exception)
             self._telescope_availability_aggregator.aggregate()
 
-    def update_event_failure(self, device_name):
-        """updates event failures"""
+    def update_event_failure(self, device_name: str) -> None:
+        """updates event failures in Dev info"""
         with self.lock:
             devInfo = self.component.get_device(device_name)
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
             self.component._invoke_device_callback(devInfo)
 
-    def update_device_health_state(self, device_name, health_state):
+    def update_device_health_state(
+        self, device_name: str, health_state: HealthState
+    ) -> None:
         """
         Update a monitored device health state
         aggregate the health states available
@@ -501,7 +507,9 @@ class CNComponentManager(TmcComponentManager):
 
         self._aggregate_health_state()
 
-    def update_device_obs_state(self, dev_name, obs_state):
+    def update_device_obs_state(
+        self, dev_name: str, obs_state: ObsState
+    ) -> None:
         """
         Update a monitored device obs state,
         and call the relative callbacks if available
@@ -534,7 +542,9 @@ class CNComponentManager(TmcComponentManager):
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
-    def update_device_assigned_resource(self, dev_name, assign_resources):
+    def update_device_assigned_resource(
+        self, dev_name: str, assign_resources: str
+    ) -> None:
         """
         Update assign_resources for a monitored device
 
@@ -566,7 +576,7 @@ class CNComponentManager(TmcComponentManager):
                 dev_info.update_unresponsive(False)
                 self.component._invoke_device_callback(dev_info)
 
-    def is_already_assigned(self, dish_id):
+    def is_already_assigned(self, dish_id: str) -> bool:
         """
         Check if a Dish is already assigned to a subarray
 
@@ -587,21 +597,21 @@ class CNComponentManager(TmcComponentManager):
                     return True
         return False
 
-    def get_telescope_health_state(self):
+    def get_telescope_health_state(self) -> HealthState:
         """Getter method for telescope health state"""
         return self.component.telescope_health_state
 
-    def get_telescope_availability(self):
+    def get_telescope_availability(self) -> bool:
         """Getter method for Telescope Availability"""
         return self.component.telescope_availability
 
-    def set_telescope_availability(self, telescope_availability):
+    def set_telescope_availability(self, telescope_availability) -> None:
         """Setter method for telescope availability"""
         self.component.telescope_availability = telescope_availability
 
     def update_load_dish_cfg_results(
         self, dev_name: str, value: tuple, is_async_result: bool = False
-    ):
+    ) -> None:
         """This method is used to update the result returned
         from Csp Master Leaf Node
         and returned from Dish Leaf Nodes for SetKValue command.
@@ -679,7 +689,7 @@ class CNComponentManager(TmcComponentManager):
                 )
                 self.aggregate_load_dish_cfg_results()
 
-    def aggregate_load_dish_cfg_results(self):
+    def aggregate_load_dish_cfg_results(self) -> None:
         """This method aggregate load dish cfg command result based on
         generated data
         """
@@ -702,7 +712,7 @@ class CNComponentManager(TmcComponentManager):
                 exception_msg=exception_message,
             )
 
-    def reset_load_dish_cfg_data(self):
+    def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""
         self.logger.info("Resetting LoadDishCfg aggregated data")
         self.load_dish_cfg_aggregated_result = ""
@@ -710,7 +720,7 @@ class CNComponentManager(TmcComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
 
-    def _aggregate_state(self):
+    def _aggregate_state(self) -> None:
         """
         Aggregates both telescope state and tmc op state
         """
@@ -736,7 +746,7 @@ class CNComponentManager(TmcComponentManager):
         return self.component.tmc_op_state
 
     # TODO: Kept it for reference. Not getting called anywhere.
-    def _update_resources(self, subarray_dev_info):
+    def _update_resources(self, subarray_dev_info: DeviceInfo) -> None:
         """
         Updates resources for a subarray
         the relative callback if available
@@ -753,7 +763,7 @@ class CNComponentManager(TmcComponentManager):
             if subarray_dev_info.obs_state == ObsState.EMPTY:
                 subarray_dev_info.resources = []
 
-    def _update_imaging(self):
+    def _update_imaging(self) -> None:
         """
         Checks if CSP is ON and if atleast one Dish is ON. If both
         the conditions are true,
@@ -786,7 +796,7 @@ class CNComponentManager(TmcComponentManager):
             else:
                 self.component.imaging = ModesAvailability.not_available
 
-    def telescope_on(self, task_callback: Callable = None):
+    def telescope_on(self, task_callback: TaskCallbackType | None = None):
         """
         Turn the Telescope On.
 
@@ -1155,4 +1165,7 @@ class CNComponentManager(TmcComponentManager):
         """blank method for resolving pylint errors"""
 
     def stop_communicating(self):
+        """blank method for resolving pylint errors"""
+
+    def standby(self):
         """blank method for resolving pylint errors"""
