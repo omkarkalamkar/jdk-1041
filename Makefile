@@ -144,3 +144,7 @@ requirements: ## Install Dependencies
 
 # .PHONY is additive
 .PHONY: unit-test
+
+cred:
+    make k8s-namespace
+    make k8s-namespace-credentials
