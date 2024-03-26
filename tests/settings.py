@@ -270,7 +270,7 @@ def check_cspmln_availability(cm, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the CspMasterLeafNode"
+                "Timeout occurred while checking the Csp Master Leaf Node."
                 + " availability."
             )
 
