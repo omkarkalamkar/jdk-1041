@@ -13,16 +13,16 @@ class MockCallable(Callable):
     ):
         """Initialise the callable with unique id"""
         self._unique_id = unique_id
-        self.status = None
-        self.result = None
-        self.exception = None
+        self.status :TaskStatus = None
+        self.result :str = None
+        self.exception : str = None
 
     def __call__(
         self,
         status: TaskStatus = None,
         result: str = None,
         exception: str = None,
-    ):
+    )->TaskStatus:
         """Call method to set the status, result and message"""
         self.status = status
         self.result = result
