@@ -106,6 +106,7 @@ K8S_TEST_TEST_COMMAND = $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
 -include .make/make.mk
 -include .make/help.mk
 -include PrivateRules.mak
+-include .make/base.mk
 
 # flag this up for the oneshot /Dockerfile
 OCI_IMAGES=ska-tmc-centralnode
