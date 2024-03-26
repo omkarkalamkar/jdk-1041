@@ -22,24 +22,30 @@ class TelescopeStateAggregatorMid(Aggregator):
         csp_master = False
         sdp_master = False
         for dev in self._component_manager.checked_devices:
-            name = dev.dev_name.lower()
+            self._logger.info("name: %s", dev.dev_name)
+            name = dev.dev_name
             if dev.unresponsive:
                 continue
             elif (
                 name in self._component_manager.input_parameter.dish_dev_names
             ):
+                self._logger.info(
+                    "DishMode event: %s, %s", name, dev.dish_mode
+                )
                 dish_modes.add(dev.dish_mode)
                 dish_count += 1
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
+                self._logger.info("CSP State event: %s, %s", name, dev.state)
                 subsystem_states.add(dev.state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
+                self._logger.info("SDP State event: %s, %s", name, dev.state)
                 subsystem_states.add(dev.state)
                 sdp_master = True
 
