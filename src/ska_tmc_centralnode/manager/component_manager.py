@@ -18,6 +18,7 @@ from ska_tango_base.executor import TaskStatus
 from ska_tango_base.faults import StateModelError
 from ska_tmc_common import (
     AdapterFactory,
+    Aggregator,
     CommandNotAllowed,
     DeviceInfo,
     DishDeviceInfo,
@@ -181,6 +182,9 @@ class CNComponentManager(TmcComponentManager):
             "AssignResources",
             "ReleaseResources",
             "ReleaseAllResources",
+        )
+        self._telescope_availability_aggregator = Aggregator(
+            self, logger=logger
         )
 
     def stop_event_receiver(self):
@@ -479,7 +483,7 @@ class CNComponentManager(TmcComponentManager):
         """
         with self.lock:
             self.logger.info(
-                f"State event callback for device {device_name}: {health_state}"
+                f"State evt callback for device {device_name}: {health_state}"
             )
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
@@ -939,11 +943,10 @@ class CNComponentManager(TmcComponentManager):
             subarray_id = json_argument["subarray_id"]
             return True, subarray_id
         except Exception as e:
+            exp = "subarray_id key is not present in the input json argument"
             return (
                 False,
-                (
-                    f"subarray_id key is not present in the input json argument:{e}"
-                ),
+                (f"{exp}:{e}"),
             )
 
     def assign_resources(

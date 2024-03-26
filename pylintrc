@@ -62,15 +62,13 @@ confidence=
 # --disable=W".
 disable=invalid-name,
         c-extension-no-member,
-        no-member,
         duplicate-code,
-        line-too-long,
         unused-argument,
         protected-access,
         arguments-differ,
         signature-differs,
         keyword-arg-before-vararg,
-        redefined-builtin,
+        no-member
         
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -364,13 +362,6 @@ max-line-length=100
 
 # Maximum number of lines in a module.
 max-module-lines=1200
-
-# List of optional constructs for which whitespace checking is disabled. `dict-
-# separator` is used to allow tabulation in dicts, etc.: {1  : 1,\n222: 2}.
-# `trailing-comma` allows a space between comma and closing bracket: (a, ).
-# `empty-line` allows space-only lines.
-no-space-check=trailing-comma,
-               dict-separator
 
 # Allow the body of a class to be on the same line as the declaration if body
 # contains single statement.

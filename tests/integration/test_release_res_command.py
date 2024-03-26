@@ -208,7 +208,7 @@ def test_release_res_command_mid_without_subarray_id(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
-    """Test cases for release resources command without subarray id in string"""
+    """Test cases for release resources command without subarray id"""
     return release_resources_without_subarray_id(
         tango_context,
         "ska_mid/tm_central/central_node",

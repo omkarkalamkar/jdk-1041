@@ -47,6 +47,10 @@ class CentralNodeEventReceiver(EventReceiver):
         }
         self.device_subscribed = {}
         self.dish_name = ""
+        self.kvalue_aggregator = (
+            self._component_manager.dish_kvalue_validation_aggregator
+        )
+        self.input_param = self._component_manager.input_parameter
 
     def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
@@ -120,7 +124,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         InputParameterMid,
                     )
                     and dev_info.dev_name
-                    in self._component_manager.input_parameter.dish_leaf_node_dev_names
+                    in self.input_param.dish_leaf_node_dev_names
                 ):
                     proxy.subscribe_event(
                         "kValueValidationResult",
@@ -312,7 +316,7 @@ class CentralNodeEventReceiver(EventReceiver):
         )
         if not event_data.errors:
             new_value = event_data.attr_value.value
-            self._component_manager.dish_kvalue_validation_aggregator.aggregate(
+            self.kvalue_aggregator.aggregate(
                 event_data.device.dev_name(), new_value
             )
         else:
