@@ -7,6 +7,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 * Update ska-tango-base library v0.19.1
 * Update ska-tango-base chart v0.4.8
 * Update ska-tango-util chart v0.4.10
+* Update pylint v3.1.0
 
 [0.1.2]
 ************
