@@ -286,7 +286,7 @@ def check_sdpmln_availability(cm, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the SdpMasterLeafNode"
+                "Timeout occurred while checking the Sdp Master Leaf Node."
                 + " availability."
             )
 
@@ -302,7 +302,7 @@ def check_mccsmln_availability(cm, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the MccsMasterLeafNode"
+                "Timeout occurred while checking the Mccs Master Leaf Node"
                 + " availability."
             )
 
