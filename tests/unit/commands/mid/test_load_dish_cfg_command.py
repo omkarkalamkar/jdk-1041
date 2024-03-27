@@ -31,7 +31,9 @@ def test_load_dish_cfg_command(
     cm, _ = create_cm()
     _set_k_numbers_to_dish.return_value = ([ResultCode.QUEUED], [""])
     cm.is_dish_vcc_config_set = True
-    cm.is_command_allowed("LoadDishCfg")
+    # In this unit test dish_vcc initialisation should not be run during device
+    # run because this unit test is explicitly calling load dish config command.
+    cm.enable_dish_vcc_init = False
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
     cm.load_dish_cfg(dish_cfg_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
