@@ -3,21 +3,20 @@ import json
 from unittest.mock import patch
 
 import pytest
-
-# import tango
+import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import DevFactory
+from tango import ApiUtil
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 
-# from tango import ApiUtil
-
-
 # Helper Dish LN device is using Database API and in Unit test Database API
 # is not callable
 # Patch this particular method which mock return value from SetKValue command
+
+
 @pytest.mark.test
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
 def test_load_dish_cfg_command(
@@ -25,9 +24,9 @@ def test_load_dish_cfg_command(
 ):
     """Test load dish cfg invoke on devices with task status as completed"""
     # This need to be set to enable async command callback event
-    # ApiUtil.instance().set_asynch_cb_sub_model(
-    #     tango.cb_sub_model.PUSH_CALLBACK
-    # )
+    ApiUtil.instance().set_asynch_cb_sub_model(
+        tango.cb_sub_model.PUSH_CALLBACK
+    )
     logger.info("%s", tango_context)
     cm, _ = create_cm()
     _set_k_numbers_to_dish.return_value = ([ResultCode.QUEUED], [""])
@@ -43,7 +42,7 @@ def test_load_dish_cfg_command(
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
-        lookahead=5,
+        lookahead=8,
     )
     # Validate memorizedDishVccMap attribute set
     dev_factory = DevFactory()
