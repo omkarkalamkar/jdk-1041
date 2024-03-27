@@ -274,6 +274,7 @@ class CNComponentManager(TmcComponentManager):
         """Return Aggregated command result for Load Dish Cfg command"""
         return self.load_dish_cfg_aggregated_result
 
+    # pylint:disable =inconsistent-return-statements
     def get_subarray_obsstate(self) -> ObsState:
         """
         Get Current device obsState
@@ -284,7 +285,7 @@ class CNComponentManager(TmcComponentManager):
         if self.subarray_devname:
             return self.get_device(self.subarray_devname).obs_state
 
-        return self.get_device(self.subarray_devname).obs_state
+        # return self.get_device(self.subarray_devname).obs_state
 
     def get_device(self, device_name):
         """
