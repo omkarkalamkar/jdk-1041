@@ -123,7 +123,7 @@ PYTHON_BUILD_TYPE = non_tag_setup
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set global.tango_host=$(TANGO_HOST) \
 	--set global.exposeAllDS=false \
-	--set global.operator=true \
+	--set global.operator=false \
 	--set ska-tango-base.display=$(DISPLAY) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
