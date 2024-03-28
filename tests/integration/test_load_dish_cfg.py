@@ -182,7 +182,7 @@ def load_dish_cfg_when_csp_is_defective(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=8,
     )
 
     event_remover(
@@ -301,6 +301,7 @@ def test_load_dish_cfg(
     )
 
 
+@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(

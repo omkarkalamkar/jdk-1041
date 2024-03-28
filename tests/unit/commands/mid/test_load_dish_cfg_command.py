@@ -2,7 +2,6 @@
 import json
 from unittest.mock import patch
 
-import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
@@ -17,7 +16,6 @@ from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 # Patch this particular method which mock return value from SetKValue command
 
 
-@pytest.mark.test
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
 def test_load_dish_cfg_command(
     _set_k_numbers_to_dish, tango_context, task_callback, json_factory
