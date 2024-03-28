@@ -30,6 +30,8 @@ def test_all_devices_faulty():
     )
     cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     cm.add_multiple_devices(DEVICE_LIST_MID)
+    logger.info(cm.checked_devices)
+    logger.info(cm.devices)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
     while num_faulty != len(cm.devices):

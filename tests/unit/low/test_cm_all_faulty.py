@@ -65,6 +65,8 @@ def test_all_low_devices_faulty():
     cm.add_multiple_devices(DEVICE_LIST_LOW)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
+    logger.info(cm.checked_devices)
+    logger.info(cm.devices)
     while num_faulty != len(cm.devices):
         logger.info("Faulty devices %s", num_faulty)
         time.sleep(SLEEP_TIME)

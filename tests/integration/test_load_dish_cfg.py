@@ -301,7 +301,6 @@ def test_load_dish_cfg(
     )
 
 
-@pytest.mark.test
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
