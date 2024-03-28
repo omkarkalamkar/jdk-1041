@@ -6,7 +6,7 @@ from ska_tmc_common.event_receiver import EventReceiver
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
-    DISH_LEAF_NODE,
+    DISH_LEAF_NODE_PREFIX,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     MCCS_MLN_DEVICE,
@@ -132,7 +132,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     LOW_CSP_MLN_DEVICE,
                     LOW_SDP_MLN_DEVICE,
                     MCCS_MLN_DEVICE,
-                    DISH_LEAF_NODE,
+                    DISH_LEAF_NODE_PREFIX,
                 ]:
                     proxy.subscribe_event(
                         "isSubsystemAvailable",
@@ -154,7 +154,7 @@ class CentralNodeEventReceiver(EventReceiver):
                             self.handle_dish_vcc_k_value_validation_event,
                             stateless=True,
                         )
-                    if "ska_mid/tm_leaf_node/d" in dev_info.dev_name:
+                    if DISH_LEAF_NODE_PREFIX in dev_info.dev_name:
                         proxy.subscribe_event(
                             "dishMode",
                             tango.EventType.CHANGE_EVENT,
