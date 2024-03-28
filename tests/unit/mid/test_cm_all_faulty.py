@@ -19,6 +19,7 @@ from tests.settings import (
 )
 
 
+@pytest.mark.test
 def test_all_devices_faulty():
     """Test with all devices faulty"""
     op_state_model = TMCOpStateModel(logger)
