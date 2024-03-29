@@ -2,6 +2,7 @@
 import time
 
 import pytest
+from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_mid import (
@@ -19,8 +20,23 @@ from tests.settings import (
 )
 
 
-def test_all_devices_faulty():
+@pytest.fixture()
+def devices_to_load():
+    """Devices to load for command invokation"""
+    return (
+        {
+            "class": HelperBaseDevice,
+            "devices": [
+                {"name": "a/b/c"},
+            ],
+        },
+    )
+
+
+@pytest.mark.test
+def test_all_devices_faulty(tango_context):
     """Test with all devices faulty"""
+    logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
@@ -29,9 +45,12 @@ def test_all_devices_faulty():
     )
     cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     cm.add_multiple_devices(DEVICE_LIST_MID)
+    logger.info(f"Component manager faulty devices{cm.checked_devices}")
+    logger.info(f"Component total devices{cm.devices}")
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
     while num_faulty != len(cm.devices):
+        logger.info(f"Number of devices {len(cm.devices)}")
         logger.info("Faulty devices %s", num_faulty)
         time.sleep(SLEEP_TIME)
         elapsed_time = time.time() - start_time

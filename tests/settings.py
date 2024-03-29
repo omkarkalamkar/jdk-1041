@@ -128,13 +128,13 @@ def create_cm(
             op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=logger,
+            enable_dish_vcc_init=False,
             _event_receiver=p_event_receiver,
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
         # run because this unit test is explicitly calling load dish config
         # command.
-        cm.enable_dish_vcc_init = False
         DEVICE_LIST = DEVICE_LIST_MID
         cm.is_dish_vcc_config_set = True
     else:
