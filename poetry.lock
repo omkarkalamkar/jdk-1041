@@ -1364,14 +1364,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "pytest-mock"
-version = "3.12.0"
+version = "3.14.0"
 description = "Thin-wrapper around the mock package for easier use with pytest"
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 
 [package.dependencies]
-pytest = ">=5.0"
+pytest = ">=6.2.5"
 
 [package.extras]
 dev = ["pre-commit", "pytest-asyncio", "tox"]
@@ -1770,7 +1770,7 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.14.0"
+version = "0.15.1"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
@@ -2190,7 +2190,7 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "d53e0b4c8c8345cd0aa0fba529e891c513d68d7d3ba9725071fef2a975eb209b"
+content-hash = "156002bcaab70bcab34a674f13b77eb4361005d0bf4f1bdb920383d2ba363c56"
 
 [metadata.files]
 alabaster = [
@@ -2924,8 +2924,8 @@ pytest-metadata = [
     {file = "pytest_metadata-3.1.1.tar.gz", hash = "sha256:d2a29b0355fbc03f168aa96d41ff88b1a3b44a3b02acbe491801c98a048017c8"},
 ]
 pytest-mock = [
-    {file = "pytest-mock-3.12.0.tar.gz", hash = "sha256:31a40f038c22cad32287bb43932054451ff5583ff094bca6f675df2f8bc1a6e9"},
-    {file = "pytest_mock-3.12.0-py3-none-any.whl", hash = "sha256:0972719a7263072da3a21c7f4773069bcc7486027d7e8e1f81d98a47e701bc4f"},
+    {file = "pytest-mock-3.14.0.tar.gz", hash = "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0"},
+    {file = "pytest_mock-3.14.0-py3-none-any.whl", hash = "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f"},
 ]
 pytest-repeat = [
     {file = "pytest_repeat-0.9.3-py3-none-any.whl", hash = "sha256:26ab2df18226af9d5ce441c858f273121e92ff55f5bb311d25755b8d7abdd8ed"},
@@ -3208,8 +3208,8 @@ ska-tmc-cdm = [
     {file = "ska_tmc_cdm-7.3.1.tar.gz", hash = "sha256:3129cd4ec33b207f80669f521ba80fd221a42041c841f6c2f44eb8225ed8c363"},
 ]
 ska-tmc-common = [
-    {file = "ska_tmc_common-0.14.0-py3-none-any.whl", hash = "sha256:1c4e73c8f58256e1f57606f8fa3b06ceec7d466bf88dc5d72003f503833b61bb"},
-    {file = "ska_tmc_common-0.14.0.tar.gz", hash = "sha256:9c5e5f6705023df5a2d48adac09524784b65d4a40e35c6cc444000953ba9e4d1"},
+    {file = "ska_tmc_common-0.15.1-py3-none-any.whl", hash = "sha256:bfbb19165089aa0fef08d4b3bdc7d074fda63bb7c037545110872a3ee390302e"},
+    {file = "ska_tmc_common-0.15.1.tar.gz", hash = "sha256:be42a0becdb0708083494788917ab05e31747bb1d04ac988fbd4af28476f649e"},
 ]
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
