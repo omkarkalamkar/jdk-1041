@@ -2,6 +2,7 @@
 import time
 
 import pytest
+from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_mid import (
@@ -17,6 +18,19 @@ from tests.settings import (
     count_faulty_devices,
     logger,
 )
+
+
+@pytest.fixture()
+def devices_to_load():
+    """Devices to load for command invokation"""
+    return (
+        {
+            "class": HelperBaseDevice,
+            "devices": [
+                {"name": "a/b/c"},
+            ],
+        },
+    )
 
 
 @pytest.mark.test
