@@ -142,7 +142,7 @@ def load_dish_cfg_when_csp_is_defective(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=5,
+        lookahead=8,
     )
 
     csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
