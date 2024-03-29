@@ -10,6 +10,9 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import event_remover
 
 
+# pylint:disable=c-extension-no-member
+# this linting warning is suppressed cause its not able to recognise
+# tango._tango.Devstate which is c-extension member
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_on_command_mid(

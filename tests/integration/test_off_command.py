@@ -9,6 +9,7 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import event_remover
 
 
+# pylint:disable=c-extension-no-member
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_off_command_mid(
