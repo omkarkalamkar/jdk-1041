@@ -33,6 +33,7 @@ from ska_tmc_centralnode.utils.constants import (
 class CNComponentManagerMid(CNComponentManager):
     """Component manager class for central node mid"""
 
+    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         op_state_model,

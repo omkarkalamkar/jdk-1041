@@ -27,6 +27,7 @@ class TelescopeOff(TelescopeOnOff):
         *args,
         **kwargs,
     ):
+        # pylint:disable=keyword-arg-before-vararg
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )

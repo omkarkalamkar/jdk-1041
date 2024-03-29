@@ -30,6 +30,7 @@ class StowAntennas(CentralNodeCommand):
         logger=None,
         **kwargs,
     ):
+        # pylint:disable=keyword-arg-before-vararg
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
         self._adapter_factory = adapter_factory or AdapterFactory()

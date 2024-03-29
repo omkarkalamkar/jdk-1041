@@ -20,6 +20,8 @@ class LoadDishCfg(LoadDishCfgCommand):
     After Validation
     """
 
+    # pylint:disable=keyword-arg-before-vararg
+
     def __init__(
         self,
         component_manager,

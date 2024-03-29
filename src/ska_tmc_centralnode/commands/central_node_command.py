@@ -13,6 +13,7 @@ from ska_tmc_common.tmc_command import TMCCommand
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
+# pylint:disable=keyword-arg-before-vararg
 class CentralNodeCommand(TMCCommand):
     """Central node abstract command class"""
 

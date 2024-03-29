@@ -25,6 +25,7 @@ from ska_tmc_centralnode.utils.constants import MCCS_MLN_SUFIX
 class CNComponentManagerLow(CNComponentManager):
     """Component Manager class for low central node"""
 
+    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         op_state_model,

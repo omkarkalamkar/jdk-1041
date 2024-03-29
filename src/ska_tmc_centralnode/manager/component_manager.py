@@ -83,6 +83,7 @@ class CNComponentManager(TmcComponentManager):
       the TMC and telescope state aggregation
     """
 
+    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         op_state_model,

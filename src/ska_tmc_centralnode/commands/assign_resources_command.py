@@ -30,6 +30,7 @@ class AssignResources(AssignReleaseResources):
     it will throw error message regarding the prior existence of resource.
     """
 
+    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         component_manager,
