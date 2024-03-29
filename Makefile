@@ -83,7 +83,7 @@ endif
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
 ADD_ARGS +=  --forked  
-MARK = not post_deployment and not acceptance 
+MARK = not post_deployment and not acceptance and test
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context
