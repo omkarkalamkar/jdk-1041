@@ -75,6 +75,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 result=ResultCode.FAILED,
                 exception=message,
             )
+            self.component_manager.reset_load_dish_cfg_data()
         else:
             self.start_tracker_thread(
                 "get_load_disg_cfg_resultcode",
@@ -204,14 +205,14 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.logger.debug(
             f"Invoking LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
         )
+        self.component_manager.dev_names_for_load_dish_cfg.append(
+            self.csp_mln_adapter.dev_name
+        )
         return_codes, message_or_unique_ids = self.send_command(
             [self.csp_mln_adapter],
             "Error in calling LoadDishCfg command on Csp Master Leaf Node",
             "LoadDishCfg",
             json.dumps(dishid_vcc_map_params),
-        )
-        self.component_manager.dev_names_for_load_dish_cfg.append(
-            self.csp_mln_adapter.dev_name
         )
         return return_codes, message_or_unique_ids
 

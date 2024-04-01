@@ -676,7 +676,7 @@ class CNComponentManager(TmcComponentManager):
                             ResultCode.FAILED,
                             result_code_or_exception_or_task_status,
                         ]
-            if result_code_or_exception:
+            if result_code_or_exception and self.dev_names_for_load_dish_cfg:
                 self.result_codes_mapping[dev_name] = result_code_or_exception
                 self.logger.info(
                     "Dev names for load_dish_cfg values %s "
