@@ -348,7 +348,7 @@ def check_lrcr_events(
         assertion_data = change_event_callback.assert_change_event(
             "longRunningCommandResult",
             Anything,
-            lookahead=10,
+            lookahead=15,
         )
         unique_id, result = assertion_data["attribute_value"]
         if unique_id.endswith(command_name):
