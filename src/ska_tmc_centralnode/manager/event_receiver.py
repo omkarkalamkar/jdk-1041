@@ -270,6 +270,10 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
+        self._logger.debug(
+            "Received event for load dish cfg result from device %s",
+            event_data.device.dev_name(),
+        )
         if event_data.err:
             errors = event_data.errors
             for error in errors:
