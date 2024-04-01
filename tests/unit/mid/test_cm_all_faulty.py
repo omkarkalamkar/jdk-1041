@@ -33,7 +33,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.test
 def test_all_devices_faulty(tango_context):
     """Test with all devices faulty"""
     logger.info("%s", tango_context)

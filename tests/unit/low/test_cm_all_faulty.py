@@ -35,7 +35,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.test
 @pytest.mark.SKA_low
 def test_all_low_devices_faulty(tango_context):
     """Test all low devices faulty"""
