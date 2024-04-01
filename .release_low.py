@@ -1,0 +1,14 @@
+"""Release information for Python Package"""
+
+name="""ska-tmc-centralnode"""
+version="0.14.3"
+version_info=version.split(".")
+description="""Central Node"""
+author="Team SAHYADRI & HIMALAYA"
+author_email="telmgt-internal@googlegroups.com"
+license="""BSD-3-Clause"""
+url="""https://www.skaobservatory.org/"""
+copyright=""""""
+
+release=0.14.3
+tag=0.14.3
