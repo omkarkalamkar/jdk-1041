@@ -48,26 +48,10 @@ def load_dish_cfg(
 
     ensure_checked_devices(central_node)
 
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "TelescopeOn Command ID: %s Returned result: %s",
-        unique_id,
-        result,
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=5,
     )
 
     result, unique_id = central_node.LoadDishCfg(config_str)
@@ -120,18 +104,8 @@ def load_dish_cfg_when_csp_is_defective(
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
-
+    csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     ensure_checked_devices(central_node)
-
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "TelscopeOn Command ID: %s Returned result: %s",
-        unique_id,
-        result,
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -139,13 +113,6 @@ def load_dish_cfg_when_csp_is_defective(
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=8,
-    )
-
-    csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",

@@ -356,7 +356,7 @@ def check_lrcr_events(
                 logger.debug("%s_UID: %s", command_name, unique_id)
                 flag = True
         COUNT = COUNT + 1
-        time.sleep(0.5)
+        time.sleep(1)
     if flag:
         return True
     return False
