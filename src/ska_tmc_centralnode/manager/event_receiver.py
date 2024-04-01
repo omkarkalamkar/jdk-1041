@@ -123,13 +123,12 @@ class CentralNodeEventReceiver(EventReceiver):
                     and dev_info.dev_name
                     in self.input_param.dish_leaf_node_dev_names
                 ):
-                    if self._component_manager.enable_dish_vcc_init:
-                        proxy.subscribe_event(
-                            "kValueValidationResult",
-                            tango.EventType.CHANGE_EVENT,
-                            self.handle_dln_kvalue_validation_result,
-                            stateless=True,
-                        )
+                    proxy.subscribe_event(
+                        "kValueValidationResult",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_dln_kvalue_validation_result,
+                        stateless=True,
+                    )
                 if "subarray_node" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
@@ -165,13 +164,12 @@ class CentralNodeEventReceiver(EventReceiver):
                             self.handle_load_dish_cfg_result_callback,
                             stateless=True,
                         )
-                        if self._component_manager.enable_dish_vcc_init:
-                            proxy.subscribe_event(
-                                "DishVccMapValidationResult",
-                                tango.EventType.CHANGE_EVENT,
-                                self.handle_dish_vcc_k_value_validation_event,
-                                stateless=True,
-                            )
+                        proxy.subscribe_event(
+                            "DishVccMapValidationResult",
+                            tango.EventType.CHANGE_EVENT,
+                            self.handle_dish_vcc_k_value_validation_event,
+                            stateless=True,
+                        )
 
                 if dev_info.dev_name == MCCS_MLN_DEVICE:
                     proxy.subscribe_event(

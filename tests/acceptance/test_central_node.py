@@ -68,7 +68,10 @@ def call_command(central_node, command_name, json_factory):
             logger.info("central_node:%s", central_node.dev_name())
             if "ska_mid" in central_node.dev_name():
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+                green_mode = str(subarray_proxy.get_green_mode())
+                assert "Futures" in green_mode
                 subarray_proxy.SetisSubarrayAvailable(True)
+
                 check_subarray_availability(
                     central_node, MID_SUBARRAY_DEVICE, True
                 )

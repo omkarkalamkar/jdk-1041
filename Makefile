@@ -34,7 +34,7 @@ HELM_CHART=test-parent
 UMBRELLA_CHART_PATH ?= charts/$(HELM_CHART)/
 K8S_CHARTS ?= ska-tmc-centralnode test-parent## list of charts
 K8S_CHART ?= $(HELM_CHART)
-
+PYTANGO_GREEN_MODE = 'futures'
 CI_PROJECT_DIR ?= .
 
 XAUTHORITY ?= $(HOME)/.Xauthority
