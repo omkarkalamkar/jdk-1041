@@ -1,3 +1,4 @@
+"""Test cases file"""
 import pytest
 import tango
 from ska_tmc_common import HelperBaseDevice
@@ -25,6 +26,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invokation"""
     return (
         {
             "class": HelperSubArrayDevice,
@@ -49,6 +51,7 @@ def devices_to_load():
 
 
 def test_imaging_available(tango_context):
+    """Test imaging available."""
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
         devices=[
@@ -59,5 +62,6 @@ def test_imaging_available(tango_context):
         state=tango.DevState.ON,
     )
     ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=12)
-    # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
+    # Here expected elapsed time is set to 12 since  set_state() API is taking
+    # more time to set the state and hence actual elapsed time is increasing
     assert cm.component.imaging == ModesAvailability.available

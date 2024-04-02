@@ -1,3 +1,4 @@
+"""Command class for TelescopeStandby command"""
 import threading
 import time
 from typing import Callable, Optional
@@ -25,6 +26,7 @@ class TelescopeStandby(TelescopeOnOff):
         logger=None,
         **kwargs,
     ):
+        # pylint:disable=keyword-arg-before-vararg
         super().__init__(
             component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
@@ -37,7 +39,8 @@ class TelescopeStandby(TelescopeOnOff):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-        """This is a long running method for TelescopeStandby command, it executes do hook,
+        """This is a long running method for TelescopeStandby command,
+        it executes do hook,
         invokes TelescopeStandby command on lower level devices.
 
         :param logger: logger
@@ -135,7 +138,7 @@ class TelescopeStandby(TelescopeOnOff):
                 if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
+                if return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -219,7 +222,7 @@ class TelescopeStandby(TelescopeOnOff):
                 if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
+                if return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -235,6 +238,7 @@ class TelescopeStandby(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_standby_subarrays(self):
+        """Turns subarrays to standby"""
         self.logger.info(
             f"Invoking Standby command for {self.subarray_adapters} devices"
         )
@@ -245,66 +249,78 @@ class TelescopeStandby(TelescopeOnOff):
         )
 
     def turn_standby_sdp(self):
+        """Turns sdp to standby"""
         self.logger.info(
-            f"Invoking Standby command for {self.sdp_mln_adapter.dev_name} devices"
+            f"Invoking Standby command for {self.sdp_mln_adapter.dev_name}"
+            + "devices"
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling Standby command for {self.sdp_mln_adapter.dev_name}",
+                "Error in calling Standby command for"
+                + self.sdp_mln_adapter.dev_name,
                 "Standby",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.sdp_mln_adapter.dev_name} is not available to receive Standby command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                self.sdp_mln_adapter.dev_name
+                + " is not available to receive Standby command"
+            ],
+        )
 
     def turn_standby_csp(self):
+        """Turns csp to standby"""
         self.logger.info(
-            f"Invoking Standby command for {self.csp_mln_adapter.dev_name} devices"
+            "Invoking Standby command for"
+            + self.csp_mln_adapter.dev_name
+            + "devices"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling Standby command for {self.csp_mln_adapter.dev_name}",
+                "Error in calling Standby command for "
+                + self.csp_mln_adapter.dev_name,
                 "Standby",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.csp_mln_adapter.dev_name} is not available to receive Standby command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.csp_mln_adapter.dev_name} is not available to receive"
+                + " Standby command"
+            ],
+        )
 
     def turn_standby_mccs(self):
+        """Turns MCCS into standby"""
         self.logger.info(
             f"Standby command on  {self.mccs_mln_adapter.dev_name}"
         )
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(
                 [self.mccs_mln_adapter],
-                f"Error in calling Standby command for {self.mccs_mln_adapter.dev_name}",
+                "Error in calling Standby command for"
+                + self.mccs_mln_adapter.dev_name,
                 "Standby",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.mccs_mln_adapter.dev_name} is not available to receive Standby command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.mccs_mln_adapter.dev_name} is not available to receive"
+                + " Standby command"
+            ],
+        )
 
     def turn_off_dishes(self):
+        """Turns off the dishes"""
         self.logger.info(
             f"Off command on Dish Leaf Nodes: {self.dish_adapters}"
         )
         return self.send_command(
             self.dish_adapters,
-            "Error in calling Off() on Dish Leaf Nodes:"
-            + "{}".format(self.dish_adapters),
+            f"Error in calling Off() on Dish Leaf Nodes:{self.dish_adapters}",
             "Off",
         )
+
+    def update_task_status(self):
+        """blank method for resolving pylint errors"""

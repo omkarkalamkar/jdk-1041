@@ -1,5 +1,5 @@
-ARG BUILD_IMAGE="artefact.skao.int/ska-tango-images-pytango-builder:9.3.32"
-ARG BASE_IMAGE="artefact.skao.int/ska-tango-images-pytango-runtime:9.3.19"
+ARG BUILD_IMAGE="artefact.skao.int/ska-tango-images-pytango-builder:9.4.3"
+ARG BASE_IMAGE="artefact.skao.int/ska-tango-images-pytango-runtime:9.4.3"
 FROM $BUILD_IMAGE AS buildenv
 
 FROM $BASE_IMAGE
@@ -18,7 +18,6 @@ COPY --chown=tango:tango . /app
 
 # Install runtime dependencies and the app
 RUN poetry install --only main
-
 RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python
 
 USER tango

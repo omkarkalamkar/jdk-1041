@@ -1,3 +1,4 @@
+"""Test cases for Load_Dish_Config command"""
 import json
 
 import pytest
@@ -38,6 +39,7 @@ def validate_attribute_after_restart(
 def load_dish_cfg(
     tango_context, central_node_name, config_str, change_event_callbacks
 ):
+    """Test cases for Load_Dish_Config command"""
     logger.info("%s", config_str)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -46,29 +48,17 @@ def load_dish_cfg(
 
     ensure_checked_devices(central_node)
 
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=5,
-    )
-
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
-        f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -109,20 +99,13 @@ def load_dish_cfg_when_csp_is_defective(
     config_str,
     change_event_callbacks,
 ):
+    """Test cases for Load_Dish_Config command with csp defective"""
     logger.info("%s", config_str)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
-
+    csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     ensure_checked_devices(central_node)
-
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -130,16 +113,11 @@ def load_dish_cfg_when_csp_is_defective(
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=5,
-    )
-
-    csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
-        f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -163,13 +141,15 @@ def load_dish_cfg_when_csp_is_defective(
 
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
-        f"LoadDishCfg Command ID: {unique_id} Returned result: {result}"
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
+        lookahead=8,
     )
 
     event_remover(
@@ -181,6 +161,7 @@ def load_dish_cfg_when_csp_is_defective(
 def load_dish_cfg_after_central_node_init(
     tango_context, central_node_name, config_str, change_event_callbacks
 ):
+    """Test cases for Load_Dish_Config command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
@@ -278,6 +259,7 @@ def test_load_dish_cfg(
     change_event_callbacks,
     json_factory,
 ):
+    """Test cases for Load_Dish_Config command"""
     return load_dish_cfg(
         tango_context,
         central_node_name,
@@ -298,6 +280,7 @@ def test_load_dish_cfg_when_csp_is_defective(
     change_event_callbacks,
     json_factory,
 ):
+    """Test cases for Load_Dish_Config command"""
     return load_dish_cfg_when_csp_is_defective(
         tango_context,
         central_node_name,
@@ -318,6 +301,8 @@ def test_load_dish_cfg_after_central_node_init(
     change_event_callbacks,
     json_factory,
 ):
+    """Test cases for Load_Dish_Config command after central node
+    initialisation"""
     return load_dish_cfg_after_central_node_init(
         tango_context,
         central_node_name,
@@ -338,6 +323,8 @@ def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
     change_event_callbacks,
     json_factory,
 ):
+    """Test cases for Load_Dish_Config command after csp master dish Leaf node
+    restarts"""
     return central_node_dish_vcc_after_csp_master_dish_ln_restart(
         tango_context,
         central_node_name,

@@ -1,3 +1,4 @@
+"""Test cases file"""
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
@@ -9,6 +10,7 @@ from tests.settings import logger
 
 
 def test_telescope_on():
+    """Test Telescope on"""
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
@@ -19,6 +21,7 @@ def test_telescope_on():
 
 
 def test_telescope_off():
+    """Test Telescope off"""
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model, logger=logger, _input_parameter=InputParameterMid(None)

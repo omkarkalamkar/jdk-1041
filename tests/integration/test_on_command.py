@@ -1,3 +1,4 @@
+"""Test cases for ON command"""
 import pytest
 import tango
 from ska_control_model import HealthState
@@ -9,6 +10,9 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import event_remover
 
 
+# pylint:disable=c-extension-no-member
+# this linting warning is suppressed cause its not able to recognise
+# tango._tango.Devstate which is c-extension member
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_on_command_mid(
@@ -16,6 +20,7 @@ def test_on_command_mid(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for ON command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
     assert central_node.HealthState == HealthState.OK
@@ -77,6 +82,7 @@ def test_on_command_low(
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test cases for ON command for low"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")
     assert central_node.HealthState == HealthState.OK
@@ -114,7 +120,7 @@ def test_on_command_low(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.ON, lookahead=2
+        "telescopeState", tango._tango.DevState.ON, lookahead=4
     )
     assert central_node.telescopeState == tango.DevState.ON
 

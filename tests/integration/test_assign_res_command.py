@@ -1,3 +1,4 @@
+"""Test module for AssignResources command."""
 import json
 import time
 
@@ -30,6 +31,7 @@ def assign_resources(
     change_event_callbacks,
     subarray_device,
 ):
+    """AssignResources Test method."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -39,7 +41,9 @@ def assign_resources(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "Telscope On Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -65,7 +69,9 @@ def assign_resources(
     else:
         result, unique_id = central_node.AssignResources(assign_input_str)
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -100,7 +106,7 @@ def assign_resources(
     #     return len_subarray_beam_ids + len_station_ids + len_channel_blocks
 
     device = get_subarray_device(json.loads(central_node.internalModel))
-    logger.debug(f"InternalModel attribute value is:{device}")
+    logger.debug("InternalModel attribute value is:%s", device)
     start_time = time.time()
     while len(device["resources"]) == 0:
         time.sleep(SLEEP_TIME)
@@ -168,6 +174,7 @@ def test_assign_res_command_mid(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test assign Resources command for mid"""
     return assign_resources(
         tango_context,
         central_node_name,
@@ -191,6 +198,7 @@ def test_assign_res_command_low(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test assign Resources command for low"""
     return assign_resources(
         tango_context,
         central_node_name,
@@ -208,6 +216,7 @@ def assign_resources_with_invalid_json(
     change_event_callbacks,
     subarray_device,
 ):
+    """Test assign resources with invalid json."""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(subarray_device)
@@ -216,7 +225,9 @@ def assign_resources_with_invalid_json(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -262,6 +273,7 @@ def test_assign_res_command_low_invalid_json(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test assign resources for low invalid json"""
     return assign_resources_with_invalid_json(
         tango_context,
         central_node_name,
@@ -277,6 +289,7 @@ def assign_resources_without_subarray_id(
     assign_input_str,
     change_event_callbacks,
 ):
+    """Test Assign Resources without subarray id"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -285,7 +298,7 @@ def assign_resources_without_subarray_id(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -309,7 +322,9 @@ def assign_resources_without_subarray_id(
     result, message = central_node.AssignResources(assign_input_str)
 
     logger.info(
-        f"AssignResources returned message: {message} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert (
@@ -320,7 +335,9 @@ def assign_resources_without_subarray_id(
 
     result, unique_id = central_node.TelescopeOff()
     logger.info(
-        f"TelescopeOff Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOff")
@@ -346,6 +363,7 @@ def test_assign_res_command_mid_without_subarray_id(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test assign Resources command mid without subarray id"""
     return assign_resources_without_subarray_id(
         tango_context,
         central_node_name,
@@ -362,6 +380,7 @@ def test_assign_resources_exception_propagation(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test Assign Resources exception propagation"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -371,7 +390,9 @@ def test_assign_resources_exception_propagation(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -400,7 +421,9 @@ def test_assign_resources_exception_propagation(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -410,7 +433,8 @@ def test_assign_resources_exception_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occurred, command failed.",
+            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}:"
+            + " Exception occurred, command failed.",
         ),
         lookahead=4,
     )
@@ -427,6 +451,7 @@ def test_assign_resources_mid_timeout(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test Assign Resources mid timeout"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -436,7 +461,9 @@ def test_assign_resources_mid_timeout(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -465,7 +492,9 @@ def test_assign_resources_mid_timeout(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -494,6 +523,7 @@ def test_assign_resources_low_timeout(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test Assign Resources low timeout"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
@@ -503,7 +533,7 @@ def test_assign_resources_low_timeout(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "Telescope On Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -532,7 +562,9 @@ def test_assign_resources_low_timeout(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -561,6 +593,7 @@ def test_assign_resources_low_error_aggregation(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test Assign Resources low error aggregation"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
@@ -570,7 +603,7 @@ def test_assign_resources_low_error_aggregation(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -597,7 +630,9 @@ def test_assign_resources_low_error_aggregation(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -607,7 +642,9 @@ def test_assign_resources_low_error_aggregation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on the following devices: {LOW_SUBARRAY_DEVICE}: Exception occurred, command failed.",
+            "Exception occurred on the following devices: "
+            + LOW_SUBARRAY_DEVICE
+            + ": Exception occurred, command failed.",
         ),
         lookahead=4,
     )

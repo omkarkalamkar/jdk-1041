@@ -1,5 +1,6 @@
+"""Command class for TelescopeOn()"""
 import threading
-from typing import Callable, Optional
+from typing import Callable, List, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
@@ -12,7 +13,8 @@ class TelescopeOn(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOn() command.
 
-    TelescopeOn command on Central node enables the telescope to perform further operations
+    TelescopeOn command on Central node enables the telescope to perform
+    further operations
     and observations. It Invokes On command on lower level devices.
     """
 
@@ -26,6 +28,7 @@ class TelescopeOn(TelescopeOnOff):
         logger=None,
         **kwargs,
     ):
+        # pylint:disable=keyword-arg-before-vararg
         super().__init__(
             component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
@@ -36,7 +39,8 @@ class TelescopeOn(TelescopeOnOff):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-        """This is a long running method for TelescopeOn command, it executes do hook,
+        """This is a long running method for TelescopeOn command, it executes
+        do hook,
         invokes TelescopeOn command on lowe level devices.
 
         :param logger: logger
@@ -97,7 +101,7 @@ class TelescopeOn(TelescopeOnOff):
                 if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
+                if return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -113,42 +117,48 @@ class TelescopeOn(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_on_sdp(self):
+        """Turns on the SDP"""
         self.logger.info(
             f"Invoking On command for {self.sdp_mln_adapter.dev_name} devices"
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling On command for {self.sdp_mln_adapter.dev_name}",
+                f"Error in calling On command for\
+                      {self.sdp_mln_adapter.dev_name}",
                 "On",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.sdp_mln_adapter.dev_name} is not available to receive On command"
-                ],
-            )
+
+        return (
+            [ResultCode.REJECTED],
+            [
+                self.sdp_mln_adapter.dev_name
+                + " is not available to receive On command"
+            ],
+        )
 
     def turn_on_csp(self):
+        """Turns on the csp"""
         self.logger.info(
             f"Invoking On command for {self.csp_mln_adapter.dev_name} devices"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling On command for {self.csp_mln_adapter.dev_name}",
+                "Error in calling On command for"
+                + self.csp_mln_adapter.dev_name,
                 "On",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.csp_mln_adapter.dev_name} is not available to receive On command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.csp_mln_adapter.dev_name} is not available to receive"
+                + " On command"
+            ],
+        )
 
-    def turn_on_subarrays(self):
+    def turn_on_subarrays(self) -> None:
+        """Turns on the subarrays"""
         self.logger.info(
             f"Invoking On command for {self.subarray_adapters} devices"
         )
@@ -159,10 +169,12 @@ class TelescopeOn(TelescopeOnOff):
             "On",
         )
 
-    def set_standby_fp_mode_dishes(self):
+    def set_standby_fp_mode_dishes(self) -> Tuple[List[ResultCode], List[str]]:
+        """Sets standby fb mode in dishes"""
         return self.send_command(
             self.dish_adapters,
-            f"Error in calling SetStandbyFPMode() command on {self.dish_adapters}",
+            "Error in calling SetStandbyFPMode()"
+            f" command on {self.dish_adapters}",
             "SetStandbyFPMode",
         )
 
@@ -199,7 +211,7 @@ class TelescopeOn(TelescopeOnOff):
                 if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
+                if return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -215,19 +227,24 @@ class TelescopeOn(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_on_mccs(self):
+        """Turns on the MCCS"""
         self.logger.info(
             f"Invoking On command for {self.mccs_mln_adapter.dev_name} device"
         )
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(
                 [self.mccs_mln_adapter],
-                f"Error in calling On command for {self.mccs_mln_adapter.dev_name}",
+                "Error in calling On command for "
+                f"{self.mccs_mln_adapter.dev_name}",
                 "On",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.mccs_mln_adapter.dev_name} is not available to receive On command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.mccs_mln_adapter.dev_name} is not available to "
+                "receive On command"
+            ],
+        )
+
+    def update_task_status(self):
+        """Updates task status implemented to"""

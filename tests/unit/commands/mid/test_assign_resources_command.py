@@ -1,3 +1,4 @@
+"""Test case file"""
 import json
 import time
 from os.path import dirname, join
@@ -22,6 +23,7 @@ from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
+    """Assign Input String"""
     path = join(dirname(__file__), "..", "..", "..", "data", assign_input_file)
     with open(path, "r") as f:
         assign_input_str = f.read()
@@ -29,6 +31,7 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
 
 
 def test_assign_resources_command_completed(tango_context, task_callback):
+    """Tests assign Resources completed"""
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -63,6 +66,7 @@ def test_assign_resources_command_completed(tango_context, task_callback):
 def test_assign_resources_command_with_mkt_ids_completed(
     tango_context, task_callback
 ):
+    """test assign resources command with meerkat id"""
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -97,6 +101,7 @@ def test_assign_resources_command_with_mkt_ids_completed(
 
 
 def test_assign_resources_exception_on_sn(tango_context, task_callback):
+    """Tests assign resources exception on sn"""
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -133,6 +138,7 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
 def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):
+    """Test Assign Resources command missing eb id"""
     logger.info("%s", tango_context)
     cm, _ = create_cm()
 
@@ -152,7 +158,8 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
         json_argument, task_callback=task_callback
     )
     assert (
-        "JSON validation error: data is not compliant with https://schema.skao.int/ska-tmc-assignresources/2.1"
+        "JSON validation error: data is not compliant with"
+        + " https://schema.skao.int/ska-tmc-assignresources/2.1"
         in message
     )
     assert res_code == TaskStatus.REJECTED

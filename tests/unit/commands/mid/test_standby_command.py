@@ -45,8 +45,8 @@ def test_telescope_standby_command(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
     assert (cm.component.telescope_availability)[
@@ -73,8 +73,8 @@ def test_telescope_standby_command_task_completed(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
     assert (cm.component.telescope_availability)[
@@ -110,8 +110,8 @@ def test_telescope_standby_command_fail_subarray(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
     assert (cm.component.telescope_availability)[
@@ -154,8 +154,8 @@ def test_telescope_standby_command_fail_dish(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
     assert (cm.component.telescope_availability)[

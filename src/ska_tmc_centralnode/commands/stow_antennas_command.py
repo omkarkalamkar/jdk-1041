@@ -1,3 +1,6 @@
+"""Command class for StowAntennas()"""
+from typing import List, Tuple
+
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -6,6 +9,8 @@ from tango import DevState
 from ska_tmc_centralnode.commands.central_node_command import (
     CentralNodeCommand,
 )
+
+# pylint:disable=abstract-method
 
 
 class StowAntennas(CentralNodeCommand):
@@ -25,6 +30,7 @@ class StowAntennas(CentralNodeCommand):
         logger=None,
         **kwargs,
     ):
+        # pylint:disable=keyword-arg-before-vararg
         super().__init__(target, args, logger, kwargs)
         self.op_state_model = pop_state_model
         self._adapter_factory = adapter_factory or AdapterFactory()
@@ -49,8 +55,8 @@ class StowAntennas(CentralNodeCommand):
             DevState.DISABLE,
         ]:
             raise CommandNotAllowed(
-                "StowAntennas() is not allowed in current state %s",
-                self.op_state_model.op_state,
+                "StowAntennas() is not allowed in current state :"
+                f"{self.op_state_model.op_state}",
             )
 
         # for this command I need a number of sub-devices
@@ -91,7 +97,8 @@ class StowAntennas(CentralNodeCommand):
 
         return ResultCode.OK, ""
 
-    def do(self, argin):
+    # pylint:disable=signature-differs
+    def do(self, argin: List[str]) -> Tuple[ResultCode, str]:
         """
         Method to invoke StowAntennas command.
 
@@ -100,9 +107,9 @@ class StowAntennas(CentralNodeCommand):
 
         """
 
-        for i in range(0, len(argin)):
+        for arg in argin:
             for adapter in self.dish_adapters:
-                if argin[i] not in adapter.dev_name:
+                if arg not in adapter.dev_name:
                     continue
 
                 self.logger.debug("Set stow mode command invoked")
@@ -118,6 +125,7 @@ class StowAntennas(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def set_stow_mode_dishes(self, adapters):
+        """Method for set stow mode for dish"""
         return self.send_command(
             [adapters],
             "Error in calling StowAntennasCommand() on TMC Dish leaf node",

@@ -1,5 +1,4 @@
 """A module for mocking the task callback functionality"""
-# pylint: disable=W
 from typing import Callable
 
 from ska_tango_base.executor import TaskStatus
@@ -14,13 +13,16 @@ class MockCallable(Callable):
     ):
         """Initialise the callable with unique id"""
         self._unique_id = unique_id
+        self.status: TaskStatus = None
+        self.result: str = None
+        self.exception: str = None
 
     def __call__(
         self,
         status: TaskStatus = None,
         result: str = None,
         exception: str = None,
-    ):
+    ) -> TaskStatus:
         """Call method to set the status, result and message"""
         self.status = status
         self.result = result

@@ -1,3 +1,4 @@
+"""Test case module"""
 import pytest
 import tango
 from ska_tmc_common import (
@@ -29,6 +30,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invocation"""
     return (
         {
             "class": HelperSubArrayDevice,
@@ -63,6 +65,7 @@ def devices_to_load():
 
 
 def set_devices_on(cm, devFactory, expected_elapsed_time):
+    """sets devices to On"""
     set_devices_state(
         devices=[
             "ska_low/tm_subarray_node/1",
@@ -80,11 +83,14 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
 
 @pytest.mark.SKA_low
 def test_tmc_state_on(tango_context):
+    """test tmc state on"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
     set_devices_on(
         cm, devFactory, 25
-    )  # Here expected elapsed time is set to 25 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
+    )  # Here expected elapsed time is set to 25 since
+    # set_state() API is taking more time to set the state and
+    # hence actual elapsed time is increasing
     assert cm.component.tmc_op_state == tango.DevState.ON

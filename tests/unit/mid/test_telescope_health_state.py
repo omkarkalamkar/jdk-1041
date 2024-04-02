@@ -1,3 +1,4 @@
+"""Test cases file"""
 import time
 
 import pytest
@@ -25,6 +26,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invokation"""
     return (
         {
             "class": HelperSubArrayDevice,
@@ -81,7 +83,9 @@ def test_set_health_state_degraded(tango_context):
     set_device_degraded(
         devFactory,
         cm,
-        12,  # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
+        12,  # Here expected elapsed time is set to 12 since  set_state()
+        # API is taking more time to set the state and hence actual
+        # elapsed time is increasing
     )
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 

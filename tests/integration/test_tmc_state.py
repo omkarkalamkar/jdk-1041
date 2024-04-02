@@ -1,3 +1,4 @@
+"""Tests tmc State"""
 import pytest
 import tango
 from ska_tmc_common.dev_factory import DevFactory
@@ -10,6 +11,7 @@ from tests.settings import event_remover, logger
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_tmc_state_mid(tango_context, change_event_callbacks):
+    """Tests tmc state for mid"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -49,6 +51,7 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_tmc_state_low(tango_context, change_event_callbacks):
+    """Test tmc state for low"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")

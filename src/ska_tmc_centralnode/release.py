@@ -15,6 +15,4 @@ version_info = version.split(".")
 description = """Central Node is a coordinator of the complete M&C system."""
 author = "Team Sahyadri, Team Himalay"
 author_email = "telmgt-internal@googlegroups.com"
-license = """BSD-3-Clause"""
 url = """https://www.skao.int/"""
-copyright = """"""
