@@ -1770,7 +1770,7 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.15.1"
+version = "0.15.3"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
@@ -2190,7 +2190,7 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "156002bcaab70bcab34a674f13b77eb4361005d0bf4f1bdb920383d2ba363c56"
+content-hash = "bfbeb4f58856edf97567c56b22432eb9c5e4bc33ecdae4f2e271e88b44db5226"
 
 [metadata.files]
 alabaster = [
@@ -3208,8 +3208,8 @@ ska-tmc-cdm = [
     {file = "ska_tmc_cdm-7.3.1.tar.gz", hash = "sha256:3129cd4ec33b207f80669f521ba80fd221a42041c841f6c2f44eb8225ed8c363"},
 ]
 ska-tmc-common = [
-    {file = "ska_tmc_common-0.15.1-py3-none-any.whl", hash = "sha256:bfbb19165089aa0fef08d4b3bdc7d074fda63bb7c037545110872a3ee390302e"},
-    {file = "ska_tmc_common-0.15.1.tar.gz", hash = "sha256:be42a0becdb0708083494788917ab05e31747bb1d04ac988fbd4af28476f649e"},
+    {file = "ska_tmc_common-0.15.3-py3-none-any.whl", hash = "sha256:72b2d3d23fed3326f5373b36f3106dab9309c2ea22e16bfa5f3f415cc17399ef"},
+    {file = "ska_tmc_common-0.15.3.tar.gz", hash = "sha256:3569a38708ce369ce1294ac4ca54165037a3beb6f97b9c350279415ca2f7895e"},
 ]
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
