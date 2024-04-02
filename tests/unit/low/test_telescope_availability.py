@@ -1,3 +1,4 @@
+"""Test case module"""
 import time
 
 import pytest
@@ -32,6 +33,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invocation."""
     return (
         {
             "class": CNHelperSubArrayDevice,
@@ -99,8 +101,8 @@ def test_telescope_availability_with_subarray_and_master_leaf_nodes(
     csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
     subarray_node.SetisSubarrayAvailable(True)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
 
     check_subarray_availability(cm, LOW_SUBARRAY_DEVICE, True)
     check_cspmln_availability(cm, True)

@@ -3,13 +3,14 @@ AssignResources class for CentralNode.
 """
 import json
 import threading
-from typing import Callable, Optional, Tuple
+from logging import Logger
+from typing import Callable, List, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import SubArrayAdapter
+from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
@@ -20,12 +21,16 @@ class AssignResources(AssignReleaseResources):
     """
     A class for CentralNode's AssignResources() command.
 
-    Assigns resources to given subarray. It accepts the subarray id, receptor id list and SDP block in JSON
-    string format. Upon successful execution, the 'receptor_ids' attribute of the given subarray is populated
-    with the given receptors.Also checking for duplicate allocation of resources is done. If already allocated
+    Assigns resources to given subarray. It accepts the subarray id,
+    receptor id list and SDP block in JSON
+    string format. Upon successful execution, the 'receptor_ids'
+    attribute of the given subarray is populated
+    with the given receptors.Also checking for duplicate allocation
+    of resources is done. If already allocated
     it will throw error message regarding the prior existence of resource.
     """
 
+    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         component_manager,
@@ -40,17 +45,18 @@ class AssignResources(AssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.tm_subarray_adapter: Optional[SubArrayAdapter] = None
-        self._skuid = skuid
+        self.tm_subarray_adapter: Optional[AdapterFactory] = None
+        self._skuid: SkuidClient = skuid
 
     def assign_resources(
         self,
-        argin,
-        logger,
+        argin: str,
+        logger: Logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ):
-        """This is a long running method for AssignResources command, it executes do hook,
+        """This is a long running method for AssignResources command,
+          it executes do hook,
         invokes AssignResources command on lower level devices.
 
         :param logger: logger
@@ -80,16 +86,20 @@ class AssignResources(AssignReleaseResources):
             self.component_manager.stop_timer()
         else:
             self.start_tracker_thread(
-                self.component_manager.get_subarray_obsstate,
+                "get_subarray_obsstate",
                 [ObsState.RESOURCING, ObsState.IDLE],
                 task_abort_event,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
                 command_id=self.component_manager.command_id,
-                lrcr_callback=self.component_manager.long_running_result_callback,
+                lrcr_callback=(
+                    self.component_manager.long_running_result_callback
+                ),
             )
 
-    def update_task_status(self, result: ResultCode, message: str = ""):
+    def update_task_status(
+        self, result: ResultCode, message: str = ""
+    ) -> None:
         """Updates the task status for command"""
         if result == ResultCode.FAILED:
             self.task_callback(
@@ -106,7 +116,8 @@ class AssignResources(AssignReleaseResources):
                 self.component_manager.command_id
             )
 
-    def do_mid(self, argin) -> Tuple[ResultCode, str]:
+    # pylint:disable=signature-differs
+    def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
         """
             Method to invoke AssignResources command on Subarray.
 
@@ -116,54 +127,98 @@ class AssignResources(AssignReleaseResources):
 
         .. code-block::
 
-            {"interface": "https://schema.skao.int/ska-tmc-assignresources/2.1","transaction_id":
-            "txn-....-00001","subarray_id": 1,"dish": {"receptor_ids": ["SKA001"]},"sdp": {
-            "interface": "https://schema.skao.int/ska-sdp-assignres/0.4",
-            "execution_block": {"eb_id": "eb-mvp01-20210623-00000","max_length": 100.0,
-            "context": {},"beams": [{"beam_id": "vis0","function": "visibilities"}, {
-            "beam_id": "pss1","search_beam_id": 1,"function": "pulsar search"}, {"beam_id": "pss2",
-            "search_beam_id": 2,"function": "pulsar search"}, {"beam_id": "pst1",
-            "timing_beam_id": 1,"function": "pulsar timing"}, {"beam_id": "pst2","timing_beam_id": 2,
-            "function": "pulsar timing"}, {"beam_id": "vlbi1","vlbi_beam_id": 1,"function": "vlbi"}],
-            "scan_types": [{"scan_type_id": ".default","beams": {"vis0": {"channels_id": "vis_channels",
-            "polarisations_id": "all"},"pss1": {"field_id": "pss_field_0","channels_id": "pulsar_channels",
-            "polarisations_id": "all"},"pss2": {"field_id": "pss_field_1","channels_id": "pulsar_channels",
-            "polarisations_id": "all"},"pst1": {"field_id": "pst_field_0","channels_id": "pulsar_channels",
-            "polarisations_id": "all"},"pst2": {"field_id": "pst_field_1","channels_id": "pulsar_channels",
-            "polarisations_id": "all"},"vlbi": {"field_id": "vlbi_field","channels_id": "vlbi_channels",
-            "polarisations_id": "all"}}}, {"scan_type_id": "target:a","derive_from": ".default",
-            "beams": {"vis0": {"field_id": "field_a"}}}],"channels": [{"channels_id": "vis_channels",
-            "spectral_windows": [{"spectral_window_id": "fsp_1_channels","count": 744,"start": 0,
-            "stride": 2,"freq_min": 350000000.0,"freq_max": 368000000.0,"link_map": [
-            [0, 0],[200, 1],[744, 2],[944, 3]]}, {"spectral_window_id": "fsp_2_channels",
-            "count": 744,"start": 2000,"stride": 1,"freq_min": 360000000.0,"freq_max": 368000000.0,
-            "link_map": [[2000, 4],[2200, 5]]}, {"spectral_window_id": "zoom_window_1",
-            "count": 744,"start": 4000,"stride": 1,"freq_min": 360000000.0,"freq_max": 361000000.0,
-            "link_map": [[4000, 6],[4200, 7]]}]}, {"channels_id": "pulsar_channels",
-            "spectral_windows": [{"spectral_window_id": "pulsar_fsp_channels","count": 744,
-            "start": 0,"freq_min": 350000000.0,"freq_max": 368000000.0}]}],
-            "polarisations": [{"polarisations_id": "all","corr_type": ["XX", "XY", "YY", "YX"]}],
-            "fields": [{"field_id": "field_a","phase_dir": {"ra": [123, 0.1],"dec": [80, 0.1],
-            "reference_time": "...","reference_frame": "ICRF3"},"pointing_fqdn":
-            "low-tmc/telstate/0/pointing"}]},"processing_blocks": [{"pb_id": "pb-mvp01-20210623-00000",
-            "sbi_ids": ["sbi-mvp01-20200325-00001"],"script": {"kind": "realtime",
-            "name": "vis_receive","version": "0.1.0"},"parameters": {}}, {
-            "pb_id": "pb-mvp01-20210623-00001","sbi_ids": ["sbi-mvp01-20200325-00001"],
-            "script": {"kind": "realtime","name": "test_realtime","version": "0.1.0"},
-            "parameters": {}}, {"pb_id": "pb-mvp01-20210623-00002","sbi_ids": ["sbi-mvp01-20200325-00002"],
-            "script": {"kind": "batch","name": "ical","version": "0.1.0"},"parameters": {},
-            "dependencies": [{"pb_id": "pb-mvp01-20210623-00000","kind": ["visibilities"]}]
-            }, {"pb_id": "pb-mvp01-20210623-00003","sbi_ids": ["sbi-mvp01-20200325-00001",
-            "sbi-mvp01-20200325-00002"],"script": {"kind": "batch","name": "dpreb","version": "0.1.0"},
-            "parameters": {},"dependencies": [{"pb_id": "pb-mvp01-20210623-00002",
-            "kind": ["calibration"]}]}],"resources": {"csp_links": [1, 2, 3, 4],
-            "receptors": ["FS4", "FS8", "FS16", "FS17", "FS22", "FS23", "FS30", "FS31", "FS32",
-            "FS33", "FS36", "FS52", "FS56", "FS57", "FS59", "FS62", "FS66", "FS69", "FS70", "FS72",
-            "FS73", "FS78", "FS80", "FS88", "FS89", "FS90", "FS91", "FS98", "FS108", "FS111", "FS132",
-            "FS144", "FS146", "FS158", "FS165", "FS167", "FS176", "FS183", "FS193", "FS200", "FS345",
-            "FS346", "FS347", "FS348", "FS349", "FS350", "FS351", "FS352", "FS353", "FS354", "FS355",
-            "FS356", "FS429", "FS430", "FS431", "FS432", "FS433", "FS434", "FS465", "FS466", "FS467",
-            "FS468", "FS469", "FS470"],"receive_nodes": 10}}}
+        {"interface": "https://schema.skao.int/ska-tmc-assignresources/2.1",
+        "transaction_id":
+        "txn-....-00001","subarray_id": 1,"dish": {"receptor_ids": ["SKA001"]},
+        "sdp": {
+        "interface": "https://schema.skao.int/ska-sdp-assignres/0.4",
+        "execution_block": {"eb_id": "eb-mvp01-20210623-00000","max_length":
+          100.0,
+        "context": {},"beams": [{"beam_id": "vis0","function": "visibilities"},
+          {
+        "beam_id": "pss1","search_beam_id": 1,"function": "pulsar search"},
+          {"beam_id": "pss2",
+        "search_beam_id": 2,"function": "pulsar search"}, {"beam_id": "pst1",
+        "timing_beam_id": 1,"function": "pulsar timing"}, {"beam_id": "pst2",
+        "timing_beam_id": 2,
+        "function": "pulsar timing"}, {"beam_id": "vlbi1","vlbi_beam_id": 1,
+        "function": "vlbi"}],
+        "scan_types": [{"scan_type_id": ".default","beams": {"vis0":
+        {"channels_id": "vis_channels",
+        "polarisations_id": "all"},"pss1": {"field_id": "pss_field_0",
+        "channels_id": "pulsar_channels",
+        "polarisations_id": "all"},"pss2": {"field_id": "pss_field_1",
+        "channels_id": "pulsar_channels",
+        "polarisations_id": "all"},"pst1": {"field_id": "pst_field_0",
+        "channels_id": "pulsar_channels",
+        "polarisations_id": "all"},"pst2": {"field_id": "pst_field_1",
+        "channels_id": "pulsar_channels",
+        "polarisations_id": "all"},"vlbi": {"field_id": "vlbi_field",
+        "channels_id": "vlbi_channels",
+        "polarisations_id": "all"}}}, {"scan_type_id": "target:a",
+        "derive_from": ".default",
+        "beams": {"vis0": {"field_id": "field_a"}}}],"channels":
+          [{"channels_id": "vis_channels",
+        "spectral_windows": [{"spectral_window_id": "fsp_1_channels",
+        "count": 744,"start": 0,
+        "stride": 2,"freq_min": 350000000.0,"freq_max": 368000000.0,
+        "link_map": [
+        [0, 0],[200, 1],[744, 2],[944, 3]]}, {"spectral_window_id":
+        "fsp_2_channels",
+        "count": 744,"start": 2000,"stride": 1,"freq_min": 360000000.0,
+        "freq_max": 368000000.0,
+        "link_map": [[2000, 4],[2200, 5]]}, {"spectral_window_id":
+        "zoom_window_1",
+        "count": 744,"start": 4000,"stride": 1,"freq_min": 360000000.0,
+        "freq_max": 361000000.0,
+        "link_map": [[4000, 6],[4200, 7]]}]}, {"channels_id":
+          "pulsar_channels",
+        "spectral_windows": [{"spectral_window_id": "pulsar_fsp_channels",
+        "count": 744,
+        "start": 0,"freq_min": 350000000.0,"freq_max": 368000000.0}]}],
+        "polarisations": [{"polarisations_id": "all","corr_type":
+          ["XX", "XY", "YY", "YX"]}],
+        "fields": [{"field_id": "field_a","phase_dir":
+        {"ra": [123, 0.1],"dec": [80, 0.1],
+        "reference_time": "...","reference_frame": "ICRF3"},
+        "pointing_fqdn":
+        "low-tmc/telstate/0/pointing"}]},"processing_blocks":
+        [{"pb_id": "pb-mvp01-20210623-00000",
+        "sbi_ids": ["sbi-mvp01-20200325-00001"],
+        "script": {"kind": "realtime",
+        "name": "vis_receive","version": "0.1.0"},
+        "parameters": {}}, {
+        "pb_id": "pb-mvp01-20210623-00001","sbi_ids":
+        ["sbi-mvp01-20200325-00001"],
+        "script": {"kind": "realtime",
+        "name": "test_realtime","version": "0.1.0"},
+        "parameters": {}}, {"pb_id":
+        "pb-mvp01-20210623-00002","sbi_ids": ["sbi-mvp01-20200325-00002"],
+        "script": {"kind": "batch",
+        "name": "ical","version": "0.1.0"},"parameters": {},
+        "dependencies": [{"pb_id":
+        "pb-mvp01-20210623-00000","kind": ["visibilities"]}]
+        }, {"pb_id": "pb-mvp01-20210623-00003",
+        "sbi_ids": ["sbi-mvp01-20200325-00001",
+        "sbi-mvp01-20200325-00002"],"script":
+        {"kind": "batch","name": "dpreb","version": "0.1.0"},
+        "parameters": {},"dependencies":
+          [{"pb_id": "pb-mvp01-20210623-00002",
+        "kind": ["calibration"]}]}],"resources":
+        {"csp_links": [1, 2, 3, 4],
+        "receptors": ["FS4", "FS8", "FS16", "FS17",
+        "FS22", "FS23", "FS30", "FS31", "FS32",
+        "FS33", "FS36", "FS52", "FS56", "FS57", "FS59",
+          "FS62", "FS66", "FS69", "FS70", "FS72",
+        "FS73", "FS78", "FS80", "FS88", "FS89", "FS90",
+          "FS91", "FS98", "FS108", "FS111", "FS132",
+        "FS144", "FS146", "FS158", "FS165", "FS167",
+        "FS176", "FS183", "FS193", "FS200", "FS345",
+        "FS346", "FS347", "FS348", "FS349", "FS350",
+        "FS351", "FS352", "FS353", "FS354", "FS355",
+        "FS356", "FS429", "FS430", "FS431", "FS432",
+        "FS433", "FS434", "FS465", "FS466", "FS467",
+        "FS468", "FS469", "FS470"],"receive_nodes": 10}}}
 
         return:
         A tuple containing a return code and a string msg.
@@ -201,10 +256,9 @@ class AssignResources(AssignReleaseResources):
                     ResultCode.FAILED,
                     f"Dish {receptor_id} is already allocated",
                 )
-            else:
-                self.logger.info(
-                    f"Dish {receptor_id} is available for assignment."
-                )
+            self.logger.info(
+                f"Dish {receptor_id} is available for assignment."
+            )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
@@ -225,7 +279,7 @@ class AssignResources(AssignReleaseResources):
             if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                 return ResultCode.FAILED, message_or_unique_id
 
-            elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+            if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                 self.component_manager.command_mapping[
                     self.component_manager.command_id
                 ] = message_or_unique_id
@@ -236,11 +290,21 @@ class AssignResources(AssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def update_resource_config_file(self, json_argument, id):
-        """This method utilizes SKUID service to generate unique sb_id / eb_id and pb_id"""
-        # New type of id "eb_id" is used to distinguish between real SB and id used during testing
+    def update_resource_config_file(
+        self, json_argument: dict, sdp_id: str
+    ) -> None:
+        """Updates the resource configuration file.
+
+        :param json_argument: A dictionary containing the JSON argument for
+        the update.
+        :param id: A string representing the ID for the resource configuration
+        file.
+        :return: None
+        """
+        # New type of id "eb_id" is used to distinguish between real
+        # SB and id used during testing
         unique_id = self._skuid.fetch_skuid("eb")
-        json_argument["sdp"]["execution_block"][id] = unique_id
+        json_argument["sdp"]["execution_block"][sdp_id] = unique_id
         if "processing_blocks" in json_argument["sdp"]:
             for i in range(len(json_argument["sdp"]["processing_blocks"])):
                 pb_id = self._skuid.fetch_skuid("pb")
@@ -274,7 +338,8 @@ class AssignResources(AssignReleaseResources):
                 "processing_blocks key not present in the input json argument"
             )
 
-    def do_low(self, argin=None):
+    # pylint:disable=signature-differs
+    def do_low(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -284,33 +349,63 @@ class AssignResources(AssignReleaseResources):
 
         .. code-block::
 
-            {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/3.0","transaction_id":"txn-....-00001","subarray_id":1,
-            "mccs":{"subarray_beam_ids":[1],"station_ids":[[1,2]],"channel_blocks":[3]},
-            "sdp":{"interface":"https://schema.skao.int/ska-sdp-assignres/0.4","execution_block":{"eb_id":"eb-mvp01-20200325-00001",
-            "max_length":100,"context":{},"beams":[{"beam_id":"vis0","function":"visibilities"},
-            {"beam_id":"pss1","search_beam_id":1,"function":"pulsar search"},{"beam_id":"pss2","search_beam_id":2,"function":"pulsar search"},
-            {"beam_id":"pst1","timing_beam_id":1,"function":"pulsar timing"},{"beam_id":"pst2","timing_beam_id":2,"function":"pulsar timing"},
-            {"beam_id":"vlbi1","vlbi_beam_id":1,"function":"vlbi"}],
-            "scan_types":[{"scan_type_id":".default","beams":{"vis0":{"channels_id":"vis_channels","polarisations_id":"all"},
-            "pss1":{"field_id":"pss_field_0","channels_id":"pulsar_channels","polarisations_id":"all"},
-            "pss2":{"field_id":"pss_field_1","channels_id":"pulsar_channels","polarisations_id":"all"},
-            "pst1":{"field_id":"pst_field_0","channels_id":"pulsar_channels","polarisations_id":"all"},
-            "pst2":{"field_id":"pst_field_1","channels_id":"pulsar_channels","polarisations_id":"all"},
-            "vlbi":{"field_id":"vlbi_field","channels_id":"vlbi_channels","polarisations_id":"all"}}},
-            {"scan_type_id":"target:a","derive_from":".default","beams":{"vis0":{"field_id":"field_a"}}}],
-            "channels":[{"channels_id":"vis_channels",
-            "spectral_windows":[{"spectral_window_id":
-            "fsp_1_channels","count":744,"start":0,"stride":2,"freq_min":350000000,"freq_max":368000000,
-            "link_map":[[0,0],[200,1],[744,2],[944,3]]},{"spectral_window_id":"fsp_2_channels",
-            "count":744,"start":2000,"stride":1,"freq_min":360000000,"freq_max":368000000,"link_map":[[2000,4],[2200,5]]},
-            {"spectral_window_id":"zoom_window_1","count":744,"start":4000,"stride":1,"freq_min":360000000,"freq_max":361000000,"link_map":[[4000,6],[4200,7]]}]},
-            {"channels_id":"pulsar_channels","spectral_windows":[{"spectral_window_id":"pulsar_fsp_channels","count":744,"start":0,"freq_min":350000000,"freq_max":368000000}]}],
-            "polarisations":[{"polarisations_id":"all","corr_type":["XX","XY","YY","YX"]}],"fields":[{"field_id":"field_a",
-            "phase_dir":{"ra":[123,0.1],"dec":[123,0.1],"reference_time":"...","reference_frame":"ICRF3"},"pointing_fqdn":"low-tmc/telstate/0/pointing"}]},
-            "processing_blocks":[{"pb_id":"pb-mvp01-20200325-00001","sbi_ids":["sbi-mvp01-20200325-00001"],"script":{},"parameters":{},
-            "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00002","sbi_ids":["sbi-mvp01-20200325-00002"],"script":{},"parameters":{},
-            "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00003","sbi_ids":["sbi-mvp01-20200325-00001","sbi-mvp01-20200325-00002"],"script":{},
-            "parameters":{},"dependencies":{}}],"resources":{"csp_links":[1,2,3,4],"receptors":["FS4","FS8"],"receive_nodes":10}}}
+        {"interface":"https://schema.skao.int/ska-low-tmc-assignresources/3.0"
+        ,"transaction_id":"txn-....-00001","subarray_id":1,
+        "mccs":{"subarray_beam_ids":[1],"station_ids":[[1,2]],
+        "channel_blocks":[3]},
+        "sdp":{"interface":"https://schema.skao.int/ska-sdp-assignres/0.4",
+        "execution_block":{"eb_id":"eb-mvp01-20200325-00001",
+        "max_length":100,"context":{},"beams":[{"beam_id":"vis0",
+        "function":"visibilities"},
+        {"beam_id":"pss1","search_beam_id":1,"function":"pulsar search"},
+        {"beam_id":"pss2","search_beam_id":2,"function":"pulsar search"},
+        {"beam_id":"pst1","timing_beam_id":1,"function":"pulsar timing"},
+        {"beam_id":"pst2","timing_beam_id":2,"function":"pulsar timing"},
+        {"beam_id":"vlbi1","vlbi_beam_id":1,"function":"vlbi"}],
+        "scan_types":[{"scan_type_id":".default","beams":{"vis0":
+        {"channels_id":"vis_channels","polarisations_id":"all"},
+        "pss1":{"field_id":"pss_field_0","channels_id":"pulsar_channels",
+        "polarisations_id":"all"},
+        "pss2":{"field_id":"pss_field_1","channels_id":"pulsar_channels",
+        "polarisations_id":"all"},
+        "pst1":{"field_id":"pst_field_0","channels_id":"pulsar_channels",
+        "polarisations_id":"all"},
+        "pst2":{"field_id":"pst_field_1","channels_id":"pulsar_channels",
+        "polarisations_id":"all"},
+        "vlbi":{"field_id":"vlbi_field","channels_id":"vlbi_channels",
+        "polarisations_id":"all"}}},
+        {"scan_type_id":"target:a","derive_from":".default","beams":
+        {"vis0":{"field_id":"field_a"}}}],
+        "channels":[{"channels_id":"vis_channels",
+        "spectral_windows":[{"spectral_window_id":
+        "fsp_1_channels","count":744,"start":0,"stride":2,
+        "freq_min":350000000,"freq_max":368000000,
+        "link_map":[[0,0],[200,1],[744,2],[944,3]]},
+        {"spectral_window_id":"fsp_2_channels",
+        "count":744,"start":2000,"stride":1,
+        "freq_min":360000000,"freq_max":368000000,
+        "link_map":[[2000,4],[2200,5]]},
+        {"spectral_window_id":"zoom_window_1","count":744,"start":4000,
+        "stride":1,"freq_min":360000000,"freq_max":361000000,
+        "link_map":[[4000,6],[4200,7]]}]},
+        {"channels_id":"pulsar_channels","spectral_windows":
+        [{"spectral_window_id":"pulsar_fsp_channels","count":
+        744,"start":0,"freq_min":350000000,"freq_max":368000000}]}],
+        "polarisations":[{"polarisations_id":"all","corr_type":
+        ["XX","XY","YY","YX"]}],"fields":[{"field_id":"field_a",
+        "phase_dir":{"ra":[123,0.1],"dec":[123,0.1],
+        "reference_time":"...","reference_frame":"ICRF3"},
+        "pointing_fqdn":"low-tmc/telstate/0/pointing"}]},
+        "processing_blocks":[{"pb_id":"pb-mvp01-20200325-00001",
+        "sbi_ids":["sbi-mvp01-20200325-00001"],"script":{},"parameters":{},
+        "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00002",
+        "sbi_ids":["sbi-mvp01-20200325-00002"],"script":{},"parameters":{},
+        "dependencies":{}},{"pb_id":"pb-mvp01-20200325-00003",
+        "sbi_ids":["sbi-mvp01-20200325-00001","sbi-mvp01-20200325-00002"],
+        "script":{},
+        "parameters":{},"dependencies":{}}],
+        "resources":{"csp_links":[1,2,3,4],"receptors":["FS4","FS8"],
+        "receive_nodes":10}}}
 
         return:
             None
@@ -362,13 +457,15 @@ class AssignResources(AssignReleaseResources):
         for return_codes, message_or_unique_ids in [
             self.send_command(
                 [self.tm_subarray_adapter],
-                f"Error in calling AssignResources on subarray: {self.tm_subarray_adapter.dev_name}",
+                "Error in calling AssignResources on subarray:"
+                + self.tm_subarray_adapter.dev_name,
                 "AssignResources",
                 json.dumps(json_argument),
             ),
             self.send_command(
                 [self.mccs_mln_adapter],
-                "Error in calling AssignResources command on MCCS Master Leaf Node",
+                "Error in calling AssignResources command"
+                + " on MCCS Master Leaf Node ",
                 "AssignResources",
                 json.dumps(input_mccs_master),
             ),
@@ -380,13 +477,14 @@ class AssignResources(AssignReleaseResources):
                     return (
                         ResultCode.FAILED,
                         message_or_unique_id,
-                    )  # even if command is rejected by subarraynode , it will be resultcode failed for centralnode
-                elif return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                    )
+                if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                     if self.component_manager.command_mapping.get(
                         self.component_manager.command_id
                     ):
                         self.logger.info(
-                            "Adding the id %s to the command mapping dictionary under command_id: %s",
+                            "Adding the id %s to the command mapping"
+                            + "dictionary under command_id: %s",
                             message_or_unique_id,
                             self.component_manager.command_id,
                         )
@@ -395,7 +493,8 @@ class AssignResources(AssignReleaseResources):
                         ].append(message_or_unique_id)
                     else:
                         self.logger.info(
-                            "Creating a command mapping dictionary for id: %s, with unique_id: %s",
+                            "Creating a command mapping dictionary for id:"
+                            + "%s, with unique_id: %s",
                             self.component_manager.command_id,
                             message_or_unique_id,
                         )
@@ -405,11 +504,19 @@ class AssignResources(AssignReleaseResources):
 
         return (ResultCode.OK, "")
 
-    def _validate_low_json(self, json_argument, req_keys):
-        """To validate the low json for assign resources command before entering the queue
-        Args:
-            json_argument (dict): Json Argument
-            req_keys (list): Required key list to check in json argument
+    def _validate_low_json(
+        self, json_argument: dict, req_keys: List
+    ) -> Tuple[bool, str]:
+        """Validates the JSON argument for the assign resources command before
+            entering the queue.
+
+        :param json_argument: A dictionary
+        representing the JSON argument to be validated.
+        :param req_keys: A list containing the
+        required keys to check in the JSON argument.
+
+        :return: A tuple containing a boolean indicating
+        validation success and a string message.
         """
         json_keys = json_argument.keys()
         for key in req_keys:
@@ -431,7 +538,8 @@ class AssignResources(AssignReleaseResources):
         except KeyError:
             return (
                 False,
-                "JSON Error: Missing 'subarray_beams' key in input json arguement",
+                "JSON Error: Missing 'subarray_beams' key in input json"
+                + " arguement",
             )
 
         for subarray_beam in subarray_beams:
@@ -440,7 +548,8 @@ class AssignResources(AssignReleaseResources):
             except KeyError:
                 return (
                     False,
-                    "JSON Error: Missing 'subarray_beam_id' key in input json arguement.",
+                    "JSON Error: Missing 'subarray_beam_id' key in input json"
+                    + " arguement.",
                 )
 
             try:
@@ -448,7 +557,8 @@ class AssignResources(AssignReleaseResources):
             except KeyError:
                 return (
                     False,
-                    "JSON Error: Missing 'apertures' key in input json arguement.",
+                    "JSON Error: Missing 'apertures' key in input json"
+                    + " arguement.",
                 )
 
             try:
@@ -456,14 +566,18 @@ class AssignResources(AssignReleaseResources):
             except KeyError:
                 return (
                     False,
-                    "JSON Error: Missing 'number_of_channels' key in input json arguement",
+                    "JSON Error: Missing 'number_of_channels' key in input"
+                    + " json arguement",
                 )
         return (
             True,
-            "The json argument has all the required keys. Validation successful.",
+            "The json argument has all the required keys. Validation"
+            + " successful.",
         )
 
-    def _validate_and_update_resource_config(self, json_argument):
+    def _validate_and_update_resource_config(
+        self, json_argument: dict
+    ) -> Tuple[bool, str]:
         """Validate if eb_id present in sdp schema.
         Args:
             json_argument (dict): low json
@@ -485,7 +599,8 @@ class AssignResources(AssignReleaseResources):
 
     def create_mccs_cmd_data(self, json_argument: dict) -> dict:
         """
-        Method to prepare the input json_argument required while invoking AssignResources()
+        Method to prepare the input json_argument required while invoking
+        AssignResources()
         command on MCCS Master Leaf Node.
         :param json_argument: The string in JSON format.
 
@@ -499,7 +614,13 @@ class AssignResources(AssignReleaseResources):
         except Exception as e:
             raise Exception("Error while creating MCCS input json") from e
 
-    def get_subarray_adapter(self, subarray_id):
+    def get_subarray_adapter(self, subarray_id: int) -> Tuple[ResultCode, str]:
+        """Method for obtaining the adapter for a subarray.
+
+        :param subarray_id: An integer representing the subarray ID.
+        :return: A tuple containing a ResultCode enum value and a
+        string message.
+        """
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.tm_subarray_adapter = adapter

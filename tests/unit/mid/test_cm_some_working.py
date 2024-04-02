@@ -1,3 +1,4 @@
+"""Test cases file"""
 import time
 
 import pytest
@@ -29,6 +30,7 @@ WORKING_DEVICES = 3
 
 @pytest.fixture()
 def devices_to_load():
+    """devices to load for command invokation"""
     return (
         {
             "class": SKABaseDevice,
@@ -46,6 +48,7 @@ def devices_to_load():
 
 
 def test_some_working_other_faulty(tango_context):
+    """Test with some working and some faulty devices"""
     logger.info("%s", tango_context)
 
     op_state_model = TMCOpStateModel(logger)

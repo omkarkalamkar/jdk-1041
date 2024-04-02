@@ -1,4 +1,6 @@
+"""Conftest test case file for unit testing"""
 # pylint: disable=unused-argument
+# pylint: disable=redefined-outer-name
 import logging
 from os.path import dirname, join
 
@@ -52,6 +54,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def tango_context(devices_to_load, request):
+    """Tango context fixture"""
     true_context = request.config.getoption("--true-context")
     logging.info("true context: %s", true_context)
     if not true_context:
@@ -76,7 +79,8 @@ def task_callback() -> MockCallable:
 @pytest.fixture
 def change_event_callbacks() -> MockTangoEventCallbackGroup:
     """
-    Return a dictionary of Tango device change event callbacks with asynchrony support.
+    Return a dictionary of Tango device change event callbacks \
+        with asynchrony support.
 
     :return: a collections.defaultdict that returns change event
         callbacks by name.
@@ -128,10 +132,10 @@ def set_mid_sdp_csp_mln_availability_for_aggregation():
     """
     dev_factory = DevFactory()
     proxy_csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
-    proxy_csp_mln.SetisSubsystemAvailable(True)
+    proxy_csp_mln.SetSubsystemAvailable(True)
 
     proxy_sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    proxy_sdp_mln.SetisSubsystemAvailable(True)
+    proxy_sdp_mln.SetSubsystemAvailable(True)
 
     logging.debug(
         "CspSubarrayLeafNode availability is: %s",
@@ -151,13 +155,13 @@ def set_low_devices_availability_for_aggregation():
     """
     dev_factory = DevFactory()
     proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
-    proxy_csp_mln.SetisSubsystemAvailable(True)
+    proxy_csp_mln.SetSubsystemAvailable(True)
 
     proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
-    proxy_sdp_mln.SetisSubsystemAvailable(True)
+    proxy_sdp_mln.SetSubsystemAvailable(True)
 
     proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
-    proxy_mccs_mln.SetisSubsystemAvailable(True)
+    proxy_mccs_mln.SetSubsystemAvailable(True)
 
     logging.debug(
         "CspSubarrayLeafNode availability is: %s",
@@ -175,7 +179,7 @@ def set_low_devices_availability_for_aggregation():
 
 @pytest.fixture(scope="session", autouse=True)
 def is_dish_vcc_set(request):
-    # Validate dish vcc config set
+    """Validate dish vcc config set"""
     marker = request.node.get_closest_marker("SKA_mid")
     logging.debug("Checking Dish Config set or not for marker %s", marker)
     if marker:

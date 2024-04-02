@@ -3,6 +3,7 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
+# pylint:disable = attribute-defined-outside-init
 import json
 
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
@@ -139,6 +140,7 @@ class CentralNodeMid(AbstractCentralNode):
     )
 
     def update_imaging_callback(self, imaging):
+        """Callback for Update imaging"""
         self.logger.info("imaging %s", imaging)
         self.push_change_event("imaging", imaging)
 
@@ -154,7 +156,8 @@ class CentralNodeMid(AbstractCentralNode):
             """
             Initializes the attributes and properties of the Central Node.
 
-            :return: A tuple containing a return code and a string message indicating status.
+            :return: A tuple containing a return code and a string message
+            indicating status.
              The message is for information purpose only.
 
             :rtype: (ReturnCode, str)
@@ -170,15 +173,19 @@ class CentralNodeMid(AbstractCentralNode):
     # ------------------
 
     def read_imaging(self):
+        """Read Attribute for imaging"""
         return self.component_manager.component.imaging
 
     def read_pss(self):
+        """Read attribute for pss"""
         return self.component_manager.component.pss
 
     def read_pst(self):
+        """Read attribute value of pst"""
         return self.component_manager.component.pst
 
     def read_vlbi(self):
+        """Read attribute value of vlbi"""
         return self.component_manager.component.vlbi
 
     def read_dishDevNames(self):
@@ -214,9 +221,11 @@ class CentralNodeMid(AbstractCentralNode):
     # --------
     # def is_StowAntennas_allowed(self):
     #     """
-    #     Checks whether this command is allowed to be run in current device state.
+    #     Checks whether this command is allowed to be run in
+    #    current device state.
 
-    #     :return: True if this command is allowed to be run in current device state.
+    #     :return: True if this command is allowed to be run in
+    #     current device state.
 
     #     :rtype: boolean
     #     """
@@ -251,11 +260,17 @@ class CentralNodeMid(AbstractCentralNode):
             _input_parameter=InputParameterMid(None),
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
-            _update_telescope_state_callback=self.update_telescope_state_callback,
-            _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
+            _update_telescope_state_callback=(
+                self.update_telescope_state_callback
+            ),
+            _update_telescope_health_state_callback=(
+                self.update_telescope_health_state_callback
+            ),
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=self.update_imaging_callback,
-            _telescope_availability_callback=self.update_telescope_availability_callback,
+            _telescope_availability_callback=(
+                self.update_telescope_availability_callback
+            ),
             communication_state_callback=None,
             component_state_callback=None,
             command_timeout=self.CommandTimeout,
@@ -268,8 +283,12 @@ class CentralNodeMid(AbstractCentralNode):
             if self.DishVccFilePath
             else "",
             dish_vcc_init_timeout=self.DishVccInitTimeout,
-            dishKvalueAggregationAllowedPercent=self.DishKvalueAggregationAllowedPercent,
-            invoke_load_dish_cfg_command_callback=self.invoke_load_dish_cfg_command_callback,
+            dishKvalueAggregationAllowedPercent=(
+                self.DishKvalueAggregationAllowedPercent
+            ),
+            invoke_load_dish_cfg_command_callback=(
+                self.invoke_load_dish_cfg_command_callback
+            ),
             enable_dish_vcc_init=self.EnableDishVccInit,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
@@ -329,7 +348,8 @@ class CentralNodeMid(AbstractCentralNode):
 
     def is_LoadDishCfg_allowed(self):
         """
-        Checks whether LoadDishCfg command is allowed to be run in current device state.
+        Checks whether LoadDishCfg command is allowed to be run
+          in current device state.
 
         :rtype: boolean
         """
@@ -349,9 +369,13 @@ class CentralNodeMid(AbstractCentralNode):
         based on tm data sources provided in argin
         Example:
         {
-            "interface": "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
-            "tm_data_sources": ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"],
-            "tm_data_filepath": "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
+        "interface":
+        "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+            "tm_data_sources":
+        ["car://gitlab.com/ska-telescope/
+        ska-tmc/ska-tmc-simulators?main#tmdata"],
+            "tm_data_filepath": "instrument/dishid_vcc_map_configuration/
+            mid_cbf_initial_parameters.json"
         }
         """
         handler = self.get_command_object("LoadDishCfg")

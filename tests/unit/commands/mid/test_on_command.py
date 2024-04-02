@@ -23,6 +23,7 @@ from tests.settings import (
 
 
 def test_telescope_on_command(tango_context):
+    """Test telescope On Command"""
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
@@ -35,8 +36,8 @@ def test_telescope_on_command(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
     assert (cm.component.telescope_availability)[
@@ -64,8 +65,8 @@ def test_telescope_on_command_unavailability(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    csp_mln.SetisSubsystemAvailable(False)
-    sdp_mln.SetisSubsystemAvailable(False)
+    csp_mln.SetSubsystemAvailable(False)
+    sdp_mln.SetSubsystemAvailable(False)
     check_cspmln_availability(cm, False)
     check_sdpmln_availability(cm, False)
     assert (cm.component.telescope_availability)[
@@ -92,8 +93,8 @@ def test_telescope_on_command_fail_subarray(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
     assert (cm.component.telescope_availability)[
@@ -132,8 +133,8 @@ def test_telescope_on_command_task_completed(tango_context):
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
     check_cspmln_availability(cm, True)
     check_sdpmln_availability(cm, True)
     assert (cm.component.telescope_availability)[

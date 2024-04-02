@@ -1,3 +1,4 @@
+"""Settings file for test module"""
 import json
 import logging
 import time
@@ -105,6 +106,7 @@ CURRENT_TEST_DISH_VCC_KVALUE = 11
 
 
 def count_faulty_devices(cm):
+    """Counts faulty devices"""
     result = 0
     for devInfo in cm.checked_devices:
         if devInfo.unresponsive:
@@ -117,16 +119,22 @@ def create_cm(
     p_event_receiver=True,
     _input_parameter=InputParameterMid(None),
 ):
+    """Creates component manager instance"""
     op_state_model = TMCOpStateModel(logger)
 
-    """Creating component manager"""
+    # Creating component manager
     if isinstance(_input_parameter, InputParameterMid):
         cm = CNComponentManagerMid(
             op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=logger,
+            enable_dish_vcc_init=False,
             _event_receiver=p_event_receiver,
         )
+        # In this unit test dish_vcc initialisation should not be run during
+        # device
+        # run because this unit test is explicitly calling load dish config
+        # command.
         DEVICE_LIST = DEVICE_LIST_MID
         cm.is_dish_vcc_config_set = True
     else:
@@ -158,6 +166,7 @@ def create_cm_no_faulty_devices(
     p_event_receiver,
     _input_parameter=InputParameterMid(None),
 ):
+    """creates component manager with no faulty devices"""
     logger.info("%s", tango_context)
     if isinstance(_input_parameter, InputParameterMid):
         _input_parameter = InputParameterMid(None)
@@ -178,6 +187,7 @@ def create_cm_no_faulty_devices(
 
 
 def ensure_telescope_state(cm, state, expected_elapsed_time):
+    """Checks telscope state"""
     start_time = time.time()
     elapsed_time = 0
     while cm.component.telescope_state != state:
@@ -193,6 +203,7 @@ def ensure_telescope_state(cm, state, expected_elapsed_time):
 
 
 def ensure_tmc_op_state(cm, state, expected_elapsed_time):
+    """Ensure tmc op state"""
     start_time = time.time()
     elapsed_time = 0
     while cm.component.tmc_op_state != state:
@@ -204,6 +215,7 @@ def ensure_tmc_op_state(cm, state, expected_elapsed_time):
 
 
 def ensure_imaging(cm, value, expected_elapsed_time):
+    """Ensures imaging"""
     start_time = time.time()
     elapsed_time = 0
     while cm.component.imaging != value:
@@ -215,6 +227,7 @@ def ensure_imaging(cm, value, expected_elapsed_time):
 
 
 def set_devices_state(devices, state, devFactory):
+    """Sets Devices state."""
     for device in devices:
         proxy = devFactory.get_device(device)
         proxy.SetDirectState(state)
@@ -222,18 +235,21 @@ def set_devices_state(devices, state, devFactory):
 
 
 def set_device_state(device, state, devFactory):
+    """Sets device state"""
     proxy = devFactory.get_device(device)
     proxy.SetDirectState(state)
     assert proxy.State() == state
 
 
 def set_dish_mode(device, dishmode, devFactory):
+    """sets Dish mode"""
     proxy = devFactory.get_device(device)
     proxy.SetDirectDishMode(dishmode)
     assert proxy.dishmode == dishmode
 
 
 def check_subarray_availability(central_node, subarray_fqdn, expected_status):
+    """checks subarray availablity"""
     start_time = time.time()
     elapsed_time = 0
     while (json.loads(central_node.telescopeAvailability))["tmc_subarrays"][
@@ -243,11 +259,13 @@ def check_subarray_availability(central_node, subarray_fqdn, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the SubarrayNode availability."
+                "Timeout occurred while checking the SubarrayNode\
+                      availability."
             )
 
 
 def check_cspmln_availability(cm, expected_status):
+    """checks cspmln availablity"""
     start_time = time.time()
     elapsed_time = 0
     while (cm.component.telescope_availability)[
@@ -257,11 +275,13 @@ def check_cspmln_availability(cm, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the CspMasterLeafNode availability."
+                "Timeout occurred while checking the Csp Master Leaf Node."
+                + " availability."
             )
 
 
 def check_sdpmln_availability(cm, expected_status):
+    """checks sdpmln availability"""
     start_time = time.time()
     elapsed_time = 0
     while (cm.component.telescope_availability)[
@@ -271,11 +291,13 @@ def check_sdpmln_availability(cm, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the SdpMasterLeafNode availability."
+                "Timeout occurred while checking the Sdp Master Leaf Node."
+                + " availability."
             )
 
 
 def check_mccsmln_availability(cm, expected_status):
+    """checks mccs mln availability"""
     start_time = time.time()
     elapsed_time = 0
     while (cm.component.telescope_availability)[
@@ -285,7 +307,8 @@ def check_mccsmln_availability(cm, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the MccsMasterLeafNode availability."
+                "Timeout occurred while checking the Mccs Master Leaf Node"
+                + " availability."
             )
 
 
@@ -325,7 +348,7 @@ def check_lrcr_events(
         assertion_data = change_event_callback.assert_change_event(
             "longRunningCommandResult",
             Anything,
-            lookahead=10,
+            lookahead=15,
         )
         unique_id, result = assertion_data["attribute_value"]
         if unique_id.endswith(command_name):
@@ -333,7 +356,7 @@ def check_lrcr_events(
                 logger.debug("%s_UID: %s", command_name, unique_id)
                 flag = True
         COUNT = COUNT + 1
-        time.sleep(0.5)
+        time.sleep(1)
     if flag:
         return True
     return False

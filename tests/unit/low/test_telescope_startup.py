@@ -1,3 +1,4 @@
+"""Test case module"""
 import pytest
 import tango
 from ska_control_model import HealthState

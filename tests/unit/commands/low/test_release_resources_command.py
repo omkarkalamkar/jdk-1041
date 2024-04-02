@@ -132,7 +132,6 @@ def check_if_subarray_is_available(cm):
     ] is not True:
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
+        exp = "Timeout occurred while checking the SubarrayNode availability."
         if elapsed_time > TIMEOUT:
-            pytest.fail(
-                "Timeout occurred while checking the SubarrayNode availability."
-            )
+            pytest.fail(exp)

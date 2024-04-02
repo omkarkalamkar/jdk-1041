@@ -1,3 +1,4 @@
+"""Test cases for standby command"""
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -16,6 +17,7 @@ def test_standby_command_mid(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test standby command for mid"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -34,7 +36,7 @@ def test_standby_command_mid(
         lookahead=8,
     )
     logger.info(
-        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+        "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
 
     result, unique_id = central_node.TelescopeStandby()
@@ -52,7 +54,7 @@ def test_standby_command_mid(
         lookahead=4,
     )
     logger.info(
-        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+        "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
 
     csp_master = dev_factory.get_device("mid-csp/control/0")
@@ -89,7 +91,7 @@ def test_standby_command_mid(
     change_event_callbacks.assert_change_event(
         "telescopeState", DevState.STANDBY, lookahead=4
     )
-    logger.info(f"telescopeState: {central_node.telescopeState}")
+    logger.info("telescopeState: %s", central_node.telescopeState)
 
     assert central_node.telescopeState == DevState.STANDBY
 
@@ -106,6 +108,7 @@ def test_standby_command_low(
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test standby command for low"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_low/tm_central/central_node")
@@ -124,7 +127,7 @@ def test_standby_command_low(
         lookahead=8,
     )
     logger.info(
-        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+        "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
 
     result, unique_id = central_node.TelescopeStandby()
@@ -141,7 +144,7 @@ def test_standby_command_low(
         lookahead=3,
     )
     logger.info(
-        f"longRunningCommandResult: {central_node.longRunningCommandResult}"
+        "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
 
     mccs_master = dev_factory.get_device("low-mccs/control/control")
@@ -160,7 +163,7 @@ def test_standby_command_low(
     change_event_callbacks.assert_change_event(
         "telescopeState", DevState.STANDBY, lookahead=4
     )
-    logger.info(f"telescopeState: {central_node.telescopeState}")
+    logger.info("telescopeState: %s", central_node.telescopeState)
 
     assert central_node.telescopeState == DevState.STANDBY
 

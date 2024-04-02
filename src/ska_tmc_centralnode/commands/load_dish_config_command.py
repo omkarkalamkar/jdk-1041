@@ -1,3 +1,4 @@
+"""Commad class for Load_dish_config_command"""
 import json
 import threading
 from typing import Callable, Optional, Tuple
@@ -11,12 +12,15 @@ from ska_tmc_centralnode.commands.central_node_command import (
 )
 
 
+# pylint:disable =abstract-method
 class LoadDishCfg(LoadDishCfgCommand):
     """
     A class for CentralNode's LoadDishConfig command.
     Load DishId-VCC map from CAR URI and provide it to Csp Master Leaf Node
     After Validation
     """
+
+    # pylint:disable=keyword-arg-before-vararg
 
     def __init__(
         self,
@@ -33,6 +37,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
+        self.dish_cfg = self.component_manager.event_receiver_object
+        self.dish_cfg_params: str = ""
 
     def load_dish_cfg(
         self,
@@ -69,15 +75,18 @@ class LoadDishCfg(LoadDishCfgCommand):
                 result=ResultCode.FAILED,
                 exception=message,
             )
+            self.component_manager.reset_load_dish_cfg_data()
         else:
             self.start_tracker_thread(
-                self.component_manager.get_load_disg_cfg_resultcode,
+                "get_load_disg_cfg_resultcode",
                 [ResultCode.OK],
                 task_abort_event,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
                 command_id=self.component_manager.command_id,
-                lrcr_callback=self.component_manager.long_running_result_callback,
+                lrcr_callback=(
+                    self.component_manager.long_running_result_callback
+                ),
             )
         self.component_manager.load_dish_cfg_command_id = (
             self.component_manager.command_id
@@ -91,7 +100,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         :type message: str
         """
         self.logger.info(
-            "Calling task callback for LoadDishCfg with result %s and message %s",
+            "Calling task callback for LoadDishCfg with result \
+                %s and message %s",
             result,
             message,
         )
@@ -140,21 +150,22 @@ class LoadDishCfg(LoadDishCfgCommand):
                 return {}, f"Error in Loading Dish VCC map json file {e}"
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
-    def do(self, dish_cfg_params: str) -> Tuple[ResultCode, str]:
+    # pylint:disable=signature-differs
+    def do(self, argin: str) -> Tuple[ResultCode, str]:
         """This command does following
         1. Load content of DishId-VCC mapping file from CAR URI
         2. Validate Json
         3. Invoke command on csp master leaf node
         4. Invoke SetKValue command on Dish Leaf Node for each dish id
         provided in dishid_vcc map
-        :param dish_cfg_params: dishid vcc map params
+        :param argin: dishid vcc map params
         """
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        dishid_vcc_map_params = json.loads(dish_cfg_params)
+        dishid_vcc_map_params = json.loads(argin)
         self.logger.info("DishId Vcc Map Params %s", dishid_vcc_map_params)
 
         dishid_vcc_map_json, _ = self.get_dishid_vcc_map_json(
@@ -173,32 +184,35 @@ class LoadDishCfg(LoadDishCfgCommand):
                 # condition for exception raised during invoking command
                 if return_code in [ResultCode.FAILED]:
                     self.logger.info(
-                        "Invocation of command LoadDishCfg failed with error %s",
+                        "command LoadDishCfg failed with error %s",
                         message_or_unique_id,
                     )
                     return ResultCode.FAILED, message_or_unique_id
         self.logger.info(
-            f"Successfully Invoked LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
+            f"Successfully Invoked LoadDishCfg command on:\
+                {self.csp_mln_adapter.dev_name}"
         )
         return (ResultCode.OK, "")
 
     def _invoke_load_dish_cfg_on_csp_master_ln(
         self, dishid_vcc_map_params: str
     ) -> Tuple[ResultCode, list]:
-        """Invoke LoadDishCfg command on Csp Master with vcc_map_params argument
-        :param dishid_vcc_map_params: vcc_map_params info containing vcc_dish mapping
+        """Invoke LoadDishCfg command on Csp Master with
+         vcc_map_params argument
+        :param dishid_vcc_map_params:
+        vcc_map_params info containing vcc_dish mapping
         """
         self.logger.debug(
             f"Invoking LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
+        )
+        self.component_manager.dev_names_for_load_dish_cfg.append(
+            self.csp_mln_adapter.dev_name
         )
         return_codes, message_or_unique_ids = self.send_command(
             [self.csp_mln_adapter],
             "Error in calling LoadDishCfg command on Csp Master Leaf Node",
             "LoadDishCfg",
             json.dumps(dishid_vcc_map_params),
-        )
-        self.component_manager.dev_names_for_load_dish_cfg.append(
-            self.csp_mln_adapter.dev_name
         )
         return return_codes, message_or_unique_ids
 
@@ -229,9 +243,10 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter.proxy.command_inout_asynch(
                         "SetKValue",
                         k_value,
-                        self.component_manager.event_receiver_object.handle_load_dish_cfg_result_callback,
+                        self.dish_cfg.handle_load_dish_cfg_result_callback,
                     )
-                    # Append dish dev names to track on which dish SetKValue is invoked
+                    # Append dish dev names to track on which dish
+                    # SetKValue is invoked
                     self.component_manager.dev_names_for_load_dish_cfg.append(
                         dish_adapter.dev_name
                     )
