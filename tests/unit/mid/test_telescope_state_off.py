@@ -4,7 +4,11 @@ import tango
 from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
-from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
+
+# from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
+from ska_tmc_common.test_helpers.helper_dish_ln_device import (
+    HelperDishLNDevice,
+)
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
@@ -48,14 +52,16 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperDishDevice,
+            "class": HelperDishLNDevice,
             "devices": [
                 {"name": DISH_MASTER_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
     )
 
 
+@pytest.mark.hope
 def test_telescope_state_off_with_dishmode_standbylp(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(

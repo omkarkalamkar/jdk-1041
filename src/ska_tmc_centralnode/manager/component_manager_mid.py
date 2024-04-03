@@ -398,6 +398,18 @@ class CNComponentManagerMid(CNComponentManager):
         self._aggregate_state()
         self._update_imaging()
 
+    def get_dish_device_names(self) -> tuple:
+        """
+        Return Dish Master device names
+        """
+        return self.input_parameter.dish_dev_names
+
+    def get_dish_leaf_node_device_names(self) -> tuple:
+        """
+        Return Dish Master device names
+        """
+        return self.input_parameter.dish_leaf_node_dev_names
+
     def update_device_dish_mode(self, dev_name, dish_mode: DishMode) -> None:
         """
         Update the dish mode of the given dish and call
@@ -412,13 +424,16 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
             # Update Dish Master device name with full FQDN for real Dish
-            dish_master_dev_names = self.get_dish_device_names()
-            for dish in dish_master_dev_names:
-                if dev_name in dish:
-                    dev_name = dish
+            # dish_master_dev_names = self.get_dish_leaf_node_device_names()
+            # for dish in dish_master_dev_names:
+            #     if dev_name in dish:
+            #         dev_name = dish
 
             dev_info = self.component.get_device(dev_name)
             dev_info.dish_mode = dish_mode
+            self.logger.info(
+                f"Dish event callback dev_info  {dev_info}: {dish_mode}"
+            )
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
 

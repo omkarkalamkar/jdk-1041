@@ -112,11 +112,18 @@ class CentralNodeEventReceiver(EventReceiver):
                     in self.input_param.dish_leaf_node_dev_names
                 ):
                     proxy.subscribe_event(
+                        "dishMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_dish_mode_event,
+                        stateless=True,
+                    )
+                    proxy.subscribe_event(
                         "kValueValidationResult",
                         tango.EventType.CHANGE_EVENT,
                         self.handle_dln_kvalue_validation_result,
                         stateless=True,
                     )
+
                 if "subarray_node" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
@@ -137,7 +144,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     LOW_CSP_MLN_DEVICE,
                     LOW_SDP_MLN_DEVICE,
                     MCCS_MLN_DEVICE,
-                    DISH_LEAF_NODE_PREFIX,
+                    # DISH_LEAF_NODE_PREFIX,
                 ]:
                     proxy.subscribe_event(
                         "isSubsystemAvailable",
@@ -159,13 +166,13 @@ class CentralNodeEventReceiver(EventReceiver):
                             self.handle_dish_vcc_k_value_validation_event,
                             stateless=True,
                         )
-                    if DISH_LEAF_NODE_PREFIX in dev_info.dev_name:
-                        proxy.subscribe_event(
-                            "dishMode",
-                            tango.EventType.CHANGE_EVENT,
-                            self.handle_dish_mode_event,
-                            stateless=True,
-                        )
+                    # if DISH_LEAF_NODE_PREFIX in dev_info.dev_name:
+                    #     proxy.subscribe_event(
+                    #         "dishMode",
+                    #         tango.EventType.CHANGE_EVENT,
+                    #         self.handle_dish_mode_event,
+                    #         stateless=True,
+                    #     )
 
                 if dev_info.dev_name == MCCS_MLN_DEVICE:
                     proxy.subscribe_event(
@@ -222,7 +229,8 @@ class CentralNodeEventReceiver(EventReceiver):
             self._component_manager.update_event_failure(
                 event_data.device.dev_name()
             )
-            return
+            # return
+
         new_value = event_data.attr_value.value
         self._component_manager.update_device_dish_mode(
             event_data.device.dev_name(), new_value
