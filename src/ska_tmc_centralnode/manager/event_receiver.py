@@ -229,7 +229,7 @@ class CentralNodeEventReceiver(EventReceiver):
             self._component_manager.update_event_failure(
                 event_data.device.dev_name()
             )
-            # return
+            return
 
         new_value = event_data.attr_value.value
         self._component_manager.update_device_dish_mode(
