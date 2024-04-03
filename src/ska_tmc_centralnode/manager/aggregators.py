@@ -177,7 +177,7 @@ class HealthStateAggregatorMid(Aggregator):
         # what if one of them is not working (i.e. faulty flag)? i.e. Csp, Sdp or dishes
         # number of dishes is also variable
         for dev in self._component_manager.checked_devices:
-            name = dev.dev_name.lower()
+            name = dev.dev_name
             if dev.unresponsive:
                 continue
             elif (
