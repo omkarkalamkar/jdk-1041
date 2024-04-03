@@ -164,8 +164,10 @@ def load_dish_cfg_after_central_node_init(
     """Test cases for Load_Dish_Config command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
-    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
-    dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+    # csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    # dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+    dish_ln_device = DeviceProxy(DISH_LEAF_NODE_DEVICE)
+    csp_master_ln_device = DeviceProxy(MID_CSP_MLN_DEVICE)
     # Central Node and Csp Master Leaf Node Device Server
     central_node_ds = DeviceProxy("dserver/central_node_mid/01")
     csp_master_ds = DeviceProxy("dserver/mocks/01")
