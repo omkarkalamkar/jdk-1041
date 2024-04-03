@@ -1,3 +1,4 @@
+"""Test case for kvalue validation from dish leaf node"""
 import json
 
 import pytest
@@ -12,6 +13,7 @@ from tests.integration.conftest import ensure_checked_devices
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_dln_kvalue_validation_result(tango_context):
+    """Test Dish leaf node kvalue validation result"""
     dev_factory = DevFactory()
     central_node = DeviceProxy("ska_mid/tm_central/central_node")
     ensure_checked_devices(central_node)
@@ -27,7 +29,8 @@ def test_dln_kvalue_validation_result(tango_context):
 
     # Match the below values on dishVccValidationStatus
     dict_to_compare = {
-        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish Vcc Version is Same",
+        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish"
+        + " Vcc Version is Same",
         "d0001": "k-value not identical",
     }
     assert wait_and_validate_device_attribute_value(
@@ -37,7 +40,7 @@ def test_dln_kvalue_validation_result(tango_context):
         is_json=True,
     ), "Timeout while waiting for validating attribute value"
 
-    # Verify if all dish leaf node gives k-value validation result as ResultCode.Ok
+    # Verify if all dish leaf node gives k-value validation ResultCode.Ok
     dish_leaf_node_01.SetDirectkValueValidationResult(str(int(ResultCode.OK)))
 
     assert wait_and_validate_device_attribute_value(
@@ -45,7 +48,8 @@ def test_dln_kvalue_validation_result(tango_context):
     ), "Timeout while waiting for validating attribute value"
 
     result_string_to_match = {
-        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish Vcc Version is Same",
+        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish"
+        + " Vcc Version is Same",
         "dish": "ALL DISH OK",
     }
 

@@ -1,3 +1,4 @@
+"""Input Validator class for central node"""
 # -*- coding: utf-8 -*-
 #
 # This file is part of the centralnode project
@@ -33,7 +34,8 @@ module_logger = logging.getLogger(__name__)
 
 class AssignResourceValidator:
 
-    """Class to validate the input string of AssignResources command of Central Node"""
+    """Class to validate the input string of AssignResources command
+    of Central Node"""
 
     def __init__(
         self,
@@ -52,7 +54,7 @@ class AssignResourceValidator:
             self._subarrays.append(int(tokens[2]))
         self.logger.debug("Available subarray ids: %s", self._subarrays)
 
-        # Populate the list of receptor ids from list of existing dish leaf node
+        # Populate the list of receptor ids from list of existing dishleaf node
         # FQDNs. The list is used later to search for any invalid receptor id
         # in AssignReources request JSON.
         for receptor in receptor_list:
@@ -79,12 +81,16 @@ class AssignResourceValidator:
 
     def _search_invalid_receptors(self, receptor_id_list):
         """
-        This method accepts the receptor id list from the AssignResources request. It searches
-        each of the receptor id from this list into the list of receptors which are present in the
-        system. The receptor ids that are not found in the list of present receptors are added in a
+        This method accepts the receptor id list from the AssignResources
+        request. It searches
+        each of the receptor id from this list into the list of receptors
+        which are present in the
+        system. The receptor ids that are not found in the list of present
+        receptors are added in a
         list and returned to the caller.
 
-        :param: receptor_id_list: List of strings for example ["SKA001", "SKA002", "MKT001"]
+        :param: receptor_id_list: List of strings for example
+          ["SKA001", "SKA002", "MKT001"]
 
         :returns: List of receptors that do not exist. Empty list is returned
         when all receptors exist.
@@ -102,8 +108,10 @@ class AssignResourceValidator:
 
     def loads(self, input_string):
         """
-        Validates the input string received as an argument of AssignResources command.
-        If the request is correct, returns the deserialized JSON object. The ska-tmc-cdm
+        Validates the input string received as an argument of AssignResources
+          command.
+        If the request is correct, returns the deserialized JSON object.
+        The ska-tmc-cdm
         is used to validate the JSON.
 
         :param: input_string: A JSON string
@@ -115,7 +123,8 @@ class AssignResourceValidator:
 
             SubarrayNotPresentError: If the subarray is not present.
 
-            ResourceNotPresentError: When a receptor in the receptor_id_list is not present.
+            ResourceNotPresentError: When a receptor in the
+            receptor_id_list is not present.
         """
 
         # Check if JSON is correct
@@ -137,7 +146,7 @@ class AssignResourceValidator:
                 + "Full exception info: "
                 + str(json_error)
             )
-            raise InvalidJSONError(exception_message)
+            raise InvalidJSONError(exception_message) from json_error
 
         # Validate subarray ID
         # TODO: Use the object returned by cdm library instead of parsing
@@ -159,8 +168,10 @@ class AssignResourceValidator:
         except AssertionError as assertion_error:
             raise ValueError("Empty receptorIDList") from assertion_error
 
-        # Validate the receptor IDs to be in the correct format. The expected format is 'SKAnnn' or 'MKTnnn'.
-        # SKA nnn is a 3 digit number in range 001 to 133. MKT nnn is a 3 digit number in range 000 to 063.
+        # Validate the receptor IDs to be in the correct format.
+        # The expected format is 'SKAnnn' or 'MKTnnn'.
+        # SKA nnn is a 3 digit number in range 001 to 133.
+        # MKT nnn is a 3 digit number in range 000 to 063.
         for leaf_id in receptor_list:
             if len(leaf_id) != 6:
                 exception_message = (
@@ -168,8 +179,8 @@ class AssignResourceValidator:
                 )
                 raise InvalidReceptorIdError(exception_message)
             if not leaf_id[3:].isdigit():
-                exception_message = f"The dish id {leaf_id} does not have id in the correct format."
-                raise InvalidReceptorIdError(exception_message)
+                exp_msg = "The dish id {leaf_id} not in correct format."
+                raise InvalidReceptorIdError(exp_msg)
             if leaf_id[:3] not in ["SKA", "MKT"]:
                 exception_message = f"The dish prefix {leaf_id} is invalid."
                 raise InvalidReceptorIdError(exception_message)
@@ -202,15 +213,18 @@ class AssignResourceValidator:
 
 class ReleaseResourceValidator:
 
-    """Class to validate the input string of ReleaseResources command of Central Node"""
+    """Class to validate the input string of ReleaseResources command
+    of Central Node"""
 
     def __init__(self, logger=module_logger):
         self.logger = logger
 
     def loads(self, input_string):
         """
-        Validates the input string received as an argument of ReleaseResources command.
-        If the request is correct, returns the deserialized JSON object. The ska-tmc-cdm
+        Validates the input string received as an argument of ReleaseResources
+        command.
+        If the request is correct, returns the deserialized JSON object.
+        The ska-tmc-cdm
         is used to validate the JSON.
 
         :param: input_string: A JSON string
@@ -222,7 +236,8 @@ class ReleaseResourceValidator:
 
             SubarrayNotPresentError: If the subarray is not present.
 
-            ResourceNotPresentError: When a receptor in the receptor_id_list is not present.
+            ResourceNotPresentError: When a receptor in the receptor_id_list
+            is not present.
         """
 
         # Check if JSON is correct
@@ -244,6 +259,6 @@ class ReleaseResourceValidator:
                 + "Full exception info: "
                 + str(json_error)
             )
-            raise InvalidJSONError(exception_message)
+            raise InvalidJSONError(exception_message) from json_error
         release_request = json.loads(release_json)
         return release_request

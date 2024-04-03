@@ -1,3 +1,4 @@
+"""Command class for TelescopeOff()"""
 import threading
 import time
 from typing import Callable, Optional
@@ -12,7 +13,8 @@ from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 
 class TelescopeOff(TelescopeOnOff):
     """
-    A class for CentralNode's TelescopeOff() command. Sets the CentralNode into telescopestate to OFF.
+    A class for CentralNode's TelescopeOff() command. Sets the
+      CentralNode into telescopestate to OFF.
     """
 
     def __init__(
@@ -25,6 +27,7 @@ class TelescopeOff(TelescopeOnOff):
         *args,
         **kwargs,
     ):
+        # pylint:disable=keyword-arg-before-vararg
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
@@ -70,7 +73,8 @@ class TelescopeOff(TelescopeOnOff):
         None
 
         return:
-            A tuple containing a return code and a string message indicating status.
+            A tuple containing a return code and a string message indicating
+            status.
 
         rtype:
             (ResultCode, str)
@@ -132,7 +136,7 @@ class TelescopeOff(TelescopeOnOff):
                 if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
+                if return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -148,42 +152,48 @@ class TelescopeOff(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_off_csp(self):
+        """Turns off the csp Devices"""
         self.logger.info(
             f"Invoking Off command for {self.csp_mln_adapter.dev_name} devices"
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling Off command for {self.csp_mln_adapter.dev_name}",
+                f"Error in calling Off command for\
+                  {self.csp_mln_adapter.dev_name}",
                 "Off",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.csp_mln_adapter.dev_name} is not available to receive Off command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.csp_mln_adapter.dev_name} is not available to receive\
+                      Off command"
+            ],
+        )
 
     def turn_off_sdp(self):
+        """Turn off sdp"""
         self.logger.info(
             f"Invoking Off command for {self.sdp_mln_adapter.dev_name} devices"
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling Off command for {self.sdp_mln_adapter.dev_name}",
+                f"Error in calling Off command for\
+                      {self.sdp_mln_adapter.dev_name}",
                 "Off",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.sdp_mln_adapter.dev_name} is not available to receive Off command"
-                ],
-            )
+
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.sdp_mln_adapter.dev_name} is not available to \
+                    receive Off command"
+            ],
+        )
 
     def turn_off_subarrays(self):
+        """Turn off the subarrays"""
         self.logger.info(
             f"Invoking Off command for {self.subarray_adapters} devices"
         )
@@ -194,6 +204,7 @@ class TelescopeOff(TelescopeOnOff):
         )
 
     def turn_off_dishes(self):
+        """Turns off the dishes"""
         return self.send_command(
             self.dish_adapters,
             "Error in calling Off() on TMC Dish leaf node",
@@ -207,7 +218,8 @@ class TelescopeOff(TelescopeOnOff):
         None
 
         return:
-            A tuple containing a return code and a string message indicating status.
+            A tuple containing a return code and a string message indicating
+            status.
 
         rtype:
             (ResultCode, str)
@@ -271,7 +283,7 @@ class TelescopeOff(TelescopeOnOff):
                 if return_code in [ResultCode.FAILED]:
                     return ResultCode.FAILED, message_or_unique_id
                 # condition for unavailable devices
-                elif return_code in [ResultCode.REJECTED]:
+                if return_code in [ResultCode.REJECTED]:
                     # return ResultCode.FAILED, message_or_unique_id
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
@@ -287,19 +299,24 @@ class TelescopeOff(TelescopeOnOff):
         return (ResultCode.OK, "")
 
     def turn_off_mccs(self):
+        """Turn off the mccs"""
         self.logger.info(
             f"Invoking Off command for {self.mccs_mln_adapter.dev_name} device"
         )
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(
                 [self.mccs_mln_adapter],
-                f"Error in calling Off command for {self.mccs_mln_adapter.dev_name}",
+                f"Error in calling Off command for \
+                    {self.mccs_mln_adapter.dev_name}",
                 "Off",
             )
-        else:
-            return (
-                [ResultCode.REJECTED],
-                [
-                    f"{self.mccs_mln_adapter.dev_name} is not available to receive Off command"
-                ],
-            )
+        return (
+            [ResultCode.REJECTED],
+            [
+                f"{self.mccs_mln_adapter.dev_name} is not available to \
+                    receive Off command"
+            ],
+        )
+
+    def update_task_status(self):
+        """Updates task status implemented to"""

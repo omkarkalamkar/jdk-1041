@@ -1,3 +1,4 @@
+"""Aggregation method for telescope state Aggregating for Mid"""
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.aggregators import Aggregator
@@ -11,10 +12,14 @@ from ska_tmc_centralnode.utils.constants import (
 
 
 class TelescopeStateAggregatorMid(Aggregator):
+    """Class for TelescopeStateAggregation for Mid Telescope"""
+
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """Aggregate method for TelescopeStateAggregateMid"""
         # import debugpy; debugpy.debug_this_thread()
         subsystem_states = set()
         dish_modes = set()
@@ -26,14 +31,12 @@ class TelescopeStateAggregatorMid(Aggregator):
             name = dev.dev_name
             if dev.unresponsive:
                 continue
-            elif (
-                name in self._component_manager.input_parameter.dish_dev_names
-            ):
+            if name in self._component_manager.input_parameter.dish_dev_names:
+                dish_modes.add(dev.dish_mode)
+                dish_count += 1
                 self._logger.info(
                     "DishMode event: %s, %s", name, dev.dish_mode
                 )
-                dish_modes.add(dev.dish_mode)
-                dish_count += 1
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
@@ -50,7 +53,8 @@ class TelescopeStateAggregatorMid(Aggregator):
                 sdp_master = True
 
         self._logger.info(
-            "telescopeSetStateset : %s , dishmodeset : %s dish_vcc_config_set: %s",
+            "telescopeSetStateset : %s , dishmodeset :\
+                  %s dish_vcc_config_set: %s",
             subsystem_states,
             dish_modes,
             self._component_manager.is_dish_vcc_config_set,
@@ -69,10 +73,10 @@ class TelescopeStateAggregatorMid(Aggregator):
                 csp_master,
             )
             return DevState.UNKNOWN
-        elif dish_count == 0:
+        if dish_count == 0:
             self._logger.info("dish_count == 0")
             return DevState.UNKNOWN
-        elif (
+        if (
             subsystem_states == {DevState.ON}
             and dish_modes == {DishMode.STANDBY_FP}
             or dish_modes == {DishMode.OPERATE}
@@ -84,29 +88,32 @@ class TelescopeStateAggregatorMid(Aggregator):
             or dish_modes == {DishMode.OPERATE, DishMode.CONFIG}
         ):
             return DevState.ON
-        elif (
+        if (
             subsystem_states == {DevState.OFF}
             and dish_modes == {DishMode.STANDBY_LP}
             or dish_modes == {DishMode.SHUTDOWN}
         ):
             return DevState.OFF
-        elif DevState.INIT in subsystem_states:
+        if DevState.INIT in subsystem_states:
             return DevState.INIT
-        elif DevState.FAULT in subsystem_states:
+        if DevState.FAULT in subsystem_states:
             return DevState.FAULT
-        elif DevState.STANDBY in subsystem_states and dish_modes == {
+        if DevState.STANDBY in subsystem_states and dish_modes == {
             DishMode.STANDBY_LP
         }:
             return DevState.STANDBY
-        else:
-            return DevState.UNKNOWN
+        return DevState.UNKNOWN
 
 
 class TelescopeStateAggregatorLow(Aggregator):
+    """Class for TelescopeStateAggregation for low Telescope"""
+
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """Aggregate method for TelescopeStateAggregatorLow"""
         telescopeStateList = []
         mccs_master = False
         csp_master = False
@@ -116,7 +123,7 @@ class TelescopeStateAggregatorLow(Aggregator):
             name = dev.dev_name.lower()
             if dev.unresponsive:
                 continue
-            elif (
+            if (
                 name
                 == self._component_manager.input_parameter.mccs_master_dev_name
             ):
@@ -148,25 +155,28 @@ class TelescopeStateAggregatorLow(Aggregator):
                 mccs_master,
             )
             return DevState.UNKNOWN
-        elif telescopeSetStateList == set([DevState.ON]):
+        if telescopeSetStateList == set([DevState.ON]):
             return DevState.ON
-        elif telescopeSetStateList == set([DevState.OFF]):
+        if telescopeSetStateList == set([DevState.OFF]):
             return DevState.OFF
-        elif DevState.INIT in telescopeSetStateList:
+        if DevState.INIT in telescopeSetStateList:
             return DevState.INIT
-        elif DevState.FAULT in telescopeSetStateList:
+        if DevState.FAULT in telescopeSetStateList:
             return DevState.FAULT
-        elif DevState.STANDBY in telescopeSetStateList:
+        if DevState.STANDBY in telescopeSetStateList:
             return DevState.STANDBY
-        else:
-            return DevState.UNKNOWN
+        return DevState.UNKNOWN
 
 
 class HealthStateAggregatorMid(Aggregator):
+    """Class for HealthStateAggregation for Mid Telescope"""
+
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """Aggregation method for HealthState for Mid Telescope"""
         # import debugpy; debugpy.debug_this_thread()
         healthStateList = []
         subarray_count = 0
@@ -174,13 +184,14 @@ class HealthStateAggregatorMid(Aggregator):
         csp_master = False
         sdp_master = False
         # get states of CspMaster, SdpMaster and DishMaster devices
-        # what if one of them is not working (i.e. faulty flag)? i.e. Csp, Sdp or dishes
+        # what if one of them is not working (i.e. faulty flag)? i.e.
+        # Csp, Sdp or dishes
         # number of dishes is also variable
         for dev in self._component_manager.checked_devices:
             name = dev.dev_name
             if dev.unresponsive:
                 continue
-            elif (
+            if (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
@@ -207,25 +218,28 @@ class HealthStateAggregatorMid(Aggregator):
         healthStateSetList = set(healthStateList)
         if not sdp_master and not csp_master:
             return HealthState.UNKNOWN
-        elif subarray_count == 0:
+        if subarray_count == 0:
             return HealthState.UNKNOWN
-        elif dish_count == 0:
+        if dish_count == 0:
             return HealthState.UNKNOWN
-        elif healthStateSetList == set([HealthState.OK]):
+        if healthStateSetList == set([HealthState.OK]):
             return HealthState.OK
-        elif HealthState.FAILED in healthStateSetList:
+        if HealthState.FAILED in healthStateSetList:
             return HealthState.FAILED
-        elif HealthState.DEGRADED in healthStateSetList:
+        if HealthState.DEGRADED in healthStateSetList:
             return HealthState.DEGRADED
-        else:
-            return HealthState.UNKNOWN
+        return HealthState.UNKNOWN
 
 
 class HealthStateAggregatorLow(Aggregator):
+    """Class for TelescopeStateAggregation for low Telescope"""
+
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """aggregate method for HealthStateAggregation"""
         # import debugpy; debugpy.debug_this_thread()
         healthStateList = []
         subarray_count = 0
@@ -237,7 +251,7 @@ class HealthStateAggregatorLow(Aggregator):
             name = dev.dev_name.lower()
             if dev.unresponsive:
                 continue
-            elif (
+            if (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
@@ -266,23 +280,26 @@ class HealthStateAggregatorLow(Aggregator):
         self._logger.info("Health state list : %s", healthStateList)
         if subarray_count == 0:
             return HealthState.UNKNOWN
-        elif not sdp_master and not csp_master and not mccs_master:
+        if not sdp_master and not csp_master and not mccs_master:
             return HealthState.UNKNOWN
-        elif healthStateSetList == set([HealthState.OK]):
+        if healthStateSetList == set([HealthState.OK]):
             return HealthState.OK
-        elif HealthState.FAILED in healthStateSetList:
+        if HealthState.FAILED in healthStateSetList:
             return HealthState.FAILED
-        elif HealthState.DEGRADED in healthStateSetList:
+        if HealthState.DEGRADED in healthStateSetList:
             return HealthState.DEGRADED
-        else:
-            return HealthState.UNKNOWN
+        return HealthState.UNKNOWN
 
 
 class TMCOpStateAggregator(Aggregator):
+    """Class for TelescopeOpStateAggregation for low Telescope"""
+
     def __init__(self, cm, logger) -> None:
+        self.logger = logger
         super().__init__(cm, logger)
 
     def aggregate(self):
+        """Aggregate method for TMC Op State"""
         tmcStateList = []
         # get states of all TM devices
         # what if one of them is not working? i.e. tm subarray
@@ -297,23 +314,25 @@ class TMCOpStateAggregator(Aggregator):
         tmcSetStateList = set(tmcStateList)
         if tmcSetStateList == set([DevState.ON]):
             return DevState.ON
-        elif tmcSetStateList == set([DevState.OFF]):
+        if tmcSetStateList == set([DevState.OFF]):
             #  Untill all TMC devices are refactored, devices report Off state.
             return DevState.OFF
-        elif DevState.INIT in tmcSetStateList:
+        if DevState.INIT in tmcSetStateList:
             return DevState.INIT
-        elif DevState.FAULT in tmcSetStateList:
+        if DevState.FAULT in tmcSetStateList:
             return DevState.FAULT
-        else:
-            return DevState.UNKNOWN
+        return DevState.UNKNOWN
 
 
 class TelescopeAvailabilityAggregatorMid(Aggregator):
+    """Class for TelescopeAvailablity for Mid Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
         self.logger = logger
 
     def aggregate(self):
+        """Aggregate method for Mid Telescope Availability"""
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
@@ -351,11 +370,14 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
 
 
 class TelescopeAvailabilityAggregatorLow(Aggregator):
+    """Class for TelescopeAvailablity for low Telescope"""
+
     def __init__(self, cm, logger) -> None:
         super().__init__(cm, logger)
         self.logger = logger
 
     def aggregate(self):
+        """Aggregate method for Low Telescope Availability"""
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
@@ -436,7 +458,8 @@ class LoadDishCfgCommandResultAggregator:
         result_code = ""
         message = ""
         self.logger.info(
-            "Aggregating result for longRunningCommandResult attribute with values %s",
+            "Aggregating result for longRunningCommandResult attribute\
+                  with values %s",
             self._component_manager.result_codes_mapping.values(),
         )
         result_codes, failed_messages = self._get_result_codes_and_failed_msg()
@@ -474,6 +497,7 @@ class DishkValueValidationResultAggregator:
         self._component_manager = cm
         self.logger = logger
         self.dln_kvalue_validation_results = {}
+        self.input_parameter_obj = self._component_manager.input_parameter
 
     def is_events_received_percentage_valid(self) -> bool:
         """Verify the percent of kvalue validation result event received
@@ -484,9 +508,7 @@ class DishkValueValidationResultAggregator:
             total_events = len(self.dln_kvalue_validation_results.values())
             percent_event_received = (
                 total_events
-                / len(
-                    self._component_manager.input_parameter.dish_leaf_node_dev_names
-                )
+                / len(self.input_parameter_obj.dish_leaf_node_dev_names)
             ) * 100
             if (
                 percent_event_received

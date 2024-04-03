@@ -1,3 +1,4 @@
+"""Test cases file component manager"""
 import time
 
 import pytest
@@ -25,6 +26,7 @@ from tests.settings import (
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invokations."""
     return (
         {
             "class": HelperSubArrayDevice,
@@ -49,6 +51,7 @@ def devices_to_load():
 
 
 def test_all_working(tango_context):
+    """Test all working"""
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     num_faulty = count_faulty_devices(cm)

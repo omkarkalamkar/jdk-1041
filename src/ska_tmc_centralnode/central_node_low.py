@@ -16,6 +16,8 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 
 __all__ = ["CentralNodeLow", "main"]
 
+# pylint:disable = attribute-defined-outside-init
+
 
 class CentralNodeLow(AbstractCentralNode):
     """
@@ -55,7 +57,8 @@ class CentralNodeLow(AbstractCentralNode):
             """
             Initializes the attributes and properties of the Central Node.
 
-            :return: A tuple containing a return code and a string message indicating status.
+            :return: A tuple containing a return code and a string
+            message indicating status.
              The message is for information purpose only.
 
             :rtype: (ReturnCode, str)
@@ -94,11 +97,17 @@ class CentralNodeLow(AbstractCentralNode):
             self.op_state_model,
             logger=self.logger,
             _update_device_callback=self.update_device_callback,
-            _update_telescope_state_callback=self.update_telescope_state_callback,
-            _update_telescope_health_state_callback=self.update_telescope_health_state_callback,
+            _update_telescope_state_callback=(
+                self.update_telescope_state_callback
+            ),
+            _update_telescope_health_state_callback=(
+                self.update_telescope_health_state_callback
+            ),
             _update_tmc_op_state_callback=self.update_tmc_op_state_callback,
             _update_imaging_callback=None,
-            _telescope_availability_callback=self.update_telescope_availability_callback,
+            _telescope_availability_callback=(
+                self.update_telescope_availability_callback
+            ),
             communication_state_callback=None,
             component_state_callback=None,
             command_timeout=self.CommandTimeout,
@@ -120,12 +129,6 @@ class CentralNodeLow(AbstractCentralNode):
         cm.input_parameter.sdp_subarray_dev_names = self.SdpSubarrayLeafNodes
         cm.update_input_parameter()
         return cm
-
-    def init_command_objects(self):
-        """
-        Initialises the command handlers for commands supported by this device.
-        """
-        super().init_command_objects()
 
 
 # ----------

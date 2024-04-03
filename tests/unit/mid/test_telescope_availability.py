@@ -1,3 +1,4 @@
+"""Test cases file"""
 import time
 
 import pytest
@@ -80,8 +81,8 @@ def test_telescope_availability_with_subarray_and_master_leaf_nodes(
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
     subarray_node.SetisSubarrayAvailable(True)
-    csp_mln.SetisSubsystemAvailable(True)
-    sdp_mln.SetisSubsystemAvailable(True)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
 
     check_subarray_availability(cm, MID_SUBARRAY_DEVICE, True)
     check_cspmln_availability(cm, True)
@@ -107,5 +108,6 @@ def check_subarray_availability(cm, subarray_fqdn, expected_status):
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
             pytest.fail(
-                "Timeout occurred while checking the SubarrayNode availability."
+                "Timeout occurred while checking the SubarrayNode"
+                + " availability."
             )

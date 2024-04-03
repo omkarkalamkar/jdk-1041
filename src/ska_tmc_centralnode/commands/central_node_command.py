@@ -1,6 +1,8 @@
+"""Abstract Command class for central node"""
+# pylint:disable =abstract-method
 import operator
 import time
-from typing import Callable, Tuple
+from typing import Callable, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
@@ -11,14 +13,19 @@ from ska_tmc_common.tmc_command import TMCCommand
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 
+# pylint:disable=keyword-arg-before-vararg
 class CentralNodeCommand(TMCCommand):
+    """Central node abstract command class"""
+
     def __init__(self, component_manager, *args, logger=None, **kwargs):
         super().__init__(component_manager, *args, logger=logger, **kwargs)
         self.timeout_id = f"{time.time()}_{self.__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
         self.task_callback: Callable | None = None
+        self.mccs_mln_adapter = None
 
     def init_adapters(self) -> Tuple[ResultCode, str]:
+        """Initialises adapters for central node command class"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
         ):
@@ -28,7 +35,8 @@ class CentralNodeCommand(TMCCommand):
 
         return result, message
 
-    def do(self, argin=None):
+    def do(self, argin: Optional[str] = None) -> ResultCode:
+        """Do method for central node command class"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
         ):
@@ -44,7 +52,8 @@ class CentralNodeCommand(TMCCommand):
         command_caller,
         err_msg: str,
         command_name: str,
-    ):
+    ) -> Tuple[ResultCode, str]:
+        """Invokes command on adapter"""
         return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
         message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
         try:
@@ -63,7 +72,14 @@ class CentralNodeCommand(TMCCommand):
             )
         return return_codes, message_or_unique_ids
 
-    def send_command(self, adapters, description, command, argin=None):
+    def send_command(
+        self,
+        adapters: Optional[AdapterFactory],
+        description: str,
+        command: str,
+        argin=None,
+    ):
+        """Submit command in progress"""
         if argin is None:
             return self.invoke_command(
                 adapters, operator.methodcaller(command), description, command
@@ -75,19 +91,23 @@ class CentralNodeCommand(TMCCommand):
             command,
         )
 
-    def reject_command(self, message):
+    def reject_command(self, message: str) -> Tuple[ResultCode, str]:
+        """Rejects command method for logs error message."""
         self.logger.error(message)
         return TaskStatus.REJECTED, message
 
     def adapter_error_message(
         self, dev_name: str, error
     ) -> Tuple[ResultCode, str]:
+        """Adapter Error message"""
         message = f"Adapter creation failed for {dev_name}: {str(error)}"
         self.logger.error(message)
         return ResultCode.FAILED, message
 
 
 class TelescopeOnOff(CentralNodeCommand):
+    """Central node abstract command class"""
+
     def __init__(
         self,
         component_manager,
@@ -104,6 +124,7 @@ class TelescopeOnOff(CentralNodeCommand):
         self.dish_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
+        """Initialises adapters for mid"""
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         self.subarray_adapters = []
@@ -114,7 +135,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
+                "Adapter is created for CSP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -127,7 +150,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
+                "Adapter is created for SDP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.sdp_mln_dev_name,
+                self.sdp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -160,8 +185,12 @@ class TelescopeOnOff(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            message = f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}"
-            return (ResultCode.FAILED, message)
+            faulty_dev = ".".join(error_dev_names)
+            message = f"Error in creating tm subarray adapters {faulty_dev},"
+            return (
+                ResultCode.FAILED,
+                message,
+            )
 
         error_dev_names = []
         num_working = 0
@@ -196,6 +225,7 @@ class TelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
+        """Initialises adapter low"""
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         self.mccs_mln_adapter = None
@@ -206,7 +236,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.csp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
+                "Adapter is created for CSP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -222,8 +254,11 @@ class TelescopeOnOff(CentralNodeCommand):
                 )
             )
             self.logger.debug(
-                f"Adapter is created for MCCS Master Leaf Node {self.component_manager.input_parameter.mccs_mln_dev_name}: {self.mccs_mln_adapter}"
+                "Adapter is created for MCCS Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.mccs_mln_dev_name,
+                self.mccs_mln_adapter,
             )
+
         except Exception as e:
             return (
                 self.component_manager.input_parameter.mccs_mln_dev_name,
@@ -235,7 +270,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                f"Adapter is created for SDP Master Leaf Node {self.component_manager.input_parameter.sdp_mln_dev_name}: {self.sdp_mln_adapter}"
+                "Adapter is created for SDP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.sdp_mln_dev_name,
+                self.sdp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -265,13 +302,19 @@ class TelescopeOnOff(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            message = f"Error in creating tm subarray low adapters {'.'.join(error_dev_names)}"
-            return (ResultCode.FAILED, message)
+            faulty_dev = ".".join(error_dev_names)
+            message = f"Error in creating tm subarray adapters {faulty_dev},"
+            return (
+                ResultCode.FAILED,
+                message,
+            )
 
         return ResultCode.OK, ""
 
 
 class AssignReleaseResources(CentralNodeCommand):
+    """AssignResources command class"""
+
     def __init__(
         self,
         component_manager,
@@ -286,6 +329,7 @@ class AssignReleaseResources(CentralNodeCommand):
         self.subarray_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
+        """Initialises adapter for mid"""
         self.dish_adapters = []
         self.subarray_adapters = []
         error_dev_names = []
@@ -313,9 +357,11 @@ class AssignReleaseResources(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
+            faulty_dev = ".".join(error_dev_names)
+            message = f"Error in creating tm subarray adapters {faulty_dev},"
             return (
                 ResultCode.FAILED,
-                f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
+                message,
             )
 
         error_dev_names = []
@@ -350,6 +396,7 @@ class AssignReleaseResources(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
+        """Initialises adapter for central node low"""
         self.mccs_mln_adapter = None
         self.subarray_adapters = []
 
@@ -388,10 +435,9 @@ class AssignReleaseResources(CentralNodeCommand):
                     error_dev_names.append(dev_name)
 
         if num_working == 0:
-            return (
-                ResultCode.FAILED,
-                f"Error in creating tm subarray adapters {'.'.join(error_dev_names)}",
-            )
+            faulty_dev = ".".join(error_dev_names)
+            message = f"Error in creating tm subarray adapters {faulty_dev},"
+            return (ResultCode.FAILED, message)
 
         return (ResultCode.OK, "")
 
@@ -404,7 +450,7 @@ class LoadDishCfgCommand(CentralNodeCommand):
     def __init__(
         self,
         component_manager,
-        adapter_factory=None,
+        adapter_factory: Optional[AdapterFactory] = None,
         *args,
         logger=None,
         **kwargs,
@@ -417,9 +463,10 @@ class LoadDishCfgCommand(CentralNodeCommand):
         self.dish_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
-        self.csp_mln_adapter = None
-        self.sdp_mln_adapter = None
-        self.subarray_adapters = []
+        """Initialises Adapters for mid"""
+        self.csp_mln_adapter: Optional[AdapterFactory] = None
+        self.sdp_mln_adapter: Optional[AdapterFactory] = None
+        self.subarray_adapters: Optional[AdapterFactory] = []
         self.dish_adapters = []
         try:
             self.csp_mln_adapter = self._adapter_factory.get_or_create_adapter(
@@ -427,7 +474,9 @@ class LoadDishCfgCommand(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                f"Adapter is created for CSP Master Leaf Node {self.component_manager.input_parameter.csp_mln_dev_name}: {self.csp_mln_adapter}"
+                "Adapter is created for CSP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.csp_mln_dev_name,
+                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -462,5 +511,4 @@ class LoadDishCfgCommand(CentralNodeCommand):
                 ResultCode.FAILED,
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}",
             )
-
         return (ResultCode.OK, "")

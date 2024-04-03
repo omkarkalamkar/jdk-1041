@@ -1,4 +1,5 @@
-from concurrent import futures
+"""Event Receiver class for central node"""
+from typing import Optional
 
 import tango
 from ska_tmc_common.device_info import DeviceInfo
@@ -45,10 +46,10 @@ class CentralNodeEventReceiver(EventReceiver):
             "healthState": self.handle_health_state_event,
         }
         self.device_subscribed = {}
+        self.dish_name = ""
+        self.input_param = self._component_manager.input_parameter
 
-    def submit_task(
-        self, executor: futures.ThreadPoolExecutor, device_info: DeviceInfo
-    ) -> None:
+    def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
 
         :param executor: Threadpoolexecutor object
@@ -65,14 +66,18 @@ class CentralNodeEventReceiver(EventReceiver):
                 device_info.dev_name,
                 self.device_subscribed,
             )
-            executor.submit(
-                self.subscribe_events,
+
+            self.subscribe_events(
                 dev_info=device_info,
                 attribute_dictionary=(self.attribute_dictionary),
             )
 
-    def subscribe_events(self, dev_info, attribute_dictionary=None):
+    def subscribe_events(
+        self, dev_info: DeviceInfo, attribute_dictionary: Optional[dict] = None
+    ) -> None:
+        """Subscribe events for central node event receiver"""
         super().subscribe_events(dev_info, self.attribute_dictionary)
+
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
@@ -116,7 +121,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         InputParameterMid,
                     )
                     and dev_info.dev_name
-                    in self._component_manager.input_parameter.dish_leaf_node_dev_names
+                    in self.input_param.dish_leaf_node_dev_names
                 ):
                     proxy.subscribe_event(
                         "kValueValidationResult",
@@ -183,7 +188,12 @@ class CentralNodeEventReceiver(EventReceiver):
                 self._logger.info("Subscribing device %s", dev_info.dev_name)
                 self.device_subscribed[dev_info.dev_name] = True
 
-    def handle_assigned_resource_event(self, evt):
+    def handle_assigned_resource_event(self, evt: tango.EventData) -> None:
+        """Handles assigned Resources event
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
         if evt.err:
             error = evt.errors[0]
             self._logger.error(
@@ -241,7 +251,8 @@ class CentralNodeEventReceiver(EventReceiver):
             )
             return
         self._logger.debug(
-            f"In handle_lrcr_event event_data.attr_value.value is: {event_data.attr_value.value}"
+            "In handle_lrcr_event event_data.attr_value.value is:%s",
+            event_data.attr_value.value,
         )
         new_value = event_data.attr_value.value
         self._component_manager.update_long_running_command_result(
@@ -252,12 +263,17 @@ class CentralNodeEventReceiver(EventReceiver):
         self, event_data: tango.EventData
     ) -> None:
         """This callback is called in following two scenario
-        1. LongrunningResult returned from CspMasterLeafNode for LoadDishCfg command
+        1. LongrunningResult returned from CspMasterLeafNode for
+          LoadDishCfg command
         2. SetKValue command result returned from DishLeafNodes
         Args:
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
+        self._logger.debug(
+            "Received event for load dish cfg result from device %s",
+            event_data.device.dev_name(),
+        )
         if event_data.err:
             errors = event_data.errors
             for error in errors:
@@ -269,8 +285,10 @@ class CentralNodeEventReceiver(EventReceiver):
             return
         if getattr(event_data, "attr_value", False):
             self._logger.debug(
-                f"In long running command result callback for csp master leaf node  "
-                f"with event_data.attr_value.value is: {event_data.attr_value.value}"
+                "In long running command result callback for"
+                "csp master leaf node  "
+                "with event_data.attr_value.value is: %s",
+                event_data.attr_value.value,
             )
             new_value = event_data.attr_value.value
             self._component_manager.update_load_dish_cfg_results(
@@ -279,7 +297,8 @@ class CentralNodeEventReceiver(EventReceiver):
         # In case of Async callback get command result from argout
         elif getattr(event_data, "argout", False):
             self._logger.debug(
-                f"Received Async callback event with event_data.argout is: {event_data.argout}"
+                "Received Async callback event with event_data.argout is: %s",
+                event_data.argout,
             )
             new_value = event_data.argout
             self._component_manager.update_load_dish_cfg_results(
@@ -298,7 +317,8 @@ class CentralNodeEventReceiver(EventReceiver):
         )
         if not event_data.errors:
             new_value = event_data.attr_value.value
-            self._component_manager.dish_kvalue_validation_aggregator.aggregate(
+            cm = self._component_manager
+            cm.dish_kvalue_validation_aggregator.aggregate(
                 event_data.device.dev_name(), new_value
             )
         else:

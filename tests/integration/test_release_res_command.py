@@ -1,3 +1,4 @@
+"""Test cases for rlease resources command"""
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -24,6 +25,7 @@ def release_resources(
     release_input_string,
     change_event_callbacks,
 ):
+    """Method for rlease resources command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     if "ska_mid" in central_node_name:
@@ -70,7 +72,7 @@ def release_resources(
 
     result, unique_id = central_node.ReleaseResources(release_input_string)
 
-    logger.info(f"Unique id:{unique_id[0]}")
+    logger.info("Unique id:%s", unique_id[0])
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
 
@@ -92,6 +94,7 @@ def test_release_res_command_mid(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for rlease resources command for low"""
     return release_resources(
         tango_context,
         "ska_mid/tm_central/central_node",
@@ -109,6 +112,7 @@ def test_release_res_command_low(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test cases for release resources command"""
     return release_resources(
         tango_context,
         "ska_low/tm_central/central_node",
@@ -126,6 +130,7 @@ def release_resources_without_subarray_id(
     release_input_string,
     change_event_callbacks,
 ):
+    """Invokes release resources command without subarray id"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -169,7 +174,7 @@ def release_resources_without_subarray_id(
 
     result, unique_id = central_node.ReleaseResources(release_input_string)
 
-    logger.info(f"Unique id:{unique_id[0]}")
+    logger.info("Unique id:%s", unique_id[0])
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
 
@@ -181,7 +186,9 @@ def release_resources_without_subarray_id(
 
     result, unique_id = central_node.TelescopeOff()
     logger.info(
-        f"TelescopeOff Command ID: {unique_id} Returned result: {result}"
+        "Telscope Off Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
     assert unique_id[0].endswith("TelescopeOff")
     assert result[0] == ResultCode.QUEUED
@@ -201,6 +208,7 @@ def test_release_res_command_mid_without_subarray_id(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for release resources command without subarray id"""
     return release_resources_without_subarray_id(
         tango_context,
         "ska_mid/tm_central/central_node",
@@ -219,6 +227,7 @@ def test_release_resources_error_propagation(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for release resources error propagation command."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -228,7 +237,9 @@ def test_release_resources_error_propagation(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeID Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -251,7 +262,9 @@ def test_release_resources_error_propagation(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -279,7 +292,9 @@ def test_release_resources_error_propagation(
     )
 
     logger.info(
-        f"ReleaseResources Command ID: {unique_id} Returned result: {result}"
+        "ReleaseResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("ReleaseResources")
@@ -289,7 +304,8 @@ def test_release_resources_error_propagation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}: Exception occurred, command failed.",
+            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}:"
+            + " Exception occurred, command failed.",
         ),
         lookahead=6,
     )
@@ -309,6 +325,7 @@ def test_release_resources_mid_timeout(
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
+    """Test cases for release resources command for mid timeout."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
@@ -318,7 +335,7 @@ def test_release_resources_mid_timeout(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -341,7 +358,9 @@ def test_release_resources_mid_timeout(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -368,7 +387,9 @@ def test_release_resources_mid_timeout(
     )
 
     logger.info(
-        f"ReleaseResources Command ID: {unique_id} Returned result: {result}"
+        "ReleaseResources Command ID: %s Returned result: %s ",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("ReleaseResources")
@@ -397,6 +418,7 @@ def test_release_resources_low_timeout(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test cases for release resources command for low timeout."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
@@ -406,7 +428,9 @@ def test_release_resources_low_timeout(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -429,7 +453,9 @@ def test_release_resources_low_timeout(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -456,7 +482,9 @@ def test_release_resources_low_timeout(
     )
 
     logger.info(
-        f"ReleaseResources Command ID: {unique_id} Returned result: {result}"
+        "ReleaseResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("ReleaseResources")
@@ -484,6 +512,7 @@ def test_release_resources_error_aggregation(
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
+    """Test Release Resources error propagation."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
@@ -493,7 +522,9 @@ def test_release_resources_error_aggregation(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        f"TelescopeOn Command ID: {unique_id} Returned result: {result}"
+        "TelescopeOn Command ID: %s  Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -518,7 +549,7 @@ def test_release_resources_error_aggregation(
     )
 
     logger.info(
-        f"AssignResources Command ID: {unique_id} Returned result: {result}"
+        "AssignResources Command ID: %s Returned result: %s", unique_id, result
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -543,7 +574,9 @@ def test_release_resources_error_aggregation(
     )
 
     logger.info(
-        f"ReleaseResources Command ID: {unique_id} Returned result: {result}"
+        "ReleaseResources Command ID: %s Returned result: %s",
+        unique_id,
+        result,
     )
 
     assert unique_id[0].endswith("ReleaseResources")
@@ -553,7 +586,9 @@ def test_release_resources_error_aggregation(
         "longRunningCommandResult",
         (
             unique_id[0],
-            f"Exception occurred on the following devices: {LOW_SUBARRAY_DEVICE}: Exception occurred, command failed.",
+            "Exception occurred on the following devices: "
+            + LOW_SUBARRAY_DEVICE
+            + ": Exception occurred, command failed.",
         ),
         lookahead=6,
     )

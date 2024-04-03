@@ -1,3 +1,4 @@
+"""Test case module"""
 import time
 
 import pytest
@@ -25,6 +26,7 @@ WORKING_DEVICES = 1
 
 @pytest.fixture()
 def devices_to_load():
+    """Devices to load for command invocation"""
     return (
         {
             "class": SKABaseDevice,
@@ -41,6 +43,7 @@ def devices_to_load():
 
 @pytest.mark.SKA_low
 def test_low_some_working_other_faulty(tango_context):
+    """Test low some working other faulty devices."""
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerLow(

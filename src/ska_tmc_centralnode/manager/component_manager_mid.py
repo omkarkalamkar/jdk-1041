@@ -31,6 +31,9 @@ from ska_tmc_centralnode.utils.constants import (
 
 
 class CNComponentManagerMid(CNComponentManager):
+    """Component manager class for central node mid"""
+
+    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         op_state_model,
@@ -93,8 +96,8 @@ class CNComponentManagerMid(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             communication_state_callback,
-            component_state_callback,
             _telescope_availability_callback,
+            component_state_callback,
             max_workers,
             proxy_timeout,
             sleep_time,
@@ -103,7 +106,6 @@ class CNComponentManagerMid(CNComponentManager):
             *args,
             **kwargs,
         )
-
         self.subarray_availability = {
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names
@@ -135,8 +137,10 @@ class CNComponentManagerMid(CNComponentManager):
         self._dish_vcc_validation_status = "{}"
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.enable_dish_vcc_init = enable_dish_vcc_init
+        self.command_result = None
 
     def check_if_dishes_are_responsive(self):
+        """Checks whether dishes are responsive"""
         self.logger.info("Checking if dishes are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
@@ -144,14 +148,17 @@ class CNComponentManagerMid(CNComponentManager):
 
     @property
     def is_dish_vcc_config_set(self):
+        """Getter method for is_dish_vcc_config_set"""
         return self._is_dish_vcc_config_set
 
     @is_dish_vcc_config_set.setter
     def is_dish_vcc_config_set(self, value):
+        """Setter method for is_dish_vcc_config_set"""
         self._is_dish_vcc_config_set = value
 
     @property
     def dish_vcc_validation_status(self):
+        """Getter method for dish vcc validation status"""
         return self._dish_vcc_validation_status
 
     @dish_vcc_validation_status.setter
@@ -277,19 +284,25 @@ class CNComponentManagerMid(CNComponentManager):
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.
 
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or (unique_id,TaskStatus)
-        Whenever there is exception occured , (unique_id,exception_msg) event is first raised
-        and catched in ValueError.The exception_msg and command_id is then passed to long_running_result_callback.
-        Command_mapping contains {centralnode_command_id:unique_id} , all events are verified with respect to this mapping.
-        If there is no command_mapping present the event might be of old command.
+        Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
+        or (unique_id,TaskStatus)
+        Whenever there is exception occured , (unique_id,exception_msg)
+        event is first raised
+        and catched in ValueError.The exception_msg and command_id is then
+        passed to long_running_result_callback.
+        Command_mapping contains {centralnode_command_id:unique_id} ,
+          all events are verified with respect to this mapping.
+        If there is no command_mapping present the event
+          might be of old command.
 
-        :param dev_name: name of the device who's event has been captured in this method
+        :param dev_name: name of the device who's event has been
+          captured in this method
         :type dev_name: str
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
         """
         self.logger.info(
-            "Received longRunningCommandResult event for device: %s, with value: %s",
+            "longRunningCommandResult event for device: %s, with value: %s",
             dev_name,
             value,
         )
@@ -299,7 +312,8 @@ class CNComponentManagerMid(CNComponentManager):
         ):  # ignoring other command events
             try:
                 self.logger.info(
-                    f"LongRunningCommandResult event occurred: {result_code_or_exception_or_task_status}"
+                    "LongRunningCommandResult event occurred:%s",
+                    result_code_or_exception_or_task_status,
                 )
 
                 if not result_code_or_exception_or_task_status:
@@ -310,18 +324,24 @@ class CNComponentManagerMid(CNComponentManager):
                     == ResultCode.OK
                     and unique_id in self.command_mapping.values()
                 ):
-                    # Update the command_result only if it's "AssignResources" or "ReleaseResources" and successful.
+                    # Update the command_result only if it's
+                    # "AssignResources" or "ReleaseResources" and successful.
                     self.command_result = ResultCode.OK
 
             except ValueError:
                 if unique_id in self.command_mapping.values():
                     self.logger.info(
-                        "Updating LRCRCallback with value: %s for %s for device: %s",
+                        "Updating LRCRCallback with value: %s for %s for"
+                        + " device: %s",
                         unique_id,
                         value,
                         dev_name,
                     )
-                    exception_message = f"Exception occurred on device: {dev_name}: {result_code_or_exception_or_task_status}"
+                    exp_string = (
+                        "Exception occurred on device: "
+                        + f"{dev_name}:"
+                        + f" {result_code_or_exception_or_task_status}"
+                    )
                     index_of_unique_id = list(
                         self.command_mapping.values()
                     ).index(
@@ -333,10 +353,10 @@ class CNComponentManagerMid(CNComponentManager):
                     self.long_running_result_callback(
                         command_id,
                         ResultCode.FAILED,
-                        exception_msg=exception_message,
+                        exception_msg=exp_string,
                     )
 
-    def update_device_state(self, dev_name, state):
+    def update_device_state(self, device_name, state):
         """
         Update a monitored device state,
         aggregate the states available
@@ -349,26 +369,29 @@ class CNComponentManagerMid(CNComponentManager):
         """
         with self.lock:
             self.logger.info(
-                f"State event callback for device {dev_name}: {state}"
+                f"State event callback for device {device_name}: {state}"
             )
-            if "sdp" in dev_name:
-                # Update SDP Master device name with full FQDN in case of real SDP
+            if "sdp" in device_name:
+                # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
-                if dev_name in sdp_master_dev_name:
-                    dev_name = sdp_master_dev_name
-            if "csp" in dev_name:
-                # Update CSP Master device name with full FQDN in case of real CSP
+                if device_name in sdp_master_dev_name:
+                    device_name = sdp_master_dev_name
+            if "csp" in device_name:
+                # Update CSP Master device name with full FQDN for real CSP
                 csp_master_dev_name = self.get_csp_master_dev_name()
-                if dev_name in csp_master_dev_name:
-                    dev_name = csp_master_dev_name
-            if ("elt/master" in dev_name) or ("dish-manager" in dev_name):
-                # Update Dish Master device name with full FQDN in case of real Dish
+                if device_name in csp_master_dev_name:
+                    device_name = csp_master_dev_name
+            if ("elt/master" in device_name) or (
+                "dish-manager" in device_name
+            ):
+                # Update Dish Master device name with full FQDN in case of
+                # real Dish
                 dish_master_dev_names = self.get_dish_device_names()
                 for dish in dish_master_dev_names:
-                    if dev_name in dish.lower():
-                        dev_name = dish
+                    if device_name in dish.lower():
+                        device_name = dish
 
-            devInfo = self.component.get_device(dev_name)
+            devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.state = state
                 devInfo.last_event_arrived = time.time()
@@ -394,7 +417,7 @@ class CNComponentManagerMid(CNComponentManager):
                 f"Dish event callback for device {dev_name}: {dish_mode}"
             )
 
-            # Update Dish Master device name with full FQDN in case of real Dish
+            # Update Dish Master device name with full FQDN for real Dish
             dish_master_dev_names = self.get_dish_device_names()
             self.logger.info(
                 "dish_master_dev_names: %s", dish_master_dev_names
@@ -402,7 +425,8 @@ class CNComponentManagerMid(CNComponentManager):
             for dish in dish_master_dev_names:
                 # device name received in event is always in lower case for
                 # example. mid-dish/dish-manager/ska001 for dish manager 001.
-                # Therefore need to compare device name with dish name in lower case
+                # Therefore need to compare device name with dish name in
+                # lower case
                 if dev_name in dish.lower():
                     dev_name = dish
 
@@ -428,8 +452,8 @@ class CNComponentManagerMid(CNComponentManager):
         """
         result = []
         for dish in range(1, (num_dishes + 1)):
-            self.add_device(dln_prefix + "{:03d}".format(dish))
-            result.append(dln_prefix + "{:03d}".format(dish))
+            self.add_device(f"{dln_prefix}{dish:03d}")
+            result.append(f"{dln_prefix}{dish:03d}")
         return result
 
     def _aggregate_telescope_state(self):
@@ -480,9 +504,10 @@ class CNComponentManagerMid(CNComponentManager):
                 "LoadDishCfg",
             ]:
                 raise CommandNotAllowed(
-                    "Dish Vcc Config not Set. Please set using LoadDishCfg command. "
-                    "Current Telescope State is %s",
-                    str(self.op_state_model.op_state),
+                    "Dish Vcc Config not Set. Please set using LoadDishCfg"
+                    " command. "
+                    "Current Telescope State is :"
+                    + f"{str(self.op_state_model.op_state)}",
                 )
         if self.op_state_model.op_state in [
             DevState.FAULT,
@@ -490,8 +515,8 @@ class CNComponentManagerMid(CNComponentManager):
             DevState.DISABLE,
         ]:
             raise CommandNotAllowed(
-                "Command is not allowed in current state %s",
-                str(self.op_state_model.op_state),
+                "Command is not allowed in current state :"
+                + f"{str(self.op_state_model.op_state)}",
             )
         if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
             self.logger.debug(f"Checking mid devices for {command_name}")
@@ -505,6 +530,7 @@ class CNComponentManagerMid(CNComponentManager):
         return True
 
     def update_telescope_availability(self, device_name, event_value):
+        """Updates telescope availablity status"""
         with self.lock:
             if "tm_subarray_node" in device_name:
                 self.subarray_availability[device_name] = event_value
@@ -572,8 +598,10 @@ class CNComponentManagerMid(CNComponentManager):
 
         Result Code | Action
         UNKNOWN     | Load Dish Config using LoadDishCfg command
-        OK          | Dish Vcc already set so set is_dish_vcc_config_set to True
-        FAILED      | Dish Vcc is mismatch so set set is_dish_vcc_config_set to False
+        OK          | Dish Vcc already set so set is_dish_vcc_config_set
+        to True
+        FAILED      | Dish Vcc is mismatch so set set is_dish_vcc_config_set
+        to False
         NOT_ALLOWED | Set is_dish_vcc_config_set to False
         """
         self.logger.info(
@@ -592,9 +620,9 @@ class CNComponentManagerMid(CNComponentManager):
                     csp_validation_result == ResultCode.UNKNOWN
                     and self.command_in_progress != "LoadDishCfg"
                 ):
-                    """Unknown Result code sent when no dish vcc set
-                    so invoke LoadDishCfg
-                    """
+                    # Unknown Result code sent when no dish vcc set
+                    # so invoke LoadDishCfg
+
                     self.command_in_progress = "LoadDishCfg"
                     if self.check_if_csp_all_dish_ready():
                         self.invoke_load_dish_cfg_command_callback()
@@ -604,8 +632,7 @@ class CNComponentManagerMid(CNComponentManager):
                         )
                         self.command_in_progress = ""
                 elif (
-                    csp_validation_result
-                    in DISH_VCC_VALIDATION_RESULT_STATUS.keys()
+                    csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
                 ):
                     if csp_validation_result == ResultCode.OK:
                         self.update_dish_vcc_flag(True)

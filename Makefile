@@ -34,7 +34,7 @@ HELM_CHART=test-parent
 UMBRELLA_CHART_PATH ?= charts/$(HELM_CHART)/
 K8S_CHARTS ?= ska-tmc-centralnode test-parent## list of charts
 K8S_CHART ?= $(HELM_CHART)
-
+PYTANGO_GREEN_MODE = 'futures'
 CI_PROJECT_DIR ?= .
 
 XAUTHORITY ?= $(HOME)/.Xauthority
@@ -66,7 +66,7 @@ PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:./src \
 MARK ?= -x## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= tests## A specific test file to pass to pytest
-ADD_ARGS ?=  ## Additional args to pass to pytest
+ADD_ARGS ?=  -x ## Additional args to pass to pytest
 
 
 CI_REGISTRY ?= gitlab.com
@@ -82,8 +82,8 @@ endif
 
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
-ADD_ARGS +=  --forked
-MARK = not post_deployment and not acceptance
+ADD_ARGS +=  --forked  
+MARK = not post_deployment and not acceptance 
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context
@@ -105,6 +105,7 @@ K8S_TEST_TEST_COMMAND = $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
 -include .make/release.mk
 -include .make/make.mk
 -include .make/help.mk
+-include .make/base.mk
 -include PrivateRules.mak
 
 # flag this up for the oneshot /Dockerfile
@@ -122,7 +123,7 @@ PYTHON_BUILD_TYPE = non_tag_setup
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set global.tango_host=$(TANGO_HOST) \
 	--set global.exposeAllDS=false \
-	--set global.operator=true \
+	--set global.operator=false \
 	--set ska-tango-base.display=$(DISPLAY) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
@@ -143,3 +144,7 @@ requirements: ## Install Dependencies
 
 # .PHONY is additive
 .PHONY: unit-test
+
+cred:
+	make k8s-namespace
+	curl -s https://gitlab.com/ska-telescope/templates-repository/-/raw/master/scripts/namespace_auth.sh | bash -s $(SERVICE_ACCOUNT) $(KUBE_NAMESPACE) || true
