@@ -63,7 +63,7 @@ deviceServers:
     enabled: true
     instances: ["01"]
     subarray_count: 1
-    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
+    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.cluster.local:9870"
     mid:
       file: "data/centralnode_mid.yaml"
       CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
