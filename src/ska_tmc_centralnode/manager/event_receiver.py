@@ -7,7 +7,6 @@ from ska_tmc_common.event_receiver import EventReceiver
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
-    DISH_LEAF_NODE_PREFIX,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     MCCS_MLN_DEVICE,
