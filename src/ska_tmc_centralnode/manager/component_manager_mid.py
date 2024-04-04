@@ -394,7 +394,7 @@ class CNComponentManagerMid(CNComponentManager):
                 devInfo.state = state
                 devInfo.last_event_arrived = time.time()
                 self.logger.info(
-                    "dev_info: %s, %s", devInfo.dev_name, devInfo.state
+                    "Device info is: %s, %s", devInfo.dev_name, devInfo.state
                 )
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
@@ -418,7 +418,7 @@ class CNComponentManagerMid(CNComponentManager):
             # Update Dish Master device name with full FQDN for real Dish
             dish_master_dev_names = self.get_dish_device_names()
             self.logger.info(
-                "dish_master_dev_names: %s", dish_master_dev_names
+                "Dish master device names: %s", dish_master_dev_names
             )
             for dish in dish_master_dev_names:
                 # device name received in event is always in lower case for
@@ -432,7 +432,9 @@ class CNComponentManagerMid(CNComponentManager):
             dev_info.dish_mode = dish_mode
             dev_info.last_event_arrived = time.time()
             self.logger.info(
-                "dish dev_info: %s, %s", dev_info.dev_name, dev_info.dish_mode
+                "dish device info: %s, %s",
+                dev_info.dev_name,
+                dev_info.dish_mode,
             )
             dev_info.update_unresponsive(False)
 

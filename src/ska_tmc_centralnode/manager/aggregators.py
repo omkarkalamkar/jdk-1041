@@ -27,7 +27,7 @@ class TelescopeStateAggregatorMid(Aggregator):
         csp_master = False
         sdp_master = False
         for dev in self._component_manager.checked_devices:
-            self._logger.info("name: %s", dev.dev_name)
+            self._logger.info("Device name is: %s", dev.dev_name)
             name = dev.dev_name
             if dev.unresponsive:
                 continue
