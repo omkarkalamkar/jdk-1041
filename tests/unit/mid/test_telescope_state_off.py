@@ -1,7 +1,7 @@
 """Test cases file"""
 import pytest
 import tango
-from ska_tmc_common import HelperBaseDevice
+from ska_tmc_common import HelperBaseDevice, HelperDishDevice
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 
@@ -48,14 +48,18 @@ def devices_to_load():
                 {"name": MID_CSP_MASTER_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},
                 {"name": MID_SDP_MASTER_DEVICE},
-                {"name": DISH_LEAF_NODE_DEVICE},
             ],
         },
         {
             "class": HelperDishLNDevice,
             "devices": [
-                {"name": DISH_MASTER_DEVICE},
                 {"name": DISH_LEAF_NODE_DEVICE},
+            ],
+        },
+        {
+            "class": HelperDishDevice,
+            "devices": [
+                {"name": DISH_MASTER_DEVICE},
             ],
         },
     )

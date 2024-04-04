@@ -398,12 +398,6 @@ class CNComponentManagerMid(CNComponentManager):
         self._aggregate_state()
         self._update_imaging()
 
-    def get_dish_device_names(self) -> tuple:
-        """
-        Return Dish Master device names
-        """
-        return self.input_parameter.dish_dev_names
-
     def get_dish_leaf_node_device_names(self) -> tuple:
         """
         Return Dish Master device names

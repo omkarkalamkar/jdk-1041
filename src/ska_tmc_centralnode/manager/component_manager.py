@@ -323,6 +323,12 @@ class CNComponentManager(TmcComponentManager):
         """
         return self.input_parameter.csp_master_dev_name
 
+    def get_dish_device_names(self) -> tuple:
+        """
+        Return Dish Master device names
+        """
+        return self.input_parameter.dish_dev_name
+
     def check_if_csp_mln_is_available(self) -> bool:
         """
         Returns boolean value based on availability of CspMasterLeafNode,

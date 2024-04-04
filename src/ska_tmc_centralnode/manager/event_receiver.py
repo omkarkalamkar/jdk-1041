@@ -143,7 +143,6 @@ class CentralNodeEventReceiver(EventReceiver):
                     LOW_CSP_MLN_DEVICE,
                     LOW_SDP_MLN_DEVICE,
                     MCCS_MLN_DEVICE,
-                    # DISH_LEAF_NODE_PREFIX,
                 ]:
                     proxy.subscribe_event(
                         "isSubsystemAvailable",
@@ -165,14 +164,6 @@ class CentralNodeEventReceiver(EventReceiver):
                             self.handle_dish_vcc_k_value_validation_event,
                             stateless=True,
                         )
-                    # if DISH_LEAF_NODE_PREFIX in dev_info.dev_name:
-                    #     proxy.subscribe_event(
-                    #         "dishMode",
-                    #         tango.EventType.CHANGE_EVENT,
-                    #         self.handle_dish_mode_event,
-                    #         stateless=True,
-                    #     )
-
                 if dev_info.dev_name == MCCS_MLN_DEVICE:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
