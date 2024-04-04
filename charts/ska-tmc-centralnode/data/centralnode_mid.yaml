@@ -4,6 +4,7 @@ domain: general-monitoring
 instances: ["01"]
 {{- $DishMasterPrefix := .Values.deviceServers.centralnode.mid.DishMasterPrefix }}
 {{- $DishMasterPostfix := .Values.deviceServers.centralnode.mid.DishMasterPostfix }}
+{{- $DishMasterTag := .Values.deviceServers.centralnode.mid.DishMasterTag }}
 entrypoints:
   - name: "ska_tmc_centralnode.central_node_mid.CentralNodeMid"
 server:
@@ -50,7 +51,7 @@ server:
         - name: "DishMasterFQDN"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
-          - "{{ . | lower }}/{{ $DishMasterPrefix }}/{{ $DishMasterPostfix }}"
+          - "{{ . | lower }}/{{ $DishMasterTag }}"
           {{- end }}
         - name: "SkuidService"
           values:
