@@ -49,6 +49,12 @@ class CentralNodeMid(AbstractCentralNode):
         default_value=tuple(),
     )
 
+    DishMasterTag = device_property(
+        dtype="str",
+        doc="Device name tag for Dish Master device",
+        default_value="",
+    )
+
     DishVccUri = device_property(
         dtype=("str",),
         doc="Default DishVccConfig URI",
@@ -321,6 +327,7 @@ class CentralNodeMid(AbstractCentralNode):
         cm.input_parameter.csp_subarray_dev_names = self.CspSubarrayLeafNodes
         cm.input_parameter.sdp_subarray_dev_names = self.SdpSubarrayLeafNodes
         cm.input_parameter.dish_leaf_node_prefix = self.DishLeafNodePrefix
+        cm.input_parameter.dish_master_tag = self.DishMasterTag
 
         cm.update_input_parameter()
         return cm

@@ -340,6 +340,7 @@ class InputParameterMid(InputParameter):
         self._sdp_mln_dev_name: str = "ska_mid/tm_leaf_node/sdp_master"
         self._csp_mln_dev_name: str = "ska_mid/tm_leaf_node/csp_master"
         self._dish_leaf_node_prefix: str = "ska_mid/tm_leaf_node/d0"
+        self._dish_master_tag: str = "elt/master"
         self._changed_callback: Callable = changed_callback
 
     @property
@@ -364,6 +365,31 @@ class InputParameterMid(InputParameter):
         :type value: str
         """
         self._dish_leaf_node_prefix = value
+        if self._changed_callback is not None:
+            self._changed_callback()
+
+    @property
+    def dish_master_tag(self) -> str:
+        """
+        Input parameter
+        Return the TMC dish master device tag
+
+        :return: the TMC dish master device tag
+        :rtype: str
+        """
+        return self._dish_master_tag
+
+    @dish_master_tag.setter
+    def dish_master_tag(self, value: str):
+        """
+        Input parameter
+        Set the TM dish master device tag to be
+        managed by the CentralNode
+
+        :param value: the TM dish master device tag
+        :type value: str
+        """
+        self._dish_master_tag = value
         if self._changed_callback is not None:
             self._changed_callback()
 
