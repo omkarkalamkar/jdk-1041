@@ -400,7 +400,7 @@ class CNComponentManagerMid(CNComponentManager):
 
     def get_dish_leaf_node_device_names(self) -> tuple:
         """
-        Return Dish Master device names
+        Return Dish leaf node device names
         """
         return self.input_parameter.dish_leaf_node_dev_names
 
