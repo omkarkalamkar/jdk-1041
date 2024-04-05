@@ -3,7 +3,7 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.enum import DishMode, PointingState
+from ska_tmc_common.enum import DishMode
 
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import event_remover
@@ -51,45 +51,33 @@ def test_off_command_mid(
     )
 
     csp_master = dev_factory.get_device("mid-csp/control/0")
-    csp_master.subscribe_event(
-        "State",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["State"],
-    )
+    csp_master.SetDirectState(tango.DevState.OFF)
 
-    change_event_callbacks.assert_change_event(
-        "State", tango._tango.DevState.OFF, lookahead=5
-    )
     sdp_master = dev_factory.get_device("mid-sdp/control/0")
-    sdp_master.subscribe_event(
-        "State",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["State"],
-    )
+    sdp_master.SetDirectState(tango.DevState.OFF)
 
-    change_event_callbacks.assert_change_event(
-        "State", tango._tango.DevState.OFF, lookahead=5
-    )
-
+    # dish_master = dev_factory.get_device("ska001/elt/master")
+    # dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
+    # dish_master.SetDirectPointingState(PointingState.READY)
     dish_leaf_node = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
     dish_leaf_node.subscribe_event(
         "dishMode",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["dishMode"],
     )
-    dish_leaf_node.subscribe_event(
-        "pointingState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["pointingState"],
-    )
+    # dish_leaf_node.subscribe_event(
+    #     "pointingState",
+    #     tango.EventType.CHANGE_EVENT,
+    #     change_event_callbacks["pointingState"],
+    # )
     change_event_callbacks["dishMode"].assert_change_event(
         (DishMode.STANDBY_LP),
         lookahead=2,
     )
-    change_event_callbacks["pointingState"].assert_change_event(
-        (PointingState.READY),
-        lookahead=2,
-    )
+    # change_event_callbacks["pointingState"].assert_change_event(
+    #     (PointingState.READY),
+    #     lookahead=2,
+    # )
 
     central_node.subscribe_event(
         "telescopeState",

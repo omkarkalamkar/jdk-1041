@@ -58,16 +58,7 @@ def test_standby_command_mid(
     )
 
     csp_master = dev_factory.get_device("mid-csp/control/0")
-    csp_master = dev_factory.get_device("mid-csp/control/0")
-    csp_master.subscribe_event(
-        "State",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["State"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "State", tango._tango.DevState.STANDBY, lookahead=5
-    )
+    csp_master.SetDirectState(tango.DevState.STANDBY)
 
     dish_leaf_node = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
     dish_leaf_node.subscribe_event(

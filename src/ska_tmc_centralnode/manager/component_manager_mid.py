@@ -411,17 +411,16 @@ class CNComponentManagerMid(CNComponentManager):
         :param dishMode: Dish mode of the device
         :type dishMode: DishMode
         """
-
         with self.lock:
             self.logger.info(
                 f"Dish event callback for device {dev_name}: {dish_mode}"
             )
 
             # Update Dish Master device name with full FQDN for real Dish
-            # dish_master_dev_names = self.get_dish_leaf_node_device_names()
-            # for dish in dish_master_dev_names:
-            #     if dev_name in dish:
-            #         dev_name = dish
+            dish_master_dev_names = self.get_dish_leaf_node_device_names()
+            for dish in dish_master_dev_names:
+                if dev_name in dish:
+                    dev_name = dish
 
             dev_info = self.component.get_device(dev_name)
             dev_info.dish_mode = dish_mode

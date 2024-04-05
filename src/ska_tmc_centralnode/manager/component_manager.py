@@ -327,7 +327,13 @@ class CNComponentManager(TmcComponentManager):
         """
         Return Dish Master device names
         """
-        return self.input_parameter.dish_dev_name
+        return self.input_parameter.dish_dev_names
+
+    def get_dish_leaf_node_device_names(self) -> tuple:
+        """
+        Return Dish leaf node device names
+        """
+        return self.input_parameter.dish_leaf_node_dev_names
 
     def check_if_csp_mln_is_available(self) -> bool:
         """
@@ -414,7 +420,8 @@ class CNComponentManager(TmcComponentManager):
             devInfo = SubArrayDeviceInfo(device_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterMid)
-            and device_name.lower() in self.input_parameter.dish_dev_names
+            and device_name.lower()
+            in self.input_parameter.dish_leaf_node_dev_names
         ):
             devInfo = DishDeviceInfo(device_name, False)
         elif (
@@ -498,9 +505,9 @@ class CNComponentManager(TmcComponentManager):
                 csp_master_dev_name = self.get_csp_master_dev_name()
                 if device_name in csp_master_dev_name:
                     device_name = csp_master_dev_name
-            if "elt/master" in device_name:
+            if "ska_mid/tm_leaf_node/d0" in device_name:
                 # Update Dish Master device name with full FQDN for real Dish
-                dish_master_dev_names = self.get_dish_device_names()
+                dish_master_dev_names = self.get_dish_leaf_node_device_names()
                 for dish in dish_master_dev_names:
                     if device_name in dish:
                         device_name = dish
