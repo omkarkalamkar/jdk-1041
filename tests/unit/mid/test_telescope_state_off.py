@@ -1,14 +1,13 @@
 """Test cases file"""
 import pytest
 import tango
-from ska_tmc_common import HelperBaseDevice, HelperDishDevice
-from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.enum import DishMode
-
-# from ska_tmc_common.test_helpers.helper_dish_device import HelperDishDevice
-from ska_tmc_common.test_helpers.helper_dish_ln_device import (
+from ska_tmc_common import (
+    HelperBaseDevice,
+    HelperDishDevice,
     HelperDishLNDevice,
 )
+from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_common.enum import DishMode
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )

@@ -2,7 +2,11 @@
 import time
 
 import pytest
-from ska_tmc_common import HelperBaseDevice
+from ska_tmc_common import (
+    HelperBaseDevice,
+    HelperDishDevice,
+    HelperDishLNDevice,
+)
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
@@ -50,8 +54,18 @@ def devices_to_load():
                 {"name": MID_CSP_MASTER_DEVICE},
                 {"name": MID_SDP_MLN_DEVICE},
                 {"name": MID_SDP_MASTER_DEVICE},
-                {"name": DISH_MASTER_DEVICE},
+            ],
+        },
+        {
+            "class": HelperDishLNDevice,
+            "devices": [
                 {"name": DISH_LEAF_NODE_DEVICE},
+            ],
+        },
+        {
+            "class": HelperDishDevice,
+            "devices": [
+                {"name": DISH_MASTER_DEVICE},
             ],
         },
     )

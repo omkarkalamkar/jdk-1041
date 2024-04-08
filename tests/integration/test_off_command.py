@@ -56,28 +56,17 @@ def test_off_command_mid(
     sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectState(tango.DevState.OFF)
 
-    # dish_master = dev_factory.get_device("ska001/elt/master")
-    # dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
-    # dish_master.SetDirectPointingState(PointingState.READY)
     dish_leaf_node = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
     dish_leaf_node.subscribe_event(
         "dishMode",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["dishMode"],
     )
-    # dish_leaf_node.subscribe_event(
-    #     "pointingState",
-    #     tango.EventType.CHANGE_EVENT,
-    #     change_event_callbacks["pointingState"],
-    # )
+
     change_event_callbacks["dishMode"].assert_change_event(
         (DishMode.STANDBY_LP),
         lookahead=2,
     )
-    # change_event_callbacks["pointingState"].assert_change_event(
-    #     (PointingState.READY),
-    #     lookahead=2,
-    # )
 
     central_node.subscribe_event(
         "telescopeState",
