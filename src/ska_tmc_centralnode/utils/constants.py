@@ -12,6 +12,12 @@ LOW_SDP_MLN_DEVICE = "ska_low/tm_leaf_node/sdp_master"
 MCCS_MLN_DEVICE = "ska_low/tm_leaf_node/mccs_master"
 MCCS_MLN_SUFIX = "tm_leaf_node/mccs_master"
 DISH_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d"
+DISH_LEAF_NODE_1 = "ska_mid/tm_leaf_node/d0001"
+MID_SDP_MASTER_DEVICE = "mid-sdp/control/0"
+MID_CSP_MASTER_DEVICE = "mid-csp/control/0"
+LOW_SDP_MASTER_DEVICE = "low-sdp/control/0"
+LOW_CSP_MASTER_DEVICE = "low-csp/control/0"
+MCCS_MASTER_DEVICE = "low-mccs/control/control"
 mccs_release_interface = (
     "https://schema.skatelescope.org/ska-low-mccs-controller-release/2.0"
 )
