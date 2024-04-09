@@ -47,6 +47,7 @@ class CentralNodeEventReceiver(EventReceiver):
         }
         self.device_subscribed = {}
         self.dish_name = ""
+        self.input_parameter = self._component_manager.input_parameter
 
     def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
@@ -107,7 +108,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         InputParameterMid,
                     )
                     and dev_info.dev_name
-                    in self._component_manager.get_dish_leaf_node_dev_names()
+                    in self.input_parameter.dish_leaf_node_dev_names
                 ):
                     proxy.subscribe_event(
                         "dishMode",
