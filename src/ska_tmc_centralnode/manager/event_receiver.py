@@ -122,7 +122,6 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_dln_kvalue_validation_result,
                         stateless=True,
                     )
-
                 if "subarray_node" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
@@ -220,7 +219,6 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.device.dev_name()
             )
             return
-
         new_value = event_data.attr_value.value
         self._component_manager.update_device_dish_mode(
             event_data.device.dev_name(), new_value
