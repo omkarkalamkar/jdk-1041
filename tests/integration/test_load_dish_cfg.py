@@ -290,6 +290,7 @@ def test_load_dish_cfg_when_csp_is_defective(
         change_event_callbacks,
     )
 
+
 @pytest.mark.skip(reason="Fails intermittently")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
@@ -311,6 +312,7 @@ def test_load_dish_cfg_after_central_node_init(
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
     )
+
 
 @pytest.mark.skip(reason="Fails intermittently")
 @pytest.mark.post_deployment
