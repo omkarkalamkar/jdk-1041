@@ -64,7 +64,6 @@ def devices_to_load():
     )
 
 
-@pytest.mark.t1
 def test_telescope_state_on_with_dishmode_standbyfp(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
@@ -83,7 +82,6 @@ def test_telescope_state_on_with_dishmode_standbyfp(tango_context):
     assert cm.component.telescope_state == tango.DevState.ON
 
 
-@pytest.mark.t1
 def test_telescope_state_on_with_dishmode_operate(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
@@ -102,7 +100,6 @@ def test_telescope_state_on_with_dishmode_operate(tango_context):
     assert cm.component.telescope_state == tango.DevState.ON
 
 
-@pytest.mark.t1
 def test_telescope_state_on_with_dishmode_config(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
