@@ -506,9 +506,11 @@ class CNComponentManager(TmcComponentManager):
                 if device_name in csp_master_dev_name:
                     device_name = csp_master_dev_name
             if "ska_mid/tm_leaf_node/d0" in device_name:
-                # Update Dish Master device name with full FQDN for real Dish
-                dish_master_dev_names = self.get_dish_leaf_node_device_names()
-                for dish in dish_master_dev_names:
+                # Update Dish leaf node device name with full FQDN
+                dish_leaf_node_dev_names = (
+                    self.get_dish_leaf_node_device_names()
+                )
+                for dish in dish_leaf_node_dev_names:
                     if device_name in dish:
                         device_name = dish
 
