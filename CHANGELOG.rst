@@ -1,6 +1,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[Main]
+******
+* Update the .readthedocs.yaml and pyproject.toml file to fix the RTD generation
+
 [0.14.4]
 ************
 * Implement changes for introduced dishMode and pointingState attribute on HelperDishLNDevice
