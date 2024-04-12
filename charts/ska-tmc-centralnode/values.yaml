@@ -38,11 +38,11 @@ itango:
     tag: 9.4.3
     pullPolicy: IfNotPresent
 
-centralnodemid:
+centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.14.3
+    tag: 0.14.4
     pullPolicy: IfNotPresent
 
 resources:
@@ -63,7 +63,7 @@ deviceServers:
     enabled: true
     instances: ["01"]
     subarray_count: 1
-    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
+    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.cluster.local:9870"
     mid:
       file: "data/centralnode_mid.yaml"
       CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"

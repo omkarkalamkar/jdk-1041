@@ -26,24 +26,27 @@ class TelescopeStateAggregatorMid(Aggregator):
         dish_count = 0
         csp_master = False
         sdp_master = False
-        for dev in self._component_manager.checked_devices:
-            name = dev.dev_name.lower()
-            if dev.unresponsive:
+        for device in self._component_manager.checked_devices:
+            name = device.dev_name.lower()
+            if device.unresponsive:
                 continue
-            if name in self._component_manager.input_parameter.dish_dev_names:
-                dish_modes.add(dev.dish_mode)
+            if (
+                name
+                in self._component_manager.get_dish_leaf_node_device_names()
+            ):
+                dish_modes.add(device.dish_mode)
                 dish_count += 1
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                subsystem_states.add(dev.state)
+                subsystem_states.add(device.state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                subsystem_states.add(dev.state)
+                subsystem_states.add(device.state)
                 sdp_master = True
 
         self._logger.info(
@@ -113,27 +116,27 @@ class TelescopeStateAggregatorLow(Aggregator):
         csp_master = False
         sdp_master = False
 
-        for dev in self._component_manager.checked_devices:
-            name = dev.dev_name.lower()
-            if dev.unresponsive:
+        for device in self._component_manager.checked_devices:
+            name = device.dev_name.lower()
+            if device.unresponsive:
                 continue
             if (
                 name
                 == self._component_manager.input_parameter.mccs_master_dev_name
             ):
-                telescopeStateList.append(dev.state)
+                telescopeStateList.append(device.state)
                 mccs_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                telescopeStateList.append(dev.state)
+                telescopeStateList.append(device.state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                telescopeStateList.append(dev.state)
+                telescopeStateList.append(device.state)
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
@@ -181,32 +184,33 @@ class HealthStateAggregatorMid(Aggregator):
         # what if one of them is not working (i.e. faulty flag)? i.e.
         # Csp, Sdp or dishes
         # number of dishes is also variable
-        for dev in self._component_manager.checked_devices:
-            name = dev.dev_name.lower()
-            if dev.unresponsive:
+        for device in self._component_manager.checked_devices:
+            name = device.dev_name.lower()
+            if device.unresponsive:
                 continue
             if (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                healthStateList.append(dev.health_state)
+                healthStateList.append(device.health_state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                healthStateList.append(dev.health_state)
+                healthStateList.append(device.health_state)
                 sdp_master = True
             elif (
                 name
                 in self._component_manager.input_parameter.subarray_dev_names
             ):
-                healthStateList.append(dev.health_state)
+                healthStateList.append(device.health_state)
                 subarray_count += 1
             elif (
-                name in self._component_manager.input_parameter.dish_dev_names
+                name
+                in self._component_manager.get_dish_leaf_node_device_names()
             ):
-                healthStateList.append(dev.health_state)
+                healthStateList.append(device.health_state)
                 dish_count += 1
 
         healthStateSetList = set(healthStateList)
@@ -241,33 +245,33 @@ class HealthStateAggregatorLow(Aggregator):
         sdp_master = False
         mccs_master = False
         # get health states of sdp, csp and mccs master devices
-        for dev in self._component_manager.checked_devices:
-            name = dev.dev_name.lower()
-            if dev.unresponsive:
+        for device in self._component_manager.checked_devices:
+            name = device.dev_name.lower()
+            if device.unresponsive:
                 continue
             if (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                healthStateList.append(dev.health_state)
+                healthStateList.append(device.health_state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                healthStateList.append(dev.health_state)
+                healthStateList.append(device.health_state)
                 sdp_master = True
             elif (
                 name
                 in self._component_manager.input_parameter.subarray_dev_names
             ):
-                healthStateList.append(dev.health_state)
+                healthStateList.append(device.health_state)
                 subarray_count += 1
             elif (
                 name
                 in self._component_manager.input_parameter.mccs_master_dev_name
             ):
-                healthStateList.append(dev.health_state)
+                healthStateList.append(device.health_state)
                 mccs_master = True
 
         healthStateSetList = set(healthStateList)
@@ -298,12 +302,12 @@ class TMCOpStateAggregator(Aggregator):
         # get states of all TM devices
         # what if one of them is not working? i.e. tm subarray
         # number of devices is also variable, how to handle that number
-        for dev in self._component_manager.checked_devices:
-            name = dev.dev_name.lower()
+        for device in self._component_manager.checked_devices:
+            name = device.dev_name.lower()
             if "tm" in name:
-                if dev.unresponsive:
+                if device.unresponsive:
                     continue
-                tmcStateList.append(dev.state)
+                tmcStateList.append(device.state)
 
         tmcSetStateList = set(tmcStateList)
         if tmcSetStateList == set([DevState.ON]):
@@ -330,28 +334,28 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
-        for dev in self._component_manager.checked_devices:
-            if "tm_subarray_node" in dev.dev_name:
-                if dev.unresponsive:
+        for device in self._component_manager.checked_devices:
+            if "tm_subarray_node" in device.dev_name:
+                if device.unresponsive:
                     telescope_availability["tmc_subarrays"][
-                        dev.dev_name
+                        device.dev_name
                     ] = False
                 else:
                     telescope_availability["tmc_subarrays"][
-                        dev.dev_name
+                        device.dev_name
                     ] = self._component_manager.subarray_availability[
-                        dev.dev_name
+                        device.dev_name
                     ]
-            elif "tm_leaf_node/csp_master" in dev.dev_name:
-                if dev.unresponsive:
+            elif "tm_leaf_node/csp_master" in device.dev_name:
+                if device.unresponsive:
                     telescope_availability["csp_master_leaf_node"] = False
                 else:
                     telescope_availability[
                         "csp_master_leaf_node"
                     ] = self._component_manager.csp_mln_availability
 
-            elif "tm_leaf_node/sdp_master" in dev.dev_name:
-                if dev.unresponsive:
+            elif "tm_leaf_node/sdp_master" in device.dev_name:
+                if device.unresponsive:
                     telescope_availability["sdp_master_leaf_node"] = False
                 else:
                     telescope_availability[
@@ -375,36 +379,36 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
-        for dev in self._component_manager.checked_devices:
-            if "tm_subarray_node" in dev.dev_name:
-                if dev.unresponsive:
+        for device in self._component_manager.checked_devices:
+            if "tm_subarray_node" in device.dev_name:
+                if device.unresponsive:
                     telescope_availability["tmc_subarrays"][
-                        dev.dev_name
+                        device.dev_name
                     ] = False
                 else:
                     telescope_availability["tmc_subarrays"][
-                        dev.dev_name
+                        device.dev_name
                     ] = self._component_manager.subarray_availability[
-                        dev.dev_name
+                        device.dev_name
                     ]
-            elif "tm_leaf_node/csp_master" in dev.dev_name:
-                if dev.unresponsive:
+            elif "tm_leaf_node/csp_master" in device.dev_name:
+                if device.unresponsive:
                     telescope_availability["csp_master_leaf_node"] = False
                 else:
                     telescope_availability[
                         "csp_master_leaf_node"
                     ] = self._component_manager.csp_mln_availability
 
-            elif "tm_leaf_node/sdp_master" in dev.dev_name:
-                if dev.unresponsive:
+            elif "tm_leaf_node/sdp_master" in device.dev_name:
+                if device.unresponsive:
                     telescope_availability["sdp_master_leaf_node"] = False
                 else:
                     telescope_availability[
                         "sdp_master_leaf_node"
                     ] = self._component_manager.sdp_mln_availability
 
-            elif MCCS_MLN_SUFIX in dev.dev_name:
-                if dev.unresponsive:
+            elif MCCS_MLN_SUFIX in device.dev_name:
+                if device.unresponsive:
                     telescope_availability["mccs_master_leaf_node"] = False
                 else:
                     telescope_availability[

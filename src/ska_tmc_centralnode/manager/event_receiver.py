@@ -47,7 +47,7 @@ class CentralNodeEventReceiver(EventReceiver):
         }
         self.device_subscribed = {}
         self.dish_name = ""
-        self.input_param = self._component_manager.input_parameter
+        self.input_parameter = self._component_manager.input_parameter
 
     def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
@@ -101,13 +101,14 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_obs_state_event,
                         stateless=True,
                     )
+
                 if (
                     isinstance(
                         self._component_manager.input_parameter,
                         InputParameterMid,
                     )
                     and dev_info.dev_name
-                    in self._component_manager.input_parameter.dish_dev_names
+                    in self.input_parameter.dish_leaf_node_dev_names
                 ):
                     proxy.subscribe_event(
                         "dishMode",
@@ -115,14 +116,6 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_dish_mode_event,
                         stateless=True,
                     )
-                if (
-                    isinstance(
-                        self._component_manager.input_parameter,
-                        InputParameterMid,
-                    )
-                    and dev_info.dev_name
-                    in self.input_param.dish_leaf_node_dev_names
-                ):
                     proxy.subscribe_event(
                         "kValueValidationResult",
                         tango.EventType.CHANGE_EVENT,
@@ -170,7 +163,6 @@ class CentralNodeEventReceiver(EventReceiver):
                             self.handle_dish_vcc_k_value_validation_event,
                             stateless=True,
                         )
-
                 if dev_info.dev_name == MCCS_MLN_DEVICE:
                     proxy.subscribe_event(
                         "longRunningCommandResult",

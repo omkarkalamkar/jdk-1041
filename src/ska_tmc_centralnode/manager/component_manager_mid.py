@@ -398,22 +398,27 @@ class CNComponentManagerMid(CNComponentManager):
         self._aggregate_state()
         self._update_imaging()
 
+    def get_dish_leaf_node_device_names(self) -> tuple:
+        """
+        Return Dish leaf node device names
+        """
+        return self.input_parameter.dish_leaf_node_dev_names
+
     def update_device_dish_mode(self, dev_name, dish_mode: DishMode) -> None:
         """
-        Update the dish mode of the given dish and call
-        the relative callbacks if available.
+        Update the dish mode of the given dish leaf node
+        and call the relative callbacks if available.
         :param dishMode: Dish mode of the device
         :type dishMode: DishMode
         """
-
         with self.lock:
             self.logger.info(
                 f"Dish event callback for device {dev_name}: {dish_mode}"
             )
 
-            # Update Dish Master device name with full FQDN for real Dish
-            dish_master_dev_names = self.get_dish_device_names()
-            for dish in dish_master_dev_names:
+            # Update Dish leaf node device name with full FQDN for real Dish
+            dish_leaf_node_dev_names = self.get_dish_leaf_node_device_names()
+            for dish in dish_leaf_node_dev_names:
                 if dev_name in dish:
                     dev_name = dish
 
