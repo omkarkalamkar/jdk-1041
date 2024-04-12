@@ -6,6 +6,12 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
+from ska_tmc_centralnode.utils.constants import (
+    DISH_LEAF_NODE_1,
+    LOW_CSP_MASTER_DEVICE,
+    MCCS_MASTER_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import event_remover, logger
 
@@ -57,11 +63,20 @@ def test_standby_command_mid(
         "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
 
-    csp_master = dev_factory.get_device("mid-csp/control/0")
-    csp_master.SetDirectState(DevState.STANDBY)
+    csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master.SetDirectState(tango.DevState.STANDBY)
 
-    dish_master = dev_factory.get_device("ska001/elt/master")
-    dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
+    dish_leaf_node = dev_factory.get_device(DISH_LEAF_NODE_1)
+    dish_leaf_node.subscribe_event(
+        "dishMode",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["dishMode"],
+    )
+
+    change_event_callbacks["dishMode"].assert_change_event(
+        (DishMode.STANDBY_LP),
+        lookahead=2,
+    )
 
     central_node.subscribe_event(
         "telescopeState",
@@ -129,10 +144,10 @@ def test_standby_command_low(
         "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
 
-    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master = dev_factory.get_device(MCCS_MASTER_DEVICE)
     mccs_master.SetDirectState(DevState.STANDBY)
 
-    csp_master = dev_factory.get_device("low-csp/control/0")
+    csp_master = dev_factory.get_device(LOW_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(DevState.STANDBY)
 
     central_node.subscribe_event(

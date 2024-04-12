@@ -140,7 +140,7 @@ html_theme = "ska_ser_sphinx_theme"
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "CentralNodeMiddoc"
+htmlhelp_basename = "CentralNodedoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -166,8 +166,8 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "CentralNodemid.tex",
-        "Central Node Mid Documentation",
+        "CentralNode.tex",
+        "Central Node Documentation",
         "NCRA India",
         "manual",
     ),
@@ -179,7 +179,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "centralnodemid", "Central Node Mid Documentation", [author], 1)
+    (master_doc, "centralnode", "Central Node Documentation", [author], 1)
 ]
 
 
@@ -191,10 +191,10 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "Centralnodemid",
-        "Central Node Mid Documentation",
+        "Centralnode",
+        "Central Node Documentation",
         author,
-        "centralnodemid",
+        "centralnode",
         "One line description of project.",
         "Miscellaneous",
     ),

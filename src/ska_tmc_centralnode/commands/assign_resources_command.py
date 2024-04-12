@@ -36,7 +36,7 @@ class AssignResources(AssignReleaseResources):
         component_manager,
         adapter_factory=None,
         skuid=SkuidClient(
-            "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
+            "ska-ser-skuid-test-svc.ska-tmc-centralnode.cluster.local:9870"
         ),
         *args,
         logger=None,

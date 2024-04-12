@@ -77,6 +77,11 @@ def test_check_telescope_availability_attribute_initial_events(tango_context):
         tango_context, True, True, InputParameterLow(None)
     )
     check_subarray_availability(cm, LOW_SUBARRAY_DEVICE, False)
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    csp_mln.SetSubsystemAvailable(False)
+    sdp_mln.SetSubsystemAvailable(False)
     check_cspmln_availability(cm, False)
     check_sdpmln_availability(cm, False)
     assert (cm.component.telescope_availability)["tmc_subarrays"][

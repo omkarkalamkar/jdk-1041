@@ -61,7 +61,7 @@ server:
 depends_on:
   - device: sys/database/2
 image:
-  registry: "{{.Values.centralnodemid.image.registry}}"
-  image: "{{.Values.centralnodemid.image.image}}"
-  tag: "{{.Values.centralnodemid.image.tag}}"
-  pullPolicy: "{{.Values.centralnodemid.image.pullPolicy}}"
+  registry: "{{.Values.centralnode.image.registry}}"
+  image: "{{.Values.centralnode.image.image}}"
+  tag: "{{.Values.centralnode.image.tag}}"
+  pullPolicy: "{{.Values.centralnode.image.pullPolicy}}"

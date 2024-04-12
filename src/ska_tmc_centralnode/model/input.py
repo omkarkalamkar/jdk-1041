@@ -422,7 +422,7 @@ class InputParameterMid(InputParameter):
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
 
-        for dev_name in self.dish_dev_names:
+        for dev_name in self.dish_leaf_node_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
