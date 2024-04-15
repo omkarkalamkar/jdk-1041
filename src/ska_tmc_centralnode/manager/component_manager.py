@@ -385,7 +385,7 @@ class CNComponentManager(TmcComponentManager):
             if dev_info is not None and not dev_info.unresponsive:
                 self.logger.debug(
                     f"Device {dev_name} dev_info.unresponsive:"
-                    + " {dev_info.unresponsive} "
+                    + f" {dev_info.unresponsive} "
                 )
                 count += 1
         if count == 0:
