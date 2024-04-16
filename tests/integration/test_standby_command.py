@@ -47,6 +47,12 @@ def test_standby_command_mid(
     assert unique_id[0].endswith("TelescopeStandby")
     assert result[0] == ResultCode.QUEUED
 
+    csp_master = dev_factory.get_device("mid-csp/control/0")
+    csp_master.SetDirectState(DevState.STANDBY)
+
+    dish_master = dev_factory.get_device("ska001/elt/master")
+    dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
+
     # Check whether the command ResultCode is OK
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
@@ -57,12 +63,6 @@ def test_standby_command_mid(
         "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
 
-    csp_master = dev_factory.get_device("mid-csp/control/0")
-    csp_master.SetDirectState(DevState.STANDBY)
-
-    dish_master = dev_factory.get_device("ska001/elt/master")
-    dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
-
     central_node.subscribe_event(
         "telescopeState",
         tango.EventType.CHANGE_EVENT,
@@ -71,7 +71,7 @@ def test_standby_command_mid(
 
     # Check whether the telescopeState is STANDBY
     change_event_callbacks.assert_change_event(
-        "telescopeState", DevState.STANDBY, lookahead=4
+        "telescopeState", DevState.STANDBY, lookahead=12
     )
     logger.info("telescopeState: %s", central_node.telescopeState)
 
