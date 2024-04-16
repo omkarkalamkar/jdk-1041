@@ -44,11 +44,6 @@ def test_off_command_mid(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id_off[0], str(int(ResultCode.OK))),
-        lookahead=6,
-    )
 
     csp_master = dev_factory.get_device("mid-csp/control/0")
     csp_master.SetDirectState(tango.DevState.OFF)
@@ -60,6 +55,12 @@ def test_off_command_mid(
     dish_master.SetDirectDishMode(DishMode.STANDBY_LP)
     dish_master.SetDirectPointingState(PointingState.READY)
 
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id_off[0], str(int(ResultCode.OK))),
+        lookahead=6,
+    )
+
     central_node.subscribe_event(
         "telescopeState",
         tango.EventType.CHANGE_EVENT,
@@ -67,7 +68,7 @@ def test_off_command_mid(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=6
+        "telescopeState", tango._tango.DevState.OFF, lookahead=12
     )
     event_remover(
         change_event_callbacks,

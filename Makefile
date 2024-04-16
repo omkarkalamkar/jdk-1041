@@ -62,6 +62,7 @@ PYTHON_TEST_FILE ?=
 # Set the specific environment variables required for pytest
 PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:./src \
 							 TANGO_HOST=$(TANGO_HOST)
+							 CLUSTER_DOMAIN=$(CLUSTER_DOMAIN)
 
 MARK ?= -x## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
