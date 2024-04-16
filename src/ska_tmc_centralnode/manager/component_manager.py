@@ -104,7 +104,8 @@ class CNComponentManager(TmcComponentManager):
         proxy_timeout=500,
         sleep_time=1,
         skuid_service=(
-            "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.cluster.local:9870"
+            "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
+            + ".skao.int:9870"
         ),
         command_timeout=30,
         *args,
