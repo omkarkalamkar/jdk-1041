@@ -5,6 +5,14 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ************
 * Update CentralNode to work with dish-lmc chart 3.0.0
 
+[Main]
+******
+* Update the .readthedocs.yaml and pyproject.toml file to fix the RTD generation
+
+[0.14.4]
+************
+* Implement changes for introduced dishMode and pointingState attribute on HelperDishLNDevice
+
 [0.14.3]
 ************
 * Update pytango v9.4.2

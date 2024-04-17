@@ -4,8 +4,16 @@ import tango
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.enum import DishMode, PointingState
+from ska_tmc_common.enum import DishMode
 
+from ska_tmc_centralnode.utils.constants import (
+    DISH_LEAF_NODE_1,
+    LOW_CSP_MASTER_DEVICE,
+    LOW_SDP_MASTER_DEVICE,
+    MCCS_MASTER_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import event_remover
 
@@ -37,15 +45,22 @@ def test_on_command_mid(
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    csp_master = dev_factory.get_device("mid-csp/control/0")
+    csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(tango.DevState.ON)
 
-    sdp_master = dev_factory.get_device("mid-sdp/control/0")
+    sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
     sdp_master.SetDirectState(tango.DevState.ON)
 
-    dish_master = dev_factory.get_device("ska001/elt/master")
-    dish_master.SetDirectDishMode(DishMode.STANDBY_FP)
-    dish_master.SetDirectPointingState(PointingState.READY)
+    dish_leaf_node = dev_factory.get_device(DISH_LEAF_NODE_1)
+    dish_leaf_node.subscribe_event(
+        "dishMode",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["dishMode"],
+    )
+    change_event_callbacks["dishMode"].assert_change_event(
+        (DishMode.STANDBY_FP),
+        lookahead=2,
+    )
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
@@ -105,13 +120,13 @@ def test_on_command_low(
         lookahead=4,
     )
 
-    mccs_master = dev_factory.get_device("low-mccs/control/control")
+    mccs_master = dev_factory.get_device(MCCS_MASTER_DEVICE)
     mccs_master.SetDirectState(tango.DevState.ON)
 
-    csp_master = dev_factory.get_device("low-csp/control/0")
+    csp_master = dev_factory.get_device(LOW_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(tango.DevState.ON)
 
-    sdp_master = dev_factory.get_device("low-sdp/control/0")
+    sdp_master = dev_factory.get_device(LOW_SDP_MASTER_DEVICE)
     sdp_master.SetDirectState(tango.DevState.ON)
 
     central_node.subscribe_event(

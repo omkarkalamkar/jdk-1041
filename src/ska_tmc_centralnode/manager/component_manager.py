@@ -69,6 +69,8 @@ from ska_tmc_centralnode.utils.constants import (
     REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
 )
 
+# pylint:disable = too-many-lines
+
 
 class CNComponentManager(TmcComponentManager):
     """
@@ -330,6 +332,12 @@ class CNComponentManager(TmcComponentManager):
         """
         return self.input_parameter.dish_dev_names
 
+    def get_dish_leaf_node_device_names(self) -> tuple:
+        """
+        Return Dish leaf node device names
+        """
+        return self.input_parameter.dish_leaf_node_dev_names
+
     def check_if_csp_mln_is_available(self) -> bool:
         """
         Returns boolean value based on availability of CspMasterLeafNode,
@@ -416,7 +424,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo = SubArrayDeviceInfo(device_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterMid)
-            and device_name in self.input_parameter.dish_dev_names
+            and device_name in self.input_parameter.dish_leaf_node_dev_names
         ):
             devInfo = DishDeviceInfo(device_name, False)
             self.logger.info("DishDeviceInfo created: %s", devInfo)

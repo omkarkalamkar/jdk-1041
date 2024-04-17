@@ -66,16 +66,16 @@ PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:./src \
 MARK ?= -x## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= tests## A specific test file to pass to pytest
-ADD_ARGS ?=  -x ## Additional args to pass to pytest
+ADD_ARGS ?=  -x   ## Additional args to pass to pytest
 
 
 CI_REGISTRY ?= gitlab.com
-CUSTOM_VALUES = --set central_node.centralnodemid.image.tag=$(VERSION)
+CUSTOM_VALUES = --set central_node.centralnode.image.tag=$(VERSION)
 K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/$(PROJECT):$(VERSION)
 ifneq ($(CI_JOB_ID),)
-CUSTOM_VALUES = --set central_node.centralnodemid.image.image=$(PROJECT) \
-	--set central_node.centralnodemid.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
-	--set central_node.centralnodemid.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
+CUSTOM_VALUES = --set central_node.centralnode.image.image=$(PROJECT) \
+	--set central_node.centralnode.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
+	--set central_node.centralnode.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
 
 K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT)/$(PROJECT):$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
 endif
@@ -101,10 +101,6 @@ K8S_TEST_TEST_COMMAND = $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
 -include .make/python.mk
 -include .make/helm.mk
 -include .make/oci.mk
--include .make/docs.mk
--include .make/release.mk
--include .make/make.mk
--include .make/help.mk
 -include .make/base.mk
 -include PrivateRules.mak
 

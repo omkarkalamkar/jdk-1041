@@ -8,6 +8,7 @@ import pytest
 from ska_tmc_common import (
     HelperBaseDevice,
     HelperDishDevice,
+    HelperDishLNDevice,
     HelperMCCSController,
     HelperMCCSMasterLeafNode,
     HelperSubArrayDevice,
@@ -47,6 +48,11 @@ def devices_to_load():
             "class": HelperDishDevice,
             "devices": [
                 {"name": "ska001/elt/master"},
+            ],
+        },
+        {
+            "class": HelperDishLNDevice,
+            "devices": [
                 {"name": "ska_mid/tm_leaf_node/d0001"},
             ],
         },

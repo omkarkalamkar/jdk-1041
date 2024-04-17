@@ -289,7 +289,7 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-@pytest.mark.skip(reason="Read attribute Corba exception occurs")
+@pytest.mark.skip(reason="Fails intermittently")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
@@ -312,7 +312,7 @@ def test_load_dish_cfg_after_central_node_init(
     )
 
 
-@pytest.mark.skip(reason="Need a more debugging")
+@pytest.mark.skip(reason="Fails intermittently")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
