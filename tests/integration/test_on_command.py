@@ -51,6 +51,12 @@ def test_on_command_mid(
     sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
     sdp_master.SetDirectState(tango.DevState.ON)
 
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
+
     dish_leaf_node = dev_factory.get_device(DISH_LEAF_NODE_1)
     dish_leaf_node.subscribe_event(
         "dishMode",
@@ -60,12 +66,6 @@ def test_on_command_mid(
     change_event_callbacks["dishMode"].assert_change_event(
         (DishMode.STANDBY_FP),
         lookahead=2,
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
     )
 
     central_node.subscribe_event(
