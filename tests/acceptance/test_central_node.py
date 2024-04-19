@@ -56,6 +56,8 @@ def central_node():
 @when("I get the attribute InternalModel of the CentralNode device")
 def internal_model(central_node):
     """Internal model method"""
+    logger.info("central_node:%s", central_node.dev_name())
+    logger.info("central_node:%s", central_node.internalModel)
     pytest.internal_model = central_node.internalModel
 
 
