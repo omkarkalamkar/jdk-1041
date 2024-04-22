@@ -478,6 +478,7 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
         with self.lock:
+            self.logger.info("Calling for the health aggregation")
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )

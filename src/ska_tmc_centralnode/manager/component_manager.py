@@ -531,6 +531,7 @@ class CNComponentManager(TmcComponentManager):
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
+        self.logger.info("Aggregate the health state")
         self._aggregate_health_state()
 
     def update_device_obs_state(

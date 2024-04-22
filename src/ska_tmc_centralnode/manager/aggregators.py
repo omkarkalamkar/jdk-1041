@@ -26,6 +26,9 @@ class TelescopeStateAggregatorMid(Aggregator):
         dish_count = 0
         csp_master = False
         sdp_master = False
+        self._logger.info(
+            "checked devices: %s", self._component_manager.checked_devices
+        )
         for device in self._component_manager.checked_devices:
             self._logger.info("Device name is: %s", device.dev_name)
             name = device.dev_name
