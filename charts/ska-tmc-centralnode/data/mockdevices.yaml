@@ -2,8 +2,6 @@ name: "mocks-{{.Release.Name}}"
 function: testing
 domain: mocks
 instances: ["01"]
-{{- $DishMasterPrefix := .Values.deviceServers.centralnode.mid.DishMasterPrefix }}
-{{- $DishMasterPostfix := .Values.deviceServers.centralnode.mid.DishMasterPostfix }}
 {{- $DishMasterTag := .Values.deviceServers.centralnode.mid.DishMasterTag }}
 entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_base_device.HelperBaseDevice"

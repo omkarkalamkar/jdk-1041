@@ -73,8 +73,6 @@ deviceServers:
       DishLeafNodePrefix: "ska_mid/tm_leaf_node/d0"
       DishMasterTag: "elt/master"
       DishIDs: ["SKA001", "MKT001"]
-      DishMasterPrefix: "elt"
-      DishMasterPostfix: "master"
       DishVccConfig:
         DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
         DishVccFilePath: "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
