@@ -194,11 +194,14 @@ class HealthStateAggregatorMid(Aggregator):
         # what if one of them is not working (i.e. faulty flag)? i.e.
         # Csp, Sdp or dishes
         # number of dishes is also variable
-        self._logger.info(
-            "checked devices: %s", self._component_manager.checked_devices
-        )
+
         for device in self._component_manager.checked_devices:
             name = device.dev_name
+            self._logger.info("Name: %s", name)
+            self._logger.info(
+                "Dish names: %s",
+                self._component_manager.get_dish_device_names(),
+            )
             if device.unresponsive:
                 continue
             if (
@@ -226,8 +229,11 @@ class HealthStateAggregatorMid(Aggregator):
                 dish_count += 1
 
         healthStateSetList = set(healthStateList)
+        self._logger.info("healthStateSetList: %s", healthStateSetList)
         self._logger.info("sdp_master: %s", sdp_master)
         self._logger.info("csp_master: %s", csp_master)
+        self._logger.info("subarray_count: %s", subarray_count)
+        self._logger.info("dish_count: %s", dish_count)
         if not sdp_master and not csp_master:
             return HealthState.UNKNOWN
         if subarray_count == 0:
