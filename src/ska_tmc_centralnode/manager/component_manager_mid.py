@@ -393,9 +393,6 @@ class CNComponentManagerMid(CNComponentManager):
             if devInfo is not None:
                 devInfo.state = state
                 devInfo.last_event_arrived = time.time()
-                self.logger.info(
-                    "Device info is: %s, %s", devInfo.dev_name, devInfo.state
-                )
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
@@ -429,11 +426,6 @@ class CNComponentManagerMid(CNComponentManager):
             dev_info = self.component.get_device(dev_name)
             dev_info.dish_mode = dish_mode
             dev_info.last_event_arrived = time.time()
-            self.logger.info(
-                "dish device info: %s, %s",
-                dev_info.dev_name,
-                dev_info.dish_mode,
-            )
             dev_info.update_unresponsive(False)
 
         self._aggregate_state()
@@ -478,7 +470,6 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
         with self.lock:
-            self.logger.info("Calling for the health aggregation")
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )

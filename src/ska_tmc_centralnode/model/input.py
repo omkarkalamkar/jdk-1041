@@ -1,8 +1,5 @@
 """Input Parameter class for central node"""
-import logging
 from typing import Callable, List
-
-logger = logging.getLogger(__name__)
 
 
 class InputParameter:
@@ -383,11 +380,14 @@ class InputParameterMid(InputParameter):
     def dish_master_tag(self, value: str):
         """
         Input parameter
-        Set the TM dish master device tag to be
+        Set the TMC dish master device tag to be
         managed by the CentralNode
 
         :param value: the TM dish master device tag
         :type value: str
+        :return: : None
+        :rtype: None
+
         """
         self._dish_master_tag = value
         if self._changed_callback is not None:
@@ -450,13 +450,11 @@ class InputParameterMid(InputParameter):
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
-        logger.info("list_dev_names: %s", list_dev_names)
 
         for dev_name in self.dish_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
-        logger.info("list_dev_names: %s", list_dev_names)
 
         for devInfo in component_manager.devices:
             if devInfo.dev_name not in list_dev_names:

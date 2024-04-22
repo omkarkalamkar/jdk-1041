@@ -32,15 +32,9 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     )
 
     sdp_master.SetDirectHealthState(HealthState.DEGRADED)
-    logger.info("SDP Master Health: %s", sdp_master.healthState)
-    logger.info("Telescope HealthState: %s", central_node.telescopeHealthState)
-
     change_event_callbacks["healthState"].assert_change_event(
         HealthState.DEGRADED, lookahead=2
     )
-
-    logger.info("SDP Master Health: %s", sdp_master.healthState)
-    logger.info("Telescope HealthState: %s", central_node.telescopeHealthState)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.DEGRADED, lookahead=2

@@ -27,7 +27,6 @@ class TelescopeStateAggregatorMid(Aggregator):
         csp_master = False
         sdp_master = False
         for device in self._component_manager.checked_devices:
-            self._logger.info("Device name is: %s", device.dev_name)
             name = device.dev_name
             if device.unresponsive:
                 continue
@@ -37,25 +36,16 @@ class TelescopeStateAggregatorMid(Aggregator):
             ):
                 dish_modes.add(device.dish_mode)
                 dish_count += 1
-                self._logger.info(
-                    "DishMode event: %s, %s", name, device.dish_mode
-                )
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                self._logger.info(
-                    "CSP State event: %s, %s", name, device.state
-                )
                 subsystem_states.add(device.state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                self._logger.info(
-                    "SDP State event: %s, %s", name, device.state
-                )
                 subsystem_states.add(device.state)
                 sdp_master = True
 
@@ -197,25 +187,18 @@ class HealthStateAggregatorMid(Aggregator):
 
         for device in self._component_manager.checked_devices:
             name = device.dev_name
-            self._logger.info("Name: %s", name)
-            self._logger.info(
-                "Dish names: %s",
-                self._component_manager.get_dish_device_names(),
-            )
             if device.unresponsive:
                 continue
             if (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                self._logger.info("CSP health: %s", device.health_state)
                 healthStateList.append(device.health_state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                self._logger.info("SDP health: %s", device.health_state)
                 healthStateList.append(device.health_state)
                 sdp_master = True
             elif (
@@ -229,11 +212,6 @@ class HealthStateAggregatorMid(Aggregator):
                 dish_count += 1
 
         healthStateSetList = set(healthStateList)
-        self._logger.info("healthStateSetList: %s", healthStateSetList)
-        self._logger.info("sdp_master: %s", sdp_master)
-        self._logger.info("csp_master: %s", csp_master)
-        self._logger.info("subarray_count: %s", subarray_count)
-        self._logger.info("dish_count: %s", dish_count)
         if not sdp_master and not csp_master:
             return HealthState.UNKNOWN
         if subarray_count == 0:

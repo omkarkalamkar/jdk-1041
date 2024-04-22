@@ -419,7 +419,6 @@ class CNComponentManager(TmcComponentManager):
         :param dev_name: device name
         :type dev_name: str
         """
-        self.logger.info("device name is: %s", device_name)
         if "subarray" in device_name.lower():
             devInfo = SubArrayDeviceInfo(device_name, False)
         elif (
@@ -427,7 +426,6 @@ class CNComponentManager(TmcComponentManager):
             and device_name in self.input_parameter.dish_leaf_node_dev_names
         ):
             devInfo = DishDeviceInfo(device_name, False)
-            self.logger.info("DishDeviceInfo created: %s", devInfo)
         elif (
             isinstance(self.input_parameter, InputParameterLow)
             and device_name.lower() in self.input_parameter.mccs_mln_dev_name
@@ -502,8 +500,6 @@ class CNComponentManager(TmcComponentManager):
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
-                self.logger.info(f"sdp_master_dev_name: {sdp_master_dev_name}")
-                self.logger.info(f"device_name: {device_name}")
                 if device_name in sdp_master_dev_name:
                     device_name = sdp_master_dev_name
             if "csp" in device_name:
@@ -521,17 +517,12 @@ class CNComponentManager(TmcComponentManager):
                             device_name = dish
 
             devInfo = self.component.get_device(device_name)
-            self.logger.info(f"devInfo: {devInfo}")
             if devInfo is not None:
                 devInfo.health_state = health_state
                 devInfo.last_event_arrived = time.time()
-                self.logger.info(
-                    "dev_info: %s, %s", devInfo.dev_name, devInfo.health_state
-                )
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
-        self.logger.info("Aggregate the health state")
         self._aggregate_health_state()
 
     def update_device_obs_state(
