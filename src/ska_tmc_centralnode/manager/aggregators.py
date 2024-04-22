@@ -26,9 +26,6 @@ class TelescopeStateAggregatorMid(Aggregator):
         dish_count = 0
         csp_master = False
         sdp_master = False
-        self._logger.info(
-            "checked devices: %s", self._component_manager.checked_devices
-        )
         for device in self._component_manager.checked_devices:
             self._logger.info("Device name is: %s", device.dev_name)
             name = device.dev_name
@@ -197,6 +194,9 @@ class HealthStateAggregatorMid(Aggregator):
         # what if one of them is not working (i.e. faulty flag)? i.e.
         # Csp, Sdp or dishes
         # number of dishes is also variable
+        self._logger.info(
+            "checked devices: %s", self._component_manager.checked_devices
+        )
         for device in self._component_manager.checked_devices:
             name = device.dev_name
             if device.unresponsive:
@@ -205,12 +205,14 @@ class HealthStateAggregatorMid(Aggregator):
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
+                self._logger.info("CSP health: %s", device.health_state)
                 healthStateList.append(device.health_state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
+                self._logger.info("SDP health: %s", device.health_state)
                 healthStateList.append(device.health_state)
                 sdp_master = True
             elif (
@@ -224,6 +226,8 @@ class HealthStateAggregatorMid(Aggregator):
                 dish_count += 1
 
         healthStateSetList = set(healthStateList)
+        self._logger.info("sdp_master: %s", sdp_master)
+        self._logger.info("csp_master: %s", csp_master)
         if not sdp_master and not csp_master:
             return HealthState.UNKNOWN
         if subarray_count == 0:
