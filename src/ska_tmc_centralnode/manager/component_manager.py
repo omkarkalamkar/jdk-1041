@@ -502,6 +502,8 @@ class CNComponentManager(TmcComponentManager):
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
+                self.logger.info(f"sdp_master_dev_name: {sdp_master_dev_name}")
+                self.logger.info(f"device_name: {device_name}")
                 if device_name in sdp_master_dev_name:
                     device_name = sdp_master_dev_name
             if "csp" in device_name:
@@ -519,6 +521,7 @@ class CNComponentManager(TmcComponentManager):
                             device_name = dish
 
             devInfo = self.component.get_device(device_name)
+            self.logger.info(f"devInfo: {devInfo}")
             if devInfo is not None:
                 devInfo.health_state = health_state
                 devInfo.last_event_arrived = time.time()
