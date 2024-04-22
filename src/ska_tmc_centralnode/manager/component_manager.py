@@ -69,8 +69,6 @@ from ska_tmc_centralnode.utils.constants import (
     REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
 )
 
-# pylint:disable = too-many-lines
-
 
 class CNComponentManager(TmcComponentManager):
     """
