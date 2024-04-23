@@ -337,7 +337,7 @@ class InputParameterMid(InputParameter):
         self._sdp_mln_dev_name: str = "ska_mid/tm_leaf_node/sdp_master"
         self._csp_mln_dev_name: str = "ska_mid/tm_leaf_node/csp_master"
         self._dish_leaf_node_prefix: str = "ska_mid/tm_leaf_node/d0"
-        self.dish_master_identifier: str = "elt/master"
+        self._dish_master_identifier: str = "elt/master"
         self._changed_callback: Callable = changed_callback
 
     @property
