@@ -2,7 +2,7 @@ name: "centralnode-test"
 function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
-{{- $DishMasterTag := .Values.deviceServers.centralnode.mid.DishMasterTag }}
+{{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
 entrypoints:
   - name: "ska_tmc_centralnode.central_node_mid.CentralNodeMid"
 server:
@@ -29,9 +29,9 @@ server:
         - name: "DishLeafNodePrefix"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
-        - name: "DishMasterTag"
+        - name: "DishMasterIdentifier"
           values:
-          - "{{.Values.deviceServers.centralnode.mid.DishMasterTag}}"
+          - "{{.Values.deviceServers.centralnode.mid.DishMasterIdentifier}}"
         - name: "DishVccUri"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishVccConfig.DishVccUri}}"
@@ -49,7 +49,7 @@ server:
         - name: "DishMasterFQDN"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
-          - "{{ . | lower }}/{{ $DishMasterTag }}"
+          - "{{ . | lower }}/{{ $DishMasterIdentifier }}"
           {{- end }}
         - name: "SkuidService"
           values:

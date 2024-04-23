@@ -90,11 +90,10 @@ class AssignResourceValidator:
         list and returned to the caller.
 
         :param: receptor_id_list: List of strings for example
-          ["SKA001", "SKA002", "MKT001"]
+            ["SKA001", "SKA002", "MKT001"]
 
         :returns: List of receptors that do not exist. Empty list is returned
-        when all receptors exist.
-
+            when all receptors exist.
         """
         non_existing_receptors = []
         for receptor in receptor_id_list:
@@ -109,10 +108,8 @@ class AssignResourceValidator:
     def loads(self, input_string):
         """
         Validates the input string received as an argument of AssignResources
-          command.
-        If the request is correct, returns the deserialized JSON object.
-        The ska-tmc-cdm
-        is used to validate the JSON.
+        command. If the request is correct, returns the deserialized JSON
+        object. The ska-tmc-cdm is used to validate the JSON.
 
         :param: input_string: A JSON string
 

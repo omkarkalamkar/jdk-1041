@@ -44,7 +44,7 @@ central_node:
 
     centralnode:
       enabled: true
-      DishMasterTag: "elt/master"
+      DishMasterIdentifier: "elt/master"
 
 ska-taranta:
   enabled: false

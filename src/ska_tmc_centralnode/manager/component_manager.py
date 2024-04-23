@@ -506,7 +506,7 @@ class CNComponentManager(TmcComponentManager):
                 if device_name in csp_master_dev_name:
                     device_name = csp_master_dev_name
             if isinstance(self.input_parameter, InputParameterMid):
-                if self.input_parameter.dish_master_tag in device_name:
+                if self.input_parameter.dish_master_identifier in device_name:
                     # Update Dish Master device name with full FQDN in case of
                     # real Dish
                     dish_master_dev_names = self.get_dish_device_names()

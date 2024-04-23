@@ -21,8 +21,7 @@ class AbstractCentralNode(TMCBaseDevice):
     Central Node is a coordinator of the complete Telescope system.
     Central Node is inherited from TMCBaseDevice class which is further
     inherited from SKABaseDevice class. TMCBaseDevice class contains
-    attributes common
-    to CentralNode and SubarrayNode.
+    attributes common to CentralNode and SubarrayNode.
     """
 
     # -----------------
@@ -168,8 +167,7 @@ class AbstractCentralNode(TMCBaseDevice):
             Initializes the attributes and properties of the Central Node.
 
             :return: A tuple containing a return code and a string message
-              indicating status.
-             The message is for information purpose only.
+                indicating status.The message is for information purpose only.
 
             :rtype: (ReturnCode, str)
             """
@@ -291,10 +289,10 @@ class AbstractCentralNode(TMCBaseDevice):
     def is_TelescopeOn_allowed(self):
         """
         Checks whether this command is allowed to be run in current device
-          state.
+            state.
 
         :return: True if this command is allowed to be run in current device
-          state.
+            state.
 
         :rtype: boolean
         """
@@ -305,8 +303,7 @@ class AbstractCentralNode(TMCBaseDevice):
     def TelescopeOn(self):
         """
         This command invokes TelescopeOn() command on DishLeadNode,
-        CspMasterLeafNode,
-        SdpMasterLeafNode.
+        CspMasterLeafNode,SdpMasterLeafNode.
         """
         handler = self.get_command_object("TelescopeOn")
         result_code, unique_id = handler()
@@ -318,7 +315,7 @@ class AbstractCentralNode(TMCBaseDevice):
         state.
 
         :return: True if this command is allowed to be run in current device
-        state.
+            state.
 
         :rtype: boolean
         """
@@ -344,7 +341,7 @@ class AbstractCentralNode(TMCBaseDevice):
         device state.
 
         :return: True if this command is allowed to be run in current
-        device state.
+            device state.
 
         :rtype: boolean
         """
@@ -354,8 +351,7 @@ class AbstractCentralNode(TMCBaseDevice):
     def TelescopeOff(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
-        command
-        on CspMasterLeafNode and SdpMasterLeafNode.
+        command on CspMasterLeafNode and SdpMasterLeafNode.
 
         """
         handler = self.get_command_object("TelescopeOff")
@@ -368,7 +364,7 @@ class AbstractCentralNode(TMCBaseDevice):
         state.
 
         :return: True if this command is allowed to be run in current device
-          state.
+            state.
 
         :rtype: boolean
 
@@ -382,8 +378,7 @@ class AbstractCentralNode(TMCBaseDevice):
     def On(self):
         """
         This command invokes On command on DishLeadNode, TelescopeOn()
-          command on CspMasterLeafNode,
-        SdpMasterLeafNode.
+            command on CspMasterLeafNode,SdpMasterLeafNode.
         """
         handler = self.get_command_object("On")
         result_code, unique_id = handler()
@@ -395,7 +390,7 @@ class AbstractCentralNode(TMCBaseDevice):
         state.
 
         :return: True if this command is allowed to be run in current device
-        state.
+            state.
 
         :rtype: boolean
         """
@@ -407,9 +402,7 @@ class AbstractCentralNode(TMCBaseDevice):
     def Off(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode,
-        TelescopeOff() command on CspMasterLeafNode and
-        SdpMasterLeafNode.
-
+        TelescopeOff() command on CspMasterLeafNode and SdpMasterLeafNode.
         """
         handler = self.get_command_object("Off")
         result_code, unique_id = handler()
@@ -421,7 +414,7 @@ class AbstractCentralNode(TMCBaseDevice):
         state.
 
         :return: True if this command is allowed to be run in current device
-          state.
+            state.
 
         :rtype: boolean
         """
@@ -435,7 +428,6 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         This command invokes Standby() command on CspMasterLeafNode,
         SdpMasterLeafNode and DishLeafNode.
-
         """
         handler = self.get_command_object("Standby")
         result_code, unique_id = handler()
@@ -447,7 +439,7 @@ class AbstractCentralNode(TMCBaseDevice):
         state.
 
         :return: True if this command is allowed to be run in current device
-        state
+            state
 
         :rtype: boolean
         """
@@ -469,7 +461,7 @@ class AbstractCentralNode(TMCBaseDevice):
     def AssignResources(self, argin):
         """
         AssignResources command invokes the AssignResources command on
-         lower level devices.
+            lower level devices.
         """
         handler = self.get_command_object("AssignResources")
         result_code, unique_id = handler(argin)
@@ -478,10 +470,10 @@ class AbstractCentralNode(TMCBaseDevice):
     def is_ReleaseResources_allowed(self):
         """
         Checks whether ReleaseResources command is allowed to be run in
-         current device state.
+            current device state.
 
         :return: True if ReleaseResources command is allowed to be
-        run in current device state.
+            run in current device state.
 
         :rtype: boolean
         """

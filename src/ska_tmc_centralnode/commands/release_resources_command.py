@@ -22,16 +22,13 @@ class ReleaseResources(AssignReleaseResources):
     A class for CentralNode's ReleaseResources() command.
 
     Release all the resources assigned to the given Subarray. It accepts the
-    subarray id, releaseALL flag and
-    receptorIDList in JSON string format. When the releaseALL flag is True,
-      ReleaseAllResources command
-    is invoked on the respective SubarrayNode. In this case,
-    the receptorIDList tag is empty as all
-    the resources of the Subarray are to be released.
+    subarray id, releaseALL flag and receptorIDList in JSON string format.
+    When the releaseALL flag is True, ReleaseAllResources command
+    is invoked on the respective SubarrayNode. In this case,the receptorIDList
+    tag is empty as all the resources of the Subarray are to be released.
     When releaseALL is False, ReleaseResources will be invoked on
-      the SubarrayNode and the resources provided
-    in receptorIDList tag, are to be released from the Subarray.
-    The selective release of the resources when
+    the SubarrayNode and the resources provided in receptorIDList tag, are to
+    be released from the Subarray. The selective release of the resources when
     releaseALL Flag is False is not yet supported.
     """
 
@@ -58,15 +55,15 @@ class ReleaseResources(AssignReleaseResources):
         task_abort_event: Optional[threading.Event] = None,
     ):
         """This is a long running method for ReleaseResources command,
-          it executes do hook,
-        invokes ReleaseResources command on lower level devices.
+        it executes do hook, invokes ReleaseResources command on lower
+        level devices.
 
-        :param logger: logger
-        :type logger: logging.Logger
-        :param task_callback: Update task state, defaults to None
-        :type task_callback: Callable, optional
-        :param task_abort_event: Check for abort, defaults to None
-        :type task_abort_event: Event, optional
+        :param: logger
+        :type: logging.Logger
+        :param: task_callback which Update task state, defaults to None
+        :type: Callable, optional
+        :param: task_abort_event which Check for abort, defaults to None
+        :type: Event, Optional
         """
         # Indicate that the task has started
         self.task_callback = task_callback
@@ -129,21 +126,21 @@ class ReleaseResources(AssignReleaseResources):
 
         :param argin: DevString
 
-            Example:
+        Example:
 
-            .. code-block::
+        .. code-block::
 
-                {
-                    "interface":
-                    "https://schema.skao.int/ska-tmc-releaseresources/2.0",
-                    "transaction_id": "txn-....-00001",
-                    "subarray_id": 1,
-                    "release_all": true,
-                    "receptor_ids": [
-                    ]
-                }
+            {"interface":
+            "https://schema.skao.int/ska-tmc-releaseresources/2.0",
+            "transaction_id": "txn-....-00001",
+            "subarray_id": 1,
+            "release_all": true,
+            "receptor_ids": []
+            }
 
-        :return: None
+            :return: A tuple containing a return code and a string msg.
+                For Example:
+                (ResultCode.OK, "")
         """
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -206,21 +203,24 @@ class ReleaseResources(AssignReleaseResources):
         """
         Method to invoke ReleaseResources command on Subarray Node.
 
-        :param argin: DevString
+        :param: argin
+        :type: DevString
 
-            Example:
+        Example:
 
-            .. code-block::
+        .. code-block::
 
-                {"interface":
-                "https://schema.skao.int/ska-low-tmc-releaseresources/2.0",
-                "transaction_id":"txn-....-00001","subarray_id":1,
-                "release_all":true}
+            {"interface":
+            "https://schema.skao.int/ska-low-tmc-releaseresources/2.0",
+            "transaction_id":"txn-....-00001","subarray_id":1,
+            "release_all":true}
 
-        return:
-            None
+        :return:
+            A tuple containing a return code and a string msg.
+            For Example:
+            (ResultCode.OK, "")
 
-        raises:
+        :raises:
             ValueError if input argument json string contains invalid value
 
             KeyError if input argument json string contains invalid key
@@ -330,9 +330,11 @@ class ReleaseResources(AssignReleaseResources):
     def _validate_low_json(self, json_argument: dict, req_keys: list):
         """To validate the low json for release resources command before
         erterning the queue
-        Args:
-            json_argument (dict): Json Argument
-            req_keys (list): Required key list to check in json argument
+
+        :param: json_argument
+        :type: A dictionary containing Json Argument
+        :param: req_keys
+        :type: A Lis tof Required key list to check in json_argument
         """
         json_keys = json_argument.keys()
         for key in req_keys:
