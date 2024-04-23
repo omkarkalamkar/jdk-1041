@@ -44,6 +44,7 @@ autodoc_mock_imports = [
     "ska_ser_log_transactions",
     "load_dish_config_command",
     "ska_control_model",
+    "pandas",
 ]
 
 import os
