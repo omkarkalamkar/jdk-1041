@@ -13,6 +13,8 @@ global:
   DEBUG: 5678
 
 ska-tango-base:
+  labels:
+    app: ska-tmc-centralnode
   vnc:
     enabled: false
   tangorest:
@@ -34,12 +36,15 @@ ska-ser-skuid:
       generator_id: mvp01
 
 central_node:
+  labels:
+    app: ska-tmc-centralnode
   deviceServers:
     mocks:
       enabled: true
 
     centralnode:
       enabled: true
+      DishMasterIdentifier: "elt/master"
 
 ska-taranta:
   enabled: false

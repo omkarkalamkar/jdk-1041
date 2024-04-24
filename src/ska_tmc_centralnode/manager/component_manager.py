@@ -104,7 +104,8 @@ class CNComponentManager(TmcComponentManager):
         proxy_timeout=500,
         sleep_time=1,
         skuid_service=(
-            "ska-ser-skuid-test-svc.ska-tmc-centralnode.cluster.local:9870"
+            "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
+            + ".skao.int:9870"
         ),
         command_timeout=30,
         *args,
@@ -391,7 +392,7 @@ class CNComponentManager(TmcComponentManager):
             if dev_info is not None and not dev_info.unresponsive:
                 self.logger.debug(
                     f"Device {dev_name} dev_info.unresponsive:"
-                    + " {dev_info.unresponsive} "
+                    + f" {dev_info.unresponsive} "
                 )
                 count += 1
         if count == 0:
@@ -420,8 +421,7 @@ class CNComponentManager(TmcComponentManager):
             devInfo = SubArrayDeviceInfo(device_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterMid)
-            and device_name.lower()
-            in self.input_parameter.dish_leaf_node_dev_names
+            and device_name in self.input_parameter.dish_leaf_node_dev_names
         ):
             devInfo = DishDeviceInfo(device_name, False)
         elif (
@@ -505,14 +505,14 @@ class CNComponentManager(TmcComponentManager):
                 csp_master_dev_name = self.get_csp_master_dev_name()
                 if device_name in csp_master_dev_name:
                     device_name = csp_master_dev_name
-            if "ska_mid/tm_leaf_node/d0" in device_name:
-                # Update Dish leaf node device name with full FQDN
-                dish_leaf_node_dev_names = (
-                    self.get_dish_leaf_node_device_names()
-                )
-                for dish in dish_leaf_node_dev_names:
-                    if device_name in dish:
-                        device_name = dish
+            if isinstance(self.input_parameter, InputParameterMid):
+                if self.input_parameter.dish_master_identifier in device_name:
+                    # Update Dish Master device name with full FQDN in case of
+                    # real Dish
+                    dish_master_dev_names = self.get_dish_device_names()
+                    for dish in dish_master_dev_names:
+                        if device_name in dish.lower():
+                            device_name = dish
 
             devInfo = self.component.get_device(device_name)
             if devInfo is not None:

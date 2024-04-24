@@ -96,6 +96,7 @@ def devices_to_load():
                         ],
                         "SdpMasterFQDN": ["mid-sdp/control/0"],
                         "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d0"],
+                        "DishMasterIdentifier": ["elt/master"],
                         "TMCMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
                         "CspSubarrayLeafNodes": [
                             "ska_mid/tm_leaf_node/csp_subarray01"

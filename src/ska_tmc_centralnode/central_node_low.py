@@ -22,7 +22,6 @@ __all__ = ["CentralNodeLow", "main"]
 class CentralNodeLow(AbstractCentralNode):
     """
     Central Node is a coordinator of the complete Telescope system
-
     """
 
     # -----------------
@@ -57,9 +56,8 @@ class CentralNodeLow(AbstractCentralNode):
             """
             Initializes the attributes and properties of the Central Node.
 
-            :return: A tuple containing a return code and a string
-            message indicating status.
-             The message is for information purpose only.
+            :return: A tuple containing a return code and a string message
+                indicating status.The message is for information purpose only.
 
             :rtype: (ReturnCode, str)
             """

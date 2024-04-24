@@ -44,17 +44,18 @@ def test_on_command_mid(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
-        lookahead=4,
-    )
 
     csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(tango.DevState.ON)
 
     sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
     sdp_master.SetDirectState(tango.DevState.ON)
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], str(int(ResultCode.OK))),
+        lookahead=4,
+    )
 
     dish_leaf_node = dev_factory.get_device(DISH_LEAF_NODE_1)
     dish_leaf_node.subscribe_event(
@@ -74,7 +75,7 @@ def test_on_command_mid(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.ON, lookahead=5
+        "telescopeState", tango._tango.DevState.ON, lookahead=12
     )
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown

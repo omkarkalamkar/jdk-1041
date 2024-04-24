@@ -1,6 +1,16 @@
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.14.6]
+************
+* Update CentralNode to work with dish-lmc chart 3.0.0
+* Fix the issue about dishes not getting added into monitoring
+* Fix issues in the tests
+
+[0.14.5]
+************
+* Update CentralNode to work with dish-lmc chart 3.0.0
+
 [Main]
 ******
 * Update the .readthedocs.yaml and pyproject.toml file to fix the RTD generation

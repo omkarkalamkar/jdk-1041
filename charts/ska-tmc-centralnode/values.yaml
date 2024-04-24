@@ -42,7 +42,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.14.4
+    tag: 0.14.6
     pullPolicy: IfNotPresent
 
 resources:
@@ -63,7 +63,7 @@ deviceServers:
     enabled: true
     instances: ["01"]
     subarray_count: 1
-    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.cluster.local:9870"
+    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     mid:
       file: "data/centralnode_mid.yaml"
       CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
@@ -71,9 +71,8 @@ deviceServers:
       SdpMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/sdp_master"
       SdpMasterFQDN: "mid-sdp/control/0"
       DishLeafNodePrefix: "ska_mid/tm_leaf_node/d0"
+      DishMasterIdentifier: "elt/master"
       DishIDs: ["SKA001", "MKT001"]
-      DishMasterPrefix: "elt"
-      DishMasterPostfix: "master"
       DishVccConfig:
         DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
         DishVccFilePath: "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"

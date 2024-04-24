@@ -27,7 +27,7 @@ class TelescopeStateAggregatorMid(Aggregator):
         csp_master = False
         sdp_master = False
         for device in self._component_manager.checked_devices:
-            name = device.dev_name.lower()
+            name = device.dev_name
             if device.unresponsive:
                 continue
             if (
@@ -184,8 +184,9 @@ class HealthStateAggregatorMid(Aggregator):
         # what if one of them is not working (i.e. faulty flag)? i.e.
         # Csp, Sdp or dishes
         # number of dishes is also variable
+
         for device in self._component_manager.checked_devices:
-            name = device.dev_name.lower()
+            name = device.dev_name
             if device.unresponsive:
                 continue
             if (
@@ -206,10 +207,7 @@ class HealthStateAggregatorMid(Aggregator):
             ):
                 healthStateList.append(device.health_state)
                 subarray_count += 1
-            elif (
-                name
-                in self._component_manager.get_dish_leaf_node_device_names()
-            ):
+            elif name in self._component_manager.get_dish_device_names():
                 healthStateList.append(device.health_state)
                 dish_count += 1
 

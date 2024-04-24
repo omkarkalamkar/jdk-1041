@@ -17,6 +17,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    sdp_master = dev_factory.get_device("mid-sdp/control/0")
 
     ensure_checked_devices(central_node)
     central_node.subscribe_event(
@@ -24,9 +25,16 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["telescopeHealthState"],
     )
+    sdp_master.subscribe_event(
+        "healthState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["healthState"],
+    )
 
-    sdp_master = dev_factory.get_device("mid-sdp/control/0")
     sdp_master.SetDirectHealthState(HealthState.DEGRADED)
+    change_event_callbacks["healthState"].assert_change_event(
+        HealthState.DEGRADED, lookahead=2
+    )
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.DEGRADED, lookahead=2

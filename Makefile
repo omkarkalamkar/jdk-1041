@@ -9,7 +9,7 @@
 # PROJECT to give a final Docker tag of
 # artefact.skao.int/ska-telescope/ska-tmc-centralnode
 
-
+CLUSTER_DOMAIN ?= cluster.local
 CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
 PROJECT = ska-tmc-centralnode
 KUBE_APP = ska-tmc-centralnode
@@ -45,8 +45,7 @@ TARANTA ?= false
 MINIKUBE ?= false ## Minikube or not
 FAKE_DEVICES ?= true ## Install fake devices or not
 TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
-CLUSTER_DOMAIN ?= cluster.local
-SKUID ?= ska-ser-skuid-$(HELM_RELEASE)-svc.$(KUBE_NAMESPACE).$(CLUSTER_DOMAIN):9870
+SKUID ?= ska-ser-skuid-$(HELM_RELEASE)-svc.$(KUBE_NAMESPACE).svc.$(CLUSTER_DOMAIN):9870
 CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode
 CI_ENVIRONMENT_SLUG ?= ska-tmc-centralnode
 $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH_SLUG)\n    app.gitlab.com/env: $(CI_ENVIRONMENT_SLUG)' > gilab_values.yaml)
@@ -118,9 +117,9 @@ unit-test: python-test
 PYTHON_BUILD_TYPE = non_tag_setup
 
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
+	--set global.cluster_domain=$(CLUSTER_DOMAIN) \
 	--set global.tango_host=$(TANGO_HOST) \
 	--set global.exposeAllDS=false \
-	--set global.cluster_domain=$(CLUSTER_DOMAIN) \
 	--set global.operator=true \
 	--set ska-tango-base.display=$(DISPLAY) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
