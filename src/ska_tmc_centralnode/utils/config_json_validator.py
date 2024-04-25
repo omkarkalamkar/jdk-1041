@@ -26,7 +26,7 @@ class DishConfigValidator:
         if all(k_value in k_value_range for k_value in k_values):
             return True, ""
         else:
-            return False, "K values are not in range (1 to 2222)"
+            return False, "K values are not in range (1 to 1178)"
 
     def _is_valid_vcc_ids(self, vcc_ids: list) -> bool:
         """
