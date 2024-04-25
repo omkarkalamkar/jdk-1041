@@ -19,10 +19,10 @@ class DishConfigValidator:
         return vcc_ids, k_values
 
     def _is_valid_k_values(self, k_values: list) -> tuple:
-        """Check if k values are within 1, 2223 range
+        """Check if k values are within 1, 1177 range
         :params k_values: List of k values to validate
         """
-        k_value_range = range(1, 2223)
+        k_value_range = range(1, 1177)
         if all(k_value in k_value_range for k_value in k_values):
             return True, ""
         else:
