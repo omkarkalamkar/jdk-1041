@@ -1,11 +1,12 @@
 class DishConfigValidator:
     """This class implement method to validate DishConfig json"""
 
-    def __init__(self, dish_config_json: dict):
+    def __init__(self, dish_config_json: dict, k_value_valid_range):
         """
         params:
         dish_config_json(dict): Dish Config Json
         """
+        self.k_value_valid_range = k_value_valid_range
         self.dish_config_json = dish_config_json
 
     def _get_vcc_k_values(self) -> tuple:

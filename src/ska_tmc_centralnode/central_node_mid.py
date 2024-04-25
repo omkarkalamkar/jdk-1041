@@ -79,6 +79,12 @@ class CentralNodeMid(AbstractCentralNode):
         dtype="DevDouble", default_value=100.0
     )
 
+    KValueValidRange = device_property(
+        dtype="DevShort",
+        default_value=1177,
+        doc="the valid k-value range",
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -291,6 +297,7 @@ class CentralNodeMid(AbstractCentralNode):
             dishKvalueAggregationAllowedPercent=(
                 self.DishKvalueAggregationAllowedPercent
             ),
+            k_value_valid_range=self.KValueValidRange,
             invoke_load_dish_cfg_command_callback=(
                 self.invoke_load_dish_cfg_command_callback
             ),

@@ -29,6 +29,9 @@ server:
         - name: "DishLeafNodePrefix"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
+        - name: "KValueValidRange"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.KValueValidRange}"
         - name: "DishMasterIdentifier"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishMasterIdentifier}}"

@@ -20,7 +20,7 @@ class TestDishConfigValidator:
                 "SKA133": {"vcc": 4, "k": 620},
             },
         }
-        dish_config_validator = DishConfigValidator(dish_config_json)
+        dish_config_validator = DishConfigValidator(dish_config_json, 1177)
         is_valid, msg = dish_config_validator.is_json_valid()
         assert is_valid is True
 
@@ -37,7 +37,7 @@ class TestDishConfigValidator:
                 "SKA133": {"vcc": 4, "k": 620},
             },
         }
-        dish_config_validator = DishConfigValidator(dish_config_json)
+        dish_config_validator = DishConfigValidator(dish_config_json, 1177)
         is_valid, msg = dish_config_validator.is_json_valid()
         assert is_valid is False
         assert msg == "Invalid Dish id ABC001 provided in Json"
@@ -56,7 +56,7 @@ class TestDishConfigValidator:
                 "SKA133": {"vcc": 4, "k": 620},
             },
         }
-        dish_config_validator = DishConfigValidator(dish_config_json)
+        dish_config_validator = DishConfigValidator(dish_config_json, 1177)
         is_valid, msg = dish_config_validator.is_json_valid()
         assert is_valid is False
         assert msg == "Dish id SKA187 not in range (1,133)"
@@ -74,7 +74,7 @@ class TestDishConfigValidator:
                 "SKA101": {"vcc": 1, "k": 620},
             },
         }
-        dish_config_validator = DishConfigValidator(dish_config_json)
+        dish_config_validator = DishConfigValidator(dish_config_json, 1177)
         is_valid, msg = dish_config_validator.is_json_valid()
         assert is_valid is False
         assert msg == "Duplicate Vcc ids found in json"

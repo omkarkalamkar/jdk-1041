@@ -9,6 +9,7 @@ package.
 import json
 import threading
 import time
+from typing import Callable
 
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
@@ -16,6 +17,7 @@ from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
+from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.manager.aggregators import (
     DishkValueValidationResultAggregator,
     HealthStateAggregatorMid,
@@ -23,6 +25,7 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 from ska_tmc_centralnode.utils.constants import (
     DISH_VCC_CONFIG_INTERFACE_VERSION,
     DISH_VCC_VALIDATION_RESULT_STATUS,
@@ -61,6 +64,7 @@ class CNComponentManagerMid(CNComponentManager):
         dishKvalueAggregationAllowedPercent=100.0,
         invoke_load_dish_cfg_command_callback=None,
         enable_dish_vcc_init=True,
+        k_value_valid_range=1177,
         *args,
         **kwargs,
     ):
@@ -138,6 +142,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.enable_dish_vcc_init = enable_dish_vcc_init
         self.command_result = None
+        self.k_value_valid_range = k_value_valid_range
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""
@@ -633,3 +638,42 @@ class CNComponentManagerMid(CNComponentManager):
                             csp_validation_result
                         ]
                     }
+
+    def load_dish_cfg(self, argin: str, task_callback: Callable = None):
+        """
+        Load Dish Cfg command for Dish-VCC map.
+        :param argin: Dish Id Vcc map initial params
+        :return: a result code and message
+        """
+        loadishcfg_command = LoadDishCfg(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        try:
+            dishid_vcc_map_params = json.loads(argin)
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
+            return loadishcfg_command.reject_command(
+                f"The JSON string is malformed. Error: {str(e)}"
+            )
+
+        (
+            dishid_vcc_map_json,
+            error_message,
+        ) = loadishcfg_command.get_dishid_vcc_map_json(dishid_vcc_map_params)
+        if error_message:
+            return loadishcfg_command.reject_command(error_message)
+        self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
+        config_json_validator = DishConfigValidator(
+            dishid_vcc_map_json, self.k_value_valid_range
+        )
+        is_valid_dish_cfg, message = config_json_validator.is_json_valid()
+        if not is_valid_dish_cfg:
+            return loadishcfg_command.reject_command(message)
+
+        task_status, response = self.submit_task(
+            loadishcfg_command.load_dish_cfg,
+            args=[argin, self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
