@@ -3,7 +3,8 @@ function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
 {{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
-{{- $KValueValidRange := .Values.deviceServers.centralnode.mid.KValueValidRange }}
+{{- $KValueValidRangeUpperLimit := .Values.deviceServers.centralnode.mid.KValueValidRangeUpperLimit }}
+{{- $KValueValidRangeLowerLimit := .Values.deviceServers.centralnode.mid.KValueValidRangeLowerLimit }}
 entrypoints:
   - name: "ska_tmc_centralnode.central_node_mid.CentralNodeMid"
 server:
@@ -30,9 +31,12 @@ server:
         - name: "DishLeafNodePrefix"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
-        - name: "KValueValidRange"
+        - name: "KValueValidRangeUpperLimit"
           values:
-          - "{{ $KValueValidRange }}"
+          - "{{ $KValueValidRangeUpperLimit }}"
+        - name: "KValueValidRangeLowerLimit"
+          values:
+          - "{{ $KValueValidRangeLowerLimit }}"
         - name: "DishMasterIdentifier"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishMasterIdentifier}}"

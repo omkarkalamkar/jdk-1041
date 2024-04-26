@@ -77,7 +77,8 @@ deviceServers:
         DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
         DishVccFilePath: "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
       EnableDishVccInit: "true"
-      KValueValidRange: 1177
+      KValueValidRangeUpperLimit: 1177
+      KValueValidRangeLowerLimit: 1
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"

@@ -64,7 +64,8 @@ class CNComponentManagerMid(CNComponentManager):
         dishKvalueAggregationAllowedPercent=100.0,
         invoke_load_dish_cfg_command_callback=None,
         enable_dish_vcc_init=True,
-        k_value_valid_range=1177,
+        k_value_valid_range_upper_limit=1177,
+        k_value_valid_range_lower_limit=1,
         *args,
         **kwargs,
     ):
@@ -142,7 +143,8 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.enable_dish_vcc_init = enable_dish_vcc_init
         self.command_result = None
-        self.k_value_valid_range = k_value_valid_range
+        self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
+        self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""
@@ -665,7 +667,9 @@ class CNComponentManagerMid(CNComponentManager):
             return loadishcfg_command.reject_command(error_message)
         self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
         config_json_validator = DishConfigValidator(
-            dishid_vcc_map_json, self.k_value_valid_range
+            dishid_vcc_map_json,
+            self.k_value_valid_range_lower_limit,
+            self.k_value_valid_range_upper_limit,
         )
         is_valid_dish_cfg, message = config_json_validator.is_json_valid()
         if not is_valid_dish_cfg:

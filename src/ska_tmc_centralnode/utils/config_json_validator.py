@@ -1,12 +1,18 @@
 class DishConfigValidator:
     """This class implement method to validate DishConfig json"""
 
-    def __init__(self, dish_config_json: dict, k_value_valid_range):
+    def __init__(
+        self,
+        dish_config_json: dict,
+        k_value_valid_range_lower_limit,
+        k_value_valid_range_upper_limit,
+    ):
         """
         params:
         dish_config_json(dict): Dish Config Json
         """
-        self.k_value_valid_range = k_value_valid_range
+        self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
+        self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
         self.dish_config_json = dish_config_json
 
     def _get_vcc_k_values(self) -> tuple:
@@ -23,13 +29,18 @@ class DishConfigValidator:
         """Check if k values are within 1, 1177 range
         :params k_values: List of k values to validate
         """
-        k_value_range = range(1, self.k_value_valid_range + 1)
+        k_value_range = range(
+            self.k_value_valid_range_lower_limit,
+            self.k_value_valid_range_upper_limit + 1,
+        )
         if all(k_value in k_value_range for k_value in k_values):
             return True, ""
         else:
             return (
                 False,
-                f"K values are not in range (1 to {self.k_value_valid_range})",
+                f"K values are not in range "
+                f"({self.k_value_valid_range_lower_limit} to "
+                f"{self.k_value_valid_range_upper_limit})",
             )
 
     def _is_valid_vcc_ids(self, vcc_ids: list) -> bool:
