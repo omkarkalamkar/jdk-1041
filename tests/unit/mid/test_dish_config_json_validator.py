@@ -78,3 +78,21 @@ class TestDishConfigValidator:
         is_valid, msg = dish_config_validator.is_json_valid()
         assert is_valid is False
         assert msg == "Duplicate Vcc ids found in json"
+
+    def test_invalid_k_value_exceeds_range(self):
+        """Test case for invalid k value exceeding the range"""
+        dish_config_json = {
+            "interface": (
+                "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
+            ),
+            "dish_parameters": {
+                "SKA001": {"vcc": 1, "k": 11},
+                "SKA100": {"vcc": 2, "k": 101},
+                "SKA036": {"vcc": 3, "k": 1178},
+                "SKA133": {"vcc": 4, "k": 620},
+            },
+        }
+        dish_config_validator = DishConfigValidator(dish_config_json, 1177)
+        is_valid, msg = dish_config_validator.is_json_valid()
+        assert is_valid is False
+        assert msg == "K values are not in range (1 to 1177)"

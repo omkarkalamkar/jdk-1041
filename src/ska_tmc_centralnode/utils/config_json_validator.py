@@ -23,11 +23,11 @@ class DishConfigValidator:
         """Check if k values are within 1, 1177 range
         :params k_values: List of k values to validate
         """
-        k_value_range = range(1, 1177)
+        k_value_range = range(1, self.k_value_valid_range + 1)
         if all(k_value in k_value_range for k_value in k_values):
             return True, ""
         else:
-            return False, "K values are not in range (1 to 1178)"
+            return False, "K values are not in range (1 to 1177)"
 
     def _is_valid_vcc_ids(self, vcc_ids: list) -> bool:
         """
