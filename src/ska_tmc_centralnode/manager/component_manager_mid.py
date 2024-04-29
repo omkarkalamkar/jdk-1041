@@ -27,6 +27,7 @@ from ska_tmc_centralnode.manager.aggregators import (
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
     DISH_VCC_VALIDATION_RESULT_STATUS,
     MID_CSP_MLN_DEVICE,
@@ -234,6 +235,10 @@ class CNComponentManagerMid(CNComponentManager):
                 current_dish_vcc_validation_status.update(
                     csp_validation_status
                 )
+        elif CENTRALNODE_MID in updated_validation_status:
+            current_dish_vcc_validation_status.update(
+                updated_validation_status
+            )
         else:
             # If the event from dish only
             if MID_CSP_MLN_DEVICE not in updated_validation_status:
@@ -664,6 +669,7 @@ class CNComponentManagerMid(CNComponentManager):
             error_message,
         ) = loadishcfg_command.get_dishid_vcc_map_json(dishid_vcc_map_params)
         if error_message:
+            self.dish_vcc_validation_status = {CENTRALNODE_MID: error_message}
             return loadishcfg_command.reject_command(error_message)
         self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
         config_json_validator = DishConfigValidator(
@@ -673,6 +679,8 @@ class CNComponentManagerMid(CNComponentManager):
         )
         is_valid_dish_cfg, message = config_json_validator.is_json_valid()
         if not is_valid_dish_cfg:
+            if error_message:
+                self.dish_vcc_validation_status = {CENTRALNODE_MID: error_message}
             return loadishcfg_command.reject_command(message)
 
         task_status, response = self.submit_task(

@@ -50,6 +50,7 @@ def test_load_dish_cfg_command(
     assert csp_mln.memorizedDishVccMap == dish_cfg_input_str
 
 
+@pytest.mark.aki
 def test_load_dish_cfg_command_invalid_json(
     tango_context, task_callback, json_factory
 ):
@@ -58,7 +59,7 @@ def test_load_dish_cfg_command_invalid_json(
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
-    dish_cfg_input_str = json_factory("command_load_dish_cfg")
+    dish_cfg_input_str = json_factory("command_load_dish_cfg1")
 
     dish_cfg_input = json.loads(dish_cfg_input_str)
     dish_cfg_input.pop("tm_data_sources")

@@ -80,13 +80,13 @@ class CentralNodeMid(AbstractCentralNode):
     )
 
     KValueValidRangeUpperLimit = device_property(
-        dtype="DevShort",
+        dtype=int,
         default_value=1177,
         doc="the valid k-value range",
     )
 
     KValueValidRangelowerLimit = device_property(
-        dtype="DevShort",
+        dtype=int,
         default_value=1,
         doc="the valid k-value range",
     )
