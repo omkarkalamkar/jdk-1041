@@ -42,7 +42,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.14.7
+    tag: 0.15.0
     pullPolicy: IfNotPresent
 
 resources:
@@ -77,8 +77,9 @@ deviceServers:
         DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
         DishVccFilePath: "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
       EnableDishVccInit: "true"
-      KValueValidRangeUpperLimit: 1177
-      KValueValidRangeLowerLimit: 1
+      KValueValidRange:
+        min: 1
+        max: 1177
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"
