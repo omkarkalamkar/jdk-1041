@@ -680,7 +680,9 @@ class CNComponentManagerMid(CNComponentManager):
         is_valid_dish_cfg, message = config_json_validator.is_json_valid()
         if not is_valid_dish_cfg:
             if error_message:
-                self.dish_vcc_validation_status = {CENTRALNODE_MID: error_message}
+                self.dish_vcc_validation_status = {
+                    CENTRALNODE_MID: error_message
+                }
             return loadishcfg_command.reject_command(message)
 
         task_status, response = self.submit_task(
