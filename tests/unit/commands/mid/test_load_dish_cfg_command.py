@@ -67,6 +67,7 @@ def test_load_dish_cfg_command_invalid_json(
     result_code, message = cm.load_dish_cfg(
         json.dumps(dish_cfg_input), task_callback=task_callback
     )
+    logger.info(f"My message is >>>>>{message}")
     assert result_code == TaskStatus.REJECTED
 
 
