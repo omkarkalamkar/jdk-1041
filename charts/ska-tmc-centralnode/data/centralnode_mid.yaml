@@ -2,7 +2,6 @@ name: "centralnode-test"
 function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
-
 {{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
 {{- $KValueValidRangeUpperLimit := .Values.deviceServers.centralnode.mid.KValueValidRange.max | int }}
 {{- $KValueValidRangeLowerLimit := .Values.deviceServers.centralnode.mid.KValueValidRange.min | int }}
@@ -19,31 +18,79 @@ server:
       devices:
       - name: "ska_mid/tm_central/central_node"
         properties:
-          - name: "CspMasterLeafNodeFQDN"
-            values:
-            - "{{.Values.deviceServers.centralnode.mid.CspMasterLeafNodeFQDN}}"
-          - name: "CspMasterFQDN"
-            values:
-            - "{{.Values.deviceServers.centralnode.mid.CspMasterFQDN}}"
-          - name: "SdpMasterLeafNodeFQDN"
-            values:
-            - "{{.Values.deviceServers.centralnode.mid.SdpMasterLeafNodeFQDN}}"
-          - name: "SdpMasterFQDN"
-            values:
-            - "{{.Values.deviceServers.centralnode.mid.SdpMasterFQDN}}"
-          - name: "DishLeafNodePrefix"
-            values:
-            - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
-          - name: "KValueValidRangeUpperLimit"
-            values:
-            - "{{ $KValueValidRangeUpperLimit }}"
-          - name: "KValueValidRangeLowerLimit"
-            values:
-            - "{{ $KValueValidRangeLowerLimit }}"
+        - name: "CspMasterLeafNodeFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.CspMasterLeafNodeFQDN}}"
+        - name: "CspMasterFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.CspMasterFQDN}}"
+        - name: "SdpMasterLeafNodeFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.SdpMasterLeafNodeFQDN}}"
+        - name: "SdpMasterFQDN"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.SdpMasterFQDN}}"
+        - name: "DishLeafNodePrefix"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
+        - name: "DishMasterIdentifier"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishMasterIdentifier}}"
+        - name: "DishVccUri"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishVccConfig.DishVccUri}}"
+        - name: "DishVccFilePath"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishVccConfig.DishVccFilePath}}"
+        - name: "EnableDishVccInit"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.EnableDishVccInit}}"
+        - name: "DishIDs"
+          values:
+          {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
+          - "{{ . }}"
+          {{- end }}
+        - name: "DishMasterFQDN"
+          values:
+          {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
+          - "{{ . | lower }}/{{ $DishMasterIdentifier }}"
+          {{- end }}
+        - name: "SkuidService"
+          values:
+          - "{{.Values.deviceServers.centralnode.SkuidService}}"
+        - name: "TMCSubarrayNodes"
+          values:
+          {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
+          - "ska_mid/tm_subarray_node/{{ . }}"
+          {{- end }}
+        - name: "CspSubarrayLeafNodes"
+          values:
+          {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
+          - "ska_mid/tm_leaf_node/csp_subarray{{ printf "%02s" . }}"
+          {{- end }}
+        - name: "SdpSubarrayLeafNodes"
+          values:
+          {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
+          - "ska_mid/tm_leaf_node/sdp_subarray{{ printf "%02s" . }}"
+          {{- end }}
+        - name: "KValueValidRangeUpperLimit"
+          values:
+          - "{{ $KValueValidRangeUpperLimit }}"
+        - name: "KValueValidRangeLowerLimit"
+          values:
+          - "{{ $KValueValidRangeLowerLimit }}"
+        - name: "SkaLevel"
+          values:
+            - "1"
+        - name: "LoggingTargetsDefault"
+          values:
+            - "tango::logger"
+        - name: "LoggingLevelDefault"
+          values:
+            - "5"
 {{- else }}
 {{- fail "KValueValidRangeUpperLimit should be greater than KValueValidRangeLowerLimit" }}
 {{- end }}
-
 depends_on:
   - device: sys/database/2
 image:

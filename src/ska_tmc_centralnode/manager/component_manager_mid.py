@@ -660,10 +660,12 @@ class CNComponentManagerMid(CNComponentManager):
             dishid_vcc_map_params = json.loads(argin)
             self.logger.debug("JSON argin is in correct format.")
         except json.JSONDecodeError as e:
+            self.dish_vcc_validation_status = {
+                CENTRALNODE_MID: "JsonDecodeError"
+            }
             return loadishcfg_command.reject_command(
                 f"The JSON string is malformed. Error: {str(e)}"
             )
-
         (
             dishid_vcc_map_json,
             error_message,

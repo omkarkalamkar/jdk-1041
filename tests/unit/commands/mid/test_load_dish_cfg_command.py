@@ -62,8 +62,9 @@ def test_load_dish_cfg_command_invalid_json(
 
     dish_cfg_input = json.loads(dish_cfg_input_str)
     dish_cfg_input.pop("tm_data_sources")
+
     result_code, message = cm.load_dish_cfg(
-        dish_cfg_input, task_callback=task_callback
+        json.dumps(dish_cfg_input), task_callback=task_callback
     )
     assert result_code == TaskStatus.REJECTED
 
