@@ -1,0 +1,5 @@
+{
+    "interface": "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0",
+    "tm_data_sources": ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?~057f984de559d0550d19504c55270a8817b22dbf#tmdata"],
+    "tm_data_filepath": "instrument/dishid_vcc_map_configuration/out_of_range_kvalue.json"
+}
