@@ -69,6 +69,23 @@ def test_load_dish_cfg_command_invalid_json(
     assert result_code == TaskStatus.REJECTED
 
 
+def test_load_dish_cfg_command_kvalue_out_of_range(
+    tango_context, task_callback, json_factory
+):
+    """Test LoadDishCfg command rejected when kvalue is out of range"""
+    logger.info("%s", tango_context)
+    cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
+    cm.is_command_allowed("LoadDishCfg")
+    dish_cfg_input_str = json_factory("load_dish_cfg_kvalue_out_of_range")
+    result_code, message = cm.load_dish_cfg(
+        dish_cfg_input_str, task_callback=task_callback
+    )
+    exception_message = "K values are not in range (1 to 1177)"
+    assert result_code == TaskStatus.REJECTED
+    assert message == exception_message
+
+
 def test_load_dish_cfg_command_invalid_file_name(
     tango_context, task_callback, json_factory
 ):

@@ -3,6 +3,10 @@ function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
 {{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
+{{- $KValueValidRangeUpperLimit := .Values.deviceServers.centralnode.mid.KValueValidRange.max | int }}
+{{- $KValueValidRangeLowerLimit := .Values.deviceServers.centralnode.mid.KValueValidRange.min | int }}
+
+{{- if ge $KValueValidRangeUpperLimit $KValueValidRangeLowerLimit }}
 entrypoints:
   - name: "ska_tmc_centralnode.central_node_mid.CentralNodeMid"
 server:
@@ -69,6 +73,12 @@ server:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
           - "ska_mid/tm_leaf_node/sdp_subarray{{ printf "%02s" . }}"
           {{- end }}
+        - name: "KValueValidRangeUpperLimit"
+          values:
+          - "{{ $KValueValidRangeUpperLimit }}"
+        - name: "KValueValidRangeLowerLimit"
+          values:
+          - "{{ $KValueValidRangeLowerLimit }}"
         - name: "SkaLevel"
           values:
             - "1"
@@ -78,6 +88,9 @@ server:
         - name: "LoggingLevelDefault"
           values:
             - "5"
+{{- else }}
+{{- fail "KValueValidRangeUpperLimit should be greater than KValueValidRangeLowerLimit" }}
+{{- end }}
 depends_on:
   - device: sys/database/2
 image:
@@ -85,4 +98,3 @@ image:
   image: "{{.Values.centralnode.image.image}}"
   tag: "{{.Values.centralnode.image.tag}}"
   pullPolicy: "{{.Values.centralnode.image.pullPolicy}}"
-

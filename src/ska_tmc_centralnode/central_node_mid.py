@@ -79,6 +79,18 @@ class CentralNodeMid(AbstractCentralNode):
         dtype="DevDouble", default_value=100.0
     )
 
+    KValueValidRangeUpperLimit = device_property(
+        dtype=int,
+        default_value=1177,
+        doc="the valid k-value range",
+    )
+
+    KValueValidRangelowerLimit = device_property(
+        dtype=int,
+        default_value=1,
+        doc="the valid k-value range",
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -291,6 +303,8 @@ class CentralNodeMid(AbstractCentralNode):
             dishKvalueAggregationAllowedPercent=(
                 self.DishKvalueAggregationAllowedPercent
             ),
+            k_value_valid_range_upper_limit=self.KValueValidRangeUpperLimit,
+            k_value_valid_range_lower_limit=self.KValueValidRangelowerLimit,
             invoke_load_dish_cfg_command_callback=(
                 self.invoke_load_dish_cfg_command_callback
             ),

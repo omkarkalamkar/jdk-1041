@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-tmc-centralnode"
-version = "0.14.6"
+version = "0.15.0"
 description = "Central Node is a coordinator of the complete M&C system"
 authors = ["Team SAHYADRI & Team HIMALAYA <telmgt-internal@googlegroups.com>"]
 license = "BSD-3-Clause"
@@ -17,6 +17,10 @@ CentralNodeDS = 'ska_tmc_centralnode.central_node_mid:main'
 [[tool.poetry.source]]
 name = 'ska-nexus'
 url = 'https://artefact.skao.int/repository/pypi-internal/simple'
+
+[[tool.poetry.source]]
+name = "PyPI-public"
+url = 'https://pypi.org/simple'
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
@@ -54,10 +58,6 @@ pytest-mock = "^3.10.0"
 pytest-xdist = "^2.4.0"
 pytest-repeat = "^0.9.1"
 
-[[tool.poetry.source]]
-name = "PyPI-public"
-url = 'https://pypi.org/simple'
-
 [tool.poetry.group.docs.dependencies]
 docutils = "^0.18.1"
 Sphinx = "^5.1.1"
@@ -66,6 +66,7 @@ sphinx-autodoc-typehints = "^1.19.3"
 sphinxcontrib-plantuml = "^0.22"
 typing_extensions  = "^4.3.0"
 sphinx-rtd-theme = "^1.2.2"
+recommonmark = "^0.7.1"
 
 [tool.isort]
 multi_line_output = 3
