@@ -45,7 +45,6 @@ autodoc_mock_imports = [
     "load_dish_config_command",
     "ska_control_model",
     "pandas",
-    "recommonmark"
 ]
 
 import os
@@ -80,7 +79,8 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
     "sphinx.ext.githubpages",
-    "sphinx.ext.napoleon"
+    "sphinx.ext.napoleon",
+    "recommonmark"
 ]
 
 # Add any paths that contain templates here, relative to this directory.
