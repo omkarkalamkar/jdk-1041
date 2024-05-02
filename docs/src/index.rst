@@ -25,6 +25,11 @@ This project is developing the Central Node (Mid and Low) component of the Teles
 
    api/index
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Releases
+
+   CHANGELOG.rst
 
 Indices and tables
 ------------------

@@ -45,6 +45,7 @@ autodoc_mock_imports = [
     "load_dish_config_command",
     "ska_control_model",
     "pandas",
+    "recommonmark"
 ]
 
 import os
@@ -88,8 +89,8 @@ extensions = [
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+source_suffix = ['.rst', '.md']
+# source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
