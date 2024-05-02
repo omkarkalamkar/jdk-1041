@@ -5,7 +5,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ********
 * Update in kValue range from 1-2221 to 1-1177
 
-[0.15.0]
+[0.14.6]
 ************
 * Update CentralNode to work with dish-lmc chart 3.0.0
 * Fix the issue about dishes not getting added into monitoring
