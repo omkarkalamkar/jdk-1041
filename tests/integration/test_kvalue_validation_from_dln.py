@@ -2,17 +2,19 @@
 import json
 
 import pytest
+import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
 from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
+from tests.settings import logger
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_dln_kvalue_validation_result(tango_context):
+@pytest.mark.SKA_mid1
+def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
     """Test Dish leaf node kvalue validation result"""
     dev_factory = DevFactory()
     central_node = DeviceProxy("ska_mid/tm_central/central_node")
@@ -47,10 +49,26 @@ def test_dln_kvalue_validation_result(tango_context):
         central_node, "isdishvccconfigset", True
     ), "Timeout while waiting for validating attribute value"
 
+    # Add validation for isdishvccconfigset
+
+    logger.info("Subscribing isDishVccConfigSet")
+    central_node.subscribe_event(
+        "isDishVccConfigSet",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["isDishVccConfigSet"],
+    )
+
+    logger.info("Check if isDishVccConfigSet to True")
+    change_event_callbacks.assert_change_event(
+        "isDishVccConfigSet",
+        True,
+        lookahead=4,
+    )
+
     result_string_to_match = {
+        "dish": "ALL DISH OK",
         "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish"
         + " Vcc Version is Same",
-        "dish": "ALL DISH OK",
     }
 
     assert wait_and_validate_device_attribute_value(
@@ -59,3 +77,19 @@ def test_dln_kvalue_validation_result(tango_context):
         json.dumps(result_string_to_match),
         is_json=True,
     ), "Timeout while waiting for validating attribute value"
+
+    # Add validation for DishVccValidationStatus
+
+    logger.info("Subscribing DishVccValidationStatus")
+    central_node.subscribe_event(
+        "DishVccValidationStatus",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["DishVccValidationStatus"],
+    )
+
+    logger.info("Check if DishVccValidationStatus to True")
+    change_event_callbacks.assert_change_event(
+        "DishVccValidationStatus",
+        json.dumps(result_string_to_match),
+        lookahead=4,
+    )

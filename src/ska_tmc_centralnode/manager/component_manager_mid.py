@@ -105,8 +105,6 @@ class CNComponentManagerMid(CNComponentManager):
             _update_imaging_callback,
             communication_state_callback,
             _telescope_availability_callback,
-            _update_dishvccconfig_callback,
-            _dishvccvalidation_callback,
             component_state_callback,
             max_workers,
             proxy_timeout,
