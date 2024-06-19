@@ -134,6 +134,7 @@ def create_cm(
             enable_dish_vcc_init=False,
             _event_receiver=p_event_receiver,
             _dishvccvalidation_callback=task_callback,
+            _update_dishvccconfig_callback=task_callback,
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
