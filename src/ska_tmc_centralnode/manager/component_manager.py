@@ -64,7 +64,6 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 from ska_tmc_centralnode.utils.constants import (
-    ASSIGN_INTERFACE,
     REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
 )
 
@@ -107,6 +106,7 @@ class CNComponentManager(TmcComponentManager):
             + ".skao.int:9870"
         ),
         command_timeout=30,
+        assignresources_interface="",
         *args,
         **kwargs,
     ):
@@ -147,6 +147,7 @@ class CNComponentManager(TmcComponentManager):
         self.adapter_factory = AdapterFactory()
         self.event_receiver = True
         self.command_timeout = command_timeout
+        self.assignresources_interface = assignresources_interface
 
         self.event_receiver = _event_receiver
         if self.event_receiver:
@@ -963,10 +964,11 @@ class CNComponentManager(TmcComponentManager):
             logger=self.logger,
         )
 
+        self.logger.info(f"Assign Interface: {self.assignresources_interface}")
         if isinstance(self.input_parameter, InputParameterLow):
             try:
                 validate(
-                    version=ASSIGN_INTERFACE,
+                    version=self.assignresources_interface,
                     config=json.loads(argin),
                     strictness=2,
                 )

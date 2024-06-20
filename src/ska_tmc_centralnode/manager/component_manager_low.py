@@ -47,6 +47,9 @@ class CNComponentManagerLow(CNComponentManager):
         sleep_time=1,
         skuid_service="",
         command_timeout=30,
+        assignresources_interface=(
+            "https://schema.skao.int/ska-low-tmc-assignresources/3.3"
+        ),
         *args,
         **kwargs,
     ):
@@ -89,6 +92,7 @@ class CNComponentManagerLow(CNComponentManager):
             sleep_time,
             skuid_service="",
             command_timeout=command_timeout,
+            assignresources_interface=assignresources_interface,
             *args,
             **kwargs,
         )

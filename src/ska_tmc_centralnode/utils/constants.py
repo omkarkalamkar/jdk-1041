@@ -2,7 +2,6 @@
 """
 from ska_control_model.result_code import ResultCode
 
-REQUIRED_LOW_ASSIGN_RESOURCE_KEYS = ["subarray_id", "sdp"]
 REQUIRED_LOW_RELEASE_RESOURCE_KEYS = ["subarray_id"]
 MCCS_REQUIRED_KEYS = ["subarray_beam_ids", "station_ids", "channel_blocks"]
 MID_CSP_MLN_DEVICE = "ska_mid/tm_leaf_node/csp_master"
@@ -22,7 +21,6 @@ CENTRALNODE_MID = "ska_mid/tm_central/central_node"
 mccs_release_interface = (
     "https://schema.skatelescope.org/ska-low-mccs-controller-release/2.0"
 )
-ASSIGN_INTERFACE = "https://schema.skao.int/ska-low-tmc-assignresources/3.3"
 
 DISH_VCC_VALIDATION_RESULT_STATUS = {
     ResultCode.FAILED: "TMC and CSP Master Dish VCC version is Different",
