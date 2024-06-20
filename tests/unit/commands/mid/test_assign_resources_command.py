@@ -135,6 +135,7 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     subarray_device.SetDefective(json.dumps({"enabled": False}))
 
 
+@pytest.mark.ms
 def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback
 ):

@@ -22,6 +22,7 @@ CENTRALNODE_MID = "ska_mid/tm_central/central_node"
 mccs_release_interface = (
     "https://schema.skatelescope.org/ska-low-mccs-controller-release/2.0"
 )
+ASSIGN_INTERFACE = "https://schema.skao.int/ska-low-tmc-assignresources/3.3"
 
 DISH_VCC_VALIDATION_RESULT_STATUS = {
     ResultCode.FAILED: "TMC and CSP Master Dish VCC version is Different",
