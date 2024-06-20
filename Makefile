@@ -67,7 +67,7 @@ MARK ?= -x## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= tests## A specific test file to pass to pytest
 ADD_ARGS ?=  -x   ## Additional args to pass to pytest
-CI_KEEP_NAMESPACE ?= true
+
 
 CI_REGISTRY ?= gitlab.com
 CUSTOM_VALUES = --set central_node.centralnode.image.tag=$(VERSION)
