@@ -11,6 +11,8 @@ from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
+pytest.mark.repeat(10)
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid

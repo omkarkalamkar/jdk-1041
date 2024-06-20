@@ -306,7 +306,10 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-@pytest.mark.skip(reason="Fails intermittently")
+pytest.mark.repeat(10)
+
+
+# @pytest.mark.skip(reason="Fails intermittently")
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
