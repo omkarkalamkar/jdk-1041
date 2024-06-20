@@ -14,6 +14,7 @@ from tests.settings import (
     RESET_DEFECT,
     TIMEOUT_DEFECT,
     check_subarray_availability,
+    event_remover,
     logger,
 )
 
@@ -502,6 +503,11 @@ def test_release_resources_low_timeout(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
+
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult"],
+    )
 
 
 @pytest.mark.post_deployment
