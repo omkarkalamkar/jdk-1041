@@ -309,6 +309,12 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
+# Test Cases with with requirment to restart server fail
+# randomly due to issues in restart
+@pytest.mark.skip(
+    reason="Skipped due to intermittent failures "
+    ", Raised SKB-404 to track same"
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
