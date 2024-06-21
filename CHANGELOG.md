@@ -1,6 +1,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.15.1]
+********
+* Update Push event mechanism for isDishVccConfigSet , DishVccValidationStatus
+
 [0.15.0]
 ********
 * Update in kValue range from 1-2221 to 1-1177

@@ -52,6 +52,8 @@ class CNComponentManagerMid(CNComponentManager):
         _update_tmc_op_state_callback=None,
         _update_imaging_callback=None,
         _telescope_availability_callback=None,
+        _update_dishvccconfig_callback=None,
+        _dishvccvalidation_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
         max_workers=5,
@@ -146,6 +148,8 @@ class CNComponentManagerMid(CNComponentManager):
         self.command_result = None
         self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
         self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
+        self.update_dishvccconfig_callback = _update_dishvccconfig_callback
+        self.dishvccvalidation_callback = _dishvccvalidation_callback
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""
@@ -262,6 +266,7 @@ class CNComponentManagerMid(CNComponentManager):
                 if value != "k-value identical"
             }
         )
+        self.dishvccvalidation_callback(self._dish_vcc_validation_status)
         # empty the dictionaries
         current_dish_vcc_validation_status = {}
         updated_validation_status = {}
@@ -548,6 +553,7 @@ class CNComponentManagerMid(CNComponentManager):
         """
         self.logger.info("Updating dish vcc config set flag to %s", value)
         self.is_dish_vcc_config_set = value
+        self.update_dishvccconfig_callback(self.is_dish_vcc_config_set)
         self._aggregate_telescope_state()
 
     def get_default_dish_vcc_config_params(self):
