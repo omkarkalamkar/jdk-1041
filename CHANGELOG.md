@@ -1,6 +1,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.16.0]
+* Updated base classes v1.0.0
+* Updated control model v1.0.0
+* Updated pytango v9.5.0
+  
 [0.15.0]
 ********
 * Update in kValue range from 1-2221 to 1-1177

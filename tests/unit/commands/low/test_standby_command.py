@@ -57,7 +57,10 @@ def test_low_telescope_standby_command(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, ""),
+        }
     )
 
 
@@ -95,7 +98,7 @@ def test_telescope_standby_command_unavailability(tango_context):
 
     cm.telescope_on(task_callback=task_callback)
     time.sleep(1)
-    assert task_callback.result == ResultCode.OK
+    assert task_callback.result[0] == ResultCode.OK
 
 
 @pytest.mark.SKA_low
@@ -141,9 +144,10 @@ def test_low_telescope_standby_command_fail_subarray(
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
+    callback_data = task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED
     )
+    assert callback_data["result"][0] == ResultCode.FAILED
 
 
 @pytest.mark.SKA_low

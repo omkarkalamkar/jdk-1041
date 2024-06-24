@@ -83,7 +83,7 @@ class AssignResources(AssignReleaseResources):
         self.logger.info(f"command assign_resources returncode: {result_code}")
         self.logger.info(message)
         if result_code == ResultCode.FAILED:
-            self.update_task_status(result_code, message)
+            self.update_task_status((result_code, message), message)
             self.component_manager.stop_timer()
         else:
             self.start_tracker_thread(
@@ -99,12 +99,12 @@ class AssignResources(AssignReleaseResources):
             )
 
     def update_task_status(
-        self, result: ResultCode, message: str = ""
+        self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
         """Updates the task status for command"""
         if result == ResultCode.FAILED:
             self.task_callback(
-                result=result, status=TaskStatus.COMPLETED, exception=message
+                result=result, status=TaskStatus.COMPLETED, exception=exception
             )
             self.component_manager.subarray_devname = ""
         else:

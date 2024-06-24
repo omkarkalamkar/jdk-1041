@@ -66,7 +66,7 @@ def load_dish_cfg(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
         lookahead=4,
     )
 
@@ -148,7 +148,7 @@ def load_dish_cfg_when_csp_is_defective(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
         lookahead=8,
     )
 
@@ -168,13 +168,14 @@ def load_dish_cfg_after_central_node_init(
     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
     # Central Node and Csp Master Leaf Node Device Server
     central_node_ds = DeviceProxy("dserver/central_node_mid/01")
-    csp_master_ds = DeviceProxy("dserver/mocks/01")
-
+    csp_master_ln_ds = DeviceProxy("dserver/mocks/01")
+    dish_ln_ds = DeviceProxy("dserver/mocks/09")
     # set memorized attribute to empty
     csp_master_ln_device.memorizedDishVccMap = ""
 
     # Restart Central Node, CSP Master Leaf Node, Dish Leaf Node
-    csp_master_ds.RestartServer()
+    csp_master_ln_ds.RestartServer()
+    dish_ln_ds.RestartServer()
     assert wait_and_validate_device_attribute_value(
         dish_ln_device, "State", tango.DevState.ON
     )
@@ -215,15 +216,17 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
         change_event_callbacks["DishVccMapValidationResult"],
     )
     # Csp Master Leaf Node and Dish Leaf Node Device Server
-    csp_master_ds = DeviceProxy("dserver/mocks/01")
-
+    csp_master_ln_ds = DeviceProxy("dserver/mocks/01")
+    csp_master_ln_ds = DeviceProxy("dserver/mocks/01")
+    dish_ln_ds = DeviceProxy("dserver/mocks/09")
     # Validate before restart memorizedDishVccMap is set
     assert json.loads(csp_master_ln_device.memorizedDishVccMap) == json.loads(
         config_str
     )
 
     # Restart CSP Master Leaf Node, Dish Leaf Node
-    csp_master_ds.RestartServer()
+    csp_master_ln_ds.RestartServer()
+    dish_ln_ds.RestartServer()
     assert wait_and_validate_device_attribute_value(
         dish_ln_device, "State", tango.DevState.ON
     )

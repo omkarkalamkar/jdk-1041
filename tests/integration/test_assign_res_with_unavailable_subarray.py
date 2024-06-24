@@ -1,4 +1,6 @@
 """Test module for assign resources unavailability"""
+import json
+
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -47,7 +49,7 @@ def assign_resources(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
         lookahead=4,
     )
 

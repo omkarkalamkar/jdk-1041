@@ -140,7 +140,7 @@ def test_telescope_standby_command_fail_subarray(tango_context):
         logger=logger, task_callback=task_callback
     )
     assert task_callback.status == TaskStatus.COMPLETED
-    assert task_callback.result == ResultCode.FAILED
+    assert task_callback.result[0] == ResultCode.FAILED
 
 
 def test_telescope_standby_command_fail_dish(tango_context):
@@ -186,7 +186,7 @@ def test_telescope_standby_command_fail_dish(tango_context):
         logger=logger, task_callback=task_callback
     )
     assert task_callback.status == TaskStatus.COMPLETED
-    assert task_callback.result == ResultCode.FAILED
+    assert task_callback.result[0] == ResultCode.FAILED
 
 
 def test_telescope_standby_fail_check_allowed(tango_context):

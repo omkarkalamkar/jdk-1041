@@ -80,7 +80,7 @@ def test_telescope_on_command_unavailability(tango_context):
 
     cm.telescope_on(task_callback=task_callback)
     time.sleep(1)
-    assert task_callback.result == ResultCode.OK
+    assert task_callback.result[0] == ResultCode.OK
 
 
 def test_telescope_on_command_fail_subarray(tango_context):
@@ -120,7 +120,7 @@ def test_telescope_on_command_fail_subarray(tango_context):
     cm.adapter_factory = my_adapter_factory
     on_command.telescope_on(logger=logger, task_callback=task_callback)
     assert task_callback.status == TaskStatus.COMPLETED
-    assert task_callback.result == ResultCode.FAILED
+    assert task_callback.result[0] == ResultCode.FAILED
 
 
 def test_telescope_on_command_task_completed(tango_context):

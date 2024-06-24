@@ -63,10 +63,10 @@ PYTHON_TEST_FILE ?=
 PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:./src \
 							 TANGO_HOST=$(TANGO_HOST)
 
-MARK ?= -x## What -m opt to pass to pytest
+MARK ?= ## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= tests## A specific test file to pass to pytest
-ADD_ARGS ?=  -x   ## Additional args to pass to pytest
+ADD_ARGS ?= ## Additional args to pass to pytest
 
 
 CI_REGISTRY ?= gitlab.com
@@ -82,7 +82,7 @@ endif
 
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
-ADD_ARGS +=  --forked  
+ADD_ARGS += --forked  
 MARK = not post_deployment and not acceptance 
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)

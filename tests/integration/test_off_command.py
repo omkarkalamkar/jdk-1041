@@ -1,4 +1,6 @@
 """Test cases for Off command"""
+import json
+
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -40,7 +42,7 @@ def test_off_command_mid(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_on[0], str(int(ResultCode.OK))),
+        (unique_id_on[0], json.dumps((int(ResultCode.OK), ""))),
         lookahead=4,
     )
 
@@ -73,7 +75,7 @@ def test_off_command_mid(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_off[0], str(int(ResultCode.OK))),
+        (unique_id_off[0], json.dumps((int(ResultCode.OK), ""))),
         lookahead=6,
     )
 
@@ -116,12 +118,12 @@ def test_off_command_low(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_on[0], str(int(ResultCode.OK))),
+        (unique_id_on[0], json.dumps((int(ResultCode.OK), ""))),
         lookahead=3,
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_off[0], str(int(ResultCode.OK))),
+        (unique_id_off[0], json.dumps((int(ResultCode.OK), ""))),
         lookahead=3,
     )
 

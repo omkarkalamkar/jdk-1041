@@ -1,7 +1,7 @@
 name: "mocks-{{.Release.Name}}"
 function: testing
 domain: mocks
-instances: ["01"]
+instances: ["01","02","03","04","05","06","07","08","09"]
 {{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
 entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_base_device.HelperBaseDevice"
@@ -22,10 +22,14 @@ server:
       - name: "HelperCspMasterLeafDevice"
         devices:
         - name: "ska_mid/tm_leaf_node/csp_master"
+    - name: "02"
+      classes:
       - name: "HelperCspMasterDevice"
         devices:
         - name: "mid-csp/control/0"
         - name: "low-csp/control/0"
+    - name: "03"
+      classes:
       - name: "HelperBaseDevice"
         devices:
         - name: "ska_mid/tm_leaf_node/sdp_master"
@@ -33,27 +37,39 @@ server:
         - name: "ska_low/tm_leaf_node/sdp_master"
         - name: "mid-sdp/control/0"
         - name: "low-sdp/control/0"
+    - name: "04"
+      classes:
       - name: "CNHelperSubArrayDevice"
         devices:
         - name: "ska_mid/tm_subarray_node/1"
         - name: "ska_low/tm_subarray_node/1"
+    - name: "05"
+      classes:
       - name: "HelperMCCSMasterLeafNode"
         devices:
         - name: "ska_low/tm_leaf_node/mccs_master"
+    - name: "06"
+      classes:
       - name: "HelperMCCSController"
         devices:
         - name: "low-mccs/control/control"
+    - name: "07"
+      classes:
       - name: "HelperSubarrayLeafDevice"
         devices:
         - name: "ska_mid/tm_leaf_node/csp_subarray01"
         - name: "ska_mid/tm_leaf_node/sdp_subarray01"
         - name: "ska_low/tm_leaf_node/csp_subarray01"
         - name: "ska_low/tm_leaf_node/sdp_subarray01"
+    - name: "08"
+      classes:
       - name: "HelperDishDevice"
         devices:
         {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
         - name: "{{ . | lower }}/{{ $DishMasterIdentifier }}"
         {{- end }}
+    - name: "09"
+      classes:
       - name: "HelperDishLNDevice"
         devices:
         - name: "ska_mid/tm_leaf_node/d0001"

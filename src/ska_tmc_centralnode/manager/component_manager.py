@@ -105,7 +105,7 @@ class CNComponentManager(TmcComponentManager):
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
         ),
-        command_timeout=30,
+        command_timeout=60,
         *args,
         **kwargs,
     ):
@@ -665,24 +665,9 @@ class CNComponentManager(TmcComponentManager):
                 result_code_or_exception = [value[0][0], value[1][0]]
 
             else:
-                unique_id, result_code_or_exception_or_task_status = value
+                unique_id, resultcode_message = value
                 if unique_id.endswith("LoadDishCfg"):
-                    if result_code_or_exception_or_task_status.isdigit():
-                        # Failed event is called twice one with error message
-                        # and other with result code
-                        # in case of second Failed event just ignore
-                        # it as Failed Message already updated in
-                        # first event call
-                        if dev_name not in self.result_codes_mapping:
-                            result_code_or_exception = [
-                                result_code_or_exception_or_task_status,
-                                "",
-                            ]
-                    elif result_code_or_exception_or_task_status:
-                        result_code_or_exception = [
-                            ResultCode.FAILED,
-                            result_code_or_exception_or_task_status,
-                        ]
+                    result_code_or_exception = json.loads(resultcode_message)
             if result_code_or_exception and self.dev_names_for_load_dish_cfg:
                 self.result_codes_mapping[dev_name] = result_code_or_exception
                 self.logger.info(

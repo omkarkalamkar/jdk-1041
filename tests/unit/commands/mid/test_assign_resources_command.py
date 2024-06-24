@@ -58,7 +58,10 @@ def test_assign_resources_command_completed(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, "Command Completed"),
+        },
         lookahead=5,
     )
 
@@ -95,7 +98,10 @@ def test_assign_resources_command_with_mkt_ids_completed(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, "Command Completed"),
+        },
         lookahead=5,
     )
 
@@ -112,7 +118,7 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     cm.is_command_allowed("AssignResources")
     defect = {
         "enabled": True,
-        "fault_type": FaultType.COMMAND_NOT_ALLOWED,
+        "fault_type": FaultType.COMMAND_NOT_ALLOWED_BEFORE_QUEUING,
         "error_message": "Command not allowed on leaf node.",
         "result": ResultCode.FAILED,
     }
@@ -128,10 +134,9 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    result = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
-    )
-    assert "Command not allowed on leaf node." in result["exception"]
+    result = task_callback.assert_against_call(status=TaskStatus.COMPLETED)
+    assert result["result"][0] == ResultCode.FAILED
+    assert "Command not allowed on leaf node." in result["result"][1]
     subarray_device.SetDefective(json.dumps({"enabled": False}))
 
 
@@ -183,7 +188,10 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK},
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, "Command Completed"),
+        },
         lookahead=5,
     )
 
@@ -213,7 +221,10 @@ def test_assign_resources_command_with_mkt_ids_ok(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, "Command Completed"),
+        }
     )
 
 
@@ -312,8 +323,7 @@ def test_assign_resources_command_timeout(tango_context, task_callback):
     )
     task_callback.assert_against_call(
         status=TaskStatus.COMPLETED,
-        result=ResultCode.FAILED,
-        exception="Timeout has occurred, command failed",
+        result=(ResultCode.FAILED, "Timeout has occurred, command failed"),
     )
     subarray_device.SetDefective(json.dumps({"enabled": False}))
 

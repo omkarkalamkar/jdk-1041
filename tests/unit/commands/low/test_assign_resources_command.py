@@ -21,7 +21,7 @@ from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 @pytest.mark.SKA_low
 def test_low_assign_resources_command(
-    tango_context, task_callback, json_factory, caplog
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
@@ -39,7 +39,10 @@ def test_low_assign_resources_command(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, "Command Completed"),
+        }
     )
 
 
@@ -172,7 +175,7 @@ def test_low_assign_resources_command_missing_mccs(
     del json_argument["mccs"]
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED, result=(ResultCode.FAILED,)
     )
     assert "mccs" in task_callback_data["exception"]
 
@@ -190,9 +193,10 @@ def test_low_assign_resources_command_missing_channel_blocks(
     del json_argument["mccs"]["channel_blocks"]
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED
     )
-    assert "channel_blocks" in task_callback_data["exception"]
+    assert ResultCode.FAILED == task_callback_data["result"][0]
+    assert "channel_blocks" in task_callback_data["result"][1]
 
 
 @pytest.mark.skip(reason="validate test during integration of MCCS")
@@ -209,9 +213,10 @@ def test_low_assign_resources_command_missing_station_ids(
     del json_argument["mccs"]["station_ids"]
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED
     )
-    assert "station_ids" in task_callback_data["exception"]
+    assert ResultCode.FAILED == task_callback_data["result"][0]
+    assert "station_ids" in task_callback_data["result"][1]
 
 
 @pytest.mark.SKA_low

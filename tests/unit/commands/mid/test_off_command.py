@@ -88,7 +88,7 @@ def test_telescope_off_command_fail_subarray(tango_context):
     cm.adapter_factory = my_adapter_factory
     off_command.telescope_off(logger=logger, task_callback=task_callback)
     assert task_callback.status == TaskStatus.COMPLETED
-    assert task_callback.result == ResultCode.FAILED
+    assert task_callback.result[0] == ResultCode.FAILED
 
 
 def test_telescope_off_command_task_completed(tango_context):

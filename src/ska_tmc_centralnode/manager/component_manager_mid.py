@@ -319,54 +319,63 @@ class CNComponentManagerMid(CNComponentManager):
             value,
         )
         unique_id, result_code_or_exception_or_task_status = value
-        if unique_id.endswith(
-            self.supported_commands
+        if (
+            not unique_id.endswith(self.supported_commands)
+            or (not result_code_or_exception_or_task_status)
+            or (unique_id not in self.command_mapping.values())
         ):  # ignoring other command events
-            try:
-                self.logger.info(
-                    "LongRunningCommandResult event occurred:%s",
-                    result_code_or_exception_or_task_status,
-                )
-
-                if not result_code_or_exception_or_task_status:
-                    # This is in case an empty event is received.
-                    pass
-                elif (
-                    int(result_code_or_exception_or_task_status)
-                    == ResultCode.OK
-                    and unique_id in self.command_mapping.values()
-                ):
-                    # Update the command_result only if it's
-                    # "AssignResources" or "ReleaseResources" and successful.
+            pass
+        try:
+            result_code, message = json.loads(
+                result_code_or_exception_or_task_status
+            )
+            match int(result_code):
+                case ResultCode.OK:
                     self.command_result = ResultCode.OK
-
-            except ValueError:
-                if unique_id in self.command_mapping.values():
+                case (
+                    ResultCode.FAILED
+                    | ResultCode.REJECTED
+                    | ResultCode.NOT_ALLOWED
+                ):
                     self.logger.info(
-                        "Updating LRCRCallback with value: %s for %s for"
+                        "Updating LRCRCallback with message: %s for %s for"
                         + " device: %s",
                         unique_id,
-                        value,
+                        message,
                         dev_name,
                     )
                     exp_string = (
-                        "Exception occurred on device: "
-                        + f"{dev_name}:"
-                        + f" {result_code_or_exception_or_task_status}"
+                        "Exception occurred on device:"
+                        + f"{unique_id}:"
+                        + f" {dev_name}:"
+                        + f" {message}"
                     )
-                    index_of_unique_id = list(
-                        self.command_mapping.values()
-                    ).index(
-                        unique_id
-                    )  # get index location of unique_id received in event
-                    command_id = list(self.command_mapping.keys())[
-                        index_of_unique_id
-                    ]  # command id mapped to unique id
+                    command_id = self.get_command_id(unique_id)
                     self.long_running_result_callback(
                         command_id,
                         ResultCode.FAILED,
                         exception_msg=exp_string,
                     )
+        except Exception as e:
+            self.logger.error(e)
+
+    def get_command_id(self, unique_id: int) -> str:
+        """This Method is used to get command
+        it from the command mapping dictionary
+
+        Args:
+            unique_id (int): unique id of the command
+
+        Returns:
+            str: returns the command id with reference to unique id.
+        """
+        index_of_unique_id = list(self.command_mapping.values()).index(
+            unique_id
+        )  # get index location of unique_id received in event
+        command_id = list(self.command_mapping.keys())[
+            index_of_unique_id
+        ]  # command id mapped to unique id
+        return command_id
 
     def update_device_state(self, device_name, state):
         """
