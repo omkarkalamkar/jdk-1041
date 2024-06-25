@@ -105,7 +105,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             result,
             exception,
         )
-        if result == ResultCode.FAILED:
+        if result[0] == ResultCode.FAILED:
             self.component_manager.update_dish_vcc_flag(False)
             self.task_callback(
                 result=result,

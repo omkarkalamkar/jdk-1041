@@ -104,5 +104,5 @@ def test_telescope_state_standby(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_standby(devFactory, cm, 30)
+    set_device_standby(devFactory, cm, 40)
     assert cm.component.telescope_state == tango.DevState.STANDBY

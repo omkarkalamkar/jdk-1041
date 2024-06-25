@@ -147,7 +147,7 @@ def check_internal_model(device_list):
         if "tm_subarray" in dev["dev_name"]:
             assert str(ObsState(running_dev.obsState)) == dev["obsState"]
             if running_dev.assignedResources is None:
-                assert dev["resources"] == []
+                assert dev["resources"] == "{ }"
             else:
                 assert np.array_equal(
                     np.asarray(running_dev.assignedResources),

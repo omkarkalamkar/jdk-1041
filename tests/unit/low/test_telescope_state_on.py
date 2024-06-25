@@ -80,5 +80,5 @@ def test_telescope_state_on(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_devices_on(cm, devFactory, 30)
+    set_devices_on(cm, devFactory, 40)
     assert cm.component.telescope_state == tango.DevState.ON

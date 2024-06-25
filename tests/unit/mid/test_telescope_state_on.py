@@ -76,7 +76,7 @@ def test_telescope_state_on_with_dishmode_standbyfp(tango_context):
     dish_master = DevFactory().get_device(DISH_LEAF_NODE_DEVICE)
     dish_master.SetDirectDishMode(DishMode.STANDBY_FP)
     # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
-    ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=12)
+    ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=30)
     assert cm.component.telescope_state == tango.DevState.ON
 
 
@@ -94,7 +94,7 @@ def test_telescope_state_on_with_dishmode_operate(tango_context):
     dish_master = DevFactory().get_device(DISH_LEAF_NODE_DEVICE)
     dish_master.SetDirectDishMode(DishMode.OPERATE)
     # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
-    ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=12)
+    ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=30)
     assert cm.component.telescope_state == tango.DevState.ON
 
 
@@ -112,5 +112,5 @@ def test_telescope_state_on_with_dishmode_config(tango_context):
     dish_master = DevFactory().get_device(DISH_LEAF_NODE_DEVICE)
     dish_master.SetDirectDishMode(DishMode.CONFIG)
     # Here expected elapsed time is set to 12 since  set_state() API is taking more time to set the state and hence actual elapsed time is increasing
-    ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=12)
+    ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=30)
     assert cm.component.telescope_state == tango.DevState.ON

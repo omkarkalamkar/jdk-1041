@@ -102,7 +102,7 @@ class AssignResources(AssignReleaseResources):
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
         """Updates the task status for command"""
-        if result == ResultCode.FAILED:
+        if result[0] == ResultCode.FAILED:
             self.task_callback(
                 result=result, status=TaskStatus.COMPLETED, exception=exception
             )

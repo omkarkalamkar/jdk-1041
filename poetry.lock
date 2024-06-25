@@ -1736,30 +1736,32 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.17.0"
+version = "0.17.1"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
-python-versions = ">=3.10,<3.11"
+python-versions = "~3.10"
+develop = false
 
 [package.dependencies]
-black = ">=23.3.0,<24.0.0"
-fire = ">=0.4.0,<0.5.0"
-jsonschema = ">=4.0.1,<5.0.0"
+black = "^23.3.0"
+fire = "^0.4.0"
+jsonschema = "^4.0.1"
 katpoint = "1.0a2"
-marshmallow = ">=3.14.1,<4.0.0"
-mock = ">=4.0.3,<5.0.0"
-numpy = ">=1.23.0,<2.0.0"
+marshmallow = "^3.14.1"
+mock = "^4.0.3"
+numpy = "^1.23.0"
 pytango = "9.5.0"
-ska-ser-logging = ">=0.4.1,<0.5.0"
+ska-ser-logging = "^0.4.1"
 ska-tango-base = "1.0.0"
 ska-tango-testing = "0.6.0"
 ska-telmodel = "1.15.1"
 
 [package.source]
-type = "legacy"
-url = "https://artefact.skao.int/repository/pypi-internal/simple"
-reference = 'ska-nexus'
+type = "git"
+url = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git"
+reference = "hm-476"
+resolved_reference = "280169979dc20ea62a40e9ca82314c58124f52eb"
 
 [[package]]
 name = "snowballstemmer"
@@ -2144,7 +2146,7 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "c6ca1ef221b66b1579bd3588a0e1e5cb6e78fe1cb39fb09f802af9f0f54a3015"
+content-hash = "bf15a2e8cc37402849adf07002a0da0c05d72e2457782b92661b042115ff02c6"
 
 [metadata.files]
 alabaster = [
@@ -3110,10 +3112,7 @@ ska-tmc-cdm = [
     {file = "ska_tmc_cdm-7.3.1-py3-none-any.whl", hash = "sha256:6096dfd4d7c0211dad2ac58cfe0c3cc88b3d5448f20405c5cb7864ec44f28757"},
     {file = "ska_tmc_cdm-7.3.1.tar.gz", hash = "sha256:3129cd4ec33b207f80669f521ba80fd221a42041c841f6c2f44eb8225ed8c363"},
 ]
-ska-tmc-common = [
-    {file = "ska_tmc_common-0.17.0-py3-none-any.whl", hash = "sha256:0d706ab216fbd0b60be4b5390eb7269de7cfe3c24246bd67562797635c108865"},
-    {file = "ska_tmc_common-0.17.0.tar.gz", hash = "sha256:62ef992652d2e816c0d1c8ccdae6aff14a0181c55d4148e6e0630ccc95883d8f"},
-]
+ska-tmc-common = []
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
     {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},

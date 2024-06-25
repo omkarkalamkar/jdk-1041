@@ -36,11 +36,6 @@ def devices_to_load():
             "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": LOW_SUBARRAY_DEVICE},
-            ],
-        },
-        {
-            "class": CNHelperSubArrayDevice,
-            "devices": [
                 {"name": LOW_SDP_SLN_DEVICE},
                 {"name": LOW_CSP_SLN_DEVICE},
             ],

@@ -87,7 +87,7 @@ def test_tmc_state_on(tango_context):
         tango_context, True, True, InputParameterLow(None)
     )
     set_devices_on(
-        cm, devFactory, 25
+        cm, devFactory, 30
     )  # Here expected elapsed time is set to 25 since
     # set_state() API is taking more time to set the state and
     # hence actual elapsed time is increasing

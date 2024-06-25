@@ -35,11 +35,6 @@ def devices_to_load():
             "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
-            ],
-        },
-        {
-            "class": CNHelperSubArrayDevice,
-            "devices": [
                 {"name": MID_CSP_SLN_DEVICE},
                 {"name": MID_SDP_SLN_DEVICE},
             ],

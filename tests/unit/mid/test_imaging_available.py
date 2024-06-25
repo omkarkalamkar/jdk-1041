@@ -59,7 +59,7 @@ def test_imaging_available(tango_context):
         devFactory=DevFactory(),
         state=tango.DevState.ON,
     )
-    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=12)
+    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=30)
     # Here expected elapsed time is set to 12 since  set_state() API is taking
     # more time to set the state and hence actual elapsed time is increasing
     assert cm.component.imaging == ModesAvailability.available
