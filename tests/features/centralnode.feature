@@ -2,7 +2,7 @@
 Feature: Central Node acceptance
 
 	#Check central node correctly report failed and working devices defined within its scope of monitoring (internal model)
-	@XTP-3613 @XTP-3614 @post_deployment @acceptance @SKA_mid @SKA_low @new
+	@XTP-3613 @XTP-3614 @post_deployment @acceptance @SKA_mid @SKA_low
 	Scenario Outline: Monitor Telescope Components
 		Given a TANGO ecosystem with a set of devices deployed
 		And a CentralNode device

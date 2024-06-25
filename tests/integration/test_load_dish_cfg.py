@@ -66,7 +66,7 @@ def load_dish_cfg(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -148,7 +148,7 @@ def load_dish_cfg_when_csp_is_defective(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
 
