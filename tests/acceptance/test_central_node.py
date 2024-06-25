@@ -150,7 +150,7 @@ def check_internal_model(device_list):
                 assert dev["resources"] == "{ }"
             else:
                 assert np.array_equal(
-                    np.asarray(running_dev.assignedResources),
+                    np.array(running_dev.assignedResources),
                     np.array(dev["resources"]),
                 )
 
