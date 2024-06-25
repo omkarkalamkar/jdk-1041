@@ -123,16 +123,16 @@ def load_dish_cfg_when_csp_is_defective(
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
 
-    EXPECTED_FAILED_MESSAGE = (
-        f"Exception occurred on device:"
-        f" Command failed on device {MID_CSP_MLN_DEVICE}: "
-        "Exception occurred, command failed."
+    expected_failed_message = (
+        f'[{ResultCode.FAILED}, "Exception occurred on device: '
+        f'Command failed on device {MID_CSP_MLN_DEVICE}: Exception occurred, command failed."]'
     )
+    logger.info(f"{expected_failed_message} is this")
 
     assert check_lrcr_events(
         change_event_callback=change_event_callbacks,
         command_name="LoadDishCfg",
-        result_to_check=EXPECTED_FAILED_MESSAGE,
+        result_to_check=expected_failed_message,
     )
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
