@@ -123,7 +123,6 @@ def test_release_res_command_mid(
     )
 
 
-@pytest.mark
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
