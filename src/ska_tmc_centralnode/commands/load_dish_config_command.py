@@ -92,7 +92,9 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.command_id
         )
 
-    def update_task_status(self, result: ResultCode, exception: str = ""):
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ):
         """Updates the task status for command
         :param result: Result code of command
         :type: ResultCode enum

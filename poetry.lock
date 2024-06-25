@@ -1760,8 +1760,8 @@ ska-telmodel = "1.15.1"
 [package.source]
 type = "git"
 url = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git"
-reference = "hm-476"
-resolved_reference = "ea515e9a7394b15b1057e2f10927755bd7fbb6cd"
+reference = "master"
+resolved_reference = "067f2c1a73ba759dc7c126fd033aafb4e644e0f3"
 
 [[package]]
 name = "snowballstemmer"
@@ -2146,7 +2146,7 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "bf15a2e8cc37402849adf07002a0da0c05d72e2457782b92661b042115ff02c6"
+content-hash = "bb4be661b1d17e403cf023cdb5512c0bedf847587be6f85786f497e6cceb7935"
 
 [metadata.files]
 alabaster = [

@@ -32,7 +32,7 @@ pytango = "9.5.0"
 ska-ser-logging = "^0.4.1"
 ska-tango-base = "1.0.0"
 ska-tmc-cdm = "7.3.1"
-ska-tmc-common = {git="https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git", branch="hm-476"}
+ska-tmc-common = {git="https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git", branch="master"}
 ska-tango-testing = "0.6.0"
 ska-ser-log-transactions = "*"
 ska-ser-skuid = "*"

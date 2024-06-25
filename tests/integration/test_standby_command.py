@@ -139,7 +139,7 @@ def test_standby_command_low(
     # Check whether the command ResultCode is OK
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
         lookahead=3,
     )
     logger.info(

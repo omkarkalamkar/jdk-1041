@@ -110,6 +110,7 @@ def test_release_res_command_mid(
     )
 
 
+@pytest.mark
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
@@ -424,6 +425,7 @@ def test_release_resources_mid_timeout(
     result, unique_id = central_node.TelescopeOff()
 
 
+@pytest.mark
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_resources_low_timeout(
@@ -523,6 +525,7 @@ def test_release_resources_low_timeout(
     result, unique_id = central_node.TelescopeOff()
 
 
+@pytest.mark
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_resources_error_aggregation(

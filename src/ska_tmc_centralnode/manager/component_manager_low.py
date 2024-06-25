@@ -166,11 +166,13 @@ class CNComponentManagerLow(CNComponentManager):
             result_code, message = json.loads(
                 result_code_or_exception_or_task_status
             )
+            if not self.event_dict.get(self.command_id):
+                self.event_dict[self.command_id] = {}
             match int(result_code):
                 case ResultCode.OK:
-                    self.event_dict[self.command_id] = {
-                        dev_name: ResultCode.OK
-                    }
+                    self.event_dict[self.command_id].update(
+                        {dev_name: ResultCode.OK}
+                    )
                     self.command_mapping[self.command_id].remove(unique_id)
                     self.logger.info(
                         "Updated command mapping dictionary is: %s",
@@ -182,9 +184,9 @@ class CNComponentManagerLow(CNComponentManager):
                     | ResultCode.FAILED
                     | ResultCode.NOT_ALLOWED
                 ):
-                    self.event_dict[self.command_id] = {
-                        dev_name: {"error": message}
-                    }
+                    self.event_dict[self.command_id].update(
+                        {dev_name: {"error": message}}
+                    )
                     self.error_count += 1
                     self.command_mapping[self.command_id].remove(unique_id)
                     self.logger.info(

@@ -604,6 +604,7 @@ def test_assign_resources_low_timeout(
     result, unique_id = central_node.TelescopeOff()
 
 
+@pytest.mark
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_assign_resources_low_error_aggregation(
