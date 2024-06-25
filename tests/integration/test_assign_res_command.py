@@ -588,7 +588,12 @@ def test_assign_resources_low_timeout(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Timeout has occurred, command failed",
+            json.dumps(
+                (
+                    int(ResultCode.FAILED),
+                    "Timeout has occurred, command failed",
+                )
+            ),
         ),
         lookahead=4,
     )
