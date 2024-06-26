@@ -741,34 +741,6 @@ class CNComponentManager(TmcComponentManager):
         )
         return task_status, response
 
-    def is_subarray_in_right_obs_state(
-        self, subarray_id: int, desired_obsstate: List, command_name: str
-    ) -> bool:
-        """
-        Checks subarray obsstate before invoking command
-
-        :param subarray_id: subarray id on which command invoke
-        :type subarray_id: int
-        :param desired_obsstate: list of obs states which are allowed
-        :type desired_obsstate: List
-        :param command_name: name of command for obstate check
-        :type: str
-
-        :return: return boolean value if command in valid obstate else
-            return exception.
-        """
-        subarray_devices = self.input_parameter.subarray_dev_names
-        for device in subarray_devices:
-            subarray_device_id = re.findall(r"\d+", device)
-            if subarray_id == int(subarray_device_id[0]):
-                subarray_obstate = self.get_device(device).obs_state
-                if subarray_obstate not in desired_obsstate:
-                    raise StateModelError(
-                        f"{command_name} command not permitted in observation "
-                        + f"state {subarray_obstate}"
-                    )
-        return True
-
     def is_input_json_valid(self, argin: str) -> Tuple[bool, str]:
         """
         Checks inputs json.
@@ -802,6 +774,45 @@ class CNComponentManager(TmcComponentManager):
                 (f"{exp}:{e}"),
             )
 
+    def command_not_allowed_callable(
+        self, subarray_id: int, desired_obsstate: List, command_name: str
+    ):
+        """This method provides callable for command not allowed
+
+        Args:
+            subarray_id (int): subarray_id
+            desired_obsstate (List): desired observation state
+            command_name (str): command name
+        """
+
+        def is_subarray_in_right_obs_state() -> bool:
+            """
+            Checks subarray obsstate before invoking command
+
+            :param subarray_id: subarray id on which command invoke
+            :type subarray_id: int
+            :param desired_obsstate: list of obs states which are allowed
+            :type desired_obsstate: List
+            :param command_name: name of command for obstate check
+            :type: str
+
+            :return: return boolean value if command in valid obstate else
+                return exception.
+            """
+            subarray_devices = self.input_parameter.subarray_dev_names
+            for device in subarray_devices:
+                subarray_device_id = re.findall(r"\d+", device)
+                if subarray_id == int(subarray_device_id[0]):
+                    subarray_obstate = self.get_device(device).obs_state
+                    if subarray_obstate not in desired_obsstate:
+                        raise StateModelError(
+                            f"{command_name} command not permitted "
+                            + f"in observation state {subarray_obstate}"
+                        )
+            return True
+
+        return is_subarray_in_right_obs_state
+
     def assign_resources(
         self, argin: str, task_callback: Optional[Callable] = None
     ):
@@ -825,13 +836,6 @@ class CNComponentManager(TmcComponentManager):
         )
         if not result:
             return TaskStatus.REJECTED, subarray_id_or_message
-
-        # check whether subarray is in proper obstate or not.
-        self.is_subarray_in_right_obs_state(
-            subarray_id_or_message,
-            [ObsState.EMPTY, ObsState.IDLE],
-            "AssignResources",
-        )
 
         # Execute the command if the input JSON is valid
         self.logger.info("Calling component manager assign_resources method")
@@ -915,6 +919,11 @@ class CNComponentManager(TmcComponentManager):
             assign_resources_command.assign_resources,
             args=[json_argument, self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                subarray_id_or_message,
+                [ObsState.EMPTY, ObsState.IDLE],
+                "AssignResources",
+            ),
         )
         return task_status, response
 
@@ -940,11 +949,6 @@ class CNComponentManager(TmcComponentManager):
         )
         if not result:
             return TaskStatus.REJECTED, subarray_id_or_message
-
-        # check whether subarray is in proper obstate or not.
-        self.is_subarray_in_right_obs_state(
-            subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"
-        )
 
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
@@ -991,6 +995,9 @@ class CNComponentManager(TmcComponentManager):
             release_resources_command.release_resources,
             args=[json.dumps(input_json_or_message), self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"
+            ),
         )
         return task_status, response
 
