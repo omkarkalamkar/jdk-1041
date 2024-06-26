@@ -320,7 +320,6 @@ def test_release_resources_error_propagation(
     assert exception_message in event_data["attribute_value"][1]
     tmc_subarray.SetDefective(RESET_DEFECT)
     # Tear Down
-    tmc_subarray.ReleaseAllResources()
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
@@ -418,7 +417,6 @@ def test_release_resources_mid_timeout(
         lookahead=8,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
-    tmc_subarray.ReleaseAllResources()
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
