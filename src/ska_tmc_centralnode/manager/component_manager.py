@@ -1073,17 +1073,6 @@ class CNComponentManager(TmcComponentManager):
 
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
-            # (
-            #     is_valid,
-            #     invalid_json_error_msg,
-            # ) = release_resources_command._validate_low_json(
-            #     input_json_or_message,
-            #     REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
-            # )
-            # if not is_valid:
-            #     return release_resources_command.reject_command(
-            #         invalid_json_error_msg
-            #     )
             try:
                 validate(
                     version=self.releaseresources_interface,

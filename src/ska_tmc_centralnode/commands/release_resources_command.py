@@ -326,25 +326,3 @@ class ReleaseResources(AssignReleaseResources):
             return json_argument
         except Exception as e:
             raise Exception("Error while creating MCCS input json") from e
-
-    def _validate_low_json(self, json_argument: dict, req_keys: list):
-        """To validate the low json for release resources command before
-        erterning the queue
-
-        :param: json_argument
-        :type: A dictionary containing Json Argument
-        :param: req_keys
-        :type: A Lis tof Required key list to check in json_argument
-        """
-        json_keys = json_argument.keys()
-        for key in req_keys:
-            if key not in json_keys:
-                return (
-                    False,
-                    f"{key} key is not present in the input json argument.",
-                )
-        return (
-            True,
-            "The json argument has all the required keys. Validation"
-            + " successful.",
-        )
