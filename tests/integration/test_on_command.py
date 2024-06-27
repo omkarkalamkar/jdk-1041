@@ -55,7 +55,7 @@ def test_on_command_mid(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -84,7 +84,7 @@ def test_on_command_mid(
     result, unique_id = central_node.TelescopeOff()
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
     event_remover(
@@ -118,7 +118,7 @@ def test_on_command_low(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -146,7 +146,7 @@ def test_on_command_low(
     result, unique_id = central_node.TelescopeOff()
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
     event_remover(

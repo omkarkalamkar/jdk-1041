@@ -114,7 +114,7 @@ class TelescopeOn(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def turn_on_sdp(self):
         """Turns on the SDP"""
@@ -224,7 +224,7 @@ class TelescopeOn(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def turn_on_mccs(self):
         """Turns on the MCCS"""

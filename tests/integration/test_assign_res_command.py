@@ -58,7 +58,7 @@ def assign_resources(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -242,7 +242,7 @@ def assign_resources_with_invalid_json(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -313,7 +313,7 @@ def assign_resources_without_subarray_id(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -346,7 +346,7 @@ def assign_resources_without_subarray_id(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -407,7 +407,7 @@ def test_assign_resources_exception_propagation(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -478,7 +478,7 @@ def test_assign_resources_mid_timeout(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -555,12 +555,7 @@ def test_assign_resources_low_timeout(
         "longRunningCommandResult",
         (
             unique_id[0],
-            # The above code is using the `json.dumps()` function to
-            # convert a tuple
-            # containing an integer value `ResultCode.OK`
-            # and an empty string `""` into a
-            # JSON formatted string.
-            json.dumps((int(ResultCode.OK), "")),
+            json.dumps((int(ResultCode.OK), "Command Completed")),
         ),
         lookahead=4,
     )
@@ -636,7 +631,7 @@ def test_assign_resources_low_error_aggregation(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
     subarray_proxy.SetisSubarrayAvailable(True)

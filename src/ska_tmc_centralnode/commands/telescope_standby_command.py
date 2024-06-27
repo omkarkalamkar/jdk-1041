@@ -151,7 +151,7 @@ class TelescopeStandby(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def do_low(self, argin=None):
         """
@@ -235,7 +235,7 @@ class TelescopeStandby(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def turn_standby_subarrays(self):
         """Turns subarrays to standby"""

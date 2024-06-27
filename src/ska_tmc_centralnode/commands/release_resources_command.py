@@ -102,7 +102,9 @@ class ReleaseResources(AssignReleaseResources):
                 ),
             )
 
-    def update_task_status(self, result: ResultCode, exception: str = ""):
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ):
         """Updates the task status for command"""
         if result[0] == ResultCode.FAILED:
             self.task_callback(

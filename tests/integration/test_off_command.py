@@ -42,7 +42,10 @@ def test_off_command_mid(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_on[0], json.dumps((int(ResultCode.OK), ""))),
+        (
+            unique_id_on[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=4,
     )
 
@@ -75,7 +78,10 @@ def test_off_command_mid(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_off[0], json.dumps((int(ResultCode.OK), ""))),
+        (
+            unique_id_off[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=6,
     )
 
@@ -118,12 +124,18 @@ def test_off_command_low(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_on[0], json.dumps((int(ResultCode.OK), ""))),
+        (
+            unique_id_on[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=3,
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_off[0], json.dumps((int(ResultCode.OK), ""))),
+        (
+            unique_id_off[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=3,
     )
 

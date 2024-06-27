@@ -44,7 +44,10 @@ def release_resources(
     )
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id_on[0], json.dumps((int(ResultCode.OK), ""))),
+        (
+            unique_id_on[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=4,
     )
 
@@ -100,7 +103,10 @@ def release_resources(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_off[0], json.dumps((int(ResultCode.OK), ""))),
+        (
+            unique_id_off[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=4,
     )
 

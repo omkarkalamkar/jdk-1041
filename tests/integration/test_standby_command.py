@@ -40,7 +40,7 @@ def test_standby_command_mid(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
     logger.info(
@@ -73,7 +73,7 @@ def test_standby_command_mid(
     # Check whether the command ResultCode is OK
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
     logger.info(
@@ -122,7 +122,7 @@ def test_standby_command_low(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
     logger.info(
@@ -139,7 +139,7 @@ def test_standby_command_low(
     # Check whether the command ResultCode is OK
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=3,
     )
     logger.info(

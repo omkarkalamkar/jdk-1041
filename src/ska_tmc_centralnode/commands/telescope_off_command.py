@@ -148,7 +148,7 @@ class TelescopeOff(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def turn_off_csp(self):
         """Turns off the csp Devices"""
@@ -295,7 +295,7 @@ class TelescopeOff(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def turn_off_mccs(self):
         """Turn off the mccs"""

@@ -132,7 +132,7 @@ def commands_result_events(
         "longRunningCommandResult: %s", central_node.longRunningCommandResult
     )
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), ""))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
