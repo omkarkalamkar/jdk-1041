@@ -43,7 +43,6 @@ class CNComponentManagerLow(CNComponentManager):
         _telescope_availability_callback=None,
         communication_state_callback=None,
         component_state_callback=None,
-        max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
         skuid_service="",
@@ -83,12 +82,11 @@ class CNComponentManagerLow(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             communication_state_callback,
-            component_state_callback,
             _telescope_availability_callback,
-            max_workers,
+            component_state_callback,
             proxy_timeout,
             sleep_time,
-            skuid_service="",
+            skuid_service=skuid_service,
             command_timeout=command_timeout,
             *args,
             **kwargs,
@@ -109,8 +107,6 @@ class CNComponentManagerLow(CNComponentManager):
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorLow(self, self.logger)
         )
-        self.subarray_mccsmln_event: dict = {}
-        self.error_event: dict = {}
         self.event_dict: dict = {}
         self.error_count: int = 0
 

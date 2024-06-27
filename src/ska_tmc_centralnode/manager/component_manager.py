@@ -94,14 +94,13 @@ class CNComponentManager(TmcComponentManager):
         communication_state_callback=None,
         _telescope_availability_callback=None,
         component_state_callback=None,
-        max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
         skuid_service=(
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
         ),
-        command_timeout=60,
+        command_timeout=30,
         *args,
         **kwargs,
     ):
@@ -132,7 +131,6 @@ class CNComponentManager(TmcComponentManager):
             _event_receiver=False,
             communication_state_callback=communication_state_callback,
             component_state_callback=component_state_callback,
-            max_workers=max_workers,
             proxy_timeout=proxy_timeout,
             sleep_time=sleep_time,
             *args,
