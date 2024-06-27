@@ -180,6 +180,13 @@ class CNComponentManager(TmcComponentManager):
             self, logger=logger
         )
         self._liveliness_probe = None
+        self.supported_commands_for_responsive_check = [
+            "TelescopeOn",
+            "TelescopeOff",
+            "TelescopeStandby",
+            "AssignResources",
+            "ReleaseResources",
+        ]
 
     def stop_event_receiver(self):
         """Stops the event receiver."""
@@ -349,19 +356,6 @@ class CNComponentManager(TmcComponentManager):
             )
             return False
 
-        return True
-
-    def check_if_mccs_mln_is_available(self) -> bool:
-        """
-        Returns boolean value based on availability of MccsMasterLeafNode,
-        which indicated availability of Mccs Master.
-        """
-        telescope_availability = self.get_telescope_availability()
-        if not telescope_availability["mccs_master_leaf_node"] is True:
-            self.logger.info(
-                "MccsMasterLeafNode is not available to receive command"
-            )
-            return False
         return True
 
     def check_if_subarrays_are_responsive(self) -> bool:
@@ -797,6 +791,7 @@ class CNComponentManager(TmcComponentManager):
             :return: return boolean value if command in valid obstate else
                 return exception.
             """
+            self.check_device_responsiveness(command_name)
             subarray_devices = self.input_parameter.subarray_dev_names
             for device in subarray_devices:
                 subarray_device_id = re.findall(r"\d+", device)
@@ -810,6 +805,14 @@ class CNComponentManager(TmcComponentManager):
             return True
 
         return is_subarray_in_right_obs_state
+
+    def check_device_responsiveness(self, command_name: str) -> None:
+        """
+        Override this method to add responsive checks for the devices
+        :param command_name: Command name for the check
+        :type command_name: str
+        """
+        return True
 
     def assign_resources(
         self, argin: str, task_callback: Optional[Callable] = None

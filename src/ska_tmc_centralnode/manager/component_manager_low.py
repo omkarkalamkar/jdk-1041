@@ -198,8 +198,13 @@ class CNComponentManagerLow(CNComponentManager):
                     )
             if len(self.event_dict[self.command_id]) == 2:
                 self.update_long_running_command_result_callback()
-        except Exception as e:
-            self.logger.info(e)
+        except Exception as exception:
+            self.logger.exception(
+                "Exception occurred while processing"
+                + "long running command result"
+                + "attribute event: %s",
+                exception,
+            )
 
     def update_long_running_command_result_callback(self) -> None:
         """
@@ -296,6 +301,19 @@ class CNComponentManagerLow(CNComponentManager):
                 self._health_state_aggregator.aggregate()
             )
 
+    def check_if_mccs_mln_is_available(self) -> bool:
+        """
+        Returns boolean value based on availability of MccsMasterLeafNode,
+        which indicated availability of Mccs Master.
+        """
+        telescope_availability = self.get_telescope_availability()
+        if not telescope_availability["mccs_master_leaf_node"] is True:
+            self.logger.info(
+                "MccsMasterLeafNode is not available to receive command"
+            )
+            return False
+        return True
+
     def is_command_allowed(self, command_name=None) -> bool:
         """
         Checks whether this command is allowed
@@ -318,16 +336,19 @@ class CNComponentManagerLow(CNComponentManager):
                 "Command is not allowed in current state :",
                 f"{str(self.op_state_model.op_state)}",
             )
-        if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
-            self.logger.debug(f"Checking low devices for {command_name}")
-            self.check_if_mccs_mln_is_responsive()
-            self.check_if_subarrays_are_responsive()
-        elif command_name in ["AssignResources", "ReleaseResources"]:
-            self.logger.debug(f"Checking low devices for {command_name}")
-            self.check_if_subarrays_are_responsive()
-            self.check_if_mccs_mln_is_responsive()
-
         return True
+
+    def check_device_responsiveness(self, command_name) -> None:
+        """
+        This method overrides the method from super class
+        to add responsive checks for the devices
+        :param command_name: Command name for the check
+        :type command_name: str
+        """
+        if command_name in self.supported_commands_for_responsive_check:
+            self.logger.debug(f"Checking low devices for {command_name}")
+            self.check_if_mccs_mln_is_responsive()
+            self.check_if_subarrays_are_responsive()
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availability"""

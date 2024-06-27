@@ -368,8 +368,13 @@ class CNComponentManagerMid(CNComponentManager):
                         ResultCode.FAILED,
                         exception_msg=exp_string,
                     )
-        except Exception as e:
-            self.logger.error(e)
+        except Exception as exception:
+            self.logger.exception(
+                "Exception occurred while processing"
+                + "long running command result"
+                + "attribute event: %s",
+                exception,
+            )
 
     def get_command_id(self, unique_id: int) -> str:
         """This Method is used to get command
@@ -541,16 +546,19 @@ class CNComponentManagerMid(CNComponentManager):
                 "Command is not allowed in current state :"
                 + f"{str(self.op_state_model.op_state)}",
             )
-        if command_name in ["TelescopeOn", "TelescopeOff", "TelescopeStandby"]:
+        return True
+
+    def check_device_responsiveness(self, command_name) -> None:
+        """
+        This method overrides the method from super class
+        to add responsive checks for the devices
+        :param command_name: Command name for the check
+        :type command_name: str
+        """
+        if command_name in self.supported_commands_for_responsive_check:
             self.logger.debug(f"Checking mid devices for {command_name}")
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
-        elif command_name in ["AssignResources", "ReleaseResources"]:
-            self.logger.info(f"Checking mid devices for {command_name}")
-            self.check_if_subarrays_are_responsive()
-            self.check_if_dishes_are_responsive()
-
-        return True
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availablity status"""
