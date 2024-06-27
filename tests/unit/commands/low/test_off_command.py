@@ -57,7 +57,7 @@ def test_low_telescope_off_command(tango_context, task_callback):
     task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
-            "result": (ResultCode.OK, ""),
+            "result": (ResultCode.OK, "Command Completed"),
         }
     )
 

@@ -169,7 +169,7 @@ def load_dish_cfg_after_central_node_init(
     # Central Node and Csp Master Leaf Node Device Server
     central_node_ds = DeviceProxy("dserver/central_node_mid/01")
     csp_master_ln_ds = DeviceProxy("dserver/mocks/01")
-    dish_ln_ds = DeviceProxy("dserver/mocks/09")
+    dish_ln_ds = DeviceProxy("dserver/mocks/07")
     # set memorized attribute to empty
     csp_master_ln_device.memorizedDishVccMap = ""
 
@@ -237,8 +237,7 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
     )
     # Csp Master Leaf Node and Dish Leaf Node Device Server
     csp_master_ln_ds = DeviceProxy("dserver/mocks/01")
-    csp_master_ln_ds = DeviceProxy("dserver/mocks/01")
-    dish_ln_ds = DeviceProxy("dserver/mocks/09")
+    dish_ln_ds = DeviceProxy("dserver/mocks/07")
     # Validate before restart memorizedDishVccMap is set
     assert json.loads(csp_master_ln_device.memorizedDishVccMap) == json.loads(
         config_str
