@@ -6,6 +6,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 * Updated control model v1.0.0
 * Updated pytango v9.5.0
   
+[0.15.1]
+********
+* Update Push event mechanism for isDishVccConfigSet , DishVccValidationStatus
+
 [0.15.0]
 ********
 * Update in kValue range from 1-2221 to 1-1177

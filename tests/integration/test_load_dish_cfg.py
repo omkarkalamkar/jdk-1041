@@ -184,16 +184,36 @@ def load_dish_cfg_after_central_node_init(
     )
 
     central_node_ds.RestartServer()
+    assert wait_and_validate_device_attribute_value(
+        central_node, "State", tango.DevState.ON
+    )
 
     # Validate LoadDishCfg command called after initialization
 
+    central_node.subscribe_event(
+        "isDishVccConfigSet",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["isDishVccConfigSet"],
+    )
     assert wait_and_validate_device_attribute_value(
         central_node, "isDishVccConfigSet", False
     ), "Timeout while waiting for validating attribute value"
 
+    change_event_callbacks.assert_change_event(
+        "isDishVccConfigSet",
+        (False),
+        lookahead=4,
+    )
+
     assert wait_and_validate_device_attribute_value(
         central_node, "isDishVccConfigSet", True
     ), "Timeout while waiting for validating attribute value"
+
+    change_event_callbacks.assert_change_event(
+        "isDishVccConfigSet",
+        True,
+        lookahead=4,
+    )
 
     assert wait_and_validate_device_attribute_value(
         csp_master_ln_device, "memorizedDishVccMap", config_str, is_json=True
@@ -292,7 +312,12 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-@pytest.mark.skip(reason="Fails intermittently")
+# Test Cases with with requirment to restart server fail
+# randomly due to issues in restart
+@pytest.mark.skip(
+    reason="Skipped due to intermittent failures "
+    ", Raised SKB-404 to track same"
+)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(

@@ -24,6 +24,7 @@ from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
+from tests.mock_callable import MockCallable
 
 logger = logging.getLogger(__name__)
 SLEEP_TIME = 0.5
@@ -124,12 +125,16 @@ def create_cm(
 
     # Creating component manager
     if isinstance(_input_parameter, InputParameterMid):
+        unique_id = f"{time.time()}"
+        task_callback = MockCallable(unique_id)
         cm = CNComponentManagerMid(
             op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=logger,
             enable_dish_vcc_init=False,
             _event_receiver=p_event_receiver,
+            _dishvccvalidation_callback=task_callback,
+            _update_dishvccconfig_callback=task_callback,
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device

@@ -1,6 +1,10 @@
 [tool.poetry]
 name = "ska-tmc-centralnode"
+<<<<<<< HEAD
 version = "0.16.0"
+=======
+version = "0.15.1"
+>>>>>>> 4346a5159aac1757222d2451b6b7edf1ca6d5c05
 description = "Central Node is a coordinator of the complete M&C system"
 authors = ["Team SAHYADRI & Team HIMALAYA <telmgt-internal@googlegroups.com>"]
 license = "BSD-3-Clause"
@@ -24,7 +28,6 @@ url = 'https://pypi.org/simple'
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
-jsonschema = "^4.0.1"
 marshmallow = "^3.14.1"
 fire = "^0.4.0"
 numpy = "^1.23.0"
@@ -40,11 +43,20 @@ mock = "^4.0.3"
 katpoint = "1.0a2"
 pandas="1.4.2"
 ipython = "8.5.0"
+<<<<<<< HEAD
 ska-control-model="1.0.0"
 attrs = "^23.2.0"
 referencing = "^0.35.0"
 jsonschema-specifications = "^2023.12.1"
 rpds-py = "^0.18.0"
+=======
+ska-control-model="0.3.1"
+attrs = "*"
+jsonschema = "*"
+jsonschema-specifications = "*"
+referencing = "*"
+rpds-py = "*"
+>>>>>>> 4346a5159aac1757222d2451b6b7edf1ca6d5c05
 
 [tool.poetry.dev-dependencies]
 black = "^23.3.0"
