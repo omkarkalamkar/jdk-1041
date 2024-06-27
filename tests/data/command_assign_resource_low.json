@@ -1,10 +1,9 @@
 {
-    "interface": "https://schema.skao.int/ska-low-tmc-assignresources/3.3",
+    "interface": "https://schema.skao.int/ska-low-tmc-assignresources/4.0",
     "transaction_id": "txn-....-00001",
     "subarray_id": 1,
     "mccs": {
       "interface": "https://schema.skao.int/ska-low-mccs-controller-allocate/3.0",
-      "subarray_id": 1,
       "subarray_beams": [
         {
           "subarray_beam_id": 1,

@@ -63,9 +63,6 @@ from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
-from ska_tmc_centralnode.utils.constants import (
-    REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
-)
 
 
 class CNComponentManager(TmcComponentManager):
@@ -107,6 +104,7 @@ class CNComponentManager(TmcComponentManager):
         ),
         command_timeout=30,
         assignresources_interface="",
+        releaseresources_interface="",
         *args,
         **kwargs,
     ):
@@ -148,6 +146,7 @@ class CNComponentManager(TmcComponentManager):
         self.event_receiver = True
         self.command_timeout = command_timeout
         self.assignresources_interface = assignresources_interface
+        self.releaseresources_interface = releaseresources_interface
 
         self.event_receiver = _event_receiver
         if self.event_receiver:
@@ -964,7 +963,6 @@ class CNComponentManager(TmcComponentManager):
             logger=self.logger,
         )
 
-        self.logger.info(f"Assign Interface: {self.assignresources_interface}")
         if isinstance(self.input_parameter, InputParameterLow):
             try:
                 validate(
@@ -1075,17 +1073,25 @@ class CNComponentManager(TmcComponentManager):
 
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
-            (
-                is_valid,
-                invalid_json_error_msg,
-            ) = release_resources_command._validate_low_json(
-                input_json_or_message,
-                REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
-            )
-            if not is_valid:
-                return release_resources_command.reject_command(
-                    invalid_json_error_msg
+            # (
+            #     is_valid,
+            #     invalid_json_error_msg,
+            # ) = release_resources_command._validate_low_json(
+            #     input_json_or_message,
+            #     REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
+            # )
+            # if not is_valid:
+            #     return release_resources_command.reject_command(
+            #         invalid_json_error_msg
+            #     )
+            try:
+                validate(
+                    version=self.releaseresources_interface,
+                    config=json.loads(argin),
+                    strictness=2,
                 )
+            except Exception as e:
+                return release_resources_command.reject_command(str(e))
         elif isinstance(self.input_parameter, InputParameterMid):
             self.logger.info(f"Json argument::{input_json_or_message}")
             # Utilize CDM to validate json.
