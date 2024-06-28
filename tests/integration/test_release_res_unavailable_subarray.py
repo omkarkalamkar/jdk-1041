@@ -1,4 +1,6 @@
 """Test cases for release resources command"""
+import json
+
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
@@ -42,7 +44,10 @@ def release_resources(
     )
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id_on[0], str(int(ResultCode.OK))),
+        (
+            unique_id_on[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=4,
     )
 
@@ -59,7 +64,10 @@ def release_resources(
         )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_assign[0], str(int(ResultCode.OK))),
+        (
+            unique_id_assign[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=4,
     )
 
@@ -81,7 +89,7 @@ def release_resources(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -95,7 +103,10 @@ def release_resources(
     )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_off[0], str(int(ResultCode.OK))),
+        (
+            unique_id_off[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=4,
     )
 

@@ -1,0 +1,63 @@
+name: "mocks-{{.Release.Name}}"
+function: testing
+domain: mocks
+instances: ["01","02","03","04","05","06","07"]
+entrypoints:
+  - name: "ska_tmc_common.test_helpers.helper_base_device.HelperBaseDevice"
+  - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
+  - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
+  - name: "ska_tmc_common.test_helpers.helper_dish_ln_device.HelperDishLNDevice"
+  - name: "ska_tmc_common.test_helpers.helper_csp_master_device.HelperCspMasterDevice"
+  - name: "ska_tmc_common.test_helpers.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
+  - name: "cn_helper_subarray_device.CNHelperSubArrayDevice"
+    path: "/app/tests/helpers/cn_helper_subarray_device.py"
+{{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
+server:
+  name: "mocks"
+  instances:
+    - name: "01"
+      classes:
+      - name: "HelperCspMasterLeafDevice"
+        devices:
+        - name: "ska_mid/tm_leaf_node/csp_master"
+    - name: "02"
+      classes:
+      - name: "HelperCspMasterDevice"
+        devices:
+        - name: "mid-csp/control/0"
+    - name: "03"
+      classes:
+      - name: "HelperBaseDevice"
+        devices:
+        - name: "ska_mid/tm_leaf_node/sdp_master"
+        - name: "mid-sdp/control/0"
+    - name: "04"
+      classes:
+      - name: "CNHelperSubArrayDevice"
+        devices:
+        - name: "ska_mid/tm_subarray_node/1"
+    - name: "05"
+      classes:
+      - name: "HelperSubarrayLeafDevice"
+        devices:
+        - name: "ska_mid/tm_leaf_node/csp_subarray01"
+        - name: "ska_mid/tm_leaf_node/sdp_subarray01"
+    - name: "06"
+      classes:
+      - name: "HelperDishDevice"
+        devices:
+        {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
+        - name: "{{ . | lower }}/{{ $DishMasterIdentifier }}"
+        {{- end }}
+    - name: "07"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "ska_mid/tm_leaf_node/d0001"
+depends_on:
+  - device: sys/database/2
+image:
+  registry: "{{.Values.centralnode.image.registry}}"
+  image: "{{.Values.centralnode.image.image}}"
+  tag: "{{.Values.centralnode.image.tag}}"
+  pullPolicy: "{{.Values.centralnode.image.pullPolicy}}"

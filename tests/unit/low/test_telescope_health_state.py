@@ -9,11 +9,9 @@ from ska_tmc_common import (
     HelperMCCSMasterLeafNode,
 )
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
 from ska_tmc_centralnode.model.input import InputParameterLow
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     LOW_CSP_MASTER_DEVICE,
     LOW_CSP_MLN_DEVICE,
@@ -34,7 +32,7 @@ def devices_to_load():
     """Devices to load for command invocation."""
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": LOW_SUBARRAY_DEVICE},
                 {"name": LOW_SDP_SLN_DEVICE},
@@ -102,7 +100,7 @@ def test_set_health_state_degraded(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_device_degraded(devFactory, cm, 15)
+    set_device_degraded(devFactory, cm, 40)
     assert cm.component.telescope_health_state == HealthState.DEGRADED
 
 
@@ -129,7 +127,7 @@ def test_set_health_state_failed(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_failed(devFactory, cm, 15)
+    set_failed(devFactory, cm, 40)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
 

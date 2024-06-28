@@ -8,9 +8,6 @@ from ska_tmc_common import (
     HelperDishLNDevice,
 )
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
@@ -38,11 +35,6 @@ def devices_to_load():
             "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
-            ],
-        },
-        {
-            "class": HelperSubArrayDevice,
-            "devices": [
                 {"name": MID_CSP_SLN_DEVICE},
                 {"name": MID_SDP_SLN_DEVICE},
             ],

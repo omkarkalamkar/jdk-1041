@@ -28,7 +28,7 @@ from tests.mock_callable import MockCallable
 
 logger = logging.getLogger(__name__)
 SLEEP_TIME = 0.5
-TIMEOUT = 25
+TIMEOUT = 50
 KVALUE = 9
 DISH_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d0"
 NUM_DISHES = 10

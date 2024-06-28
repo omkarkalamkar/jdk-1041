@@ -12,7 +12,6 @@ import pandas as pd
 from ska_control_model import HealthState
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.base import TaskCallbackType
-from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from ska_tango_base.faults import StateModelError
@@ -48,10 +47,7 @@ from ska_tmc_centralnode.input_validator import (
     AssignResourceValidator,
     ReleaseResourceValidator,
 )
-from ska_tmc_centralnode.manager.aggregators import (
-    LoadDishCfgCommandResultAggregator,
-    TMCOpStateAggregator,
-)
+from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import (
     CentralComponent,
@@ -98,7 +94,6 @@ class CNComponentManager(TmcComponentManager):
         communication_state_callback=None,
         _telescope_availability_callback=None,
         component_state_callback=None,
-        max_workers=5,
         proxy_timeout=500,
         sleep_time=1,
         skuid_service=(
@@ -136,7 +131,6 @@ class CNComponentManager(TmcComponentManager):
             _event_receiver=False,
             communication_state_callback=communication_state_callback,
             component_state_callback=component_state_callback,
-            max_workers=max_workers,
             proxy_timeout=proxy_timeout,
             sleep_time=sleep_time,
             *args,
@@ -174,10 +168,9 @@ class CNComponentManager(TmcComponentManager):
         self.subarray_devname: str = ""
         self.command_mapping = {}
         self.result_codes_mapping = {}
-        self.dev_names_for_load_dish_cfg = []
+
         self.no_of_events_for_command = 0
-        self.load_dish_cfg_aggregated_result = None
-        self.load_dish_cfg_command_id = None
+
         self.supported_commands = (
             "AssignResources",
             "ReleaseResources",
@@ -187,6 +180,13 @@ class CNComponentManager(TmcComponentManager):
             self, logger=logger
         )
         self._liveliness_probe = None
+        self.supported_commands_for_responsive_check = [
+            "TelescopeOn",
+            "TelescopeOff",
+            "TelescopeStandby",
+            "AssignResources",
+            "ReleaseResources",
+        ]
 
     def stop_event_receiver(self):
         """Stops the event receiver."""
@@ -269,10 +269,6 @@ class CNComponentManager(TmcComponentManager):
                 result.append(dev)
                 continue
         return result
-
-    def get_load_disg_cfg_resultcode(self):
-        """Return Aggregated command result for Load Dish Cfg command"""
-        return self.load_dish_cfg_aggregated_result
 
     # pylint:disable =inconsistent-return-statements
     def get_subarray_obsstate(self) -> ObsState:
@@ -360,19 +356,6 @@ class CNComponentManager(TmcComponentManager):
             )
             return False
 
-        return True
-
-    def check_if_mccs_mln_is_available(self) -> bool:
-        """
-        Returns boolean value based on availability of MccsMasterLeafNode,
-        which indicated availability of Mccs Master.
-        """
-        telescope_availability = self.get_telescope_availability()
-        if not telescope_availability["mccs_master_leaf_node"] is True:
-            self.logger.info(
-                "MccsMasterLeafNode is not available to receive command"
-            )
-            return False
         return True
 
     def check_if_subarrays_are_responsive(self) -> bool:
@@ -623,117 +606,6 @@ class CNComponentManager(TmcComponentManager):
         """Setter method for telescope availability"""
         self.component.telescope_availability = telescope_availability
 
-    def update_load_dish_cfg_results(
-        self, dev_name: str, value: tuple, is_async_result: bool = False
-    ) -> None:
-        """This method is used to update the result returned
-        from Csp Master Leaf Node
-        and returned from Dish Leaf Nodes for SetKValue command.
-        Update result_codes_mapping with dev name as a key and
-        command result as a value
-        If all events are received from all device then aggregate
-        the result
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
-        or (unique_id,TaskStatus)
-        :param dev_name: name of the device who's event has been
-        captured in this method
-        :type dev_name: str
-        :param value: longRunningCommandResult attribute event.
-        :type value: tuple
-        :param is_async_result: Whether this callback is called
-        from Async command result call or
-        longRunningCommandResult attribute callback
-        Examples of value
-        Async callback value: [array([0], dtype=int32), ['']]
-        LongRunningCommandResultCallBack value:
-        ('1698838234.9087641-LoadDishCfg',
-        'Exception occurred, command failed.')
-        """
-        self.logger.info(
-            "longRunningCommandResult event for device: %s, with value: %s",
-            dev_name,
-            value,
-        )
-        with self.lock:
-            result_code_or_exception = []
-            if is_async_result:
-                # Set result code and message
-                self.logger.debug(
-                    "event from asynchronous command result callback %s",
-                    value,
-                )
-                result_code_or_exception = [value[0][0], value[1][0]]
-
-            else:
-                unique_id, result_code_or_exception_or_task_status = value
-                if unique_id.endswith("LoadDishCfg"):
-                    if result_code_or_exception_or_task_status.isdigit():
-                        # Failed event is called twice one with error message
-                        # and other with result code
-                        # in case of second Failed event just ignore
-                        # it as Failed Message already updated in
-                        # first event call
-                        if dev_name not in self.result_codes_mapping:
-                            result_code_or_exception = [
-                                result_code_or_exception_or_task_status,
-                                "",
-                            ]
-                    elif result_code_or_exception_or_task_status:
-                        result_code_or_exception = [
-                            ResultCode.FAILED,
-                            result_code_or_exception_or_task_status,
-                        ]
-            if result_code_or_exception and self.dev_names_for_load_dish_cfg:
-                self.result_codes_mapping[dev_name] = result_code_or_exception
-                self.logger.info(
-                    "Dev names for load_dish_cfg values %s "
-                    + "and result_codes_mapping are %s",
-                    self.dev_names_for_load_dish_cfg,
-                    self.result_codes_mapping,
-                )
-
-            # When all events received from dishes and Csp master leaf node
-            # then aggregate the result
-            if len(self.dev_names_for_load_dish_cfg) == len(
-                self.result_codes_mapping
-            ):
-                # Aggregate the result
-                self.logger.info(
-                    "All Events received for load dish cfg Aggregating results"
-                )
-                self.aggregate_load_dish_cfg_results()
-
-    def aggregate_load_dish_cfg_results(self) -> None:
-        """This method aggregate load dish cfg command result based on
-        generated data
-        """
-        load_dish_cfg_aggregator = LoadDishCfgCommandResultAggregator(
-            self, self.logger
-        )
-        (
-            load_dish_cfg_aggregated_result,
-            message,
-        ) = load_dish_cfg_aggregator.aggregate()
-        self.load_dish_cfg_aggregated_result = load_dish_cfg_aggregated_result
-        if (
-            self.load_dish_cfg_aggregated_result == ResultCode.FAILED
-            and self.load_dish_cfg_command_id
-        ):
-            exception_message = f"Exception occurred on device: {message}"
-            self.long_running_result_callback(
-                self.load_dish_cfg_command_id,
-                ResultCode.FAILED,
-                exception_msg=exception_message,
-            )
-
-    def reset_load_dish_cfg_data(self) -> None:
-        """Reset all data which is set for aggregating LoadDisgCfg command"""
-        self.logger.info("Resetting LoadDishCfg aggregated data")
-        self.load_dish_cfg_aggregated_result = ""
-        self.dev_names_for_load_dish_cfg = []
-        self.result_codes_mapping = {}
-        self.load_dish_cfg_command_id = None
-
     def _aggregate_state(self) -> None:
         """
         Aggregates both telescope state and tmc op state
@@ -816,14 +688,17 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
-        telescopon_command = TelescopeOn(
+        telescope_on_command = TelescopeOn(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
         task_status, response = self.submit_task(
-            telescopon_command.telescope_on,
+            telescope_on_command.telescope_on,
             args=[self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                command_name="TelescopeOn"
+            ),
         )
         return task_status, response
 
@@ -841,6 +716,9 @@ class CNComponentManager(TmcComponentManager):
             telescope_off_command.telescope_off,
             args=[self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                command_name="TelescopeOff"
+            ),
         )
         return task_status, response
 
@@ -858,36 +736,11 @@ class CNComponentManager(TmcComponentManager):
             telescopestandby_command.telescope_standby,
             args=[self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                command_name="TelescopeStandby"
+            ),
         )
         return task_status, response
-
-    def is_subarray_in_right_obs_state(
-        self, subarray_id: int, desired_obsstate: List, command_name: str
-    ) -> bool:
-        """
-        Checks subarray obsstate before invoking command
-
-        :param subarray_id: subarray id on which command invoke
-        :type subarray_id: int
-        :param desired_obsstate: list of obs states which are allowed
-        :type desired_obsstate: List
-        :param command_name: name of command for obstate check
-        :type: str
-
-        :return: return boolean value if command in valid obstate else
-            return exception.
-        """
-        subarray_devices = self.input_parameter.subarray_dev_names
-        for device in subarray_devices:
-            subarray_device_id = re.findall(r"\d+", device)
-            if subarray_id == int(subarray_device_id[0]):
-                subarray_obstate = self.get_device(device).obs_state
-                if subarray_obstate not in desired_obsstate:
-                    raise StateModelError(
-                        f"{command_name} command not permitted in observation "
-                        + f"state {subarray_obstate}"
-                    )
-        return True
 
     def is_input_json_valid(self, argin: str) -> Tuple[bool, str]:
         """
@@ -922,6 +775,58 @@ class CNComponentManager(TmcComponentManager):
                 (f"{exp}:{e}"),
             )
 
+    def command_not_allowed_callable(
+        self,
+        subarray_id: int = 0,
+        desired_obsstate: List | None = None,
+        command_name: str = "",
+    ):
+        """This method provides callable for command not allowed
+
+        Args:
+            subarray_id (int): subarray_id
+            desired_obsstate (List): desired observation state
+            command_name (str): command name
+        """
+
+        def is_subarray_in_right_obs_state() -> bool:
+            """
+            Checks subarray obsstate before invoking command
+
+            :param subarray_id: subarray id on which command invoke
+            :type subarray_id: int
+            :param desired_obsstate: list of obs states which are allowed
+            :type desired_obsstate: List
+            :param command_name: name of command for obstate check
+            :type: str
+
+            :return: return boolean value if command in valid obstate else
+                return exception.
+            """
+            self.check_device_responsiveness(command_name)
+            if subarray_id and desired_obsstate:
+                subarray_devices = self.input_parameter.subarray_dev_names
+                for device in subarray_devices:
+                    subarray_device_id = re.findall(r"\d+", device)
+                    if subarray_id == int(subarray_device_id[0]):
+                        subarray_obstate = self.get_device(device).obs_state
+                        if subarray_obstate not in desired_obsstate:
+                            raise StateModelError(
+                                f"{command_name} command not permitted "
+                                + f"in observation state {subarray_obstate}"
+                            )
+            return True
+
+        return is_subarray_in_right_obs_state
+
+    def check_device_responsiveness(self, command_name: str) -> None:
+        """
+        Override this method to add responsive checks for the devices
+        :param command_name: Command name for the check
+        :type command_name: str
+        """
+        return True
+
     def assign_resources(
         self, argin: str, task_callback: Optional[Callable] = None
     ):
@@ -945,13 +850,6 @@ class CNComponentManager(TmcComponentManager):
         )
         if not result:
             return TaskStatus.REJECTED, subarray_id_or_message
-
-        # check whether subarray is in proper obstate or not.
-        self.is_subarray_in_right_obs_state(
-            subarray_id_or_message,
-            [ObsState.EMPTY, ObsState.IDLE],
-            "AssignResources",
-        )
 
         # Execute the command if the input JSON is valid
         self.logger.info("Calling component manager assign_resources method")
@@ -1035,6 +933,11 @@ class CNComponentManager(TmcComponentManager):
             assign_resources_command.assign_resources,
             args=[json_argument, self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                subarray_id_or_message,
+                [ObsState.EMPTY, ObsState.IDLE],
+                "AssignResources",
+            ),
         )
         return task_status, response
 
@@ -1060,11 +963,6 @@ class CNComponentManager(TmcComponentManager):
         )
         if not result:
             return TaskStatus.REJECTED, subarray_id_or_message
-
-        # check whether subarray is in proper obstate or not.
-        self.is_subarray_in_right_obs_state(
-            subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"
-        )
 
         release_resources_command = ReleaseResources(
             self, adapter_factory=self.adapter_factory, logger=self.logger
@@ -1111,6 +1009,9 @@ class CNComponentManager(TmcComponentManager):
             release_resources_command.release_resources,
             args=[json.dumps(input_json_or_message), self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"
+            ),
         )
         return task_status, response
 
@@ -1129,22 +1030,49 @@ class CNComponentManager(TmcComponentManager):
         self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
 
     def is_command_allowed(self):
-        """blank method for resolving pylint errors"""
+        """This method needs to be overridden by the child classes
+        in order to check whether command is allowed or not"""
 
-    def off(self):
-        """blank method for resolving pylint errors"""
+    def off(
+        self, task_callback: TaskCallbackType | None = None
+    ) -> tuple[TaskStatus, str]:
+        """This method needs to be overridden by the child classes
+        in order to check have functionality under off command"""
+        message = (
+            "Command is not Implemented in Central Node."
+            + " Please use TelescopeOff command"
+        )
+        return TaskStatus.REJECTED, message
 
-    def on(self):
-        """blank method for resolving pylint errors"""
+    def on(
+        self, task_callback: TaskCallbackType | None = None
+    ) -> tuple[TaskStatus, str]:
+        """This method needs to be overridden by the child classes
+        in order to check have functionality under off command"""
+        message = (
+            "Command is not Implemented in Central Node."
+            + " Please use TelescopeOn command"
+        )
+        return TaskStatus.REJECTED, message
 
     def start_communicating(self):
-        """blank method for resolving pylint errors"""
+        """This method needs to be overridden by the child classes
+        to have this functionality"""
 
     def stop_communicating(self):
-        """blank method for resolving pylint errors"""
+        """This method needs to be overridden by the child classes
+        to have this functionality"""
 
-    def standby(self):
-        """blank method for resolving pylint errors"""
+    def standby(
+        self, task_callback: TaskCallbackType | None = None
+    ) -> tuple[TaskStatus, str]:
+        """This method needs to be overridden by the child classes
+        in order to check have functionality under off command"""
+        message = (
+            "Command is not Implemented in Central Node."
+            + " Please use TelescopeStandby command"
+        )
+        return TaskStatus.REJECTED, message
 
     def _aggregate_health_state(self):
         """

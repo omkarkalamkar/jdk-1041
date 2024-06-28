@@ -84,7 +84,7 @@ class ReleaseResources(AssignReleaseResources):
             message,
         )
         if result_code == ResultCode.FAILED:
-            self.update_task_status(result_code, message)
+            self.update_task_status((result_code, message), message)
             self.component_manager.stop_timer()
             self.component_manager.command_mapping.pop(
                 self.component_manager.command_id
@@ -102,11 +102,15 @@ class ReleaseResources(AssignReleaseResources):
                 ),
             )
 
-    def update_task_status(self, result: ResultCode, message: str = ""):
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ):
         """Updates the task status for command"""
-        if result == ResultCode.FAILED:
+        if result[0] == ResultCode.FAILED:
             self.task_callback(
-                result=result, status=TaskStatus.COMPLETED, exception=message
+                result=result,
+                status=TaskStatus.COMPLETED,
+                exception=exception,
             )
             self.component_manager.subarray_devname = ""
         else:

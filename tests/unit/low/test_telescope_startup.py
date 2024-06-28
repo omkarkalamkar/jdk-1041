@@ -7,11 +7,9 @@ from ska_tmc_common import (
     HelperMCCSController,
     HelperMCCSMasterLeafNode,
 )
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
 from ska_tmc_centralnode.model.input import InputParameterLow
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     LOW_CSP_MASTER_DEVICE,
     LOW_CSP_MLN_DEVICE,
@@ -30,7 +28,7 @@ from tests.settings import (
 def devices_to_load():
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": LOW_SUBARRAY_DEVICE},
                 {"name": LOW_SDP_SLN_DEVICE},

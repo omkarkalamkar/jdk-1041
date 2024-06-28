@@ -6,6 +6,7 @@ import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -42,7 +43,10 @@ def test_low_release_resources_command(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, "Command Completed"),
+        }
     )
 
 
@@ -135,3 +139,33 @@ def check_if_subarray_is_available(cm):
         exp = "Timeout occurred while checking the SubarrayNode availability."
         if elapsed_time > TIMEOUT:
             pytest.fail(exp)
+
+
+@pytest.mark.SKA_low
+def test_low_release_resources_raises_state_model_exception(
+    tango_context, task_callback, json_factory
+):
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    cm.is_command_allowed("ReleaseResources")
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    subarray_device.SetDirectObsState(ObsState.EMPTY)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
+    release_input_str = json_factory("command_release_resource_low")
+    cm.release_resources(release_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    data = task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.REJECTED,
+            "result": Anything,
+            "exception": Anything,
+        }
+    )
+    assert ResultCode.REJECTED == data["result"][0]
+    assert "ReleaseResources command not permitted" in data["result"][1]

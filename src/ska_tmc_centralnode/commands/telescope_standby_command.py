@@ -58,13 +58,13 @@ class TelescopeStandby(TelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
-                result=ResultCode.FAILED,
+                result=(ResultCode.FAILED, message),
                 exception=message,
             )
         else:
             task_callback(
                 status=TaskStatus.COMPLETED,
-                result=ResultCode.OK,
+                result=(ResultCode.OK, message),
             )
 
     def do_mid(self, argin=None):
@@ -151,7 +151,7 @@ class TelescopeStandby(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def do_low(self, argin=None):
         """
@@ -235,7 +235,7 @@ class TelescopeStandby(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def turn_standby_subarrays(self):
         """Turns subarrays to standby"""

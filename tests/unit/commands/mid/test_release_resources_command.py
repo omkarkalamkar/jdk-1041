@@ -7,6 +7,7 @@ import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -49,7 +50,10 @@ def test_mid_release_resources_command_with_ok(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, "Command Completed"),
+        }
     )
 
 
@@ -154,8 +158,7 @@ def test_release_resources_command_timeout(tango_context, task_callback):
     )
     task_callback.assert_against_call(
         status=TaskStatus.COMPLETED,
-        result=ResultCode.FAILED,
-        exception="Timeout has occurred, command failed",
+        result=(ResultCode.FAILED, "Timeout has occurred, command failed"),
     )
     subarray_device.SetDefective(json.dumps({"enabled": False}))
 
@@ -171,7 +174,7 @@ def test_release_resources_exception_on_sn(tango_context, task_callback):
     cm.is_command_allowed("ReleaseResources")
     defect = {
         "enabled": True,
-        "fault_type": FaultType.COMMAND_NOT_ALLOWED,
+        "fault_type": FaultType.COMMAND_NOT_ALLOWED_BEFORE_QUEUING,
         "error_message": "Command not allowed on leaf node.",
         "result": ResultCode.FAILED,
     }
@@ -189,9 +192,10 @@ def test_release_resources_exception_on_sn(tango_context, task_callback):
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     result = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED,
     )
-    assert "Command not allowed on leaf node." in result["exception"]
+    assert ResultCode.FAILED == result["result"][0]
+    assert "Command not allowed on leaf node." in result["result"][1]
     subarray_device.SetDefective(json.dumps({"enabled": False}))
 
 
@@ -207,3 +211,31 @@ def check_if_subarray_is_available(cm):
             pytest.fail(
                 "Timeout occurred while checking the SubarrayNode availability."
             )
+
+
+def test_mid_release_resources_raises_state_model_exception(
+    tango_context, task_callback
+):
+    cm, _ = create_cm()
+    cm.is_dish_vcc_config_set = True
+    cm.is_command_allowed("ReleaseResources")
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetDirectObsState(ObsState.EMPTY)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+    release_input_str = get_release_input_str()
+    cm.release_resources(release_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    data = task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.REJECTED,
+            "result": Anything,
+            "exception": Anything,
+        }
+    )
+    assert ResultCode.REJECTED == data["result"][0]
+    assert "ReleaseResources command not permitted" in data["result"][1]

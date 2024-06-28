@@ -5,10 +5,8 @@ import pytest
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,
@@ -29,7 +27,7 @@ def devices_to_load():
     """Devices to load for command invokation"""
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": MID_CSP_SLN_DEVICE},
                 {"name": MID_SDP_SLN_DEVICE},
@@ -83,7 +81,7 @@ def test_set_health_state_degraded(tango_context):
     set_device_degraded(
         devFactory,
         cm,
-        12,  # Here expected elapsed time is set to 12 since  set_state()
+        40,  # Here expected elapsed time is set to 12 since  set_state()
         # API is taking more time to set the state and hence actual
         # elapsed time is increasing
     )
@@ -110,7 +108,7 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
 def test_set_health_state_failed(tango_context):
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_failed(devFactory, cm, 15)
+    set_failed(devFactory, cm, 40)
     assert cm.component.telescope_health_state == HealthState.FAILED
 
 

@@ -58,13 +58,13 @@ class TelescopeOn(TelescopeOnOff):
         if ret_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
-                result=ResultCode.FAILED,
+                result=(ResultCode.FAILED, message),
                 exception=message,
             )
         else:
             task_callback(
                 status=TaskStatus.COMPLETED,
-                result=ResultCode.OK,
+                result=(ResultCode.OK, message),
             )
 
     def do_mid(self, argin=None):
@@ -114,7 +114,7 @@ class TelescopeOn(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def turn_on_sdp(self):
         """Turns on the SDP"""
@@ -224,7 +224,7 @@ class TelescopeOn(TelescopeOnOff):
                 f"Unavailable devices are {unavailable_devices}",
             )
 
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def turn_on_mccs(self):
         """Turns on the MCCS"""

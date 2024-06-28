@@ -11,7 +11,6 @@ from ska_tmc_common import (
     HelperDishLNDevice,
     HelperMCCSController,
     HelperMCCSMasterLeafNode,
-    HelperSubArrayDevice,
 )
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
@@ -36,7 +35,7 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
                 {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},

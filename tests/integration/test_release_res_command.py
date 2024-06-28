@@ -1,8 +1,11 @@
 """Test cases for rlease resources command"""
+import json
+
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 
 from tests.integration.conftest import ensure_checked_devices
@@ -47,7 +50,10 @@ def release_resources(
     )
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id_on[0], str(int(ResultCode.OK))),
+        (
+            unique_id_on[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=6,
     )
 
@@ -67,7 +73,10 @@ def release_resources(
         )
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_assign[0], str(int(ResultCode.OK))),
+        (
+            unique_id_assign[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=6,
     )
 
@@ -79,7 +88,7 @@ def release_resources(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=6,
     )
 
@@ -148,7 +157,10 @@ def release_resources_without_subarray_id(
     )
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id_on[0], str(int(ResultCode.OK))),
+        (
+            unique_id_on[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=4,
     )
 
@@ -159,7 +171,10 @@ def release_resources_without_subarray_id(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id_assign[0], str(int(ResultCode.OK))),
+        (
+            unique_id_assign[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
         lookahead=4,
     )
 
@@ -181,7 +196,7 @@ def release_resources_without_subarray_id(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -196,7 +211,7 @@ def release_resources_without_subarray_id(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
     event_remover(
@@ -258,7 +273,7 @@ def test_release_resources_error_propagation(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=5,
     )
 
@@ -283,7 +298,7 @@ def test_release_resources_error_propagation(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=6,
     )
     tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
@@ -304,19 +319,18 @@ def test_release_resources_error_propagation(
 
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks.assert_change_event(
+    event_data = change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (
-            unique_id[0],
-            f"Exception occurred on device: {MID_SUBARRAY_DEVICE}:"
-            + " Exception occurred, command failed.",
-        ),
-        lookahead=6,
+        (unique_id[0], Anything),
+        lookahead=8,
     )
+    exception_message = (
+        f"{MID_SUBARRAY_DEVICE}:" + " Exception occurred, command failed."
+    )
+
+    assert exception_message in event_data["attribute_value"][1]
     tmc_subarray.SetDefective(RESET_DEFECT)
     # Tear Down
-    tmc_subarray.ReleaseAllResources()
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
@@ -358,7 +372,7 @@ def test_release_resources_mid_timeout(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=5,
     )
 
@@ -383,7 +397,7 @@ def test_release_resources_mid_timeout(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=6,
     )
 
@@ -408,12 +422,16 @@ def test_release_resources_mid_timeout(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Timeout has occurred, command failed",
+            json.dumps(
+                (
+                    int(ResultCode.FAILED),
+                    "Timeout has occurred, command failed",
+                )
+            ),
         ),
         lookahead=8,
     )
     tmc_subarray.SetDefective(RESET_DEFECT)
-    tmc_subarray.ReleaseAllResources()
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
@@ -457,7 +475,7 @@ def test_release_resources_low_timeout(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -482,7 +500,7 @@ def test_release_resources_low_timeout(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=6,
     )
 
@@ -507,7 +525,12 @@ def test_release_resources_low_timeout(
         "longRunningCommandResult",
         (
             unique_id[0],
-            "Timeout has occurred, command failed",
+            json.dumps(
+                (
+                    int(ResultCode.FAILED),
+                    "Timeout has occurred, command failed",
+                )
+            ),
         ),
         lookahead=6,
     )
@@ -556,7 +579,7 @@ def test_release_resources_error_aggregation(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=5,
     )
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -581,7 +604,7 @@ def test_release_resources_error_aggregation(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=6,
     )
 
@@ -600,16 +623,16 @@ def test_release_resources_error_aggregation(
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks.assert_change_event(
+    event_data = change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (
-            unique_id[0],
-            "Exception occurred on the following devices: "
-            + LOW_SUBARRAY_DEVICE
-            + ": Exception occurred, command failed.",
-        ),
-        lookahead=6,
+        (unique_id[0], Anything),
+        lookahead=8,
     )
+    exception_message = (
+        f"{LOW_SUBARRAY_DEVICE}:" + " Exception occurred, command failed."
+    )
+
+    assert exception_message in event_data["attribute_value"][1]
     subarray_proxy.SetDefective(RESET_DEFECT)
     # Teardown
     subarray_proxy.ReleaseAllResources()

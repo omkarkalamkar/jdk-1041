@@ -4,7 +4,9 @@ import time
 import mock
 import pytest
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -21,7 +23,7 @@ from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 @pytest.mark.SKA_low
 def test_low_assign_resources_command(
-    tango_context, task_callback, json_factory, caplog
+    tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
@@ -39,7 +41,10 @@ def test_low_assign_resources_command(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.COMPLETED, "result": ResultCode.OK}
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (ResultCode.OK, "Command Completed"),
+        }
     )
 
 
@@ -172,7 +177,7 @@ def test_low_assign_resources_command_missing_mccs(
     del json_argument["mccs"]
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED, result=(ResultCode.FAILED,)
     )
     assert "mccs" in task_callback_data["exception"]
 
@@ -190,9 +195,10 @@ def test_low_assign_resources_command_missing_channel_blocks(
     del json_argument["mccs"]["channel_blocks"]
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED
     )
-    assert "channel_blocks" in task_callback_data["exception"]
+    assert ResultCode.FAILED == task_callback_data["result"][0]
+    assert "channel_blocks" in task_callback_data["result"][1]
 
 
 @pytest.mark.skip(reason="validate test during integration of MCCS")
@@ -209,9 +215,10 @@ def test_low_assign_resources_command_missing_station_ids(
     del json_argument["mccs"]["station_ids"]
     cm.assign_resources(json_argument, task_callback=task_callback)
     task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=ResultCode.FAILED
+        status=TaskStatus.COMPLETED
     )
-    assert "station_ids" in task_callback_data["exception"]
+    assert ResultCode.FAILED == task_callback_data["result"][0]
+    assert "station_ids" in task_callback_data["result"][1]
 
 
 @pytest.mark.SKA_low
@@ -239,3 +246,32 @@ def check_if_subarray_is_available(cm):
             pytest.fail(
                 "Timeout occurred while checking the SubarrayNode availability."
             )
+
+
+@pytest.mark.SKA_low
+def test_low_assign_resources_raises_state_model_exception(
+    tango_context, task_callback, json_factory
+):
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    subarray_device.SetDirectObsState(ObsState.READY)
+    check_if_subarray_is_available(cm)
+    cm.is_dish_vcc_config_set = True
+    cm.is_command_allowed("AssignResources")
+    assign_input_str = json_factory("command_assign_resource_low")
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    data = task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.REJECTED,
+            "result": Anything,
+            "exception": Anything,
+        }
+    )
+    assert ResultCode.REJECTED == data["result"][0]
+    assert "AssignResources command not permitted" in data["result"][1]

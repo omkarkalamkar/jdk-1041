@@ -4,14 +4,12 @@ import time
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
 from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
     LOW_SUBARRAY_DEVICE,
@@ -33,7 +31,7 @@ def devices_to_load():
             "devices": [{"name": "ska_low/tm_central/central_node"}],
         },
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": LOW_SUBARRAY_DEVICE},
             ],

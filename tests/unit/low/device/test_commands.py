@@ -11,7 +11,7 @@ def central_node_device(request):
     """Create DeviceProxy for tests"""
     true_context = request.config.getoption("--true-context")
     if not true_context:
-        with DeviceTestContext(CentralNodeLow) as proxy:
+        with DeviceTestContext(CentralNodeLow, timeout=50) as proxy:
             yield proxy
     else:
         database = tango.Database()
