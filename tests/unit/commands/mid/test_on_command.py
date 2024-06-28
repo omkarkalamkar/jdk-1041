@@ -3,6 +3,7 @@ import time
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -13,6 +14,7 @@ from tango import DevState
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from tests.mock_callable import MockCallable
 from tests.settings import (
+    DISH_LEAF_NODE_DEVICE,
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
     check_cspmln_availability,
@@ -168,3 +170,32 @@ def test_telescope_on_fail_check_allowed(tango_context):
     with pytest.raises(CommandNotAllowed):
         cm.is_dish_vcc_config_set = True
         cm.is_command_allowed("TelescopeOn")
+
+
+def test_telescope_on_command_rejected(tango_context, task_callback):
+    logger.info("%s", tango_context)
+    # import debugpy; debugpy.debug_this_thread()
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    dev_info_dishln = cm.get_device(DISH_LEAF_NODE_DEVICE)
+    dev_info_dishln.update_unresponsive(True)
+    cm.is_dish_vcc_config_set = True
+    cm.is_command_allowed("TelescopeOn")
+    cm.telescope_on(task_callback=task_callback)
+
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    data = task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.REJECTED,
+            "result": Anything,
+            "exception": Anything,
+        },
+        lookahead=5,
+    )
+    assert ResultCode.REJECTED == data["result"][0]
+    assert f"['{DISH_LEAF_NODE_DEVICE}'] not available" in data["result"][1]

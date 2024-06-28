@@ -688,14 +688,17 @@ class CNComponentManager(TmcComponentManager):
 
         :return: a result code and message
         """
-        telescopon_command = TelescopeOn(
+        telescope_on_command = TelescopeOn(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
         task_status, response = self.submit_task(
-            telescopon_command.telescope_on,
+            telescope_on_command.telescope_on,
             args=[self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                command_name="TelescopeOn"
+            ),
         )
         return task_status, response
 
@@ -713,6 +716,9 @@ class CNComponentManager(TmcComponentManager):
             telescope_off_command.telescope_off,
             args=[self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                command_name="TelescopeOff"
+            ),
         )
         return task_status, response
 
@@ -730,6 +736,9 @@ class CNComponentManager(TmcComponentManager):
             telescopestandby_command.telescope_standby,
             args=[self.logger],
             task_callback=task_callback,
+            is_cmd_allowed=self.command_not_allowed_callable(
+                command_name="TelescopeStandby"
+            ),
         )
         return task_status, response
 
@@ -767,7 +776,10 @@ class CNComponentManager(TmcComponentManager):
             )
 
     def command_not_allowed_callable(
-        self, subarray_id: int, desired_obsstate: List, command_name: str
+        self,
+        subarray_id: int = 0,
+        desired_obsstate: List | None = None,
+        command_name: str = "",
     ):
         """This method provides callable for command not allowed
 
@@ -792,16 +804,17 @@ class CNComponentManager(TmcComponentManager):
                 return exception.
             """
             self.check_device_responsiveness(command_name)
-            subarray_devices = self.input_parameter.subarray_dev_names
-            for device in subarray_devices:
-                subarray_device_id = re.findall(r"\d+", device)
-                if subarray_id == int(subarray_device_id[0]):
-                    subarray_obstate = self.get_device(device).obs_state
-                    if subarray_obstate not in desired_obsstate:
-                        raise StateModelError(
-                            f"{command_name} command not permitted "
-                            + f"in observation state {subarray_obstate}"
-                        )
+            if subarray_id and desired_obsstate:
+                subarray_devices = self.input_parameter.subarray_dev_names
+                for device in subarray_devices:
+                    subarray_device_id = re.findall(r"\d+", device)
+                    if subarray_id == int(subarray_device_id[0]):
+                        subarray_obstate = self.get_device(device).obs_state
+                        if subarray_obstate not in desired_obsstate:
+                            raise StateModelError(
+                                f"{command_name} command not permitted "
+                                + f"in observation state {subarray_obstate}"
+                            )
             return True
 
         return is_subarray_in_right_obs_state

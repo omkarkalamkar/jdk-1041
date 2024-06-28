@@ -8,6 +8,7 @@ import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
+from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.device_info import SubArrayDeviceInfo
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -374,3 +375,31 @@ def check_if_subarray_is_available(cm):
             pytest.fail(
                 "Timeout occurred while checking the SubarrayNode availability."
             )
+
+
+def test_mid_assign_resources_raises_state_model_exception(
+    tango_context, task_callback
+):
+    cm, _ = create_cm()
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    subarray_device.SetDirectObsState(ObsState.READY)
+    check_if_subarray_is_available(cm)
+    cm.is_dish_vcc_config_set = True
+    cm.is_command_allowed("AssignResources")
+    assign_input_str = get_assign_input_str()
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+
+    data = task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.REJECTED,
+            "result": Anything,
+            "exception": Anything,
+        }
+    )
+    assert ResultCode.REJECTED == data["result"][0]
+    assert "AssignResources command not permitted" in data["result"][1]
