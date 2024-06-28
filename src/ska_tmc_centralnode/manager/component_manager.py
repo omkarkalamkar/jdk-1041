@@ -1017,22 +1017,49 @@ class CNComponentManager(TmcComponentManager):
         self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
 
     def is_command_allowed(self):
-        """blank method for resolving pylint errors"""
+        """This method needs to be overridden by the child classes
+        in order to check whether command is allowed or not"""
 
-    def off(self):
-        """blank method for resolving pylint errors"""
+    def off(
+        self, task_callback: TaskCallbackType | None = None
+    ) -> tuple[TaskStatus, str]:
+        """This method needs to be overridden by the child classes
+        in order to check have functionality under off command"""
+        message = (
+            "Command is not Implemented in Central Node."
+            + " Please use TelescopeOff command"
+        )
+        return TaskStatus.REJECTED, message
 
-    def on(self):
-        """blank method for resolving pylint errors"""
+    def on(
+        self, task_callback: TaskCallbackType | None = None
+    ) -> tuple[TaskStatus, str]:
+        """This method needs to be overridden by the child classes
+        in order to check have functionality under off command"""
+        message = (
+            "Command is not Implemented in Central Node."
+            + " Please use TelescopeOn command"
+        )
+        return TaskStatus.REJECTED, message
 
     def start_communicating(self):
-        """blank method for resolving pylint errors"""
+        """This method needs to be overridden by the child classes
+        to have this functionality"""
 
     def stop_communicating(self):
-        """blank method for resolving pylint errors"""
+        """This method needs to be overridden by the child classes
+        to have this functionality"""
 
-    def standby(self):
-        """blank method for resolving pylint errors"""
+    def standby(
+        self, task_callback: TaskCallbackType | None = None
+    ) -> tuple[TaskStatus, str]:
+        """This method needs to be overridden by the child classes
+        in order to check have functionality under off command"""
+        message = (
+            "Command is not Implemented in Central Node."
+            + " Please use TelescopeStandby command"
+        )
+        return TaskStatus.REJECTED, message
 
     def _aggregate_health_state(self):
         """
