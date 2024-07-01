@@ -103,8 +103,8 @@ class CNComponentManager(TmcComponentManager):
             + ".skao.int:9870"
         ),
         command_timeout=30,
-        assignresources_interface="",
-        releaseresources_interface="",
+        assignresources_interface: str = "",
+        releaseresources_interface: str = "",
         *args,
         **kwargs,
     ):
@@ -970,8 +970,14 @@ class CNComponentManager(TmcComponentManager):
                     config=json.loads(argin),
                     strictness=2,
                 )
-            except Exception as e:
-                return assign_resources_command.reject_command(str(e))
+            except Exception as exception:
+                # Catch other unexpected exceptions
+                self.logger.exception(
+                    "Exception occurred while validating for "
+                    + "assignresource json : %s ",
+                    exception,
+                )
+                return assign_resources_command.reject_command(str(exception))
 
         elif isinstance(self.input_parameter, InputParameterMid):
             # Utilize CDM to validate json.

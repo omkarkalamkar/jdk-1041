@@ -47,11 +47,11 @@ class CNComponentManagerLow(CNComponentManager):
         sleep_time=1,
         skuid_service="",
         command_timeout=30,
-        assignresources_interface=(
+        assignresources_interface: str = (
             "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
         ),
-        releaseresources_interface=(
-            "https://schema.skao.int/ska-tmc-releaseresources/2.0"
+        releaseresources_interface: str = (
+            "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
         ),
         *args,
         **kwargs,

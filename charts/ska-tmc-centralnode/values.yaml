@@ -89,7 +89,7 @@ deviceServers:
       MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
       MCCSMasterFQDN: "low-mccs/control/control"
       AssignResourcesInterface: "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
-      ReleaseResourcesInterface: "https://schema.skao.int/ska-tmc-releaseresources/2.0"
+      ReleaseResourcesInterface: "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
 
 
 nodeSelector: {}

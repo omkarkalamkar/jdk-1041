@@ -45,12 +45,12 @@ class AbstractCentralNode(TMCBaseDevice):
 
     AssignResourcesInterface = device_property(
         dtype="str",
-        doc="Interface value of Asignresources schema",
+        doc="Interface value of AsignResources schema",
     )
 
     ReleaseResourcesInterface = device_property(
         dtype="str",
-        doc="Interface value of Asignresources schema",
+        doc="Interface value of ReleaseResources schema",
     )
 
     CspMasterLeafNodeFQDN = device_property(dtype="str")
