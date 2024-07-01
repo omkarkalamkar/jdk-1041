@@ -162,6 +162,30 @@ class CentralNodeMid(AbstractCentralNode):
         self.logger.info("imaging %s", imaging)
         self.push_change_event("imaging", imaging)
 
+    def update_dishvccconfig_callback(self, isdishvccconfigset):
+        """Update isDishVccConfigSet callbacks"""
+        try:
+            self.push_change_event("isDishVccConfigSet", isdishvccconfigset)
+
+        except Exception as exception:
+            self.logger.info(
+                "Exception while pushing event for isDishVccConfigSet - %s",
+                exception,
+            )
+
+    def dishvccvalidation_callback(self, dishvccvalidationstatus):
+        """Update DishVccValidationStatus callbacks"""
+        try:
+            self.push_change_event(
+                "DishVccValidationStatus", dishvccvalidationstatus
+            )
+        except Exception as exception:
+            self.logger.info(
+                "Exception while pushing event for "
+                "DishVccValidationStatus - %s",
+                exception,
+            )
+
     # ---------------
     # General methods
     # ---------------
@@ -182,6 +206,10 @@ class CentralNodeMid(AbstractCentralNode):
             super().do()
 
             self._device.set_change_event("imaging", True, False)
+            self._device.set_change_event("isDishVccConfigSet", True, False)
+            self._device.set_change_event(
+                "DishVccValidationStatus", True, False
+            )
 
             return (ResultCode.OK, "")
 
@@ -288,6 +316,8 @@ class CentralNodeMid(AbstractCentralNode):
             _telescope_availability_callback=(
                 self.update_telescope_availability_callback
             ),
+            _update_dishvccconfig_callback=self.update_dishvccconfig_callback,
+            _dishvccvalidation_callback=self.dishvccvalidation_callback,
             communication_state_callback=None,
             component_state_callback=None,
             command_timeout=self.CommandTimeout,
