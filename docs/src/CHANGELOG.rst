@@ -5,6 +5,16 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.15.2]
+********
+* Utilise ska-telmodel v1.17.0
+* Update Assignresources json(interface v.4.0)
+* Remove custom validations and added telmodel validation for Assignresources and Releaseresources commands.
+
+[0.15.1]
+********
+* Update Push event mechanism for isDishVccConfigSet , DishVccValidationStatus
+
 [0.15.0]
 ********
 * Update in kValue range from 1-2221 to 1-1177
