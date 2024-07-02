@@ -72,7 +72,6 @@ def test_assign_resources_missing_sdp_key(
     assert "sdp" in message
 
 
-@pytest.mark.ms
 def test_assign_resources_missing_csp_key(
     tango_context, task_callback, json_factory
 ):
@@ -172,7 +171,6 @@ def test_low_assign_resources_missing_subarray_id(
     assert "subarray_id" in message
 
 
-@pytest.mark.ms
 def test_low_assign_resources_command_missing_mccs(
     tango_context, task_callback, json_factory
 ):
