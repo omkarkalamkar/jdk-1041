@@ -5,6 +5,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.16.1]
+********
+* Utilised ska-telmodel v1.17.0
+* Updated Assignresources json(interface v.4.0)
+* Removed custom validations and added telmodel validation for Assignresources and Releaseresources commands.
+* Included base classes v.1.0.0 updates 
+
 [0.15.2]
 ********
 * Utilise ska-telmodel v1.17.0
@@ -12,6 +19,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 * Remove custom validations and added telmodel validation for Assignresources and Releaseresources commands.
 
 [0.16.0]
+********
 * Updated base classes v1.0.0
 * Updated control model v1.0.0
 * Updated pytango v9.5.0
