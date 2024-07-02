@@ -88,12 +88,12 @@ def telescope_availability(
     """Checks telescope availability"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
-    mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
     if "ska_mid" in central_node_fqdn:
         csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
         sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
         subarray_node = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     else:
+        mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
         csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
         sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
         subarray_node = dev_factory.get_device(LOW_SUBARRAY_DEVICE)

@@ -66,7 +66,7 @@ def load_dish_cfg(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
@@ -123,16 +123,16 @@ def load_dish_cfg_when_csp_is_defective(
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
 
-    EXPECTED_FAILED_MESSAGE = (
-        f"Exception occurred on device:"
-        f" Command failed on device {MID_CSP_MLN_DEVICE}: "
-        "Exception occurred, command failed."
+    expected_failed_message = (
+        f'[{ResultCode.FAILED}, "Exception occurred on device: '
+        f'Command failed on device {MID_CSP_MLN_DEVICE}: Exception occurred, command failed."]'
     )
+    logger.info(f"{expected_failed_message} is this")
 
     assert check_lrcr_events(
         change_event_callback=change_event_callbacks,
         command_name="LoadDishCfg",
-        result_to_check=EXPECTED_FAILED_MESSAGE,
+        result_to_check=expected_failed_message,
     )
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
@@ -148,7 +148,7 @@ def load_dish_cfg_when_csp_is_defective(
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
-        (unique_id[0], str(int(ResultCode.OK))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
 
@@ -168,13 +168,14 @@ def load_dish_cfg_after_central_node_init(
     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
     # Central Node and Csp Master Leaf Node Device Server
     central_node_ds = DeviceProxy("dserver/central_node_mid/01")
-    csp_master_ds = DeviceProxy("dserver/mocks/01")
-
+    csp_master_ln_ds = DeviceProxy("dserver/mocks/01")
+    dish_ln_ds = DeviceProxy("dserver/mocks/07")
     # set memorized attribute to empty
     csp_master_ln_device.memorizedDishVccMap = ""
 
     # Restart Central Node, CSP Master Leaf Node, Dish Leaf Node
-    csp_master_ds.RestartServer()
+    csp_master_ln_ds.RestartServer()
+    dish_ln_ds.RestartServer()
     assert wait_and_validate_device_attribute_value(
         dish_ln_device, "State", tango.DevState.ON
     )
@@ -235,15 +236,16 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
         change_event_callbacks["DishVccMapValidationResult"],
     )
     # Csp Master Leaf Node and Dish Leaf Node Device Server
-    csp_master_ds = DeviceProxy("dserver/mocks/01")
-
+    csp_master_ln_ds = DeviceProxy("dserver/mocks/01")
+    dish_ln_ds = DeviceProxy("dserver/mocks/07")
     # Validate before restart memorizedDishVccMap is set
     assert json.loads(csp_master_ln_device.memorizedDishVccMap) == json.loads(
         config_str
     )
 
     # Restart CSP Master Leaf Node, Dish Leaf Node
-    csp_master_ds.RestartServer()
+    csp_master_ln_ds.RestartServer()
+    dish_ln_ds.RestartServer()
     assert wait_and_validate_device_attribute_value(
         dish_ln_device, "State", tango.DevState.ON
     )

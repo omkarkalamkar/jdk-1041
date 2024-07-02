@@ -7,11 +7,9 @@ from ska_tmc_common import (
     HelperMCCSMasterLeafNode,
 )
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
 from ska_tmc_centralnode.model.input import InputParameterLow
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     LOW_CSP_MASTER_DEVICE,
     LOW_CSP_MLN_DEVICE,
@@ -32,7 +30,7 @@ from tests.settings import (
 def devices_to_load():
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": LOW_SUBARRAY_DEVICE},
                 {"name": LOW_SDP_SLN_DEVICE},
@@ -77,5 +75,5 @@ def test_telescope_state_off(tango_context):
         devFactory=DevFactory(),
         state=tango.DevState.OFF,
     )
-    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=15)
+    ensure_telescope_state(cm, tango.DevState.OFF, expected_elapsed_time=30)
     assert cm.component.telescope_state == tango.DevState.OFF

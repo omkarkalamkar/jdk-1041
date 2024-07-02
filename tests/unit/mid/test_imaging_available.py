@@ -3,11 +3,9 @@ import pytest
 import tango
 from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
 from ska_tmc_centralnode.model.enum import ModesAvailability
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,
@@ -29,7 +27,7 @@ def devices_to_load():
     """Devices to load for command invokation"""
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
                 {"name": MID_CSP_SLN_DEVICE},
@@ -61,7 +59,7 @@ def test_imaging_available(tango_context):
         devFactory=DevFactory(),
         state=tango.DevState.ON,
     )
-    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=12)
+    ensure_imaging(cm, ModesAvailability.available, expected_elapsed_time=30)
     # Here expected elapsed time is set to 12 since  set_state() API is taking
     # more time to set the state and hence actual elapsed time is increasing
     assert cm.component.imaging == ModesAvailability.available

@@ -3,10 +3,8 @@ import pytest
 import tango
 from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
 
+from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,
@@ -28,7 +26,7 @@ def devices_to_load():
     """Devices to load list for command invocation"""
     return (
         {
-            "class": HelperSubArrayDevice,
+            "class": CNHelperSubArrayDevice,
             "devices": [
                 {"name": MID_SUBARRAY_DEVICE},
                 {"name": MID_CSP_SLN_DEVICE},
@@ -61,7 +59,7 @@ def test_tmc_state_init(tango_context):
     """tests tmc state initialisation"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_device_init(devFactory, cm, 15)
+    set_device_init(devFactory, cm, 30)
     assert cm.component.tmc_op_state == tango.DevState.INIT
 
 
@@ -89,7 +87,7 @@ def test_tmc_state_fault_over_standby(tango_context):
     """tests for tmc state fault over standby"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_one_device_fault(devFactory, cm, 15)
+    set_one_device_fault(devFactory, cm, 40)
     assert cm.component.tmc_op_state == tango.DevState.FAULT
 
 

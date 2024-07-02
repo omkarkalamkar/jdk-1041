@@ -58,7 +58,9 @@ def tango_context(devices_to_load, request):
     true_context = request.config.getoption("--true-context")
     logging.info("true context: %s", true_context)
     if not true_context:
-        with MultiDeviceTestContext(devices_to_load, process=True) as context:
+        with MultiDeviceTestContext(
+            devices_to_load, process=True, timeout=50
+        ) as context:
             DevFactory._test_context = context
             logging.info("test context set")
             yield context

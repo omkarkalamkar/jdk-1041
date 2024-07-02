@@ -11,6 +11,12 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 * Update Assignresources json(interface v.4.0)
 * Remove custom validations and added telmodel validation for Assignresources and Releaseresources commands.
 
+[0.16.0]
+* Updated base classes v1.0.0
+* Updated control model v1.0.0
+* Updated pytango v9.5.0
+* Moved the loadDishVccCfg related methods from component manager to Mid component manager.
+
 [0.15.1]
 ********
 * Update Push event mechanism for isDishVccConfigSet , DishVccValidationStatus

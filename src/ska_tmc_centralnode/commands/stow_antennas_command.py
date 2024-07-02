@@ -122,7 +122,7 @@ class StowAntennas(CentralNodeCommand):
                 ):
                     if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                         return ResultCode.FAILED, message_or_unique_id
-        return (ResultCode.OK, "")
+        return (ResultCode.OK, "Command Completed")
 
     def set_stow_mode_dishes(self, adapters):
         """Method for set stow mode for dish"""

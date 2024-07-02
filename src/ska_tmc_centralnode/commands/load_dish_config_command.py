@@ -72,7 +72,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         if ret_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
-                result=ResultCode.FAILED,
+                result=(ResultCode.FAILED, message),
                 exception=message,
             )
             self.component_manager.reset_load_dish_cfg_data()
@@ -92,7 +92,9 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.command_id
         )
 
-    def update_task_status(self, result: ResultCode, message: str = ""):
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ):
         """Updates the task status for command
         :param result: Result code of command
         :type: ResultCode enum
@@ -103,12 +105,14 @@ class LoadDishCfg(LoadDishCfgCommand):
             "Calling task callback for LoadDishCfg with result \
                 %s and message %s",
             result,
-            message,
+            exception,
         )
-        if result == ResultCode.FAILED:
+        if result[0] == ResultCode.FAILED:
             self.component_manager.update_dish_vcc_flag(False)
             self.task_callback(
-                result=result, status=TaskStatus.COMPLETED, exception=message
+                result=result,
+                status=TaskStatus.COMPLETED,
+                exception=exception,
             )
         else:
             self.update_memorized_attribute()

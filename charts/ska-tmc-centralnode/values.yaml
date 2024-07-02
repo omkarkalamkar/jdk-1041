@@ -42,7 +42,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.15.2
+    tag: 0.16.0
     pullPolicy: IfNotPresent
 
 resources:
@@ -56,8 +56,10 @@ resources:
 deviceServers:
   mocks:
     enabled: false
-    instances: ["01"]
-    file: "data/mockdevices.yaml"
+    mid:
+      file: "data/mockdevices_mid.yaml"
+    low:
+      file: "data/mockdevices_low.yaml"
 
   centralnode:
     enabled: true

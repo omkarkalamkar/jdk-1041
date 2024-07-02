@@ -277,7 +277,7 @@ class CentralNodeEventReceiver(EventReceiver):
             return
         if getattr(event_data, "attr_value", False):
             self._logger.debug(
-                "In long running command result callback for"
+                "In long running command result callback for "
                 "csp master leaf node  "
                 "with event_data.attr_value.value is: %s",
                 event_data.attr_value.value,
