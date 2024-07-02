@@ -128,7 +128,6 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["subarray_beams"][0]["subarray_beam_id"]
-    # cm.assign_resources(json_argument, task_callback=task_callback)
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
     assert "subarray_beam_id" in message
