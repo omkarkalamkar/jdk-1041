@@ -402,7 +402,7 @@ reference = "PyPI-public"
 
 [[package]]
 name = "fire"
-version = "0.4.0"
+version = "0.5.0"
 description = "A library for automatically generating command line interfaces."
 category = "main"
 optional = false
@@ -520,7 +520,7 @@ notebook = ["ipywidgets", "notebook"]
 parallel = ["ipyparallel"]
 qtconsole = ["qtconsole"]
 test = ["pytest (<7.1)", "pytest-asyncio", "testpath"]
-test-extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.19)", "pandas", "pytest (<7.1)", "pytest-asyncio", "testpath", "trio"]
+test_extra = ["curio", "matplotlib (!=3.2.0)", "nbformat", "numpy (>=1.19)", "pandas", "pytest (<7.1)", "pytest-asyncio", "testpath", "trio"]
 
 [package.source]
 type = "legacy"
@@ -1132,7 +1132,7 @@ reference = "PyPI-public"
 
 [[package]]
 name = "pylint"
-version = "3.2.4"
+version = "3.2.5"
 description = "python code static checker"
 category = "dev"
 optional = false
@@ -1481,7 +1481,7 @@ urllib3 = ">=1.21.1,<3"
 
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
-use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
+use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
 
 [package.source]
 type = "legacy"
@@ -1692,7 +1692,7 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-telmodel"
-version = "1.15.1"
+version = "1.17.0"
 description = "SKA telescope model library"
 category = "main"
 optional = false
@@ -1736,7 +1736,7 @@ reference = 'ska-nexus'
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.17.1"
+version = "0.17.2"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
@@ -1744,7 +1744,7 @@ python-versions = ">=3.10,<3.11"
 
 [package.dependencies]
 black = ">=23.3.0,<24.0.0"
-fire = ">=0.4.0,<0.5.0"
+fire = ">=0.5.0,<0.6.0"
 jsonschema = ">=4.0.1,<5.0.0"
 katpoint = "1.0a2"
 marshmallow = ">=3.14.1,<4.0.0"
@@ -1754,7 +1754,7 @@ pytango = "9.5.0"
 ska-ser-logging = ">=0.4.1,<0.5.0"
 ska-tango-base = "1.0.0"
 ska-tango-testing = "0.6.0"
-ska-telmodel = "1.15.1"
+ska-telmodel = "1.17.0"
 
 [package.source]
 type = "legacy"
@@ -2144,7 +2144,7 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "51f792e16f8bc81175a56dc1ef059d0f6178d919215d2f53b404f20b9245bacb"
+content-hash = "e085f8cacb52040d0ace469ca2b9c2964cd39cc2a9514c41d6d1664464b09cf8"
 
 [metadata.files]
 alabaster = [
@@ -2450,7 +2450,7 @@ executing = [
     {file = "executing-2.0.1.tar.gz", hash = "sha256:35afe2ce3affba8ee97f2d69927fa823b08b472b7b994e36a52a964b93d16147"},
 ]
 fire = [
-    {file = "fire-0.4.0.tar.gz", hash = "sha256:c5e2b8763699d1142393a46d0e3e790c5eb2f0706082df8f647878842c216a62"},
+    {file = "fire-0.5.0.tar.gz", hash = "sha256:a6b0d49e98c8963910021f92bba66f65ab440da2982b78eb1bbf95a0a34aacc6"},
 ]
 flake8 = [
     {file = "flake8-5.0.4-py2.py3-none-any.whl", hash = "sha256:7a1cf6b73744f5806ab95e526f6f0d8c01c66d7bbe349562d22dfca20610b248"},
@@ -2762,8 +2762,8 @@ pygments = [
     {file = "pygments-2.18.0.tar.gz", hash = "sha256:786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199"},
 ]
 pylint = [
-    {file = "pylint-3.2.4-py3-none-any.whl", hash = "sha256:43b8ffdf1578e4e4439fa1f6ace402281f5dd61999192280fa12fe411bef2999"},
-    {file = "pylint-3.2.4.tar.gz", hash = "sha256:5753d27e49a658b12a48c2883452751a2ecfc7f38594e0980beb03a6e77e6f86"},
+    {file = "pylint-3.2.5-py3-none-any.whl", hash = "sha256:32cd6c042b5004b8e857d727708720c54a676d1e22917cf1a2df9b4d4868abd6"},
+    {file = "pylint-3.2.5.tar.gz", hash = "sha256:e9b7171e242dcc6ebd0aaa7540481d1a72860748a0a7816b8fe6cf6c80a6fe7e"},
 ]
 pylint-junit = [
     {file = "pylint_junit-0.3.4-py2.py3-none-any.whl", hash = "sha256:006f8e793a1b64f1e0c8a29c6ee531b8af971deddafbc605c3076270f36c88f0"},
@@ -3104,16 +3104,16 @@ ska-tango-testing = [
     {file = "ska_tango_testing-0.6.0.tar.gz", hash = "sha256:fdc1d807dc1cad2ddc1d754cb5ee9debe846db667de12e412474388c3fff97d6"},
 ]
 ska-telmodel = [
-    {file = "ska_telmodel-1.15.1-py3-none-any.whl", hash = "sha256:77a782934d59603c0a428273ac2475f571a738c4645c12850e0ce7a746955539"},
-    {file = "ska_telmodel-1.15.1.tar.gz", hash = "sha256:9ad3af1d6d386940e375ecaa94faa2496c3b1fab1acd03fe214914c15c309197"},
+    {file = "ska_telmodel-1.17.0-py3-none-any.whl", hash = "sha256:396c14b6397f70358e50c0aabb53df12e9179682c62b1d9d1675a0b724f6d549"},
+    {file = "ska_telmodel-1.17.0.tar.gz", hash = "sha256:507d439682925b280fee74481f91cb616ee93233279cfd37e111fd591b0e3016"},
 ]
 ska-tmc-cdm = [
     {file = "ska_tmc_cdm-7.3.1-py3-none-any.whl", hash = "sha256:6096dfd4d7c0211dad2ac58cfe0c3cc88b3d5448f20405c5cb7864ec44f28757"},
     {file = "ska_tmc_cdm-7.3.1.tar.gz", hash = "sha256:3129cd4ec33b207f80669f521ba80fd221a42041c841f6c2f44eb8225ed8c363"},
 ]
 ska-tmc-common = [
-    {file = "ska_tmc_common-0.17.1-py3-none-any.whl", hash = "sha256:8173c2930266e8207e07667d97a87371317d934fcdec015fe2d070526e2ada52"},
-    {file = "ska_tmc_common-0.17.1.tar.gz", hash = "sha256:e53a914c0ebf012e4d8c71bc2b298d62ad698df76b70a317c324dab4b495495f"},
+    {file = "ska_tmc_common-0.17.2-py3-none-any.whl", hash = "sha256:fc799e9d7ace15fdc5ad7118cc03a443714ca0ce183970fbcd789b7c4f607246"},
+    {file = "ska_tmc_common-0.17.2.tar.gz", hash = "sha256:6d07a417129bdf8ac6abbc144b291cf7c5fa618402f6afc03c859df2114a7f7b"},
 ]
 snowballstemmer = [
     {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},

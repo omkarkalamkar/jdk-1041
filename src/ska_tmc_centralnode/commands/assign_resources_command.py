@@ -4,7 +4,7 @@ AssignResources class for CentralNode.
 import json
 import threading
 from logging import Logger
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
@@ -501,78 +501,6 @@ class AssignResources(AssignReleaseResources):
                         ] = [message_or_unique_id]
 
         return (ResultCode.OK, "")
-
-    def _validate_low_json(
-        self, json_argument: dict, req_keys: List
-    ) -> Tuple[bool, str]:
-        """Validates the JSON argument for the assign resources command before
-            entering the queue.
-
-        :param: json_argument
-        :type: A dictionary representing the JSON argument to be validated.
-        :param: req_keys
-        :type: A list containing the required keys to check in the JSON
-            argument.
-
-        :return: A tuple containing a boolean indicating
-            validation success and a string message.
-        """
-        json_keys = json_argument.keys()
-        for key in req_keys:
-            if key not in json_keys:
-                return (
-                    False,
-                    f"{key} key is not present in the input json argument.",
-                )
-
-        try:
-            json_argument["mccs"]["interface"]
-        except KeyError:
-            return (
-                False,
-                "JSON Error: Missing 'interface' key in input json arguement",
-            )
-        try:
-            subarray_beams = json_argument["mccs"]["subarray_beams"]
-        except KeyError:
-            return (
-                False,
-                "JSON Error: Missing 'subarray_beams' key in input json"
-                + " arguement",
-            )
-
-        for subarray_beam in subarray_beams:
-            try:
-                subarray_beam["subarray_beam_id"]
-            except KeyError:
-                return (
-                    False,
-                    "JSON Error: Missing 'subarray_beam_id' key in input json"
-                    + " arguement.",
-                )
-
-            try:
-                subarray_beam["apertures"]
-            except KeyError:
-                return (
-                    False,
-                    "JSON Error: Missing 'apertures' key in input json"
-                    + " arguement.",
-                )
-
-            try:
-                subarray_beam["number_of_channels"]
-            except KeyError:
-                return (
-                    False,
-                    "JSON Error: Missing 'number_of_channels' key in input"
-                    + " json arguement",
-                )
-        return (
-            True,
-            "The json argument has all the required keys. Validation"
-            + " successful.",
-        )
 
     def _validate_and_update_resource_config(
         self, json_argument: dict

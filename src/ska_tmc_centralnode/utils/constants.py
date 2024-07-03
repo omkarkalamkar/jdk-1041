@@ -2,9 +2,6 @@
 """
 from ska_control_model.result_code import ResultCode
 
-REQUIRED_LOW_ASSIGN_RESOURCE_KEYS = ["subarray_id", "sdp"]
-REQUIRED_LOW_RELEASE_RESOURCE_KEYS = ["subarray_id"]
-MCCS_REQUIRED_KEYS = ["subarray_beam_ids", "station_ids", "channel_blocks"]
 MID_CSP_MLN_DEVICE = "ska_mid/tm_leaf_node/csp_master"
 LOW_CSP_MLN_DEVICE = "ska_low/tm_leaf_node/csp_master"
 MID_SDP_MLN_DEVICE = "ska_mid/tm_leaf_node/sdp_master"

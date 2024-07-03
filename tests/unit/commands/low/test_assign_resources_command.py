@@ -57,7 +57,7 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
-    del json_argument["sdp"]["execution_block"]["processing_blocks"]
+    del json_argument["sdp"]["processing_blocks"]
     (res_code, _) = cm.assign_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
     with pytest.raises(Exception) as e:
@@ -75,6 +75,19 @@ def test_assign_resources_missing_sdp_key(
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
     assert "sdp" in message
+
+
+def test_assign_resources_missing_csp_key(
+    tango_context, task_callback, json_factory
+):
+    logger.info("%s", tango_context)
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    assign_input_str = json_factory("command_assign_resource_low")
+    json_argument = json.loads(assign_input_str)
+    del json_argument["csp"]
+    (res_code, message) = cm.assign_resources(json.dumps(json_argument))
+    assert res_code == TaskStatus.REJECTED
+    assert "csp" in message
 
 
 def test_low_assign_resources_command_fail_subarray(
@@ -106,7 +119,6 @@ def test_low_assign_resources_command_fail_subarray(
     assert res_code == ResultCode.FAILED
 
 
-@pytest.mark.skip(reason="validate test during integration of MCCS")
 def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     tango_context, task_callback, json_factory
 ):
@@ -115,11 +127,10 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
-    del json_argument["mccs"]["subarray_beam_ids"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
+    del json_argument["mccs"]["subarray_beams"][0]["subarray_beam_id"]
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
-    assert res_code == ResultCode.REJECTED
-    assert "subarray_beam_ids" in message
+    assert res_code == TaskStatus.REJECTED
+    assert "subarray_beam_id" in message
 
 
 @pytest.mark.SKA_low
@@ -164,7 +175,6 @@ def test_low_assign_resources_missing_subarray_id(
     assert "subarray_id" in message
 
 
-@pytest.mark.skip(reason="validate test during integration of MCCS")
 def test_low_assign_resources_command_missing_mccs(
     tango_context, task_callback, json_factory
 ):
@@ -175,15 +185,14 @@ def test_low_assign_resources_command_missing_mccs(
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED, result=(ResultCode.FAILED,)
+    res_code, message = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
     )
-    assert "mccs" in task_callback_data["exception"]
+    assert res_code == TaskStatus.REJECTED
+    assert "mccs" in message
 
 
-@pytest.mark.skip(reason="validate test during integration of MCCS")
-def test_low_assign_resources_command_missing_channel_blocks(
+def test_low_assign_resources_command_missing_aperture_id(
     tango_context, task_callback, json_factory
 ):
     logger.info("%s", tango_context)
@@ -192,16 +201,16 @@ def test_low_assign_resources_command_missing_channel_blocks(
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
-    del json_argument["mccs"]["channel_blocks"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED
+    del json_argument["mccs"]["subarray_beams"][0]["apertures"][0][
+        "aperture_id"
+    ]
+    res_code, message = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
     )
-    assert ResultCode.FAILED == task_callback_data["result"][0]
-    assert "channel_blocks" in task_callback_data["result"][1]
+    assert res_code == TaskStatus.REJECTED
+    assert "aperture_id" in message
 
 
-@pytest.mark.skip(reason="validate test during integration of MCCS")
 def test_low_assign_resources_command_missing_station_ids(
     tango_context, task_callback, json_factory
 ):
@@ -212,13 +221,14 @@ def test_low_assign_resources_command_missing_station_ids(
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("command_assign_resource_low")
     json_argument = json.loads(assign_input_str)
-    del json_argument["mccs"]["station_ids"]
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    task_callback_data = task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED
+    del json_argument["mccs"]["subarray_beams"][0]["apertures"][0][
+        "station_id"
+    ]
+    res_code, message = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
     )
-    assert ResultCode.FAILED == task_callback_data["result"][0]
-    assert "station_ids" in task_callback_data["result"][1]
+    assert res_code == TaskStatus.REJECTED
+    assert "station_id" in message
 
 
 @pytest.mark.SKA_low

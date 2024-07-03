@@ -42,7 +42,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.16.0
+    tag: 0.16.1
     pullPolicy: IfNotPresent
 
 resources:
@@ -90,6 +90,8 @@ deviceServers:
       SdpMasterFQDN: "low-sdp/control/0"
       MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
       MCCSMasterFQDN: "low-mccs/control/control"
+      AssignResourcesInterface: "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
+      ReleaseResourcesInterface: "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
 
 
 nodeSelector: {}

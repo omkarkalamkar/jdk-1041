@@ -15,6 +15,7 @@ from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from ska_tango_base.faults import StateModelError
+from ska_telmodel.schema import validate
 from ska_tmc_common import (
     AdapterFactory,
     Aggregator,
@@ -58,10 +59,6 @@ from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
 )
-from ska_tmc_centralnode.utils.constants import (
-    REQUIRED_LOW_ASSIGN_RESOURCE_KEYS,
-    REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
-)
 
 
 class CNComponentManager(TmcComponentManager):
@@ -101,6 +98,8 @@ class CNComponentManager(TmcComponentManager):
             + ".skao.int:9870"
         ),
         command_timeout=30,
+        assignresources_interface: str = "",
+        releaseresources_interface: str = "",
         *args,
         **kwargs,
     ):
@@ -140,6 +139,8 @@ class CNComponentManager(TmcComponentManager):
         self.adapter_factory = AdapterFactory()
         self.event_receiver = True
         self.command_timeout = command_timeout
+        self.assignresources_interface = assignresources_interface
+        self.releaseresources_interface = releaseresources_interface
 
         self.event_receiver = _event_receiver
         if self.event_receiver:
@@ -861,16 +862,21 @@ class CNComponentManager(TmcComponentManager):
         )
 
         if isinstance(self.input_parameter, InputParameterLow):
-            (
-                is_valid,
-                invalid_json_error_msg,
-            ) = assign_resources_command._validate_low_json(
-                input_json_or_message, REQUIRED_LOW_ASSIGN_RESOURCE_KEYS
-            )
-            if not is_valid:
-                return assign_resources_command.reject_command(
-                    invalid_json_error_msg
+            try:
+                validate(
+                    version=self.assignresources_interface,
+                    config=json.loads(argin),
+                    strictness=2,
                 )
+            except Exception as exception:
+                # Catch other unexpected exceptions
+                self.logger.exception(
+                    "Exception occurred while validating for "
+                    + "assignresource json : %s ",
+                    exception,
+                )
+                return assign_resources_command.reject_command(str(exception))
+
         elif isinstance(self.input_parameter, InputParameterMid):
             # Utilize CDM to validate json.
             available_subarrays_list = self.input_parameter.subarray_dev_names
@@ -887,6 +893,7 @@ class CNComponentManager(TmcComponentManager):
                 )
 
                 json_argument = assign_validator.loads(argin)
+
             except (
                 InvalidJSONError,
                 SubarrayNotPresentError,
@@ -970,17 +977,14 @@ class CNComponentManager(TmcComponentManager):
 
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
-            (
-                is_valid,
-                invalid_json_error_msg,
-            ) = release_resources_command._validate_low_json(
-                input_json_or_message,
-                REQUIRED_LOW_RELEASE_RESOURCE_KEYS,
-            )
-            if not is_valid:
-                return release_resources_command.reject_command(
-                    invalid_json_error_msg
+            try:
+                validate(
+                    version=self.releaseresources_interface,
+                    config=json.loads(argin),
+                    strictness=2,
                 )
+            except Exception as e:
+                return release_resources_command.reject_command(str(e))
         elif isinstance(self.input_parameter, InputParameterMid):
             self.logger.info(f"Json argument::{input_json_or_message}")
             # Utilize CDM to validate json.
