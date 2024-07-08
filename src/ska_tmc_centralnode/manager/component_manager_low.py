@@ -165,7 +165,7 @@ class CNComponentManagerLow(CNComponentManager):
             or (not result_code_or_exception_or_task_status)
             or (unique_id not in self.command_mapping.values())
         ):  # ignoring other command events
-            pass
+            return
         try:
             result_code, message = json.loads(
                 result_code_or_exception_or_task_status
