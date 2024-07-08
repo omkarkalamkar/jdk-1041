@@ -5,6 +5,10 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.16.2]
+********
+* Fix long running command result handling in component manager
+  
 [0.16.1]
 ********
 * Utilised ska-telmodel v1.17.0
