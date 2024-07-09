@@ -185,7 +185,7 @@ def test_assign_res_command_mid(
         MID_SUBARRAY_DEVICE,
     )
 
-@pytest.mark.assign
+
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
