@@ -165,6 +165,7 @@ class CNComponentManagerLow(CNComponentManager):
             or (not result_code_or_exception_or_task_status)
             or (unique_id not in self.command_mapping.values())
         ):  # ignoring other command events
+            print(unique_id, self.command_mapping.values())
             return
         try:
             result_code, message = json.loads(
@@ -204,6 +205,8 @@ class CNComponentManagerLow(CNComponentManager):
                         self.command_id,
                         dev_name,
                     )
+            print("None")
+
             if len(self.event_dict[self.command_id]) == 2:
                 self.update_long_running_command_result_callback()
         except Exception as exception:
