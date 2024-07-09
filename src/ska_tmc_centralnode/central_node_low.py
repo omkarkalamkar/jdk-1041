@@ -111,7 +111,6 @@ class CentralNodeLow(AbstractCentralNode):
             command_timeout=self.CommandTimeout,
             assignresources_interface=self.AssignResourcesInterface,
             releaseresources_interface=self.ReleaseResourcesInterface,
-            max_workers=self.MaxWorker,
             proxy_timeout=self.ProxyTimeout,
             _input_parameter=InputParameterLow(None),
             sleep_time=self.SleepTime,

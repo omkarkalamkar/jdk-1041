@@ -159,13 +159,17 @@ class CNComponentManagerLow(CNComponentManager):
             dev_name,
             value,
         )
+        unique_ids = []
+        for data in self.command_mapping.values():
+            for uid in data:
+                unique_ids.append(uid)
+
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
             or (not result_code_or_exception_or_task_status)
-            or (unique_id not in self.command_mapping.values())
+            or (unique_id not in unique_ids)
         ):  # ignoring other command events
-            print(unique_id, self.command_mapping.values())
             return
         try:
             result_code, message = json.loads(
@@ -205,7 +209,6 @@ class CNComponentManagerLow(CNComponentManager):
                         self.command_id,
                         dev_name,
                     )
-            print("None")
 
             if len(self.event_dict[self.command_id]) == 2:
                 self.update_long_running_command_result_callback()

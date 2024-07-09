@@ -185,7 +185,7 @@ def test_assign_res_command_mid(
         MID_SUBARRAY_DEVICE,
     )
 
-
+@pytest.mark.assign
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
@@ -652,7 +652,7 @@ def test_assign_resources_low_error_aggregation(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    event_data = change_event_callbacks.assert_change_event(
+    event_data = change_event_callbacks.assertAssignResources_change_event(
         "longRunningCommandResult",
         (unique_id[0], Anything),
         lookahead=8,
