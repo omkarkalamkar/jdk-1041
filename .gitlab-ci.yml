@@ -1,30 +1,10 @@
 image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
 
-python-test:
-  tags:
-    - k8srunner-large
-  variables:
-    PYTHON_TEST_COUNT: 1
-  retry: 1
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32
 
-python-lint:
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32 
-  
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
   SKALLOP_VERSION: "2.7.4"
 # Temporarily pinning the versions for python-test and python-lint
-python-test:
-  tags:
-    - k8srunner-large
-  variables:
-    PYTHON_TEST_COUNT: 1
-  retry: 1
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32
-
-python-lint:
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32
 
 stages:
   - lint
