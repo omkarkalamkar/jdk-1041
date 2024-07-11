@@ -15,6 +15,18 @@ stages:
   - scan
   - lifecycle
 
+join_linting_reports:
+  stage: join-reports
+  tags:
+    - k8srunner
+  script:
+    - echo "This step is needed as the artifacts can't be passed in the same stage"
+    - make join-lint-reports
+  artifacts:
+    paths:
+      - build/
+    when: always
+    
 include:
   # # # Helm Chart linting and Publish
   # Note: Commenting this part to Disable helm chart linting and Publish job from the pipeline
