@@ -2712,29 +2712,30 @@ version = "0.17.6"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 category = "main"
 optional = false
-python-versions = "~3.10"
-files = []
-develop = false
+python-versions = ">=3.10,<3.11"
+files = [
+    {file = "ska_tmc_common-0.17.6-py3-none-any.whl", hash = "sha256:1f8285e7fda9f0ace2cc4be0e4d720fd26e13345673284f5d2b24e725344a38b"},
+    {file = "ska_tmc_common-0.17.6.tar.gz", hash = "sha256:6adf2f7d62113a5f757b3a0cc7eca27440fd9ac339d569f6f37c3e4266810df4"},
+]
 
 [package.dependencies]
-black = "^23.3.0"
-fire = "^0.5.0"
-jsonschema = "^4.0.1"
+black = ">=23.3.0,<24.0.0"
+fire = ">=0.5.0,<0.6.0"
+jsonschema = ">=4.0.1,<5.0.0"
 katpoint = "1.0a2"
-marshmallow = "^3.14.1"
-mock = "^4.0.3"
-numpy = "^1.23.0"
+marshmallow = ">=3.14.1,<4.0.0"
+mock = ">=4.0.3,<5.0.0"
+numpy = ">=1.23.0,<2.0.0"
 pytango = "9.5.0"
-ska-ser-logging = "^0.4.1"
+ska-ser-logging = ">=0.4.1,<0.5.0"
 ska-tango-base = "1.0.0"
 ska-tango-testing = "0.6.0"
 ska-telmodel = "1.18.1"
 
 [package.source]
-type = "git"
-url = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git"
-reference = "hm-486"
-resolved_reference = "f2d0a0465c1d82f6054757ebec9e00c0c4f1f0ac"
+type = "legacy"
+url = "https://artefact.skao.int/repository/pypi-internal/simple"
+reference = 'ska-nexus'
 
 [[package]]
 name = "snowballstemmer"
@@ -3216,4 +3217,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.11"
-content-hash = "4cb5c90940f55a13921a9f33c905cda517fdec6bd35ce760f837d198b1f5ec4f"
+content-hash = "95a1458d2c3962c251764d4f8105d7a41224dc0fe67db03b49ac69c6f8d18da8"

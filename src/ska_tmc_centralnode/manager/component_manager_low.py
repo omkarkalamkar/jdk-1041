@@ -219,7 +219,6 @@ class CNComponentManagerLow(CNComponentManager):
                         self.command_id,
                         dev_name,
                     )
-
             if len(self.event_dict[self.command_id]) == 2:
                 self.update_long_running_command_result_callback()
         except Exception as exception:
