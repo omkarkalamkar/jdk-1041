@@ -135,6 +135,19 @@ class CNComponentManagerLow(CNComponentManager):
             "Updated command mapping dictionary is: %s", self.command_mapping
         )
 
+    def get_unique_ids(self) -> list:
+        """Provides unique id for processing long
+        running command result events.
+
+        Returns:
+            list: Provides list of unique ids under progress
+        """
+        unique_ids = []
+        for data in self.command_mapping.values():
+            for uid in data:
+                unique_ids.append(uid)
+        return unique_ids
+
     def update_long_running_command_result(self, dev_name: str, value: tuple):
         """Updates the LRCR callback with received event.
 
@@ -159,13 +172,15 @@ class CNComponentManagerLow(CNComponentManager):
             dev_name,
             value,
         )
+        unique_ids = self.get_unique_ids()
+
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
             or (not result_code_or_exception_or_task_status)
-            or (unique_id not in self.command_mapping.values())
+            or (unique_id not in unique_ids)
         ):  # ignoring other command events
-            pass
+            return
         try:
             result_code, message = json.loads(
                 result_code_or_exception_or_task_status

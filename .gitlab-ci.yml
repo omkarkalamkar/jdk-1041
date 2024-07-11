@@ -1,30 +1,9 @@
 image: $SKA_K8S_TOOLS_DOCKER_BUILDER_IMAGE
 
-python-test:
-  tags:
-    - k8srunner-large
-  variables:
-    PYTHON_TEST_COUNT: 1
-  retry: 1
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32
 
-python-lint:
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32 
-  
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-  SKALLOP_VERSION: "2.7.4"
 # Temporarily pinning the versions for python-test and python-lint
-python-test:
-  tags:
-    - k8srunner-large
-  variables:
-    PYTHON_TEST_COUNT: 1
-  retry: 1
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32
-
-python-lint:
-  image: artefact.skao.int/ska-tango-images-pytango-builder:9.3.32
 
 stages:
   - lint
@@ -47,7 +26,7 @@ join_linting_reports:
     paths:
       - build/
     when: always
-
+    
 include:
   # # # Helm Chart linting and Publish
   # Note: Commenting this part to Disable helm chart linting and Publish job from the pipeline
@@ -79,11 +58,8 @@ include:
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
 
 k8s-test:
-  tags:
-    - k8srunner-large
   variables:
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA"
-    
   before_script:
     - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT
     - make k8s-install-chart
