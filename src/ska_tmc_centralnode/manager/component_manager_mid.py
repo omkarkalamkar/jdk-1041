@@ -348,6 +348,7 @@ class CNComponentManagerMid(CNComponentManager):
                     ResultCode.FAILED
                     | ResultCode.REJECTED
                     | ResultCode.NOT_ALLOWED
+                    | ResultCode.ABORTED
                 ):
                     self.logger.info(
                         "Updating LRCRCallback with message: %s for %s for"
