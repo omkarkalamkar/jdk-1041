@@ -191,6 +191,11 @@ class AbstractCentralNode(TMCBaseDevice):
             self._device.set_change_event("lastDeviceInfoChanged", True, False)
             self._device.set_change_event("tmOpState", True, False)
             self._device.set_change_event("telescopeAvailability", True, False)
+            self._device.set_archive_event("telescopeHealthState", True)
+            self._device.set_archive_event("telescopeState", True)
+            self._device.set_archive_event("lastDeviceInfoChanged", True)
+            self._device.set_archive_event("tmOpState", True)
+            self._device.set_archive_event("telescopeAvailability", True)
             ApiUtil.instance().set_asynch_cb_sub_model(
                 tango.cb_sub_model.PUSH_CALLBACK
             )

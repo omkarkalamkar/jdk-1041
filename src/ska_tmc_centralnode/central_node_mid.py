@@ -210,7 +210,9 @@ class CentralNodeMid(AbstractCentralNode):
             self._device.set_change_event(
                 "DishVccValidationStatus", True, False
             )
-
+            self._device.set_archive_event("imaging", True)
+            self._device.set_archive_event("isDishVccConfigSet", True)
+            self._device.set_archive_event("DishVccValidationStatus", True)
             return (ResultCode.OK, "")
 
     # ------------------
