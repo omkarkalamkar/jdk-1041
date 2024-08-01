@@ -5,6 +5,7 @@ of state and mode attributes defined by the SKA Control Model.
 """
 # pylint:disable = attribute-defined-outside-init
 import json
+from typing import Any
 
 import tango
 from ska_control_model import HealthState
@@ -137,27 +138,44 @@ class AbstractCentralNode(TMCBaseDevice):
         access=AttrWriteType.READ,
     )
 
+    def push_change_archive_events(
+        self, attribute_name: str, value: Any
+    ) -> None:
+        """Method to push change event and archive event
+        of the given attribute.
+
+        Args:
+            attribute_name (str): Attribute name
+            value (Any): Attribute value need to be pushed
+        """
+        self.push_change_event(attribute_name, value)
+        self.push_archive_event(attribute_name, value)
+
     def update_device_callback(self, devInfo):
         """Update device callabacks"""
         self.last_device_info_changed = devInfo.to_json()
-        self.push_change_event("lastDeviceInfoChanged", devInfo.to_json())
+        self.push_change_archive_events(
+            "lastDeviceInfoChanged", devInfo.to_json()
+        )
 
     def update_telescope_state_callback(self, telescope_state):
         """Update telescope state callback"""
         self.logger.info("telescopeState %s", telescope_state)
-        self.push_change_event("telescopeState", telescope_state)
+        self.push_change_archive_events("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         """Update Telescope health state callabacks"""
-        self.push_change_event("telescopeHealthState", telescope_health_state)
+        self.push_change_archive_events(
+            "telescopeHealthState", telescope_health_state
+        )
 
     def update_tmc_op_state_callback(self, tmc_op_state):
         """Update tmc operational state callabacks"""
-        self.push_change_event("tmOpState", tmc_op_state)
+        self.push_change_archive_events("tmOpState", tmc_op_state)
 
     def update_telescope_availability_callback(self, telescope_availability):
         """Update device availabililty callabacks"""
-        self.push_change_event(
+        self.push_change_archive_events(
             "telescopeAvailability", json.dumps(telescope_availability)
         )
 
@@ -186,16 +204,16 @@ class AbstractCentralNode(TMCBaseDevice):
 
             self._device._version_id = release.version
             self._device.last_device_info_changed = ""
-            self._device.set_change_event("telescopeHealthState", True, False)
-            self._device.set_change_event("telescopeState", True, False)
-            self._device.set_change_event("lastDeviceInfoChanged", True, False)
-            self._device.set_change_event("tmOpState", True, False)
-            self._device.set_change_event("telescopeAvailability", True, False)
-            self._device.set_archive_event("telescopeHealthState", True)
-            self._device.set_archive_event("telescopeState", True)
-            self._device.set_archive_event("lastDeviceInfoChanged", True)
-            self._device.set_archive_event("tmOpState", True)
-            self._device.set_archive_event("telescopeAvailability", True)
+            for attribute_name in [
+                "telescopeHealthState",
+                "telescopeState",
+                "lastDeviceInfoChanged",
+                "tmOpState",
+                "telescopeAvailability",
+            ]:
+                self._device.set_change_event(attribute_name, True, False)
+                self._device.set_archive_event(attribute_name, True)
+
             ApiUtil.instance().set_asynch_cb_sub_model(
                 tango.cb_sub_model.PUSH_CALLBACK
             )
