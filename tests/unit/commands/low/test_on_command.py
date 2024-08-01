@@ -1,5 +1,6 @@
 import time
 
+import mock
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
@@ -126,10 +127,9 @@ def test_telescope_on_command_fail_subarray(tango_context, task_callback):
 
     # include exception in TelescopeOn command
     failing_dev = "ska_low/tm_subarray_node/1"
-
-    adapter_factory.get_or_create_adapter(
-        failing_dev, attrs={"TelescopeOn.side_effect": Exception}
-    )
+    attrs = {"TelescopeOn.side_effect": Exception}
+    subarrayMock = mock.Mock(**attrs)
+    adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
     cm.adapter_factory = adapter_factory
 
     cm.telescope_on(task_callback=task_callback)
