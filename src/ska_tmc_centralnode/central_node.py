@@ -5,7 +5,6 @@ of state and mode attributes defined by the SKA Control Model.
 """
 # pylint:disable = attribute-defined-outside-init
 import json
-from typing import Any
 
 import tango
 from ska_control_model import HealthState
@@ -137,19 +136,6 @@ class AbstractCentralNode(TMCBaseDevice):
         dtype="str",
         access=AttrWriteType.READ,
     )
-
-    def push_change_archive_events(
-        self, attribute_name: str, value: Any
-    ) -> None:
-        """Method to push change event and archive event
-        of the given attribute.
-
-        Args:
-            attribute_name (str): Attribute name
-            value (Any): Attribute value need to be pushed
-        """
-        self.push_change_event(attribute_name, value)
-        self.push_archive_event(attribute_name, value)
 
     def update_device_callback(self, devInfo):
         """Update device callabacks"""
