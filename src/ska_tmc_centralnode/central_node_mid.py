@@ -160,12 +160,14 @@ class CentralNodeMid(AbstractCentralNode):
     def update_imaging_callback(self, imaging):
         """Callback for Update imaging"""
         self.logger.info("imaging %s", imaging)
-        self.push_change_event("imaging", imaging)
+        self.push_change_archive_events("imaging", imaging)
 
     def update_dishvccconfig_callback(self, isdishvccconfigset):
         """Update isDishVccConfigSet callbacks"""
         try:
-            self.push_change_event("isDishVccConfigSet", isdishvccconfigset)
+            self.push_change_archive_events(
+                "isDishVccConfigSet", isdishvccconfigset
+            )
 
         except Exception as exception:
             self.logger.info(
@@ -176,7 +178,7 @@ class CentralNodeMid(AbstractCentralNode):
     def dishvccvalidation_callback(self, dishvccvalidationstatus):
         """Update DishVccValidationStatus callbacks"""
         try:
-            self.push_change_event(
+            self.push_change_archive_events(
                 "DishVccValidationStatus", dishvccvalidationstatus
             )
         except Exception as exception:
@@ -204,13 +206,13 @@ class CentralNodeMid(AbstractCentralNode):
             :rtype: (ReturnCode, str)
             """
             super().do()
-
-            self._device.set_change_event("imaging", True, False)
-            self._device.set_change_event("isDishVccConfigSet", True, False)
-            self._device.set_change_event(
-                "DishVccValidationStatus", True, False
-            )
-
+            for attribute_name in [
+                "imaging",
+                "isDishVccConfigSet",
+                "DishVccValidationStatus",
+            ]:
+                self._device.set_change_event(attribute_name, True, False)
+                self._device.set_archive_event(attribute_name, True)
             return (ResultCode.OK, "")
 
     # ------------------
