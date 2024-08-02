@@ -120,7 +120,6 @@ class CNComponentManagerLow(CNComponentManager):
 
     def check_if_mccs_mln_is_responsive(self):
         """Checks whether mccs mln is responsive"""
-        self.logger.info("Checking if MCCSMasterLeafNode is responsive")
         return self._check_if_device_is_responsive(
             [self.input_parameter.mccs_mln_dev_name]
         )

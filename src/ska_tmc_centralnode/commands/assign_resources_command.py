@@ -1,16 +1,19 @@
 """
-AssignResources class for CentralNode.
+AssignResources Command class for CentralNode.
 """
 import json
-import threading
 from logging import Logger
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
-from ska_tmc_common.adapters import AdapterFactory
+from ska_tmc_common import (
+    AdapterFactory,
+    TimeKeeper,
+    error_propagation_decorator,
+    timeout_decorator,
+)
 
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
@@ -21,26 +24,25 @@ class AssignResources(AssignReleaseResources):
     """
     A class for CentralNode's AssignResources() command.
 
-    Assigns resources to given subarray. It accepts the subarray id,
-    receptor id list and SDP block in JSON
-    string format. Upon successful execution, the 'receptor_ids'
-    attribute of the given subarray is populated
-    with the given receptors.Also checking for duplicate allocation
-    of resources is done. If already allocated
-    it will throw error message regarding the prior existence of resource.
+    Assigns resources to a given subarray. It accepts the subarray ID,
+    receptor ID list, and SDP block in JSON string format.
+    Upon successful execution, the 'receptor_ids' attribute of the given
+    subarray is populated with the given receptors.
+    Checking for duplicate allocation of resources is done.
+    If already allocated, it will throw an error message regarding the prior
+    existence of the resource.
     """
 
-    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         component_manager,
-        adapter_factory=None,
-        skuid=SkuidClient(
+        logger: Logger,
+        *args,
+        adapter_factory: Optional[AdapterFactory] = None,
+        skuid: SkuidClient = SkuidClient(
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
         ),
-        *args,
-        logger=None,
         **kwargs,
     ):
         super().__init__(
@@ -48,183 +50,110 @@ class AssignResources(AssignReleaseResources):
         )
         self.tm_subarray_adapter: Optional[AdapterFactory] = None
         self._skuid: SkuidClient = skuid
+        self.timekeeper = TimeKeeper(
+            self.component_manager.command_timeout, logger
+        )
 
+    @timeout_decorator
+    @error_propagation_decorator(
+        "get_subarray_obsstate", [ObsState.RESOURCING, ObsState.IDLE]
+    )
     def assign_resources(
         self,
         argin: str,
-        logger: Logger,
-        task_callback: Callable = None,
-        task_abort_event: Optional[threading.Event] = None,
-    ):
-        """This is a long running method for AssignResources command it
-        executes do hook,invokes AssignResources command on lower level
-        devices.
-
-        :param: logger: logger
-        :type: logger: logging.Logger
-        :param: task_callback: Update task state, defaults to None
-        :type: task_callback: Callable, optional
-        :param: task_abort_event Check for abort, defaults to None
-        :type: Event, Optional
+    ) -> Tuple[ResultCode, str]:
         """
-        # Indicate that the task has started
-        self.task_callback = task_callback
-        self.set_command_id(__class__.__name__)
-        task_callback(status=TaskStatus.IN_PROGRESS)
-        self.component_manager.command_in_progress = "AssignResources"
-        self.component_manager.command_result = ResultCode.STARTED
-        self.component_manager.start_timer(
-            self.timeout_id,
-            self.component_manager.command_timeout,
-            self.timeout_callback,
-        )
+        This is a long-running method for the AssignResources command.
 
-        result_code, message = self.do(argin=json.dumps(argin))
-        self.logger.info(f"command assign_resources returncode: {result_code}")
-        self.logger.info(message)
-        if result_code == ResultCode.FAILED:
-            self.update_task_status((result_code, message), message)
-            self.component_manager.stop_timer()
-        else:
-            self.start_tracker_thread(
-                "get_subarray_obsstate",
-                [ObsState.RESOURCING, ObsState.IDLE],
-                task_abort_event,
-                timeout_id=self.timeout_id,
-                timeout_callback=self.timeout_callback,
-                command_id=self.component_manager.command_id,
-                lrcr_callback=(
-                    self.component_manager.long_running_result_callback
-                ),
-            )
+        :param argin: Input argument for the command
+        :type argin: str
 
-    def update_task_status(
-        self, result: Tuple[ResultCode, str], exception: str = ""
-    ) -> None:
-        """Updates the task status for command"""
-        if result[0] == ResultCode.FAILED:
-            self.task_callback(
-                result=result, status=TaskStatus.COMPLETED, exception=exception
-            )
-            self.component_manager.subarray_devname = ""
-        else:
-            self.task_callback(result=result, status=TaskStatus.COMPLETED)
-        self.component_manager.command_in_progress = ""
-        if self.component_manager.command_mapping.get(
-            self.component_manager.command_id
-        ):
-            self.component_manager.command_mapping.pop(
-                self.component_manager.command_id
-            )
+        :returns: Result code and message
+        :rtype: Tuple[ResultCode, str]
+        """
+        return self.do(argin)
 
     # pylint:disable=signature-differs
     def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
         """
-        Method to invoke AssignResources command on Subarray.
+        Method to invoke the AssignResources command on a Subarray.
 
-        :param: argin
-        :type: DevString
+        :param argin: Input argument for the command
+        :type argin: str
 
-        Example:
+        {"interface": "https://schema.skao.int/ska-tmc-assignresources/2.1",
+        "transaction_id": "txn-....-00001","subarray_id": 1,"dish": {
+        "receptor_ids": ["SKA001"] },"sdp": {
+        "interface": "https://schema.skao.int/ska-sdp-assignres/0.4",
+        "execution_block": {"eb_id": "eb-mvp01-20210623-00000",
+        "max_length": 100.0,"context": {},"beams": [{ "beam_id": "vis0",
+        "function": "visibilities"}, {"beam_id": "pss1","search_beam_id": 1,
+        "function": "pulsar search"}, {"beam_id": "pss2", "search_beam_id": 2,
+        "function": "pulsar search"}, {"beam_id": "pst1","timing_beam_id": 1,
+        "function": "pulsar timing"}, {"beam_id": "pst2","timing_beam_id": 2,
+        "function": "pulsar timing"}, {"beam_id": "vlbi1",vlbi_beam_id": 1,
+        function": "vlbi"}],"scan_types": [{"scan_type_id": ".default",
+        "beams": {"vis0": {"channels_id": "vis_channels",
+        "polarisations_id": "all"},"pss1": {"field_id": "pss_field_0",
+        "channels_id": "pulsar_channels","polarisations_id": "all"  },
+        "pss2": {"field_id": "pss_field_1","channels_id": "pulsar_channels",
+        "polarisations_id": "all"},"pst1": {"field_id": "pst_field_0",
+        "channels_id": "pulsar_channels","polarisations_id": "all"},
+        "pst2": {"field_id": "pst_field_1","channels_id": "pulsar_channels",
+        "polarisations_id": "all"},"vlbi": {"field_id": "vlbi_field",
+        "channels_id": "vlbi_channels","polarisations_id": "all"}}}, {
+        "scan_type_id": "target:a","derive_from": ".default","beams": {
+        "vis0": {"field_id": "field_a"}}}],"channels": [{
+        "channels_id": "vis_channels","spectral_windows": [{
+        "spectral_window_id": "fsp_1_channels","count": 744,"start": 0,
+        "stride": 2,"freq_min": 350000000.0,"freq_max": 368000000.0,
+        "link_map": [[0, 0],[200, 1],[744, 2],[944, 3]]}, {
+        "spectral_window_id": "fsp_2_channels","count": 744,"start": 2000,
+        "stride": 1,"freq_min": 360000000.0,"freq_max": 368000000.0,
+        "link_map": [ [2000, 4],[2200, 5]]}, {
+        "spectral_window_id": "zoom_window_1","count": 744,"start": 4000,
+        "stride": 1,"freq_min": 360000000.0,"freq_max": 361000000.0,
+        "link_map": [[4000, 6],[4200, 7]]}]}, {"channels_id": "pulsar_channels"
+        "spectral_windows": [{"spectral_window_id": "pulsar_fsp_channels",
+        "count": 744,"start": 0,"freq_min": 350000000.0,"freq_max": 368000000.0
+        }]}],"polarisations": [{"polarisations_id": "all",
+        "corr_type": ["XX", "XY", "YY", "YX"]}],
+        "fields": [{"field_id": "field_a","phase_dir": {"ra": [123, 0.1],
+        "dec": [80, 0.1],"reference_time": "...","reference_frame": "ICRF3"},
+        "pointing_fqdn": "low-tmc/telstate/0/pointing"}]},
+        "processing_blocks": [{"pb_id": "pb-mvp01-20210623-00000",
+        "sbi_ids": ["sbi-mvp01-20200325-00001"],"script": {"kind": "realtime",
+        "name": "vis_receive","version": "0.1.0"},"parameters": {}}, {
+        "pb_id": "pb-mvp01-20210623-00001",
+        "sbi_ids": ["sbi-mvp01-20200325-00001"],
+        "script": {"kind": "realtime","name": "test_realtime",
+        "version": "0.1.0"},"parameters": {}}, {
+        "pb_id": "pb-mvp01-20210623-00002",
+        "sbi_ids": ["sbi-mvp01-20200325-00002"],"script": {"kind": "batch",
+        "name": "ical","version": "0.1.0"},"parameters": {},"dependencies": [{
+        "pb_id": "pb-mvp01-20210623-00000","kind": ["visibilities"]}]}, {
+        "pb_id": "pb-mvp01-20210623-00003",
+        "sbi_ids": ["sbi-mvp01-20200325-00001", "sbi-mvp01-20200325-00002"],
+        "script": {"kind": "batch","name": "dpreb","version": "0.1.0" },
+        "parameters": {},"dependencies": [{"pb_id": "pb-mvp01-20210623-00002",
+        "kind": ["calibration"]}]}],
+        "resources": {"csp_links": [1, 2, 3, 4],
+        "receptors": ["FS4", "FS8", "FS16", "FS17", "FS22", "FS23", "FS30",
+        "FS31", "FS32", "FS33", "FS36", "FS52", "FS56", "FS57", "FS59", "FS62",
+          "FS66", "FS69", "FS70", "FS72", "FS73", "FS78", "FS80", "FS88",
+            "FS89", "FS90", "FS91", "FS98", "FS108", "FS111", "FS132", "FS144",
+              "FS146", "FS158", "FS165", "FS167", "FS176", "FS183", "FS193",
+                "FS200", "FS345", "FS346", "FS347", "FS348", "FS349", "FS350",
+                  "FS351", "FS352", "FS353", "FS354", "FS355", "FS356",
+                    "FS429", "FS430", "FS431", "FS432", "FS433", "FS434",
+                      "FS465", "FS466", "FS467", "FS468", "FS469", "FS470"],
+          "receive_nodes": 10 } }}
 
-        .. code-block::
-
-            {"interface": "https://schema.skao.int/ska-tmc-assignresources/2.1"
-            ,"transaction_id":"txn-....-00001","subarray_id": 1,"dish":
-            {"receptor_ids": ["SKA001"]},"sdp": {"interface":
-            "https://schema.skao.int/ska-sdp-assignres/0.4",
-            "execution_block": {"eb_id": "eb-mvp01-20210623-00000","max_length"
-            :100.0,"context": {},"beams": [{"beam_id": "vis0","function":
-            "visibilities"},{"beam_id": "pss1","search_beam_id": 1,"function":
-            "pulsar search"},{"beam_id": "pss2","search_beam_id": 2,"function":
-            "pulsar search"}, {"beam_id": "pst1","timing_beam_id": 1,"function"
-            : "pulsar timing"}, {"beam_id": "pst2","timing_beam_id": 2,
-            "function": "pulsar timing"}, {"beam_id": "vlbi1","vlbi_beam_id":
-            1,"function": "vlbi"}],
-            "scan_types": [{"scan_type_id": ".default","beams": {"vis0":
-            {"channels_id": "vis_channels",
-            "polarisations_id": "all"},"pss1": {"field_id": "pss_field_0",
-            "channels_id": "pulsar_channels",
-            "polarisations_id": "all"},"pss2": {"field_id": "pss_field_1",
-            "channels_id": "pulsar_channels",
-            "polarisations_id": "all"},"pst1": {"field_id": "pst_field_0",
-            "channels_id": "pulsar_channels",
-            "polarisations_id": "all"},"pst2": {"field_id": "pst_field_1",
-            "channels_id": "pulsar_channels",
-            "polarisations_id": "all"},"vlbi": {"field_id": "vlbi_field",
-            "channels_id": "vlbi_channels",
-            "polarisations_id": "all"}}}, {"scan_type_id": "target:a",
-            "derive_from": ".default",
-            "beams": {"vis0": {"field_id": "field_a"}}}],"channels":
-            [{"channels_id": "vis_channels",
-            "spectral_windows": [{"spectral_window_id": "fsp_1_channels",
-            "count": 744,"start": 0,
-            "stride": 2,"freq_min": 350000000.0,"freq_max": 368000000.0,
-            "link_map": [
-            [0, 0],[200, 1],[744, 2],[944, 3]]}, {"spectral_window_id":
-            "fsp_2_channels",
-            "count": 744,"start": 2000,"stride": 1,"freq_min": 360000000.0,
-            "freq_max": 368000000.0,
-            "link_map": [[2000, 4],[2200, 5]]}, {"spectral_window_id":
-            "zoom_window_1",
-            "count": 744,"start": 4000,"stride": 1,"freq_min": 360000000.0,
-            "freq_max": 361000000.0,
-            "link_map": [[4000, 6],[4200, 7]]}]}, {"channels_id":
-            "pulsar_channels",
-            "spectral_windows": [{"spectral_window_id": "pulsar_fsp_channels",
-            "count": 744,
-            "start": 0,"freq_min": 350000000.0,"freq_max": 368000000.0}]}],
-            "polarisations": [{"polarisations_id": "all","corr_type":
-            ["XX", "XY", "YY", "YX"]}],
-            "fields": [{"field_id": "field_a","phase_dir":
-            {"ra": [123, 0.1],"dec": [80, 0.1],
-            "reference_time": "...","reference_frame": "ICRF3"},
-            "pointing_fqdn":
-            "low-tmc/telstate/0/pointing"}]},"processing_blocks":
-            [{"pb_id": "pb-mvp01-20210623-00000",
-            "sbi_ids": ["sbi-mvp01-20200325-00001"],
-            "script": {"kind": "realtime",
-            "name": "vis_receive","version": "0.1.0"},
-            "parameters": {}}, {
-            "pb_id": "pb-mvp01-20210623-00001","sbi_ids":
-            ["sbi-mvp01-20200325-00001"],
-            "script": {"kind": "realtime",
-            "name": "test_realtime","version": "0.1.0"},
-            "parameters": {}}, {"pb_id":
-            "pb-mvp01-20210623-00002","sbi_ids": ["sbi-mvp01-20200325-00002"],
-            "script": {"kind": "batch",
-            "name": "ical","version": "0.1.0"},"parameters": {},
-            "dependencies": [{"pb_id":
-            "pb-mvp01-20210623-00000","kind": ["visibilities"]}]
-            }, {"pb_id": "pb-mvp01-20210623-00003",
-            "sbi_ids": ["sbi-mvp01-20200325-00001",
-            "sbi-mvp01-20200325-00002"],"script":
-            {"kind": "batch","name": "dpreb","version": "0.1.0"},
-            "parameters": {},"dependencies":
-            [{"pb_id": "pb-mvp01-20210623-00002",
-            "kind": ["calibration"]}]}],"resources":
-            {"csp_links": [1, 2, 3, 4],
-            "receptors": ["FS4", "FS8", "FS16", "FS17",
-            "FS22", "FS23", "FS30", "FS31", "FS32",
-            "FS33", "FS36", "FS52", "FS56", "FS57", "FS59",
-            "FS62", "FS66", "FS69", "FS70", "FS72",
-            "FS73", "FS78", "FS80", "FS88", "FS89", "FS90",
-            "FS91", "FS98", "FS108", "FS111", "FS132",
-            "FS144", "FS146", "FS158", "FS165", "FS167",
-            "FS176", "FS183", "FS193", "FS200", "FS345",
-            "FS346", "FS347", "FS348", "FS349", "FS350",
-            "FS351", "FS352", "FS353", "FS354", "FS355",
-            "FS356", "FS429", "FS430", "FS431", "FS432",
-            "FS433", "FS434", "FS465", "FS466", "FS467",
-            "FS468", "FS469", "FS470"],"receive_nodes": 10}}}
-
-        :return: A tuple containing a return code and a string msg.
-            For Example:
-            (ResultCode.OK, "")
-
+        :returns: Result code and message
+        :rtype: Tuple[ResultCode, str]
         """
         try:
-            self.logger.debug(f"Loading json string:{argin}")
+            self.logger.debug("Loading the JSON string: %s", argin)
             json_argument = json.loads(argin)
         except Exception as e:
             return (
@@ -246,7 +175,7 @@ class AssignResources(AssignReleaseResources):
             return result_code, message
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
-        self.logger.debug(f"receptor_ids are:{receptor_ids}")
+        self.logger.debug(f"Receptor IDs are: {receptor_ids}")
         for receptor_id in receptor_ids:
             if self.component_manager.is_already_assigned(receptor_id):
                 return (
@@ -281,7 +210,7 @@ class AssignResources(AssignReleaseResources):
                     self.component_manager.command_id
                 ] = message_or_unique_id
 
-        self.logger.debug(
+        self.logger.info(
             f"Resources assigned successfully to:{self.tm_subarray_adapter}"
         )
 
@@ -418,11 +347,14 @@ class AssignResources(AssignReleaseResources):
         """
         try:
             json_argument = json.loads(argin)
-            self.logger.debug(f"Loading json string:{argin}")
-        except Exception as e:
+            self.logger.debug(
+                "Starting AssignResources command with arguments: %s",
+                json_argument,
+            )
+        except Exception as exception:
             return (
                 ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
+                ("Problem in loading the JSON string: %s", exception),
             )
 
         result_code, message = self.init_adapters()
@@ -443,10 +375,10 @@ class AssignResources(AssignReleaseResources):
 
         try:
             input_mccs_master = self.create_mccs_cmd_data(json_argument)
-        except Exception as e:
+        except Exception as exception:
             return (
                 ResultCode.FAILED,
-                ("Errors in input json argument: %s", e),
+                ("Errors in input json argument: %s", exception),
             )
 
         self.component_manager.log_state(
@@ -521,8 +453,8 @@ class AssignResources(AssignReleaseResources):
                 sdp_id = sdp_keys[sdp_values.index("")]
                 self.update_resource_config_file(json_argument, sdp_id)
             return True, ""
-        except Exception as e:
-            return False, f"Error while updating SDP schema: {e}"
+        except Exception as exception:
+            return False, f"Error while updating SDP schema: {exception}"
 
     def create_mccs_cmd_data(self, json_argument: dict) -> dict:
         """
@@ -539,8 +471,10 @@ class AssignResources(AssignReleaseResources):
             mccs_input = json_argument["mccs"]
             mccs_input["subarray_id"] = subarray_id
             return mccs_input
-        except Exception as e:
-            raise Exception("Error while creating MCCS input json") from e
+        except Exception as exception:
+            raise Exception(
+                "Error while creating MCCS input json"
+            ) from exception
 
     def get_subarray_adapter(self, subarray_id: int) -> Tuple[ResultCode, str]:
         """Method for obtaining the adapter for a subarray.
@@ -562,3 +496,6 @@ class AssignResources(AssignReleaseResources):
             )
 
         return ResultCode.OK, ""
+
+    def update_task_status(self):
+        """Updates task status implemented to"""

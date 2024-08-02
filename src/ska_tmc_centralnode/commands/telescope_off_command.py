@@ -14,7 +14,7 @@ from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 class TelescopeOff(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOff() command. Sets the
-      CentralNode into telescopestate to OFF.
+      CentralNode into telescope state to OFF.
     """
 
     def __init__(
@@ -53,7 +53,7 @@ class TelescopeOff(TelescopeOnOff):
         task_callback(status=TaskStatus.IN_PROGRESS)
 
         return_code, message = self.do(argin=None)
-        self.logger.info(message)
+        logger.info(f"TelescopeOff command result: {message}")
         if return_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
@@ -67,7 +67,7 @@ class TelescopeOff(TelescopeOnOff):
 
     def do_mid(self, argin=None):
         """
-        Method to invoke Off command on Lower level devices.
+        Method to invoke Off command on lower level devices.
         param:
         None
 
@@ -86,7 +86,7 @@ class TelescopeOff(TelescopeOnOff):
             return return_code, message
 
         self.component_manager.log_state(
-            "Device states before executing TelescopeOff command"
+            "Device states before executing TelescopeOff command."
         )
 
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
@@ -97,21 +97,22 @@ class TelescopeOff(TelescopeOnOff):
                 return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
-            "waiting for ALL Subarray devices obsState to be Empty"
+            "Waiting for all subarray devices to reach the EMPTY "
+            "observation state."
         )
         all_empty = False
         start_time = time.time()
         while not all_empty:
             all_empty = True
             for adapter in self.subarray_adapters:
-                if (
-                    not self.component_manager.get_device(
-                        adapter.dev_name
-                    ).obs_state
-                    == ObsState.EMPTY
-                ):
+                obs_state = self.component_manager.get_device(
+                    adapter.dev_name
+                ).obs_state
+                if obs_state != ObsState.EMPTY:
                     self.logger.error(
-                        "Subarray %s still not empty", adapter.dev_name
+                        "Subarray %s is still not empty, current state: %s",
+                        adapter.dev_name,
+                        obs_state,
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time
@@ -131,88 +132,82 @@ class TelescopeOff(TelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                # condition for exception raised during invoking command
-                if return_code in [ResultCode.FAILED]:
+                if return_code == ResultCode.FAILED:
                     return ResultCode.FAILED, message_or_unique_id
-                # condition for unavailable devices
-                if return_code in [ResultCode.REJECTED]:
-                    # return ResultCode.FAILED, message_or_unique_id
+                if return_code == ResultCode.REJECTED:
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
                     )
 
         if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
+            self.logger.info("Unavailable devices: %s", unavailable_devices)
+            return ResultCode.OK, f"Unavailable devices: {unavailable_devices}"
 
-        return (ResultCode.OK, "Command Completed")
+        return ResultCode.OK, "TelescopeOff command completed successfully."
 
     def turn_off_csp(self):
-        """Turns off the csp Devices"""
+        """Turn off the CSP devices"""
         self.logger.info(
-            f"Invoking Off command for {self.csp_mln_adapter.dev_name} devices"
+            "Invoking Off command for CSP devices: %s",
+            self.csp_mln_adapter.dev_name,
         )
-        if self.component_manager.check_if_csp_mln_is_available() is True:
+        if self.component_manager.check_if_csp_mln_is_available():
             return self.send_command(
                 [self.csp_mln_adapter],
-                f"Error in calling Off command for\
-                  {self.csp_mln_adapter.dev_name}",
+                f"Error in calling Off command for "
+                f"{self.csp_mln_adapter.dev_name}",
                 "Off",
             )
-        return (
-            [ResultCode.REJECTED],
-            [
-                f"{self.csp_mln_adapter.dev_name} is not available to receive\
-                      Off command"
-            ],
-        )
+        return [ResultCode.REJECTED], [
+            f"{self.csp_mln_adapter.dev_name} "
+            "is not available to receive Off command"
+        ]
 
     def turn_off_sdp(self):
-        """Turn off sdp"""
+        """Turn off the SDP devices"""
         self.logger.info(
-            f"Invoking Off command for {self.sdp_mln_adapter.dev_name} devices"
+            "Invoking Off command for SDP devices: %s",
+            self.sdp_mln_adapter.dev_name,
         )
-        if self.component_manager.check_if_sdp_mln_is_available() is True:
+        if self.component_manager.check_if_sdp_mln_is_available():
             return self.send_command(
                 [self.sdp_mln_adapter],
-                f"Error in calling Off command for\
-                      {self.sdp_mln_adapter.dev_name}",
+                f"Error in calling Off command for "
+                f"{self.sdp_mln_adapter.dev_name}",
                 "Off",
             )
-
-        return (
-            [ResultCode.REJECTED],
-            [
-                f"{self.sdp_mln_adapter.dev_name} is not available to \
-                    receive Off command"
-            ],
-        )
+        return [ResultCode.REJECTED], [
+            f"{self.sdp_mln_adapter.dev_name} "
+            "is not available to receive Off command"
+        ]
 
     def turn_off_subarrays(self):
         """Turn off the subarrays"""
         self.logger.info(
-            f"Invoking Off command for {self.subarray_adapters} devices"
+            "Invoking Off command for subarray devices: %s",
+            self.subarray_adapters,
         )
         return self.send_command(
             self.subarray_adapters,
-            f"Error in calling Off command for {self.subarray_adapters}",
+            "Error in calling Off command for subarray devices",
             "Off",
         )
 
     def turn_off_dishes(self):
-        """Turns off the dishes"""
+        """Turn off the dishes"""
+        self.logger.info(
+            "Invoking Off command for dish devices: %s",
+            self.dish_adapters,
+        )
         return self.send_command(
             self.dish_adapters,
-            "Error in calling Off() on TMC Dish leaf node",
+            "Error in calling Off command for dish devices",
             "Off",
         )
 
     def do_low(self, argin=None):
         """
-        Method to invoke Off command on Lower level devices.
+        Method to invoke Off command on lower level devices.
         param:
         None
 
@@ -231,7 +226,7 @@ class TelescopeOff(TelescopeOnOff):
             return ret_code, message
 
         self.component_manager.log_state(
-            "Device states before executing TelescopeOff command"
+            "Device states before executing TelescopeOff command."
         )
 
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
@@ -242,30 +237,30 @@ class TelescopeOff(TelescopeOnOff):
                 return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
-            """Waiting for all the Subarray devices to be in EMPTY
-            observation state"""
+            "Waiting for all subarray devices to reach the "
+            "EMPTY observation state."
         )
         all_empty = False
         start_time = time.time()
         while not all_empty:
             all_empty = True
             for adapter in self.subarray_adapters:
-                if (
-                    not self.component_manager.get_device(
-                        adapter.dev_name
-                    ).obs_state
-                    == ObsState.EMPTY
-                ):
+                obs_state = self.component_manager.get_device(
+                    adapter.dev_name
+                ).obs_state
+                if obs_state != ObsState.EMPTY:
                     self.logger.error(
-                        "Subarray %s still not empty", adapter.dev_name
+                        "Subarray %s is still not empty, current state: %s",
+                        adapter.dev_name,
+                        obs_state,
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time
             if elapsed_time > self._timeout_subarrays:
                 return (
                     ResultCode.FAILED,
-                    """Timeout in waiting for the subarray devices to be in
-                    EMPTY observation state""",
+                    "Timeout waiting for subarray devices to reach "
+                    "the EMPTY state.",
                 )
             time.sleep(self._step_sleep)
 
@@ -278,44 +273,36 @@ class TelescopeOff(TelescopeOnOff):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                # condition for exception raised during invoking command
-                if return_code in [ResultCode.FAILED]:
+                if return_code == ResultCode.FAILED:
                     return ResultCode.FAILED, message_or_unique_id
-                # condition for unavailable devices
-                if return_code in [ResultCode.REJECTED]:
-                    # return ResultCode.FAILED, message_or_unique_id
+                if return_code == ResultCode.REJECTED:
                     unavailable_devices.append(
                         message_or_unique_id.split(" ")[0]
                     )
 
         if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
-            return (
-                ResultCode.OK,
-                f"Unavailable devices are {unavailable_devices}",
-            )
+            self.logger.info("Unavailable devices: %s", unavailable_devices)
+            return ResultCode.OK, f"Unavailable devices: {unavailable_devices}"
 
-        return (ResultCode.OK, "Command Completed")
+        return ResultCode.OK, "TelescopeOff command completed successfully."
 
     def turn_off_mccs(self):
-        """Turn off the mccs"""
+        """Turn off the MCCS devices"""
         self.logger.info(
-            f"Invoking Off command for {self.mccs_mln_adapter.dev_name} device"
+            "Invoking Off command for MCCS devices: %s",
+            self.mccs_mln_adapter.dev_name,
         )
-        if self.component_manager.check_if_mccs_mln_is_available() is True:
+        if self.component_manager.check_if_mccs_mln_is_available():
             return self.send_command(
                 [self.mccs_mln_adapter],
-                f"Error in calling Off command for \
-                    {self.mccs_mln_adapter.dev_name}",
+                f"Error in calling Off command for "
+                f"{self.mccs_mln_adapter.dev_name}",
                 "Off",
             )
-        return (
-            [ResultCode.REJECTED],
-            [
-                f"{self.mccs_mln_adapter.dev_name} is not available to \
-                    receive Off command"
-            ],
-        )
+        return [ResultCode.REJECTED], [
+            f"{self.mccs_mln_adapter.dev_name} is not available "
+            "to receive Off command"
+        ]
 
     def update_task_status(self):
         """Updates task status implemented to"""

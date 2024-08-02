@@ -460,7 +460,7 @@ class LoadDishCfgCommandResultAggregator:
         )
         result_codes, failed_messages = self._get_result_codes_and_failed_msg()
         self.logger.info(
-            "Result codes are %s and failed messages are %s",
+            "Result code are %s and failed messages are %s",
             result_codes,
             failed_messages,
         )

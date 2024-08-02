@@ -2,13 +2,9 @@
 ReleaseResources class for CentralNode.
 """
 import json
-import threading
-from logging import Logger
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.central_node_command import (
@@ -50,78 +46,15 @@ class ReleaseResources(AssignReleaseResources):
     def release_resources(
         self,
         argin: str,
-        logger: Logger,
-        task_callback: Callable = None,
-        task_abort_event: Optional[threading.Event] = None,
-    ):
-        """This is a long running method for ReleaseResources command,
-        it executes do hook, invokes ReleaseResources command on lower
-        level devices.
+    ) -> Tuple[ResultCode, str]:
+        """This is a long running method for ReleaseResources command
 
-        :param: logger
-        :type: logging.Logger
-        :param: task_callback which Update task state, defaults to None
-        :type: Callable, optional
-        :param: task_abort_event which Check for abort, defaults to None
-        :type: Event, Optional
+        :param argin: Input argument for the command
+        :type argin: `str`
+        :returns: Result code and message
+        :rtype: `Tuple[ResultCode, str]`
         """
-        # Indicate that the task has started
-        self.task_callback = task_callback
-        self.set_command_id(__class__.__name__)
-        task_callback(status=TaskStatus.IN_PROGRESS)
-        self.component_manager.command_in_progress = "ReleaseResources"
-        self.component_manager.command_result = ResultCode.STARTED
-        self.component_manager.start_timer(
-            self.timeout_id,
-            self.component_manager.command_timeout,
-            self.timeout_callback,
-        )
-
-        result_code, message = self.do(argin=argin)
-        self.logger.info(
-            "ReleaseResources command execution result: %s, message: %s",
-            result_code,
-            message,
-        )
-        if result_code == ResultCode.FAILED:
-            self.update_task_status((result_code, message), message)
-            self.component_manager.stop_timer()
-            self.component_manager.command_mapping.pop(
-                self.component_manager.command_id
-            )
-        else:
-            self.start_tracker_thread(
-                "get_subarray_obsstate",
-                [ObsState.RESOURCING, ObsState.EMPTY],
-                task_abort_event,
-                timeout_id=self.timeout_id,
-                timeout_callback=self.timeout_callback,
-                command_id=self.component_manager.command_id,
-                lrcr_callback=(
-                    self.component_manager.long_running_result_callback
-                ),
-            )
-
-    def update_task_status(
-        self, result: Tuple[ResultCode, str], exception: str = ""
-    ):
-        """Updates the task status for command"""
-        if result[0] == ResultCode.FAILED:
-            self.task_callback(
-                result=result,
-                status=TaskStatus.COMPLETED,
-                exception=exception,
-            )
-            self.component_manager.subarray_devname = ""
-        else:
-            self.task_callback(result=result, status=TaskStatus.COMPLETED)
-        if self.component_manager.command_mapping.get(
-            self.component_manager.command_id
-        ):
-            self.component_manager.command_mapping.pop(
-                self.component_manager.command_id
-            )
-        self.component_manager.command_in_progress = ""
+        return self.do(argin=argin)
 
     # pylint:disable=signature-differs
     def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
@@ -152,10 +85,10 @@ class ReleaseResources(AssignReleaseResources):
 
         try:
             json_argument = json.loads(argin)
-        except Exception as e:
+        except Exception as exception:
             return (
                 ResultCode.FAILED,
-                f"Problem in loading the JSON string: {e}",
+                f"Problem in loading the JSON string: {exception}",
             )
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
@@ -239,10 +172,10 @@ class ReleaseResources(AssignReleaseResources):
 
         try:
             json_argument = json.loads(argin)
-        except Exception as e:
+        except Exception as exception:
             return (
                 ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", e),
+                ("Problem in loading the JSON string: %s", exception),
             )
 
         if "transaction_id" in json_argument:
@@ -268,10 +201,10 @@ class ReleaseResources(AssignReleaseResources):
             )
         try:
             input_mccs_master = self.create_mccs_input_data(json_argument)
-        except Exception as e:
+        except Exception as exception:
             return (
                 ResultCode.FAILED,
-                ("Errors in input json argument: %s", e),
+                ("Errors in input json argument: %s", exception),
             )
         if json_argument["release_all"] is True:
             for return_codes, message_or_unique_ids in (
@@ -328,5 +261,10 @@ class ReleaseResources(AssignReleaseResources):
                 del json_argument["interface"]
             json_argument["interface"] = mccs_release_interface
             return json_argument
-        except Exception as e:
-            raise Exception("Error while creating MCCS input json") from e
+        except Exception as exception:
+            raise Exception(
+                "Error while creating MCCS input json"
+            ) from exception
+
+    def update_task_status(self):
+        """Updates task status implemented to"""

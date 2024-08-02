@@ -299,7 +299,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self.get_device(device).state
                 for device in devices_to_check_list
             ]
-            self.logger.info("Device State List %s", dev_state_list)
+            self.logger.debug("Current device states: %s", dev_state_list)
             count += 1
             if count == self.dish_vcc_init_timeout:
                 break
@@ -315,27 +315,27 @@ class CNComponentManagerMid(CNComponentManager):
         and catched in ValueError.The exception_msg and command_id is then
         passed to long_running_result_callback.
         Command_mapping contains {centralnode_command_id:unique_id} ,
-          all events are verified with respect to this mapping.
+        all events are verified with respect to this mapping.
         If there is no command_mapping present the event
-          might be of old command.
+        might be of old command.
 
         :param dev_name: name of the device who's event has been
-          captured in this method
+        captured in this method
         :type dev_name: str
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
         """
         self.logger.info(
-            "longRunningCommandResult event for device: %s, with value: %s",
+            "longRunningCommandResult event for device '%s'. Event value: %s",
             dev_name,
             value,
         )
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
-            or (not result_code_or_exception_or_task_status)
-            or (unique_id not in self.command_mapping.values())
-        ):  # ignoring other command events
+            or not result_code_or_exception_or_task_status
+            or unique_id not in self.command_mapping.values()
+        ):
             return
         try:
             result_code, message = json.loads(
@@ -344,6 +344,12 @@ class CNComponentManagerMid(CNComponentManager):
             match int(result_code):
                 case ResultCode.OK:
                     self.command_result = ResultCode.OK
+                    self.logger.info(
+                        "Command with unique_id '%s' "
+                        "on device '%s' succeeded.",
+                        unique_id,
+                        dev_name,
+                    )
                 case (
                     ResultCode.FAILED
                     | ResultCode.REJECTED
@@ -351,17 +357,18 @@ class CNComponentManagerMid(CNComponentManager):
                     | ResultCode.ABORTED
                 ):
                     self.logger.info(
-                        "Updating LRCRCallback with message: %s for %s for"
-                        + " device: %s",
-                        unique_id,
+                        "Updating LRCRCallback with result_code '%s' and "
+                        "message '%s' "
+                        "for command '%s' on device '%s'.",
+                        result_code,
                         message,
+                        unique_id,
                         dev_name,
                     )
+
                     exp_string = (
-                        "Exception occurred on device:"
-                        + f"{unique_id}:"
-                        + f" {dev_name}:"
-                        + f" {message}"
+                        f"Exception occurred on device: {unique_id}: "
+                        f"{dev_name}: {message}"
                     )
                     command_id = self.get_command_id(unique_id)
                     self.long_running_result_callback(
@@ -371,9 +378,10 @@ class CNComponentManagerMid(CNComponentManager):
                     )
         except Exception as exception:
             self.logger.exception(
-                "Exception occurred while processing"
-                + "long running command result"
-                + "attribute event: %s",
+                "Exception occurred while processing long running "
+                "command result "
+                "for device '%s': %s",
+                dev_name,
                 exception,
             )
 
@@ -408,7 +416,9 @@ class CNComponentManagerMid(CNComponentManager):
         """
         with self.lock:
             self.logger.info(
-                f"State event callback for device {device_name}: {state}"
+                "Device '%s' state updated: %s",
+                device_name,
+                state.name,
             )
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
@@ -453,7 +463,9 @@ class CNComponentManagerMid(CNComponentManager):
         """
         with self.lock:
             self.logger.info(
-                f"Dish event callback for device {dev_name}: {dish_mode}"
+                "Dish event callback for device '%s': %s",
+                dev_name,
+                dish_mode.name,
             )
 
             # Update Dish leaf node device name with full FQDN for real Dish
@@ -609,8 +621,8 @@ class CNComponentManagerMid(CNComponentManager):
                 if len(num_of_dish_values) == len(
                     self.input_parameter.dish_leaf_node_dev_names
                 ):
-                    self.logger.info("All Dish Available")
-                    return True
+                    self.logger.info("All dishes are available and ready.")
+                return True
             except Exception as e:
                 self.logger.exception("Error %s", e)
             count += 1

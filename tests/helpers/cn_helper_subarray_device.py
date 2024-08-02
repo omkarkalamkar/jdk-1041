@@ -44,5 +44,5 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
                 self.push_change_event(
                     "isSubarrayAvailable", self._is_subarray_available
                 )
-            except Exception as e:
-                self.logger.exception(f"Error pushing the event. {e}")
+            except Exception as exception:
+                self.logger.exception(f"Error pushing the event. {exception}")

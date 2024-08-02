@@ -147,37 +147,48 @@ class LoadDishCfg(LoadDishCfgCommand):
             try:
                 data = TMData(data_sources)
                 return data[tm_data_filepath].get_dict(), ""
-            except Exception as e:
+            except Exception as exception:
                 self.logger.exception(
-                    "Error in Loading Dish VCC map json file %s", e
+                    "Error in Loading Dish VCC map json file %s", exception
                 )
-                return {}, f"Error in Loading Dish VCC map json file {e}"
+                return (
+                    {},
+                    f"Error in Loading Dish VCC map json file {exception}",
+                )
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
     # pylint:disable=signature-differs
     def do(self, argin: str) -> Tuple[ResultCode, str]:
-        """This command does following
-        1. Load content of DishId-VCC mapping file from CAR URI
-        2. Validate Json
-        3. Invoke command on csp master leaf node
-        4. Invoke SetKValue command on Dish Leaf Node for each dish id
-        provided in dishid_vcc map
-        :param argin: dishid vcc map params
+        """
+        This command performs the following steps:
+        1. Loads the content of the DishId-VCC mapping file from CAR URI.
+        2. Validates the JSON.
+        3. Invokes a command on the CSP master leaf node.
+        4. Invokes the SetKValue command on the Dish Leaf Node for each dish ID
+        provided in the DishId-VCC map.
+
+        :param argin: DishId-VCC map parameters in JSON string format.
+        :type argin: str
+        :return: Result code and message
+        :rtype: Tuple[ResultCode, str]
         """
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
+            self.logger.error("Failed to initialize adapters: %s", message)
             return result_code, message
 
         dishid_vcc_map_params = json.loads(argin)
-        self.logger.info("DishId Vcc Map Params %s", dishid_vcc_map_params)
+        self.logger.info(
+            "DishId-VCC map parameters: %s", dishid_vcc_map_params
+        )
 
         dishid_vcc_map_json, _ = self.get_dishid_vcc_map_json(
             dishid_vcc_map_params
         )
 
-        self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
         dish_parameters = dishid_vcc_map_json.get("dish_parameters")
+
         for return_codes, message_or_unique_ids in [
             self._invoke_load_dish_cfg_on_csp_master_ln(dishid_vcc_map_params),
             self._set_k_numbers_to_dish(dish_parameters),
@@ -185,18 +196,19 @@ class LoadDishCfg(LoadDishCfgCommand):
             for return_code, message_or_unique_id in zip(
                 return_codes, message_or_unique_ids
             ):
-                # condition for exception raised during invoking command
-                if return_code in [ResultCode.FAILED]:
-                    self.logger.info(
-                        "command LoadDishCfg failed with error %s",
+                if return_code == ResultCode.FAILED:
+                    self.logger.error(
+                        "Command 'LoadDishCfg' failed with error: %s",
                         message_or_unique_id,
                     )
                     return ResultCode.FAILED, message_or_unique_id
+
         self.logger.info(
-            f"Successfully Invoked LoadDishCfg command on:\
-                {self.csp_mln_adapter.dev_name}"
+            "Successfully invoked 'LoadDishCfg' command on "
+            "CSP Master Leaf Node: %s",
+            self.csp_mln_adapter.dev_name,
         )
-        return (ResultCode.OK, "")
+        return ResultCode.OK, ""
 
     def _invoke_load_dish_cfg_on_csp_master_ln(
         self, dishid_vcc_map_params: str
