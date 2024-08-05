@@ -144,7 +144,7 @@ class TelescopeOff(TelescopeOnOff):
             self.logger.info("Unavailable devices: %s", unavailable_devices)
             return ResultCode.OK, f"Unavailable devices: {unavailable_devices}"
 
-        return ResultCode.OK, "TelescopeOff command completed successfully."
+        return (ResultCode.OK, "Command Completed")
 
     def turn_off_csp(self):
         """Turn off the CSP devices"""

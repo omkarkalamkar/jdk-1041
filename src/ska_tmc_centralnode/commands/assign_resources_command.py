@@ -449,7 +449,7 @@ class AssignResources(AssignReleaseResources):
         except Exception as exception:
             return (
                 ResultCode.FAILED,
-                ("Errors in input json argument: %s", exception),
+                ("JSON arguments error:: %s", exception),
             )
 
         self.component_manager.log_state(

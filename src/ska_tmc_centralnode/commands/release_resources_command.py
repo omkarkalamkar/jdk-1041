@@ -234,7 +234,7 @@ class ReleaseResources(AssignReleaseResources):
         except Exception as exception:
             return (
                 ResultCode.FAILED,
-                ("Errors in input json argument: %s", exception),
+                ("Error in MCCS JSON argument: %s", exception),
             )
         if json_argument["release_all"] is True:
             for return_codes, message_or_unique_ids in (
