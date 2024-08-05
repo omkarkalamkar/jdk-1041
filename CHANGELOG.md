@@ -5,6 +5,10 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.16.4]
+********
+* Added timeout and error propagation decorators for Assign and Release resources command and Improve logger statements.
+
 [0.16.3]
 ********
 * Fixed long running command result handling in component manager for result code ABORTED

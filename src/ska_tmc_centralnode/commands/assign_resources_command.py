@@ -71,7 +71,9 @@ class AssignResources(AssignReleaseResources):
         argin: str,
     ) -> Tuple[ResultCode, str]:
         """
-        This is a long-running method for the AssignResources command.
+        This is a long running method for AssignResources command it
+        executes do hook,invokes AssignResources command on lower level
+        devices
 
         :param argin: Input argument for the command
         :type argin: str
@@ -84,7 +86,30 @@ class AssignResources(AssignReleaseResources):
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
-        """Updates the task status for command"""
+        """
+        Updates the task status for a command.
+
+        This method updates the task status based on the result of the command
+        execution. If the result indicates a failure,
+        it calls the `task_callback` with the failure details and clears the
+        subarray device name. For both success and failure,
+        it sets the task status to completed and clears the command in progress
+        Additionally, it removes the command ID from
+        the command mapping if it exists.
+
+        Parameters:
+        -----------
+        result : Tuple[ResultCode, str]
+            A tuple containing the result code and a message.
+            The result code indicates whether the command succeeded or failed.
+        exception : str, optional
+            A string representing any exception message.
+            This is used when the result indicates a failure.
+            Default is an empty string.
+        Returns:
+        --------
+        None
+        """
         if result[0] == ResultCode.FAILED:
             self.task_callback(
                 result=result, status=TaskStatus.COMPLETED, exception=exception
@@ -246,13 +271,32 @@ class AssignResources(AssignReleaseResources):
     def update_resource_config_file(
         self, json_argument: dict, sdp_id: str
     ) -> None:
-        """Updates the resource configuration file.
+        """
+        Updates the resource configuration file.
 
-        :param: json_argument
-        :type: A dictionary containing the JSON argument forthe update.
-        :param id: A string representing the ID for the resource configuration
-            file.
-        :return: None
+        This method updates the resource configuration file with unique
+        identifiers for execution blocks and processing blocks.
+        It fetches unique IDs using the `skuid` service and updates the
+        corresponding entries in the provided JSON argument.
+
+        Parameters:
+        -----------
+        json_argument : dict
+            A dictionary containing the JSON argument for the update.
+            This dictionary should have a specific structure
+            with keys for 'sdp', 'execution_block', and 'processing_blocks'.
+        sdp_id : str
+            A string representing the ID for the resource configuration file.
+
+        Returns:
+        --------
+        None
+
+        Raises:
+        -------
+        Exception
+            If the 'processing_blocks' key is not present in the input
+            JSON argument.
         """
         # New type of id "eb_id" is used to distinguish between real
         # SB and id used during testing
@@ -464,9 +508,34 @@ class AssignResources(AssignReleaseResources):
     def _validate_and_update_resource_config(
         self, json_argument: dict
     ) -> Tuple[bool, str]:
-        """Validate if eb_id present in sdp schema.
-        :param: json_argument
-        :type: DevString (low json)
+        """
+        Validate and update the resource configuration.
+
+        This method validates if the 'eb_id' is present in the SDP schema
+        within the provided JSON argument. If the 'eb_id' is not
+        present, it fetches the appropriate IDs and updates the resource
+        configuration file accordingly.
+
+        Parameters:
+        -----------
+        json_argument : dict
+            A dictionary representing the low-level JSON configuration for the
+            resource.
+
+        Returns:
+        --------
+        Tuple[bool, str]
+            A tuple where the first element is a boolean indicating the success
+            of the validation and update process, and the second
+            element is a string containing an error message if the
+            process failed.
+
+        Raises:
+        -------
+        Exception
+            If an error occurs while updating the SDP schema, it returns
+            a tuple
+            with False and the error message.
         """
         try:
             if (
