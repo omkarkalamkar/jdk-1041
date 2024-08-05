@@ -957,11 +957,9 @@ class CNComponentManager(TmcComponentManager):
                 processing_block_error_msg
             )
 
-        json_argument_wrapped = json.dumps({"argin": json_argument})
-
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
-            kwargs={"argin": json_argument_wrapped},
+            kwargs={"argin": json.dumps(json_argument)},
             task_callback=task_callback,
             is_cmd_allowed=self.command_not_allowed_callable(
                 subarray_id_or_message,
@@ -1033,12 +1031,9 @@ class CNComponentManager(TmcComponentManager):
                     f"Subarray {subarray} is not available."
                 )
 
-        # Wrap input_json_or_message if needed
-        input_json_wrapped = json.dumps({"argin": input_json_or_message})
-
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
-            kwargs={"argin": input_json_wrapped},
+            kwargs={"argin": json.dumps(input_json_or_message)},
             task_callback=task_callback,
             is_cmd_allowed=self.command_not_allowed_callable(
                 subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"

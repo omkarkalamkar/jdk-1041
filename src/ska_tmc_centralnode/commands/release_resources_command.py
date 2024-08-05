@@ -4,7 +4,11 @@ ReleaseResources class for CentralNode.
 import json
 from typing import Optional, Tuple
 
+from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
+from ska_tango_base.executor import TaskStatus
+from ska_tmc_common import error_propagation_decorator, timeout_decorator
 from ska_tmc_common.adapters import AdapterFactory
 
 from ska_tmc_centralnode.commands.central_node_command import (
@@ -42,7 +46,12 @@ class ReleaseResources(AssignReleaseResources):
         )
         self.my_subarray_adapter = None
         self.subarray_adapter = None
+        self.task_callback: TaskCallbackType
 
+    @timeout_decorator
+    @error_propagation_decorator(
+        "get_subarray_obsstate", [ObsState.RESOURCING, ObsState.EMPTY]
+    )
     def release_resources(
         self,
         argin: str,
@@ -54,7 +63,28 @@ class ReleaseResources(AssignReleaseResources):
         :returns: Result code and message
         :rtype: `Tuple[ResultCode, str]`
         """
-        return self.do(argin=argin)
+        return self.do(argin)
+
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ):
+        """Updates the task status for command"""
+        if result[0] == ResultCode.FAILED:
+            self.task_callback(
+                result=result,
+                status=TaskStatus.COMPLETED,
+                exception=exception,
+            )
+            self.component_manager.subarray_devname = ""
+        else:
+            self.task_callback(result=result, status=TaskStatus.COMPLETED)
+        if self.component_manager.command_mapping.get(
+            self.component_manager.command_id
+        ):
+            self.component_manager.command_mapping.pop(
+                self.component_manager.command_id
+            )
+        self.component_manager.command_in_progress = ""
 
     # pylint:disable=signature-differs
     def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
@@ -265,6 +295,3 @@ class ReleaseResources(AssignReleaseResources):
             raise Exception(
                 "Error while creating MCCS input json"
             ) from exception
-
-    def update_task_status(self):
-        """Updates task status implemented to"""

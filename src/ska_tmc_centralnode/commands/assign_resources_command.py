@@ -6,8 +6,10 @@ from logging import Logger
 from typing import Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
+from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import (
     AdapterFactory,
     TimeKeeper,
@@ -53,6 +55,7 @@ class AssignResources(AssignReleaseResources):
         self.timekeeper = TimeKeeper(
             self.component_manager.command_timeout, logger
         )
+        self.task_callback: TaskCallbackType  # need to change
 
     @timeout_decorator
     @error_propagation_decorator(
@@ -72,6 +75,25 @@ class AssignResources(AssignReleaseResources):
         :rtype: Tuple[ResultCode, str]
         """
         return self.do(argin)
+
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ) -> None:
+        """Updates the task status for command"""
+        if result[0] == ResultCode.FAILED:
+            self.task_callback(
+                result=result, status=TaskStatus.COMPLETED, exception=exception
+            )
+            self.component_manager.subarray_devname = ""
+        else:
+            self.task_callback(result=result, status=TaskStatus.COMPLETED)
+        self.component_manager.command_in_progress = ""
+        if self.component_manager.command_mapping.get(
+            self.component_manager.command_id
+        ):
+            self.component_manager.command_mapping.pop(
+                self.component_manager.command_id
+            )
 
     # pylint:disable=signature-differs
     def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
@@ -496,6 +518,3 @@ class AssignResources(AssignReleaseResources):
             )
 
         return ResultCode.OK, ""
-
-    def update_task_status(self):
-        """Updates task status implemented to"""
