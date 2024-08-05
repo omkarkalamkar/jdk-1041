@@ -463,9 +463,8 @@ class CNComponentManagerMid(CNComponentManager):
         """
         with self.lock:
             self.logger.info(
-                "Dish event callback for device '%s': %s",
-                dev_name,
-                dish_mode.name,
+                f"Received dishMode event from {dev_name}: "
+                + f"{DishMode(dish_mode).name}"
             )
 
             # Update Dish leaf node device name with full FQDN for real Dish

@@ -488,9 +488,8 @@ class CNComponentManager(TmcComponentManager):
         """
         with self.lock:
             self.logger.info(
-                "Device '%s' health state updated: %s",
-                device_name,
-                health_state.name,
+                f"healthState event for {device_name}: "
+                + f"{HealthState(health_state).name}"
             )
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
@@ -514,6 +513,11 @@ class CNComponentManager(TmcComponentManager):
             devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.health_state = health_state
+                self.logger.debug(
+                    "Updated healthState of %s: %s",
+                    devInfo.health_state,
+                    HealthState(devInfo.health_state).name,
+                )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
@@ -533,10 +537,8 @@ class CNComponentManager(TmcComponentManager):
         :type obs_state: ObsState
         """
         with self.lock:
-            self.logger.info(
-                "Observation State event callback for device '%s': %s",
-                dev_name,
-                obs_state.name,
+            self.logger.debug(
+                f"obsState event for {dev_name}: {ObsState(obs_state).name}"
             )
             sdp_subarray_dev_names = self.get_sdp_subarray_dev_names()
             for sdp_subarray in sdp_subarray_dev_names:
