@@ -115,7 +115,8 @@ class TelescopeStandby(TelescopeOnOff):
                     == ObsState.EMPTY
                 ):
                     self.logger.error(
-                        "Subarray %s is still not empty, current state: %s",
+                        "Subarray current ObsState %s, while "
+                        "waiting for ObsState.EMPTY. "
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time

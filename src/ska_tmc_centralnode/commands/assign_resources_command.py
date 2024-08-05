@@ -2,7 +2,7 @@
 AssignResources Command class for CentralNode.
 """
 import json
-from logging import Logger
+import time
 from typing import Optional, Tuple
 
 from ska_ser_skuid.client import SkuidClient
@@ -13,6 +13,7 @@ from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import (
     AdapterFactory,
     TimeKeeper,
+    TimeoutCallback,
     error_propagation_decorator,
     timeout_decorator,
 )
@@ -35,16 +36,17 @@ class AssignResources(AssignReleaseResources):
     existence of the resource.
     """
 
+    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         component_manager,
-        logger: Logger,
-        *args,
-        adapter_factory: Optional[AdapterFactory] = None,
-        skuid: SkuidClient = SkuidClient(
+        adapter_factory=None,
+        skuid=SkuidClient(
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
         ),
+        *args,
+        logger=None,
         **kwargs,
     ):
         super().__init__(
@@ -55,7 +57,10 @@ class AssignResources(AssignReleaseResources):
         self.timekeeper = TimeKeeper(
             self.component_manager.command_timeout, logger
         )
-        self.task_callback: TaskCallbackType  # need to change
+
+        self.timeout_id = f"{time.time()}_{__class__.__name__}"
+        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
+        self.task_callback: TaskCallbackType
 
     @timeout_decorator
     @error_propagation_decorator(
@@ -370,7 +375,7 @@ class AssignResources(AssignReleaseResources):
         try:
             json_argument = json.loads(argin)
             self.logger.debug(
-                "Starting AssignResources command with arguments: %s",
+                "Executing AssignResources command with arguments: %s",
                 json_argument,
             )
         except Exception as exception:

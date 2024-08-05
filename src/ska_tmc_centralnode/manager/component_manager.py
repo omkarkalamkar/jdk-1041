@@ -367,24 +367,16 @@ class CNComponentManager(TmcComponentManager):
         )
 
     def _check_if_device_is_responsive(self, dev_names: List[str]):
-        """Checks if the devices are responsive.
-
-        :param dev_names: List of device names to check
-        :type dev_names: List[str]
-        :raises CommandNotAllowed: If none of the devices are responsive
-        """
+        """checks if the device is responsive"""
         count = 0
         for dev_name in dev_names:
             dev_info = self.get_device(dev_name)
             if dev_info is not None and not dev_info.unresponsive:
-                # Log the responsiveness status of the device
                 self.logger.debug(
-                    "Device '%s' - Responsive: %s",
-                    dev_name,
-                    not dev_info.unresponsive,
+                    f"Device {dev_name} dev_info.unresponsive:"
+                    + f" {dev_info.unresponsive} "
                 )
                 count += 1
-
         if count == 0:
             raise CommandNotAllowed(f"{dev_names} not available")
 
@@ -456,9 +448,8 @@ class CNComponentManager(TmcComponentManager):
         :type exception: Exception
         """
         # Log the device failure with the device name
-        self.logger.error(
-            "Device '%s' failed: %s", device_info.dev_name, str(exception)
-        )
+        message = f"Failed to ping device {device_info.dev_name}: {exception}"
+        self.logger.error(message)
 
         with self.lock:
             # Update the device status with the exception details
@@ -487,7 +478,7 @@ class CNComponentManager(TmcComponentManager):
         :type health_state: HealthState
         """
         with self.lock:
-            self.logger.info(
+            self.logger.debug(
                 f"healthState event for {device_name}: "
                 + f"{HealthState(health_state).name}"
             )
@@ -515,7 +506,7 @@ class CNComponentManager(TmcComponentManager):
                 devInfo.health_state = health_state
                 self.logger.debug(
                     "Updated healthState of %s: %s",
-                    devInfo.health_state,
+                    devInfo.dev_name,
                     HealthState(devInfo.health_state).name,
                 )
                 devInfo.last_event_arrived = time.time()
@@ -555,6 +546,11 @@ class CNComponentManager(TmcComponentManager):
             devInfo = self.component.get_device(dev_name)
             if devInfo is not None:
                 devInfo.obs_state = obs_state
+                self.logger.debug(
+                    "Updated ObsState of %s: %s",
+                    devInfo.dev_name,
+                    ObsState(devInfo.obs_state).name,
+                )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
@@ -967,6 +963,11 @@ class CNComponentManager(TmcComponentManager):
                 "AssignResources",
             ),
         )
+        self.logger.info(
+            "AssignResources command's status: "
+            + f"{task_status.name}, and response: {response}"
+        )
+
         return task_status, response
 
     def release_resources(
@@ -1039,6 +1040,11 @@ class CNComponentManager(TmcComponentManager):
                 subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"
             ),
         )
+        self.logger.info(
+            "ReleaseResources command's status: "
+            + f"{task_status.name}, and response: {response}"
+        )
+
         return task_status, response
 
     def log_state(self, msg: str = "Device States") -> None:

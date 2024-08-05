@@ -11,6 +11,7 @@ import threading
 import time
 from typing import Callable
 
+from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
@@ -415,11 +416,8 @@ class CNComponentManagerMid(CNComponentManager):
         :type state: DevState
         """
         with self.lock:
-            self.logger.info(
-                "Device '%s' state updated: %s",
-                device_name,
-                state.name,
-            )
+            self.logger.debug(f"State event for {device_name}: {state}")
+
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
@@ -441,6 +439,10 @@ class CNComponentManagerMid(CNComponentManager):
             devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.state = state
+                self.logger.debug(
+                    f"Updated Device State of {devInfo.dev_name}: "
+                    f"{devInfo.state}"
+                )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
@@ -462,11 +464,10 @@ class CNComponentManagerMid(CNComponentManager):
         :type dishMode: DishMode
         """
         with self.lock:
-            self.logger.info(
+            self.logger.debug(
                 f"Received dishMode event from {dev_name}: "
                 + f"{DishMode(dish_mode).name}"
             )
-
             # Update Dish leaf node device name with full FQDN for real Dish
             dish_leaf_node_dev_names = self.get_dish_leaf_node_device_names()
             for dish in dish_leaf_node_dev_names:
@@ -475,6 +476,11 @@ class CNComponentManagerMid(CNComponentManager):
 
             dev_info = self.component.get_device(dev_name)
             dev_info.dish_mode = dish_mode
+            self.logger.debug(
+                "Updated DishMode of %s: %s",
+                dev_info.dev_name,
+                DishMode(dev_info.dish_mode).name,
+            )
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
 
@@ -523,6 +529,10 @@ class CNComponentManagerMid(CNComponentManager):
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )
+            self.logger.debug(
+                "SubarrayNode aggregated healthState: "
+                + f"{HealthState(self._health_state_aggregator).name}"
+            )
 
     def is_command_allowed(self, command_name=None):
         """
@@ -558,6 +568,11 @@ class CNComponentManagerMid(CNComponentManager):
                 "Command is not allowed in current state :"
                 + f"{str(self.op_state_model.op_state)}",
             )
+        self.logger.info(
+            f"Command '{command_name}' is not supported "
+            + f"in {self.op_state_model.op_state} for CentralNode"
+        )
+
         return True
 
     def check_device_responsiveness(self, command_name) -> None:

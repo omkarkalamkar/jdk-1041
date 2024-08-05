@@ -14,7 +14,7 @@ from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 class TelescopeOff(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOff() command. Sets the
-      CentralNode into telescope state to OFF.
+      CentralNode into telescopeState to OFF.
     """
 
     def __init__(
@@ -53,7 +53,7 @@ class TelescopeOff(TelescopeOnOff):
         task_callback(status=TaskStatus.IN_PROGRESS)
 
         return_code, message = self.do(argin=None)
-        logger.info(f"TelescopeOff command result: {message}")
+        self.logger.info(message)
         if return_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
@@ -110,7 +110,8 @@ class TelescopeOff(TelescopeOnOff):
                 ).obs_state
                 if obs_state != ObsState.EMPTY:
                     self.logger.error(
-                        "Subarray %s is still not empty, current state: %s",
+                        "Subarray current ObsState %s, while "
+                        "waiting for ObsState.EMPTY. ",
                         adapter.dev_name,
                         obs_state,
                     )
@@ -249,7 +250,7 @@ class TelescopeOff(TelescopeOnOff):
                     adapter.dev_name
                 ).obs_state
                 if obs_state != ObsState.EMPTY:
-                    self.logger.error(
+                    self.logger(
                         "Subarray %s is still not empty, current state: %s",
                         adapter.dev_name,
                         obs_state,
@@ -257,11 +258,7 @@ class TelescopeOff(TelescopeOnOff):
                     all_empty = False
             elapsed_time = time.time() - start_time
             if elapsed_time > self._timeout_subarrays:
-                return (
-                    ResultCode.FAILED,
-                    "Timeout waiting for subarray devices to reach "
-                    "the EMPTY state.",
-                )
+                return (ResultCode.FAILED,)
             time.sleep(self._step_sleep)
 
         unavailable_devices = []
@@ -284,7 +281,7 @@ class TelescopeOff(TelescopeOnOff):
             self.logger.info("Unavailable devices: %s", unavailable_devices)
             return ResultCode.OK, f"Unavailable devices: {unavailable_devices}"
 
-        return ResultCode.OK, "TelescopeOff command completed successfully."
+        return (ResultCode.OK, "Command Completed")
 
     def turn_off_mccs(self):
         """Turn off the MCCS devices"""

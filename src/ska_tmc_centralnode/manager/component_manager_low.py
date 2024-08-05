@@ -9,6 +9,7 @@ package.
 import json
 import time
 
+from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -271,9 +272,7 @@ class CNComponentManagerLow(CNComponentManager):
         :type state: DevState
         """
         with self.lock:
-            self.logger.debug(
-                f"State event callback for device {device_name}: {state}"
-            )
+            self.logger.debug(f"State event for {device_name}: {state}")
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN in case of
                 # real SDP
@@ -290,6 +289,9 @@ class CNComponentManagerLow(CNComponentManager):
             devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.state = state
+                self.logger.debug(
+                    f"Updated State of {devInfo.dev_name}: {devInfo.state}"
+                )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
@@ -322,6 +324,10 @@ class CNComponentManagerLow(CNComponentManager):
         with self.lock:
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
+            )
+            self.logger.debug(
+                "SubarrayNode aggregated healthState: "
+                + f"{HealthState(self._health_state_aggregator).name}"
             )
 
     def check_if_mccs_mln_is_available(self) -> bool:

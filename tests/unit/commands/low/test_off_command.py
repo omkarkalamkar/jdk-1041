@@ -26,6 +26,7 @@ from tests.settings import (
 
 
 @pytest.mark.SKA_low
+@pytest.mark.test
 def test_low_telescope_off_command(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()

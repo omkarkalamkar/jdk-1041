@@ -124,8 +124,6 @@ class AssignResourceValidator:
             receptor_id_list is not present.
         """
 
-        # Check if JSON is correct
-        self.logger.debug("Checking JSON format.")
         try:
             assign_request = CODEC.loads(AssignResourcesRequest, input_string)
             assign_json = CODEC.dumps(assign_request)
@@ -136,7 +134,8 @@ class AssignResourceValidator:
             Exception,
         ) as json_error:
             self.logger.exception(
-                "Exception while parsing the json: %s", str(json_error)
+                "Exception occured while validating the json with cdm: %s",
+                str(json_error),
             )
             exception_message = (
                 "Malformed input string. Please check the JSON format."
@@ -238,7 +237,6 @@ class ReleaseResourceValidator:
         """
 
         # Check if JSON is correct
-        self.logger.debug("Checking JSON format.")
         try:
             r_request = CODEC.loads(ReleaseResourcesRequest, input_string)
             release_json = CODEC.dumps(r_request)
@@ -249,7 +247,7 @@ class ReleaseResourceValidator:
             Exception,
         ) as json_error:
             self.logger.exception(
-                "Exception while parsing the json: %s", str(json_error)
+                self.logger.exception("Exception: %s", str(json_error))
             )
             exception_message = (
                 "Malformed input string. Please check the JSON format."

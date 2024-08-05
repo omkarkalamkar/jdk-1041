@@ -472,6 +472,10 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         handler = self.get_command_object("AssignResources")
         result_code, unique_id = handler(argin)
+        self.logger.debug(
+            "ResultCode, unique_id/message is %s, %s", result_code, unique_id
+        )
+
         return [[result_code], [str(unique_id)]]
 
     def is_ReleaseResources_allowed(self):
@@ -501,6 +505,10 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         handler = self.get_command_object("ReleaseResources")
         result_code, unique_id = handler(argin)
+        self.logger.debug(
+            "ResultCode, unique_id/message is %s, %s", result_code, unique_id
+        )
+
         return [[result_code], [str(unique_id)]]
 
     def create_component_manager(self):
@@ -605,3 +613,4 @@ class AbstractCentralNode(TMCBaseDevice):
                     logger=None,
                 ),
             )
+            self.logger.info("Commands registered.")
