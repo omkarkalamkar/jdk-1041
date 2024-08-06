@@ -116,7 +116,7 @@ class ReleaseResources(AssignReleaseResources):
         except Exception as exception:
             return (
                 ResultCode.FAILED,
-                f"Problem in loading the JSON string: {exception}",
+                f"Error while loading the Assign JSON string: {exception}",
             )
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]

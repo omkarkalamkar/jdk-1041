@@ -531,7 +531,7 @@ class CNComponentManagerMid(CNComponentManager):
             )
             self.logger.debug(
                 "SubarrayNode aggregated healthState: "
-                + f"{HealthState(self._health_state_aggregator).name}"
+                + f"{HealthState(self.component.telescope_health_state).name}"
             )
 
     def is_command_allowed(self, command_name=None):
