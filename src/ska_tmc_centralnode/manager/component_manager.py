@@ -437,20 +437,24 @@ class CNComponentManager(TmcComponentManager):
             self._telescope_availability_aggregator.aggregate()
 
     def update_device_ping_failure(
-        self, device_info: DeviceInfo, exception: str
+        self, device_info: DeviceInfo, exception: Exception
     ) -> None:
         """
-        Set a device to failed and call the relative callback if available
+        Set a device to failed and call the relative callback if available.
 
-        :param device_info: a device info
+        :param device_info: Information about the device
         :type device_info: DeviceInfo
-        :param exception: an exception
-        :type: Exception
+        :param exception: Exception raised during the ping failure
+        :type exception: Exception
         """
-        self.logger.info(f"device failed: {device_info.dev_name}")
-        self.logger.error(str(exception))
+        # Log the device failure with the device name
+        message = f"Failed to ping device {device_info.dev_name}: {exception}"
+        self.logger.error(message)
+
         with self.lock:
-            self.component.update_device_exception(device_info, exception)
+            # Update the device status with the exception details
+            self.component.update_device_exception(device_info, str(exception))
+            # Aggregate the telescope availability data
             self._telescope_availability_aggregator.aggregate()
 
     def update_event_failure(self, device_name: str) -> None:
@@ -474,8 +478,9 @@ class CNComponentManager(TmcComponentManager):
         :type health_state: HealthState
         """
         with self.lock:
-            self.logger.info(
-                f"State evt callback for device {device_name}: {health_state}"
+            self.logger.debug(
+                f"healthState event for {device_name}: "
+                + f"{HealthState(health_state).name}"
             )
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
@@ -499,6 +504,11 @@ class CNComponentManager(TmcComponentManager):
             devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.health_state = health_state
+                self.logger.debug(
+                    "Updated healthState of %s: %s",
+                    devInfo.dev_name,
+                    HealthState(devInfo.health_state).name,
+                )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
@@ -518,8 +528,8 @@ class CNComponentManager(TmcComponentManager):
         :type obs_state: ObsState
         """
         with self.lock:
-            self.logger.info(
-                f"ObsState event callback for device {dev_name}: {obs_state}"
+            self.logger.debug(
+                f"obsState event for {dev_name}: {ObsState(obs_state).name}"
             )
             sdp_subarray_dev_names = self.get_sdp_subarray_dev_names()
             for sdp_subarray in sdp_subarray_dev_names:
@@ -536,6 +546,11 @@ class CNComponentManager(TmcComponentManager):
             devInfo = self.component.get_device(dev_name)
             if devInfo is not None:
                 devInfo.obs_state = obs_state
+                self.logger.debug(
+                    "Updated ObsState of %s: %s",
+                    devInfo.dev_name,
+                    ObsState(devInfo.obs_state).name,
+                )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
@@ -548,12 +563,12 @@ class CNComponentManager(TmcComponentManager):
 
         :param dev_name: name of the device
         :type dev_name: str
-        :param assign_resources: assign_resources
+        :param assign_resources: assigned resources in JSON format
         :type assign_resources: str
         """
         with self.lock:
             self.logger.info(
-                "assignedResources event callback for device %s : %s",
+                "Updating assigned resources for device '%s': %s",
                 dev_name,
                 assign_resources,
             )
@@ -583,11 +598,13 @@ class CNComponentManager(TmcComponentManager):
 
         :return True is already assigned, False otherwise
         """
-        self.logger.debug(f"Dish Id is: {dish_id}")
+        self.logger.debug(
+            "Checking if dish with ID '%s' is already assigned", dish_id
+        )
         for devInfo in self.devices:
             if isinstance(devInfo, SubArrayDeviceInfo):
                 self.logger.debug(
-                    f"Subarray Device resources: {devInfo.resources}"
+                    "Subarray Device resources for device '%s': %s",
                 )
                 if devInfo.resources is None:
                     return False
@@ -938,7 +955,7 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
-            args=[json_argument, self.logger],
+            kwargs={"argin": json.dumps(json_argument)},
             task_callback=task_callback,
             is_cmd_allowed=self.command_not_allowed_callable(
                 subarray_id_or_message,
@@ -946,6 +963,11 @@ class CNComponentManager(TmcComponentManager):
                 "AssignResources",
             ),
         )
+        self.logger.info(
+            "AssignResources command's status: "
+            + f"{task_status.name}, and response: {response}"
+        )
+
         return task_status, response
 
     def release_resources(
@@ -993,6 +1015,7 @@ class CNComponentManager(TmcComponentManager):
                 input_json_or_message = release_validator.loads(argin)
             except InvalidJSONError as e:
                 return release_resources_command.reject_command(str(e))
+
         # Reject command if Subarray is not available
         subarray_id = subarray_id_or_message
         subarray_suffics = "/" + str(subarray_id)
@@ -1011,12 +1034,17 @@ class CNComponentManager(TmcComponentManager):
 
         task_status, response = self.submit_task(
             release_resources_command.release_resources,
-            args=[json.dumps(input_json_or_message), self.logger],
+            kwargs={"argin": json.dumps(input_json_or_message)},
             task_callback=task_callback,
             is_cmd_allowed=self.command_not_allowed_callable(
                 subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"
             ),
         )
+        self.logger.info(
+            "ReleaseResources command's status: "
+            + f"{task_status.name}, and response: {response}"
+        )
+
         return task_status, response
 
     def log_state(self, msg: str = "Device States") -> None:

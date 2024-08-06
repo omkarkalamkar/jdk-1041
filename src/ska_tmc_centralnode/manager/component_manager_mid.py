@@ -11,6 +11,7 @@ import threading
 import time
 from typing import Callable
 
+from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
@@ -299,7 +300,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self.get_device(device).state
                 for device in devices_to_check_list
             ]
-            self.logger.info("Device State List %s", dev_state_list)
+            self.logger.debug("Current device states: %s", dev_state_list)
             count += 1
             if count == self.dish_vcc_init_timeout:
                 break
@@ -315,27 +316,27 @@ class CNComponentManagerMid(CNComponentManager):
         and catched in ValueError.The exception_msg and command_id is then
         passed to long_running_result_callback.
         Command_mapping contains {centralnode_command_id:unique_id} ,
-          all events are verified with respect to this mapping.
+        all events are verified with respect to this mapping.
         If there is no command_mapping present the event
-          might be of old command.
+        might be of old command.
 
         :param dev_name: name of the device who's event has been
-          captured in this method
+        captured in this method
         :type dev_name: str
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
         """
         self.logger.info(
-            "longRunningCommandResult event for device: %s, with value: %s",
+            "longRunningCommandResult event for device '%s'. Event value: %s",
             dev_name,
             value,
         )
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
-            or (not result_code_or_exception_or_task_status)
-            or (unique_id not in self.command_mapping.values())
-        ):  # ignoring other command events
+            or not result_code_or_exception_or_task_status
+            or unique_id not in self.command_mapping.values()
+        ):
             return
         try:
             result_code, message = json.loads(
@@ -344,6 +345,12 @@ class CNComponentManagerMid(CNComponentManager):
             match int(result_code):
                 case ResultCode.OK:
                     self.command_result = ResultCode.OK
+                    self.logger.info(
+                        "Command with unique_id '%s' "
+                        "on device '%s' succeeded.",
+                        unique_id,
+                        dev_name,
+                    )
                 case (
                     ResultCode.FAILED
                     | ResultCode.REJECTED
@@ -351,17 +358,18 @@ class CNComponentManagerMid(CNComponentManager):
                     | ResultCode.ABORTED
                 ):
                     self.logger.info(
-                        "Updating LRCRCallback with message: %s for %s for"
-                        + " device: %s",
-                        unique_id,
+                        "Updating LRCRCallback with result_code '%s' and "
+                        "message '%s' "
+                        "for command '%s' on device '%s'.",
+                        result_code,
                         message,
+                        unique_id,
                         dev_name,
                     )
+
                     exp_string = (
-                        "Exception occurred on device:"
-                        + f"{unique_id}:"
-                        + f" {dev_name}:"
-                        + f" {message}"
+                        f"Exception occurred on device: {unique_id}: "
+                        f"{dev_name}: {message}"
                     )
                     command_id = self.get_command_id(unique_id)
                     self.long_running_result_callback(
@@ -371,9 +379,10 @@ class CNComponentManagerMid(CNComponentManager):
                     )
         except Exception as exception:
             self.logger.exception(
-                "Exception occurred while processing"
-                + "long running command result"
-                + "attribute event: %s",
+                "Exception occurred while processing long running "
+                "command result "
+                "for device '%s': %s",
+                dev_name,
                 exception,
             )
 
@@ -407,9 +416,8 @@ class CNComponentManagerMid(CNComponentManager):
         :type state: DevState
         """
         with self.lock:
-            self.logger.info(
-                f"State event callback for device {device_name}: {state}"
-            )
+            self.logger.debug(f"State event for {device_name}: {state}")
+
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN for real SDP
                 sdp_master_dev_name = self.get_sdp_master_dev_name()
@@ -431,6 +439,10 @@ class CNComponentManagerMid(CNComponentManager):
             devInfo = self.component.get_device(device_name)
             if devInfo is not None:
                 devInfo.state = state
+                self.logger.debug(
+                    f"Updated Device State of {devInfo.dev_name}: "
+                    f"{devInfo.state}"
+                )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
@@ -452,10 +464,10 @@ class CNComponentManagerMid(CNComponentManager):
         :type dishMode: DishMode
         """
         with self.lock:
-            self.logger.info(
-                f"Dish event callback for device {dev_name}: {dish_mode}"
+            self.logger.debug(
+                f"Received dishMode event from {dev_name}: "
+                + f"{DishMode(dish_mode).name}"
             )
-
             # Update Dish leaf node device name with full FQDN for real Dish
             dish_leaf_node_dev_names = self.get_dish_leaf_node_device_names()
             for dish in dish_leaf_node_dev_names:
@@ -464,6 +476,11 @@ class CNComponentManagerMid(CNComponentManager):
 
             dev_info = self.component.get_device(dev_name)
             dev_info.dish_mode = dish_mode
+            self.logger.debug(
+                "Updated DishMode of %s: %s",
+                dev_info.dev_name,
+                DishMode(dev_info.dish_mode).name,
+            )
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
 
@@ -512,6 +529,10 @@ class CNComponentManagerMid(CNComponentManager):
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )
+            self.logger.debug(
+                "SubarrayNode aggregated healthState: "
+                + f"{HealthState(self.component.telescope_health_state).name}"
+            )
 
     def is_command_allowed(self, command_name=None):
         """
@@ -547,6 +568,11 @@ class CNComponentManagerMid(CNComponentManager):
                 "Command is not allowed in current state :"
                 + f"{str(self.op_state_model.op_state)}",
             )
+        self.logger.info(
+            f"Command '{command_name}' is not supported "
+            + f"in {self.op_state_model.op_state} for CentralNode"
+        )
+
         return True
 
     def check_device_responsiveness(self, command_name) -> None:
@@ -609,8 +635,8 @@ class CNComponentManagerMid(CNComponentManager):
                 if len(num_of_dish_values) == len(
                     self.input_parameter.dish_leaf_node_dev_names
                 ):
-                    self.logger.info("All Dish Available")
-                    return True
+                    self.logger.info("All dishes are available and ready.")
+                return True
             except Exception as e:
                 self.logger.exception("Error %s", e)
             count += 1

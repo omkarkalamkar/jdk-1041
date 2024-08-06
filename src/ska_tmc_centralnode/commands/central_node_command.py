@@ -1,9 +1,12 @@
 """Abstract Command class for central node"""
 # pylint:disable =abstract-method
+import logging
 import operator
 import time
-from typing import Callable, Optional, Tuple
+from typing import Any, Optional, Tuple, Union
 
+from ska_ser_logging import configure_logging
+from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import TimeoutCallback
@@ -12,16 +15,56 @@ from ska_tmc_common.tmc_command import TMCCommand
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 
+configure_logging()
+LOGGER = logging.getLogger(__name__)
+
+
+def task_callback_default(
+    status: Union[TaskStatus, None] = None,
+    progress: Union[int, None] = None,
+    result: Any = None,
+    exception: Union[Exception, None] = None,
+) -> None:
+    """
+    Default method if the taskcallback is not passed
+
+    :param status: status of the task.
+    :param progress: progress of the task.
+    :param result: result of the task.
+    :param exception: an exception raised from the task.
+    """
+    LOGGER.warning(
+        "This is default task callback."
+        + "There is no action taken under this callback."
+        + "Please provide task callback."
+    )
+    LOGGER.info(
+        "long running command status: %s, progress: %s ,result:%s ,"
+        + "exception %s",
+        status,
+        progress,
+        result,
+        exception,
+    )
+
 
 # pylint:disable=keyword-arg-before-vararg
 class CentralNodeCommand(TMCCommand):
     """Central node abstract command class"""
 
-    def __init__(self, component_manager, *args, logger=None, **kwargs):
+    def __init__(
+        self,
+        component_manager,
+        *args,
+        logger: logging.Logger = LOGGER,
+        **kwargs,
+    ):
         super().__init__(component_manager, *args, logger=logger, **kwargs)
-        self.timeout_id = f"{time.time()}_{self.__class__.__name__}"
-        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
-        self.task_callback: Callable | None = None
+        self.timeout_id: str = f"{time.time()}_{self.__class__.__name__}"
+        self.timeout_callback: TimeoutCallback = TimeoutCallback(
+            self.timeout_id, self.logger
+        )
+        self.task_callback: TaskCallbackType = task_callback_default
         self.mccs_mln_adapter = None
 
     def init_adapters(self) -> Tuple[ResultCode, str]:
@@ -93,7 +136,10 @@ class CentralNodeCommand(TMCCommand):
 
     def reject_command(self, message: str) -> Tuple[ResultCode, str]:
         """Rejects command method for logs error message."""
-        self.logger.error(message)
+        self.logger.error(
+            "Command execution failed due to reason : %s",
+            message,
+        )
         return TaskStatus.REJECTED, message
 
     def adapter_error_message(

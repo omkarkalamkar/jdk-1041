@@ -243,7 +243,9 @@ class CentralNodeEventReceiver(EventReceiver):
             )
             return
         self._logger.debug(
-            "In handle_lrcr_event event_data.attr_value.value is:%s",
+            "Received CHANGE_EVENT for device %s. "
+            "New value of longRunningCommandResult: %s",
+            event_data.device.dev_name(),
             event_data.attr_value.value,
         )
         new_value = event_data.attr_value.value

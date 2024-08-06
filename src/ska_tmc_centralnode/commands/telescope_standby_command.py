@@ -100,7 +100,8 @@ class TelescopeStandby(TelescopeOnOff):
                 return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
-            "waiting for ALL Subarray devices obsState to be Empty"
+            "Waiting for all subarray devices to reach the EMPTY "
+            "observation state."
         )
         all_empty = False
         start_time = time.time()
@@ -114,7 +115,8 @@ class TelescopeStandby(TelescopeOnOff):
                     == ObsState.EMPTY
                 ):
                     self.logger.error(
-                        "Subarray %s still not empty", adapter.dev_name
+                        "Subarray current ObsState %s, while "
+                        "waiting for ObsState.EMPTY. "
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time
@@ -184,7 +186,8 @@ class TelescopeStandby(TelescopeOnOff):
             if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                 return ResultCode.FAILED, message_or_unique_id
         self.logger.info(
-            "waiting for ALL Subarray devices obsState to be Empty"
+            "Waiting for all subarray devices to reach the EMPTY "
+            "observation state."
         )
         all_empty = False
         start_time = time.time()

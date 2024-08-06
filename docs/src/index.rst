@@ -31,6 +31,13 @@ This project is developing the Central Node (Mid and Low) component of the Teles
 
    CHANGELOG.rst
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Introduction
+
+   README
+
+
 Indices and tables
 ------------------
 * :ref:`genindex`

@@ -253,11 +253,6 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
     )
-    assign_res_command.assign_resources(
-        json.loads(assign_input_str),
-        logger=logger,
-        task_callback=task_callback,
-    )
     (res_code, _) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
 

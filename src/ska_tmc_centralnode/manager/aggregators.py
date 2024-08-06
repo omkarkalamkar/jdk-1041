@@ -459,10 +459,13 @@ class LoadDishCfgCommandResultAggregator:
             self._component_manager.result_codes_mapping.values(),
         )
         result_codes, failed_messages = self._get_result_codes_and_failed_msg()
+        failed_devices = [msg.split(":")[0] for msg in failed_messages]
         self.logger.info(
-            "Result codes are %s and failed messages are %s",
+            "Result codes are %s, failed messages are %s, "
+            "TMC components with errors are %s",
             result_codes,
             failed_messages,
+            failed_devices,
         )
 
         if ResultCode.FAILED in result_codes:
