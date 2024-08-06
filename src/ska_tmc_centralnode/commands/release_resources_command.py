@@ -4,7 +4,6 @@ ReleaseResources class for CentralNode.
 import json
 from typing import Optional, Tuple
 
-from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
@@ -46,7 +45,6 @@ class ReleaseResources(AssignReleaseResources):
         )
         self.my_subarray_adapter = None
         self.subarray_adapter = None
-        self.task_callback: TaskCallbackType
 
     @timeout_decorator
     @error_propagation_decorator(
