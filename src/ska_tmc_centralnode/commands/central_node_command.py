@@ -3,7 +3,7 @@
 import logging
 import operator
 import time
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, Union
 
 from ska_ser_logging import configure_logging
 from ska_tango_base.base import TaskCallbackType
@@ -20,10 +20,10 @@ LOGGER = logging.getLogger(__name__)
 
 
 def task_callback_default(
-    status: TaskStatus | None = None,
-    progress: int | None = None,
+    status: Union[TaskStatus, None] = None,
+    progress: Union[int, None] = None,
     result: Any = None,
-    exception: Exception | None = None,
+    exception: Union[Exception, None] = None,
 ) -> None:
     """
     Default method if the taskcallback is not passed

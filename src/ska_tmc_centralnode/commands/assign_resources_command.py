@@ -28,8 +28,10 @@ class AssignResources(AssignReleaseResources):
 
     Assigns resources to a given subarray. It accepts the subarray ID,
     receptor ID list, and SDP block in JSON string format.
+
     Upon successful execution, the 'receptor_ids' attribute of the given
     subarray is populated with the given receptors.
+
     Checking for duplicate allocation of resources is done.
     If already allocated, it will throw an error message regarding the prior
     existence of the resource.
@@ -69,16 +71,18 @@ class AssignResources(AssignReleaseResources):
         argin: str,
     ) -> Tuple[ResultCode, str]:
         """
-        This is a long running method for AssignResources command it
-        executes do hook,invokes AssignResources command on lower level
-        devices
+        This is a long running method for AssignResources command.
 
-        :param argin: Input argument for the command
+        It executes the do hook and invokes the AssignResources command on
+        lower-level devices.
+
+        :param argin: Input argument for the command.
         :type argin: str
 
-        :returns: Result code and message
+        :returns: Result code and message.
         :rtype: Tuple[ResultCode, str]
         """
+
         return self.do(argin)
 
     def update_task_status(
