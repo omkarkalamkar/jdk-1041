@@ -82,7 +82,6 @@ class AssignResources(AssignReleaseResources):
         :returns: Result code and message.
         :rtype: Tuple[ResultCode, str]
         """
-
         return self.do(argin)
 
     def update_task_status(
@@ -90,14 +89,6 @@ class AssignResources(AssignReleaseResources):
     ) -> None:
         """
         Updates the task status for a command.
-
-        This method updates the task status based on the result of the command
-        execution. If the result indicates a failure,
-        it calls the `task_callback` with the failure details and clears the
-        subarray device name. For both success and failure,
-        it sets the task status to completed and clears the command in progress
-        Additionally, it removes the command ID from
-        the command mapping if it exists.
 
         Parameters:
         -----------
@@ -108,6 +99,7 @@ class AssignResources(AssignReleaseResources):
             A string representing any exception message.
             This is used when the result indicates a failure.
             Default is an empty string.
+
         Returns:
         --------
         None
@@ -194,14 +186,14 @@ class AssignResources(AssignReleaseResources):
         "resources": {"csp_links": [1, 2, 3, 4],
         "receptors": ["FS4", "FS8", "FS16", "FS17", "FS22", "FS23", "FS30",
         "FS31", "FS32", "FS33", "FS36", "FS52", "FS56", "FS57", "FS59", "FS62",
-          "FS66", "FS69", "FS70", "FS72", "FS73", "FS78", "FS80", "FS88",
-            "FS89", "FS90", "FS91", "FS98", "FS108", "FS111", "FS132", "FS144",
-              "FS146", "FS158", "FS165", "FS167", "FS176", "FS183", "FS193",
-                "FS200", "FS345", "FS346", "FS347", "FS348", "FS349", "FS350",
-                  "FS351", "FS352", "FS353", "FS354", "FS355", "FS356",
-                    "FS429", "FS430", "FS431", "FS432", "FS433", "FS434",
-                      "FS465", "FS466", "FS467", "FS468", "FS469", "FS470"],
-          "receive_nodes": 10 } }}
+        "FS66", "FS69", "FS70", "FS72", "FS73", "FS78", "FS80", "FS88",
+        "FS89", "FS90", "FS91", "FS98", "FS108", "FS111", "FS132", "FS144",
+        "FS146", "FS158", "FS165", "FS167", "FS176", "FS183", "FS193",
+        "FS200", "FS345", "FS346", "FS347", "FS348", "FS349", "FS350",
+        "FS351", "FS352", "FS353", "FS354", "FS355", "FS356",
+        "FS429", "FS430", "FS431", "FS432", "FS433", "FS434",
+        "FS465", "FS466", "FS467", "FS468", "FS469", "FS470"],
+        "receive_nodes": 10 } }}
 
         :returns: Result code and message
         :rtype: Tuple[ResultCode, str]
