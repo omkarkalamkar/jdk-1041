@@ -5,11 +5,11 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-[0.16.4]
+[0.16.5]
 ********
 * Added timeout and error propagation decorators for Assign and Release resources command and Improve logger statements.
 
-[0.16.3]
+[0.16.4]
 ********
 * set and push archive events for all the attributes
   
