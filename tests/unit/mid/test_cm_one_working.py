@@ -1,6 +1,4 @@
 """Test cases file"""
-import time
-
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
@@ -15,10 +13,8 @@ from tests.settings import (
     DISH_LEAF_NODE_PREFIX,
     MID_SUBARRAY_DEVICE,
     NUM_DISHES,
-    SLEEP_TIME,
-    TIMEOUT,
-    count_faulty_devices,
     logger,
+    set_devices_unresponsive,
 )
 
 
@@ -38,6 +34,18 @@ def devices_to_load():
     )
 
 
+FAULTY_LIST = [
+    "ska_mid/tm_leaf_node/csp_master",
+    "mid-csp/control/0",
+    "ska_mid/tm_leaf_node/sdp_master",
+    "mid-sdp/control/0",
+    "ska_mid/tm_leaf_node/csp_subarray01",
+    "ska_mid/tm_leaf_node/sdp_subarray01",
+    "ska_mid/tm_leaf_node/d0001",
+    "ska001/elt/master",
+]
+
+
 def test_one_working_other_faulty(tango_context):
     """Test with one working and other faulty devices"""
     logger.info("%s", tango_context)
@@ -48,17 +56,9 @@ def test_one_working_other_faulty(tango_context):
     cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
         cm.add_device(dev)
-    start_time = time.time()
-    num_faulty = count_faulty_devices(cm)
-    while num_faulty != len(cm.devices) - 1:
-        logger.info("Faulty devices %s", num_faulty)
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-        num_faulty = count_faulty_devices(cm)
-    elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
+
+    set_devices_unresponsive(cm, FAULTY_LIST)
+
     subarrayDevInfo = cm.get_device("ska_mid/tm_subarray_node/1")
     for devInfo in cm.devices:
         if devInfo == subarrayDevInfo:

@@ -1,5 +1,4 @@
 """Test case module"""
-import time
 
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
@@ -13,9 +12,6 @@ from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
     LOW_SUBARRAY_DEVICE,
-    SLEEP_TIME,
-    TIMEOUT,
-    count_faulty_devices,
     logger,
     set_devices_unresponsive,
 )
@@ -64,17 +60,7 @@ def test_low_one_working_other_faulty(
     for dev in DEVICE_LIST_LOW:
         cm.add_device(dev)
     set_devices_unresponsive(cm, FAULTY_LIST)
-    start_time = time.time()
-    num_faulty = count_faulty_devices(cm)
-    while num_faulty != len(cm.devices) - 1:
-        logger.info("Faulty devices %s", num_faulty)
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-        num_faulty = count_faulty_devices(cm)
-    elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
+
     subarrayDevInfo = cm.get_device("ska_low/tm_subarray_node/1")
     for devInfo in cm.devices:
         if devInfo == subarrayDevInfo:

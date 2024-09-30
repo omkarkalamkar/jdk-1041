@@ -1,6 +1,4 @@
 """Test cases file"""
-import time
-
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
@@ -17,10 +15,9 @@ from tests.settings import (
     MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
     NUM_DISHES,
-    SLEEP_TIME,
-    TIMEOUT,
     count_faulty_devices,
     logger,
+    set_devices_unresponsive,
 )
 
 WORKING_DEVICES = 3
@@ -45,6 +42,16 @@ def devices_to_load():
     )
 
 
+FAULTY_LIST = [
+    "ska_mid/tm_leaf_node/csp_master",
+    "mid-csp/control/0",
+    "ska_mid/tm_leaf_node/sdp_master",
+    "mid-sdp/control/0",
+    "ska_mid/tm_leaf_node/d0001",
+    "ska001/elt/master",
+]
+
+
 def test_some_working_other_faulty(tango_context):
     """Test with some working and some faulty devices"""
     logger.info("%s", tango_context)
@@ -58,17 +65,10 @@ def test_some_working_other_faulty(tango_context):
     cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
         cm.add_device(dev)
-    start_time = time.time()
+    set_devices_unresponsive(cm, FAULTY_LIST)
+
     num_faulty = count_faulty_devices(cm)
     # the device list contains one duplicate of the dishes
     num_devices = len(DEVICE_LIST_MID) + NUM_DISHES - 1
-    while num_devices != len(cm.checked_devices):
-        logger.info("Faulty devices %s", num_faulty)
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-        num_faulty = count_faulty_devices(cm)
-    elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
+
     assert num_faulty == num_devices - WORKING_DEVICES

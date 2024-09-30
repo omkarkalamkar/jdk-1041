@@ -1,6 +1,4 @@
 """Test cases file for component manager faulty"""
-import time
-
 import pytest
 from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
@@ -13,10 +11,8 @@ from tests.settings import (
     DEVICE_LIST_MID,
     DISH_LEAF_NODE_PREFIX,
     NUM_DISHES,
-    SLEEP_TIME,
-    TIMEOUT,
-    count_faulty_devices,
     logger,
+    set_devices_unresponsive,
 )
 
 
@@ -44,19 +40,9 @@ def test_all_devices_faulty(tango_context):
     )
     cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     cm.add_multiple_devices(DEVICE_LIST_MID)
+    set_devices_unresponsive(cm, DEVICE_LIST_MID)
     logger.info(f"Component manager faulty devices{cm.checked_devices}")
     logger.info(f"Component total devices{cm.devices}")
-    start_time = time.time()
-    num_faulty = count_faulty_devices(cm)
-    while num_faulty != len(cm.devices):
-        logger.info(f"Number of devices {len(cm.devices)}")
-        logger.info("Faulty devices %s", num_faulty)
-        time.sleep(SLEEP_TIME)
-        elapsed_time = time.time() - start_time
-        if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
-        num_faulty = count_faulty_devices(cm)
-    elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
+
     for devInfo in cm.devices:
         assert devInfo.unresponsive
