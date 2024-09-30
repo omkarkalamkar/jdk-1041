@@ -15,12 +15,13 @@ from tests.settings import (
     TIMEOUT,
     count_faulty_devices,
     logger,
+    set_devices_unresponsive,
 )
 
 
 @pytest.fixture()
 def devices_to_load():
-    """Devices to load for command invokation"""
+    """Devices to load for command invocation"""
     return (
         {
             "class": HelperBaseDevice,
@@ -41,8 +42,10 @@ def test_all_low_devices_faulty(tango_context):
         logger=logger,
     )
     cm.add_multiple_devices(DEVICE_LIST_LOW)
+    set_devices_unresponsive(cm, DEVICE_LIST_LOW)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
+
     logger.info(f"Component manager faulty devices{cm.checked_devices}")
     logger.info(f"Component total devices{cm.devices}")
     while num_faulty != len(cm.devices):

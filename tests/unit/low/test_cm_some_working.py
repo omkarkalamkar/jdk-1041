@@ -17,6 +17,7 @@ from tests.settings import (
     TIMEOUT,
     count_faulty_devices,
     logger,
+    set_devices_unresponsive,
 )
 
 WORKING_DEVICES = 1
@@ -39,6 +40,14 @@ def devices_to_load():
     )
 
 
+FAULTY_LIST = [
+    "ska_low/tm_leaf_node/csp_master",
+    "ska_low/tm_leaf_node/sdp_master",
+    "ska_low/tm_leaf_node/csp_subarray01",
+    "ska_low/tm_leaf_node/sdp_subarray01",
+]
+
+
 @pytest.mark.SKA_low
 def test_low_some_working_other_faulty(tango_context):
     """Test low some working other faulty devices."""
@@ -47,6 +56,7 @@ def test_low_some_working_other_faulty(tango_context):
     cm = CNComponentManagerLow(
         op_state_model, _input_parameter=InputParameterLow(None), logger=logger
     )
+    set_devices_unresponsive(cm, FAULTY_LIST)
     for dev in DEVICE_LIST_LOW:
         cm.add_device(dev)
     start_time = time.time()

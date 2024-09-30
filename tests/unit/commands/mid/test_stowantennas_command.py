@@ -18,10 +18,8 @@ from tests.settings import create_cm, logger
 )
 def test_telescope_stow_antennas_command(tango_context):
     logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
-    # num_faulty = count_faulty_devices(cm)
-    # assert num_faulty == 0
+
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time

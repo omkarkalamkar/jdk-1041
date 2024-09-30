@@ -106,6 +106,19 @@ RESET_DEFECT = json.dumps(
 CURRENT_TEST_DISH_VCC_KVALUE = 11
 
 
+def set_devices_unresponsive(cm, device_names: list):
+    """Sets devices unresponsive
+
+    Args:
+        cm: component manager instance
+        device_names (list): devices names to be
+        set as unresponsive
+    """
+    for device_name in device_names:
+        dev_info = cm.get_device(device_name)
+        dev_info.update_unresponsive(True, "Faulty")
+
+
 def count_faulty_devices(cm):
     """Counts faulty devices"""
     result = 0
