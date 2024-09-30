@@ -60,9 +60,10 @@ def test_low_one_working_other_faulty(
     cm = CNComponentManagerLow(
         op_state_model, _input_parameter=InputParameterLow(None), logger=logger
     )
-    set_devices_unresponsive(cm, FAULTY_LIST)
+
     for dev in DEVICE_LIST_LOW:
         cm.add_device(dev)
+    set_devices_unresponsive(cm, FAULTY_LIST)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
     while num_faulty != len(cm.devices) - 1:

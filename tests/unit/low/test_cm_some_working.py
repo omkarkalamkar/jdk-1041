@@ -56,9 +56,9 @@ def test_low_some_working_other_faulty(tango_context):
     cm = CNComponentManagerLow(
         op_state_model, _input_parameter=InputParameterLow(None), logger=logger
     )
-    set_devices_unresponsive(cm, FAULTY_LIST)
     for dev in DEVICE_LIST_LOW:
         cm.add_device(dev)
+    set_devices_unresponsive(cm, FAULTY_LIST)
     start_time = time.time()
     num_faulty = count_faulty_devices(cm)
     num_devices = len(DEVICE_LIST_LOW)
