@@ -53,12 +53,12 @@ def test_one_working_other_faulty(tango_context):
     cm = CNComponentManagerMid(
         op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
     )
-    cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
+    dishes = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
         cm.add_device(dev)
 
     set_devices_unresponsive(cm, FAULTY_LIST)
-
+    set_devices_unresponsive(cm, dishes)
     subarrayDevInfo = cm.get_device("ska_mid/tm_subarray_node/1")
     for devInfo in cm.devices:
         if devInfo == subarrayDevInfo:

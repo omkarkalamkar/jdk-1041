@@ -38,11 +38,11 @@ def test_all_devices_faulty(tango_context):
         _input_parameter=InputParameterMid(None),
         logger=logger,
     )
-    DISHES = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
+    dishes = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     cm.add_multiple_devices(DEVICE_LIST_MID)
     set_devices_unresponsive(cm, DEVICE_LIST_MID)
-    print("------------------------", DISHES)
-    set_devices_unresponsive(cm, DISHES)
+
+    set_devices_unresponsive(cm, dishes)
 
     logger.info(f"Component manager faulty devices{len(cm.checked_devices)}")
     logger.info(f"Component total devices{cm.devices}")

@@ -62,10 +62,11 @@ def test_some_working_other_faulty(tango_context):
         _input_parameter=InputParameterMid(None),
         logger=logger,
     )
-    cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
+    dishes = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
         cm.add_device(dev)
     set_devices_unresponsive(cm, FAULTY_LIST)
+    set_devices_unresponsive(cm, dishes)
 
     num_faulty = count_faulty_devices(cm)
     # the device list contains one duplicate of the dishes
