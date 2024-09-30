@@ -5,6 +5,10 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.16.6]
+********
+* Utilised ska-tmc-common v0.20.0 with liveliness probe changes.
+
 [0.16.5]
 ********
 * Added timeout and error propagation decorators for Assign and Release resources command and Improve logger statements.
