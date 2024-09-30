@@ -11,7 +11,7 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
-from ska_tmc_common import FaultType
+from ska_tmc_common import FaultType, LivelinessProbeType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -135,6 +135,7 @@ def create_cm(
             _event_receiver=p_event_receiver,
             _dishvccvalidation_callback=task_callback,
             _update_dishvccconfig_callback=task_callback,
+            _liveliness_probe=LivelinessProbeType.NONE,
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
@@ -148,6 +149,7 @@ def create_cm(
             _input_parameter=InputParameterLow(None),
             logger=logger,
             _event_receiver=p_event_receiver,
+            _liveliness_probe=LivelinessProbeType.NONE,
         )
         DEVICE_LIST = DEVICE_LIST_LOW
 
