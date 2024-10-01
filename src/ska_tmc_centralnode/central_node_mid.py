@@ -261,43 +261,6 @@ class CentralNodeMid(AbstractCentralNode):
         self.component_manager.input_parameter.dish_leaf_node_dev_names = value
         self.component_manager.update_input_parameter()
 
-    # TODO: Not in the scope for PI15
-
-    # --------
-    # Commands
-    # --------
-    # def is_StowAntennas_allowed(self):
-    #     """
-    #     Checks whether this command is allowed to be run in
-    #    current device state.
-
-    #     :return: True if this command is allowed to be run in
-    #     current device state.
-
-    #     :rtype: boolean
-    #     """
-    #     handler = self.get_command_object("StowAntennas")
-    #     return handler.check_allowed()
-
-    # @command(
-    #     dtype_in=("str",),
-    #     doc_in="List of Receptors to be stowed",
-    #     dtype_out="DevVarLongStringArray",
-    # )
-    # def StowAntennas(self, argin):
-    #     """
-    #     This command stows the specified receptors.
-    #     """
-    #     self.log_state("Device states before executing StowAntennas command")
-    #     handler = self.get_command_object("StowAntennas")
-    #     if self.component_manager.command_executor.queue_full:
-    #         return [[ResultCode.FAILED], ["Queue is full!"]]
-    #     unique_id = self.component_manager.command_executor.enqueue_command(
-    #         handler, argin
-    #     )
-    #     self.log_state("Device states after executing StowAntennas command")
-    #     return [[ResultCode.QUEUED], [str(unique_id)]]
-
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state

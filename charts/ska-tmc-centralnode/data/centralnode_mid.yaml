@@ -88,6 +88,9 @@ server:
         - name: "LoggingLevelDefault"
           values:
             - "5"
+        - name: "SleepTime"
+          values:
+            - "1"
 {{- else }}
 {{- fail "KValueValidRangeUpperLimit should be greater than KValueValidRangeLowerLimit" }}
 {{- end }}
