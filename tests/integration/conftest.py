@@ -158,7 +158,7 @@ def checked_devices(json_model: dict) -> int:
     """Checked devices for availability"""
     result = 0
     for dev in json_model["devices"]:
-        if int(dev["ping"]) > 0 and dev["unresponsive"] == "False":
+        if dev["unresponsive"] == "False":
             result += 1
     return result
 

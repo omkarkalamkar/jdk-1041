@@ -11,7 +11,7 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
-from ska_tmc_common import FaultType
+from ska_tmc_common import FaultType, LivelinessProbeType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -106,6 +106,19 @@ RESET_DEFECT = json.dumps(
 CURRENT_TEST_DISH_VCC_KVALUE = 11
 
 
+def set_devices_unresponsive(cm, device_names: list):
+    """Sets devices unresponsive
+
+    Args:
+        cm: component manager instance
+        device_names (list): devices names to be
+        set as unresponsive
+    """
+    for device_name in device_names:
+        dev_info = cm.get_device(device_name)
+        dev_info.update_unresponsive(True, "Faulty")
+
+
 def count_faulty_devices(cm):
     """Counts faulty devices"""
     result = 0
@@ -135,6 +148,7 @@ def create_cm(
             _event_receiver=p_event_receiver,
             _dishvccvalidation_callback=task_callback,
             _update_dishvccconfig_callback=task_callback,
+            _liveliness_probe=LivelinessProbeType.NONE,
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
@@ -148,6 +162,7 @@ def create_cm(
             _input_parameter=InputParameterLow(None),
             logger=logger,
             _event_receiver=p_event_receiver,
+            _liveliness_probe=LivelinessProbeType.NONE,
         )
         DEVICE_LIST = DEVICE_LIST_LOW
 

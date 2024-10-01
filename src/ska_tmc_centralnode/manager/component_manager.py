@@ -414,29 +414,27 @@ class CNComponentManager(TmcComponentManager):
         else:
             devInfo = DeviceInfo(device_name, False)
         self.component.update_device(devInfo)
-        self.liveliness_probe_object.add_device(device_name)
+        if self.liveliness_probe_object:
+            self.liveliness_probe_object.add_device(device_name)
 
     def update_input_parameter(self) -> None:
         """updates the input parameter for component manager instance"""
         with self.lock:
             self.input_parameter.update(self)
 
-    def update_ping_info(self, ping: int, device_name: str) -> None:
+    def update_responsiveness_info(self, device_name: str) -> None:
         """
-        Update a device with correct ping information.
+        Update a device with correct responsiveness information.
 
         :param dev_name: name of the device
         :type dev_name: str
-        :param ping: device response time
-        :type ping: int
         """
         with self.lock:
             dev_info = self.get_device(device_name)
-            dev_info.ping = ping
-            dev_info.update_unresponsive(False)
+            dev_info.update_unresponsive(False, "")
             self._telescope_availability_aggregator.aggregate()
 
-    def update_device_ping_failure(
+    def update_exception_for_unresponsiveness(
         self, device_info: DeviceInfo, exception: Exception
     ) -> None:
         """
@@ -448,12 +446,15 @@ class CNComponentManager(TmcComponentManager):
         :type exception: Exception
         """
         # Log the device failure with the device name
-        message = f"Failed to ping device {device_info.dev_name}: {exception}"
+        message = (
+            f"device: {device_info.dev_name}: {exception}"
+            + "failed to respond"
+        )
         self.logger.error(message)
 
         with self.lock:
             # Update the device status with the exception details
-            self.component.update_device_exception(device_info, str(exception))
+            self.component.update_unresponsive(True, str(exception))
             # Aggregate the telescope availability data
             self._telescope_availability_aggregator.aggregate()
 
