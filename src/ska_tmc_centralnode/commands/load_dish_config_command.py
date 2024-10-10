@@ -145,7 +145,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
         if data_sources and tm_data_filepath:
             count = 0
-            while count < 2:    
+            while count < 2:
                 try:
                     data = TMData(data_sources)
                     return data[tm_data_filepath].get_dict(), ""
@@ -153,12 +153,11 @@ class LoadDishCfg(LoadDishCfgCommand):
                     self.logger.exception(
                         "Error in Loading Dish VCC map json file %s", exception
                     )
-                    count+=1
+                    count += 1
             return (
                 {},
-                f"Error in Loading Dish VCC map json file {exception}",
-
-                    )
+                "Error in Loading Dish VCC map json file",
+            )
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
     # pylint:disable=signature-differs
