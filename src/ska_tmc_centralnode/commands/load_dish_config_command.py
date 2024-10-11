@@ -144,19 +144,20 @@ class LoadDishCfg(LoadDishCfgCommand):
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
         if data_sources and tm_data_filepath:
-            count = 0
-            while count < 2:
+            retry = 0
+            while retry < 2:
                 try:
                     data = TMData(data_sources)
                     return data[tm_data_filepath].get_dict(), ""
                 except Exception as exception:
-                    self.logger.exception(
-                        "Error in Loading Dish VCC map json file %s", exception
+                    log_msg = (
+                        f"Error in Loading Dish VCC map json file {exception}"
                     )
-                    count += 1
+                    self.logger.exception(log_msg)
+                    retry += 1
             return (
                 {},
-                "Error in Loading Dish VCC map json file",
+                log_msg,
             )
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
