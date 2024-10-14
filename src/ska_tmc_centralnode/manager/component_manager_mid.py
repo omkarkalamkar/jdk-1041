@@ -154,6 +154,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
+        self.dish_vcc_error = False
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""
@@ -729,7 +730,13 @@ class CNComponentManagerMid(CNComponentManager):
         ) = loadishcfg_command.get_dishid_vcc_map_json(dishid_vcc_map_params)
         if error_message:
             self.dish_vcc_validation_status = {CENTRALNODE_MID: error_message}
-            return loadishcfg_command.reject_command(error_message)
+            self.dish_vcc_error = True
+            task_status, response = self.submit_task(
+                loadishcfg_command.load_dish_cfg,
+                args=[argin, self.logger],
+                task_callback=task_callback,
+            )
+            return task_status, response
         self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
         config_json_validator = DishConfigValidator(
             dishid_vcc_map_json,

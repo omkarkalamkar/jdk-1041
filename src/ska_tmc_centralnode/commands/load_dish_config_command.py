@@ -10,6 +10,8 @@ from ska_telmodel.data import TMData
 from ska_tmc_centralnode.commands.central_node_command import (
     LoadDishCfgCommand,
 )
+from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
+from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 
 
 # pylint:disable =abstract-method
@@ -66,6 +68,44 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.command_timeout,
             self.timeout_callback,
         )
+        if self.component_manager.dish_vcc_error is True:
+            retry = 0
+            while retry < 3:
+                (
+                    dishid_vcc_map_json,
+                    error_message,
+                ) = self.get_dishid_vcc_map_json(json.loads(dish_cfg_params))
+                if error_message:
+                    retry += 1
+                else:
+                    break
+
+                if retry >= 3:
+                    self.component_manager.dish_vcc_validation_status = {
+                        CENTRALNODE_MID: error_message
+                    }
+                    task_callback(
+                        status=TaskStatus.COMPLETED,
+                        result=(ResultCode.FAILED, error_message),
+                        exception=error_message,
+                    )
+
+            self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
+            config_json_validator = DishConfigValidator(
+                dishid_vcc_map_json,
+                self.component_manager.k_value_valid_range_lower_limit,
+                self.component_manager.k_value_valid_range_upper_limit,
+            )
+            is_valid_dish_cfg, message = config_json_validator.is_json_valid()
+            if not is_valid_dish_cfg:
+                self.component_manager.dish_vcc_validation_status = {
+                    CENTRALNODE_MID: error_message
+                }
+                task_callback(
+                    status=TaskStatus.COMPLETED,
+                    result=(ResultCode.FAILED, error_message),
+                    exception=error_message,
+                )
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
         self.logger.info(message)
@@ -144,21 +184,17 @@ class LoadDishCfg(LoadDishCfgCommand):
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
         if data_sources and tm_data_filepath:
-            retry = 0
-            while retry < 2:
-                try:
-                    data = TMData(data_sources)
-                    return data[tm_data_filepath].get_dict(), ""
-                except Exception as exception:
-                    log_msg = (
-                        f"Error in Loading Dish VCC map json file {exception}"
-                    )
-                    self.logger.exception(log_msg)
-                    retry += 1
-            return (
-                {},
-                log_msg,
-            )
+            try:
+                data = TMData(data_sources)
+                return data[tm_data_filepath].get_dict(), ""
+            except Exception as exception:
+                self.logger.exception(
+                    "Error in Loading Dish VCC map json file %s", exception
+                )
+                return (
+                    {},
+                    f"Error in Loading Dish VCC map json file {exception}",
+                )
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
     # pylint:disable=signature-differs
