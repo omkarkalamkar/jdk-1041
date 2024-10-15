@@ -53,7 +53,6 @@ def test_load_dish_cfg_command(
     assert csp_mln.memorizedDishVccMap == dish_cfg_input_str
 
 
-
 def test_load_dish_cfg_command_invalid_json(
     tango_context, task_callback, json_factory
 ):
@@ -103,7 +102,6 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
     exception_message = "K values are not in range (1 to 1177)"
     assert result_code == TaskStatus.REJECTED
     assert message == exception_message
-
 
 
 def test_load_dish_cfg_command_invalid_file_name(
