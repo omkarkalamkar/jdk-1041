@@ -105,7 +105,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     exception=message,
                 )
                 return
-        self.logger.info("")
+
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
         self.logger.info(message)

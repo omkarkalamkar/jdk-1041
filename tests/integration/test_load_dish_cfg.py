@@ -388,7 +388,6 @@ def load_dish_cfg_with_wrong_path(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    logger.info("The JSON is %s", dish_cfg_input)
     result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
@@ -424,7 +423,6 @@ def load_dish_cfg_with_wrong_path(
     )
 
 
-@pytest.mark.kk
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
