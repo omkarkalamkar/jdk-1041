@@ -399,9 +399,9 @@ def load_dish_cfg_with_wrong_path(
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
 
-    expected_failed_message = "Error in Loading Dish VCC map json file "
-    +"gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?t1#tmdata"
-    +"not found in SKA CAR - make sure to add tmdata CI!"
+    expected_failed_message = f"Error in Loading Dish VCC map json file "
+    f"gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?t1#tmdata"
+    f"not found in SKA CAR - make sure to add tmdata CI!"
     logger.info(f"{expected_failed_message} is this")
 
     assert check_lrcr_events(
