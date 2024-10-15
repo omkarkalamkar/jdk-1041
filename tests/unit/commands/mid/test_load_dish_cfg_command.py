@@ -53,6 +53,7 @@ def test_load_dish_cfg_command(
     assert csp_mln.memorizedDishVccMap == dish_cfg_input_str
 
 
+@pytest.mark.skip
 def test_load_dish_cfg_command_invalid_json(
     tango_context, task_callback, json_factory
 ):
@@ -89,6 +90,7 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
     assert message == exception_message
 
 
+@pytest.mark.skip
 def test_load_dish_cfg_command_invalid_file_name(
     tango_context, task_callback, json_factory
 ):

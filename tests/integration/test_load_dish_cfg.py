@@ -360,3 +360,93 @@ def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
     )
+
+
+def load_dish_cfg_with_wrong_path(
+    tango_context,
+    central_node_name,
+    config_str,
+    change_event_callbacks,
+):
+    """Test cases for Load_Dish_Config command with csp defective"""
+    logger.info("%s", config_str)
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    ensure_checked_devices(central_node)
+
+    dish_cfg_input = json.loads(config_str)
+    dish_cfg_input.update(
+        {
+            "tm_data_sources": [
+                "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?t1#tmdata"
+            ]
+        }
+    )
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    logger.info("The JSON is %s", dish_cfg_input)
+    result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
+    logger.info(
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
+    )
+
+    assert unique_id[0].endswith("LoadDishCfg")
+    assert result[0] == ResultCode.QUEUED
+
+    expected_failed_message = "Error in Loading Dish VCC map json file "
+    +"gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?t1#tmdata"
+    +"not found in SKA CAR - make sure to add tmdata CI!"
+    logger.info(f"{expected_failed_message} is this")
+
+    assert check_lrcr_events(
+        change_event_callback=change_event_callbacks,
+        command_name="LoadDishCfg",
+        result_to_check=expected_failed_message,
+    )
+
+    assert central_node.telescopeState == tango.DevState.UNKNOWN
+
+    result, unique_id = central_node.LoadDishCfg(config_str)
+    logger.info(
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=8,
+    )
+
+    event_remover(
+        change_event_callbacks,
+        ["longRunningCommandResult"],
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [("ska_mid/tm_central/central_node")],
+)
+def test_load_dish_cfg_with_wrong_path(
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+):
+    """Test cases for Load_Dish_Config command"""
+    return load_dish_cfg_with_wrong_path(
+        tango_context,
+        central_node_name,
+        json_factory("command_load_dish_cfg"),
+        change_event_callbacks,
+    )

@@ -75,10 +75,9 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dishid_vcc_map_json,
                     error_message,
                 ) = self.get_dishid_vcc_map_json(json.loads(dish_cfg_params))
-                if error_message:
-                    retry += 1
-                else:
+                if not error_message:
                     break
+                retry += 1
 
                 if retry >= 3:
                     self.component_manager.dish_vcc_validation_status = {
@@ -89,23 +88,23 @@ class LoadDishCfg(LoadDishCfgCommand):
                         result=(ResultCode.FAILED, error_message),
                         exception=error_message,
                     )
+                    return
 
             self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
-            config_json_validator = DishConfigValidator(
-                dishid_vcc_map_json,
-                self.component_manager.k_value_valid_range_lower_limit,
-                self.component_manager.k_value_valid_range_upper_limit,
+            is_valid_dish_cfg, message = self.load_dish_config_json_validator(
+                dishid_vcc_map_json
             )
-            is_valid_dish_cfg, message = config_json_validator.is_json_valid()
             if not is_valid_dish_cfg:
                 self.component_manager.dish_vcc_validation_status = {
-                    CENTRALNODE_MID: error_message
+                    CENTRALNODE_MID: message
                 }
                 task_callback(
                     status=TaskStatus.COMPLETED,
-                    result=(ResultCode.FAILED, error_message),
-                    exception=error_message,
+                    result=(ResultCode.FAILED, message),
+                    exception=message,
                 )
+                return
+        self.logger.info("")
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
         self.logger.info(message)
@@ -183,6 +182,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
+        self.logger.info("The initial params are : %s", initial_params)
         if data_sources and tm_data_filepath:
             try:
                 data = TMData(data_sources)
@@ -320,3 +320,15 @@ class LoadDishCfg(LoadDishCfgCommand):
             ]
 
         return return_codes, message_or_unique_ids
+
+    def load_dish_config_json_validator(self, argin):
+        """
+        Method to validate the JSON for LoadDishConfig Command
+        """
+        config_json_validator = DishConfigValidator(
+            argin,
+            self.component_manager.k_value_valid_range_lower_limit,
+            self.component_manager.k_value_valid_range_upper_limit,
+        )
+        is_valid_dish_cfg, message = config_json_validator.is_json_valid()
+        return is_valid_dish_cfg, message
