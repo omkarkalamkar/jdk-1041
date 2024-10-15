@@ -68,7 +68,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.command_timeout,
             self.timeout_callback,
         )
-        if self.component_manager.dish_vcc_error is True:
+        if self.component_manager.dish_vcc_data_download_error is True:
             retry = 0
             while retry < 3:
                 (
@@ -83,6 +83,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     self.component_manager.dish_vcc_validation_status = {
                         CENTRALNODE_MID: error_message
                     }
+                    self.logger.debug("Number of retries exhausted")
                     task_callback(
                         status=TaskStatus.COMPLETED,
                         result=(ResultCode.FAILED, error_message),
@@ -189,7 +190,8 @@ class LoadDishCfg(LoadDishCfgCommand):
                 return data[tm_data_filepath].get_dict(), ""
             except Exception as exception:
                 self.logger.exception(
-                    "Error in Loading Dish VCC map json file %s", exception
+                    "Error in Loading Dish VCC map json file %s, retrying",
+                    exception,
                 )
                 return (
                     {},

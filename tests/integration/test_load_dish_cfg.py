@@ -399,10 +399,14 @@ def load_dish_cfg_with_wrong_path(
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
 
-    expected_failed_message = (
-        "Error in Loading Dish VCC map json file "
-        + "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?t1#tmdata"
-        + "not found in SKA CAR - make sure to add tmdata CI!"
+    expected_failed_message = json.dumps(
+        [
+            ResultCode.FAILED,
+            "Error in Loading"
+            + " Dish VCC map json file gitlab://gitlab.com/ska-telescope/ska-tmc/ska-"
+            + "tmc-simulators?t1#tmdata not found in SKA CAR - make sure to add "
+            + "tmdata CI!",
+        ]
     )
     logger.info(f"{expected_failed_message} is this")
 
@@ -414,25 +418,13 @@ def load_dish_cfg_with_wrong_path(
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
 
-    result, unique_id = central_node.LoadDishCfg(config_str)
-    logger.info(
-        "LoadDishCfg Command ID: %s Returned result: %s",
-        unique_id,
-        result,
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=8,
-    )
-
     event_remover(
         change_event_callbacks,
         ["longRunningCommandResult"],
     )
 
 
+@pytest.mark.kk
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(

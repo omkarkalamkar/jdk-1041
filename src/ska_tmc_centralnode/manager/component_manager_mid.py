@@ -27,7 +27,6 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
-from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -154,7 +153,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
-        self.dish_vcc_error = False
+        self.dish_vcc_data_download_error = False
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""
@@ -730,7 +729,7 @@ class CNComponentManagerMid(CNComponentManager):
         ) = loadishcfg_command.get_dishid_vcc_map_json(dishid_vcc_map_params)
         if error_message:
             self.dish_vcc_validation_status = {CENTRALNODE_MID: error_message}
-            self.dish_vcc_error = True
+            self.dish_vcc_data_download_error = True
             task_status, response = self.submit_task(
                 loadishcfg_command.load_dish_cfg,
                 args=[argin, self.logger],
@@ -738,17 +737,15 @@ class CNComponentManagerMid(CNComponentManager):
             )
             return task_status, response
         self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
-        config_json_validator = DishConfigValidator(
-            dishid_vcc_map_json,
-            self.k_value_valid_range_lower_limit,
-            self.k_value_valid_range_upper_limit,
+        (
+            is_valid_dish_cfg,
+            message,
+        ) = loadishcfg_command.load_dish_config_json_validator(
+            dishid_vcc_map_json
         )
-        is_valid_dish_cfg, message = config_json_validator.is_json_valid()
         if not is_valid_dish_cfg:
-            if error_message:
-                self.dish_vcc_validation_status = {
-                    CENTRALNODE_MID: error_message
-                }
+            if message:
+                self.dish_vcc_validation_status = {CENTRALNODE_MID: message}
             return loadishcfg_command.reject_command(message)
 
         task_status, response = self.submit_task(
