@@ -89,6 +89,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                         result=(ResultCode.FAILED, error_message),
                         exception=error_message,
                     )
+                    self.component_manager.dish_vcc_data_download_error = False
                     return
 
             self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)

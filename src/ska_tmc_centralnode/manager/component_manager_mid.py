@@ -857,3 +857,4 @@ class CNComponentManagerMid(CNComponentManager):
         self.dev_names_for_load_dish_cfg = []
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
+        self.dish_vcc_data_download_error = False
