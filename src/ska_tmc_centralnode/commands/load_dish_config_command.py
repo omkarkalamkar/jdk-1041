@@ -3,6 +3,7 @@ import json
 import threading
 from typing import Callable, Optional, Tuple
 
+from retry import retry
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_telmodel.data import TMData
@@ -10,6 +11,8 @@ from ska_telmodel.data import TMData
 from ska_tmc_centralnode.commands.central_node_command import (
     LoadDishCfgCommand,
 )
+from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
+from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 
 
 # pylint:disable =abstract-method
@@ -66,6 +69,39 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.command_timeout,
             self.timeout_callback,
         )
+        if self.component_manager.dish_vcc_data_download_error is True:
+            (
+                dishid_vcc_map_json,
+                error_message,
+            ) = self.fetch_dishid_vcc_map(dish_cfg_params)
+            if error_message:
+                self.component_manager.dish_vcc_validation_status = {
+                    CENTRALNODE_MID: error_message
+                }
+                self.logger.debug("Number of retries exhausted")
+                task_callback(
+                    status=TaskStatus.COMPLETED,
+                    result=(ResultCode.FAILED, error_message),
+                    exception=error_message,
+                )
+                self.component_manager.dish_vcc_data_download_error = False
+                return
+
+            self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
+            is_valid_dish_cfg, message = self.load_dish_config_json_validator(
+                dishid_vcc_map_json
+            )
+            if not is_valid_dish_cfg:
+                self.component_manager.dish_vcc_validation_status = {
+                    CENTRALNODE_MID: message
+                }
+                task_callback(
+                    status=TaskStatus.COMPLETED,
+                    result=(ResultCode.FAILED, message),
+                    exception=message,
+                )
+                return
+
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
         self.logger.info(message)
@@ -143,13 +179,15 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
+        self.logger.info("The initial params are : %s", initial_params)
         if data_sources and tm_data_filepath:
             try:
                 data = TMData(data_sources)
                 return data[tm_data_filepath].get_dict(), ""
             except Exception as exception:
                 self.logger.exception(
-                    "Error in Loading Dish VCC map json file %s", exception
+                    "Error in Loading Dish VCC map json file %s, retrying",
+                    exception,
                 )
                 return (
                     {},
@@ -280,3 +318,20 @@ class LoadDishCfg(LoadDishCfgCommand):
             ]
 
         return return_codes, message_or_unique_ids
+
+    def load_dish_config_json_validator(self, argin):
+        """
+        Method to validate the JSON for LoadDishConfig Command
+        """
+        config_json_validator = DishConfigValidator(
+            argin,
+            self.component_manager.k_value_valid_range_lower_limit,
+            self.component_manager.k_value_valid_range_upper_limit,
+        )
+        is_valid_dish_cfg, message = config_json_validator.is_json_valid()
+        return is_valid_dish_cfg, message
+
+    @retry(tries=3, delay=1)
+    def fetch_dishid_vcc_map(self, dish_cfg_params):
+        """Fetch the DishId-VCC map JSON."""
+        return self.get_dishid_vcc_map_json(json.loads(dish_cfg_params))

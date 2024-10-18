@@ -5,6 +5,10 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.16.8]
+********
+* Added retry mechanism while downloading tel-model resources to resolve SKB-495.
+  
 [0.16.7]
 ********
 * Utilised ska-tmc-common v0.20.2 with liveliness probe updated to track device with full trl.

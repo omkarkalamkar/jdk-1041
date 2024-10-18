@@ -69,7 +69,22 @@ def test_load_dish_cfg_command_invalid_json(
     result_code, message = cm.load_dish_cfg(
         json.dumps(dish_cfg_input), task_callback=task_callback
     )
-    assert result_code == TaskStatus.REJECTED
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (
+                ResultCode.FAILED,
+                "tm_data_sources and tm_data_filepath not provided in json",
+            ),
+            "exception": "tm_data_sources and tm_data_filepath not provided in json",
+        },
+    )
 
 
 def test_load_dish_cfg_command_kvalue_out_of_range(
@@ -104,7 +119,26 @@ def test_load_dish_cfg_command_invalid_file_name(
     result_code, message = cm.load_dish_cfg(
         json.dumps(dish_cfg_input), task_callback=task_callback
     )
-    assert result_code == TaskStatus.REJECTED
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (
+                ResultCode.FAILED,
+                "Error in Loading Dish VCC map json file 'No telescope model "
+                + "data with key instrument/dishid_vcc_map_configuration/"
+                + "mid_cbf_initial_parameters_invalid.json exists!'",
+            ),
+            "exception": "Error in Loading Dish VCC map json file 'No "
+            + "telescope model data with key instrument/dishid_vcc_map_"
+            + "configuration/mid_cbf_initial_parameters_invalid.json exists!'",
+        },
+    )
 
 
 def test_dish_vcc_validation_status(task_callback, json_factory):
