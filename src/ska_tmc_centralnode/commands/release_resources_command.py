@@ -54,7 +54,7 @@ class ReleaseResources(AssignReleaseResources):
         self,
         argin: str,
     ) -> Tuple[ResultCode, str]:
-        """This is a long running method for ReleaseResources command
+        """This is a long running command method for ReleaseResources command
 
         :param argin: Input argument for the command
         :type argin: `str`
@@ -66,7 +66,7 @@ class ReleaseResources(AssignReleaseResources):
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
     ):
-        """Updates the task status for command"""
+        """Updates the task status for command ReleaseResources"""
         if result[0] == ResultCode.FAILED:
             self.task_callback(
                 result=result,
