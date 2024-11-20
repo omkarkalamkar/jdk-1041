@@ -7,7 +7,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [0.16.9]
 ********
-* Utilised ska-tmc-common v.0.22.4 with updated received addresses value.
+* Utilised ska-tmc-common v.0.22.6 with updated received addresses value.
 
 [0.16.8]
 ********
