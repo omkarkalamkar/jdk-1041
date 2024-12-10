@@ -258,6 +258,7 @@ class CNComponentManagerLow(CNComponentManager):
                 ResultCode.FAILED,
                 exception_msg=exception_message,
             )
+            self.observable.notify_observers(attribute_value_change=True)
         self.reset_event_count(self.command_id)
 
     def update_device_state(self, device_name, state):

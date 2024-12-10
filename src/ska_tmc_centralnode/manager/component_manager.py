@@ -454,7 +454,7 @@ class CNComponentManager(TmcComponentManager):
 
         with self.lock:
             # Update the device status with the exception details
-            self.component.update_unresponsive(True, str(exception))
+            self.component.update_device_exception(device_info, exception)
             # Aggregate the telescope availability data
             self._telescope_availability_aggregator.aggregate()
 
@@ -555,6 +555,7 @@ class CNComponentManager(TmcComponentManager):
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
+            self.observable.notify_observers(attribute_value_change=True)
 
     def update_device_assigned_resource(
         self, dev_name: str, assign_resources: str

@@ -377,6 +377,9 @@ class CNComponentManagerMid(CNComponentManager):
                         ResultCode.FAILED,
                         exception_msg=exp_string,
                     )
+                    self.observable.notify_observers(
+                        attribute_value_change=True
+                    )
         except Exception as exception:
             self.logger.exception(
                 "Exception occurred while processing long running "
@@ -849,6 +852,7 @@ class CNComponentManagerMid(CNComponentManager):
                 ResultCode.FAILED,
                 exception_msg=exception_message,
             )
+            self.observable.notify_observers(attribute_value_change=True)
 
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""
