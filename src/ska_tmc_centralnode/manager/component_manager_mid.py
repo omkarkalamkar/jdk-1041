@@ -377,9 +377,7 @@ class CNComponentManagerMid(CNComponentManager):
                         ResultCode.FAILED,
                         exception_msg=exp_string,
                     )
-                    self.observable.notify_observers(
-                        attribute_value_change=True
-                    )
+                    self.observable.notify_observers(command_exception=True)
         except Exception as exception:
             self.logger.exception(
                 "Exception occurred while processing long running "
