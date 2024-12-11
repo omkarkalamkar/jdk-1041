@@ -120,7 +120,6 @@ class CNComponentManagerMid(CNComponentManager):
         }
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
-        self.rlock = threading.RLock()
         telescope_availability = self.get_telescope_availability()
         telescope_availability["tmc_subarrays"] = self.subarray_availability
         self.set_telescope_availability = telescope_availability
@@ -416,7 +415,7 @@ class CNComponentManagerMid(CNComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug(f"State event for {device_name}: {state}")
 
             if "sdp" in device_name:
@@ -464,7 +463,7 @@ class CNComponentManagerMid(CNComponentManager):
         :param dishMode: Dish mode of the device
         :type dishMode: DishMode
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug(
                 f"Received dishMode event from {dev_name}: "
                 + f"{DishMode(dish_mode).name}"
@@ -512,7 +511,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
@@ -526,7 +525,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )
@@ -590,7 +589,7 @@ class CNComponentManagerMid(CNComponentManager):
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availablity status"""
-        with self.lock:
+        with self.rlock:
             if "tm_subarray_node" in device_name:
                 self.subarray_availability[device_name] = event_value
             elif "tm_leaf_node/csp_master" in device_name:
@@ -850,7 +849,7 @@ class CNComponentManagerMid(CNComponentManager):
                 ResultCode.FAILED,
                 exception_msg=exception_message,
             )
-            self.observable.notify_observers(attribute_value_change=True)
+            self.observable.notify_observers(command_exception=True)
 
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""

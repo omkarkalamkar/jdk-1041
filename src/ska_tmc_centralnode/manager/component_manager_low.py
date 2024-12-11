@@ -272,7 +272,7 @@ class CNComponentManagerLow(CNComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug(f"State event for {device_name}: {state}")
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN in case of
@@ -308,7 +308,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
@@ -322,7 +322,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )
@@ -382,7 +382,7 @@ class CNComponentManagerLow(CNComponentManager):
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availability"""
-        with self.lock:
+        with self.rlock:
             self.logger.debug(f"device_name is: {device_name}")
             self.logger.debug(f"event_value is: {event_value}")
 
