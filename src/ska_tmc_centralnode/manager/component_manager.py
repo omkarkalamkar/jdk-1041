@@ -455,8 +455,10 @@ class CNComponentManager(TmcComponentManager):
         self.logger.error(message)
 
         with self.rlock:
+            device_name = device_info.dev_name
+            dev_info = self.component.get_device(device_name)
             # Update the device status with the exception details
-            self.component.update_device_exception(device_info, exception)
+            dev_info.update_unresponsive(True, str(exception))
             # Aggregate the telescope availability data
             self._telescope_availability_aggregator.aggregate()
 
