@@ -5,7 +5,6 @@ import json
 import time
 from typing import Optional, Tuple
 
-from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
@@ -58,7 +57,6 @@ class ReleaseResources(AssignReleaseResources):
 
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
-        self.task_callback: TaskCallbackType
 
     @timeout_tracker
     @error_propagation_tracker(
