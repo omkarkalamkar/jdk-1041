@@ -372,6 +372,7 @@ def test_assign_res_command_mid_without_subarray_id(
         change_event_callbacks,
     )
 
+
 @pytest.mark.test1
 @pytest.mark.repeat(100)
 @pytest.mark.post_deployment
