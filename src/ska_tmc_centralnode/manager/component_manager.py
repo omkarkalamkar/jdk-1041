@@ -421,7 +421,7 @@ class CNComponentManager(TmcComponentManager):
 
     def update_input_parameter(self) -> None:
         """updates the input parameter for component manager instance"""
-        with self.rlock:
+        with self.lock:
             self.input_parameter.update(self)
 
     def update_responsiveness_info(self, device_name: str) -> None:
@@ -482,7 +482,7 @@ class CNComponentManager(TmcComponentManager):
         :param health_state: health state of the device
         :type health_state: HealthState
         """
-        with self.rlock:
+        with self.lock:
             self.logger.debug(
                 f"healthState event for {device_name}: "
                 + f"{HealthState(health_state).name}"
@@ -572,7 +572,7 @@ class CNComponentManager(TmcComponentManager):
         :param assign_resources: assigned resources in JSON format
         :type assign_resources: str
         """
-        with self.rlock:
+        with self.lock:
             self.logger.info(
                 "Updating assigned resources for device '%s': %s",
                 dev_name,
@@ -648,7 +648,7 @@ class CNComponentManager(TmcComponentManager):
         if self._op_state_aggregator is None:
             self._op_state_aggregator = TMCOpStateAggregator(self, self.logger)
 
-        with self.rlock:
+        with self.lock:
             self.component.tmc_op_state = self._op_state_aggregator.aggregate()
 
     def get_tmc_op_state(self):
@@ -681,7 +681,7 @@ class CNComponentManager(TmcComponentManager):
         """
         dish_on = False
         csp_state = DevState.UNKNOWN
-        with self.rlock:
+        with self.lock:
             for dev_name in self.input_parameter.dish_dev_names:
                 dish = self.get_device(dev_name)
                 if (
