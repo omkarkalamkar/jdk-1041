@@ -373,8 +373,9 @@ def test_assign_res_command_mid_without_subarray_id(
     )
 
 
+@pytest.mark.repeat(100)
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_mid1
 def test_assign_resources_exception_propagation(
     tango_context,
     change_event_callbacks,
@@ -599,8 +600,9 @@ def test_assign_resources_low_timeout(
     result, unique_id = central_node.TelescopeOff()
 
 
+@pytest.mark.repeat(100)
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_low1
 def test_assign_resources_low_error_aggregation(
     tango_context,
     change_event_callbacks,
