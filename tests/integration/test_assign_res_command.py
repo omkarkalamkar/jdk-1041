@@ -446,6 +446,8 @@ def test_assign_resources_exception_propagation(
     tmc_subarray.ClearCommandCallInfo()
 
 
+@pytest.mark.test1
+@pytest.mark.repeat(100)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_assign_resources_mid_timeout(
@@ -521,6 +523,7 @@ def test_assign_resources_mid_timeout(
 
     # Teardown
     result, unique_id = central_node.TelescopeOff()
+    tmc_subarray.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
@@ -601,8 +604,6 @@ def test_assign_resources_low_timeout(
     result, unique_id = central_node.TelescopeOff()
 
 
-@pytest.mark.test1
-@pytest.mark.repeat(100)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_assign_resources_low_error_aggregation(
