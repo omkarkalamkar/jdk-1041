@@ -441,9 +441,11 @@ def test_assign_resources_exception_propagation(
         f"{MID_SUBARRAY_DEVICE}: Exception occurred, command failed."
     )
     assert exception_message in event_data["attribute_value"][1]
+
     tmc_subarray.SetDefective(RESET_DEFECT)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
+    tmc_subarray.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
