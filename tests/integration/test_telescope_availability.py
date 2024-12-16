@@ -161,7 +161,7 @@ def test_telescope_availability_mid(tango_context, change_event_callbacks):
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_telescope_availability_low(tango_context, change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(

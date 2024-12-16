@@ -26,7 +26,7 @@ from tests.settings import (
 )
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_low_telescope_on_command(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -64,7 +64,7 @@ def test_low_telescope_on_command(tango_context, task_callback):
     )
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_telescope_on_command_unavailability(tango_context):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -101,7 +101,7 @@ def test_telescope_on_command_unavailability(tango_context):
     assert task_callback.result[0] == ResultCode.OK
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_telescope_on_command_fail_subarray(tango_context, task_callback):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
@@ -145,7 +145,7 @@ def test_telescope_on_command_fail_subarray(tango_context, task_callback):
     assert callback_data["result"][0] == ResultCode.FAILED
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_low_telescope_on_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
@@ -158,7 +158,7 @@ def test_low_telescope_on_fail_check_allowed(tango_context):
         cm.is_command_allowed("TelescopeOn")
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_telescope_on_command_rejected(tango_context, task_callback):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()

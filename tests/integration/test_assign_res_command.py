@@ -187,7 +187,7 @@ def test_assign_res_command_mid(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_low/tm_central/central_node")],
@@ -262,7 +262,7 @@ def assign_resources_with_invalid_json(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_low/tm_central/central_node")],
@@ -526,7 +526,7 @@ def test_assign_resources_mid_timeout(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_assign_resources_low_timeout(
     tango_context,
     change_event_callbacks,
@@ -605,7 +605,7 @@ def test_assign_resources_low_timeout(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_assign_resources_low_error_aggregation(
     tango_context,
     change_event_callbacks,

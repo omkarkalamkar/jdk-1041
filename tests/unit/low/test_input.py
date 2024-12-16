@@ -4,7 +4,7 @@ import pytest
 from ska_tmc_centralnode.model.input import InputParameterLow
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_properties():
     """Test properties for telescope low."""
     input = InputParameterLow(None)

@@ -45,7 +45,7 @@ FAULTY_LIST = [
 ]
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_low_some_working_other_faulty(tango_context):
     """Test low some working other faulty devices."""
     logger.info("%s", tango_context)

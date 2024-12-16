@@ -21,7 +21,7 @@ def test_reset_command_mid():
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_reset_command_low():
     """Tests reset command for low"""
     reset_command("ska_low/tm_central/central_node")

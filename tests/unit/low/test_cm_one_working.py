@@ -46,7 +46,7 @@ FAULTY_LIST = [
 ]
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_low_one_working_other_faulty(
     tango_context,
 ):

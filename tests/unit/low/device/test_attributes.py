@@ -29,7 +29,7 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_attributes(central_node_device):
     """Test attributes for low"""
     assert central_node_device.State() in [DevState.UNKNOWN, DevState.ON]

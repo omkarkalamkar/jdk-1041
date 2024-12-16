@@ -63,7 +63,7 @@ def test_internal_model_events_mid(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_internal_model_events_low(
     tango_context, set_low_devices_availability_for_aggregation
 ):
@@ -154,7 +154,7 @@ def test_command_result_events_mid(
 
 @pytest.mark.skip(reason="Needs to be tested.")
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_command_result_events_low(
     tango_context,
     change_event_callbacks,

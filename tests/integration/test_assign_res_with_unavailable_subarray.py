@@ -103,7 +103,7 @@ def test_assign_res_command_mid_unavailable_subarray(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_low/tm_central/central_node")],

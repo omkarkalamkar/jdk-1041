@@ -94,7 +94,7 @@ def test_on_command_mid(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.SKA_lowm
 def test_on_command_low(
     tango_context,
     change_event_callbacks,
