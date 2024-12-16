@@ -546,6 +546,7 @@ def test_release_resources_low_timeout(
         change_event_callbacks,
         ["longRunningCommandResult"],
     )
+    tmc_subarray.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
