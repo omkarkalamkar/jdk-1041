@@ -75,6 +75,7 @@ k8s-test-low:
     CONFIG: 'low'
     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
+    MARK: "test1"
   before_script:
     - echo $TELESCOPE
     - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT

@@ -239,8 +239,6 @@ def test_release_res_command_mid_without_subarray_id(
     )
 
 
-@pytest.mark.test1
-@pytest.mark.repeat(100)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_resources_error_propagation(
@@ -444,6 +442,8 @@ def test_release_resources_mid_timeout(
     )
 
 
+@pytest.mark.test1
+@pytest.mark.repeat(100)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_resources_low_timeout(
