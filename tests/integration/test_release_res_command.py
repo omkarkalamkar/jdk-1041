@@ -343,6 +343,7 @@ def test_release_resources_error_propagation(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.repeat(100)
 def test_release_resources_mid_timeout(
     tango_context,
     change_event_callbacks,
@@ -443,8 +444,7 @@ def test_release_resources_mid_timeout(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_low
-@pytest.mark.repeat(100)
+@pytest.mark.SKA_lowm
 def test_release_resources_low_timeout(
     tango_context,
     change_event_callbacks,
