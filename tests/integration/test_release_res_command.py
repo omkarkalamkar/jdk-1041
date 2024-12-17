@@ -645,3 +645,4 @@ def test_release_resources_error_aggregation(
         change_event_callbacks,
         ["longRunningCommandResult"],
     )
+    subarray_proxy.ClearCommandCallInfo()
