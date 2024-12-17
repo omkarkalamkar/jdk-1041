@@ -14,7 +14,7 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
         further commands refactoring."
 )
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 def test_stow_antennas_command(tango_context):
     """Tests stow antennas command"""
     logger.info("%s", tango_context)

@@ -9,7 +9,7 @@ from tests.settings import event_remover, logger
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 def test_tmc_state_mid(tango_context, change_event_callbacks):
     """Tests tmc state for mid"""
     logger.info("%s", tango_context)

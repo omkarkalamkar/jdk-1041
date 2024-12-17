@@ -97,7 +97,7 @@ def release_resources(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 def test_release_res_command_mid(
     tango_context,
     change_event_callbacks,
@@ -221,7 +221,7 @@ def release_resources_without_subarray_id(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 def test_release_res_command_mid_without_subarray_id(
     tango_context,
     change_event_callbacks,
@@ -240,7 +240,7 @@ def test_release_res_command_mid_without_subarray_id(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 def test_release_resources_error_propagation(
     tango_context,
     change_event_callbacks,
@@ -343,7 +343,6 @@ def test_release_resources_error_propagation(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.repeat(100)
 def test_release_resources_mid_timeout(
     tango_context,
     change_event_callbacks,

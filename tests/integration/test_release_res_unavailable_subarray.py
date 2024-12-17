@@ -115,7 +115,7 @@ def release_resources(
     reason="This functionality is not present in the current version"
 )
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 def test_release_res_command_mid(
     tango_context, change_event_callbacks, json_factory
 ):

@@ -84,7 +84,7 @@ def assign_resources(
     reason="This functionality is not present in the current version"
 )
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],

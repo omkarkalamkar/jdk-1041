@@ -12,7 +12,7 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 def test_internal_model_events_mid(
     tango_context,
     change_event_callbacks,
@@ -138,7 +138,7 @@ def commands_result_events(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_midm
+@pytest.mark.SKA_mid
 def test_command_result_events_mid(
     tango_context,
     change_event_callbacks,
