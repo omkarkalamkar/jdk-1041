@@ -9,7 +9,7 @@ from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import AdapterFactory, TimeKeeper, TimeoutCallback
+from ska_tmc_common import AdapterFactory, TimeoutCallback
 from ska_tmc_common.v1.error_propagation_tracker import (
     error_propagation_tracker,
 )
@@ -53,10 +53,6 @@ class AssignResources(AssignReleaseResources):
         )
         self.tm_subarray_adapter: Optional[AdapterFactory] = None
         self._skuid: SkuidClient = skuid
-        self.timekeeper = TimeKeeper(
-            self.component_manager.command_timeout, logger
-        )
-
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
 

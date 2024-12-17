@@ -8,7 +8,7 @@ from typing import Optional, Tuple
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import TimeKeeper, TimeoutCallback
+from ska_tmc_common import TimeoutCallback
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.v1.error_propagation_tracker import (
     error_propagation_tracker,
@@ -50,11 +50,6 @@ class ReleaseResources(AssignReleaseResources):
         )
         self.my_subarray_adapter = None
         self.subarray_adapter = None
-
-        self.timekeeper = TimeKeeper(
-            self.component_manager.command_timeout, logger
-        )
-
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
 
