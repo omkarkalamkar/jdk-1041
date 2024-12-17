@@ -84,7 +84,7 @@ def assign_resources(
     reason="This functionality is not present in the current version"
 )
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
@@ -103,7 +103,7 @@ def test_assign_res_command_mid_unavailable_subarray(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_low/tm_central/central_node")],

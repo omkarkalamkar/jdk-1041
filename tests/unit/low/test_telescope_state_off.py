@@ -61,7 +61,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_telescope_state_off(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)

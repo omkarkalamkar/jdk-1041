@@ -21,7 +21,7 @@ from tests.settings import event_remover
 
 # pylint:disable=c-extension-no-member
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 def test_off_command_mid(
     tango_context,
     change_event_callbacks,
@@ -101,7 +101,7 @@ def test_off_command_mid(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_off_command_low(
     tango_context,
     change_event_callbacks,

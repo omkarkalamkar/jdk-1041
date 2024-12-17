@@ -163,7 +163,7 @@ def assign_resources(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
@@ -187,7 +187,7 @@ def test_assign_res_command_mid(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_low/tm_central/central_node")],
@@ -262,7 +262,7 @@ def assign_resources_with_invalid_json(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_low/tm_central/central_node")],
@@ -352,7 +352,7 @@ def assign_resources_without_subarray_id(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
@@ -374,7 +374,7 @@ def test_assign_res_command_mid_without_subarray_id(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.test1
 def test_assign_resources_exception_propagation(
     tango_context,
@@ -448,7 +448,7 @@ def test_assign_resources_exception_propagation(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 def test_assign_resources_mid_timeout(
     tango_context,
     change_event_callbacks,
@@ -526,7 +526,7 @@ def test_assign_resources_mid_timeout(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_assign_resources_low_timeout(
     tango_context,
     change_event_callbacks,
@@ -605,7 +605,7 @@ def test_assign_resources_low_timeout(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_assign_resources_low_error_aggregation(
     tango_context,
     change_event_callbacks,

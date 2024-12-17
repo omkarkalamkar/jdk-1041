@@ -23,7 +23,7 @@ def central_node_device(request):
             break
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_commands(central_node_device):
     """Test Command for low telescope"""
     try:

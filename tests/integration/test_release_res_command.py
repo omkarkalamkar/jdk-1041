@@ -97,7 +97,7 @@ def release_resources(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 def test_release_res_command_mid(
     tango_context,
     change_event_callbacks,
@@ -115,7 +115,7 @@ def test_release_res_command_mid(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_release_res_command_low(
     tango_context,
     change_event_callbacks,
@@ -221,7 +221,7 @@ def release_resources_without_subarray_id(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 def test_release_res_command_mid_without_subarray_id(
     tango_context,
     change_event_callbacks,
@@ -240,7 +240,7 @@ def test_release_res_command_mid_without_subarray_id(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 def test_release_resources_error_propagation(
     tango_context,
     change_event_callbacks,
@@ -343,6 +343,7 @@ def test_release_resources_error_propagation(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.repeat(100)
 def test_release_resources_mid_timeout(
     tango_context,
     change_event_callbacks,
@@ -443,7 +444,7 @@ def test_release_resources_mid_timeout(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_release_resources_low_timeout(
     tango_context,
     change_event_callbacks,
@@ -549,7 +550,6 @@ def test_release_resources_low_timeout(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-@pytest.mark.repeat(100)
 def test_release_resources_error_aggregation(
     tango_context,
     change_event_callbacks,

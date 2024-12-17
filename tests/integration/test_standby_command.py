@@ -19,7 +19,7 @@ from tests.settings import event_remover, logger
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 def test_standby_command_mid(
     tango_context,
     change_event_callbacks,
@@ -101,7 +101,7 @@ def test_standby_command_mid(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_standby_command_low(
     tango_context,
     change_event_callbacks,

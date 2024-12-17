@@ -21,7 +21,7 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_low_assign_resources_command(
     tango_context, task_callback, json_factory
 ):
@@ -48,7 +48,7 @@ def test_low_assign_resources_command(
     )
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback, json_factory
 ):
@@ -133,7 +133,7 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     assert "subarray_beam_id" in message
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_low_assign_resources_command_empty_input_json(
     tango_context, task_callback
 ):
@@ -160,7 +160,7 @@ def test_low_assign_resources_command_with_invalide_key(
     )
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_low_assign_resources_missing_subarray_id(
     tango_context, task_callback, json_factory
 ):
@@ -231,7 +231,7 @@ def test_low_assign_resources_command_missing_station_ids(
     assert "station_id" in message
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -258,7 +258,7 @@ def check_if_subarray_is_available(cm):
             )
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_low_assign_resources_raises_state_model_exception(
     tango_context, task_callback, json_factory
 ):

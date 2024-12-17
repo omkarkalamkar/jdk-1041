@@ -24,7 +24,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_all_low_devices_faulty(tango_context):
     """Test all low devices faulty"""
     op_state_model = TMCOpStateModel(logger)

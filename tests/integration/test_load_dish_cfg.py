@@ -270,7 +270,7 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
@@ -291,7 +291,7 @@ def test_load_dish_cfg(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
@@ -318,7 +318,7 @@ def test_load_dish_cfg_when_csp_is_defective(
     ", Raised SKB-404 to track same"
 )
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
@@ -341,7 +341,7 @@ def test_load_dish_cfg_after_central_node_init(
 
 @pytest.mark.skip(reason="Fails intermittently")
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],
@@ -424,7 +424,7 @@ def load_dish_cfg_with_wrong_path(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 @pytest.mark.parametrize(
     "central_node_name",
     [("ska_mid/tm_central/central_node")],

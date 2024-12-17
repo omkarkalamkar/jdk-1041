@@ -45,7 +45,7 @@ def devices_to_load():
     )
 
 
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_all_working(tango_context):
     """test if all devices working"""
     logger.info("%s", tango_context)

@@ -24,7 +24,7 @@ from tests.settings import event_remover
 # this linting warning is suppressed cause its not able to recognise
 # tango._tango.Devstate which is c-extension member
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 def test_on_command_mid(
     tango_context,
     change_event_callbacks,
@@ -94,7 +94,7 @@ def test_on_command_mid(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_on_command_low(
     tango_context,
     change_event_callbacks,

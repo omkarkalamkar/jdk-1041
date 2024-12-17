@@ -11,7 +11,7 @@ from tests.settings import event_remover, logger
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_midm
 def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     """test telescope health state mid"""
     logger.info("%s", tango_context)
@@ -59,7 +59,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_lowm
+@pytest.mark.SKA_low
 def test_telescope_health_state_low(tango_context, change_event_callbacks):
     """test telescope health state low"""
     logger.info("%s", tango_context)
