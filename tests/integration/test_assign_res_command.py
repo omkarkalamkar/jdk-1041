@@ -375,7 +375,6 @@ def test_assign_res_command_mid_without_subarray_id(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.test1
 def test_assign_resources_exception_propagation(
     tango_context,
     change_event_callbacks,
