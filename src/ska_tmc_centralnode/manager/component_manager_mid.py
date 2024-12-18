@@ -786,7 +786,7 @@ class CNComponentManagerMid(CNComponentManager):
             dev_name,
             value,
         )
-        with self.lock:
+        with self.rlock:
             result_code_or_exception = []
             if is_async_result:
                 # Set result code and message

@@ -5,6 +5,10 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.16.10]
+********
+* Resolved SKB-665 and SKB-525 with updated ska-tmc-common with command callback tracker updates
+
 [0.16.9]
 ********
 * Utilised ska-tmc-common v.0.22.6 with updated received addresses value.
