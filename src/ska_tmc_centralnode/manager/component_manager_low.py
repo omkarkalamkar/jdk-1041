@@ -258,6 +258,7 @@ class CNComponentManagerLow(CNComponentManager):
                 ResultCode.FAILED,
                 exception_msg=exception_message,
             )
+            self.observable.notify_observers(command_exception=True)
         self.reset_event_count(self.command_id)
 
     def update_device_state(self, device_name, state):
@@ -381,7 +382,7 @@ class CNComponentManagerLow(CNComponentManager):
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availability"""
-        with self.lock:
+        with self.rlock:
             self.logger.debug(f"device_name is: {device_name}")
             self.logger.debug(f"event_value is: {event_value}")
 

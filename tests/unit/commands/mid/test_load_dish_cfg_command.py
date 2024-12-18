@@ -2,11 +2,14 @@
 import json
 from unittest.mock import patch
 
-import pytest
+import mock
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import DevFactory
+from ska_tmc_common.test_helpers.helper_adapter_factory import (
+    HelperAdapterFactory,
+)
 from tango import ApiUtil
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
@@ -17,7 +20,6 @@ from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 # Patch this particular method which mock return value from SetKValue command
 
 
-@pytest.mark.skip(reason="This test is unstable even with patch.")
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
 def test_load_dish_cfg_command(
     _set_k_numbers_to_dish, tango_context, task_callback, json_factory
@@ -161,3 +163,17 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     assert json.loads(cm.dish_vcc_validation_status) == {
         "ska_mid/tm_leaf_node/csp_master": "CSP Master device is unavailable"
     }
+
+
+def test_load_dish_cnfg_command_fail_csp_master(tango_context, json_factory):
+    cm, _ = create_cm()
+    adapter_factory = HelperAdapterFactory()
+    attrs = {"LoadDishCfg.side_effect": Exception}
+    cspmastermock = mock.Mock(**attrs)
+    adapter_factory.get_or_create_adapter(
+        MID_CSP_MLN_DEVICE, proxy=cspmastermock
+    )
+    dish_cfg_input_str = json_factory("command_load_dish_cfg")
+    load_dish_cnfg_command = LoadDishCfg(cm, adapter_factory, logger=logger)
+    (res_code, _) = load_dish_cnfg_command.do(dish_cfg_input_str)
+    assert res_code == ResultCode.FAILED

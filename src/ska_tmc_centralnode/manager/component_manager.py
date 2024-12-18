@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+import threading
 import time
 from typing import Callable, List, Optional, Tuple
 
@@ -169,6 +170,7 @@ class CNComponentManager(TmcComponentManager):
         self.subarray_devname: str = ""
         self.command_mapping = {}
         self.result_codes_mapping = {}
+        self.rlock = threading.RLock()
 
         self.no_of_events_for_command = 0
 
@@ -429,7 +431,7 @@ class CNComponentManager(TmcComponentManager):
         :param dev_name: name of the device
         :type dev_name: str
         """
-        with self.lock:
+        with self.rlock:
             dev_info = self.get_device(device_name)
             dev_info.update_unresponsive(False, "")
             self._telescope_availability_aggregator.aggregate()
@@ -452,15 +454,17 @@ class CNComponentManager(TmcComponentManager):
         )
         self.logger.error(message)
 
-        with self.lock:
+        with self.rlock:
+            device_name = device_info.dev_name
+            dev_info = self.component.get_device(device_name)
             # Update the device status with the exception details
-            self.component.update_unresponsive(True, str(exception))
+            dev_info.update_unresponsive(True, str(exception))
             # Aggregate the telescope availability data
             self._telescope_availability_aggregator.aggregate()
 
     def update_event_failure(self, device_name: str) -> None:
         """updates event failures in Dev info"""
-        with self.lock:
+        with self.rlock:
             devInfo = self.component.get_device(device_name)
             devInfo.last_event_arrived = time.time()
             devInfo.update_unresponsive(False)
@@ -528,7 +532,7 @@ class CNComponentManager(TmcComponentManager):
         :param obs_state: obs state of the device
         :type obs_state: ObsState
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug(
                 f"obsState event for {dev_name}: {ObsState(obs_state).name}"
             )
@@ -555,6 +559,7 @@ class CNComponentManager(TmcComponentManager):
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
+            self.observable.notify_observers(attribute_value_change=True)
 
     def update_device_assigned_resource(
         self, dev_name: str, assign_resources: str

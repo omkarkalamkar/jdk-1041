@@ -338,6 +338,7 @@ def test_release_resources_error_propagation(
         change_event_callbacks,
         ["longRunningCommandResult"],
     )
+    tmc_subarray.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
@@ -439,6 +440,7 @@ def test_release_resources_mid_timeout(
         change_event_callbacks,
         ["longRunningCommandResult"],
     )
+    tmc_subarray.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
@@ -543,6 +545,7 @@ def test_release_resources_low_timeout(
         change_event_callbacks,
         ["longRunningCommandResult"],
     )
+    tmc_subarray.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
@@ -642,3 +645,4 @@ def test_release_resources_error_aggregation(
         change_event_callbacks,
         ["longRunningCommandResult"],
     )
+    subarray_proxy.ClearCommandCallInfo()

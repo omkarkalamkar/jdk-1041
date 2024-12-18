@@ -2,13 +2,18 @@
 ReleaseResources class for CentralNode.
 """
 import json
+import time
 from typing import Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import error_propagation_decorator, timeout_decorator
+from ska_tmc_common import TimeoutCallback
 from ska_tmc_common.adapters import AdapterFactory
+from ska_tmc_common.v1.error_propagation_tracker import (
+    error_propagation_tracker,
+)
+from ska_tmc_common.v1.timeout_tracker import timeout_tracker
 
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
@@ -45,9 +50,11 @@ class ReleaseResources(AssignReleaseResources):
         )
         self.my_subarray_adapter = None
         self.subarray_adapter = None
+        self.timeout_id = f"{time.time()}_{__class__.__name__}"
+        self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
 
-    @timeout_decorator
-    @error_propagation_decorator(
+    @timeout_tracker
+    @error_propagation_tracker(
         "get_subarray_obsstate", [ObsState.RESOURCING, ObsState.EMPTY]
     )
     def release_resources(
