@@ -4,6 +4,7 @@ from typing import Callable, List, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
+from ska_tmc_common.enum import DishMode
 from tango import DevState
 
 from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
@@ -171,10 +172,15 @@ class TelescopeOn(TelescopeOnOff):
 
     def set_standby_fp_mode_dishes(self) -> Tuple[List[ResultCode], List[str]]:
         """Sets standby fb mode in dishes"""
+        invoke_on_adapters = []
+        for adapter in self.dish_adapters:
+            if adapter.proxy.dishMode != DishMode.StandbyFP:
+                invoke_on_adapters.append(adapter)
+
         return self.send_command(
-            self.dish_adapters,
+            invoke_on_adapters,
             "Error in calling SetStandbyFPMode()"
-            f" command on {self.dish_adapters}",
+            f" command on {invoke_on_adapters}",
             "SetStandbyFPMode",
         )
 
