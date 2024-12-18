@@ -174,7 +174,7 @@ class TelescopeOn(TelescopeOnOff):
         """Sets standby fb mode in dishes"""
         invoke_on_adapters = []
         for adapter in self.dish_adapters:
-            if adapter.proxy.dishMode != DishMode.StandbyFP:
+            if adapter.proxy.dishMode != DishMode.STANDBY_FP:
                 invoke_on_adapters.append(adapter)
 
         return self.send_command(
