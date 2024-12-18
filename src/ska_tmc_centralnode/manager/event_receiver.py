@@ -1,4 +1,5 @@
 """Event Receiver class for central node"""
+import threading
 from typing import Optional
 
 import tango
@@ -48,6 +49,14 @@ class CentralNodeEventReceiver(EventReceiver):
         self.device_subscribed = {}
         self.dish_name = ""
         self.input_parameter = self._component_manager.input_parameter
+
+    def pass_to_thread(self, function_name, *args):
+        """
+        Args:
+            function_name (_type_): _description_
+        """
+        t1 = threading.Thread(target=function_name, args=args)
+        t1.start()
 
     def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
@@ -198,8 +207,10 @@ class CentralNodeEventReceiver(EventReceiver):
             return
 
         new_value = evt.attr_value.value
-        self._component_manager.update_device_assigned_resource(
-            evt.device.dev_name(), new_value
+        self.pass_to_thread(
+            self._component_manager.update_device_assigned_resource,
+            evt.device.dev_name(),
+            new_value,
         )
 
     def handle_dish_mode_event(self, event_data: tango.EventData) -> None:
@@ -220,9 +231,12 @@ class CentralNodeEventReceiver(EventReceiver):
             )
             return
         new_value = event_data.attr_value.value
-        self._component_manager.update_device_dish_mode(
-            event_data.device.dev_name(), new_value
+        self.pass_to_thread(
+            self._component_manager.update_device_dish_mode,
+            event_data.device.dev_name(),
+            new_value,
         )
+
         self._logger.info(f"DishMode value updated to {new_value}")
 
     def handle_lrcr_event(self, event_data: tango.EventData) -> None:
@@ -249,8 +263,10 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data.attr_value.value,
         )
         new_value = event_data.attr_value.value
-        self._component_manager.update_long_running_command_result(
-            event_data.device.dev_name(), new_value
+        self.pass_to_thread(
+            self._component_manager.update_long_running_command_result,
+            event_data.device.dev_name(),
+            new_value,
         )
 
     def handle_load_dish_cfg_result_callback(
@@ -285,8 +301,10 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.attr_value.value,
             )
             new_value = event_data.attr_value.value
-            self._component_manager.update_load_dish_cfg_results(
-                event_data.device.dev_name(), new_value
+            self.pass_to_thread(
+                self._component_manager.update_load_dish_cfg_results,
+                event_data.device.dev_name(),
+                new_value,
             )
         # In case of Async callback get command result from argout
         elif getattr(event_data, "argout", False):
@@ -295,8 +313,11 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.argout,
             )
             new_value = event_data.argout
-            self._component_manager.update_load_dish_cfg_results(
-                event_data.device.dev_name(), new_value, is_async_result=True
+            self.pass_to_thread(
+                self._component_manager.update_load_dish_cfg_results,
+                event_data.device.dev_name(),
+                new_value,
+                True,
             )
 
     def handle_dln_kvalue_validation_result(self, event_data: tango.EventData):
@@ -368,8 +389,10 @@ class CentralNodeEventReceiver(EventReceiver):
             )
             return
         new_value = event_data.attr_value.value
-        self._component_manager.update_telescope_availability(
-            event_data.device.dev_name(), new_value
+        self.pass_to_thread(
+            self._component_manager.update_telescope_availability,
+            event_data.device.dev_name(),
+            new_value,
         )
 
     def handle_subarray_availability_event(
@@ -393,6 +416,8 @@ class CentralNodeEventReceiver(EventReceiver):
             )
             return
         new_value = event_data.attr_value.value
-        self._component_manager.update_telescope_availability(
-            event_data.device.dev_name(), new_value
+        self.pass_to_thread(
+            self._component_manager.update_telescope_availability,
+            event_data.device.dev_name(),
+            new_value,
         )
