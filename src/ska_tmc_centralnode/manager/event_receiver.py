@@ -424,6 +424,9 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
+        self._logger.info(
+            "Event for Subarray Availability event data: %s", event_data
+        )
         if event_data.err:
             errors = event_data.errors
             for error in errors:
