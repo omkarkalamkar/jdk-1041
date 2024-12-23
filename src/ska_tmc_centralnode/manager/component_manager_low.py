@@ -136,7 +136,7 @@ class CNComponentManagerLow(CNComponentManager):
                 "isSubarrayAvailable": self.update_telescope_availability,
             }
         )
-        self.__start_event_processing_threads()
+        self._start_event_processing_threads()
 
     def check_if_mccs_mln_is_responsive(self):
         """Checks whether mccs mln is responsive"""

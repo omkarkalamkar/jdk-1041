@@ -177,7 +177,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "isSubarrayAvailable": self.update_telescope_availability,
             }
         )
-        self.__start_event_processing_threads()
+        self._start_event_processing_threads()
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""

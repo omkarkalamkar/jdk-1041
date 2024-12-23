@@ -203,9 +203,8 @@ class CNComponentManager(TmcComponentManager):
             "obsState": self.update_device_obs_state,
             "assignedResources": self.update_device_assigned_resource,
         }
-        self.__start_event_processing_threads()
 
-    def __start_event_processing_threads(self) -> None:
+    def _start_event_processing_threads(self) -> None:
         """Start all the event processing threads."""
         for attribute in self.event_queues:
             thread = threading.Thread(
