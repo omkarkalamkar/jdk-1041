@@ -8,6 +8,7 @@ package.
 """
 import json
 import time
+from queue import Queue
 
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
@@ -118,6 +119,24 @@ class CNComponentManagerLow(CNComponentManager):
         )
         self.event_dict: dict = {}
         self.error_count: int = 0
+        self.event_queues.update(
+            {
+                "longRunningCommandResult": Queue(),
+                "isSubsystemAvailable": Queue(),
+                "isSubarrayAvailable": Queue(),
+            }
+        )
+
+        self.event_processing_methods.update(
+            {
+                "longRunningCommandResult": (
+                    self.update_long_running_command_result
+                ),
+                "isSubsystemAvailable": self.update_telescope_availability,
+                "isSubarrayAvailable": self.update_telescope_availability,
+            }
+        )
+        self.__start_event_processing_threads()
 
     def check_if_mccs_mln_is_responsive(self):
         """Checks whether mccs mln is responsive"""

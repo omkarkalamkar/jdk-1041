@@ -7,9 +7,11 @@ import json
 import re
 import threading
 import time
-from typing import Callable, List, Optional, Tuple
+from queue import Empty, Queue
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
+import tango
 from ska_control_model import HealthState
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.base import TaskCallbackType
@@ -190,6 +192,70 @@ class CNComponentManager(TmcComponentManager):
             "AssignResources",
             "ReleaseResources",
         ]
+        self.event_queues: Dict[str, Queue] = {
+            "obsState": Queue(),
+            "assignedResources": Queue(),
+        }
+
+        self.event_processing_methods: Dict[
+            str, Callable[[str, Any], None]
+        ] = {
+            "obsState": self.update_device_obs_state,
+            "assignedResources": self.update_device_assigned_resource,
+        }
+        self.__start_event_processing_threads()
+
+    def __start_event_processing_threads(self) -> None:
+        """Start all the event processing threads."""
+        for attribute in self.event_queues:
+            thread = threading.Thread(
+                target=self.process_event, args=[attribute], name=attribute
+            )
+            thread.start()
+
+    def process_event(self, attribute_name: str) -> None:
+        """Process the given attribute's event using the data from the
+        event_queues and invoke corresponding process method.
+
+        :param attribute_name: Name of the attribute for which event is to be
+            processed
+        :type attribute_name: str
+
+        :returns: None
+        """
+        while True:
+            try:
+                event_data = self.event_queues[attribute_name].get(
+                    block=True, timeout=0.1
+                )
+                if not self.check_event_error(
+                    event_data, f"{attribute_name}_Callback"
+                ):
+                    self.event_processing_methods[attribute_name](
+                        event_data.device.dev_name(),
+                        event_data.attr_value.value,
+                    )
+            except Empty:
+                # If an empty exception is raised by the Queue, we can
+                # safely ignore it.
+                pass
+            except Exception as exception:
+                self.logger.error(exception)
+
+    def check_event_error(self, event: tango.EventData, callback: str):
+        """Method for checking event error."""
+        if event.err:
+            error = event.errors[0]
+            self.logger.error(
+                "Error occurred on %s for device: %s - %s, %s",
+                callback,
+                event.device.dev_name(),
+                error.reason,
+                error.desc,
+            )
+            self.update_event_failure(event.device.dev_name())
+            return True
+        return False
 
     def stop_event_receiver(self):
         """Stops the event receiver."""

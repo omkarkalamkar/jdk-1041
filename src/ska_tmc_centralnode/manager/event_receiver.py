@@ -1,5 +1,4 @@
 """Event Receiver class for central node"""
-import threading
 from typing import Optional
 
 import tango
@@ -49,14 +48,6 @@ class CentralNodeEventReceiver(EventReceiver):
         self.device_subscribed = {}
         self.dish_name = ""
         self.input_parameter = self._component_manager.input_parameter
-
-    def pass_to_thread(self, function_name, *args):
-        """
-        Args:
-            function_name (_type_): _description_
-        """
-        t1 = threading.Thread(target=function_name, args=args)
-        t1.start()
 
     def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
@@ -189,34 +180,15 @@ class CentralNodeEventReceiver(EventReceiver):
                 self._logger.info("Subscribing device %s", dev_info.dev_name)
                 self.device_subscribed[dev_info.dev_name] = True
 
-    def handle_assigned_resource_event(self, evt: tango.EventData) -> None:
+    def handle_assigned_resource_event(self, event: tango.EventData) -> None:
         """Handles assigned Resources event
         Args:
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        if evt.err:
-            error = evt.errors[0]
-            self._logger.error(
-                "Received error from device %s: %s %s",
-                evt.device.dev_name(),
-                error.reason,
-                error.desc,
-            )
-            self._component_manager.update_event_failure(evt.device.dev_name())
-            return
+        self._component_manager.event_queues["assignedResources"].put(event)
 
-        new_value = evt.attr_value.value
-        # self.pass_to_thread(
-        #     self._component_manager.update_device_assigned_resource,
-        #     evt.device.dev_name(),
-        #     new_value,
-        # )
-        self._component_manager.update_device_assigned_resource(
-            evt.device.dev_name(), new_value
-        )
-
-    def handle_dish_mode_event(self, event_data: tango.EventData) -> None:
+    def handle_dish_mode_event(self, event: tango.EventData) -> None:
         """Method to handle and update the latest value of dishMode
         attribute.
 
@@ -224,28 +196,9 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        if event_data.err:
-            errors = event_data.errors
-            for error in errors:
-                error_msg = f"{error.reason},{error.desc}"
-                self._logger.error(error_msg)
-            self._component_manager.update_event_failure(
-                event_data.device.dev_name()
-            )
-            return
-        new_value = event_data.attr_value.value
-        # self.pass_to_thread(
-        #     self._component_manager.update_device_dish_mode,
-        #     event_data.device.dev_name(),
-        #     new_value,
-        # )
-        self._component_manager.update_device_dish_mode(
-            event_data.device.dev_name(), new_value
-        )
+        self._component_manager.event_queues["dishMode"].put(event)
 
-        self._logger.info(f"DishMode value updated to {new_value}")
-
-    def handle_lrcr_event(self, event_data: tango.EventData) -> None:
+    def handle_lrcr_event(self, event: tango.EventData) -> None:
         """Method to handle and update the latest value of
         longRunningCommandResult attribute.
 
@@ -253,29 +206,8 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        if event_data.err:
-            errors = event_data.errors
-            for error in errors:
-                error_msg = f"{error.reason},{error.desc}"
-                self._logger.error(error_msg)
-            self._component_manager.update_event_failure(
-                event_data.device.dev_name()
-            )
-            return
-        self._logger.debug(
-            "Received CHANGE_EVENT for device %s. "
-            "New value of longRunningCommandResult: %s",
-            event_data.device.dev_name(),
-            event_data.attr_value.value,
-        )
-        new_value = event_data.attr_value.value
-        # self.pass_to_thread(
-        #     self._component_manager.update_long_running_command_result,
-        #     event_data.device.dev_name(),
-        #     new_value,
-        # )
-        self._component_manager.update_long_running_command_result(
-            event_data.device.dev_name(), new_value
+        self._component_manager.event_queues["longRunningCommandResult"].put(
+            event
         )
 
     def handle_load_dish_cfg_result_callback(
@@ -310,11 +242,7 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.attr_value.value,
             )
             new_value = event_data.attr_value.value
-            # self.pass_to_thread(
-            #     self._component_manager.update_load_dish_cfg_results,
-            #     event_data.device.dev_name(),
-            #     new_value,
-            # )
+
             self._component_manager.update_load_dish_cfg_results(
                 event_data.device.dev_name(), new_value
             )
@@ -326,17 +254,12 @@ class CentralNodeEventReceiver(EventReceiver):
                 event_data.argout,
             )
             new_value = event_data.argout
-            # self.pass_to_thread(
-            #     self._component_manager.update_load_dish_cfg_results,
-            #     event_data.device.dev_name(),
-            #     new_value,
-            #     True,
-            # )
+
             self._component_manager.update_load_dish_cfg_results(
                 event_data.device.dev_name(), new_value, is_async_result=True
             )
 
-    def handle_dln_kvalue_validation_result(self, event_data: tango.EventData):
+    def handle_dln_kvalue_validation_result(self, event: tango.EventData):
         """Method to handle kValueValidationResult from dish
         leaf node.
         Args:
@@ -344,48 +267,24 @@ class CentralNodeEventReceiver(EventReceiver):
             change in event.
         """
         self._logger.info(
-            "Event for kValueValidationResult attribute: %s", event_data
+            "Event for kValueValidationResult attribute: %s", event
         )
-        if not event_data.errors:
-            new_value = event_data.attr_value.value
-            cm = self._component_manager
-            cm.dish_kvalue_validation_aggregator.aggregate(
-                event_data.device.dev_name(), new_value
-            )
-        else:
-            errors = event_data.errors
-            for error in errors:
-                error_msg = f"{error.reason},{error.desc}"
-                self._logger.error(error_msg)
-            self._component_manager.update_event_failure(
-                event_data.device.dev_name()
-            )
 
-    def handle_dish_vcc_k_value_validation_event(
-        self, event_data: tango.EventData
-    ):
+        self._component_manager.event_queues["kValueValidationResult"].put(
+            event
+        )
+
+    def handle_dish_vcc_k_value_validation_event(self, event: tango.EventData):
         """Handle DishVccMapValidationResult change event."""
         self._logger.info(
-            "Event for DishVccMapValidationResult attribute: %s", event_data
+            "Event for DishVccMapValidationResult attribute: %s", event
         )
-        if event_data.err:
-            errors = event_data.errors
-            for error in errors:
-                error_msg = f"{error.reason},{error.desc}"
-                self._logger.error(error_msg)
-                self._logger.error(str(event_data))
-            self._component_manager.update_event_failure(
-                event_data.device.dev_name()
-            )
-            return
-        if self._component_manager.enable_dish_vcc_init:
-            new_value = event_data.attr_value.value
-            self._component_manager.handle_dish_vcc_validation_result(
-                event_data.device.dev_name(), new_value
-            )
+        self._component_manager.event_queues["DishVccMapValidationResult"].put(
+            event
+        )
 
     def handle_masterln_availability_event(
-        self, event_data: tango.EventData
+        self, event: tango.EventData
     ) -> None:
         """Method to handle and update the latest value of isSubsystemAvailable
         attribute.
@@ -394,28 +293,10 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        if event_data.err:
-            errors = event_data.errors
-            for error in errors:
-                error_msg = f"{error.reason},{error.desc}"
-                self._logger.error(error_msg)
-                self._logger.error(str(event_data))
-            self._component_manager.update_event_failure(
-                event_data.device.dev_name()
-            )
-            return
-        new_value = event_data.attr_value.value
-        # self.pass_to_thread(
-        #     self._component_manager.update_telescope_availability,
-        #     event_data.device.dev_name(),
-        #     new_value,
-        # )
-        self._component_manager.update_telescope_availability(
-            event_data.device.dev_name(), new_value
-        )
+        self._component_manager.event_queues["isSubsystemAvailable"].put(event)
 
     def handle_subarray_availability_event(
-        self, event_data: tango.EventData
+        self, event: tango.EventData
     ) -> None:
         """Method to handle and update the latest value of isSubarrayAvailable
         attribute.
@@ -425,24 +306,6 @@ class CentralNodeEventReceiver(EventReceiver):
             change in event.
         """
         self._logger.info(
-            "Event for Subarray Availability event data: %s", event_data
+            "Event for Subarray Availability event data: %s", event
         )
-        if event_data.err:
-            errors = event_data.errors
-            for error in errors:
-                error_msg = f"{error.reason},{error.desc}"
-                self._logger.error(error_msg)
-                self._logger.error(str(event_data))
-            self._component_manager.update_event_failure(
-                event_data.device.dev_name()
-            )
-            return
-        new_value = event_data.attr_value.value
-        # self.pass_to_thread(
-        #     self._component_manager.update_telescope_availability,
-        #     event_data.device.dev_name(),
-        #     new_value,
-        # )
-        self._component_manager.update_telescope_availability(
-            event_data.device.dev_name(), new_value
-        )
+        self._component_manager.event_queues["isSubarrayAvailable"].put(event)

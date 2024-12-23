@@ -9,6 +9,7 @@ package.
 import json
 import threading
 import time
+from queue import Queue
 from typing import Callable
 
 from ska_control_model import HealthState
@@ -153,6 +154,30 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
+        self.event_queues.update(
+            {
+                "longRunningCommandResult": Queue(),
+                "dishMode": Queue(),
+                "kValueValidationResult": Queue(),
+                "DishVccMapValidationResult": Queue(),
+                "isSubsystemAvailable": Queue(),
+                "isSubarrayAvailable": Queue(),
+            }
+        )
+        handle_dish_vcc = self.handle_dish_vcc_validation_result
+        self.event_processing_methods.update(
+            {
+                "longRunningCommandResult": (
+                    self.update_long_running_command_result
+                ),
+                "dishMode": self.update_device_dish_mode,
+                "kValueValidationResult": self.update_k_value_validation,
+                "DishVccMapValidationResult": handle_dish_vcc,
+                "isSubsystemAvailable": self.update_telescope_availability,
+                "isSubarrayAvailable": self.update_telescope_availability,
+            }
+        )
+        self.__start_event_processing_threads()
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""
@@ -586,6 +611,15 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.debug(f"Checking mid devices for {command_name}")
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
+
+    def update_k_value_validation(self, dev_name: str, kvalue):
+        """_summary_
+
+        Args:
+            dev_name (str): _description_
+            kvalue (_type_): _description_
+        """
+        self.dish_kvalue_validation_aggregator.aggregate(dev_name, kvalue)
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availablity status"""
