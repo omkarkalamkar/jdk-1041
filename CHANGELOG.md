@@ -4,7 +4,11 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
-
+[0.17.1]
+********
+* Fix telescope ON issue.
+* Change event receiver with queue mechanism.
+  
 [0.17.0]
 ********
 * Resolved SKB-665 and SKB-525 with updated ska-tmc-common with command callback tracker updates
