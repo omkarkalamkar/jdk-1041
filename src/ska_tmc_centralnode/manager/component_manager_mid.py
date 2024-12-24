@@ -612,12 +612,12 @@ class CNComponentManagerMid(CNComponentManager):
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
 
-    def update_k_value_validation(self, dev_name: str, kvalue):
-        """_summary_
+    def update_k_value_validation(self, dev_name: str, kvalue: ResultCode):
+        """Updates the k value validation value and starts the aggregation.
 
         Args:
-            dev_name (str): _description_
-            kvalue (_type_): _description_
+            dev_name (str): device name
+            kvalue (ResultCode): k value validation result
         """
         self.dish_kvalue_validation_aggregator.aggregate(dev_name, kvalue)
 
