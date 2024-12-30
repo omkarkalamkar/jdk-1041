@@ -162,6 +162,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "DishVccMapValidationResult": Queue(),
                 "isSubsystemAvailable": Queue(),
                 "isSubarrayAvailable": Queue(),
+                "state": Queue(),
             }
         )
         handle_dish_vcc = self.handle_dish_vcc_validation_result
@@ -175,6 +176,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "DishVccMapValidationResult": handle_dish_vcc,
                 "isSubsystemAvailable": self.update_telescope_availability,
                 "isSubarrayAvailable": self.update_telescope_availability,
+                "state": self.update_device_state,
             }
         )
         self._start_event_processing_threads()

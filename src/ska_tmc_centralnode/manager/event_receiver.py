@@ -180,6 +180,18 @@ class CentralNodeEventReceiver(EventReceiver):
                 self._logger.info("Subscribing device %s", dev_info.dev_name)
                 self.device_subscribed[dev_info.dev_name] = True
 
+    def handle_health_state_event(self, event: tango.EventData) -> None:
+        """
+        It handles the health state events of different devices
+        """
+        self._component_manager.event_queues["healthState"].put(event)
+
+    def handle_state_event(self, event: tango.EventData) -> None:
+        """
+        It handles the state events of different devices
+        """
+        self._component_manager.event_queues["state"].put(event)
+
     def handle_assigned_resource_event(self, event: tango.EventData) -> None:
         """Handles assigned Resources event
         Args:

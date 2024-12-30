@@ -124,6 +124,7 @@ class CNComponentManagerLow(CNComponentManager):
                 "longRunningCommandResult": Queue(),
                 "isSubsystemAvailable": Queue(),
                 "isSubarrayAvailable": Queue(),
+                "state": Queue(),
             }
         )
 
@@ -134,6 +135,7 @@ class CNComponentManagerLow(CNComponentManager):
                 ),
                 "isSubsystemAvailable": self.update_telescope_availability,
                 "isSubarrayAvailable": self.update_telescope_availability,
+                "state": self.update_device_state,
             }
         )
         self._start_event_processing_threads()

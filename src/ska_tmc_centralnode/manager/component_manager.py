@@ -195,6 +195,7 @@ class CNComponentManager(TmcComponentManager):
         self.event_queues: Dict[str, Queue] = {
             "obsState": Queue(),
             "assignedResources": Queue(),
+            "healthState": Queue(),
         }
 
         self.event_processing_methods: Dict[
@@ -202,6 +203,7 @@ class CNComponentManager(TmcComponentManager):
         ] = {
             "obsState": self.update_device_obs_state,
             "assignedResources": self.update_device_assigned_resource,
+            "healthState": self.update_device_health_state,
         }
 
     def _start_event_processing_threads(self) -> None:
