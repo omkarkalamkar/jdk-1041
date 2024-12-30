@@ -226,7 +226,9 @@ class CNComponentManager(TmcComponentManager):
         """
         while True:
             try:
-                self.logger.info("%s", list(self.event_queues[attribute_name]))
+                self.logger.info(
+                    "%s", list(self.event_queues[attribute_name].queue)
+                )
                 event_data = self.event_queues[attribute_name].get(
                     block=True, timeout=0.1
                 )
