@@ -209,7 +209,6 @@ class CNComponentManager(TmcComponentManager):
     def _start_event_processing_threads(self) -> None:
         """Start all the event processing threads."""
         for attribute in self.event_queues:
-            self.logger.info("queue data %s", self.event_queues)
             thread = threading.Thread(
                 target=self.process_event, args=[attribute], name=attribute
             )
@@ -227,6 +226,7 @@ class CNComponentManager(TmcComponentManager):
         """
         while True:
             try:
+                self.logger.info("%s", list(self.event_queues[attribute_name]))
                 event_data = self.event_queues[attribute_name].get(
                     block=True, timeout=0.1
                 )
