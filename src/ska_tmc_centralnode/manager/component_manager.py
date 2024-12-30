@@ -232,10 +232,16 @@ class CNComponentManager(TmcComponentManager):
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
                 ):
-                    self.event_processing_methods[attribute_name](
-                        event_data.device.dev_name(),
-                        event_data.attr_value.value,
-                    )
+                    if attribute_name == "loadDishConfigResultAsync":
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.argout,
+                        )
+                    else:
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.attr_value.value,
+                        )
             except Empty:
                 # If an empty exception is raised by the Queue, we can
                 # safely ignore it.

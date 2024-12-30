@@ -163,6 +163,8 @@ class CNComponentManagerMid(CNComponentManager):
                 "isSubsystemAvailable": Queue(),
                 "isSubarrayAvailable": Queue(),
                 "state": Queue(),
+                "loadDishConfigResult": Queue(),
+                "loadDishConfigResultAsync": Queue(),
             }
         )
         handle_dish_vcc = self.handle_dish_vcc_validation_result
@@ -177,6 +179,10 @@ class CNComponentManagerMid(CNComponentManager):
                 "isSubsystemAvailable": self.update_telescope_availability,
                 "isSubarrayAvailable": self.update_telescope_availability,
                 "state": self.update_device_state,
+                "loadDishConfigResult": self.update_load_dish_cfg_results,
+                "loadDishConfigResultAsync": (
+                    self.update_load_dish_cfg_results_async
+                ),
             }
         )
         self._start_event_processing_threads()
@@ -790,6 +796,23 @@ class CNComponentManagerMid(CNComponentManager):
             task_callback=task_callback,
         )
         return task_status, response
+
+    def update_load_dish_cfg_results_async(
+        self, dev_name: str, value: tuple
+    ) -> None:
+        """This method is used to update the result returned
+        from Csp Master Leaf Node
+        and returned from Dish Leaf Nodes for SetKValue command.
+        :param dev_name: name of the device who's event has been
+        captured in this method
+        :type dev_name: str
+        :param value: longRunningCommandResult attribute event.
+        :type value: tuple
+
+        """
+        self.update_load_dish_cfg_results(
+            dev_name, value, is_async_result=True
+        )
 
     def update_load_dish_cfg_results(
         self, dev_name: str, value: tuple, is_async_result: bool = False
