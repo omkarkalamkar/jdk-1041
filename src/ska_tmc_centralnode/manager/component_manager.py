@@ -229,7 +229,9 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.info(
                     "%s", list(self.event_queues[attribute_name].queue)
                 )
-                event_data = self.event_queues[attribute_name].get(block=False)
+                event_data = self.event_queues[attribute_name].get(
+                    block=True, timeout=0.1
+                )
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
                 ):
@@ -249,7 +251,6 @@ class CNComponentManager(TmcComponentManager):
                 pass
             except Exception as exception:
                 self.logger.error(exception)
-            time.sleep(0.1)
 
     def check_event_error(self, event: tango.EventData, callback: str):
         """Method for checking event error."""
