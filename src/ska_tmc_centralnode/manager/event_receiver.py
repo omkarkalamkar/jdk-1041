@@ -5,7 +5,6 @@ import tango
 from ska_tmc_common.device_info import DeviceInfo
 from ska_tmc_common.event_receiver import EventReceiver
 
-from ska_tmc_centralnode.manager.dish_handler import DishHandler
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
     LOW_CSP_MLN_DEVICE,
@@ -49,7 +48,6 @@ class CentralNodeEventReceiver(EventReceiver):
         self.device_subscribed = {}
         self.dish_name = ""
         self.input_parameter = self._component_manager.input_parameter
-        self.dishhandler = DishHandler(component_manager, logger)
 
     def submit_task(self, device_info: DeviceInfo) -> None:
         """Submits the task to the executor for the given device info object.
@@ -115,7 +113,7 @@ class CentralNodeEventReceiver(EventReceiver):
                     proxy.subscribe_event(
                         "dishMode",
                         tango.EventType.CHANGE_EVENT,
-                        self.dishhandler.handle_dish_mode_event,
+                        self.handle_dish_mode_event,
                         stateless=True,
                     )
                     proxy.subscribe_event(
