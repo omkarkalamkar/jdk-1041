@@ -64,6 +64,9 @@ from ska_tmc_centralnode.model.input import (
 )
 
 
+# TODO: will be removed in clean up
+# pylint:disable=too-many-lines
+# pylint:disable=too-many-instance-attributes
 class CNComponentManager(TmcComponentManager):
     """
     A component manager for The Central Node component.
@@ -192,7 +195,7 @@ class CNComponentManager(TmcComponentManager):
             "AssignResources",
             "ReleaseResources",
         ]
-        self.event_queues: Dict[str, Queue] = {
+        self.__event_queues: Dict[str, Queue] = {
             "obsState": Queue(),
             "assignedResources": Queue(),
             "healthState": Queue(),
@@ -205,6 +208,13 @@ class CNComponentManager(TmcComponentManager):
             "assignedResources": self.update_device_assigned_resource,
             "healthState": self.update_device_health_state,
         }
+        self.queue_lock = threading.RLock()
+
+    @property
+    def event_queues(self):
+        """event queue property"""
+        with self.queue_lock:
+            return self.__event_queues
 
     def _start_event_processing_threads(self) -> None:
         """Start all the event processing threads."""
@@ -226,9 +236,6 @@ class CNComponentManager(TmcComponentManager):
         """
         while True:
             try:
-                self.logger.info(
-                    "%s", list(self.event_queues[attribute_name].queue)
-                )
                 event_data = self.event_queues[attribute_name].get(
                     block=True, timeout=0.1
                 )
