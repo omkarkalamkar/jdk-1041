@@ -1,5 +1,4 @@
 """Event Receiver class for central node"""
-import threading
 from typing import Optional
 
 import tango
@@ -111,12 +110,12 @@ class CentralNodeEventReceiver(EventReceiver):
                     and dev_info.dev_name
                     in self.input_parameter.dish_leaf_node_dev_names
                 ):
-                    thread = threading.Thread(
-                        target=self.subscribe_dish_mode,
-                        args=[proxy],
-                        daemon=True,
+                    proxy.subscribe_event(
+                        "dishMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_dish_mode_event,
+                        stateless=True,
                     )
-                    thread.start()
                     proxy.subscribe_event(
                         "kValueValidationResult",
                         tango.EventType.CHANGE_EVENT,
@@ -176,26 +175,10 @@ class CentralNodeEventReceiver(EventReceiver):
                 self._logger.error(
                     "Event not working for device %s: %s", proxy.dev_name, e
                 )
-                thread.join()
             else:
                 # Add device info in subscribed device
                 self._logger.info("Subscribing device %s", dev_info.dev_name)
                 self.device_subscribed[dev_info.dev_name] = True
-
-    def subscribe_dish_mode(self, proxy):
-        """_summary_
-
-        Args:
-            proxy (_type_): _description_
-        """
-        proxy.subscribe_event(
-            "dishMode",
-            tango.EventType.CHANGE_EVENT,
-            self.handle_dish_mode_event,
-            stateless=True,
-        )
-        while not self._stop:
-            pass
 
     def handle_health_state_event(self, event: tango.EventData) -> None:
         """
