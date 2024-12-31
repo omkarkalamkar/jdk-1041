@@ -210,6 +210,7 @@ class CentralNodeEventReceiver(EventReceiver):
         """
         self._logger.info("dish mode event %s", event)
         self._component_manager.event_queues["dishMode"].put(event)
+        self._logger.info("callback exit")
 
     def handle_lrcr_event(self, event: tango.EventData) -> None:
         """Method to handle and update the latest value of

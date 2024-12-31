@@ -448,7 +448,7 @@ class CNComponentManagerMid(CNComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug(f"State event for {device_name}: {state}")
 
             if "sdp" in device_name:
@@ -496,7 +496,7 @@ class CNComponentManagerMid(CNComponentManager):
         :param dishMode: Dish mode of the device
         :type dishMode: DishMode
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug(
                 f"Received dishMode event from {dev_name}: "
                 + f"{DishMode(dish_mode).name}"
@@ -544,7 +544,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
@@ -558,7 +558,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )
