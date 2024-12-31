@@ -345,6 +345,10 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
                         device.dev_name
                     ] = False
                 else:
+                    self.logger.debug(
+                        "Subarrays Availability in aggregation is: %s",
+                        self._component_manager.subarray_availability,
+                    )
                     telescope_availability["tmc_subarrays"][
                         device.dev_name
                     ] = self._component_manager.subarray_availability[
