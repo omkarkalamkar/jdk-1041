@@ -237,7 +237,7 @@ class CNComponentManager(TmcComponentManager):
         while True:
             try:
                 event_data = self.event_queues[attribute_name].get(
-                    block=True, timeout=0.01
+                    block=True, timeout=0.1
                 )
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
