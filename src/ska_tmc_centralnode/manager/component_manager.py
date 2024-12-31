@@ -236,9 +236,7 @@ class CNComponentManager(TmcComponentManager):
         """
         while True:
             try:
-                event_data = self.event_queues[attribute_name].get(
-                    block=True, timeout=0.1
-                )
+                event_data = self.event_queues[attribute_name].get()
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
                 ):
@@ -252,6 +250,7 @@ class CNComponentManager(TmcComponentManager):
                             event_data.device.dev_name(),
                             event_data.attr_value.value,
                         )
+                self.event_queues[attribute_name].task_done()
             except Empty:
                 # If an empty exception is raised by the Queue, we can
                 # safely ignore it.
