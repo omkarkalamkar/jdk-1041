@@ -208,6 +208,7 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
+        self._logger.info("dish mode event %s", event)
         self._component_manager.event_queues["dishMode"].put(event)
 
     def handle_lrcr_event(self, event: tango.EventData) -> None:
