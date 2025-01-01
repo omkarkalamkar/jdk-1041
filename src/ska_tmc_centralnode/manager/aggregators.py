@@ -332,23 +332,20 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
-        self.logger.debug(
-            "Telescope Availability is: %s", telescope_availability
-        )
         for device in self._component_manager.checked_devices:
             if "tm_subarray_node" in device.dev_name:
                 self.logger.debug(
                     "Subarray unresponsive flag: %s", device.unresponsive
+                )
+                self.logger.debug(
+                    "Subarrays Availability in aggregation is: %s",
+                    self._component_manager.subarray_availability,
                 )
                 if device.unresponsive:
                     telescope_availability["tmc_subarrays"][
                         device.dev_name
                     ] = False
                 else:
-                    self.logger.debug(
-                        "Subarrays Availability in aggregation is: %s",
-                        self._component_manager.subarray_availability,
-                    )
                     telescope_availability["tmc_subarrays"][
                         device.dev_name
                     ] = self._component_manager.subarray_availability[
@@ -372,6 +369,9 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
 
             self._component_manager.set_telescope_availability = (
                 telescope_availability
+            )
+            self.logger.debug(
+                "Telescope Availability is: %s", telescope_availability
             )
 
 
