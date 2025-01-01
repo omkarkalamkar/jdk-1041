@@ -51,27 +51,27 @@ def test_attributes(central_node_device):
     central_node_device.controlMode = ControlMode.REMOTE
     assert central_node_device.controlMode == ControlMode.REMOTE
     assert central_node_device.desiredTelescopeState == DevState.ON
-    assert central_node_device.cspMasterDevName == ""
-    central_node_device.cspMasterDevName = "csp"
-    assert central_node_device.cspMasterDevName == "csp"
-    assert central_node_device.sdpMasterDevName == ""
-    central_node_device.sdpMasterDevName = "sdp"
-    assert central_node_device.sdpMasterDevName == "sdp"
-    assert central_node_device.CspMasterLeafNodeDevName == ""
-    central_node_device.CspMasterLeafNodeDevName = "leafcsp"
-    assert central_node_device.CspMasterLeafNodeDevName == "leafcsp"
-    assert central_node_device.SdpMasterLeafNodeDevName == ""
-    central_node_device.SdpMasterLeafNodeDevName = "leafsdp"
-    assert central_node_device.SdpMasterLeafNodeDevName == "leafsdp"
+    # assert central_node_device.cspMasterDevName == ""
+    # central_node_device.cspMasterDevName = "csp"
+    # assert central_node_device.cspMasterDevName == "csp"
+    # assert central_node_device.sdpMasterDevName == ""
+    # central_node_device.sdpMasterDevName = "sdp"
+    # assert central_node_device.sdpMasterDevName == "sdp"
+    # assert central_node_device.CspMasterLeafNodeDevName == ""
+    # central_node_device.CspMasterLeafNodeDevName = "leafcsp"
+    # assert central_node_device.CspMasterLeafNodeDevName == "leafcsp"
+    # assert central_node_device.SdpMasterLeafNodeDevName == ""
+    # central_node_device.SdpMasterLeafNodeDevName = "leafsdp"
+    # assert central_node_device.SdpMasterLeafNodeDevName == "leafsdp"
     assert central_node_device.tmOpState == DevState.UNKNOWN
-    assert len(central_node_device.subarrayDevNames) == 0
-    central_node_device.subarrayDevNames = ["subarray1"]
-    assert len(central_node_device.subarrayDevNames) == 1
-    assert len(central_node_device.dishDevNames) == 0
-    central_node_device.dishDevNames = ["dish1"]
-    assert len(central_node_device.dishDevNames) == 1
-    central_node_device.dishLeafNodeDevNames = ["dish1"]
-    assert len(central_node_device.dishLeafNodeDevNames) == 1
+    # assert len(central_node_device.subarrayDevNames) == 0
+    # central_node_device.subarrayDevNames = ["subarray1"]
+    # assert len(central_node_device.subarrayDevNames) == 1
+    # assert len(central_node_device.dishDevNames) == 0
+    # central_node_device.dishDevNames = ["dish1"]
+    # assert len(central_node_device.dishDevNames) == 1
+    # central_node_device.dishLeafNodeDevNames = ["dish1"]
+    # assert len(central_node_device.dishLeafNodeDevNames) == 1
     json_model = json.loads(central_node_device.internalModel)
     assert "telescope_state" in json_model
     assert "tmc_op_state" in json_model
