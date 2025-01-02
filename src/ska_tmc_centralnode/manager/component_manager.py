@@ -64,9 +64,6 @@ from ska_tmc_centralnode.model.input import (
 )
 
 
-# TODO: will be removed in clean up
-# pylint:disable=too-many-lines
-# pylint:disable=too-many-instance-attributes
 class CNComponentManager(TmcComponentManager):
     """
     A component manager for The Central Node component.
@@ -208,12 +205,11 @@ class CNComponentManager(TmcComponentManager):
             "assignedResources": self.update_device_assigned_resource,
             "healthState": self.update_device_health_state,
         }
-        self.queue_lock = threading.RLock()
 
     @property
     def event_queues(self):
         """event queue property"""
-        with self.queue_lock:
+        with self.rlock:
             return self.__event_queues
 
     def _start_event_processing_threads(self) -> None:
@@ -227,11 +223,9 @@ class CNComponentManager(TmcComponentManager):
     def process_event(self, attribute_name: str) -> None:
         """Process the given attribute's event using the data from the
         event_queues and invoke corresponding process method.
-
         :param attribute_name: Name of the attribute for which event is to be
             processed
         :type attribute_name: str
-
         :returns: None
         """
         while True:
@@ -541,13 +535,6 @@ class CNComponentManager(TmcComponentManager):
             dev_info = self.component.get_device(device_name)
             # Update the device status with the exception details
             dev_info.update_unresponsive(True, str(exception))
-            if "ska_mid/tm_subarray_node" in device_name:
-                self.logger.info(
-                    "Device %s unresponsive flag: %s",
-                    device_name,
-                    dev_info.unresponsive,
-                )
-            # Aggregate the telescope availability data
             self._telescope_availability_aggregator.aggregate()
 
     def update_event_failure(self, device_name: str) -> None:
@@ -1118,9 +1105,6 @@ class CNComponentManager(TmcComponentManager):
         )
         for subarray in subarrays_list:
             telescope_availability = self.get_telescope_availability()
-            self.logger.debug(
-                "Telescope availability is: %s", telescope_availability
-            )
             if (
                 subarray.endswith(subarray_suffics)
                 and telescope_availability["tmc_subarrays"][subarray] is False

@@ -597,15 +597,14 @@ class CNComponentManagerMid(CNComponentManager):
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
+            self.logger.info(
+                f"Command '{command_name}' is not supported "
+                + f"in {self.op_state_model.op_state} for CentralNode"
+            )
             raise CommandNotAllowed(
                 "Command is not allowed in current state :"
                 + f"{str(self.op_state_model.op_state)}",
             )
-        self.logger.info(
-            f"Command '{command_name}' is not supported "
-            + f"in {self.op_state_model.op_state} for CentralNode"
-        )
-
         return True
 
     def check_device_responsiveness(self, command_name) -> None:
