@@ -1118,6 +1118,9 @@ class CNComponentManager(TmcComponentManager):
         )
         for subarray in subarrays_list:
             telescope_availability = self.get_telescope_availability()
+            self.logger.debug(
+                "Telescope availability is: %s", telescope_availability
+            )
             if (
                 subarray.endswith(subarray_suffics)
                 and telescope_availability["tmc_subarrays"][subarray] is False

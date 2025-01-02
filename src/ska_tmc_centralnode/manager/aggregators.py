@@ -344,9 +344,6 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
                     ] = self._component_manager.subarray_availability[
                         device.dev_name
                     ]
-                self.logger.debug(
-                    "Telescope Availability is: %s", telescope_availability
-                )
             elif "tm_leaf_node/csp_master" in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["csp_master_leaf_node"] = False
