@@ -106,12 +106,6 @@ class AbstractCentralNode(TMCBaseDevice):
         dtype="DevState",
     )
 
-    # subarrayDevNames = attribute(
-    #     dtype=("DevString",),
-    #     access=AttrWriteType.READ_WRITE,
-    #     max_dim_x=16,
-    # )
-
     telescopeAvailability = attribute(
         dtype="str",
         access=AttrWriteType.READ,
@@ -227,15 +221,6 @@ class AbstractCentralNode(TMCBaseDevice):
     def read_tmOpState(self):
         """Return the tmOpState attribute."""
         return self.component_manager.component.tmc_op_state
-
-    # def read_subarrayDevNames(self):
-    #     """Return the subarrayDevNames attribute."""
-    #     return self.component_manager.input_parameter.subarray_dev_names
-
-    # def write_subarrayDevNames(self, value):
-    #     """Set the subarrayDevNames attribute."""
-    #     self.component_manager.input_parameter.subarray_dev_names = value
-    #     self.component_manager.update_input_parameter()
 
     def read_telescopeAvailability(self):
         "Returns telescope availability"
