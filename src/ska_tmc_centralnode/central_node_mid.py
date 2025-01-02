@@ -203,10 +203,6 @@ class CentralNodeMid(AbstractCentralNode):
         """Read attribute value of vlbi"""
         return self.component_manager.component.vlbi
 
-    # def read_dishDevNames(self):
-    #     """Return the dishdevnames attribute."""
-    #     return self.component_manager.input_parameter.dish_dev_names
-
     def read_isDishVccConfigSet(self):
         """Return the isDishVccConfigSet attribute."""
         return self.component_manager.is_dish_vcc_config_set
