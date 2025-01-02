@@ -85,26 +85,6 @@ class AbstractCentralNode(TMCBaseDevice):
     # Attributes
     # ----------
 
-    # cspMasterDevName = attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    # )
-
-    # sdpMasterDevName = attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    # )
-
-    # CspMasterLeafNodeDevName = attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    # )
-
-    # SdpMasterLeafNodeDevName = attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    # )
-
     telescopeHealthState = attribute(
         dtype=HealthState,
         doc="Health state of Telescope",
@@ -219,41 +199,6 @@ class AbstractCentralNode(TMCBaseDevice):
     # ------------------
     # Attributes methods
     # ------------------
-    # def read_cspMasterDevName(self):
-    #     """Return the cspMasterDevName attribute."""
-    #     return self.component_manager.input_parameter.csp_master_dev_name
-
-    # def write_cspMasterDevName(self, value):
-    #     """Set the cspMasterDevName attribute."""
-    #     self.component_manager.input_parameter.csp_master_dev_name = value
-    #     self.component_manager.update_input_parameter()
-
-    # def read_sdpMasterDevName(self):
-    #     """Return the sdpMasterDevName attribute."""
-    #     return self.component_manager.input_parameter.sdp_master_dev_name
-
-    # def write_sdpMasterDevName(self, value):
-    #     """Set the sdpMasterDevName attribute."""
-    #     self.component_manager.input_parameter.sdp_master_dev_name = value
-    #     self.component_manager.update_input_parameter()
-
-    # def read_CspMasterLeafNodeDevName(self):
-    #     """Return the cspMasterLeafNodeDevName attribute."""
-    #     return self.component_manager.input_parameter.csp_mln_dev_name
-
-    # def write_CspMasterLeafNodeDevName(self, value):
-    #     """Set the cspMasterLeafNodeDevName attribute."""
-    #     self.component_manager.input_parameter.csp_mln_dev_name = value
-    #     self.component_manager.update_input_parameter()
-
-    # def read_SdpMasterLeafNodeDevName(self):
-    #     """Return the sdpMasterLeafNodeDevName attribute."""
-    #     return self.component_manager.input_parameter.sdp_mln_dev_name
-
-    # def write_SdpMasterLeafNodeDevName(self, value):
-    #     """Set the sdpMasterLeafNodeDevName attribute."""
-    #     self.component_manager.input_parameter.sdp_mln_dev_name = value
-    #     self.component_manager.update_input_parameter()
 
     def read_telescopeHealthState(self):
         """Read value of telescopeHealthState"""

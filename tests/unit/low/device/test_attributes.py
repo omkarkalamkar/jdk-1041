@@ -45,21 +45,7 @@ def test_attributes(central_node_device):
     central_node_device.controlMode = ControlMode.REMOTE
     assert central_node_device.controlMode == ControlMode.REMOTE
     assert central_node_device.desiredTelescopeState == DevState.ON
-    assert central_node_device.mccsMasterLeafNodeName == ""
-    central_node_device.mccsMasterLeafNodeName = (
-        "ska_low/tm_leaf_node/mccs_master"
-    )
-    assert (
-        central_node_device.mccsMasterLeafNodeName
-        == "ska_low/tm_leaf_node/mccs_master"
-    )
-    assert central_node_device.mccsMasterName == ""
-    central_node_device.mccsMasterName = "low-mccs/control/control"
-    assert central_node_device.mccsMasterName == "low-mccs/control/control"
     assert central_node_device.tmOpstate == DevState.UNKNOWN
-    # assert len(central_node_device.subarrayDevNames) == 0
-    # central_node_device.subarrayDevNames = ["subarray1"]
-    # assert len(central_node_device.subarrayDevNames) == 1
     json_model = json.loads(central_node_device.internalModel)
     assert "telescope_state" in json_model
     assert "tmc_op_state" in json_model
