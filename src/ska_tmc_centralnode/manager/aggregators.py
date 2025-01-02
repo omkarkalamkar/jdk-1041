@@ -334,13 +334,6 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
         )
         for device in self._component_manager.checked_devices:
             if "tm_subarray_node" in device.dev_name:
-                self.logger.debug(
-                    "Subarray unresponsive flag: %s", device.unresponsive
-                )
-                self.logger.debug(
-                    "Subarrays Availability in aggregation is: %s",
-                    self._component_manager.subarray_availability,
-                )
                 if device.unresponsive:
                     telescope_availability["tmc_subarrays"][
                         device.dev_name
@@ -351,6 +344,9 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
                     ] = self._component_manager.subarray_availability[
                         device.dev_name
                     ]
+                self.logger.debug(
+                    "Telescope Availability is: %s", telescope_availability
+                )
             elif "tm_leaf_node/csp_master" in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["csp_master_leaf_node"] = False
@@ -369,9 +365,6 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
 
             self._component_manager.set_telescope_availability = (
                 telescope_availability
-            )
-            self.logger.debug(
-                "Telescope Availability is: %s", telescope_availability
             )
 
 

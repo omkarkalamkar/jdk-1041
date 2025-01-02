@@ -541,6 +541,12 @@ class CNComponentManager(TmcComponentManager):
             dev_info = self.component.get_device(device_name)
             # Update the device status with the exception details
             dev_info.update_unresponsive(True, str(exception))
+            if "ska_mid/tm_subarray_node" in device_name:
+                self.logger.info(
+                    "Device %s unresponsive flag: %s",
+                    device_name,
+                    dev_info.unresponsive,
+                )
             # Aggregate the telescope availability data
             self._telescope_availability_aggregator.aggregate()
 

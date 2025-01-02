@@ -300,6 +300,6 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._logger.info("entered callback %s", event)
+        self._logger.info("entered Subarray Availability callback %s", event)
         self._component_manager.event_queues["isSubarrayAvailable"].put(event)
         self._logger.info("exited callback")
