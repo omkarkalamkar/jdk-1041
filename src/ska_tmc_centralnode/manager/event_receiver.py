@@ -180,6 +180,18 @@ class CentralNodeEventReceiver(EventReceiver):
                 self._logger.info("Subscribing device %s", dev_info.dev_name)
                 self.device_subscribed[dev_info.dev_name] = True
 
+    def handle_health_state_event(self, event: tango.EventData) -> None:
+        """
+        It handles the health state events of different devices
+        """
+        self._component_manager.event_queues["healthState"].put(event)
+
+    def handle_state_event(self, event: tango.EventData) -> None:
+        """
+        It handles the state events of different devices
+        """
+        self._component_manager.event_queues["state"].put(event)
+
     def handle_assigned_resource_event(self, event: tango.EventData) -> None:
         """Handles assigned Resources event
         Args:
@@ -211,7 +223,7 @@ class CentralNodeEventReceiver(EventReceiver):
         )
 
     def handle_load_dish_cfg_result_callback(
-        self, event_data: tango.EventData
+        self, event: tango.EventData
     ) -> None:
         """This callback is called in following two scenario
         1. LongrunningResult returned from CspMasterLeafNode for
@@ -221,43 +233,15 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._logger.debug(
-            "Received event for load dish cfg result from device %s",
-            event_data.device.dev_name(),
-        )
-        if event_data.err:
-            errors = event_data.errors
-            for error in errors:
-                error_msg = f"{error.reason},{error.desc}"
-                self._logger.error(error_msg)
-            self._component_manager.update_event_failure(
-                event_data.device.dev_name()
+        if getattr(event, "attr_value", False):
+            self._component_manager.event_queues["loadDishConfigResult"].put(
+                event
             )
-            return
-        if getattr(event_data, "attr_value", False):
-            self._logger.debug(
-                "In long running command result callback for "
-                "csp master leaf node  "
-                "with event_data.attr_value.value is: %s",
-                event_data.attr_value.value,
-            )
-            new_value = event_data.attr_value.value
-
-            self._component_manager.update_load_dish_cfg_results(
-                event_data.device.dev_name(), new_value
-            )
-
         # In case of Async callback get command result from argout
-        elif getattr(event_data, "argout", False):
-            self._logger.debug(
-                "Received Async callback event with event_data.argout is: %s",
-                event_data.argout,
-            )
-            new_value = event_data.argout
-
-            self._component_manager.update_load_dish_cfg_results(
-                event_data.device.dev_name(), new_value, is_async_result=True
-            )
+        elif getattr(event, "argout", False):
+            self._component_manager.event_queues[
+                "loadDishConfigResultAsync"
+            ].put(event)
 
     def handle_dln_kvalue_validation_result(self, event: tango.EventData):
         """Method to handle kValueValidationResult from dish
@@ -266,19 +250,12 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._logger.info(
-            "Event for kValueValidationResult attribute: %s", event
-        )
-
         self._component_manager.event_queues["kValueValidationResult"].put(
             event
         )
 
     def handle_dish_vcc_k_value_validation_event(self, event: tango.EventData):
         """Handle DishVccMapValidationResult change event."""
-        self._logger.info(
-            "Event for DishVccMapValidationResult attribute: %s", event
-        )
         self._component_manager.event_queues["DishVccMapValidationResult"].put(
             event
         )
@@ -305,7 +282,4 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._logger.info(
-            "Event for Subarray Availability event data: %s", event
-        )
         self._component_manager.event_queues["isSubarrayAvailable"].put(event)

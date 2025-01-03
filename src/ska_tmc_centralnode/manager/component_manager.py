@@ -192,9 +192,10 @@ class CNComponentManager(TmcComponentManager):
             "AssignResources",
             "ReleaseResources",
         ]
-        self.event_queues: Dict[str, Queue] = {
+        self.__event_queues: Dict[str, Queue] = {
             "obsState": Queue(),
             "assignedResources": Queue(),
+            "healthState": Queue(),
         }
 
         self.event_processing_methods: Dict[
@@ -202,7 +203,14 @@ class CNComponentManager(TmcComponentManager):
         ] = {
             "obsState": self.update_device_obs_state,
             "assignedResources": self.update_device_assigned_resource,
+            "healthState": self.update_device_health_state,
         }
+
+    @property
+    def event_queues(self):
+        """event queue property"""
+        with self.rlock:
+            return self.__event_queues
 
     def _start_event_processing_threads(self) -> None:
         """Start all the event processing threads."""
@@ -215,25 +223,28 @@ class CNComponentManager(TmcComponentManager):
     def process_event(self, attribute_name: str) -> None:
         """Process the given attribute's event using the data from the
         event_queues and invoke corresponding process method.
-
         :param attribute_name: Name of the attribute for which event is to be
             processed
         :type attribute_name: str
-
         :returns: None
         """
         while True:
             try:
-                event_data = self.event_queues[attribute_name].get(
-                    block=True, timeout=0.1
-                )
+                event_data = self.event_queues[attribute_name].get()
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
                 ):
-                    self.event_processing_methods[attribute_name](
-                        event_data.device.dev_name(),
-                        event_data.attr_value.value,
-                    )
+                    if attribute_name == "loadDishConfigResultAsync":
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.argout,
+                        )
+                    else:
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.attr_value.value,
+                        )
+                self.event_queues[attribute_name].task_done()
             except Empty:
                 # If an empty exception is raised by the Queue, we can
                 # safely ignore it.
@@ -524,7 +535,6 @@ class CNComponentManager(TmcComponentManager):
             dev_info = self.component.get_device(device_name)
             # Update the device status with the exception details
             dev_info.update_unresponsive(True, str(exception))
-            # Aggregate the telescope availability data
             self._telescope_availability_aggregator.aggregate()
 
     def update_event_failure(self, device_name: str) -> None:

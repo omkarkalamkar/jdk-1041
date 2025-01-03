@@ -115,38 +115,6 @@ class CentralNodeMid(AbstractCentralNode):
         doc="VLBI Attribute",
     )
 
-    cspMasterDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    sdpMasterDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    CspMasterLeafNodeDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    SdpMasterLeafNodeDevName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
-    dishDevNames = attribute(
-        dtype=("DevString",),
-        access=AttrWriteType.READ_WRITE,
-        max_dim_x=100,
-    )
-
-    dishLeafNodeDevNames = attribute(
-        dtype=("DevString",),
-        access=AttrWriteType.READ_WRITE,
-        max_dim_x=100,
-    )
-
     isDishVccConfigSet = attribute(
         dtype=bool,
         access=AttrWriteType.READ,
@@ -235,10 +203,6 @@ class CentralNodeMid(AbstractCentralNode):
         """Read attribute value of vlbi"""
         return self.component_manager.component.vlbi
 
-    def read_dishDevNames(self):
-        """Return the dishdevnames attribute."""
-        return self.component_manager.input_parameter.dish_dev_names
-
     def read_isDishVccConfigSet(self):
         """Return the isDishVccConfigSet attribute."""
         return self.component_manager.is_dish_vcc_config_set
@@ -246,20 +210,6 @@ class CentralNodeMid(AbstractCentralNode):
     def read_DishVccValidationStatus(self):
         """Return the DishVccValidationStatus"""
         return self.component_manager.dish_vcc_validation_status
-
-    def write_dishDevNames(self, value):
-        """Set the dishdevnames attribute."""
-        self.component_manager.input_parameter.dish_dev_names = value
-        self.component_manager.update_input_parameter()
-
-    def read_dishLeafNodeDevNames(self):
-        """Return the dishLeafNodedevnames attribute."""
-        return self.component_manager.input_parameter.dish_leaf_node_dev_names
-
-    def write_dishLeafNodeDevNames(self, value):
-        """Set the dishLeafNodedevnames attribute."""
-        self.component_manager.input_parameter.dish_leaf_node_dev_names = value
-        self.component_manager.update_input_parameter()
 
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(

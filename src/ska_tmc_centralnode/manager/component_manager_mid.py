@@ -162,6 +162,9 @@ class CNComponentManagerMid(CNComponentManager):
                 "DishVccMapValidationResult": Queue(),
                 "isSubsystemAvailable": Queue(),
                 "isSubarrayAvailable": Queue(),
+                "state": Queue(),
+                "loadDishConfigResult": Queue(),
+                "loadDishConfigResultAsync": Queue(),
             }
         )
         handle_dish_vcc = self.handle_dish_vcc_validation_result
@@ -175,6 +178,11 @@ class CNComponentManagerMid(CNComponentManager):
                 "DishVccMapValidationResult": handle_dish_vcc,
                 "isSubsystemAvailable": self.update_telescope_availability,
                 "isSubarrayAvailable": self.update_telescope_availability,
+                "state": self.update_device_state,
+                "loadDishConfigResult": self.update_load_dish_cfg_results,
+                "loadDishConfigResultAsync": (
+                    self.update_load_dish_cfg_results_async
+                ),
             }
         )
         self._start_event_processing_threads()
@@ -440,7 +448,7 @@ class CNComponentManagerMid(CNComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug(f"State event for {device_name}: {state}")
 
             if "sdp" in device_name:
@@ -488,7 +496,7 @@ class CNComponentManagerMid(CNComponentManager):
         :param dishMode: Dish mode of the device
         :type dishMode: DishMode
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug(
                 f"Received dishMode event from {dev_name}: "
                 + f"{DishMode(dish_mode).name}"
@@ -536,7 +544,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
@@ -550,7 +558,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             self.component.telescope_health_state = (
                 self._health_state_aggregator.aggregate()
             )
@@ -589,15 +597,14 @@ class CNComponentManagerMid(CNComponentManager):
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
+            self.logger.info(
+                f"Command '{command_name}' is not supported "
+                + f"in {self.op_state_model.op_state} for CentralNode"
+            )
             raise CommandNotAllowed(
                 "Command is not allowed in current state :"
                 + f"{str(self.op_state_model.op_state)}",
             )
-        self.logger.info(
-            f"Command '{command_name}' is not supported "
-            + f"in {self.op_state_model.op_state} for CentralNode"
-        )
-
         return True
 
     def check_device_responsiveness(self, command_name) -> None:
@@ -788,6 +795,23 @@ class CNComponentManagerMid(CNComponentManager):
             task_callback=task_callback,
         )
         return task_status, response
+
+    def update_load_dish_cfg_results_async(
+        self, dev_name: str, value: tuple
+    ) -> None:
+        """This method is used to update the result returned
+        from Csp Master Leaf Node
+        and returned from Dish Leaf Nodes for SetKValue command.
+        :param dev_name: name of the device who's event has been
+        captured in this method
+        :type dev_name: str
+        :param value: longRunningCommandResult attribute event.
+        :type value: tuple
+
+        """
+        self.update_load_dish_cfg_results(
+            dev_name, value, is_async_result=True
+        )
 
     def update_load_dish_cfg_results(
         self, dev_name: str, value: tuple, is_async_result: bool = False

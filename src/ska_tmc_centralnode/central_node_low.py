@@ -5,8 +5,7 @@ of state and mode attributes defined by the SKA Control Model.
 """
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.op_state_model import TMCOpStateModel
-from tango import AttrWriteType
-from tango.server import attribute, device_property, run
+from tango.server import device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -35,15 +34,6 @@ class CentralNodeLow(AbstractCentralNode):
     # Attributes
     # ----------
 
-    mccsMasterLeafNodeName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-    mccsMasterName = attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-    )
-
     # ---------------
     # General methods
     # ---------------
@@ -68,24 +58,6 @@ class CentralNodeLow(AbstractCentralNode):
     # ------------------
     # Attributes methods
     # ------------------
-
-    def read_mccsMasterLeafNodeName(self):
-        """Return the mccsMasterLeafNodeName attribute."""
-        return self.component_manager.input_parameter.mccs_mln_dev_name
-
-    def write_mccsMasterLeafNodeName(self, value):
-        """Set the mccsMasterLeafNodeName attribute."""
-        self.component_manager.input_parameter.mccs_mln_dev_name = value
-        self.component_manager.update_input_parameter()
-
-    def read_mccsMasterName(self):
-        """Return the mccsMasterName attribute."""
-        return self.component_manager.input_parameter.mccs_master_dev_name
-
-    def write_mccsMasterName(self, value):
-        """Set the mccsMasterName attribute."""
-        self.component_manager.input_parameter.mccs_master_dev_name = value
-        self.component_manager.update_input_parameter()
 
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
