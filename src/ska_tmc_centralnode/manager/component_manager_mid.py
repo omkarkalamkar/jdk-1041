@@ -60,7 +60,8 @@ class CNComponentManagerMid(CNComponentManager):
         communication_state_callback=None,
         component_state_callback=None,
         proxy_timeout=500,
-        sleep_time=1,
+        event_subscription_check_period=1,
+        liveliness_check_period=1,
         skuid_service="",
         command_timeout=30,
         dish_vcc_uri=None,
@@ -89,7 +90,10 @@ class CNComponentManagerMid(CNComponentManager):
             monitoring purpose.
         :param proxy_timeout: Optional. Time period to wait for
             event and responses.
-        :param sleep_time: Optional. Sleep time between reties.
+        :param event_subscription_check_period: (int) Time in seconds for sleep
+            intervals in the event subsription thread.
+        :param liveliness_check_period: (int) Period for the liveliness probe
+            to monitor each device in a loop
         :param timeout : Optional. Time period to wait for
             intialization of adapter.
         """
@@ -109,7 +113,8 @@ class CNComponentManagerMid(CNComponentManager):
             _telescope_availability_callback,
             component_state_callback,
             proxy_timeout,
-            sleep_time,
+            event_subscription_check_period,
+            liveliness_check_period,
             skuid_service,
             command_timeout,
             *args,

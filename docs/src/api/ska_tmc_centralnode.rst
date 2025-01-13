@@ -87,11 +87,11 @@ Properties in Central Node
 +-------------------------------+-----------------+--------------------------------------------------------------------------------+
 | SkuidService                  | DevString       | Default value for SKUID service                                                |
 +-------------------------------+-----------------+--------------------------------------------------------------------------------+
-| ProxyTimeout                  | DevUShort       | ??                                                                             |
-+-------------------------------+-----------------+--------------------------------------------------------------------------------+
 | CommandTimeOut                | DevFloat        | Timeout for the command execution                                              |
 +-------------------------------+-----------------+--------------------------------------------------------------------------------+
-| SleepTime                     | DevFloat        | Timeout for the command execution                                              |
+| LivelinessCheckPeriod         | DevFloat        | Period for the liveliness probe to monitor each device in a loop               |
++-------------------------------+-----------------+--------------------------------------------------------------------------------+
+| EventSubscriptionCheckPeriod  | DevFloat        | Period for the event subscriber to check the device subscriptions in a loop    |
 +-------------------------------+-----------------+--------------------------------------------------------------------------------+
 
 

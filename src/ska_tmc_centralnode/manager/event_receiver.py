@@ -3,7 +3,7 @@ from typing import Optional
 
 import tango
 from ska_tmc_common.device_info import DeviceInfo
-from ska_tmc_common.event_receiver import EventReceiver
+from ska_tmc_common.v1.event_receiver import EventReceiver
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.constants import (
@@ -31,14 +31,14 @@ class CentralNodeEventReceiver(EventReceiver):
         logger=None,
         max_workers=1,
         proxy_timeout=500,
-        sleep_time=1,
+        event_subscription_check_period=1,
     ):
         super().__init__(
             component_manager=component_manager,
             logger=logger,
             max_workers=max_workers,
             proxy_timeout=proxy_timeout,
-            sleep_time=sleep_time,
+            event_subscription_check_period=event_subscription_check_period,
         )
         self._component_manager = component_manager
         self.attribute_dictionary = {

@@ -33,6 +33,9 @@ server:
         - name: "MCCSMasterFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.low.MCCSMasterFQDN}}"
+        - name: "CommandTimeOut"
+          values:
+          - "{{.Values.deviceServers.centralnode.low.CommandTimeOut}}"
         - name: "AssignResourcesInterface"
           values:
           - "{{.Values.deviceServers.centralnode.low.AssignResourcesInterface}}"
@@ -63,9 +66,12 @@ server:
         - name: "LoggingLevelDefault"
           values:
             - "5"
-        - name: "SleepTime"
+        - name: "LivelinessCheckPeriod"
           values:
-            - "1"
+            - "{{.Values.deviceServers.centralnode.LivelinessCheckPeriod}}"
+        - name: "EventSubscriptionCheckPeriod"
+          values:
+            - "{{.Values.deviceServers.centralnode.EventSubscriptionCheckPeriod}}"
 depends_on:
   - device: sys/database/2
 image:

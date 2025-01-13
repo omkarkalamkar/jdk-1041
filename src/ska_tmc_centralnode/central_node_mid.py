@@ -235,9 +235,10 @@ class CentralNodeMid(AbstractCentralNode):
             _dishvccvalidation_callback=self.dishvccvalidation_callback,
             communication_state_callback=None,
             component_state_callback=None,
-            command_timeout=self.CommandTimeout,
+            command_timeout=self.CommandTimeOut,
             proxy_timeout=self.ProxyTimeout,
-            sleep_time=self.SleepTime,
+            event_subscription_check_period=self.EventSubscriptionCheckPeriod,
+            liveliness_check_period=self.LivelinessCheckPeriod,
             skuid_service=self.SkuidService,
             dish_vcc_uri=self.DishVccUri if self.DishVccUri else "",
             dish_vcc_file_path=self.DishVccFilePath

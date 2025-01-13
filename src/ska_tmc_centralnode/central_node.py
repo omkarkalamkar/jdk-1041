@@ -9,7 +9,7 @@ import json
 import tango
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
-from ska_tmc_common.tmc_base_device import TMCBaseDevice
+from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
 from tango import ApiUtil, AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property
 
@@ -70,7 +70,7 @@ class AbstractCentralNode(TMCBaseDevice):
     )
     ProxyTimeout = device_property(dtype="DevUShort", default_value=500)
 
-    CommandTimeout = device_property(dtype="DevUShort", default_value=30)
+    CommandTimeOut = device_property(dtype="DevUShort", default_value=30)
     # ----------
     # Attributes
     # ----------
