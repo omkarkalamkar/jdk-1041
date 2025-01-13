@@ -45,12 +45,18 @@ server:
         - name: "EnableDishVccInit"
           values:
           - "{{.Values.deviceServers.centralnode.mid.EnableDishVccInit}}"
+        - name: "DishKvalueAggregationAllowedPercent"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishKvalueAggregationAllowedPercent}}"
+        - name: "DishVccInitTimeout"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.DishVccInitTimeout}}"
         - name: "DishIDs"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
           - "{{ . }}"
           {{- end }}
-        - name: "DishMasterFQDN"
+        - name: "DishMasterFQDNs"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
           - "{{ . | lower }}/{{ $DishMasterIdentifier }}"

@@ -86,6 +86,7 @@ class CentralNodeLow(AbstractCentralNode):
             proxy_timeout=self.ProxyTimeout,
             _input_parameter=InputParameterLow(None),
             sleep_time=self.SleepTime,
+            skuid_service=self.SkuidService,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.mccs_mln_dev_name = (

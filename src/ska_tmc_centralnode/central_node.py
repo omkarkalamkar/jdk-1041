@@ -27,19 +27,9 @@ class AbstractCentralNode(TMCBaseDevice):
     # -----------------
     # Device Properties
     # -----------------
-    CentralAlarmHandler = device_property(
-        dtype="str",
-        doc="Device name of CentralAlarmHandler ",
-    )
-
-    TMCAlarmHandler = device_property(
-        dtype="str",
-        doc="Device name of TMCAlarmHandler ",
-    )
-
     TMCSubarrayNodes = device_property(
         dtype=("str",),
-        doc="List of TM Mid Subarray Node devices",
+        doc="List of TMC Mid Subarray Node devices",
         default_value=tuple(),
     )
 
@@ -63,13 +53,13 @@ class AbstractCentralNode(TMCBaseDevice):
 
     CspSubarrayLeafNodes = device_property(
         dtype=("str",),
-        doc="List of Low CspSubarrayLeafNode devices",
+        doc="List of CspSubarrayLeafNode devices",
         default_value=tuple(),
     )
 
     SdpSubarrayLeafNodes = device_property(
         dtype=("str",),
-        doc="List of Low SdpSubarrayLeafNode devices",
+        doc="List of SdpSubarrayLeafNode devices",
         default_value=tuple(),
     )
 

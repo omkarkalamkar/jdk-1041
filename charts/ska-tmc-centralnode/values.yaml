@@ -82,6 +82,8 @@ deviceServers:
       KValueValidRange:
         min: 1
         max: 1177
+      DishKvalueAggregationAllowedPercent: 100.0
+      DishVccInitTimeout: 120
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"
