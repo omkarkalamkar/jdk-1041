@@ -19,7 +19,7 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from ska_tango_base.faults import StateModelError
 from ska_telmodel.schema import validate
-from ska_tmc_common import (  # TmcComponentManager,
+from ska_tmc_common import (
     AdapterFactory,
     Aggregator,
     CommandNotAllowed,
