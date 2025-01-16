@@ -118,7 +118,7 @@ Additional Properties in Central Node Mid
 | DishVccUri                          | DevString      | Default URI for Dish VCC Configuration.                                        |
 +-------------------------------------+----------------+--------------------------------------------------------------------------------+
 | DishVccFilePath                     | DevString      | Default file path for Dish VCC Configuration                                   |
-+-------------------------------------+--------------- +--------------------------------------------------------------------------------+
++-------------------------------------+----------------+--------------------------------------------------------------------------------+
 | EnableDishVccInit                   | DevBoolean     | This property is set to true to load the dish vcc during initialization.       |
 +-------------------------------------+----------------+--------------------------------------------------------------------------------+
 | DishKvalueAggregationAllowedPercent | DevDouble      | Percentage of the dishes to be considered for DishKValue aggregation.          |
