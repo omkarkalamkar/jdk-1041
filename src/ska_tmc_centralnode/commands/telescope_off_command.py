@@ -250,7 +250,7 @@ class TelescopeOff(TelescopeOnOff):
                     adapter.dev_name
                 ).obs_state
                 if obs_state != ObsState.EMPTY:
-                    self.logger(
+                    self.logger.info(
                         "Subarray %s is still not empty, current state: %s",
                         adapter.dev_name,
                         obs_state,
