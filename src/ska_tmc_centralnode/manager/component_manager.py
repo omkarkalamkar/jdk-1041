@@ -32,8 +32,8 @@ from ska_tmc_common import (
     ResourceNotPresentError,
     SubArrayDeviceInfo,
     SubarrayNotPresentError,
-    TmcComponentManager,
 )
+from ska_tmc_common.v1.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
@@ -95,7 +95,8 @@ class CNComponentManager(TmcComponentManager):
         _telescope_availability_callback=None,
         component_state_callback=None,
         proxy_timeout=500,
-        sleep_time=1,
+        event_subscription_check_period=1,
+        liveliness_check_period=1,
         skuid_service=(
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
@@ -134,7 +135,8 @@ class CNComponentManager(TmcComponentManager):
             communication_state_callback=communication_state_callback,
             component_state_callback=component_state_callback,
             proxy_timeout=proxy_timeout,
-            sleep_time=sleep_time,
+            event_subscription_check_period=event_subscription_check_period,
+            liveliness_check_period=liveliness_check_period,
             *args,
             **kwargs,
         )
@@ -144,14 +146,14 @@ class CNComponentManager(TmcComponentManager):
         self.command_timeout = command_timeout
         self.assignresources_interface = assignresources_interface
         self.releaseresources_interface = releaseresources_interface
-
         self.event_receiver = _event_receiver
         if self.event_receiver:
+            evt_sub_check_period = self.event_subscription_check_period
             self.event_receiver_object = CentralNodeEventReceiver(
                 self,
                 logger=self.logger,
                 proxy_timeout=self.proxy_timeout,
-                sleep_time=self.sleep_time,
+                event_subscription_check_period=evt_sub_check_period,
             )
             self.start_event_receiver()
 
@@ -722,7 +724,6 @@ class CNComponentManager(TmcComponentManager):
         """
         if self._op_state_aggregator is None:
             self._op_state_aggregator = TMCOpStateAggregator(self, self.logger)
-
         with self.lock:
             self.component.tmc_op_state = self._op_state_aggregator.aggregate()
 

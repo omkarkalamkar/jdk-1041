@@ -6,7 +6,7 @@ from typing import List, Optional
 import tango
 from ska_control_model import HealthState
 from ska_tmc_common.device_info import DeviceInfo
-from ska_tmc_common.tmc_component_manager import TmcComponent
+from ska_tmc_common.v1.tmc_component_manager import TmcComponent
 from tango import DevState
 
 from ska_tmc_centralnode.model.enum import ModesAvailability

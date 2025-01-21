@@ -42,7 +42,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.17.2
+    tag: 0.17.3
     pullPolicy: IfNotPresent
 
 resources:
@@ -66,6 +66,8 @@ deviceServers:
     instances: ["01"]
     subarray_count: 1
     SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
+    LivelinessCheckPeriod: 1.0
+    EventSubscriptionCheckPeriod: 1.0
     mid:
       file: "data/centralnode_mid.yaml"
       CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
@@ -82,6 +84,9 @@ deviceServers:
       KValueValidRange:
         min: 1
         max: 1177
+      DishKvalueAggregationAllowedPercent: 100.0
+      DishVccInitTimeout: 120
+      CommandTimeOut: 30
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"
@@ -92,6 +97,7 @@ deviceServers:
       MCCSMasterFQDN: "low-mccs/control/control"
       AssignResourcesInterface: "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
       ReleaseResourcesInterface: "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
+      CommandTimeOut: 30
 
 
 nodeSelector: {}

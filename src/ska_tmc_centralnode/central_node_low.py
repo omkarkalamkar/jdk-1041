@@ -80,12 +80,14 @@ class CentralNodeLow(AbstractCentralNode):
             ),
             communication_state_callback=None,
             component_state_callback=None,
-            command_timeout=self.CommandTimeout,
+            command_timeout=self.CommandTimeOut,
             assignresources_interface=self.AssignResourcesInterface,
             releaseresources_interface=self.ReleaseResourcesInterface,
             proxy_timeout=self.ProxyTimeout,
             _input_parameter=InputParameterLow(None),
-            sleep_time=self.SleepTime,
+            event_subscription_check_period=self.EventSubscriptionCheckPeriod,
+            liveliness_check_period=self.LivelinessCheckPeriod,
+            skuid_service=self.SkuidService,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.mccs_mln_dev_name = (

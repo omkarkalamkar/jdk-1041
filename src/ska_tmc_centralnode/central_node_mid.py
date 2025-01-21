@@ -43,7 +43,7 @@ class CentralNodeMid(AbstractCentralNode):
         doc="Device name prefix for Dish Leaf Node",
     )
 
-    DishMasterFQDN = device_property(
+    DishMasterFQDNs = device_property(
         dtype=("str",),
         doc="List of Dish Master devices",
         default_value=tuple(),
@@ -56,13 +56,13 @@ class CentralNodeMid(AbstractCentralNode):
     )
 
     DishVccUri = device_property(
-        dtype=("str",),
+        dtype="str",
         doc="Default DishVccConfig URI",
         default_value="",
     )
 
     DishVccFilePath = device_property(
-        dtype=("str",),
+        dtype="str",
         doc="Default DishVccConfig File Path",
         default_value="",
     )
@@ -235,12 +235,13 @@ class CentralNodeMid(AbstractCentralNode):
             _dishvccvalidation_callback=self.dishvccvalidation_callback,
             communication_state_callback=None,
             component_state_callback=None,
-            command_timeout=self.CommandTimeout,
+            command_timeout=self.CommandTimeOut,
             proxy_timeout=self.ProxyTimeout,
-            sleep_time=self.SleepTime,
+            event_subscription_check_period=self.EventSubscriptionCheckPeriod,
+            liveliness_check_period=self.LivelinessCheckPeriod,
             skuid_service=self.SkuidService,
-            dish_vcc_uri=self.DishVccUri[0] if self.DishVccUri else "",
-            dish_vcc_file_path=self.DishVccFilePath[0]
+            dish_vcc_uri=self.DishVccUri if self.DishVccUri else "",
+            dish_vcc_file_path=self.DishVccFilePath
             if self.DishVccFilePath
             else "",
             dish_vcc_init_timeout=self.DishVccInitTimeout,
@@ -266,7 +267,7 @@ class CentralNodeMid(AbstractCentralNode):
                 self.DishLeafNodePrefix + dish_id
             )
 
-        for dish_name in self.DishMasterFQDN:
+        for dish_name in self.DishMasterFQDNs:
             if ("ska" in dish_name) or ("SKA" in dish_name):
                 cm.input_parameter.dish_dev_names.append(dish_name)
 

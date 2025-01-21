@@ -10,7 +10,7 @@
 """Release information for Python Package"""
 
 name = """ska-tmc-centralnode"""
-version = "0.17.2"
+version = "0.17.3"
 version_info = version.split(".")
 description = """Central Node is a coordinator of the complete M&C system."""
 author = "Team Sahyadri, Team Himalaya"
