@@ -258,7 +258,10 @@ class TelescopeOff(TelescopeOnOff):
                     all_empty = False
             elapsed_time = time.time() - start_time
             if elapsed_time > self._timeout_subarrays:
-                return (ResultCode.FAILED,)
+                return (
+                    ResultCode.FAILED,
+                    "Timeout in waiting for subarrays devices to be empty",
+                )
             time.sleep(self._step_sleep)
 
         unavailable_devices = []
