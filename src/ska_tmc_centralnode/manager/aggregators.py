@@ -324,16 +324,16 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
     """Class for TelescopeAvailablity for Mid Telescope"""
 
     def __init__(self, cm, logger) -> None:
-        super().__init__(cm, logger)
         self.logger = logger
+        super().__init__(cm, logger)
 
     def aggregate(self):
         """Aggregate method for Mid Telescope Availability"""
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
-        self._logger.info(f"telescope_availability:{telescope_availability}")
-        self._logger.info(f"Devices:{self._component_manager.checked_devices}")
+        self._logger.debug(f"telescope_availability:{telescope_availability}")
+        # self._logger.info(f"{self._component_manager.checked_devices}")
         for device in self._component_manager.checked_devices:
             if "tm_subarray_node" in device.dev_name:
                 if device.unresponsive:
