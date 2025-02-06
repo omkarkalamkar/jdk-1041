@@ -52,7 +52,7 @@ def devices_to_load():
         {
             "class": HelperDishLNDevice,
             "devices": [
-                {"name": "ska_mid/tm_leaf_node/d0001"},
+                {"name": "mid-tmc/leaf-node-dish/SKA001"},
             ],
         },
         {

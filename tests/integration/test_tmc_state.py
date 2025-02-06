@@ -26,12 +26,12 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
     csp_master_ln = dev_factory.get_device("mid-tmc/leaf-node-csp/0")
     sdp_master_ln = dev_factory.get_device("mid-tmc/leaf-node-sdp/0")
     csp_subarray_ln = dev_factory.get_device(
-        "ska_mid/tm_leaf_node/csp_subarray01"
+        "mid-tmc/subarray-leaf-node-csp/01"
     )
     sdp_subarray_ln = dev_factory.get_device(
-        "ska_mid/tm_leaf_node/sdp_subarray01"
+        "mid-tmc/subarray-leaf-node-sdp/01"
     )
-    dish_ln = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
+    dish_ln = dev_factory.get_device("mid-tmc/leaf-node-dish/SKA001")
 
     csp_master_ln.SetDirectState(DevState.FAULT)
     sdp_master_ln.SetDirectState(DevState.ON)
