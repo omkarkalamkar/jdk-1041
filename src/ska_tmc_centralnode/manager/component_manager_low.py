@@ -22,7 +22,6 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorLow,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
-from ska_tmc_centralnode.utils.constants import MCCS_MLN_SUFIX
 
 
 class CNComponentManagerLow(CNComponentManager):
@@ -412,12 +411,12 @@ class CNComponentManagerLow(CNComponentManager):
             self.logger.debug(f"device_name is: {device_name}")
             self.logger.debug(f"event_value is: {event_value}")
 
-            if "tm_subarray_node" in device_name:
+            if self.input_parameter.subarray_dev_names in device_name:
                 self.subarray_availability[device_name] = event_value
-            elif "tm_leaf_node/csp_master" in device_name:
+            elif self.input_parameter.csp_mln_dev_name in device_name:
                 self.csp_mln_availability = event_value
-            elif "tm_leaf_node/sdp_master" in device_name:
+            elif self.input_parameter.sdp_mln_dev_name in device_name:
                 self.sdp_mln_availability = event_value
-            elif MCCS_MLN_SUFIX in device_name:
+            elif self.input_parameter.mccs_mln_dev_name in device_name:
                 self.mccs_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()

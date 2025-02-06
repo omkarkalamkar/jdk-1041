@@ -25,7 +25,7 @@ def release_resources(
     """Release Resources method for command invocation."""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         subarray_fqdn = MID_SUBARRAY_DEVICE
         subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     else:
@@ -54,7 +54,7 @@ def release_resources(
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, subarray_fqdn, True)
 
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         result, unique_id_assign = central_node.AssignResources(
             assign_input_str
         )

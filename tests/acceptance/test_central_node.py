@@ -66,7 +66,7 @@ def call_command(central_node, command_name, json_factory):
         dev_factory = DevFactory()
         if command_name == "AssignResources":
             logger.info("central_node:%s", central_node.dev_name())
-            if "ska_mid" in central_node.dev_name():
+            if "mid-tmc" in central_node.dev_name():
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
                 green_mode = str(subarray_proxy.get_green_mode())
                 assert "Futures" in green_mode
@@ -95,7 +95,7 @@ def call_command(central_node, command_name, json_factory):
                 )
         elif command_name == "ReleaseResources":
             logger.info("central_node: %s", central_node.dev_name())
-            if "ska_mid" in central_node.dev_name():
+            if "mid-tmc" in central_node.dev_name():
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
                 subarray_proxy.SetisSubarrayAvailable(True)
                 check_subarray_availability(
@@ -213,7 +213,7 @@ def check_command(central_node, command_name, change_event_callbacks):
     if command_name == "AssignResources":
         # teardown subarray, setting ObsState = Empty
         dev_factory = DevFactory()
-        if "ska_mid" in central_node.dev_name():
+        if "mid-tmc" in central_node.dev_name():
             tmc_subarray = dev_factory.get_device(MID_SUBARRAY_DEVICE)
         else:
             tmc_subarray = dev_factory.get_device(LOW_SUBARRAY_DEVICE)

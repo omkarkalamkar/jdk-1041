@@ -32,7 +32,7 @@ server:
           - "{{.Values.deviceServers.centralnode.mid.SdpMasterFQDN}}"
         - name: "DishLeafNodePrefix"
           values:
-          - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
+          - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}{{.Values.deviceServers.centralnode.mid.DishType}}"
         - name: "DishMasterIdentifier"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishMasterIdentifier}}"
@@ -70,7 +70,7 @@ server:
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "mid-tmc/subarray/{{ . }}"
+          - "mid-tmc/subarray/{{ printf "%02s" . }}"
           {{- end }}
         - name: "CspSubarrayLeafNodes"
           values:

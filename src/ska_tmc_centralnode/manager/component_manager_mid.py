@@ -636,11 +636,11 @@ class CNComponentManagerMid(CNComponentManager):
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availablity status"""
         with self.rlock:
-            if "tm_subarray_node" in device_name:
+            if self.input_parameter.subarray_dev_names in device_name:
                 self.subarray_availability[device_name] = event_value
-            elif "tm_leaf_node/csp_master" in device_name:
+            elif self.input_parameter.csp_mln_dev_name in device_name:
                 self.csp_mln_availability = event_value
-            elif "tm_leaf_node/sdp_master" in device_name:
+            elif self.input_parameter.sdp_mln_dev_name in device_name:
                 self.sdp_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()
 
@@ -715,7 +715,7 @@ class CNComponentManagerMid(CNComponentManager):
             result,
         )
         with self.dish_vcc_validation_attr_lock:
-            if "tm_leaf_node/csp_master" in dev_name:
+            if self.input_parameter.csp_mln_dev_name in dev_name:
                 # Handle Csp Master Leaf Node event
                 csp_validation_result = int(result)
                 self.logger.info(

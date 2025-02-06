@@ -46,7 +46,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.17.4
+    tag: 0.17.4-dirty
     pullPolicy: IfNotPresent
 
 resources:
@@ -81,7 +81,8 @@ deviceServers:
       CspMasterFQDN: "mid-csp/control/0"
       SdpMasterLeafNodeFQDN: "mid-tmc/leaf-node-sdp/0"
       SdpMasterFQDN: "mid-sdp/control/0"
-      DishLeafNodePrefix: "mid-tmc/leaf-node-dish/SKA"
+      DishLeafNodePrefix: "mid-tmc/leaf-node-dish/"
+      DishType: "SKA"
       DishMasterIdentifier: "elt/master"
       DishIDs: ["SKA001", "MKT001"]
       DishVccConfig:

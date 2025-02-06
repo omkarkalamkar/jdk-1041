@@ -32,7 +32,7 @@ def release_resources(
     """Method for rlease resources command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
-    if "ska_mid" in central_node_name:
+    if "mid-tmc" in central_node_name:
         subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     else:
         subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
@@ -58,12 +58,12 @@ def release_resources(
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
-    if "ska_mid" in central_node_name:
+    if "mid-tmc" in central_node_name:
         check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
     else:
         check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
 
-    if "ska_mid" in central_node_name:
+    if "mid-tmc" in central_node_name:
         result, unique_id_assign = central_node.AssignResources(
             assign_input_str
         )

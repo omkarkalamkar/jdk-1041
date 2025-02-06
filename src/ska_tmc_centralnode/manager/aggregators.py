@@ -7,7 +7,6 @@ from tango import DevState
 
 from ska_tmc_centralnode.utils.constants import (
     DISH_KVALUE_VALIDATION_RESULT_STATUS,
-    MCCS_MLN_SUFIX,
 )
 
 
@@ -332,8 +331,9 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
+        input_param = self._component_manager.input_parameter
         for device in self._component_manager.checked_devices:
-            if "tm_subarray_node" in device.dev_name:
+            if input_param.subarray_dev_names in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["tmc_subarrays"][
                         device.dev_name
@@ -344,7 +344,7 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
                     ] = self._component_manager.subarray_availability[
                         device.dev_name
                     ]
-            elif "tm_leaf_node/csp_master" in device.dev_name:
+            elif input_param.csp_mln_dev_name in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["csp_master_leaf_node"] = False
                 else:
@@ -352,7 +352,7 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
                         "csp_master_leaf_node"
                     ] = self._component_manager.csp_mln_availability
 
-            elif "tm_leaf_node/sdp_master" in device.dev_name:
+            elif input_param.sdp_mln_dev_name in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["sdp_master_leaf_node"] = False
                 else:
@@ -377,8 +377,9 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
         telescope_availability = (
             self._component_manager.get_telescope_availability()
         )
+        input_param = self._component_manager.input_parameter
         for device in self._component_manager.checked_devices:
-            if "tm_subarray_node" in device.dev_name:
+            if input_param.subarray_dev_names in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["tmc_subarrays"][
                         device.dev_name
@@ -389,7 +390,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                     ] = self._component_manager.subarray_availability[
                         device.dev_name
                     ]
-            elif "tm_leaf_node/csp_master" in device.dev_name:
+            elif input_param.csp_mln_dev_name in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["csp_master_leaf_node"] = False
                 else:
@@ -397,7 +398,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                         "csp_master_leaf_node"
                     ] = self._component_manager.csp_mln_availability
 
-            elif "tm_leaf_node/sdp_master" in device.dev_name:
+            elif input_param.sdp_mln_dev_name in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["sdp_master_leaf_node"] = False
                 else:
@@ -405,7 +406,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                         "sdp_master_leaf_node"
                     ] = self._component_manager.sdp_mln_availability
 
-            elif MCCS_MLN_SUFIX in device.dev_name:
+            elif input_param.mccs_mln_dev_name in device.dev_name:
                 if device.unresponsive:
                     telescope_availability["mccs_master_leaf_node"] = False
                 else:

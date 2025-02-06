@@ -57,7 +57,7 @@ def assign_resources(
 
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
 
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
             assign_input_str
         )
