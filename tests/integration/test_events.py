@@ -27,7 +27,7 @@ def test_internal_model_events_mid(
 
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device("mid-tmc/central-node/0")
 
     event_id = central_node.subscribe_event(
         "lastDeviceInfoChanged",
@@ -76,7 +76,7 @@ def test_internal_model_events_low(
 
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device("low-tmc/central-node/0")
 
     event_id = central_node.subscribe_event(
         "lastDeviceInfoChanged",
@@ -148,7 +148,7 @@ def test_command_result_events_mid(
     commands_result_events(
         tango_context,
         change_event_callbacks,
-        "ska_mid/tm_central/central_node",
+        "mid-tmc/central-node/0",
     )
 
 
@@ -164,5 +164,5 @@ def test_command_result_events_low(
     commands_result_events(
         tango_context,
         change_event_callbacks,
-        "ska_low/tm_central/central_node",
+        "low-tmc/central-node/0",
     )

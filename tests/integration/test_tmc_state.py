@@ -14,7 +14,7 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
     """Tests tmc state for mid"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device("mid-tmc/central-node/0")
 
     ensure_checked_devices(central_node)
     central_node.subscribe_event(
@@ -54,7 +54,7 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
     """Test tmc state for low"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device("low-tmc/central-node/0")
 
     ensure_checked_devices(central_node)
     central_node.subscribe_event(

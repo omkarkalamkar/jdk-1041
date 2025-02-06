@@ -21,6 +21,10 @@ global:
   retry:
     - "--tries=10"
     - "--sleep=5"
+  mid:
+    domain: "mid-tmc"
+  low:
+    domain: "low-tmc"
 
 dsconfig:
   configuration_file: data/configuration.json
@@ -42,7 +46,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.17.3
+    tag: 0.17.4
     pullPolicy: IfNotPresent
 
 resources:
@@ -68,6 +72,9 @@ deviceServers:
     SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
+    family: "central-node"
+    member : "0"
+
     mid:
       file: "data/centralnode_mid.yaml"
       CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"

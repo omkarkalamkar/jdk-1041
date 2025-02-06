@@ -17,7 +17,7 @@ from tests.settings import logger
 def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
     """Test Dish leaf node kvalue validation result"""
     dev_factory = DevFactory()
-    central_node = DeviceProxy("ska_mid/tm_central/central_node")
+    central_node = DeviceProxy("mid-tmc/central-node/0")
     ensure_checked_devices(central_node)
     dish_leaf_node_01 = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
     # invoke the dish leaf node kValueValidationResult as FAILED

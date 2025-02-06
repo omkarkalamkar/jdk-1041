@@ -15,7 +15,7 @@ MID_CSP_MASTER_DEVICE = "mid-csp/control/0"
 LOW_SDP_MASTER_DEVICE = "low-sdp/control/0"
 LOW_CSP_MASTER_DEVICE = "low-csp/control/0"
 MCCS_MASTER_DEVICE = "low-mccs/control/control"
-CENTRALNODE_MID = "ska_mid/tm_central/central_node"
+CENTRALNODE_MID = "mid-tmc/central-node/0"
 mccs_release_interface = (
     "https://schema.skatelescope.org/ska-low-mccs-controller-release/2.0"
 )

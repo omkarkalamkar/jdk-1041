@@ -87,7 +87,7 @@ def assign_resources(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [("mid-tmc/central-node/0")],
 )
 def test_assign_res_command_mid_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory
@@ -106,7 +106,7 @@ def test_assign_res_command_mid_unavailable_subarray(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_low/tm_central/central_node")],
+    [("low-tmc/central-node/0")],
 )
 def test_assign_res_command_low_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory

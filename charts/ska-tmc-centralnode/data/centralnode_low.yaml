@@ -4,13 +4,13 @@ domain: general-monitoring
 instances: ["01"]
 command: "python3 /app/src/ska_tmc_centralnode/central_node_low.py"
 server:
-  name: "central_node_low"
+  name: "low_tmc_central_node"
   instances:
   - name: "01"
     classes:
-    - name: "CentralNodeLow"
+    - name: "LowTmcCentralNode"
       devices:
-      - name: "ska_low/tm_central/central_node"
+      - name: "{{ $.Values.global.low.domain }}/{{ $.Values.deviceServers.centralnode.family }}/{{ $.Values.deviceServers.centralnode.member }}"
         properties:
         - name: "CspMasterLeafNodeFQDN"
           values:

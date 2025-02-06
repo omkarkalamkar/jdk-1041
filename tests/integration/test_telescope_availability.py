@@ -155,7 +155,7 @@ def test_telescope_availability_mid(tango_context, change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(
         tango_context,
-        "ska_mid/tm_central/central_node",
+        "mid-tmc/central-node/0",
         change_event_callbacks,
     )
 
@@ -166,6 +166,6 @@ def test_telescope_availability_low(tango_context, change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(
         tango_context,
-        "ska_low/tm_central/central_node",
+        "low-tmc/central-node/0",
         change_event_callbacks,
     )

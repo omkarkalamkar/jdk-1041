@@ -8,15 +8,15 @@ instances: ["01"]
 
 {{- if ge $KValueValidRangeUpperLimit $KValueValidRangeLowerLimit }}
 entrypoints:
-  - name: "ska_tmc_centralnode.central_node_mid.CentralNodeMid"
+  - name: "ska_tmc_centralnode.central_node_mid.MidTmcCentralNode"
 server:
-  name: "central_node_mid"
+  name: "mid_tmc_central_node"
   instances:
   - name: "01"
     classes:
-    - name: "CentralNodeMid"
+    - name: "MidTmcCentralNode"
       devices:
-      - name: "ska_mid/tm_central/central_node"
+      - name: "{{ $.Values.global.mid.domain }}/{{ $.Values.deviceServers.centralnode.family }}/{{ $.Values.deviceServers.centralnode.member }}"
         properties:
         - name: "CspMasterLeafNodeFQDN"
           values:

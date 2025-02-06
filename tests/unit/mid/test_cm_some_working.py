@@ -29,7 +29,7 @@ def devices_to_load():
     return (
         {
             "class": SKABaseDevice,
-            "devices": [{"name": "ska_mid/tm_central/central_node"}],
+            "devices": [{"name": "mid-tmc/central-node/0"}],
         },
         {
             "class": CNHelperSubArrayDevice,

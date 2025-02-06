@@ -166,7 +166,7 @@ def assign_resources(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [("mid-tmc/central-node/0")],
 )
 def test_assign_res_command_mid(
     tango_context,
@@ -190,7 +190,7 @@ def test_assign_res_command_mid(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_low/tm_central/central_node")],
+    [("low-tmc/central-node/0")],
 )
 def test_assign_res_command_low(
     tango_context,
@@ -265,7 +265,7 @@ def assign_resources_with_invalid_json(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_low/tm_central/central_node")],
+    [("low-tmc/central-node/0")],
 )
 def test_assign_res_command_low_invalid_json(
     tango_context,
@@ -355,7 +355,7 @@ def assign_resources_without_subarray_id(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [("mid-tmc/central-node/0")],
 )
 def test_assign_res_command_mid_without_subarray_id(
     tango_context,
@@ -384,7 +384,7 @@ def test_assign_resources_exception_propagation(
     """Test Assign Resources exception propagation"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device("mid-tmc/central-node/0")
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
@@ -457,7 +457,7 @@ def test_assign_resources_mid_timeout(
     """Test Assign Resources mid timeout"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device("mid-tmc/central-node/0")
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)

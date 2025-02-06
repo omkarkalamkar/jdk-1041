@@ -29,7 +29,7 @@ def test_off_command_mid(
 ):
     """Test cases for Off command"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device("mid-tmc/central-node/0")
     ensure_checked_devices(central_node)
 
     result_on, unique_id_on = central_node.TelescopeOn()
@@ -109,7 +109,7 @@ def test_off_command_low(
 ):
     """Test cases for off command for low"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device("low-tmc/central-node/0")
     ensure_checked_devices(central_node)
     result_on, unique_id_on = central_node.TelescopeOn()
     result_off, unique_id_off = central_node.TelescopeOff()

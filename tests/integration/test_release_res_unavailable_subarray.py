@@ -122,7 +122,7 @@ def test_release_res_command_mid(
     """Test release resources command mid"""
     return release_resources(
         tango_context,
-        "ska_mid/tm_central/central_node",
+        "mid-tmc/central-node/0",
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources"),
         change_event_callbacks,
@@ -137,7 +137,7 @@ def test_release_res_command_low(
     """Test release resources command for low"""
     return release_resources(
         tango_context,
-        "ska_low/tm_central/central_node",
+        "low-tmc/central-node/0",
         json_factory("command_assign_resource_low"),
         json_factory("command_release_resource_low"),
         change_event_callbacks,

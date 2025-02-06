@@ -15,8 +15,8 @@ from ska_tmc_common import (
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
 
-from ska_tmc_centralnode.central_node_low import CentralNodeLow
-from ska_tmc_centralnode.central_node_mid import CentralNodeMid
+from ska_tmc_centralnode.central_node_low import LowTmcCentralNode
+from ska_tmc_centralnode.central_node_mid import MidTmcCentralNode
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
@@ -81,10 +81,10 @@ def devices_to_load():
             ],
         },
         {
-            "class": CentralNodeMid,
+            "class": MidTmcCentralNode,
             "devices": [
                 {
-                    "name": "ska_mid/tm_central/central_node",
+                    "name": "mid-tmc/central-node/0",
                     "properties": {
                         "CspMasterLeafNodeFQDN": [
                             "ska_mid/tm_leaf_node/csp_master"
@@ -109,10 +109,10 @@ def devices_to_load():
             ],
         },
         {
-            "class": CentralNodeLow,
+            "class": LowTmcCentralNode,
             "devices": [
                 {
-                    "name": "ska_low/tm_central/central_node",
+                    "name": "low-tmc/central-node/0",
                     "properties": {
                         "CspMasterLeafNodeFQDN": [
                             "ska_low/tm_leaf_node/csp_master"

@@ -19,7 +19,7 @@ def test_stow_antennas_command(tango_context):
     """Tests stow antennas command"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device("mid-tmc/central-node/0")
     ensure_checked_devices(central_node)
     initial_len = len(central_node.commandExecuted)
     (result, unique_id) = central_node.On()

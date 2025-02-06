@@ -39,10 +39,10 @@ def device_list():
 def central_node():
     """Central node device"""
     database = Database()
-    instance_list = database.get_device_exported_for_class("CentralNodeLow")
+    instance_list = database.get_device_exported_for_class("LowTmcCentralNode")
     for instance in instance_list.value_string:
         return DeviceProxy(instance)
-    instance_list = database.get_device_exported_for_class("CentralNodeMid")
+    instance_list = database.get_device_exported_for_class("MidTmcCentralNode")
     for instance in instance_list.value_string:
         dev_factory = DevFactory()
         assert wait_and_validate_device_attribute_value(

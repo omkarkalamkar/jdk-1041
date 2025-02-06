@@ -17,11 +17,11 @@ def reset_command(central_node_fqdn):
 @pytest.mark.SKA_mid
 def test_reset_command_mid():
     """test reset command for mid"""
-    reset_command("ska_mid/tm_central/central_node")
+    reset_command("mid-tmc/central-node/0")
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_reset_command_low():
     """Tests reset command for low"""
-    reset_command("ska_low/tm_central/central_node")
+    reset_command("low-tmc/central-node/0")

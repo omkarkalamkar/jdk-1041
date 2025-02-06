@@ -32,7 +32,7 @@ def test_on_command_mid(
 ):
     """Test cases for ON command"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device("mid-tmc/central-node/0")
     assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
@@ -102,7 +102,7 @@ def test_on_command_low(
 ):
     """Test cases for ON command for low"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device("low-tmc/central-node/0")
     assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
