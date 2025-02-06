@@ -43,11 +43,11 @@ def devices_to_load():
 
 
 FAULTY_LIST = [
-    "ska_mid/tm_leaf_node/csp_master",
+    "mid-tmc/leaf-node-csp/0",
     "mid-csp/control/0",
-    "ska_mid/tm_leaf_node/sdp_master",
+    "mid-tmc/leaf-node-sdp/0",
     "mid-sdp/control/0",
-    "ska_mid/tm_leaf_node/d0001",
+    "mid-tmc/leaf-node-dish/SKA001",
     "ska001/elt/master",
 ]
 

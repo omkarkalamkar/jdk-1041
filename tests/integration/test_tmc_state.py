@@ -23,8 +23,8 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
         change_event_callbacks["tmOpState"],
     )
 
-    csp_master_ln = dev_factory.get_device("ska_mid/tm_leaf_node/csp_master")
-    sdp_master_ln = dev_factory.get_device("ska_mid/tm_leaf_node/sdp_master")
+    csp_master_ln = dev_factory.get_device("mid-tmc/leaf-node-csp/0")
+    sdp_master_ln = dev_factory.get_device("mid-tmc/leaf-node-sdp/0")
     csp_subarray_ln = dev_factory.get_device(
         "ska_mid/tm_leaf_node/csp_subarray01"
     )
@@ -63,13 +63,13 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
         change_event_callbacks["tmOpState"],
     )
 
-    csp_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/csp_master")
-    sdp_master_ln = dev_factory.get_device("ska_low/tm_leaf_node/sdp_master")
+    csp_master_ln = dev_factory.get_device("low-tmc/leaf-node-csp/0")
+    sdp_master_ln = dev_factory.get_device("low-tmc/leaf-node-sdp/0")
     csp_subarray_ln = dev_factory.get_device(
-        "ska_low/tm_leaf_node/csp_subarray01"
+        "low-tmc/subarray-leaf-node-csp/01"
     )
     sdp_subarray_ln = dev_factory.get_device(
-        "ska_low/tm_leaf_node/sdp_subarray01"
+        "low-tmc/subarray-leaf-node-sdp/01"
     )
 
     csp_master_ln.SetDirectState(DevState.FAULT)

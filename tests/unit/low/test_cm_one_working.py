@@ -35,14 +35,14 @@ def devices_to_load():
 
 
 FAULTY_LIST = [
-    "ska_low/tm_leaf_node/mccs_master",
+    "low-tmc/leaf-node-mccs/0",
     "low-mccs/control/control",
     "low-sdp/control/0",
     "low-csp/control/0",
-    "ska_low/tm_leaf_node/csp_master",
-    "ska_low/tm_leaf_node/sdp_master",
-    "ska_low/tm_leaf_node/csp_subarray01",
-    "ska_low/tm_leaf_node/sdp_subarray01",
+    "low-tmc/leaf-node-csp/0",
+    "low-tmc/leaf-node-sdp/0",
+    "low-tmc/subarray-leaf-node-csp/01",
+    "low-tmc/subarray-leaf-node-sdp/01",
 ]
 
 
@@ -61,7 +61,7 @@ def test_low_one_working_other_faulty(
         cm.add_device(dev)
     set_devices_unresponsive(cm, FAULTY_LIST)
 
-    subarrayDevInfo = cm.get_device("ska_low/tm_subarray_node/1")
+    subarrayDevInfo = cm.get_device("low-tmc/subarray/01")
     for devInfo in cm.devices:
         if devInfo == subarrayDevInfo:
             assert not devInfo.unresponsive

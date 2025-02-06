@@ -228,7 +228,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "d0036": "k-value not set",
                 "d0063": "k-value not set",
                 "d0100": "k-value not set",
-                "ska_mid/tm_leaf_node/csp_master":
+                "mid-tmc/leaf-node-csp/0":
                 "TMC and CSP Master Dish Vcc Version is Same",
             }'
          validation_status = {
@@ -244,7 +244,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "d0036": "k-value identical",
                 "d0063": "k-value not set",
                 "d0100": "k-value not set",
-                "ska_mid/tm_leaf_node/csp_master":
+                "mid-tmc/leaf-node-csp/0":
                 "TMC and CSP Master Dish Vcc Version is Same",
             }'
         or Ex2:

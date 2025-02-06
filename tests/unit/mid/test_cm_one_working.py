@@ -35,13 +35,13 @@ def devices_to_load():
 
 
 FAULTY_LIST = [
-    "ska_mid/tm_leaf_node/csp_master",
+    "mid-tmc/leaf-node-csp/0",
     "mid-csp/control/0",
-    "ska_mid/tm_leaf_node/sdp_master",
+    "mid-tmc/leaf-node-sdp/0",
     "mid-sdp/control/0",
-    "ska_mid/tm_leaf_node/csp_subarray01",
-    "ska_mid/tm_leaf_node/sdp_subarray01",
-    "ska_mid/tm_leaf_node/d0001",
+    "mid-tmc/subarray-leaf-node-csp/01",
+    "mid-tmc/subarray-leaf-node-csp/01",
+    "mid-tmc/leaf-node-dish/SKA001",
     "ska001/elt/master",
 ]
 
@@ -59,7 +59,7 @@ def test_one_working_other_faulty(tango_context):
 
     set_devices_unresponsive(cm, FAULTY_LIST)
     set_devices_unresponsive(cm, dishes)
-    subarrayDevInfo = cm.get_device("ska_mid/tm_subarray_node/1")
+    subarrayDevInfo = cm.get_device("mid-tmc/subarray/01")
     for devInfo in cm.devices:
         if devInfo == subarrayDevInfo:
             assert not devInfo.unresponsive

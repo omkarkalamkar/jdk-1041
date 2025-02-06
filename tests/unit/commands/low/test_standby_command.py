@@ -132,7 +132,7 @@ def test_low_telescope_standby_command_fail_subarray(
     adapter_factory = HelperAdapterFactory()
 
     # include exception in Standby command
-    failing_dev = "ska_low/tm_subarray_node/1"
+    failing_dev = "low-tmc/subarray/01"
     attrs = {"Standby.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)

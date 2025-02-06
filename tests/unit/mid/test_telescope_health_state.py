@@ -92,7 +92,7 @@ def set_failed(devFactory, cm, expected_elapsed_time=1.5):
     proxy = devFactory.get_device("mid-csp/control/0")
     proxy.SetDirectHealthState(HealthState.DEGRADED)
     assert proxy.HealthState == HealthState.DEGRADED
-    proxy = devFactory.get_device("ska_mid/tm_subarray_node/1")
+    proxy = devFactory.get_device("mid-tmc/subarray/01")
     proxy.SetDirectHealthState(HealthState.FAILED)
     assert proxy.HealthState == HealthState.FAILED
     start_time = time.time()

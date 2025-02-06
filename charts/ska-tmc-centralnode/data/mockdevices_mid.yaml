@@ -19,7 +19,7 @@ server:
       classes:
       - name: "HelperCspMasterLeafDevice"
         devices:
-        - name: "ska_mid/tm_leaf_node/csp_master"
+        - name: "mid-tmc/leaf-node-csp/0"
     - name: "02"
       classes:
       - name: "HelperCspMasterDevice"
@@ -29,19 +29,19 @@ server:
       classes:
       - name: "HelperBaseDevice"
         devices:
-        - name: "ska_mid/tm_leaf_node/sdp_master"
+        - name: "mid-tmc/leaf-node-sdp/0"
         - name: "mid-sdp/control/0"
     - name: "04"
       classes:
       - name: "CNHelperSubArrayDevice"
         devices:
-        - name: "ska_mid/tm_subarray_node/1"
+        - name: "mid-tmc/subarray/01"
     - name: "05"
       classes:
       - name: "HelperSubarrayLeafDevice"
         devices:
-        - name: "ska_mid/tm_leaf_node/csp_subarray01"
-        - name: "ska_mid/tm_leaf_node/sdp_subarray01"
+        - name: "mid-tmc/subarray-leaf-node-csp/01"
+        - name: "mid-tmc/subarray-leaf-node-sdp/01"
     - name: "06"
       classes:
       - name: "HelperDishDevice"
@@ -53,7 +53,7 @@ server:
       classes:
       - name: "HelperDishLNDevice"
         devices:
-        - name: "ska_mid/tm_leaf_node/d0001"
+        - name: "mid-tmc/leaf-node-dish/SKA001"
 depends_on:
   - device: sys/database/2
 image:

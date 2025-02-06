@@ -70,17 +70,17 @@ server:
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_mid/tm_subarray_node/{{ . }}"
+          - "mid-tmc/subarray/{{ . }}"
           {{- end }}
         - name: "CspSubarrayLeafNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_mid/tm_leaf_node/csp_subarray{{ printf "%02s" . }}"
+          - "mid-tmc/subarray-leaf-node-csp/{{ printf "%02s" . }}"
           {{- end }}
         - name: "SdpSubarrayLeafNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_mid/tm_leaf_node/sdp_subarray{{ printf "%02s" . }}"
+          - "mid-tmc/subarray-leaf-node-sdp/{{ printf "%02s" . }}"
           {{- end }}
         - name: "KValueValidRangeUpperLimit"
           values:

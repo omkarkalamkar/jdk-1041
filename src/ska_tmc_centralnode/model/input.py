@@ -236,15 +236,15 @@ class InputParameterLow(InputParameter):
 
     def __init__(self, changed_callback: Callable) -> None:
         super().__init__(changed_callback=changed_callback)
-        self._subarray_dev_names = ["ska_low/tm_subarray_node/1"]
-        self._csp_subarray_dev_names = ["ska_low/tm_leaf_node/csp_subarray01"]
-        self._sdp_subarray_dev_names = ["ska_low/tm_leaf_node/sdp_subarray01"]
+        self._subarray_dev_names = ["low-tmc/subarray/01"]
+        self._csp_subarray_dev_names = ["low-tmc/subarray-leaf-node-csp/01"]
+        self._sdp_subarray_dev_names = ["low-tmc/subarray-leaf-node-sdp/01"]
         self._csp_master_dev_name = "low-csp/control/0"
         self._sdp_master_dev_name = "low-sdp/control/0"
         self._mccs_master_dev_name = "low-mccs/control/control"
-        self._sdp_mln_dev_name = "ska_low/tm_leaf_node/sdp_master"
-        self._csp_mln_dev_name = "ska_low/tm_leaf_node/csp_master"
-        self._mccs_mln_dev_name = "ska_low/tm_leaf_node/mccs_master"
+        self._sdp_mln_dev_name = "low-tmc/leaf-node-sdp/0"
+        self._csp_mln_dev_name = "low-tmc/leaf-node-csp/0"
+        self._mccs_mln_dev_name = "low-tmc/leaf-node-mccs/0"
         self._changed_callback = changed_callback
 
     @property
@@ -321,22 +321,22 @@ class InputParameterMid(InputParameter):
 
     def __init__(self, changed_callback: Callable) -> None:
         super().__init__(changed_callback=changed_callback)
-        self._subarray_dev_names: List[str] = ["ska_mid/tm_subarray_node/1"]
+        self._subarray_dev_names: List[str] = ["mid-tmc/subarray/01"]
         self._csp_subarray_dev_names: List[str] = [
-            "ska_mid/tm_leaf_node/csp_subarray01"
+            "mid-tmc/subarray-leaf-node-csp/01"
         ]
         self._dish_leaf_node_dev_names: List[str] = [
-            "ska_mid/tm_leaf_node/d0001"
+            "mid-tmc/leaf-node-dish/SKA001"
         ]
         self._dish_dev_names: List[str] = ["ska001/elt/master"]
         self._sdp_subarray_dev_names: List[str] = [
-            "ska_mid/tm_leaf_node/sdp_subarray01"
+            "mid-tmc/subarray-leaf-node-sdp/01"
         ]
         self._csp_master_dev_name: str = "mid-csp/control/0"
         self._sdp_master_dev_name: str = "mid-sdp/control/0"
-        self._sdp_mln_dev_name: str = "ska_mid/tm_leaf_node/sdp_master"
-        self._csp_mln_dev_name: str = "ska_mid/tm_leaf_node/csp_master"
-        self._dish_leaf_node_prefix: str = "ska_mid/tm_leaf_node/d0"
+        self._sdp_mln_dev_name: str = "mid-tmc/leaf-node-sdp/0"
+        self._csp_mln_dev_name: str = "mid-tmc/leaf-node-csp/0"
+        self._dish_leaf_node_prefix: str = "mid-tmc/leaf-node-dish/SKA"
         self._dish_master_identifier: str = "elt/master"
         self._changed_callback: Callable = changed_callback
 

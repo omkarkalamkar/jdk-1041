@@ -87,7 +87,7 @@ def assign_resources(
     # TODO Uncomment below code during integration of MCCS
     # def get_mccs_device_resources(json_model):
     #     for device in json_model["devices"]:
-    #         if device["dev_name"] == "ska_low/tm_leaf_node/mccs_master":
+    #         if device["dev_name"] == "low-tmc/leaf-node-mccs/0":
     #             return device
     #     len_subarray_beam_ids = 0
     #     if "subarray_beam_ids" in mccs_device["resources"]:

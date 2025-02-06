@@ -30,17 +30,17 @@ def devices_to_load():
         {
             "class": CNHelperSubArrayDevice,
             "devices": [
-                {"name": "ska_mid/tm_subarray_node/1"},
-                {"name": "ska_low/tm_subarray_node/1"},
+                {"name": "mid-tmc/subarray/01"},
+                {"name": "low-tmc/subarray/01"},
             ],
         },
         {
             "class": CNHelperSubArrayDevice,
             "devices": [
-                {"name": "ska_mid/tm_leaf_node/csp_subarray01"},
-                {"name": "ska_mid/tm_leaf_node/sdp_subarray01"},
-                {"name": "ska_low/tm_leaf_node/csp_subarray01"},
-                {"name": "ska_low/tm_leaf_node/sdp_subarray01"},
+                {"name": "mid-tmc/subarray-leaf-node-csp/01"},
+                {"name": "mid-tmc/subarray-leaf-node-sdp/01"},
+                {"name": "low-tmc/subarray-leaf-node-csp/01"},
+                {"name": "low-tmc/subarray-leaf-node-sdp/01"},
             ],
         },
         {
@@ -58,20 +58,20 @@ def devices_to_load():
         {
             "class": HelperBaseDevice,
             "devices": [
-                {"name": "ska_mid/tm_leaf_node/csp_master"},
+                {"name": "mid-tmc/leaf-node-csp/0"},
                 {"name": "mid-csp/control/0"},
-                {"name": "ska_mid/tm_leaf_node/sdp_master"},
+                {"name": "mid-tmc/leaf-node-sdp/0"},
                 {"name": "mid-sdp/control/0"},
-                {"name": "ska_low/tm_leaf_node/csp_master"},
+                {"name": "low-tmc/leaf-node-csp/0"},
                 {"name": "low-csp/control/0"},
-                {"name": "ska_low/tm_leaf_node/sdp_master"},
+                {"name": "low-tmc/leaf-node-sdp/0"},
                 {"name": "low-sdp/control/0"},
             ],
         },
         {
             "class": HelperMCCSMasterLeafNode,
             "devices": [
-                {"name": "ska_low/tm_leaf_node/mccs_master"},
+                {"name": "low-tmc/leaf-node-mccs/0"},
             ],
         },
         {
@@ -86,22 +86,18 @@ def devices_to_load():
                 {
                     "name": "mid-tmc/central-node/0",
                     "properties": {
-                        "CspMasterLeafNodeFQDN": [
-                            "ska_mid/tm_leaf_node/csp_master"
-                        ],
+                        "CspMasterLeafNodeFQDN": ["mid-tmc/leaf-node-csp/0"],
                         "CspMasterFQDN": ["mid-csp/control/0"],
-                        "SdpMasterLeafNodeFQDN": [
-                            "ska_mid/tm_leaf_node/sdp_master"
-                        ],
+                        "SdpMasterLeafNodeFQDN": ["mid-tmc/leaf-node-sdp/0"],
                         "SdpMasterFQDN": ["mid-sdp/control/0"],
-                        "DishLeafNodePrefix": ["ska_mid/tm_leaf_node/d0"],
+                        "DishLeafNodePrefix": ["mid-tmc/leaf-node-dish/SKA"],
                         "DishMasterIdentifier": ["elt/master"],
-                        "TMCMidSubarrayNodes": ["ska_mid/tm_subarray_node/1"],
+                        "TMCMidSubarrayNodes": ["mid-tmc/subarray/01"],
                         "CspSubarrayLeafNodes": [
-                            "ska_mid/tm_leaf_node/csp_subarray01"
+                            "mid-tmc/subarray-leaf-node-csp/01"
                         ],
                         "SdpSubarrayLeafNodes": [
-                            "ska_mid/tm_leaf_node/sdp_subarray01"
+                            "mid-tmc/subarray-leaf-node-sdp/01"
                         ],
                         "DishIDs": ["SKA001"],
                     },
@@ -114,24 +110,18 @@ def devices_to_load():
                 {
                     "name": "low-tmc/central-node/0",
                     "properties": {
-                        "CspMasterLeafNodeFQDN": [
-                            "ska_low/tm_leaf_node/csp_master"
-                        ],
+                        "CspMasterLeafNodeFQDN": ["low-tmc/leaf-node-csp/0"],
                         "CspMasterFQDN": ["low-csp/control/0"],
-                        "SdpMasterLeafNodeFQDN": [
-                            "ska_low/tm_leaf_node/sdp_master"
-                        ],
+                        "SdpMasterLeafNodeFQDN": ["low-tmc/leaf-node-sdp/0"],
                         "SdpMasterFQDN": ["low-sdp/control/0"],
-                        "MCCSMasterLeafNodeFQDN": [
-                            "ska_low/tm_leaf_node/mccs_master"
-                        ],
+                        "MCCSMasterLeafNodeFQDN": ["low-tmc/leaf-node-mccs/0"],
                         "MCCSMasterFQDN": ["low-mccs/control/control"],
-                        "TMCLowSubarrayNodes": ["ska_low/tm_subarray_node/1"],
+                        "TMCLowSubarrayNodes": ["low-tmc/subarray/01"],
                         "CspSubarrayLeafNodes": [
-                            "ska_low/tm_leaf_node/csp_subarray01"
+                            "low-tmc/subarray-leaf-node-csp/01"
                         ],
                         "SdpSubarrayLeafNodes": [
-                            "ska_low/tm_leaf_node/sdp_subarray01"
+                            "low-tmc/subarray-leaf-node-sdp/01"
                         ],
                     },
                 }

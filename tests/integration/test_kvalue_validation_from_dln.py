@@ -19,7 +19,7 @@ def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
     central_node = DeviceProxy("mid-tmc/central-node/0")
     ensure_checked_devices(central_node)
-    dish_leaf_node_01 = dev_factory.get_device("ska_mid/tm_leaf_node/d0001")
+    dish_leaf_node_01 = dev_factory.get_device("mid-tmc/leaf-node-dish/SKA001")
     # invoke the dish leaf node kValueValidationResult as FAILED
     dish_leaf_node_01.SetDirectkValueValidationResult(
         str(int(ResultCode.FAILED))
@@ -31,7 +31,7 @@ def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
 
     # Match the below values on dishVccValidationStatus
     dict_to_compare = {
-        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish"
+        "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish"
         + " Vcc Version is Same",
         "d0001": "k-value not identical",
     }
@@ -67,7 +67,7 @@ def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
 
     result_string_to_match = {
         "dish": "ALL DISH OK",
-        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish"
+        "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish"
         + " Vcc Version is Same",
     }
 

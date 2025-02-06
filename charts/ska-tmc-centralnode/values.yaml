@@ -77,11 +77,11 @@ deviceServers:
 
     mid:
       file: "data/centralnode_mid.yaml"
-      CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
+      CspMasterLeafNodeFQDN: "mid-tmc/leaf-node-csp/0"
       CspMasterFQDN: "mid-csp/control/0"
-      SdpMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/sdp_master"
+      SdpMasterLeafNodeFQDN: "mid-tmc/leaf-node-sdp/0"
       SdpMasterFQDN: "mid-sdp/control/0"
-      DishLeafNodePrefix: "ska_mid/tm_leaf_node/d0"
+      DishLeafNodePrefix: "mid-tmc/leaf-node-dish/SKA"
       DishMasterIdentifier: "elt/master"
       DishIDs: ["SKA001", "MKT001"]
       DishVccConfig:
@@ -96,11 +96,11 @@ deviceServers:
       CommandTimeOut: 30
     low:
       file: "data/centralnode_low.yaml"
-      CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"
+      CspMasterLeafNodeFQDN: "low-tmc/leaf-node-csp/0"
       CspMasterFQDN: "low-csp/control/0"
-      SdpMasterLeafNodeFQDN: "ska_low/tm_leaf_node/sdp_master"
+      SdpMasterLeafNodeFQDN: "low-tmc/leaf-node-sdp/0"
       SdpMasterFQDN: "low-sdp/control/0"
-      MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
+      MCCSMasterLeafNodeFQDN: "low-tmc/leaf-node-mccs/0"
       MCCSMasterFQDN: "low-mccs/control/control"
       AssignResourcesInterface: "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
       ReleaseResourcesInterface: "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"

@@ -38,10 +38,10 @@ def devices_to_load():
 
 
 FAULTY_LIST = [
-    "ska_low/tm_leaf_node/csp_master",
-    "ska_low/tm_leaf_node/sdp_master",
-    "ska_low/tm_leaf_node/csp_subarray01",
-    "ska_low/tm_leaf_node/sdp_subarray01",
+    "low-tmc/leaf-node-csp/0",
+    "low-tmc/leaf-node-sdp/0",
+    "low-tmc/subarray-leaf-node-csp/01",
+    "low-tmc/subarray-leaf-node-sdp/01",
 ]
 
 

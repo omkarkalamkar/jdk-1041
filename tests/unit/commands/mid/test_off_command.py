@@ -79,7 +79,7 @@ def test_telescope_off_command_fail_subarray(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeOff command
-    failing_dev = "ska_mid/tm_subarray_node/1"
+    failing_dev = "mid-tmc/subarray/01"
     attrs = {"TelescopeOff.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
 

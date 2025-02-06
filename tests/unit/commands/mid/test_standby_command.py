@@ -125,7 +125,7 @@ def test_telescope_standby_command_fail_subarray(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeStandby command
-    failing_dev = "ska_mid/tm_subarray_node/1"
+    failing_dev = "mid-tmc/subarray/01"
     attrs = {"Standby.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)
