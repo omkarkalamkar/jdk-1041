@@ -77,7 +77,7 @@ class CentralNodeEventReceiver(EventReceiver):
     ) -> None:
         """Subscribe events for central node event receiver"""
         super().subscribe_events(dev_info, self.attribute_dictionary)
-
+        input_param = self._component_manager.input_parameter
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
@@ -122,8 +122,7 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_dln_kvalue_validation_result,
                         stateless=True,
                     )
-                self._logger.info(f"My devinfo {dev_info.dev_name}")
-                if "tmc/subarray" in dev_info.dev_name:
+                if dev_info.dev_name in input_param.subarray_dev_names:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
                         tango.EventType.CHANGE_EVENT,

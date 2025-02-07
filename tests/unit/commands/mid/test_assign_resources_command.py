@@ -31,6 +31,7 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     return assign_input_str
 
 
+@pytest.mark.aki
 def test_assign_resources_command_completed(tango_context, task_callback):
     """Tests assign Resources completed"""
     logger.info("%s", tango_context)

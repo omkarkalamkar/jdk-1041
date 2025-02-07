@@ -310,7 +310,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/SKA0",
+            "mid-tmc/leaf-node-dish/ska0",
         )
         output_config = input_validator.loads(
             json.dumps(sample_assign_resources_request)
@@ -330,7 +330,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/SKA",
+            "mid-tmc/leaf-node-dish/ska",
         )
 
         with pytest.raises(SubarrayNotPresentError) as excinfo:
@@ -349,7 +349,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/SKA",
+            "mid-tmc/leaf-node-dish/ska",
         )
         with pytest.raises(InvalidReceptorIdError) as excinfo:
             input_validator.loads(json.dumps(input_json))
@@ -367,7 +367,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/SKA",
+            "mid-tmc/leaf-node-dish/ska",
         )
 
         with pytest.raises(InvalidReceptorIdError) as excinfo:
@@ -386,7 +386,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/SKA",
+            "mid-tmc/leaf-node-dish/ska",
         )
 
         with pytest.raises(InvalidReceptorIdError) as excinfo:
@@ -405,7 +405,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/SKA",
+            "mid-tmc/leaf-node-dish/ska",
         )
 
         with pytest.raises(InvalidReceptorIdError) as excinfo:
@@ -424,7 +424,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/SKA",
+            "mid-tmc/leaf-node-dish/ska",
         )
 
         with pytest.raises(InvalidReceptorIdError) as excinfo:
@@ -443,7 +443,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/SKA",
+            "mid-tmc/leaf-node-dish/ska",
         )
 
         with pytest.raises(ResourceNotPresentError) as excinfo:

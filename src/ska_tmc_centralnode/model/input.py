@@ -336,7 +336,7 @@ class InputParameterMid(InputParameter):
         self._sdp_master_dev_name: str = "mid-sdp/control/0"
         self._sdp_mln_dev_name: str = "mid-tmc/leaf-node-sdp/0"
         self._csp_mln_dev_name: str = "mid-tmc/leaf-node-csp/0"
-        self._dish_leaf_node_prefix: str = "mid-tmc/leaf-node-dish/SKA"
+        self._dish_leaf_node_prefix: str = "mid-tmc/leaf-node-dish/ska"
         self._dish_master_identifier: str = "elt/master"
         self._changed_callback: Callable = changed_callback
 
