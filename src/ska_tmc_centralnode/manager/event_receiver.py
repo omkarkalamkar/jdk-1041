@@ -122,7 +122,8 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_dln_kvalue_validation_result,
                         stateless=True,
                     )
-                if "subarray_node" in dev_info.dev_name:
+                self._logger.info(f"My devinfo {dev_info.dev_name}")
+                if "tmc/subarray" in dev_info.dev_name:
                     proxy.subscribe_event(
                         "longRunningCommandResult",
                         tango.EventType.CHANGE_EVENT,

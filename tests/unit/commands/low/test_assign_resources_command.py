@@ -21,7 +21,6 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
-@pytest.mark.aki
 @pytest.mark.SKA_low
 def test_low_assign_resources_command(
     tango_context, task_callback, json_factory

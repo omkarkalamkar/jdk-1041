@@ -333,7 +333,6 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
         )
         input_param = self._component_manager.input_parameter
         for device in self._component_manager.checked_devices:
-            self.logger.info(f"Mine {input_param.subarray_dev_names}")
             if device.dev_name in input_param.subarray_dev_names:
                 if device.unresponsive:
                     telescope_availability["tmc_subarrays"][
@@ -384,7 +383,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
         )
         input_param = self._component_manager.input_parameter
         for device in self._component_manager.checked_devices:
-            if device.dev_name.lower() in (input_param.subarray_dev_names):
+            if device.dev_name.lower() in input_param.subarray_dev_names:
                 if device.unresponsive:
                     telescope_availability["tmc_subarrays"][
                         device.dev_name
@@ -395,6 +394,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                     ] = self._component_manager.subarray_availability[
                         device.dev_name
                     ]
+
             elif device.dev_name.lower() in (
                 input_param.csp_mln_dev_name.lower()
             ):
