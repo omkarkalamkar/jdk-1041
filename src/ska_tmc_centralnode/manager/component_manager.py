@@ -1005,7 +1005,7 @@ class CNComponentManager(TmcComponentManager):
         # Reject command if Subarray is not available
         json_argument = json.loads(argin)
         subarray_id = json_argument["subarray_id"]
-        subarray_suffics = "/" + str(subarray_id)
+        subarray_suffics = "/" + str(subarray_id).zfill(2)
         subarrays_list = list(
             self._component.telescope_availability["tmc_subarrays"].keys()
         )
@@ -1100,7 +1100,7 @@ class CNComponentManager(TmcComponentManager):
 
         # Reject command if Subarray is not available
         subarray_id = subarray_id_or_message
-        subarray_suffics = "/" + str(subarray_id)
+        subarray_suffics = "/" + str(subarray_id).zfill(2)
         subarrays_list = list(
             self._component.telescope_availability["tmc_subarrays"].keys()
         )

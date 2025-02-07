@@ -411,12 +411,12 @@ class CNComponentManagerLow(CNComponentManager):
             self.logger.debug(f"device_name is: {device_name}")
             self.logger.debug(f"event_value is: {event_value}")
 
-            if self.input_parameter.subarray_dev_names in device_name:
+            if self.input_parameter.subarray_dev_names == device_name:
                 self.subarray_availability[device_name] = event_value
-            elif self.input_parameter.csp_mln_dev_name in device_name:
+            elif self.input_parameter.csp_mln_dev_name == device_name:
                 self.csp_mln_availability = event_value
-            elif self.input_parameter.sdp_mln_dev_name in device_name:
+            elif self.input_parameter.sdp_mln_dev_name == device_name:
                 self.sdp_mln_availability = event_value
-            elif self.input_parameter.mccs_mln_dev_name in device_name:
+            elif self.input_parameter.mccs_mln_dev_name == device_name:
                 self.mccs_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()

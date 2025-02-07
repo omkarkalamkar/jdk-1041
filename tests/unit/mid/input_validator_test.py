@@ -297,10 +297,10 @@ class TestAssignResourceValidator:
         "test/subarray/3",
     ]
     _test_receptor_id_list = [
-        "mid-tmc/leaf-node-dish/SKA001",
-        "mid-tmc/leaf-node-dish/SKA002",
-        "mid-tmc/leaf-node-dish/SKA003",
-        "mid-tmc/leaf-node-dish/SKA004",
+        "mid-tmc/leaf-node-dish/ska001",
+        "mid-tmc/leaf-node-dish/ska002",
+        "mid-tmc/leaf-node-dish/ska003",
+        "mid-tmc/leaf-node-dish/ska004",
     ]
 
     def test_validate_good_json(self):

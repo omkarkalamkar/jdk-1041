@@ -82,7 +82,7 @@ deviceServers:
       SdpMasterLeafNodeFQDN: "mid-tmc/leaf-node-sdp/0"
       SdpMasterFQDN: "mid-sdp/control/0"
       DishLeafNodePrefix: "mid-tmc/leaf-node-dish/"
-      DishType: "SKA"
+      DishType: "ska"
       DishMasterIdentifier: "elt/master"
       DishIDs: ["SKA001", "MKT001"]
       DishVccConfig:

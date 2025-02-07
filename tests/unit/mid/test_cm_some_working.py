@@ -47,7 +47,7 @@ FAULTY_LIST = [
     "mid-csp/control/0",
     "mid-tmc/leaf-node-sdp/0",
     "mid-sdp/control/0",
-    "mid-tmc/leaf-node-dish/SKA001",
+    "mid-tmc/leaf-node-dish/ska001",
     "ska001/elt/master",
 ]
 

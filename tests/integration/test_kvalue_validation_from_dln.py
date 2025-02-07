@@ -19,7 +19,7 @@ def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
     dev_factory = DevFactory()
     central_node = DeviceProxy("mid-tmc/central-node/0")
     ensure_checked_devices(central_node)
-    dish_leaf_node_01 = dev_factory.get_device("mid-tmc/leaf-node-dish/SKA001")
+    dish_leaf_node_01 = dev_factory.get_device("mid-tmc/leaf-node-dish/ska001")
     # invoke the dish leaf node kValueValidationResult as FAILED
     dish_leaf_node_01.SetDirectkValueValidationResult(
         str(int(ResultCode.FAILED))

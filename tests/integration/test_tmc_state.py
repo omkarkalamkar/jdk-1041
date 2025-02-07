@@ -31,7 +31,7 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
     sdp_subarray_ln = dev_factory.get_device(
         "mid-tmc/subarray-leaf-node-sdp/01"
     )
-    dish_ln = dev_factory.get_device("mid-tmc/leaf-node-dish/SKA001")
+    dish_ln = dev_factory.get_device("mid-tmc/leaf-node-dish/ska001")
 
     csp_master_ln.SetDirectState(DevState.FAULT)
     sdp_master_ln.SetDirectState(DevState.ON)

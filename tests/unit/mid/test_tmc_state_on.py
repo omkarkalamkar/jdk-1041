@@ -70,7 +70,7 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
             "mid-tmc/subarray-leaf-node-sdp/01",
             "mid-tmc/leaf-node-csp/0",
             "mid-tmc/leaf-node-sdp/0",
-            "mid-tmc/leaf-node-dish/SKA001",
+            "mid-tmc/leaf-node-dish/ska001",
         ],
         devFactory=devFactory,
         state=tango.DevState.ON,

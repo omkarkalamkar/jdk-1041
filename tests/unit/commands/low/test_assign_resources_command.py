@@ -21,6 +21,7 @@ from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
+@pytest.mark.aki
 @pytest.mark.SKA_low
 def test_low_assign_resources_command(
     tango_context, task_callback, json_factory
@@ -250,6 +251,7 @@ def check_if_subarray_is_available(cm):
     while (cm.component.telescope_availability)["tmc_subarrays"][
         LOW_SUBARRAY_DEVICE
     ] is not True:
+        logger.info(f"my>>> {(cm.component.telescope_availability)}")
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:

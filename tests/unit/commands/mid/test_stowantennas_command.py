@@ -47,7 +47,7 @@ def test_telescope_stow_antennas_fail_dish(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in SetStowMode command
-    failing_dev = "mid-tmc/leaf-node-dish/SKA001"
+    failing_dev = "mid-tmc/leaf-node-dish/ska001"
 
     attrs = {"SetStowMode.side_effect": Exception}
     dishMasterLeafMock = mock.Mock(**attrs)

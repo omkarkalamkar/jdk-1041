@@ -53,7 +53,7 @@ server:
       classes:
       - name: "HelperDishLNDevice"
         devices:
-        - name: "mid-tmc/leaf-node-dish/SKA001"
+        - name: "mid-tmc/leaf-node-dish/ska001"
 depends_on:
   - device: sys/database/2
 image:

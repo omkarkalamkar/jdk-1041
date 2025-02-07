@@ -636,11 +636,11 @@ class CNComponentManagerMid(CNComponentManager):
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availablity status"""
         with self.rlock:
-            if self.input_parameter.subarray_dev_names in device_name:
+            if self.input_parameter.subarray_dev_names == device_name:
                 self.subarray_availability[device_name] = event_value
-            elif self.input_parameter.csp_mln_dev_name in device_name:
+            elif self.input_parameter.csp_mln_dev_name == device_name:
                 self.csp_mln_availability = event_value
-            elif self.input_parameter.sdp_mln_dev_name in device_name:
+            elif self.input_parameter.sdp_mln_dev_name == device_name:
                 self.sdp_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()
 

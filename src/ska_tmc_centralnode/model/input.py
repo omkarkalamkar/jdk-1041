@@ -326,7 +326,7 @@ class InputParameterMid(InputParameter):
             "mid-tmc/subarray-leaf-node-csp/01"
         ]
         self._dish_leaf_node_dev_names: List[str] = [
-            "mid-tmc/leaf-node-dish/SKA001"
+            "mid-tmc/leaf-node-dish/ska001"
         ]
         self._dish_dev_names: List[str] = ["ska001/elt/master"]
         self._sdp_subarray_dev_names: List[str] = [
