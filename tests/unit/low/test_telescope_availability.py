@@ -87,7 +87,6 @@ def test_check_telescope_availability_attribute_initial_events(tango_context):
     ] is False
 
 
-@pytest.mark.aks
 def test_telescope_availability_with_subarray_and_master_leaf_nodes(
     tango_context,
 ):
