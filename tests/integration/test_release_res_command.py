@@ -21,7 +21,6 @@ from tests.settings import (
     RESET_DEFECT,
     TIMEOUT_DEFECT,
     check_subarray_availability,
-    event_remover,
     logger,
 )
 
@@ -218,10 +217,6 @@ def release_resources_without_subarray_id(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
 
 
 @pytest.mark.post_deployment
@@ -338,10 +333,6 @@ def test_release_resources_error_propagation(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
     tmc_subarray.ClearCommandCallInfo()
 
 
@@ -440,10 +431,6 @@ def test_release_resources_mid_timeout(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
     tmc_subarray.ClearCommandCallInfo()
 
 
@@ -544,11 +531,6 @@ def test_release_resources_low_timeout(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
     tmc_subarray.ClearCommandCallInfo()
 
 
@@ -645,8 +627,4 @@ def test_release_resources_error_aggregation(
     subarray_proxy.ReleaseAllResources()
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     result, unique_id = central_node.TelescopeOff()
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
     subarray_proxy.ClearCommandCallInfo()

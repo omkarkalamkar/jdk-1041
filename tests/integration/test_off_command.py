@@ -18,7 +18,6 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import event_remover
 
 
 # pylint:disable=c-extension-no-member
@@ -95,10 +94,6 @@ def test_off_command_mid(
 
     change_event_callbacks.assert_change_event(
         "telescopeState", tango._tango.DevState.OFF, lookahead=12
-    )
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
     )
 
 
@@ -179,9 +174,4 @@ def test_off_command_low(
 
     change_event_callbacks.assert_change_event(
         "telescopeState", tango._tango.DevState.OFF, lookahead=3
-    )
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState", "State"],
     )

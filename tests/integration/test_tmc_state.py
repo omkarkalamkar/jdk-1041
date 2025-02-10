@@ -18,7 +18,7 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_SUBARRAY_LN,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import event_remover, logger
+from tests.settings import logger
 
 
 @pytest.mark.post_deployment
@@ -51,10 +51,6 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
         DevState.FAULT, lookahead=4
     )
     assert central_node.tmOpState == DevState.FAULT
-    event_remover(
-        change_event_callbacks,
-        ["tmOpState"],
-    )
 
 
 @pytest.mark.post_deployment
@@ -86,7 +82,3 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
         DevState.FAULT, lookahead=4
     )
     assert central_node.tmOpState == DevState.FAULT
-    event_remover(
-        change_event_callbacks,
-        ["tmOpState"],
-    )

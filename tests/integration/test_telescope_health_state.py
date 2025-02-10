@@ -13,7 +13,7 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import event_remover, logger
+from tests.settings import logger
 
 
 @pytest.mark.post_deployment
@@ -58,10 +58,6 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     time.sleep(0.1)
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
-    event_remover(
-        change_event_callbacks,
-        ["telescopeHealthState"],
-    )
 
 
 @pytest.mark.post_deployment
@@ -97,7 +93,3 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     time.sleep(0.1)
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
-    event_remover(
-        change_event_callbacks,
-        ["telescopeHealthState"],
-    )

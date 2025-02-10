@@ -20,7 +20,6 @@ from tests.settings import (
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
     check_lrcr_events,
-    event_remover,
     logger,
 )
 
@@ -88,11 +87,6 @@ def load_dish_cfg(
         config_str,
     )
 
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
-
 
 def load_dish_cfg_when_csp_is_defective(
     tango_context,
@@ -151,11 +145,6 @@ def load_dish_cfg_when_csp_is_defective(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
-    )
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
     )
 
 
@@ -417,11 +406,6 @@ def load_dish_cfg_with_wrong_path(
     )
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
 
 
 @pytest.mark.post_deployment

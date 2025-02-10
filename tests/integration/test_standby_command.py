@@ -17,7 +17,7 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import event_remover, logger
+from tests.settings import logger
 
 
 @pytest.mark.post_deployment
@@ -96,11 +96,6 @@ def test_standby_command_mid(
 
     assert central_node.telescopeState == DevState.STANDBY
 
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
-    )
-
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
@@ -167,8 +162,3 @@ def test_standby_command_low(
     logger.info("telescopeState: %s", central_node.telescopeState)
 
     assert central_node.telescopeState == DevState.STANDBY
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
-    )
