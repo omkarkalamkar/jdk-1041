@@ -70,11 +70,11 @@ class CNComponentManager(TmcComponentManager):
 
     It supports:
 
-    * Monitoring its component, e.g. detect that it has been turned off
-      or on
+    Monitoring its component, e.g. detect that it has been turned off
+        or on
 
-    * Receiving the change events from lower level devices and trigger
-      the TMC and telescope state aggregation
+    Receiving the change events from lower level devices and trigger
+        the TMC and telescope state aggregation
     """
 
     # pylint:disable=keyword-arg-before-vararg
@@ -111,17 +111,17 @@ class CNComponentManager(TmcComponentManager):
         Initialise a new ComponentManager instance.
 
         :param op_state_model: the operational state model used
-          by this component
-            manager
+            by this component manager
         :param _input_parameter: allows to specify InputParameter
-          class for TMC Mid or Low
+            class for TMC Mid or Low
         :param logger: a logger for this component manager
         :param _component: allows setting of the component to be
             managed; for testing purposes only
         :param _liveliness_probe: allows to enable/disable
-          LivelinessProbe usage
+            LivelinessProbe usage
         :param _event_receiver: allows to enable/disable
-          EventReceiver usage
+            EventReceiver usage
+
         """
 
         self._component = _component or CentralComponent(logger)
@@ -223,8 +223,9 @@ class CNComponentManager(TmcComponentManager):
             thread.start()
 
     def process_event(self, attribute_name: str) -> None:
-        """Process the given attribute's event using the data from the
-        event_queues and invoke corresponding process method.
+        """
+        Process the given attribute's event using the data from the
+            event_queues and invoke corresponding process method.
         :param attribute_name: Name of the attribute for which event is to be
             processed
         :type attribute_name: str
