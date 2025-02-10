@@ -310,7 +310,7 @@ class TestAssignResourceValidator:
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/ska0",
+            "mid-tmc/leaf-node-dish/ska",
         )
         output_config = input_validator.loads(
             json.dumps(sample_assign_resources_request)

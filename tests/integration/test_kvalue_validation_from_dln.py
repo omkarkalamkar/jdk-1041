@@ -33,7 +33,7 @@ def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
     dict_to_compare = {
         "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish"
         + " Vcc Version is Same",
-        "d0001": "k-value not identical",
+        "ska001": "k-value not identical",
     }
     assert wait_and_validate_device_attribute_value(
         central_node,

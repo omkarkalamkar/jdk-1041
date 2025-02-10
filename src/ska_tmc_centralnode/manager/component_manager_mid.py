@@ -224,26 +224,26 @@ class CNComponentManagerMid(CNComponentManager):
          and sets the updated validation result.
          Ex1:
          current_dish_vcc_validation_status = '{
-                "d0001": "k-value not set",
-                "d0036": "k-value not set",
-                "d0063": "k-value not set",
-                "d0100": "k-value not set",
+                "ska001": "k-value not set",
+                "ska036": "k-value not set",
+                "ska063": "k-value not set",
+                "ska100": "k-value not set",
                 "mid-tmc/leaf-node-csp/0":
                 "TMC and CSP Master Dish Vcc Version is Same",
             }'
          validation_status = {
-                "d0001": "k-value identical",
-                "d0036": "k-value identical",
-                "d0063": "k-value not set",
-                "d0100": "k-value not set",
+                "ska001": "k-value identical",
+                "ska036": "k-value identical",
+                "ska063": "k-value not set",
+                "ska100": "k-value not set",
          }
          if validation_status received and current validation status is
          as above then this method will aggregate like below:
          self._dish_vcc_validation_status = '{
-                "d0001": "k-value identical",
-                "d0036": "k-value identical",
-                "d0063": "k-value not set",
-                "d0100": "k-value not set",
+                "ska001": "k-value identical",
+                "ska036": "k-value identical",
+                "ska063": "k-value not set",
+                "ska100": "k-value not set",
                 "mid-tmc/leaf-node-csp/0":
                 "TMC and CSP Master Dish Vcc Version is Same",
             }'
