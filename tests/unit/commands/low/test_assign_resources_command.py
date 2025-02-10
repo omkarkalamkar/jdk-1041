@@ -250,7 +250,6 @@ def check_if_subarray_is_available(cm):
     while (cm.component.telescope_availability)["tmc_subarrays"][
         LOW_SUBARRAY_DEVICE
     ] is not True:
-        logger.info(f"my>>> {(cm.component.telescope_availability)}")
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
