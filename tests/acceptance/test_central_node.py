@@ -144,7 +144,7 @@ def check_internal_model(device_list):
         assert "DevState." + str(running_dev.State()) == dev["state"]
         assert str(HealthState(running_dev.healthState)) == dev["healthState"]
 
-        if "tm_subarray" in dev["dev_name"]:
+        if "tmc/subarray" in dev["dev_name"]:
             assert str(ObsState(running_dev.obsState)) == dev["obsState"]
             if running_dev.assignedResources == "{ }":
                 assert dev["resources"] == ["{", " ", "}"]
