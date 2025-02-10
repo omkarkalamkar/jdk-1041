@@ -338,18 +338,7 @@ class CNComponentManager(TmcComponentManager):
 
         :return: list of the checked monitored devices
         """
-        result = []
-        for dev in self.component._devices:
-            if dev.unresponsive:
-                result.append(dev)
-                continue
-            if dev.ping > 0:
-                result.append(dev)
-                continue
-            if dev.last_event_arrived is not None:
-                result.append(dev)
-                continue
-        return result
+        return self.component.devices
 
     # pylint:disable =inconsistent-return-statements
     def get_subarray_obsstate(self) -> ObsState:
