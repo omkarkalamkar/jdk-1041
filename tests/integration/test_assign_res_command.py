@@ -9,6 +9,10 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
@@ -166,7 +170,7 @@ def assign_resources(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("mid-tmc/central-node/0")],
+    [(CENTRALNODE_MID)],
 )
 def test_assign_res_command_mid(
     tango_context,
@@ -190,7 +194,7 @@ def test_assign_res_command_mid(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [("low-tmc/central-node/0")],
+    [(CENTRALNODE_LOW)],
 )
 def test_assign_res_command_low(
     tango_context,
@@ -265,7 +269,7 @@ def assign_resources_with_invalid_json(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [("low-tmc/central-node/0")],
+    [(CENTRALNODE_LOW)],
 )
 def test_assign_res_command_low_invalid_json(
     tango_context,
@@ -355,7 +359,7 @@ def assign_resources_without_subarray_id(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("mid-tmc/central-node/0")],
+    [(CENTRALNODE_MID)],
 )
 def test_assign_res_command_mid_without_subarray_id(
     tango_context,
@@ -384,7 +388,7 @@ def test_assign_resources_exception_propagation(
     """Test Assign Resources exception propagation"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("mid-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
@@ -457,7 +461,7 @@ def test_assign_resources_mid_timeout(
     """Test Assign Resources mid timeout"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("mid-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)

@@ -6,6 +6,10 @@ import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     LOW_SUBARRAY_DEVICE,
@@ -122,7 +126,7 @@ def test_release_res_command_mid(
     """Test release resources command mid"""
     return release_resources(
         tango_context,
-        "mid-tmc/central-node/0",
+        CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources"),
         change_event_callbacks,
@@ -137,7 +141,7 @@ def test_release_res_command_low(
     """Test release resources command for low"""
     return release_resources(
         tango_context,
-        "low-tmc/central-node/0",
+        CENTRALNODE_LOW,
         json_factory("command_assign_resource_low"),
         json_factory("command_release_resource_low"),
         change_event_callbacks,

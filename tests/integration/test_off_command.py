@@ -8,6 +8,8 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 
 from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
     DISH_LEAF_NODE_1,
     LOW_CSP_MASTER_DEVICE,
     LOW_SDP_MASTER_DEVICE,
@@ -29,7 +31,7 @@ def test_off_command_mid(
 ):
     """Test cases for Off command"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("mid-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
 
     result_on, unique_id_on = central_node.TelescopeOn()
@@ -109,7 +111,7 @@ def test_off_command_low(
 ):
     """Test cases for off command for low"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("low-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_LOW)
     ensure_checked_devices(central_node)
     result_on, unique_id_on = central_node.TelescopeOn()
     result_off, unique_id_off = central_node.TelescopeOff()

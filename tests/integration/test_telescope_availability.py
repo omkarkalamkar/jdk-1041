@@ -5,6 +5,10 @@ import time
 import pytest
 from ska_tmc_common.dev_factory import DevFactory
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
@@ -155,7 +159,7 @@ def test_telescope_availability_mid(tango_context, change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(
         tango_context,
-        "mid-tmc/central-node/0",
+        CENTRALNODE_MID,
         change_event_callbacks,
     )
 
@@ -166,6 +170,6 @@ def test_telescope_availability_low(tango_context, change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(
         tango_context,
-        "low-tmc/central-node/0",
+        CENTRALNODE_LOW,
         change_event_callbacks,
     )

@@ -7,6 +7,10 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_MID,
+    DISH_LEAF_NODE_1,
+)
 from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
@@ -17,9 +21,9 @@ from tests.settings import logger
 def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
     """Test Dish leaf node kvalue validation result"""
     dev_factory = DevFactory()
-    central_node = DeviceProxy("mid-tmc/central-node/0")
+    central_node = DeviceProxy(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
-    dish_leaf_node_01 = dev_factory.get_device("mid-tmc/leaf-node-dish/ska001")
+    dish_leaf_node_01 = dev_factory.get_device(DISH_LEAF_NODE_1)
     # invoke the dish leaf node kValueValidationResult as FAILED
     dish_leaf_node_01.SetDirectkValueValidationResult(
         str(int(ResultCode.FAILED))

@@ -9,6 +9,8 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 
 from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
     DISH_LEAF_NODE_1,
     LOW_CSP_MASTER_DEVICE,
     LOW_SDP_MASTER_DEVICE,
@@ -32,7 +34,7 @@ def test_on_command_mid(
 ):
     """Test cases for ON command"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("mid-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
@@ -102,7 +104,7 @@ def test_on_command_low(
 ):
     """Test cases for ON command for low"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("low-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_LOW)
     assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 

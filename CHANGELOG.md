@@ -7,7 +7,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [0.17.4]
 ********
-* Resolve bug SKB-690 to comply ADR-9
+* Resolved SKB-709 on CentralNode updated checked_device property.
 
 [0.17.3]
 ********

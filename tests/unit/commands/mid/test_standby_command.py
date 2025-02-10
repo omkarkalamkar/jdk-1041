@@ -15,6 +15,7 @@ from tango import DevState
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
 )
+from ska_tmc_centralnode.utils.constants import MID_TMC_SUBARRAY
 from tests.mock_callable import MockCallable
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
@@ -125,7 +126,7 @@ def test_telescope_standby_command_fail_subarray(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeStandby command
-    failing_dev = "mid-tmc/subarray/01"
+    failing_dev = MID_TMC_SUBARRAY
     attrs = {"Standby.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)

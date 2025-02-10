@@ -17,6 +17,30 @@ from tango.test_context import MultiDeviceTestContext
 
 from ska_tmc_centralnode.central_node_low import LowTmcCentralNode
 from ska_tmc_centralnode.central_node_mid import MidTmcCentralNode
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+    DISH_DEVICE_PREFIX,
+    DISH_LEAF_NODE_1,
+    DISH_LEAF_NODE_PREFIX,
+    DISH_MASTER_1,
+    LOW_CSP_MASTER_DEVICE,
+    LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SUBARRAY_LN,
+    LOW_SDP_MASTER_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SDP_SUBARRAY_LN,
+    LOW_TMC_SUBARRAY,
+    MCCS_MASTER_DEVICE,
+    MCCS_MLN_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_SUBARRAY_LN,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_SUBARRAY_LN,
+    MID_TMC_SUBARRAY,
+)
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
@@ -30,75 +54,71 @@ def devices_to_load():
         {
             "class": CNHelperSubArrayDevice,
             "devices": [
-                {"name": "mid-tmc/subarray/01"},
-                {"name": "low-tmc/subarray/01"},
+                {"name": MID_TMC_SUBARRAY},
+                {"name": LOW_TMC_SUBARRAY},
             ],
         },
         {
             "class": CNHelperSubArrayDevice,
             "devices": [
-                {"name": "mid-tmc/subarray-leaf-node-csp/01"},
-                {"name": "mid-tmc/subarray-leaf-node-sdp/01"},
-                {"name": "low-tmc/subarray-leaf-node-csp/01"},
-                {"name": "low-tmc/subarray-leaf-node-sdp/01"},
+                {"name": MID_CSP_SUBARRAY_LN},
+                {"name": MID_SDP_SUBARRAY_LN},
+                {"name": LOW_CSP_SUBARRAY_LN},
+                {"name": LOW_SDP_SUBARRAY_LN},
             ],
         },
         {
             "class": HelperDishDevice,
             "devices": [
-                {"name": "ska001/elt/master"},
+                {"name": DISH_MASTER_1},
             ],
         },
         {
             "class": HelperDishLNDevice,
             "devices": [
-                {"name": "mid-tmc/leaf-node-dish/ska001"},
+                {"name": DISH_LEAF_NODE_1},
             ],
         },
         {
             "class": HelperBaseDevice,
             "devices": [
-                {"name": "mid-tmc/leaf-node-csp/0"},
-                {"name": "mid-csp/control/0"},
-                {"name": "mid-tmc/leaf-node-sdp/0"},
-                {"name": "mid-sdp/control/0"},
-                {"name": "low-tmc/leaf-node-csp/0"},
-                {"name": "low-csp/control/0"},
-                {"name": "low-tmc/leaf-node-sdp/0"},
-                {"name": "low-sdp/control/0"},
+                {"name": MID_CSP_MLN_DEVICE},
+                {"name": MID_CSP_MASTER_DEVICE},
+                {"name": MID_SDP_MLN_DEVICE},
+                {"name": MID_SDP_MASTER_DEVICE},
+                {"name": LOW_CSP_MLN_DEVICE},
+                {"name": LOW_CSP_MASTER_DEVICE},
+                {"name": LOW_SDP_MLN_DEVICE},
+                {"name": LOW_SDP_MASTER_DEVICE},
             ],
         },
         {
             "class": HelperMCCSMasterLeafNode,
             "devices": [
-                {"name": "low-tmc/leaf-node-mccs/0"},
+                {"name": MCCS_MLN_DEVICE},
             ],
         },
         {
             "class": HelperMCCSController,
             "devices": [
-                {"name": "low-mccs/control/control"},
+                {"name": MCCS_MASTER_DEVICE},
             ],
         },
         {
             "class": MidTmcCentralNode,
             "devices": [
                 {
-                    "name": "mid-tmc/central-node/0",
+                    "name": CENTRALNODE_MID,
                     "properties": {
-                        "CspMasterLeafNodeFQDN": ["mid-tmc/leaf-node-csp/0"],
-                        "CspMasterFQDN": ["mid-csp/control/0"],
-                        "SdpMasterLeafNodeFQDN": ["mid-tmc/leaf-node-sdp/0"],
-                        "SdpMasterFQDN": ["mid-sdp/control/0"],
-                        "DishLeafNodePrefix": ["mid-tmc/leaf-node-dish/ska"],
-                        "DishMasterIdentifier": ["elt/master"],
-                        "TMCMidSubarrayNodes": ["mid-tmc/subarray/01"],
-                        "CspSubarrayLeafNodes": [
-                            "mid-tmc/subarray-leaf-node-csp/01"
-                        ],
-                        "SdpSubarrayLeafNodes": [
-                            "mid-tmc/subarray-leaf-node-sdp/01"
-                        ],
+                        "CspMasterLeafNodeFQDN": [MID_CSP_MLN_DEVICE],
+                        "CspMasterFQDN": [MID_CSP_MASTER_DEVICE],
+                        "SdpMasterLeafNodeFQDN": [MID_SDP_MLN_DEVICE],
+                        "SdpMasterFQDN": [MID_SDP_MASTER_DEVICE],
+                        "DishLeafNodePrefix": [DISH_LEAF_NODE_PREFIX],
+                        "DishMasterIdentifier": [DISH_DEVICE_PREFIX],
+                        "TMCMidSubarrayNodes": [MID_TMC_SUBARRAY],
+                        "CspSubarrayLeafNodes": [MID_CSP_SUBARRAY_LN],
+                        "SdpSubarrayLeafNodes": [MID_SDP_SUBARRAY_LN],
                         "DishIDs": ["SKA001"],
                     },
                 }
@@ -108,21 +128,17 @@ def devices_to_load():
             "class": LowTmcCentralNode,
             "devices": [
                 {
-                    "name": "low-tmc/central-node/0",
+                    "name": CENTRALNODE_LOW,
                     "properties": {
-                        "CspMasterLeafNodeFQDN": ["low-tmc/leaf-node-csp/0"],
-                        "CspMasterFQDN": ["low-csp/control/0"],
-                        "SdpMasterLeafNodeFQDN": ["low-tmc/leaf-node-sdp/0"],
-                        "SdpMasterFQDN": ["low-sdp/control/0"],
-                        "MCCSMasterLeafNodeFQDN": ["low-tmc/leaf-node-mccs/0"],
-                        "MCCSMasterFQDN": ["low-mccs/control/control"],
-                        "TMCLowSubarrayNodes": ["low-tmc/subarray/01"],
-                        "CspSubarrayLeafNodes": [
-                            "low-tmc/subarray-leaf-node-csp/01"
-                        ],
-                        "SdpSubarrayLeafNodes": [
-                            "low-tmc/subarray-leaf-node-sdp/01"
-                        ],
+                        "CspMasterLeafNodeFQDN": [LOW_CSP_MLN_DEVICE],
+                        "CspMasterFQDN": [LOW_CSP_MASTER_DEVICE],
+                        "SdpMasterLeafNodeFQDN": [LOW_SDP_MLN_DEVICE],
+                        "SdpMasterFQDN": [LOW_SDP_MASTER_DEVICE],
+                        "MCCSMasterLeafNodeFQDN": [MCCS_MLN_DEVICE],
+                        "MCCSMasterFQDN": [MCCS_MASTER_DEVICE],
+                        "TMCLowSubarrayNodes": [LOW_TMC_SUBARRAY],
+                        "CspSubarrayLeafNodes": [LOW_CSP_SUBARRAY_LN],
+                        "SdpSubarrayLeafNodes": [LOW_SDP_SUBARRAY_LN],
                     },
                 }
             ],

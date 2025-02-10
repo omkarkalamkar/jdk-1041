@@ -13,6 +13,7 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.utils.constants import LOW_TMC_SUBARRAY
 from tests.mock_callable import MockCallable
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
@@ -126,7 +127,7 @@ def test_telescope_on_command_fail_subarray(tango_context, task_callback):
     adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeOn command
-    failing_dev = "low-tmc/subarray/01"
+    failing_dev = LOW_TMC_SUBARRAY
     attrs = {"TelescopeOn.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)

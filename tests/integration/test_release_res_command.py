@@ -8,6 +8,10 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
@@ -107,7 +111,7 @@ def test_release_res_command_mid(
     """Test cases for rlease resources command for low"""
     return release_resources(
         tango_context,
-        "mid-tmc/central-node/0",
+        CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources"),
         change_event_callbacks,
@@ -125,7 +129,7 @@ def test_release_res_command_low(
     """Test cases for release resources command"""
     return release_resources(
         tango_context,
-        "low-tmc/central-node/0",
+        CENTRALNODE_LOW,
         json_factory("command_assign_resource_low"),
         json_factory("command_release_resource_low"),
         change_event_callbacks,
@@ -231,7 +235,7 @@ def test_release_res_command_mid_without_subarray_id(
     """Test cases for release resources command without subarray id"""
     return release_resources_without_subarray_id(
         tango_context,
-        "mid-tmc/central-node/0",
+        CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources_without_subarray_id"),
         json_factory("command_ReleaseResources"),
@@ -250,7 +254,7 @@ def test_release_resources_error_propagation(
     """Test cases for release resources error propagation command."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("mid-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
@@ -352,7 +356,7 @@ def test_release_resources_mid_timeout(
     """Test cases for release resources command for mid timeout."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("mid-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_proxy.SetisSubarrayAvailable(True)
     ensure_checked_devices(central_node)

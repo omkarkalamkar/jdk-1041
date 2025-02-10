@@ -7,6 +7,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
+from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 from tests.common_utils import (
     is_device_ready,
     wait_and_validate_device_attribute_value,
@@ -273,7 +274,7 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("mid-tmc/central-node/0")],
+    [(CENTRALNODE_MID)],
 )
 def test_load_dish_cfg(
     tango_context,
@@ -294,7 +295,7 @@ def test_load_dish_cfg(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("mid-tmc/central-node/0")],
+    [(CENTRALNODE_MID)],
 )
 def test_load_dish_cfg_when_csp_is_defective(
     tango_context,
@@ -321,7 +322,7 @@ def test_load_dish_cfg_when_csp_is_defective(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("mid-tmc/central-node/0")],
+    [(CENTRALNODE_MID)],
 )
 def test_load_dish_cfg_after_central_node_init(
     tango_context,
@@ -344,7 +345,7 @@ def test_load_dish_cfg_after_central_node_init(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("mid-tmc/central-node/0")],
+    [(CENTRALNODE_MID)],
 )
 def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
     tango_context,
@@ -427,7 +428,7 @@ def load_dish_cfg_with_wrong_path(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("mid-tmc/central-node/0")],
+    [(CENTRALNODE_MID)],
 )
 def test_load_dish_cfg_with_wrong_path(
     tango_context,

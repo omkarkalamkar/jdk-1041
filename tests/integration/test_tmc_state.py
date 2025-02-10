@@ -4,6 +4,19 @@ import tango
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DevState
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+    DISH_LEAF_NODE_1,
+    LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SUBARRAY_LN,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SDP_SUBARRAY_LN,
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_SUBARRAY_LN,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_SUBARRAY_LN,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import event_remover, logger
 
@@ -14,7 +27,7 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
     """Tests tmc state for mid"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("mid-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
 
     ensure_checked_devices(central_node)
     central_node.subscribe_event(
@@ -23,15 +36,11 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
         change_event_callbacks["tmOpState"],
     )
 
-    csp_master_ln = dev_factory.get_device("mid-tmc/leaf-node-csp/0")
-    sdp_master_ln = dev_factory.get_device("mid-tmc/leaf-node-sdp/0")
-    csp_subarray_ln = dev_factory.get_device(
-        "mid-tmc/subarray-leaf-node-csp/01"
-    )
-    sdp_subarray_ln = dev_factory.get_device(
-        "mid-tmc/subarray-leaf-node-sdp/01"
-    )
-    dish_ln = dev_factory.get_device("mid-tmc/leaf-node-dish/ska001")
+    csp_master_ln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    sdp_master_ln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_subarray_ln = dev_factory.get_device(MID_CSP_SUBARRAY_LN)
+    sdp_subarray_ln = dev_factory.get_device(MID_SDP_SUBARRAY_LN)
+    dish_ln = dev_factory.get_device(DISH_LEAF_NODE_1)
 
     csp_master_ln.SetDirectState(DevState.FAULT)
     sdp_master_ln.SetDirectState(DevState.ON)
@@ -54,7 +63,7 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
     """Test tmc state for low"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("low-tmc/central-node/0")
+    central_node = dev_factory.get_device(CENTRALNODE_LOW)
 
     ensure_checked_devices(central_node)
     central_node.subscribe_event(
@@ -63,14 +72,10 @@ def test_tmc_state_low(tango_context, change_event_callbacks):
         change_event_callbacks["tmOpState"],
     )
 
-    csp_master_ln = dev_factory.get_device("low-tmc/leaf-node-csp/0")
-    sdp_master_ln = dev_factory.get_device("low-tmc/leaf-node-sdp/0")
-    csp_subarray_ln = dev_factory.get_device(
-        "low-tmc/subarray-leaf-node-csp/01"
-    )
-    sdp_subarray_ln = dev_factory.get_device(
-        "low-tmc/subarray-leaf-node-sdp/01"
-    )
+    csp_master_ln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    sdp_master_ln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    csp_subarray_ln = dev_factory.get_device(LOW_CSP_SUBARRAY_LN)
+    sdp_subarray_ln = dev_factory.get_device(LOW_SDP_SUBARRAY_LN)
 
     csp_master_ln.SetDirectState(DevState.FAULT)
     sdp_master_ln.SetDirectState(DevState.ON)

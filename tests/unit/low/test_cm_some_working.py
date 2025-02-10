@@ -8,6 +8,7 @@ from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.utils.constants import CENTRALNODE_LOW
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
@@ -26,7 +27,7 @@ def devices_to_load():
     return (
         {
             "class": SKABaseDevice,
-            "devices": [{"name": "low-tmc/central-node/0"}],
+            "devices": [{"name": CENTRALNODE_LOW}],
         },
         {
             "class": CNHelperSubArrayDevice,

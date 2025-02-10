@@ -1,6 +1,29 @@
 """Input Parameter class for central node"""
 from typing import Callable, List
 
+from ska_tmc_centralnode.utils.constants import (
+    DISH_DEVICE_PREFIX,
+    DISH_LEAF_NODE_1,
+    DISH_LEAF_NODE_PREFIX,
+    DISH_MASTER_1,
+    LOW_CSP_MASTER_DEVICE,
+    LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SUBARRAY,
+    LOW_SDP_MASTER_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SDP_SUBARRAY,
+    LOW_TMC_SUBARRAY,
+    MCCS_MASTER_DEVICE,
+    MCCS_MLN_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_SUBARRAY_LN,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_SUBARRAY_LN,
+    MID_TMC_SUBARRAY,
+)
+
 
 class InputParameter:
     """Class for Input parameter this class is used to distinguish between
@@ -236,15 +259,15 @@ class InputParameterLow(InputParameter):
 
     def __init__(self, changed_callback: Callable) -> None:
         super().__init__(changed_callback=changed_callback)
-        self._subarray_dev_names = ["low-tmc/subarray/01"]
-        self._csp_subarray_dev_names = ["low-tmc/subarray-leaf-node-csp/01"]
-        self._sdp_subarray_dev_names = ["low-tmc/subarray-leaf-node-sdp/01"]
-        self._csp_master_dev_name = "low-csp/control/0"
-        self._sdp_master_dev_name = "low-sdp/control/0"
-        self._mccs_master_dev_name = "low-mccs/control/control"
-        self._sdp_mln_dev_name = "low-tmc/leaf-node-sdp/0"
-        self._csp_mln_dev_name = "low-tmc/leaf-node-csp/0"
-        self._mccs_mln_dev_name = "low-tmc/leaf-node-mccs/0"
+        self._subarray_dev_names = [LOW_TMC_SUBARRAY]
+        self._csp_subarray_dev_names = [LOW_CSP_SUBARRAY]
+        self._sdp_subarray_dev_names = [LOW_SDP_SUBARRAY]
+        self._csp_master_dev_name = LOW_CSP_MASTER_DEVICE
+        self._sdp_master_dev_name = LOW_SDP_MASTER_DEVICE
+        self._mccs_master_dev_name = MCCS_MASTER_DEVICE
+        self._sdp_mln_dev_name = LOW_SDP_MLN_DEVICE
+        self._csp_mln_dev_name = LOW_CSP_MLN_DEVICE
+        self._mccs_mln_dev_name = MCCS_MLN_DEVICE
         self._changed_callback = changed_callback
 
     @property
@@ -321,23 +344,17 @@ class InputParameterMid(InputParameter):
 
     def __init__(self, changed_callback: Callable) -> None:
         super().__init__(changed_callback=changed_callback)
-        self._subarray_dev_names: List[str] = ["mid-tmc/subarray/01"]
-        self._csp_subarray_dev_names: List[str] = [
-            "mid-tmc/subarray-leaf-node-csp/01"
-        ]
-        self._dish_leaf_node_dev_names: List[str] = [
-            "mid-tmc/leaf-node-dish/ska001"
-        ]
-        self._dish_dev_names: List[str] = ["ska001/elt/master"]
-        self._sdp_subarray_dev_names: List[str] = [
-            "mid-tmc/subarray-leaf-node-sdp/01"
-        ]
-        self._csp_master_dev_name: str = "mid-csp/control/0"
-        self._sdp_master_dev_name: str = "mid-sdp/control/0"
-        self._sdp_mln_dev_name: str = "mid-tmc/leaf-node-sdp/0"
-        self._csp_mln_dev_name: str = "mid-tmc/leaf-node-csp/0"
-        self._dish_leaf_node_prefix: str = "mid-tmc/leaf-node-dish/ska"
-        self._dish_master_identifier: str = "elt/master"
+        self._subarray_dev_names: List[str] = [MID_TMC_SUBARRAY]
+        self._csp_subarray_dev_names: List[str] = [MID_CSP_SUBARRAY_LN]
+        self._dish_leaf_node_dev_names: List[str] = [DISH_LEAF_NODE_1]
+        self._dish_dev_names: List[str] = [DISH_MASTER_1]
+        self._sdp_subarray_dev_names: List[str] = [MID_SDP_SUBARRAY_LN]
+        self._csp_master_dev_name: str = MID_CSP_MASTER_DEVICE
+        self._sdp_master_dev_name: str = MID_SDP_MASTER_DEVICE
+        self._sdp_mln_dev_name: str = MID_SDP_MLN_DEVICE
+        self._csp_mln_dev_name: str = MID_CSP_MLN_DEVICE
+        self._dish_leaf_node_prefix: str = DISH_LEAF_NODE_PREFIX
+        self._dish_master_identifier: str = DISH_DEVICE_PREFIX
         self._changed_callback: Callable = changed_callback
 
     @property
