@@ -66,12 +66,12 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
     """sets devices to On"""
     set_devices_state(
         devices=[
-            "low-tmc/subarray/01",
-            "low-tmc/leaf-node-sdp/0",
-            "low-tmc/leaf-node-csp/0",
-            "low-tmc/leaf-node-mccs/0",
-            "low-tmc/subarray-leaf-node-csp/01",
-            "low-tmc/subarray-leaf-node-sdp/01",
+            LOW_SUBARRAY_DEVICE,
+            LOW_SDP_MLN_DEVICE,
+            LOW_CSP_MLN_DEVICE,
+            MCCS_MLN_DEVICE,
+            LOW_CSP_SLN_DEVICE,
+            LOW_SDP_SLN_DEVICE,
         ],
         devFactory=devFactory,
         state=tango.DevState.ON,

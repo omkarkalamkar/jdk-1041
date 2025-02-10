@@ -640,7 +640,7 @@ class CNComponentManager(TmcComponentManager):
         """
         with self.lock:
             self.logger.info(
-                "Updating assigned resources for device '%s': %s",
+                "Updating assigned resources for device %s: %s",
                 dev_name,
                 assign_resources,
             )
@@ -671,7 +671,7 @@ class CNComponentManager(TmcComponentManager):
         :return True is already assigned, False otherwise
         """
         self.logger.debug(
-            "Checking if dish with ID '%s' is already assigned", dish_id
+            "Checking if dish with ID %s is already assigned", dish_id
         )
         for devInfo in self.devices:
             if isinstance(devInfo, SubArrayDeviceInfo):

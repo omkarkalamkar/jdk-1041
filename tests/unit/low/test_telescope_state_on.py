@@ -64,9 +64,9 @@ def devices_to_load():
 def set_devices_on(cm, devFactory, expected_elapsed_time):
     set_devices_state(
         devices=[
-            "low-sdp/control/0",
-            "low-csp/control/0",
-            "low-mccs/control/control",
+            LOW_SDP_MASTER_DEVICE,
+            LOW_CSP_MASTER_DEVICE,
+            MCCS_CONTROLLER,
         ],
         devFactory=devFactory,
         state=tango.DevState.ON,

@@ -62,7 +62,7 @@ def test_set_health_state_ok(tango_context):
 
 
 def set_device_degraded(devFactory, cm, expected_elapsed_time):
-    proxy = devFactory.get_device("mid-csp/control/0")
+    proxy = devFactory.get_device(MID_CSP_MLN_DEVICE)
     proxy.SetDirectHealthState(HealthState.DEGRADED)
     assert proxy.HealthState == HealthState.DEGRADED
     start_time = time.time()
@@ -89,10 +89,10 @@ def test_set_health_state_degraded(tango_context):
 
 
 def set_failed(devFactory, cm, expected_elapsed_time=1.5):
-    proxy = devFactory.get_device("mid-csp/control/0")
+    proxy = devFactory.get_device(MID_CSP_MLN_DEVICE)
     proxy.SetDirectHealthState(HealthState.DEGRADED)
     assert proxy.HealthState == HealthState.DEGRADED
-    proxy = devFactory.get_device("mid-tmc/subarray/01")
+    proxy = devFactory.get_device(MID_SUBARRAY_DEVICE)
     proxy.SetDirectHealthState(HealthState.FAILED)
     assert proxy.HealthState == HealthState.FAILED
     start_time = time.time()
@@ -113,7 +113,7 @@ def test_set_health_state_failed(tango_context):
 
 
 def set_device_unknown(devFactory, cm, expected_elapsed_time=12):
-    proxy = devFactory.get_device("mid-csp/control/0")
+    proxy = devFactory.get_device(MID_CSP_MLN_DEVICE)
     proxy.SetDirectHealthState(HealthState.UNKNOWN)
     assert proxy.HealthState == HealthState.UNKNOWN
     start_time = time.time()

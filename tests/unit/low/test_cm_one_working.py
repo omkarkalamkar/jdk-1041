@@ -8,7 +8,17 @@ from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
-from ska_tmc_centralnode.utils.constants import CENTRALNODE_LOW
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    LOW_CSP_MASTER_DEVICE,
+    LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SUBARRAY_LN,
+    LOW_SDP_MASTER_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SDP_SUBARRAY_LN,
+    MCCS_MASTER_DEVICE,
+    MCCS_MLN_DEVICE,
+)
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
@@ -36,14 +46,14 @@ def devices_to_load():
 
 
 FAULTY_LIST = [
-    "low-tmc/leaf-node-mccs/0",
-    "low-mccs/control/control",
-    "low-sdp/control/0",
-    "low-csp/control/0",
-    "low-tmc/leaf-node-csp/0",
-    "low-tmc/leaf-node-sdp/0",
-    "low-tmc/subarray-leaf-node-csp/01",
-    "low-tmc/subarray-leaf-node-sdp/01",
+    MCCS_MLN_DEVICE,
+    MCCS_MASTER_DEVICE,
+    LOW_SDP_MASTER_DEVICE,
+    LOW_CSP_MASTER_DEVICE,
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_CSP_SUBARRAY_LN,
+    LOW_SDP_SUBARRAY_LN,
 ]
 
 

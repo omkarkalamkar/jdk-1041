@@ -66,8 +66,8 @@ def test_telescope_state_off_with_dishmode_standbylp(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
         devices=[
-            "mid-csp/control/0",
-            "mid-sdp/control/0",
+            MID_CSP_MLN_DEVICE,
+            MID_SDP_MLN_DEVICE,
         ],
         state=tango.DevState.OFF,
         devFactory=DevFactory(),
@@ -84,8 +84,8 @@ def test_telescope_state_off_with_dishmode_shutdown(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
         devices=[
-            "mid-csp/control/0",
-            "mid-sdp/control/0",
+            MID_CSP_MLN_DEVICE,
+            MID_SDP_MLN_DEVICE,
         ],
         state=tango.DevState.OFF,
         devFactory=DevFactory(),

@@ -49,7 +49,7 @@ def devices_to_load():
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
     """initialise device"""
-    set_device_state("mid-tmc/subarray/01", tango.DevState.INIT, devFactory)
+    set_device_state(MID_SUBARRAY_DEVICE, tango.DevState.INIT, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
@@ -63,19 +63,11 @@ def test_tmc_state_init(tango_context):
 
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     """sets one device fault"""
-    set_device_state("mid-tmc/subarray/01", tango.DevState.FAULT, devFactory)
-    set_device_state(
-        "mid-tmc/subarray-leaf-node-csp/01", tango.DevState.OFF, devFactory
-    )
-    set_device_state(
-        "mid-tmc/subarray-leaf-node-sdp/01", tango.DevState.OFF, devFactory
-    )
-    set_device_state(
-        "mid-tmc/leaf-node-csp/0", tango.DevState.STANDBY, devFactory
-    )
-    set_device_state(
-        "mid-tmc/leaf-node-sdp/0", tango.DevState.STANDBY, devFactory
-    )
+    set_device_state(MID_SUBARRAY_DEVICE, tango.DevState.FAULT, devFactory)
+    set_device_state(MID_CSP_SLN_DEVICE, tango.DevState.OFF, devFactory)
+    set_device_state(MID_SDP_SLN_DEVICE, tango.DevState.OFF, devFactory)
+    set_device_state(MID_CSP_MLN_DEVICE, tango.DevState.STANDBY, devFactory)
+    set_device_state(MID_SDP_MLN_DEVICE, tango.DevState.STANDBY, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
@@ -89,13 +81,9 @@ def test_tmc_state_fault_over_standby(tango_context):
 
 def set_device_standby(devFactory, cm, expected_elapsed_time):
     """sets device to standby"""
-    set_device_state("mid-tmc/subarray/01", tango.DevState.STANDBY, devFactory)
-    set_device_state(
-        "mid-tmc/subarray-leaf-node-csp/01", tango.DevState.OFF, devFactory
-    )
-    set_device_state(
-        "mid-tmc/subarray-leaf-node-sdp/01", tango.DevState.OFF, devFactory
-    )
-    set_device_state("mid-tmc/leaf-node-csp/0", tango.DevState.ON, devFactory)
-    set_device_state("mid-tmc/leaf-node-sdp/0", tango.DevState.ON, devFactory)
+    set_device_state(MID_SUBARRAY_DEVICE, tango.DevState.STANDBY, devFactory)
+    set_device_state(MID_CSP_SLN_DEVICE, tango.DevState.OFF, devFactory)
+    set_device_state(MID_SDP_SLN_DEVICE, tango.DevState.OFF, devFactory)
+    set_device_state(MID_CSP_MLN_DEVICE, tango.DevState.ON, devFactory)
+    set_device_state(MID_SDP_MLN_DEVICE, tango.DevState.ON, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.STANDBY, expected_elapsed_time)

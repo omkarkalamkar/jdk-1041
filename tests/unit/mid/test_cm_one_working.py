@@ -11,7 +11,15 @@ from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_MID,
+    DISH_LEAF_NODE_DEVICE,
     DISH_LEAF_NODE_PREFIX,
+    DISH_MASTER_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_SLN_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
     NUM_DISHES,
     logger,
@@ -36,14 +44,14 @@ def devices_to_load():
 
 
 FAULTY_LIST = [
-    "mid-tmc/leaf-node-csp/0",
-    "mid-csp/control/0",
-    "mid-tmc/leaf-node-sdp/0",
-    "mid-sdp/control/0",
-    "mid-tmc/subarray-leaf-node-csp/01",
-    "mid-tmc/subarray-leaf-node-sdp/01",
-    "mid-tmc/leaf-node-dish/ska001",
-    "ska001/elt/master",
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_SLN_DEVICE,
+    MID_CSP_SLN_DEVICE,
+    DISH_LEAF_NODE_DEVICE,
+    DISH_MASTER_DEVICE,
 ]
 
 
@@ -60,7 +68,7 @@ def test_one_working_other_faulty(tango_context):
 
     set_devices_unresponsive(cm, FAULTY_LIST)
     set_devices_unresponsive(cm, dishes)
-    subarrayDevInfo = cm.get_device("mid-tmc/subarray/01")
+    subarrayDevInfo = cm.get_device(MID_SUBARRAY_DEVICE)
     for devInfo in cm.devices:
         if devInfo == subarrayDevInfo:
             assert not devInfo.unresponsive
