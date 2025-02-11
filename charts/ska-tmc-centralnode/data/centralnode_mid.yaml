@@ -32,7 +32,7 @@ server:
           - "{{.Values.deviceServers.centralnode.mid.SdpMasterFQDN}}"
         - name: "DishLeafNodePrefix"
           values:
-          - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}{{.Values.deviceServers.centralnode.mid.DishType}}"
+          - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}{{lower .Values.deviceServers.centralnode.mid.DishType}}"
         - name: "DishMasterIdentifier"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishMasterIdentifier}}"
