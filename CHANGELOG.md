@@ -5,8 +5,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-[0.17.4]
+[0.17.5]
 ********
+* Resolved SKB-709 on CentralNode updated checked_device property.
+
+[0.17.4 Defective tag]
+**********************
+* Inprogress changes of ADR-9 are included.
 * Resolved SKB-709 on CentralNode updated checked_device property.
 
 [0.17.3]

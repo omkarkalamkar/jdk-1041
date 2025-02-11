@@ -223,10 +223,11 @@ class CNComponentManager(TmcComponentManager):
             thread.start()
 
     def process_event(self, attribute_name: str) -> None:
-        """Process the given attribute's event using the data from the
+        """
+        Process the given attribute's event using the data from the
         event_queues and invoke corresponding process method.
         :param attribute_name: Name of the attribute for which event is to be
-            processed
+        processed
         :type attribute_name: str
         :returns: None
         """
