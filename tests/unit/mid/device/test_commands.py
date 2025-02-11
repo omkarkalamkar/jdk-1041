@@ -2,7 +2,7 @@ import pytest
 import tango
 from tango.test_utils import DeviceTestContext
 
-from ska_tmc_centralnode.central_node_mid import CentralNodeMid
+from ska_tmc_centralnode.central_node_mid import MidTmcCentralNode
 
 
 @pytest.fixture
@@ -10,12 +10,12 @@ def central_node_device(request):
     """Create DeviceProxy for tests"""
     true_context = request.config.getoption("--true-context")
     if not true_context:
-        with DeviceTestContext(CentralNodeMid, timeout=50) as proxy:
+        with DeviceTestContext(MidTmcCentralNode, timeout=50) as proxy:
             yield proxy
     else:
         database = tango.Database()
         instance_list = database.get_device_exported_for_class(
-            "CentralNodeMid"
+            "MidTmcCentralNode"
         )
         for instance in instance_list.value_string:
             yield tango.DeviceProxy(instance)

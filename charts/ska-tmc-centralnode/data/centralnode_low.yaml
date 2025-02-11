@@ -8,9 +8,9 @@ server:
   instances:
   - name: "01"
     classes:
-    - name: "CentralNodeLow"
+    - name: "LowTmcCentralNode"
       devices:
-      - name: "ska_low/tm_central/central_node"
+      - name: "{{ $.Values.global.low.domain }}/{{ $.Values.deviceServers.centralnode.family }}/{{ $.Values.deviceServers.centralnode.member }}"
         properties:
         - name: "CspMasterLeafNodeFQDN"
           values:
@@ -45,17 +45,17 @@ server:
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_low/tm_subarray_node/{{ . }}"
+          - "low-tmc/subarray/{{ printf "%02s" . }}"
           {{- end }}
         - name: "CspSubarrayLeafNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_low/tm_leaf_node/csp_subarray{{ printf "%02s" . }}"
+          - "low-tmc/subarray-leaf-node-csp/{{ printf "%02s" . }}"
           {{- end }}
         - name: "SdpSubarrayLeafNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_low/tm_leaf_node/sdp_subarray{{ printf "%02s" . }}"
+          - "low-tmc/subarray-leaf-node-sdp/{{ printf "%02s" . }}"
           {{- end }}
         - name: "SkaLevel"
           values:

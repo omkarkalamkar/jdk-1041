@@ -6,6 +6,10 @@ import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     LOW_SUBARRAY_DEVICE,
@@ -25,7 +29,7 @@ def release_resources(
     """Release Resources method for command invocation."""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         subarray_fqdn = MID_SUBARRAY_DEVICE
         subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     else:
@@ -54,7 +58,7 @@ def release_resources(
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, subarray_fqdn, True)
 
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         result, unique_id_assign = central_node.AssignResources(
             assign_input_str
         )
@@ -122,7 +126,7 @@ def test_release_res_command_mid(
     """Test release resources command mid"""
     return release_resources(
         tango_context,
-        "ska_mid/tm_central/central_node",
+        CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources"),
         change_event_callbacks,
@@ -137,7 +141,7 @@ def test_release_res_command_low(
     """Test release resources command for low"""
     return release_resources(
         tango_context,
-        "ska_low/tm_central/central_node",
+        CENTRALNODE_LOW,
         json_factory("command_assign_resource_low"),
         json_factory("command_release_resource_low"),
         change_event_callbacks,

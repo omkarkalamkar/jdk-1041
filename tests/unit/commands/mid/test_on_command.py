@@ -13,6 +13,7 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 from tango import DevState
 
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
+from ska_tmc_centralnode.utils.constants import MID_TMC_SUBARRAY
 from tests.mock_callable import MockCallable
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
@@ -111,7 +112,7 @@ def test_telescope_on_command_fail_subarray(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in TelescopeOn command
-    failing_dev = "ska_mid/tm_subarray_node/1"
+    failing_dev = MID_TMC_SUBARRAY
     attrs = {"TelescopeOn.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
     my_adapter_factory.get_or_create_adapter(failing_dev, proxy=subarrayMock)

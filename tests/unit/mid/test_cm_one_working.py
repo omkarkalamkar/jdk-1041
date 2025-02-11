@@ -7,10 +7,19 @@ from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
+from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_MID,
+    DISH_LEAF_NODE_DEVICE,
     DISH_LEAF_NODE_PREFIX,
+    DISH_MASTER_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_SLN_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
     NUM_DISHES,
     logger,
@@ -23,7 +32,7 @@ def devices_to_load():
     return (
         {
             "class": SKABaseDevice,
-            "devices": [{"name": "ska_mid/tm_central/central_node"}],
+            "devices": [{"name": CENTRALNODE_MID}],
         },
         {
             "class": CNHelperSubArrayDevice,
@@ -35,14 +44,14 @@ def devices_to_load():
 
 
 FAULTY_LIST = [
-    "ska_mid/tm_leaf_node/csp_master",
-    "mid-csp/control/0",
-    "ska_mid/tm_leaf_node/sdp_master",
-    "mid-sdp/control/0",
-    "ska_mid/tm_leaf_node/csp_subarray01",
-    "ska_mid/tm_leaf_node/sdp_subarray01",
-    "ska_mid/tm_leaf_node/d0001",
-    "ska001/elt/master",
+    MID_CSP_MLN_DEVICE,
+    MID_CSP_MASTER_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    MID_SDP_MASTER_DEVICE,
+    MID_SDP_SLN_DEVICE,
+    MID_CSP_SLN_DEVICE,
+    DISH_LEAF_NODE_DEVICE,
+    DISH_MASTER_DEVICE,
 ]
 
 
@@ -59,7 +68,7 @@ def test_one_working_other_faulty(tango_context):
 
     set_devices_unresponsive(cm, FAULTY_LIST)
     set_devices_unresponsive(cm, dishes)
-    subarrayDevInfo = cm.get_device("ska_mid/tm_subarray_node/1")
+    subarrayDevInfo = cm.get_device(MID_SUBARRAY_DEVICE)
     for devInfo in cm.devices:
         if devInfo == subarrayDevInfo:
             assert not devInfo.unresponsive

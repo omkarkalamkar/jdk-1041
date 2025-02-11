@@ -7,6 +7,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
+from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 from tests.common_utils import (
     is_device_ready,
     wait_and_validate_device_attribute_value,
@@ -19,7 +20,6 @@ from tests.settings import (
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
     check_lrcr_events,
-    event_remover,
     logger,
 )
 
@@ -87,11 +87,6 @@ def load_dish_cfg(
         config_str,
     )
 
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
-
 
 def load_dish_cfg_when_csp_is_defective(
     tango_context,
@@ -150,11 +145,6 @@ def load_dish_cfg_when_csp_is_defective(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
-    )
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
     )
 
 
@@ -273,7 +263,7 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [(CENTRALNODE_MID)],
 )
 def test_load_dish_cfg(
     tango_context,
@@ -294,7 +284,7 @@ def test_load_dish_cfg(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [(CENTRALNODE_MID)],
 )
 def test_load_dish_cfg_when_csp_is_defective(
     tango_context,
@@ -321,7 +311,7 @@ def test_load_dish_cfg_when_csp_is_defective(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [(CENTRALNODE_MID)],
 )
 def test_load_dish_cfg_after_central_node_init(
     tango_context,
@@ -344,7 +334,7 @@ def test_load_dish_cfg_after_central_node_init(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [(CENTRALNODE_MID)],
 )
 def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
     tango_context,
@@ -417,17 +407,12 @@ def load_dish_cfg_with_wrong_path(
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
 
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
-
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [(CENTRALNODE_MID)],
 )
 def test_load_dish_cfg_with_wrong_path(
     tango_context,

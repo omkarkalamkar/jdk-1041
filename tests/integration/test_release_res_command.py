@@ -8,6 +8,10 @@ from ska_tango_base.control_model import ObsState
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
@@ -17,7 +21,6 @@ from tests.settings import (
     RESET_DEFECT,
     TIMEOUT_DEFECT,
     check_subarray_availability,
-    event_remover,
     logger,
 )
 
@@ -32,7 +35,7 @@ def release_resources(
     """Method for rlease resources command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
-    if "ska_mid" in central_node_name:
+    if "mid-tmc" in central_node_name:
         subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     else:
         subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
@@ -58,12 +61,12 @@ def release_resources(
     )
 
     subarray_proxy.SetisSubarrayAvailable(True)
-    if "ska_mid" in central_node_name:
+    if "mid-tmc" in central_node_name:
         check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
     else:
         check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
 
-    if "ska_mid" in central_node_name:
+    if "mid-tmc" in central_node_name:
         result, unique_id_assign = central_node.AssignResources(
             assign_input_str
         )
@@ -107,7 +110,7 @@ def test_release_res_command_mid(
     """Test cases for rlease resources command for low"""
     return release_resources(
         tango_context,
-        "ska_mid/tm_central/central_node",
+        CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources"),
         change_event_callbacks,
@@ -125,7 +128,7 @@ def test_release_res_command_low(
     """Test cases for release resources command"""
     return release_resources(
         tango_context,
-        "ska_low/tm_central/central_node",
+        CENTRALNODE_LOW,
         json_factory("command_assign_resource_low"),
         json_factory("command_release_resource_low"),
         change_event_callbacks,
@@ -214,10 +217,6 @@ def release_resources_without_subarray_id(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
 
 
 @pytest.mark.post_deployment
@@ -231,7 +230,7 @@ def test_release_res_command_mid_without_subarray_id(
     """Test cases for release resources command without subarray id"""
     return release_resources_without_subarray_id(
         tango_context,
-        "ska_mid/tm_central/central_node",
+        CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources_without_subarray_id"),
         json_factory("command_ReleaseResources"),
@@ -250,7 +249,7 @@ def test_release_resources_error_propagation(
     """Test cases for release resources error propagation command."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
@@ -334,10 +333,6 @@ def test_release_resources_error_propagation(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
     tmc_subarray.ClearCommandCallInfo()
 
 
@@ -352,7 +347,7 @@ def test_release_resources_mid_timeout(
     """Test cases for release resources command for mid timeout."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_proxy.SetisSubarrayAvailable(True)
     ensure_checked_devices(central_node)
@@ -436,10 +431,6 @@ def test_release_resources_mid_timeout(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
     tmc_subarray.ClearCommandCallInfo()
 
 
@@ -540,11 +531,6 @@ def test_release_resources_low_timeout(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
     tmc_subarray.ClearCommandCallInfo()
 
 
@@ -641,8 +627,4 @@ def test_release_resources_error_aggregation(
     subarray_proxy.ReleaseAllResources()
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     result, unique_id = central_node.TelescopeOff()
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult"],
-    )
     subarray_proxy.ClearCommandCallInfo()

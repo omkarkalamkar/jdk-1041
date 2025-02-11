@@ -30,49 +30,49 @@ logger = logging.getLogger(__name__)
 SLEEP_TIME = 0.5
 TIMEOUT = 50
 KVALUE = 9
-DISH_LEAF_NODE_PREFIX = "ska_mid/tm_leaf_node/d0"
+DISH_LEAF_NODE_PREFIX = "mid-tmc/leaf-node-dish/ska"
 NUM_DISHES = 10
-LOW_CENTRAL_NODE = "ska_low/tm_central/central_node"
-MID_CENTRAL_NODE = "ska_mid/tm_central/central_node"
-MID_CSP_MLN_DEVICE = "ska_mid/tm_leaf_node/csp_master"
-LOW_CSP_MLN_DEVICE = "ska_low/tm_leaf_node/csp_master"
-MID_SDP_MLN_DEVICE = "ska_mid/tm_leaf_node/sdp_master"
-LOW_SDP_MLN_DEVICE = "ska_low/tm_leaf_node/sdp_master"
-MID_CSP_SLN_DEVICE = "ska_mid/tm_leaf_node/csp_subarray01"
-LOW_CSP_SLN_DEVICE = "ska_low/tm_leaf_node/csp_subarray01"
-MID_SDP_SLN_DEVICE = "ska_mid/tm_leaf_node/sdp_subarray01"
-LOW_SDP_SLN_DEVICE = "ska_low/tm_leaf_node/sdp_subarray01"
-MID_SUBARRAY_DEVICE = "ska_mid/tm_subarray_node/1"
-LOW_SUBARRAY_DEVICE = "ska_low/tm_subarray_node/1"
-DISH_LEAF_NODE_DEVICE = "ska_mid/tm_leaf_node/d0001"
+LOW_CENTRAL_NODE = "low-tmc/central-node/0"
+MID_CENTRAL_NODE = "mid-tmc/central-node/0"
+MID_CSP_MLN_DEVICE = "mid-tmc/leaf-node-csp/0"
+LOW_CSP_MLN_DEVICE = "low-tmc/leaf-node-csp/0"
+MID_SDP_MLN_DEVICE = "mid-tmc/leaf-node-sdp/0"
+LOW_SDP_MLN_DEVICE = "low-tmc/leaf-node-sdp/0"
+MID_CSP_SLN_DEVICE = "mid-tmc/subarray-leaf-node-csp/01"
+LOW_CSP_SLN_DEVICE = "low-tmc/subarray-leaf-node-csp/01"
+MID_SDP_SLN_DEVICE = "mid-tmc/subarray-leaf-node-sdp/01"
+LOW_SDP_SLN_DEVICE = "low-tmc/subarray-leaf-node-sdp/01"
+MID_SUBARRAY_DEVICE = "mid-tmc/subarray/01"
+LOW_SUBARRAY_DEVICE = "low-tmc/subarray/01"
+DISH_LEAF_NODE_DEVICE = "mid-tmc/leaf-node-dish/ska001"
 DISH_MASTER_DEVICE = "ska001/elt/master"
 MID_SDP_MASTER_DEVICE = "mid-sdp/control/0"
 MID_CSP_MASTER_DEVICE = "mid-csp/control/0"
 LOW_CSP_MASTER_DEVICE = "low-csp/control/0"
 LOW_SDP_MASTER_DEVICE = "low-sdp/control/0"
 MCCS_CONTROLLER = "low-mccs/control/control"
-MCCS_MLN_DEVICE = "ska_low/tm_leaf_node/mccs_master"
+MCCS_MLN_DEVICE = "low-tmc/leaf-node-mccs/0"
 DEVICE_LIST_MID = [
-    "ska_mid/tm_leaf_node/csp_master",
+    "mid-tmc/leaf-node-csp/0",
     "mid-csp/control/0",
-    "ska_mid/tm_leaf_node/sdp_master",
+    "mid-tmc/leaf-node-sdp/0",
     "mid-sdp/control/0",
-    "ska_mid/tm_subarray_node/1",
-    "ska_mid/tm_leaf_node/csp_subarray01",
-    "ska_mid/tm_leaf_node/sdp_subarray01",
-    "ska_mid/tm_leaf_node/d0001",
+    "mid-tmc/subarray/01",
+    "mid-tmc/subarray-leaf-node-csp/01",
+    "mid-tmc/subarray-leaf-node-sdp/01",
+    "mid-tmc/leaf-node-dish/ska001",
     "ska001/elt/master",
 ]
 DEVICE_LIST_LOW = [
-    "ska_low/tm_leaf_node/mccs_master",
+    "low-tmc/leaf-node-mccs/0",
     "low-mccs/control/control",
-    "ska_low/tm_subarray_node/1",
+    "low-tmc/subarray/01",
     "low-sdp/control/0",
     "low-csp/control/0",
-    "ska_low/tm_leaf_node/csp_master",
-    "ska_low/tm_leaf_node/sdp_master",
-    "ska_low/tm_leaf_node/csp_subarray01",
-    "ska_low/tm_leaf_node/sdp_subarray01",
+    "low-tmc/leaf-node-csp/0",
+    "low-tmc/leaf-node-sdp/0",
+    "low-tmc/subarray-leaf-node-csp/01",
+    "low-tmc/subarray-leaf-node-sdp/01",
 ]
 TIMEOUT_DEFECT = json.dumps(
     {

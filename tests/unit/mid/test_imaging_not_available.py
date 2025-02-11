@@ -53,8 +53,8 @@ def test_imaging_not_available(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_devices_state(
         devices=[
-            "mid-csp/control/0",
-            "ska001/elt/master",
+            MID_CSP_MLN_DEVICE,
+            DISH_MASTER_DEVICE,
         ],
         devFactory=DevFactory(),
         state=tango.DevState.OFF,

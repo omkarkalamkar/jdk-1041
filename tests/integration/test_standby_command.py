@@ -9,13 +9,15 @@ from ska_tmc_common.enum import DishMode
 from tango import DevState
 
 from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
     DISH_LEAF_NODE_1,
     LOW_CSP_MASTER_DEVICE,
     MCCS_MASTER_DEVICE,
     MID_CSP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import event_remover, logger
+from tests.settings import logger
 
 
 @pytest.mark.post_deployment
@@ -28,7 +30,7 @@ def test_standby_command_mid(
     """Test standby command for mid"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
 
     result, unique_id = central_node.TelescopeOn()
@@ -94,11 +96,6 @@ def test_standby_command_mid(
 
     assert central_node.telescopeState == DevState.STANDBY
 
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
-    )
-
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
@@ -110,7 +107,7 @@ def test_standby_command_low(
     """Test standby command for low"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device(CENTRALNODE_LOW)
     ensure_checked_devices(central_node)
 
     result, unique_id = central_node.TelescopeOn()
@@ -165,8 +162,3 @@ def test_standby_command_low(
     logger.info("telescopeState: %s", central_node.telescopeState)
 
     assert central_node.telescopeState == DevState.STANDBY
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
-    )

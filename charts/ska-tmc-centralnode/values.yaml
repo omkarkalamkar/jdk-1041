@@ -21,6 +21,10 @@ global:
   retry:
     - "--tries=10"
     - "--sleep=5"
+  mid:
+    domain: "mid-tmc"
+  low:
+    domain: "low-tmc"
 
 dsconfig:
   configuration_file: data/configuration.json
@@ -42,7 +46,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.17.5
+    tag: 0.17.6
     pullPolicy: IfNotPresent
 
 resources:
@@ -68,13 +72,17 @@ deviceServers:
     SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
+    family: "central-node"
+    member : "0"
+
     mid:
       file: "data/centralnode_mid.yaml"
-      CspMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/csp_master"
+      CspMasterLeafNodeFQDN: "mid-tmc/leaf-node-csp/0"
       CspMasterFQDN: "mid-csp/control/0"
-      SdpMasterLeafNodeFQDN: "ska_mid/tm_leaf_node/sdp_master"
+      SdpMasterLeafNodeFQDN: "mid-tmc/leaf-node-sdp/0"
       SdpMasterFQDN: "mid-sdp/control/0"
-      DishLeafNodePrefix: "ska_mid/tm_leaf_node/d0"
+      DishLeafNodePrefix: "mid-tmc/leaf-node-dish/"
+      DishType: "ska"
       DishMasterIdentifier: "elt/master"
       DishIDs: ["SKA001", "MKT001"]
       DishVccConfig:
@@ -89,11 +97,11 @@ deviceServers:
       CommandTimeOut: 30
     low:
       file: "data/centralnode_low.yaml"
-      CspMasterLeafNodeFQDN: "ska_low/tm_leaf_node/csp_master"
+      CspMasterLeafNodeFQDN: "low-tmc/leaf-node-csp/0"
       CspMasterFQDN: "low-csp/control/0"
-      SdpMasterLeafNodeFQDN: "ska_low/tm_leaf_node/sdp_master"
+      SdpMasterLeafNodeFQDN: "low-tmc/leaf-node-sdp/0"
       SdpMasterFQDN: "low-sdp/control/0"
-      MCCSMasterLeafNodeFQDN: "ska_low/tm_leaf_node/mccs_master"
+      MCCSMasterLeafNodeFQDN: "low-tmc/leaf-node-mccs/0"
       MCCSMasterFQDN: "low-mccs/control/control"
       AssignResourcesInterface: "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
       ReleaseResourcesInterface: "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
