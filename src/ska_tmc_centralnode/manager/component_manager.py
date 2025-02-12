@@ -500,6 +500,7 @@ class CNComponentManager(TmcComponentManager):
         :type dev_name: str
         """
         with self.rlock:
+            self.logger.info("Response received from %s", device_name)
             dev_info = self.get_device(device_name)
             dev_info.update_unresponsive(False, "")
             self._telescope_availability_aggregator.aggregate()
