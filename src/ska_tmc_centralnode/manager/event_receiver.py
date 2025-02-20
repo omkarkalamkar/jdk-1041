@@ -76,7 +76,7 @@ class CentralNodeEventReceiver(EventReceiver):
         self, dev_info: DeviceInfo, attribute_dictionary: Optional[dict] = None
     ) -> None:
         """Subscribe events for central node event receiver"""
-        super().subscribe_events(dev_info, self.attribute_dictionary)
+        # super().subscribe_events(dev_info, self.attribute_dictionary)
 
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
