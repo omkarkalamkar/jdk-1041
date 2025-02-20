@@ -469,6 +469,7 @@ class CNComponentManager(TmcComponentManager):
         :param dev_name: device name
         :type dev_name: str
         """
+        self.logger.info("Adding Device -%s", device_name)
         if "subarray" in device_name.lower():
             devInfo = SubArrayDeviceInfo(device_name, False)
         elif (

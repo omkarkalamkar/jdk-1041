@@ -86,6 +86,16 @@ class CentralNodeEventReceiver(EventReceiver):
             )
         else:
             try:
+                for attribute, callable_value in attribute_dictionary.items():
+                    self._logger.info(
+                        "Subscribing event for attribute: %s", attribute
+                    )
+                    proxy.subscribe_event(
+                        attribute,
+                        tango.EventType.CHANGE_EVENT,
+                        callable_value,
+                        stateless=True,
+                    )
                 if ("subarray" in dev_info.dev_name) and (
                     "leaf" not in dev_info.dev_name
                 ):
@@ -270,7 +280,7 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._logger.info("Received masterln event - %s", event)
+        self._logger.info("Received event - %s", event)
         self._component_manager.event_queues["isSubsystemAvailable"].put(event)
 
     def handle_subarray_availability_event(
