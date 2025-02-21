@@ -149,19 +149,19 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     cm, _ = create_cm()
     cm.handle_dish_vcc_validation_result(MID_CSP_MLN_DEVICE, ResultCode.OK)
     assert json.loads(cm.dish_vcc_validation_status) == {
-        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish Vcc Version is Same"
+        "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish Vcc Version is Same"
     }
 
     cm.handle_dish_vcc_validation_result(MID_CSP_MLN_DEVICE, ResultCode.FAILED)
     assert json.loads(cm.dish_vcc_validation_status) == {
-        "ska_mid/tm_leaf_node/csp_master": "TMC and CSP Master Dish VCC version is Different"
+        "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish VCC version is Different"
     }
 
     cm.handle_dish_vcc_validation_result(
         MID_CSP_MLN_DEVICE, ResultCode.NOT_ALLOWED
     )
     assert json.loads(cm.dish_vcc_validation_status) == {
-        "ska_mid/tm_leaf_node/csp_master": "CSP Master device is unavailable"
+        "mid-tmc/leaf-node-csp/0": "CSP Master device is unavailable"
     }
 
 

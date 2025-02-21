@@ -8,6 +8,8 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 
 from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
     DISH_LEAF_NODE_1,
     LOW_CSP_MASTER_DEVICE,
     LOW_SDP_MASTER_DEVICE,
@@ -16,7 +18,6 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import event_remover
 
 
 # pylint:disable=c-extension-no-member
@@ -29,7 +30,7 @@ def test_off_command_mid(
 ):
     """Test cases for Off command"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
 
     result_on, unique_id_on = central_node.TelescopeOn()
@@ -94,10 +95,6 @@ def test_off_command_mid(
     change_event_callbacks.assert_change_event(
         "telescopeState", tango._tango.DevState.OFF, lookahead=12
     )
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
-    )
 
 
 @pytest.mark.post_deployment
@@ -109,7 +106,7 @@ def test_off_command_low(
 ):
     """Test cases for off command for low"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device(CENTRALNODE_LOW)
     ensure_checked_devices(central_node)
     result_on, unique_id_on = central_node.TelescopeOn()
     result_off, unique_id_off = central_node.TelescopeOff()
@@ -177,9 +174,4 @@ def test_off_command_low(
 
     change_event_callbacks.assert_change_event(
         "telescopeState", tango._tango.DevState.OFF, lookahead=3
-    )
-
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState", "State"],
     )

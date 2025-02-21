@@ -13,12 +13,12 @@ from ska_tmc_centralnode.manager.component_manager_low import (
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 
-__all__ = ["CentralNodeLow", "main"]
+__all__ = ["LowTmcCentralNode", "main"]
 
 # pylint:disable = attribute-defined-outside-init
 
 
-class CentralNodeLow(AbstractCentralNode):
+class LowTmcCentralNode(AbstractCentralNode):
     """
     Central Node is a coordinator of the complete Telescope system
     """
@@ -118,7 +118,7 @@ def main(args=None, **kwargs):
 
     :return: CentralNode TANGO object.
     """
-    return run((CentralNodeLow,), args=args, **kwargs)
+    return run((LowTmcCentralNode,), args=args, **kwargs)
 
 
 if __name__ == "__main__":

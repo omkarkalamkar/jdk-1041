@@ -10,6 +10,7 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 )
 
 from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
+from ska_tmc_centralnode.utils.constants import DISH_LEAF_NODE_1
 from tests.settings import create_cm, logger
 
 
@@ -47,7 +48,7 @@ def test_telescope_stow_antennas_fail_dish(tango_context):
     my_adapter_factory = HelperAdapterFactory()
 
     # include exception in SetStowMode command
-    failing_dev = "ska_mid/tm_leaf_node/d0001"
+    failing_dev = DISH_LEAF_NODE_1
 
     attrs = {"SetStowMode.side_effect": Exception}
     dishMasterLeafMock = mock.Mock(**attrs)

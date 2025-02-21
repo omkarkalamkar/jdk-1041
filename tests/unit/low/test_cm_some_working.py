@@ -8,6 +8,13 @@ from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    LOW_CSP_MLN_DEVICE,
+    LOW_CSP_SUBARRAY_LN,
+    LOW_SDP_MLN_DEVICE,
+    LOW_SDP_SUBARRAY_LN,
+)
 from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
@@ -26,7 +33,7 @@ def devices_to_load():
     return (
         {
             "class": SKABaseDevice,
-            "devices": [{"name": "ska_low/tm_central/central_node"}],
+            "devices": [{"name": CENTRALNODE_LOW}],
         },
         {
             "class": CNHelperSubArrayDevice,
@@ -38,10 +45,10 @@ def devices_to_load():
 
 
 FAULTY_LIST = [
-    "ska_low/tm_leaf_node/csp_master",
-    "ska_low/tm_leaf_node/sdp_master",
-    "ska_low/tm_leaf_node/csp_subarray01",
-    "ska_low/tm_leaf_node/sdp_subarray01",
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    LOW_CSP_SUBARRAY_LN,
+    LOW_SDP_SUBARRAY_LN,
 ]
 
 

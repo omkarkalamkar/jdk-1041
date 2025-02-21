@@ -5,6 +5,10 @@ import time
 import pytest
 from ska_tmc_common.dev_factory import DevFactory
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
@@ -88,7 +92,7 @@ def telescope_availability(
     """Checks telescope availability"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
         sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
         subarray_node = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -107,7 +111,7 @@ def telescope_availability(
     sdp_mln.SetSubsystemAvailable(False)
     assert sdp_mln.isSubsystemAvailable is False
 
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, False)
     else:
         check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, False)
@@ -132,7 +136,7 @@ def telescope_availability(
     sdp_mln.SetSubsystemAvailable(True)
     assert sdp_mln.isSubsystemAvailable is True
 
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
     else:
         check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
@@ -155,7 +159,7 @@ def test_telescope_availability_mid(tango_context, change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(
         tango_context,
-        "ska_mid/tm_central/central_node",
+        CENTRALNODE_MID,
         change_event_callbacks,
     )
 
@@ -166,6 +170,6 @@ def test_telescope_availability_low(tango_context, change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(
         tango_context,
-        "ska_low/tm_central/central_node",
+        CENTRALNODE_LOW,
         change_event_callbacks,
     )

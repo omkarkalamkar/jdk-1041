@@ -9,6 +9,8 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 
 from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
     DISH_LEAF_NODE_1,
     LOW_CSP_MASTER_DEVICE,
     LOW_SDP_MASTER_DEVICE,
@@ -17,7 +19,6 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import event_remover
 
 
 # pylint:disable=c-extension-no-member
@@ -32,7 +33,7 @@ def test_on_command_mid(
 ):
     """Test cases for ON command"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_mid/tm_central/central_node")
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
     assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
@@ -87,10 +88,6 @@ def test_on_command_mid(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
-    )
 
 
 @pytest.mark.post_deployment
@@ -102,7 +99,7 @@ def test_on_command_low(
 ):
     """Test cases for ON command for low"""
     dev_factory = DevFactory()
-    central_node = dev_factory.get_device("ska_low/tm_central/central_node")
+    central_node = dev_factory.get_device(CENTRALNODE_LOW)
     assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
@@ -148,8 +145,4 @@ def test_on_command_low(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
-    )
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "telescopeState"],
     )

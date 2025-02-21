@@ -8,15 +8,15 @@ instances: ["01"]
 
 {{- if ge $KValueValidRangeUpperLimit $KValueValidRangeLowerLimit }}
 entrypoints:
-  - name: "ska_tmc_centralnode.central_node_mid.CentralNodeMid"
+  - name: "ska_tmc_centralnode.central_node_mid.MidTmcCentralNode"
 server:
   name: "central_node_mid"
   instances:
   - name: "01"
     classes:
-    - name: "CentralNodeMid"
+    - name: "MidTmcCentralNode"
       devices:
-      - name: "ska_mid/tm_central/central_node"
+      - name: "{{ $.Values.global.mid.domain }}/{{ $.Values.deviceServers.centralnode.family }}/{{ $.Values.deviceServers.centralnode.member }}"
         properties:
         - name: "CspMasterLeafNodeFQDN"
           values:
@@ -32,7 +32,7 @@ server:
           - "{{.Values.deviceServers.centralnode.mid.SdpMasterFQDN}}"
         - name: "DishLeafNodePrefix"
           values:
-          - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}"
+          - "{{.Values.deviceServers.centralnode.mid.DishLeafNodePrefix}}{{lower .Values.deviceServers.centralnode.mid.DishType}}"
         - name: "DishMasterIdentifier"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishMasterIdentifier}}"
@@ -70,17 +70,17 @@ server:
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_mid/tm_subarray_node/{{ . }}"
+          - "mid-tmc/subarray/{{ printf "%02s" . }}"
           {{- end }}
         - name: "CspSubarrayLeafNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_mid/tm_leaf_node/csp_subarray{{ printf "%02s" . }}"
+          - "mid-tmc/subarray-leaf-node-csp/{{ printf "%02s" . }}"
           {{- end }}
         - name: "SdpSubarrayLeafNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
-          - "ska_mid/tm_leaf_node/sdp_subarray{{ printf "%02s" . }}"
+          - "mid-tmc/subarray-leaf-node-sdp/{{ printf "%02s" . }}"
           {{- end }}
         - name: "KValueValidRangeUpperLimit"
           values:

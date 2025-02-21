@@ -64,9 +64,7 @@ def devices_to_load():
 
 def set_device_init(devFactory, cm, expected_elapsed_time):
     """Sets the devices init"""
-    set_device_state(
-        "ska_low/tm_subarray_node/1", tango.DevState.INIT, devFactory
-    )
+    set_device_state(LOW_SUBARRAY_DEVICE, tango.DevState.INIT, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.INIT, expected_elapsed_time)
 
 
@@ -84,15 +82,9 @@ def test_tmc_state_init(tango_context):
 
 def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     """Sets one devices fault"""
-    set_device_state(
-        "ska_low/tm_subarray_node/1", tango.DevState.FAULT, devFactory
-    )
-    set_device_state(
-        "ska_low/tm_leaf_node/csp_master", tango.DevState.OFF, devFactory
-    )
-    set_device_state(
-        "ska_low/tm_leaf_node/sdp_master", tango.DevState.STANDBY, devFactory
-    )
+    set_device_state(LOW_SUBARRAY_DEVICE, tango.DevState.FAULT, devFactory)
+    set_device_state(LOW_CSP_MLN_DEVICE, tango.DevState.OFF, devFactory)
+    set_device_state(LOW_SDP_MLN_DEVICE, tango.DevState.STANDBY, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
@@ -109,13 +101,7 @@ def test_tmc_state_fault_over_standby(tango_context):
 
 def set_device_standby(devFactory, cm, expected_elapsed_time):
     """sets devices standby"""
-    set_device_state(
-        "ska_low/tm_subarray_node/1", tango.DevState.STANDBY, devFactory
-    )
-    set_device_state(
-        "ska_low/tm_leaf_node/csp_master", tango.DevState.OFF, devFactory
-    )
-    set_device_state(
-        "ska_low/tm_leaf_node/sdp_master", tango.DevState.ON, devFactory
-    )
+    set_device_state(LOW_SUBARRAY_DEVICE, tango.DevState.STANDBY, devFactory)
+    set_device_state(LOW_CSP_MLN_DEVICE, tango.DevState.OFF, devFactory)
+    set_device_state(LOW_SDP_MLN_DEVICE, tango.DevState.ON, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.STANDBY, expected_elapsed_time)

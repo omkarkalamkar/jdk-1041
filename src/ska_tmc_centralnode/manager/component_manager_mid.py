@@ -224,27 +224,27 @@ class CNComponentManagerMid(CNComponentManager):
          and sets the updated validation result.
          Ex1:
          current_dish_vcc_validation_status = '{
-                "d0001": "k-value not set",
-                "d0036": "k-value not set",
-                "d0063": "k-value not set",
-                "d0100": "k-value not set",
-                "ska_mid/tm_leaf_node/csp_master":
+                "ska001": "k-value not set",
+                "ska036": "k-value not set",
+                "ska063": "k-value not set",
+                "ska100": "k-value not set",
+                "mid-tmc/leaf-node-csp/0":
                 "TMC and CSP Master Dish Vcc Version is Same",
             }'
          validation_status = {
-                "d0001": "k-value identical",
-                "d0036": "k-value identical",
-                "d0063": "k-value not set",
-                "d0100": "k-value not set",
+                "ska001": "k-value identical",
+                "ska036": "k-value identical",
+                "ska063": "k-value not set",
+                "ska100": "k-value not set",
          }
          if validation_status received and current validation status is
          as above then this method will aggregate like below:
          self._dish_vcc_validation_status = '{
-                "d0001": "k-value identical",
-                "d0036": "k-value identical",
-                "d0063": "k-value not set",
-                "d0100": "k-value not set",
-                "ska_mid/tm_leaf_node/csp_master":
+                "ska001": "k-value identical",
+                "ska036": "k-value identical",
+                "ska063": "k-value not set",
+                "ska100": "k-value not set",
+                "mid-tmc/leaf-node-csp/0":
                 "TMC and CSP Master Dish Vcc Version is Same",
             }'
         or Ex2:
@@ -636,11 +636,11 @@ class CNComponentManagerMid(CNComponentManager):
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availablity status"""
         with self.rlock:
-            if "tm_subarray_node" in device_name:
+            if device_name in self.input_parameter.subarray_dev_names:
                 self.subarray_availability[device_name] = event_value
-            elif "tm_leaf_node/csp_master" in device_name:
+            elif self.input_parameter.csp_mln_dev_name == device_name:
                 self.csp_mln_availability = event_value
-            elif "tm_leaf_node/sdp_master" in device_name:
+            elif self.input_parameter.sdp_mln_dev_name == device_name:
                 self.sdp_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()
 
@@ -715,7 +715,7 @@ class CNComponentManagerMid(CNComponentManager):
             result,
         )
         with self.dish_vcc_validation_attr_lock:
-            if "tm_leaf_node/csp_master" in dev_name:
+            if self.input_parameter.csp_mln_dev_name in dev_name:
                 # Handle Csp Master Leaf Node event
                 csp_validation_result = int(result)
                 self.logger.info(

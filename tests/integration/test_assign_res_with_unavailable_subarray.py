@@ -7,6 +7,10 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
 
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     LOW_SUBARRAY_DEVICE,
@@ -57,7 +61,7 @@ def assign_resources(
 
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
 
-    if "ska_mid" in central_node_fqdn:
+    if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
             assign_input_str
         )
@@ -87,7 +91,7 @@ def assign_resources(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_mid/tm_central/central_node")],
+    [(CENTRALNODE_MID)],
 )
 def test_assign_res_command_mid_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory
@@ -106,7 +110,7 @@ def test_assign_res_command_mid_unavailable_subarray(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [("ska_low/tm_central/central_node")],
+    [(CENTRALNODE_LOW)],
 )
 def test_assign_res_command_low_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory

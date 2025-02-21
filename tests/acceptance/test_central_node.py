@@ -17,7 +17,6 @@ from tests.settings import (
     MID_CENTRAL_NODE,
     MID_SUBARRAY_DEVICE,
     check_subarray_availability,
-    event_remover,
     logger,
 )
 
@@ -39,10 +38,10 @@ def device_list():
 def central_node():
     """Central node device"""
     database = Database()
-    instance_list = database.get_device_exported_for_class("CentralNodeLow")
+    instance_list = database.get_device_exported_for_class("LowTmcCentralNode")
     for instance in instance_list.value_string:
         return DeviceProxy(instance)
-    instance_list = database.get_device_exported_for_class("CentralNodeMid")
+    instance_list = database.get_device_exported_for_class("MidTmcCentralNode")
     for instance in instance_list.value_string:
         dev_factory = DevFactory()
         assert wait_and_validate_device_attribute_value(
@@ -66,7 +65,7 @@ def call_command(central_node, command_name, json_factory):
         dev_factory = DevFactory()
         if command_name == "AssignResources":
             logger.info("central_node:%s", central_node.dev_name())
-            if "ska_mid" in central_node.dev_name():
+            if "mid-tmc" in central_node.dev_name():
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
                 green_mode = str(subarray_proxy.get_green_mode())
                 assert "Futures" in green_mode
@@ -95,7 +94,7 @@ def call_command(central_node, command_name, json_factory):
                 )
         elif command_name == "ReleaseResources":
             logger.info("central_node: %s", central_node.dev_name())
-            if "ska_mid" in central_node.dev_name():
+            if "mid-tmc" in central_node.dev_name():
                 subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
                 subarray_proxy.SetisSubarrayAvailable(True)
                 check_subarray_availability(
@@ -144,7 +143,7 @@ def check_internal_model(device_list):
         assert "DevState." + str(running_dev.State()) == dev["state"]
         assert str(HealthState(running_dev.healthState)) == dev["healthState"]
 
-        if "tm_subarray" in dev["dev_name"]:
+        if "tmc/subarray/" in dev["dev_name"]:
             assert str(ObsState(running_dev.obsState)) == dev["obsState"]
             if running_dev.assignedResources == "{ }":
                 assert dev["resources"] == ["{", " ", "}"]
@@ -205,15 +204,10 @@ def check_command(central_node, command_name, change_event_callbacks):
         lookahead=4,
     )
 
-    event_remover(
-        change_event_callbacks,
-        ["longRunningCommandResult", "longRunningCommandsInQueue"],
-    )
-
     if command_name == "AssignResources":
         # teardown subarray, setting ObsState = Empty
         dev_factory = DevFactory()
-        if "ska_mid" in central_node.dev_name():
+        if "mid-tmc" in central_node.dev_name():
             tmc_subarray = dev_factory.get_device(MID_SUBARRAY_DEVICE)
         else:
             tmc_subarray = dev_factory.get_device(LOW_SUBARRAY_DEVICE)

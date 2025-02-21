@@ -18,10 +18,10 @@ from ska_tmc_centralnode.manager.component_manager_mid import (
 from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterMid
 
-__all__ = ["CentralNodeMid", "main"]
+__all__ = ["MidTmcCentralNode", "main"]
 
 
-class CentralNodeMid(AbstractCentralNode):
+class MidTmcCentralNode(AbstractCentralNode):
     """
     Central Node is a coordinator of the complete Telescope system
 
@@ -364,7 +364,7 @@ def main(args=None, **kwargs):
 
     :return: CentralNode TANGO object.
     """
-    return run((CentralNodeMid,), args=args, **kwargs)
+    return run((MidTmcCentralNode,), args=args, **kwargs)
 
 
 if __name__ == "__main__":
