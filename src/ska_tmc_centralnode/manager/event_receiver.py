@@ -76,7 +76,7 @@ class CentralNodeEventReceiver(EventReceiver):
         self, dev_info: DeviceInfo, attribute_dictionary: Optional[dict] = None
     ) -> None:
         """Subscribe events for central node event receiver"""
-        super().subscribe_events(dev_info, self.attribute_dictionary)
+
         input_param = self._component_manager.input_parameter
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
@@ -86,6 +86,16 @@ class CentralNodeEventReceiver(EventReceiver):
             )
         else:
             try:
+                for attribute, callable_value in attribute_dictionary.items():
+                    self._logger.info(
+                        "Subscribing event for attribute: %s", attribute
+                    )
+                    proxy.subscribe_event(
+                        attribute,
+                        tango.EventType.CHANGE_EVENT,
+                        callable_value,
+                        stateless=True,
+                    )
                 if ("subarray" in dev_info.dev_name) and (
                     "leaf" not in dev_info.dev_name
                 ):
