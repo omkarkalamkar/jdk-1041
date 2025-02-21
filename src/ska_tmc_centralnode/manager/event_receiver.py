@@ -76,7 +76,6 @@ class CentralNodeEventReceiver(EventReceiver):
         self, dev_info: DeviceInfo, attribute_dictionary: Optional[dict] = None
     ) -> None:
         """Subscribe events for central node event receiver"""
-        # super().subscribe_events(dev_info, self.attribute_dictionary)
 
         try:
             proxy = self._dev_factory.get_device(dev_info.dev_name)
@@ -280,7 +279,6 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._logger.info("Received event - %s", event)
         self._component_manager.event_queues["isSubsystemAvailable"].put(event)
 
     def handle_subarray_availability_event(

@@ -190,7 +190,6 @@ class CentralComponent(TmcComponent):
         """
         if dev_info not in self._devices:
             self._devices.append(dev_info)
-            self.logger.info("self._devices -%s", self._devices)
         else:
             index = self._devices.index(dev_info)
             self._devices[index] = dev_info

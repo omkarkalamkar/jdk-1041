@@ -42,7 +42,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.17.5
+    tag: 0.17.7
     pullPolicy: IfNotPresent
 
 resources:
