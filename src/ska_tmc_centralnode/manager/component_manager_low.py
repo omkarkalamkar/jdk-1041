@@ -223,12 +223,7 @@ class CNComponentManagerLow(CNComponentManager):
                         self.command_mapping,
                     )
 
-                case (
-                    ResultCode.REJECTED
-                    | ResultCode.FAILED
-                    | ResultCode.NOT_ALLOWED
-                    | ResultCode.ABORTED
-                ):
+                case ResultCode.REJECTED | ResultCode.FAILED | ResultCode.NOT_ALLOWED | ResultCode.ABORTED:
                     self.event_dict[self.command_id].update(
                         {dev_name: {"error": message}}
                     )

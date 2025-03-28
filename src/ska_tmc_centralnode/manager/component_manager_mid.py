@@ -13,7 +13,7 @@ from queue import Queue
 from typing import Callable
 
 from ska_control_model import HealthState
-from ska_tango_base.commands import ResultCode
+from ska_tango_base.commands import ResultCode, TaskStatus
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -45,6 +45,7 @@ class CNComponentManagerMid(CNComponentManager):
         self,
         op_state_model,
         _input_parameter,
+        _dish_vcc_process_callback,
         logger=None,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
@@ -159,6 +160,8 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
+        self._dish_vcc_process_status = ""
+        self.dish_vcc_process_callback = _dish_vcc_process_callback
         self.event_queues.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -202,6 +205,16 @@ class CNComponentManagerMid(CNComponentManager):
     def get_load_disg_cfg_resultcode(self):
         """Return Aggregated command result for Load Dish Cfg command"""
         return self.load_dish_cfg_aggregated_result
+
+    @property
+    def dish_vcc_process_status(self):
+        return self._dish_vcc_process_status
+
+    @dish_vcc_process_status.setter
+    def dish_vcc_process_status(self, value: TaskStatus):
+        """Set dish vcc process status and invoke callback"""
+        self._dish_vcc_process_status = value
+        self.dish_vcc_process_callback(value)
 
     @property
     def is_dish_vcc_config_set(self):
@@ -388,12 +401,7 @@ class CNComponentManagerMid(CNComponentManager):
                         unique_id,
                         dev_name,
                     )
-                case (
-                    ResultCode.FAILED
-                    | ResultCode.REJECTED
-                    | ResultCode.NOT_ALLOWED
-                    | ResultCode.ABORTED
-                ):
+                case ResultCode.FAILED | ResultCode.REJECTED | ResultCode.NOT_ALLOWED | ResultCode.ABORTED:
                     self.logger.info(
                         "Updating LRCRCallback with result_code '%s' and "
                         "message '%s' "
@@ -758,6 +766,10 @@ class CNComponentManagerMid(CNComponentManager):
         loadishcfg_command = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
+        if self.dish_vcc_process_status == TaskStatus.IN_PROGRESS:
+            return loadishcfg_command.reject_command(
+                "Dish VCC Configuration is in process"
+            )
 
         try:
             dishid_vcc_map_params = json.loads(argin)
@@ -922,3 +934,4 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_data_download_error = False
+        self.dish_vcc_process_status = TaskStatus.COMPLETED

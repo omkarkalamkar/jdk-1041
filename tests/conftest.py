@@ -103,6 +103,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "healthState",
         "isDishVccConfigSet",
         "DishVccValidationStatus",
+        "DishVccProcessStatus",
         timeout=50.0,
     )
 

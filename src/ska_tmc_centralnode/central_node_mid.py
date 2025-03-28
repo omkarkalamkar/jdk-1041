@@ -6,7 +6,11 @@ of state and mode attributes defined by the SKA Control Model.
 # pylint:disable = attribute-defined-outside-init
 import json
 
-from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
+from ska_tango_base.commands import (
+    ResultCode,
+    SubmittedSlowCommand,
+    TaskStatus,
+)
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property, run
@@ -120,6 +124,11 @@ class MidTmcCentralNode(AbstractCentralNode):
         access=AttrWriteType.READ,
     )
 
+    DishVccProcessStatus = attribute(
+        dtype=TaskStatus,
+        access=AttrWriteType.READ,
+    )
+
     DishVccValidationStatus = attribute(
         dtype=str,
         access=AttrWriteType.READ,
@@ -140,6 +149,19 @@ class MidTmcCentralNode(AbstractCentralNode):
         except Exception as exception:
             self.logger.info(
                 "Exception while pushing event for isDishVccConfigSet - %s",
+                exception,
+            )
+
+    def dishvccprocess_callback(self, dish_vcc_process_status):
+        """Update dish_vcc_process_status callbacks"""
+        try:
+            self.push_change_archive_events(
+                "DishVccProcessStatus", dish_vcc_process_status
+            )
+
+        except Exception as exception:
+            self.logger.info(
+                "Exception while pushing event for dish_vcc_process_status - %s",
                 exception,
             )
 
@@ -178,6 +200,7 @@ class MidTmcCentralNode(AbstractCentralNode):
                 "imaging",
                 "isDishVccConfigSet",
                 "DishVccValidationStatus",
+                "DishVccProcessStatus",
             ]:
                 self._device.set_change_event(attribute_name, True, False)
                 self._device.set_archive_event(attribute_name, True)
@@ -211,6 +234,10 @@ class MidTmcCentralNode(AbstractCentralNode):
         """Return the DishVccValidationStatus"""
         return self.component_manager.dish_vcc_validation_status
 
+    def read_DishVccProcessStatus(self):
+        """Return the DishVccProcessStatus attribute."""
+        return self.component_manager.dish_vcc_process_status
+
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
@@ -219,6 +246,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             self.op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=self.logger,
+            _dish_vcc_process_callback=self.dishvccprocess_callback,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=(
                 self.update_telescope_state_callback
