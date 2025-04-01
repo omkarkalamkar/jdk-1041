@@ -20,6 +20,9 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
+from ska_tmc_centralnode.manager.aggregate_process import (
+    HealthStateAggregationProcess,
+)
 from ska_tmc_centralnode.manager.aggregators import (
     DishkValueValidationResultAggregator,
     HealthStateAggregatorMid,
@@ -191,6 +194,14 @@ class CNComponentManagerMid(CNComponentManager):
             }
         )
         self._start_event_processing_threads()
+        # start the aggregation process
+        self.aggregation_process = HealthStateAggregationProcess(
+            self.event_data_queue,
+            self.aggregated_health_state,
+            self.aggregate_value_update_event,
+            telescope="mid",
+        )
+        self.aggregation_process.start_aggregation_process()
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""

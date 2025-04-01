@@ -16,6 +16,9 @@ from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
+from ska_tmc_centralnode.manager.aggregate_process import (
+    HealthStateAggregationProcess,
+)
 from ska_tmc_centralnode.manager.aggregators import (
     HealthStateAggregatorLow,
     TelescopeAvailabilityAggregatorLow,
@@ -143,6 +146,14 @@ class CNComponentManagerLow(CNComponentManager):
             }
         )
         self._start_event_processing_threads()
+        # start the aggregation process
+        self.aggregation_process = HealthStateAggregationProcess(
+            self.event_data_queue,
+            self.aggregated_health_state,
+            self.aggregate_value_update_event,
+            telescope="low",
+        )
+        self.aggregation_process.start_aggregation_process()
 
     def check_if_mccs_mln_is_responsive(self):
         """Checks whether mccs mln is responsive"""

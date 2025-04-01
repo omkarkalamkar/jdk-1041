@@ -19,6 +19,7 @@ class HealthStateAggregationProcess:
         event_data_queue: Queue,
         aggregated_health_state,
         aggregate_update_event,
+        telescope="mid",
         callback=None,
     ):
         """
@@ -80,8 +81,6 @@ class HealthStateAggregationProcess:
             set(all_health_states)
         )
 
-        # event_data_dict["command_in_progress"] = event_data.command_in_progress
-        # event_data_dict["command_timestamp"] = event_data.command_timestamp
 
         return event_data_dict
 

@@ -7,6 +7,7 @@ import json
 import re
 import threading
 import time
+from multiprocessing import Event, Manager
 from queue import Empty, Queue
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -186,6 +187,17 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_availability_aggregator = Aggregator(
             self, logger=logger
         )
+        self._stop_thread: bool = False
+        self.aggregate_process_manager = Manager()
+        self.event_data_queue = self.aggregate_process_manager.Queue()
+        self.aggregated_health_state = self.aggregate_process_manager.list(
+            [""]
+        )
+        self.aggregate_value_update_event = Event()
+        self.aggregate_process_monitor_thread = threading.Thread(
+            target=self.aggregate_process_monitor
+        )
+        self.aggregate_process_monitor_thread.start()
         self._liveliness_probe = None
         self.supported_commands_for_responsive_check = [
             "TelescopeOn",
@@ -221,6 +233,25 @@ class CNComponentManager(TmcComponentManager):
                 target=self.process_event, args=[attribute], name=attribute
             )
             thread.start()
+
+    def aggregate_process_monitor(self):
+        """This method keep tracking aggregate obs state changed
+        from aggregation process
+        """
+        while not self._stop_thread:
+            if self.aggregate_value_update_event.is_set():
+                self.aggregate_value_update_event.clear()
+                current_health_state = self.aggregated_health_state[0]
+                self.logger.debug(
+                    "Aggregate obs state called %s and "
+                    "command in progress %s, subarray current obs state: %s",
+                    current_health_state,
+                    self.command_in_progress,
+                    # self.obs_state_model.obs_state,
+                )
+
+            time.sleep(0.1)
+        self.logger.debug("aggregation process monitor thread stopped")
 
     def process_event(self, attribute_name: str) -> None:
         """
@@ -302,6 +333,7 @@ class CNComponentManager(TmcComponentManager):
         """stops liveliness probe"""
         self.stop_liveliness_probe()
         self.stop_event_receiver()
+        self._stop_thread = True
 
     @property
     def input_parameter(self):
