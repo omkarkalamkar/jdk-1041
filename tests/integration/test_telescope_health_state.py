@@ -37,7 +37,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
         change_event_callbacks["healthState"],
     )
 
-    sdp_master.SetDirectHealthState(HealthState.DEGRADED)
+    sdp_master.SetDirectHealthState(HealthState.FAILED)
     change_event_callbacks["healthState"].assert_change_event(
         HealthState.DEGRADED, lookahead=2
     )

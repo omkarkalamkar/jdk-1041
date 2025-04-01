@@ -1,10 +1,14 @@
+"""
+This module contain process for aggregation
+"""
 import logging
 import queue
 from dataclasses import asdict
 from multiprocessing import Event, Process, Queue
 
 from ska_ser_logging import configure_logging
-from ska_tmc_subarraynode.manager.aggregators import HealthStateAggregatorLow
+
+from ska_tmc_centralnode.manager.aggregators import HealthStateAggregator
 
 configure_logging("DEBUG")
 
@@ -32,7 +36,10 @@ class HealthStateAggregationProcess:
         :param callback: Callback method reference used when
         aggregated health state is updated
         """
-        self.health_state_aggregator = HealthStateAggregatorLow()
+        if telescope == "mid":
+            self.health_state_aggregator = HealthStateAggregator()
+        else:
+            self.health_state_aggregator = HealthStateAggregator()
         self.event_data_queue = event_data_queue
         self.aggregated_health_state = aggregated_health_state
         self.callback = callback
@@ -80,13 +87,12 @@ class HealthStateAggregationProcess:
         event_data_dict["all_unique_health_states"] = list(
             set(all_health_states)
         )
-
-
         return event_data_dict
 
     def start_aggregation_process(self):
         """Start the health state aggregation process."""
         self.aggregation_process.start()
+        LOGGER.info("Was I really ever started")
 
     def stop_aggregation_process(self):
         """Stop the running health state aggregation process."""

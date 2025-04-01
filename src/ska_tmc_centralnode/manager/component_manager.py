@@ -7,7 +7,9 @@ import json
 import re
 import threading
 import time
-from multiprocessing import Event, Manager
+from multiprocessing import Event
+from multiprocessing import Lock as ProcessLock
+from multiprocessing import Manager
 from queue import Empty, Queue
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -53,6 +55,7 @@ from ska_tmc_centralnode.input_validator import (
     ReleaseResourceValidator,
 )
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
+from ska_tmc_centralnode.manager.event_data_manager import EventDataManager
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import (
     CentralComponent,
@@ -143,8 +146,10 @@ class CNComponentManager(TmcComponentManager):
         )
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
+        self.event_data_manager = EventDataManager(self)
         self.event_receiver = True
         self.command_timeout = command_timeout
+        self.process_lock = ProcessLock()
         self.assignresources_interface = assignresources_interface
         self.releaseresources_interface = releaseresources_interface
         self.event_receiver = _event_receiver
@@ -188,16 +193,6 @@ class CNComponentManager(TmcComponentManager):
             self, logger=logger
         )
         self._stop_thread: bool = False
-        self.aggregate_process_manager = Manager()
-        self.event_data_queue = self.aggregate_process_manager.Queue()
-        self.aggregated_health_state = self.aggregate_process_manager.list(
-            [""]
-        )
-        self.aggregate_value_update_event = Event()
-        self.aggregate_process_monitor_thread = threading.Thread(
-            target=self.aggregate_process_monitor
-        )
-        self.aggregate_process_monitor_thread.start()
         self._liveliness_probe = None
         self.supported_commands_for_responsive_check = [
             "TelescopeOn",
@@ -219,6 +214,16 @@ class CNComponentManager(TmcComponentManager):
             "assignedResources": self.update_device_assigned_resource,
             "healthState": self.update_device_health_state,
         }
+        self.aggregate_process_manager = Manager()
+        self.event_data_queue = self.aggregate_process_manager.Queue()
+        self.aggregated_health_state = self.aggregate_process_manager.list(
+            [""]
+        )
+        self.aggregate_value_update_event = Event()
+        self.aggregate_process_monitor_thread = threading.Thread(
+            target=self.aggregate_process_monitor
+        )
+        self.aggregate_process_monitor_thread.start()
 
     @property
     def event_queues(self):
@@ -243,11 +248,7 @@ class CNComponentManager(TmcComponentManager):
                 self.aggregate_value_update_event.clear()
                 current_health_state = self.aggregated_health_state[0]
                 self.logger.debug(
-                    "Aggregate obs state called %s and "
-                    "command in progress %s, subarray current obs state: %s",
-                    current_health_state,
-                    self.command_in_progress,
-                    # self.obs_state_model.obs_state,
+                    "Aggregate health state called %s", current_health_state
                 )
 
             time.sleep(0.1)
@@ -272,6 +273,12 @@ class CNComponentManager(TmcComponentManager):
                         self.event_processing_methods[attribute_name](
                             event_data.device.dev_name(),
                             event_data.argout,
+                        )
+                    elif attribute_name == "healthState":
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.attr_value.value,
+                            event_data.attr_value.time.todatetime(),
                         )
                     else:
                         self.event_processing_methods[attribute_name](
@@ -570,7 +577,7 @@ class CNComponentManager(TmcComponentManager):
             self.component._invoke_device_callback(devInfo)
 
     def update_device_health_state(
-        self, device_name: str, health_state: HealthState
+        self, device_name: str, health_state: HealthState, timestamp
     ) -> None:
         """
         Update a monitored device health state
@@ -615,9 +622,15 @@ class CNComponentManager(TmcComponentManager):
                 )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
+                self.event_data_manager.update_event_data(
+                    device=device_name,
+                    data=health_state,
+                    received_timestamp=timestamp,
+                    data_type="HealthState",
+                )
                 self.component._invoke_device_callback(devInfo)
 
-        self._aggregate_health_state()
+        # self._aggregate_health_state()
 
     def update_device_obs_state(
         self, dev_name: str, obs_state: ObsState
