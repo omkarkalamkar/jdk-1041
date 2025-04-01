@@ -6,14 +6,17 @@ from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.settings import logger
+from tests.settings import dish_vcc_process_callback, logger
 
 
 def test_telescope_on():
     """Test Telescope on"""
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
-        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
+        op_state_model,
+        _dish_vcc_process_callback=dish_vcc_process_callback,
+        logger=logger,
+        _input_parameter=InputParameterMid(None),
     )
     res_code, message = cm.telescope_on()
     assert res_code == TaskStatus.QUEUED
@@ -24,7 +27,10 @@ def test_telescope_off():
     """Test Telescope off"""
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
-        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
+        op_state_model,
+        _dish_vcc_process_callback=dish_vcc_process_callback,
+        logger=logger,
+        _input_parameter=InputParameterMid(None),
     )
     res_code, message = cm.telescope_off()
     assert res_code == TaskStatus.QUEUED

@@ -22,6 +22,7 @@ from tests.settings import (
     MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
     NUM_DISHES,
+    dish_vcc_process_callback,
     logger,
     set_devices_unresponsive,
 )
@@ -60,7 +61,10 @@ def test_one_working_other_faulty(tango_context):
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
-        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
+        op_state_model,
+        _dish_vcc_process_callback=dish_vcc_process_callback,
+        logger=logger,
+        _input_parameter=InputParameterMid(None),
     )
     dishes = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
