@@ -86,6 +86,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     exception=error_message,
                 )
                 self.component_manager.dish_vcc_data_download_error = False
+                self.component_manager.reset_load_dish_cfg_data()
                 return
 
             self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
@@ -101,6 +102,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     result=(ResultCode.FAILED, message),
                     exception=message,
                 )
+                self.component_manager.reset_load_dish_cfg_data()
                 return
 
         ret_code, message = self.do(dish_cfg_params)
