@@ -403,10 +403,10 @@ class CNComponentManagerMid(CNComponentManager):
                         dev_name,
                     )
                 case (
-                    ResultCode.FAILED,
-                    ResultCode.REJECTED,
-                    ResultCode.NOT_ALLOWED,
-                    ResultCode.ABORTED,
+                    ResultCode.FAILED
+                    | ResultCode.REJECTED
+                    | ResultCode.NOT_ALLOWED
+                    | ResultCode.ABORTED
                 ):
                     self.logger.info(
                         "Updating LRCRCallback with result_code '%s' and "

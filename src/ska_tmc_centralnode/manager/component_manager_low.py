@@ -224,10 +224,10 @@ class CNComponentManagerLow(CNComponentManager):
                     )
 
                 case (
-                    ResultCode.REJECTED,
-                    ResultCode.FAILED,
-                    ResultCode.NOT_ALLOWED,
-                    ResultCode.ABORTED,
+                    ResultCode.REJECTED
+                    | ResultCode.FAILED
+                    | ResultCode.NOT_ALLOWED
+                    | ResultCode.ABORTED
                 ):
                     self.event_dict[self.command_id].update(
                         {dev_name: {"error": message}}
