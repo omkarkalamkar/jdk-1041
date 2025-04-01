@@ -49,6 +49,7 @@ def test_load_dish_cfg_command(
         },
         lookahead=8,
     )
+    assert cm.dish_vcc_process_status == TaskStatus.COMPLETED
     # Validate memorizedDishVccMap attribute set
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
@@ -177,3 +178,21 @@ def test_load_dish_cnfg_command_fail_csp_master(tango_context, json_factory):
     load_dish_cnfg_command = LoadDishCfg(cm, adapter_factory, logger=logger)
     (res_code, _) = load_dish_cnfg_command.do(dish_cfg_input_str)
     assert res_code == ResultCode.FAILED
+
+
+def test_load_dish_config_command_fail(
+    tango_context, json_factory, task_callback
+):
+    # Validate load dish cfg is rejected if dish vcc process status
+    # is in progress
+    cm, _ = create_cm()
+    cm.dish_vcc_process_status = TaskStatus.IN_PROGRESS
+    cm.is_command_allowed("LoadDishCfg")
+    dish_cfg_input_str = json_factory("command_load_dish_cfg_invalid")
+
+    dish_cfg_input = json.loads(dish_cfg_input_str)
+
+    result_code, message = cm.load_dish_cfg(
+        json.dumps(dish_cfg_input), task_callback=task_callback
+    )
+    assert result_code == TaskStatus.REJECTED

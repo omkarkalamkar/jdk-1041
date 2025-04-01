@@ -160,7 +160,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
-        self._dish_vcc_process_status = ""
+        self._dish_vcc_process_status = TaskStatus.STAGING
         self.dish_vcc_process_callback = _dish_vcc_process_callback
         self.event_queues.update(
             {
