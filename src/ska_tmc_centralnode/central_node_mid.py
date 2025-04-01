@@ -161,7 +161,8 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         except Exception as exception:
             self.logger.info(
-                "Exception while pushing event for dish_vcc_process_status - %s",
+                "Exception while pushing event for "
+                "dish_vcc_process_status - %s",
                 exception,
             )
 

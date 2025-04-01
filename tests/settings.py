@@ -128,6 +128,11 @@ def count_faulty_devices(cm):
     return result
 
 
+def dish_vcc_process_callback(event):
+    """Dummy dish vcc process callback for testing"""
+    logger.info("Dish Vcc process callback called with event %s", event)
+
+
 def create_cm(
     p_liveliness_probe=False,
     p_event_receiver=True,
@@ -144,6 +149,7 @@ def create_cm(
             op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=logger,
+            _dish_vcc_process_callback=dish_vcc_process_callback,
             enable_dish_vcc_init=False,
             _event_receiver=p_event_receiver,
             _dishvccvalidation_callback=task_callback,

@@ -208,6 +208,7 @@ class CNComponentManagerMid(CNComponentManager):
 
     @property
     def dish_vcc_process_status(self):
+        """return dish vcc process status"""
         return self._dish_vcc_process_status
 
     @dish_vcc_process_status.setter
@@ -401,7 +402,12 @@ class CNComponentManagerMid(CNComponentManager):
                         unique_id,
                         dev_name,
                     )
-                case ResultCode.FAILED | ResultCode.REJECTED | ResultCode.NOT_ALLOWED | ResultCode.ABORTED:
+                case (
+                    ResultCode.FAILED,
+                    ResultCode.REJECTED,
+                    ResultCode.NOT_ALLOWED,
+                    ResultCode.ABORTED,
+                ):
                     self.logger.info(
                         "Updating LRCRCallback with result_code '%s' and "
                         "message '%s' "
