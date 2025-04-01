@@ -367,6 +367,10 @@ class CNComponentManagerLow(CNComponentManager):
                 + f"{HealthState(self.component.telescope_health_state).name}"
             )
 
+    def stop_aggregation_process(self):
+        """Stop aggregation process"""
+        self.aggregation_process.stop_aggregation_process()
+
     def check_if_mccs_mln_is_available(self) -> bool:
         """
         Returns boolean value based on availability of MccsMasterLeafNode,

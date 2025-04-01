@@ -313,6 +313,24 @@ class CNComponentManager(TmcComponentManager):
         if self.event_receiver:
             self.event_receiver_object.stop()
 
+    def stop_aggregation_process(self):
+        """Override this method in mid and low"""
+        raise NotImplementedError
+
+    def stop_all_process(self):
+        """This stop aggregation process"""
+        with self.process_lock:
+            self.stop_aggregation_process()
+            del self.event_data_queue
+            del self.aggregated_health_state
+            self.aggregate_process_manager.shutdown()
+            self.logger.debug("aggregation process stopped")
+
+    def __del__(self):
+        """shutdown aggregation process"""
+        self.logger.debug("component destructor called")
+        self.stop_all_process()
+
     def reset(
         self: CNComponentManager, task_callback: Optional[Callable] = None
     ) -> tuple[TaskStatus, str]:

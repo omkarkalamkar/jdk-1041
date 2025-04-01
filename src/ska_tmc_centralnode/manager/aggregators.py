@@ -588,7 +588,7 @@ class DishkValueValidationResultAggregator:
 class HealthStateAggregator:
     """New Aggregator class for Mid"""
 
-    # TODO : Will be implemented in upcoming story
+    # TODO : Will be implemented in upcoming story as rule based approach
     # def __init__(self, health_state_rules: dict):
     #     """
     #     :param obs_state_rules: Rules to use for aggregation
@@ -618,12 +618,13 @@ class HealthStateAggregator:
     #                 else health_state
     #             )
     def aggregate(self, event_data: dict) -> HealthState:
+        # TODO: To be refactored in rule based aggregation story
         """Aggregate healthState based on event data
         :param event_data: event data dict which contain data required
         for aggregation
         :type event_data: dict
         """
-        LOGGER.debug("Got event data for aggregation %s", event_data)
+        LOGGER.info("Got event data for aggregation %s", event_data)
         if "FAILED" in event_data["all_unique_health_states"]:
             return HealthState.FAILED
         if "DEGRADED" in event_data["all_unique_health_states"]:

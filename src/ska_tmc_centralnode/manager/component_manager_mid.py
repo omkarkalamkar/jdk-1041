@@ -583,6 +583,10 @@ class CNComponentManagerMid(CNComponentManager):
                 + f"{HealthState(self.component.telescope_health_state).name}"
             )
 
+    def stop_aggregation_process(self):
+        """Stop aggregation process"""
+        self.aggregation_process.stop_aggregation_process()
+
     def is_command_allowed(self, command_name=None):
         """
         Checks whether this command is allowed

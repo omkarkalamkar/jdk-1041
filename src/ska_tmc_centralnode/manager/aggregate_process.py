@@ -92,7 +92,6 @@ class HealthStateAggregationProcess:
     def start_aggregation_process(self):
         """Start the health state aggregation process."""
         self.aggregation_process.start()
-        LOGGER.info("Was I really ever started")
 
     def stop_aggregation_process(self):
         """Stop the running health state aggregation process."""
