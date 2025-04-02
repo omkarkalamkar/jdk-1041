@@ -36,7 +36,7 @@ def test_all_devices_faulty(tango_context):
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
-        _dish_vcc_process_callback=dish_vcc_process_callback,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         _input_parameter=InputParameterMid(None),
         logger=logger,
     )
