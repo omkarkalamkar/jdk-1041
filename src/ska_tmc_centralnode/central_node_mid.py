@@ -15,10 +15,7 @@ from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
-from ska_tmc_centralnode.model.enum import (
-    DishVccProcessStatus,
-    ModesAvailability,
-)
+from ska_tmc_centralnode.model.enum import DishConfigStatus, ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 __all__ = ["MidTmcCentralNode", "main"]
@@ -124,7 +121,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     )
 
     DishVccCommandStatus = attribute(
-        dtype=DishVccProcessStatus,
+        dtype=DishConfigStatus,
         access=AttrWriteType.READ,
     )
 
@@ -152,7 +149,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             )
 
     def dishvcccommandstatus_cb(
-        self, dish_vcc_command_status: DishVccProcessStatus
+        self, dish_vcc_command_status: DishConfigStatus
     ):
         """Update dish_vcc_command_status callbacks"""
         try:

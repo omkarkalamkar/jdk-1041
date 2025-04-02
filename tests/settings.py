@@ -20,7 +20,7 @@ from ska_tmc_centralnode.manager.component_manager_low import (
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
-from ska_tmc_centralnode.model.enum import DishVccProcessStatus
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
@@ -163,7 +163,7 @@ def create_cm(
         # command.
         DEVICE_LIST = DEVICE_LIST_MID
         cm.is_dish_vcc_config_set = True
-        cm.dish_vcc_command_status = DishVccProcessStatus.COMPLETED
+        cm.dish_vcc_command_status = DishConfigStatus.COMPLETED
     else:
         cm = CNComponentManagerLow(
             op_state_model,

@@ -28,7 +28,7 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
-from ska_tmc_centralnode.model.enum import DishVccProcessStatus
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -161,7 +161,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
-        self._dish_vcc_command_status = DishVccProcessStatus.STAGING
+        self._dish_vcc_command_status = DishConfigStatus.STAGING
         self.dish_vcc_command_status_callback = (
             _dish_vcc_command_status_callback
         )
@@ -215,7 +215,7 @@ class CNComponentManagerMid(CNComponentManager):
         return self._dish_vcc_command_status
 
     @dish_vcc_command_status.setter
-    def dish_vcc_command_status(self, value: DishVccProcessStatus):
+    def dish_vcc_command_status(self, value: DishConfigStatus):
         """Set dish vcc command status and invoke callback"""
         self._dish_vcc_command_status = value
         self.dish_vcc_command_status_callback(value)
@@ -747,9 +747,7 @@ class CNComponentManagerMid(CNComponentManager):
 
                     self.command_in_progress = "LoadDishCfg"
                     if self.check_if_csp_all_dish_ready():
-                        self.dish_vcc_command_status = (
-                            DishVccProcessStatus.INIT
-                        )
+                        self.dish_vcc_command_status = DishConfigStatus.INIT
                         self.invoke_load_dish_cfg_command_callback()
                     else:
                         self.logger.info(
@@ -758,9 +756,7 @@ class CNComponentManagerMid(CNComponentManager):
                         self.command_in_progress = ""
                         # Initialization Failed so mark
                         # process status as failed
-                        self.dish_vcc_command_status = (
-                            DishVccProcessStatus.FAILED
-                        )
+                        self.dish_vcc_command_status = DishConfigStatus.FAILED
                 elif (
                     csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
                 ):
@@ -784,8 +780,8 @@ class CNComponentManagerMid(CNComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
         if self.dish_vcc_command_status in (
-            DishVccProcessStatus.STAGING,
-            DishVccProcessStatus.IN_PROGRESS,
+            DishConfigStatus.STAGING,
+            DishConfigStatus.IN_PROGRESS,
         ):
             message = (
                 "Dish Vcc Configuration is in Progress. dish vcc "
@@ -956,4 +952,4 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_data_download_error = False
-        self.dish_vcc_command_status = DishVccProcessStatus.COMPLETED
+        self.dish_vcc_command_status = DishConfigStatus.COMPLETED

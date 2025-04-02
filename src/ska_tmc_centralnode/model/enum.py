@@ -10,8 +10,8 @@ class ModesAvailability(IntEnum):
     available = 1
 
 
-class DishVccProcessStatus(IntEnum):
-    """Process Status for Dish Vcc Configuration"""
+class DishConfigStatus(IntEnum):
+    """Status for Dish Vcc Configuration"""
 
     STAGING = 0
     INIT = 1

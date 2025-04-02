@@ -13,7 +13,7 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 from tango import ApiUtil
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
-from ska_tmc_centralnode.model.enum import DishVccProcessStatus
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 
 # Helper Dish LN device is using Database API and in Unit test Database API
@@ -50,7 +50,7 @@ def test_load_dish_cfg_command(
         },
         lookahead=8,
     )
-    assert cm.dish_vcc_command_status == DishVccProcessStatus.COMPLETED
+    assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     # Validate memorizedDishVccMap attribute set
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
@@ -187,7 +187,7 @@ def test_load_dish_config_command_fail(
     # Validate load dish cfg is rejected if dish vcc process status
     # is in progress
     cm, _ = create_cm()
-    cm.dish_vcc_command_status = DishVccProcessStatus.IN_PROGRESS
+    cm.dish_vcc_command_status = DishConfigStatus.IN_PROGRESS
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg_invalid")
 

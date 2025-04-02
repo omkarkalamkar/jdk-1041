@@ -11,7 +11,7 @@ from ska_telmodel.data import TMData
 from ska_tmc_centralnode.commands.central_node_command import (
     LoadDishCfgCommand,
 )
-from ska_tmc_centralnode.model.enum import DishVccProcessStatus
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 
@@ -66,7 +66,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.component_manager.command_in_progress = "LoadDishCfg"
         self.component_manager.command_result = ResultCode.STARTED
         self.component_manager.dish_vcc_command_status = (
-            DishVccProcessStatus.IN_PROGRESS
+            DishConfigStatus.IN_PROGRESS
         )
         self.component_manager.start_timer(
             self.timeout_id,
