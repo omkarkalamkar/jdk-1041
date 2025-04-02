@@ -6,11 +6,7 @@ of state and mode attributes defined by the SKA Control Model.
 # pylint:disable = attribute-defined-outside-init
 import json
 
-from ska_tango_base.commands import (
-    ResultCode,
-    SubmittedSlowCommand,
-    TaskStatus,
-)
+from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
 from tango.server import attribute, command, device_property, run
@@ -19,7 +15,10 @@ from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
-from ska_tmc_centralnode.model.enum import ModesAvailability
+from ska_tmc_centralnode.model.enum import (
+    DishVccProcessStatus,
+    ModesAvailability,
+)
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 __all__ = ["MidTmcCentralNode", "main"]
@@ -125,7 +124,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     )
 
     DishVccProcessStatus = attribute(
-        dtype=TaskStatus,
+        dtype=DishVccProcessStatus,
         access=AttrWriteType.READ,
     )
 
@@ -152,7 +151,9 @@ class MidTmcCentralNode(AbstractCentralNode):
                 exception,
             )
 
-    def dishvccprocess_callback(self, dish_vcc_process_status):
+    def dishvccprocess_callback(
+        self, dish_vcc_process_status: DishVccProcessStatus
+    ):
         """Update dish_vcc_process_status callbacks"""
         try:
             self.push_change_archive_events(

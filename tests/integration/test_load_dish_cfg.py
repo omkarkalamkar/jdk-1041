@@ -3,10 +3,11 @@ import json
 
 import pytest
 import tango
-from ska_tango_base.commands import ResultCode, TaskStatus
+from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
+from ska_tmc_centralnode.model.enum import DishVccProcessStatus
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 from tests.common_utils import (
     is_device_ready,
@@ -71,7 +72,7 @@ def load_dish_cfg(
     assert result[0] == ResultCode.QUEUED
     change_event_callbacks.assert_change_event(
         "DishVccProcessStatus",
-        TaskStatus.IN_PROGRESS,
+        DishVccProcessStatus.IN_PROGRESS,
         lookahead=4,
     )
 
@@ -82,7 +83,7 @@ def load_dish_cfg(
     )
     change_event_callbacks.assert_change_event(
         "DishVccProcessStatus",
-        TaskStatus.COMPLETED,
+        DishVccProcessStatus.COMPLETED,
         lookahead=4,
     )
 
@@ -139,7 +140,7 @@ def load_dish_cfg_rejected(
     assert result[0] == ResultCode.QUEUED
     change_event_callbacks.assert_change_event(
         "DishVccProcessStatus",
-        TaskStatus.IN_PROGRESS,
+        DishVccProcessStatus.IN_PROGRESS,
         lookahead=4,
     )
     # Invoke Another LoadDishCfg command
@@ -154,7 +155,7 @@ def load_dish_cfg_rejected(
     )
     change_event_callbacks.assert_change_event(
         "DishVccProcessStatus",
-        TaskStatus.COMPLETED,
+        DishVccProcessStatus.COMPLETED,
         lookahead=4,
     )
     csp_master_ln_device.SetDelay(2)
