@@ -80,13 +80,13 @@ class LoadDishCfg(LoadDishCfgCommand):
                     CENTRALNODE_MID: error_message
                 }
                 self.logger.debug("Number of retries exhausted")
+                self.component_manager.reset_load_dish_cfg_data()
                 task_callback(
                     status=TaskStatus.COMPLETED,
                     result=(ResultCode.FAILED, error_message),
                     exception=error_message,
                 )
                 self.component_manager.dish_vcc_data_download_error = False
-                self.component_manager.reset_load_dish_cfg_data()
                 return
 
             self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
@@ -97,24 +97,24 @@ class LoadDishCfg(LoadDishCfgCommand):
                 self.component_manager.dish_vcc_validation_status = {
                     CENTRALNODE_MID: message
                 }
+                self.component_manager.reset_load_dish_cfg_data()
                 task_callback(
                     status=TaskStatus.COMPLETED,
                     result=(ResultCode.FAILED, message),
                     exception=message,
                 )
-                self.component_manager.reset_load_dish_cfg_data()
                 return
 
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
+            self.component_manager.reset_load_dish_cfg_data()
             task_callback(
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.FAILED, message),
                 exception=message,
             )
-            self.component_manager.reset_load_dish_cfg_data()
         else:
             self.start_tracker_thread(
                 "get_load_disg_cfg_resultcode",
