@@ -211,7 +211,7 @@ class CNComponentManagerMid(CNComponentManager):
 
     @property
     def dish_vcc_command_status(self):
-        """return dish vcc command status"""
+        """Return dish vcc command status"""
         return self._dish_vcc_command_status
 
     @dish_vcc_command_status.setter
