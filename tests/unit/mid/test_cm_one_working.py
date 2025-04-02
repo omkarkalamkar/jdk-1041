@@ -62,7 +62,7 @@ def test_one_working_other_faulty(tango_context):
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
-        _dish_vcc_process_callback=dish_vcc_process_callback,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         logger=logger,
         _input_parameter=InputParameterMid(None),
     )

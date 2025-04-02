@@ -14,7 +14,7 @@ def test_telescope_on():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
-        _dish_vcc_process_callback=dish_vcc_process_callback,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         logger=logger,
         _input_parameter=InputParameterMid(None),
     )
@@ -28,7 +28,7 @@ def test_telescope_off():
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
-        _dish_vcc_process_callback=dish_vcc_process_callback,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         logger=logger,
         _input_parameter=InputParameterMid(None),
     )
