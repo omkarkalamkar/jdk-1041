@@ -123,7 +123,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         access=AttrWriteType.READ,
     )
 
-    DishVccProcessStatus = attribute(
+    DishVccCommandStatus = attribute(
         dtype=DishVccProcessStatus,
         access=AttrWriteType.READ,
     )
@@ -151,19 +151,19 @@ class MidTmcCentralNode(AbstractCentralNode):
                 exception,
             )
 
-    def dishvccprocess_callback(
-        self, dish_vcc_process_status: DishVccProcessStatus
+    def dishvcccommandstatus_cb(
+        self, dish_vcc_command_status: DishVccProcessStatus
     ):
-        """Update dish_vcc_process_status callbacks"""
+        """Update dish_vcc_command_status callbacks"""
         try:
             self.push_change_archive_events(
-                "DishVccProcessStatus", dish_vcc_process_status
+                "DishVccCommandStatus", dish_vcc_command_status
             )
 
         except Exception as exception:
             self.logger.info(
                 "Exception while pushing event for "
-                "dish_vcc_process_status - %s",
+                "dish_vcc_command_status - %s",
                 exception,
             )
 
@@ -202,7 +202,7 @@ class MidTmcCentralNode(AbstractCentralNode):
                 "imaging",
                 "isDishVccConfigSet",
                 "DishVccValidationStatus",
-                "DishVccProcessStatus",
+                "DishVccCommandStatus",
             ]:
                 self._device.set_change_event(attribute_name, True, False)
                 self._device.set_archive_event(attribute_name, True)
@@ -236,9 +236,9 @@ class MidTmcCentralNode(AbstractCentralNode):
         """Return the DishVccValidationStatus"""
         return self.component_manager.dish_vcc_validation_status
 
-    def read_DishVccProcessStatus(self):
-        """Return the DishVccProcessStatus attribute."""
-        return self.component_manager.dish_vcc_process_status
+    def read_DishVccCommandStatus(self):
+        """Return the DishVccCommandStatus attribute."""
+        return self.component_manager.dish_vcc_command_status
 
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
@@ -248,7 +248,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             self.op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=self.logger,
-            _dish_vcc_process_callback=self.dishvccprocess_callback,
+            _dish_vcc_command_status_callback=self.dishvcccommandstatus_cb,
             _update_device_callback=self.update_device_callback,
             _update_telescope_state_callback=(
                 self.update_telescope_state_callback

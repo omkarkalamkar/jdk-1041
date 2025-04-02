@@ -50,7 +50,7 @@ def test_load_dish_cfg_command(
         },
         lookahead=8,
     )
-    assert cm.dish_vcc_process_status == DishVccProcessStatus.COMPLETED
+    assert cm.dish_vcc_command_status == DishVccProcessStatus.COMPLETED
     # Validate memorizedDishVccMap attribute set
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
@@ -187,7 +187,7 @@ def test_load_dish_config_command_fail(
     # Validate load dish cfg is rejected if dish vcc process status
     # is in progress
     cm, _ = create_cm()
-    cm.dish_vcc_process_status = DishVccProcessStatus.IN_PROGRESS
+    cm.dish_vcc_command_status = DishVccProcessStatus.IN_PROGRESS
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg_invalid")
 

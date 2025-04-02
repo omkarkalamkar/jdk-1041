@@ -46,7 +46,7 @@ class CNComponentManagerMid(CNComponentManager):
         self,
         op_state_model,
         _input_parameter,
-        _dish_vcc_process_callback,
+        _dish_vcc_command_status_callback,
         logger=None,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
@@ -161,8 +161,10 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
-        self._dish_vcc_process_status = DishVccProcessStatus.STAGING
-        self.dish_vcc_process_callback = _dish_vcc_process_callback
+        self._dish_vcc_command_status = DishVccProcessStatus.STAGING
+        self.dish_vcc_command_status_callback = (
+            _dish_vcc_command_status_callback
+        )
         self.event_queues.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -208,15 +210,15 @@ class CNComponentManagerMid(CNComponentManager):
         return self.load_dish_cfg_aggregated_result
 
     @property
-    def dish_vcc_process_status(self):
-        """return dish vcc process status"""
-        return self._dish_vcc_process_status
+    def dish_vcc_command_status(self):
+        """return dish vcc command status"""
+        return self._dish_vcc_command_status
 
-    @dish_vcc_process_status.setter
-    def dish_vcc_process_status(self, value: DishVccProcessStatus):
-        """Set dish vcc process status and invoke callback"""
-        self._dish_vcc_process_status = value
-        self.dish_vcc_process_callback(value)
+    @dish_vcc_command_status.setter
+    def dish_vcc_command_status(self, value: DishVccProcessStatus):
+        """Set dish vcc command status and invoke callback"""
+        self._dish_vcc_command_status = value
+        self.dish_vcc_command_status_callback(value)
 
     @property
     def is_dish_vcc_config_set(self):
@@ -745,7 +747,7 @@ class CNComponentManagerMid(CNComponentManager):
 
                     self.command_in_progress = "LoadDishCfg"
                     if self.check_if_csp_all_dish_ready():
-                        self.dish_vcc_process_status = (
+                        self.dish_vcc_command_status = (
                             DishVccProcessStatus.INIT
                         )
                         self.invoke_load_dish_cfg_command_callback()
@@ -756,7 +758,7 @@ class CNComponentManagerMid(CNComponentManager):
                         self.command_in_progress = ""
                         # Initialization Failed so mark
                         # process status as failed
-                        self.dish_vcc_process_status = (
+                        self.dish_vcc_command_status = (
                             DishVccProcessStatus.FAILED
                         )
                 elif (
@@ -781,7 +783,7 @@ class CNComponentManagerMid(CNComponentManager):
         loadishcfg_command = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        if self.dish_vcc_process_status in (
+        if self.dish_vcc_command_status in (
             DishVccProcessStatus.STAGING,
             DishVccProcessStatus.IN_PROGRESS,
         ):
@@ -952,4 +954,4 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_data_download_error = False
-        self.dish_vcc_process_status = DishVccProcessStatus.COMPLETED
+        self.dish_vcc_command_status = DishVccProcessStatus.COMPLETED

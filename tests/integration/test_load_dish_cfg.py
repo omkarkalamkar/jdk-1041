@@ -56,9 +56,9 @@ def load_dish_cfg(
     )
 
     central_node.subscribe_event(
-        "DishVccProcessStatus",
+        "DishVccCommandStatus",
         tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["DishVccProcessStatus"],
+        change_event_callbacks["DishVccCommandStatus"],
     )
 
     result, unique_id = central_node.LoadDishCfg(config_str)
@@ -71,7 +71,7 @@ def load_dish_cfg(
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
     change_event_callbacks.assert_change_event(
-        "DishVccProcessStatus",
+        "DishVccCommandStatus",
         DishVccProcessStatus.IN_PROGRESS,
         lookahead=4,
     )
@@ -82,7 +82,7 @@ def load_dish_cfg(
         lookahead=4,
     )
     change_event_callbacks.assert_change_event(
-        "DishVccProcessStatus",
+        "DishVccCommandStatus",
         DishVccProcessStatus.COMPLETED,
         lookahead=4,
     )
@@ -123,9 +123,9 @@ def load_dish_cfg_rejected(
     )
 
     central_node.subscribe_event(
-        "DishVccProcessStatus",
+        "DishVccCommandStatus",
         tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["DishVccProcessStatus"],
+        change_event_callbacks["DishVccCommandStatus"],
     )
     # Set delay for load dish cfg command
     csp_master_ln_device.SetDelay(5)
@@ -139,7 +139,7 @@ def load_dish_cfg_rejected(
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
     change_event_callbacks.assert_change_event(
-        "DishVccProcessStatus",
+        "DishVccCommandStatus",
         DishVccProcessStatus.IN_PROGRESS,
         lookahead=4,
     )
@@ -154,7 +154,7 @@ def load_dish_cfg_rejected(
         lookahead=4,
     )
     change_event_callbacks.assert_change_event(
-        "DishVccProcessStatus",
+        "DishVccCommandStatus",
         DishVccProcessStatus.COMPLETED,
         lookahead=4,
     )

@@ -65,7 +65,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "LoadDishCfg"
         self.component_manager.command_result = ResultCode.STARTED
-        self.component_manager.dish_vcc_process_status = (
+        self.component_manager.dish_vcc_command_status = (
             DishVccProcessStatus.IN_PROGRESS
         )
         self.component_manager.start_timer(

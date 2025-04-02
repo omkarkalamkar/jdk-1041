@@ -150,7 +150,7 @@ def create_cm(
             op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=logger,
-            _dish_vcc_process_callback=dish_vcc_process_callback,
+            _dish_vcc_command_status_callback=dish_vcc_process_callback,
             enable_dish_vcc_init=False,
             _event_receiver=p_event_receiver,
             _dishvccvalidation_callback=task_callback,
@@ -163,7 +163,7 @@ def create_cm(
         # command.
         DEVICE_LIST = DEVICE_LIST_MID
         cm.is_dish_vcc_config_set = True
-        cm.dish_vcc_process_status = DishVccProcessStatus.COMPLETED
+        cm.dish_vcc_command_status = DishVccProcessStatus.COMPLETED
     else:
         cm = CNComponentManagerLow(
             op_state_model,
