@@ -761,6 +761,9 @@ class CNComponentManagerMid(CNComponentManager):
                     csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
                 ):
                     if csp_validation_result == ResultCode.OK:
+                        self.dish_vcc_command_status = (
+                            DishConfigStatus.COMPLETED
+                        )
                         self.update_dish_vcc_flag(True)
                     else:
                         self.update_dish_vcc_flag(False)
