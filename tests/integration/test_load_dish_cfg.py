@@ -111,6 +111,7 @@ def load_dish_cfg_rejected(
     LoadDishCfg command is in progress"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
 
     ensure_checked_devices(central_node)
 
@@ -125,7 +126,8 @@ def load_dish_cfg_rejected(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["DishVccProcessStatus"],
     )
-
+    # Set delay for load dish cfg command
+    csp_master_ln_device.SetDelay(5)
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
@@ -142,7 +144,8 @@ def load_dish_cfg_rejected(
     )
     # Invoke Another LoadDishCfg command
     second_result, second_unique_id = central_node.LoadDishCfg(config_str)
-    assert second_result == TaskStatus.REJECTED
+    logger.info("second result is %s", second_unique_id)
+    assert second_result[0] == ResultCode.REJECTED
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
@@ -154,6 +157,7 @@ def load_dish_cfg_rejected(
         TaskStatus.COMPLETED,
         lookahead=4,
     )
+    csp_master_ln_device.SetDelay(2)
 
 
 def load_dish_cfg_when_csp_is_defective(
