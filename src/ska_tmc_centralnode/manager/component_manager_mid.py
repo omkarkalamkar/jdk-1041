@@ -787,9 +787,11 @@ class CNComponentManagerMid(CNComponentManager):
             DishVccProcessStatus.STAGING,
             DishVccProcessStatus.IN_PROGRESS,
         ):
-            return loadishcfg_command.reject_command(
-                "Dish VCC Configuration is in process"
+            message = (
+                "Dish Vcc Configuration is in Progress. dish vcc "
+                f"command status {self.dish_vcc_command_status}"
             )
+            return loadishcfg_command.reject_command(message)
 
         try:
             dishid_vcc_map_params = json.loads(argin)
