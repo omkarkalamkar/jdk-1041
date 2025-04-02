@@ -16,7 +16,7 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregate_process import (
-    HealthStateAggregationProcess,
+    HealthStateAggregationProcessor,
 )
 from ska_tmc_centralnode.manager.aggregators import (
     TelescopeAvailabilityAggregatorLow,
@@ -145,7 +145,7 @@ class CNComponentManagerLow(CNComponentManager):
         )
         self._start_event_processing_threads()
         # start the aggregation process
-        self.aggregation_process = HealthStateAggregationProcess(
+        self.aggregation_process = HealthStateAggregationProcessor(
             self.event_data_queue,
             self.aggregated_health_state,
             self.aggregate_value_update_event,

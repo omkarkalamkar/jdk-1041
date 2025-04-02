@@ -30,7 +30,7 @@ class HealthAggregatorFactory:
         raise ValueError(f"Unknown telescope type: {telescope}")
 
 
-class HealthStateAggregationProcess:
+class HealthStateAggregationProcessor:
     """Health State Aggregation Process Class"""
 
     def __init__(

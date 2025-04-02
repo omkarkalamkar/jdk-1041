@@ -16,7 +16,7 @@ from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
 
 from ska_tmc_centralnode.manager.aggregate_process import (
-    HealthStateAggregationProcess,
+    HealthStateAggregationProcessor,
 )
 from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.settings import (
@@ -209,7 +209,7 @@ def aggregation_process_mid():
     aggregated_obs_state = process_manager.list([""])
     mock_obj = mock.Mock()
 
-    aggregation_process = HealthStateAggregationProcess(
+    aggregation_process = HealthStateAggregationProcessor(
         event_queue, aggregated_obs_state, mock_obj
     )
 
@@ -226,7 +226,7 @@ def aggregation_process_low():
     event_queue = process_manager.Queue()
     aggregated_obs_state = process_manager.list([""])
     mock_obj = mock.Mock()
-    aggregation_process = HealthStateAggregationProcess(
+    aggregation_process = HealthStateAggregationProcessor(
         event_queue, aggregated_obs_state, mock_obj
     )
 
