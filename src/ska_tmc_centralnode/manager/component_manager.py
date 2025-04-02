@@ -240,15 +240,17 @@ class CNComponentManager(TmcComponentManager):
             thread.start()
 
     def aggregate_process_monitor(self):
-        """This method keep tracking aggregate obs state changed
+        """This method keep tracking aggregate health state changed
         from aggregation process
         """
         while not self._stop_thread:
             if self.aggregate_value_update_event.is_set():
                 self.aggregate_value_update_event.clear()
                 current_health_state = self.aggregated_health_state[0]
+                self.component.telescope_health_state = current_health_state
                 self.logger.debug(
-                    "Aggregate health state called %s", current_health_state
+                    "Aggregate telescope health state called %s",
+                    current_health_state,
                 )
 
             time.sleep(0.1)
@@ -647,8 +649,6 @@ class CNComponentManager(TmcComponentManager):
                     data_type="HealthState",
                 )
                 self.component._invoke_device_callback(devInfo)
-
-        # self._aggregate_health_state()
 
     def update_device_obs_state(
         self, dev_name: str, obs_state: ObsState
@@ -1240,12 +1240,6 @@ class CNComponentManager(TmcComponentManager):
             + " Please use TelescopeStandby command"
         )
         return TaskStatus.REJECTED, message
-
-    def _aggregate_health_state(self):
-        """
-        Aggregates all health states
-        and call the relative callback if available
-        """
 
     def _aggregate_telescope_state(self):
         """

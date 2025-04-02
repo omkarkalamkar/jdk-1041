@@ -12,7 +12,6 @@ import time
 from queue import Queue
 from typing import Callable
 
-from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
@@ -25,7 +24,6 @@ from ska_tmc_centralnode.manager.aggregate_process import (
 )
 from ska_tmc_centralnode.manager.aggregators import (
     DishkValueValidationResultAggregator,
-    HealthStateAggregatorMid,
     LoadDishCfgCommandResultAggregator,
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
@@ -563,25 +561,6 @@ class CNComponentManagerMid(CNComponentManager):
         with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
-
-    def _aggregate_health_state(self):
-        """
-        Aggregates all health states
-        and call the relative callback if available
-        """
-        if self._health_state_aggregator is None:
-            self._health_state_aggregator = HealthStateAggregatorMid(
-                self, self.logger
-            )
-
-        with self.rlock:
-            self.component.telescope_health_state = (
-                self._health_state_aggregator.aggregate()
-            )
-            self.logger.debug(
-                "SubarrayNode aggregated healthState: "
-                + f"{HealthState(self.component.telescope_health_state).name}"
-            )
 
     def stop_aggregation_process(self):
         """Stop aggregation process"""

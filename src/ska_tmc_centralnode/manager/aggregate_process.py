@@ -66,7 +66,6 @@ class HealthStateAggregationProcess:
                     0
                 ] = self.health_state_aggregator.aggregate(event_data_dict)
                 self.aggregate_update_event.set()
-
                 if self.callback:
                     self.callback(self.aggregated_health_state[0])
 
