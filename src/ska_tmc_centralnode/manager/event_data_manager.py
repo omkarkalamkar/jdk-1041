@@ -1,5 +1,5 @@
 """
-Use event manager to manager all event related data
+Use event manager to manage all event related data
 """
 import copy
 import functools
