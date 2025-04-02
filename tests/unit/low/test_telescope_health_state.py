@@ -69,9 +69,6 @@ def test_set_health_state_ok(tango_context):
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, _input_parameter=InputParameterLow(None)
     )
-    import pdb
-
-    pdb.set_trace()
     start_time = time.time()
     elapsed_time = 0
     # need to wait for the first event to come just after the subscription
@@ -81,7 +78,6 @@ def test_set_health_state_ok(tango_context):
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
     assert cm.component.telescope_health_state == HealthState.OK
-    assert 0
 
 
 def set_device_degraded(devFactory, cm, expected_elapsed_time):
