@@ -357,7 +357,7 @@ indent-string='    '
 max-line-length=79
 
 # Maximum number of lines in a module.
-max-module-lines=1200
+max-module-lines=1260
 
 # Allow the body of a class to be on the same line as the declaration if body
 # contains single statement.
@@ -394,7 +394,7 @@ spelling-store-unknown-words=no
 max-args=25
 
 # Maximum number of attributes for a class (see R0902).
-max-attributes=25
+max-attributes=33
 
 # Maximum number of boolean expressions in an if statement.
 max-bool-expr=8

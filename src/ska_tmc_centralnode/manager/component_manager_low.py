@@ -10,14 +10,15 @@ import json
 import time
 from queue import Queue
 
-from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
+from ska_tmc_centralnode.manager.aggregate_process import (
+    HealthStateAggregationProcessor,
+)
 from ska_tmc_centralnode.manager.aggregators import (
-    HealthStateAggregatorLow,
     TelescopeAvailabilityAggregatorLow,
     TelescopeStateAggregatorLow,
 )
@@ -143,6 +144,14 @@ class CNComponentManagerLow(CNComponentManager):
             }
         )
         self._start_event_processing_threads()
+        # start the aggregation process
+        self.aggregation_process = HealthStateAggregationProcessor(
+            self.event_data_queue,
+            self.aggregated_health_state,
+            self.aggregate_value_update_event,
+            telescope="low",
+        )
+        self.aggregation_process.start_aggregation_process()
 
     def check_if_mccs_mln_is_responsive(self):
         """Checks whether mccs mln is responsive"""
@@ -337,24 +346,9 @@ class CNComponentManagerLow(CNComponentManager):
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
-    def _aggregate_health_state(self):
-        """
-        Aggregates all health states
-        and call the relative callback if available
-        """
-        if self._health_state_aggregator is None:
-            self._health_state_aggregator = HealthStateAggregatorLow(
-                self, self.logger
-            )
-
-        with self.lock:
-            self.component.telescope_health_state = (
-                self._health_state_aggregator.aggregate()
-            )
-            self.logger.debug(
-                "SubarrayNode aggregated healthState: "
-                + f"{HealthState(self.component.telescope_health_state).name}"
-            )
+    def stop_aggregation_process(self):
+        """Stop aggregation process"""
+        self.aggregation_process.stop_aggregation_process()
 
     def check_if_mccs_mln_is_available(self) -> bool:
         """
