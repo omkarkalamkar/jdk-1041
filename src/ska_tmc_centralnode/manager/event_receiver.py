@@ -1,5 +1,5 @@
 """Event Receiver class for central node"""
-from typing import Optional
+from typing import List, Optional
 
 import tango
 from ska_tmc_common.device_info import DeviceInfo
@@ -41,10 +41,11 @@ class CentralNodeEventReceiver(EventReceiver):
             event_subscription_check_period=event_subscription_check_period,
         )
         self._component_manager = component_manager
-        self.attribute_dictionary = {
-            "state": self.handle_state_event,
-            "healthState": self.handle_health_state_event,
-        }
+        self.attribute_tobe_subscribed = [
+            "state",
+            "healthState",
+        ]
+
         self.device_subscribed = {}
         self.dish_name = ""
         self.input_parameter = self._component_manager.input_parameter
@@ -69,12 +70,14 @@ class CentralNodeEventReceiver(EventReceiver):
 
             self.subscribe_events(
                 dev_info=device_info,
-                attribute_dictionary=(self.attribute_dictionary),
+                attribute_tobe_subscribed=(self.attribute_tobe_subscribed),
             )
 
     def subscribe_events(
-        self, dev_info: DeviceInfo, attribute_dictionary: Optional[dict] = None
-    ) -> None:
+        self,
+        dev_info: DeviceInfo,
+        attribute_tobe_subscribed: Optional[List[str]] = None,
+    ):
         """Subscribe events for central node event receiver"""
 
         input_param = self._component_manager.input_parameter
@@ -86,16 +89,29 @@ class CentralNodeEventReceiver(EventReceiver):
             )
         else:
             try:
-                for attribute, callable_value in attribute_dictionary.items():
+                # for attribute, callable_value
+                # in attribute_dictionary.items():
+                #     self._logger.info(
+                #         "Subscribing event for attribute: %s", attribute
+                #     )
+                #     proxy.subscribe_event(
+                #         attribute,
+                #         tango.EventType.CHANGE_EVENT,
+                #         callable_value,
+                #         stateless=True,
+                #     )
+                for attribute in self.attribute_tobe_subscribed:
                     self._logger.info(
                         "Subscribing event for attribute: %s", attribute
                     )
+                    handle_event = self.event_handling_methods[attribute]
                     proxy.subscribe_event(
                         attribute,
                         tango.EventType.CHANGE_EVENT,
-                        callable_value,
+                        handle_event,
                         stateless=True,
                     )
+
                 if ("subarray" in dev_info.dev_name) and (
                     "leaf" not in dev_info.dev_name
                 ):
