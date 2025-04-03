@@ -52,14 +52,34 @@ FAULTY_LIST = [
 ]
 
 
+def mock_callback(*args, **kwargs):
+    """Devices to mock_callback"""
+
+
+@pytest.mark.test_low_some_working_other_faulty
 @pytest.mark.SKA_low
 def test_low_some_working_other_faulty(tango_context):
     """Test low some working other faulty devices."""
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
+
     cm = CNComponentManagerLow(
-        op_state_model, _input_parameter=InputParameterLow(None), logger=logger
+        op_state_model,
+        _input_parameter=InputParameterLow(None),
+        logger=logger,
+        _update_device_callback=mock_callback,
+        _update_telescope_state_callback=mock_callback,
+        _update_telescope_health_state_callback=mock_callback,
+        _update_tmc_op_state_callback=mock_callback,
+        _update_imaging_callback=mock_callback,
+        _telescope_availability_callback=mock_callback,
+        communication_state_callback=mock_callback,
+        component_state_callback=mock_callback,
     )
+
+    # cm = CNComponentManagerLow(
+    #     op_state_model, _input_parameter=InputParameterLow(None), logger=logger
+    # )
     for dev in DEVICE_LIST_LOW:
         cm.add_device(dev)
     set_devices_unresponsive(cm, FAULTY_LIST)

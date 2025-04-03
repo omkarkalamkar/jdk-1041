@@ -8,7 +8,9 @@ package.
 """
 import json
 import time
+from logging import Logger
 from queue import Queue
+from typing import Callable
 
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
@@ -32,18 +34,18 @@ class CNComponentManagerLow(CNComponentManager):
         self,
         op_state_model,
         _input_parameter,
-        logger=None,
+        logger: Logger,
+        _update_device_callback: Callable,
+        _update_telescope_state_callback: Callable,
+        _update_telescope_health_state_callback: Callable,
+        _update_tmc_op_state_callback: Callable,
+        _update_imaging_callback: Callable,
+        _telescope_availability_callback: Callable,
+        communication_state_callback: Callable,
+        component_state_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        _telescope_availability_callback=None,
-        communication_state_callback=None,
-        component_state_callback=None,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -84,17 +86,17 @@ class CNComponentManagerLow(CNComponentManager):
             op_state_model,
             _input_parameter,
             logger,
-            _component,
-            _liveliness_probe,
-            _event_receiver,
             _update_device_callback,
             _update_telescope_state_callback,
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_imaging_callback,
-            communication_state_callback,
             _telescope_availability_callback,
+            communication_state_callback,
             component_state_callback,
+            _component,
+            _liveliness_probe,
+            _event_receiver,
             proxy_timeout,
             skuid_service=skuid_service,
             command_timeout=command_timeout,
@@ -105,6 +107,7 @@ class CNComponentManagerLow(CNComponentManager):
             *args,
             **kwargs,
         )
+
         self._telescope_availability_aggregator = None
         self.subarray_availability = {
             subarray: False
@@ -115,6 +118,7 @@ class CNComponentManagerLow(CNComponentManager):
         self.mccs_mln_availability = False
 
         telescope_availability = self.get_telescope_availability()
+
         telescope_availability["tmc_subarrays"] = self.subarray_availability
         self.set_telescope_availability = telescope_availability
 

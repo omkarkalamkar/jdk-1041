@@ -7,6 +7,7 @@ import json
 import re
 import threading
 import time
+from logging import Logger
 from queue import Empty, Queue
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -82,18 +83,18 @@ class CNComponentManager(TmcComponentManager):
         self,
         op_state_model,
         _input_parameter,
-        logger=None,
+        logger: Logger,
+        _update_device_callback: Callable,
+        _update_telescope_state_callback: Callable,
+        _update_telescope_health_state_callback: Callable,
+        _update_tmc_op_state_callback: Callable,
+        _update_imaging_callback: Callable,
+        _telescope_availability_callback: Callable,
+        communication_state_callback: Callable,
+        component_state_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
-        _event_receiver=True,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        communication_state_callback=None,
-        _telescope_availability_callback=None,
-        component_state_callback=None,
+        _event_receiver: bool = True,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,

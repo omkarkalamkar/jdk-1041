@@ -34,6 +34,12 @@ class LowTmcCentralNode(AbstractCentralNode):
     # Attributes
     # ----------
 
+    def communication_state_callback(self):
+        """communication state callabacks"""
+
+    def component_state_callback(self):
+        """component state callbacks"""
+
     # ---------------
     # General methods
     # ---------------
@@ -78,8 +84,8 @@ class LowTmcCentralNode(AbstractCentralNode):
             _telescope_availability_callback=(
                 self.update_telescope_availability_callback
             ),
-            communication_state_callback=None,
-            component_state_callback=None,
+            communication_state_callback=self.communication_state_callback,
+            component_state_callback=self.component_state_callback,
             command_timeout=self.CommandTimeOut,
             assignresources_interface=self.AssignResourcesInterface,
             releaseresources_interface=self.ReleaseResourcesInterface,
