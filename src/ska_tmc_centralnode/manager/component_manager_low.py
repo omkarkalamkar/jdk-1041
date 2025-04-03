@@ -123,7 +123,7 @@ class CNComponentManagerLow(CNComponentManager):
         )
         self.event_dict: dict = {}
         self.error_count: int = 0
-        self.event_queues.update(
+        self.event_queues_cn.update(
             {
                 "longRunningCommandResult": Queue(),
                 "isSubsystemAvailable": Queue(),
