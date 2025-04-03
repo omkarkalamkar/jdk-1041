@@ -217,6 +217,7 @@ class CNComponentManagerMid(CNComponentManager):
     @dish_vcc_command_status.setter
     def dish_vcc_command_status(self, value: DishConfigStatus):
         """Set dish vcc command status and invoke callback"""
+        self.logger.debug("Setting dish config status %s", value)
         self._dish_vcc_command_status = value
         self.dish_vcc_command_status_callback(value)
 
@@ -761,11 +762,20 @@ class CNComponentManagerMid(CNComponentManager):
                     csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
                 ):
                     if csp_validation_result == ResultCode.OK:
-                        self.dish_vcc_command_status = (
-                            DishConfigStatus.COMPLETED
-                        )
+                        # Update dish config status to completed only
+                        # during central node initialization.
+                        # This handle scenario when dish vcc already set
+                        # and central node restart
+                        if (
+                            self.dish_vcc_command_status
+                            == DishConfigStatus.STAGING
+                        ):
+                            self.dish_vcc_command_status = (
+                                DishConfigStatus.COMPLETED
+                            )
                         self.update_dish_vcc_flag(True)
                     else:
+                        self.dish_vcc_command_status = DishConfigStatus.FAILED
                         self.update_dish_vcc_flag(False)
                     self.dish_vcc_validation_status = {
                         MID_CSP_MLN_DEVICE: DISH_VCC_VALIDATION_RESULT_STATUS[
@@ -782,6 +792,7 @@ class CNComponentManagerMid(CNComponentManager):
         loadishcfg_command = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
+        self.logger.info(f"command status {self.dish_vcc_command_status}")
         if self.dish_vcc_command_status in (
             DishConfigStatus.STAGING,
             DishConfigStatus.IN_PROGRESS,
