@@ -5,6 +5,12 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.18.2]
+********
+* DishVccCommandStatus attribute added for central node
+* LoadDishCfg command is rejected if DishVccCommandStatus is STAGING or IN PROGRESS
+* After Central Node Initialization complete DishVccCommandStatus changed to COMPLETED or FAILED
+
 [0.18.0]
 ********
 * Tag release with ADR-9 changes
