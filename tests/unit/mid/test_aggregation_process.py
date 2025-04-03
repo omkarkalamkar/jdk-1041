@@ -46,14 +46,12 @@ def generate_data(health_state_data_type):
     return event_data
 
 
-@pytest.mark.aki2
 def test_health_aggregation_process(
     aggregation_process_mid,
 ):
     """Test health state aggregation when data is added to the event data queue."""
 
     aggregation_process = aggregation_process_mid
-
     aggregation_process.start_aggregation_process()
 
     health_states_to_test = [
