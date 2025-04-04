@@ -87,7 +87,15 @@ class LoadDishCfg(LoadDishCfgCommand):
                 self.component_manager.dish_vcc_data_download_error = False
                 return
 
-            self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
+            self.logger.info(
+                "DishId Vcc Map Json %s",
+                json.dumps(
+                    dishid_vcc_map_json
+                    if isinstance(dishid_vcc_map_json, dict)
+                    else json.loads(dishid_vcc_map_json),
+                    indent=4,
+                ),
+            )
             is_valid_dish_cfg, message = self.load_dish_config_json_validator(
                 dishid_vcc_map_json
             )
@@ -137,7 +145,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         :param message: any message returned as a part of command
         :type message: str
         """
-        self.logger.info(
+        self.logger.debug(
             "Calling task callback for LoadDishCfg with result \
                 %s and message %s",
             result,
@@ -179,7 +187,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
-        self.logger.info("The initial params are : %s", initial_params)
+        self.logger.debug("The initial params are : %s", initial_params)
         if data_sources and tm_data_filepath:
             try:
                 data = TMData(data_sources)
@@ -218,7 +226,8 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         dishid_vcc_map_params = json.loads(argin)
         self.logger.info(
-            "DishId-VCC map parameters: %s", dishid_vcc_map_params
+            "DishId-VCC map parameters: %s",
+            json.dumps(dishid_vcc_map_params, indent=4),
         )
 
         dishid_vcc_map_json, _ = self.get_dishid_vcc_map_json(
@@ -256,7 +265,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         :param dishid_vcc_map_params:
         vcc_map_params info containing vcc_dish mapping
         """
-        self.logger.debug(
+        self.logger.info(
             f"Invoking LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
         )
         self.component_manager.dev_names_for_load_dish_cfg.append(
@@ -310,7 +319,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     )
                     self.logger.info(error_message)
         except Exception as e:
-            self.logger.info(
+            self.logger.exception(
                 "Error in Calling setKvalue command on dish adapter %s", e
             )
             return [ResultCode.FAILED], [

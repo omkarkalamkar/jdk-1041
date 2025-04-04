@@ -96,7 +96,7 @@ class TelescopeOff(TelescopeOnOff):
             if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                 return ResultCode.FAILED, message_or_unique_id
 
-        self.logger.info(
+        self.logger.debug(
             "Waiting for all subarray devices to reach the EMPTY "
             "observation state."
         )
@@ -237,7 +237,7 @@ class TelescopeOff(TelescopeOnOff):
             if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
                 return ResultCode.FAILED, message_or_unique_id
 
-        self.logger.info(
+        self.logger.debug(
             "Waiting for all subarray devices to reach the "
             "EMPTY observation state."
         )
@@ -250,7 +250,7 @@ class TelescopeOff(TelescopeOnOff):
                     adapter.dev_name
                 ).obs_state
                 if obs_state != ObsState.EMPTY:
-                    self.logger.info(
+                    self.logger.debug(
                         "Subarray %s is still not empty, current state: %s",
                         adapter.dev_name,
                         obs_state,

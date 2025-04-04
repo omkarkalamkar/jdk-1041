@@ -193,7 +193,10 @@ class AssignResources(AssignReleaseResources):
         :rtype: Tuple[ResultCode, str]
         """
         try:
-            self.logger.debug("Loading the JSON string: %s", argin)
+            self.logger.debug(
+                "Loading the JSON string: %s",
+                json.dumps(json.loads(argin), indent=4),
+            )
             json_argument = json.loads(argin)
         except Exception as e:
             return (
@@ -222,14 +225,14 @@ class AssignResources(AssignReleaseResources):
                     ResultCode.FAILED,
                     f"Dish {receptor_id} is already allocated",
                 )
-            self.logger.info(
+            self.logger.debug(
                 f"Dish {receptor_id} is available for assignment."
             )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
 
-        self.logger.debug(
+        self.logger.info(
             f"Invoking AssignResources command on:{self.tm_subarray_adapter}"
         )
 
@@ -444,7 +447,7 @@ class AssignResources(AssignReleaseResources):
                     if self.component_manager.command_mapping.get(
                         self.component_manager.command_id
                     ):
-                        self.logger.info(
+                        self.logger.debug(
                             "Adding the id %s to the command mapping"
                             + "dictionary under command_id: %s",
                             message_or_unique_id,
@@ -454,7 +457,7 @@ class AssignResources(AssignReleaseResources):
                             self.component_manager.command_id
                         ].append(message_or_unique_id)
                     else:
-                        self.logger.info(
+                        self.logger.debug(
                             "Creating a command mapping dictionary for id:"
                             + "%s, with unique_id: %s",
                             self.component_manager.command_id,

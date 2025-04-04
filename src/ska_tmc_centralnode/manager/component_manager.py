@@ -640,7 +640,7 @@ class CNComponentManager(TmcComponentManager):
         :type assign_resources: str
         """
         with self.lock:
-            self.logger.info(
+            self.logger.debug(
                 "Updating assigned resources for device %s: %s",
                 dev_name,
                 assign_resources,
@@ -942,7 +942,7 @@ class CNComponentManager(TmcComponentManager):
             return TaskStatus.REJECTED, subarray_id_or_message
 
         # Execute the command if the input JSON is valid
-        self.logger.info("Calling component manager assign_resources method")
+        self.logger.debug("Calling component manager assign_resources method")
         assign_resources_command = AssignResources(
             self,
             adapter_factory=self.adapter_factory,

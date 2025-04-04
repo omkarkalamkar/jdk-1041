@@ -38,7 +38,7 @@ def task_callback_default(
         + "There is no action taken under this callback."
         + "Please provide task callback."
     )
-    LOGGER.info(
+    LOGGER.debug(
         "long running command status: %s, progress: %s ,result:%s ,"
         + "exception %s",
         status,
@@ -104,7 +104,7 @@ class CentralNodeCommand(TMCCommand):
                 return_code, message_or_unique_id = command_caller(adapter)
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
-                self.logger.debug(
+                self.logger.info(
                     f"Invoked {command_name} on device {adapter.dev_name}"
                 )
 
@@ -137,7 +137,7 @@ class CentralNodeCommand(TMCCommand):
     def reject_command(self, message: str) -> Tuple[ResultCode, str]:
         """Rejects command method for logs error message."""
         self.logger.error(
-            "Command execution failed due to reason : %s",
+            "Command execution failed on due to reason : %s",
             message,
         )
         return TaskStatus.REJECTED, message
