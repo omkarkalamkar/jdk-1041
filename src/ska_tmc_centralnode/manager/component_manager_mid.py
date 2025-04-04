@@ -792,14 +792,18 @@ class CNComponentManagerMid(CNComponentManager):
         loadishcfg_command = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        self.logger.info(f"command status {self.dish_vcc_command_status}")
+        self.logger.debug(
+            "command status "
+            f"{DishConfigStatus(self.dish_vcc_command_status).name}"
+        )
         if self.dish_vcc_command_status in (
             DishConfigStatus.STAGING,
             DishConfigStatus.IN_PROGRESS,
         ):
             message = (
-                "Dish Vcc Configuration is in Progress. dish vcc "
-                f"command status {self.dish_vcc_command_status}"
+                "Dish Vcc Configuration is in Progress. "
+                "dish vcc command status "
+                f"{DishConfigStatus(self.dish_vcc_command_status).name}"
             )
             return loadishcfg_command.reject_command(message)
 
