@@ -47,8 +47,6 @@ def test_all_devices_faulty(tango_context):
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
-        communication_state_callback=mock_callback,
-        component_state_callback=mock_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
     )

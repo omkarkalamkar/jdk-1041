@@ -143,12 +143,6 @@ class MidTmcCentralNode(AbstractCentralNode):
                 exception,
             )
 
-    def communication_state_callback(self):
-        """communication state callabacks"""
-
-    def component_state_callback(self):
-        """component state callbacks"""
-
     def dishvccvalidation_callback(self, dishvccvalidationstatus):
         """Update DishVccValidationStatus callbacks"""
         try:
@@ -237,8 +231,6 @@ class MidTmcCentralNode(AbstractCentralNode):
             _telescope_availability_callback=(
                 self.update_telescope_availability_callback
             ),
-            communication_state_callback=self.communication_state_callback,
-            component_state_callback=self.component_state_callback,
             _update_dishvccconfig_callback=self.update_dishvccconfig_callback,
             _dishvccvalidation_callback=self.dishvccvalidation_callback,
             command_timeout=self.CommandTimeOut,

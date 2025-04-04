@@ -26,8 +26,6 @@ def test_telescope_on():
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
-        communication_state_callback=mock_callback,
-        component_state_callback=mock_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
     )
@@ -51,8 +49,8 @@ def test_telescope_off():
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
-        communication_state_callback=mock_callback,
-        component_state_callback=mock_callback,
+        # communication_state_callback=mock_callback,
+        # component_state_callback=mock_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
     )

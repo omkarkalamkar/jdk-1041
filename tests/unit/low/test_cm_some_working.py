@@ -73,8 +73,6 @@ def test_low_some_working_other_faulty(tango_context):
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
-        communication_state_callback=mock_callback,
-        component_state_callback=mock_callback,
     )
 
     for dev in DEVICE_LIST_LOW:
