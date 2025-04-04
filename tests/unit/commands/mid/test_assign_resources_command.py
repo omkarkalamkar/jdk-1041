@@ -31,53 +31,28 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     return assign_input_str
 
 
+@pytest.mark.assign_resources_completed
 def test_assign_resources_command_completed(tango_context, task_callback):
     """Tests assign Resources completed"""
-    logger.info("Test started: Assign Resources Command Completed")
-
+    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
-        "Checked %s devices in %s seconds",
-        len(cm.checked_devices),
-        elapsed_time,
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-
     cm.is_dish_vcc_config_set = True
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
 
     assign_input_str = get_assign_input_str()
 
-    # Get subarray device
-    # dev_factory = DevFactory()
-    # subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
-    logger.info(
-        "Before setting availability: %s", cm.component.telescope_availability
-    )
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
 
-    # Set subarray availability to True
-    # subarray_device.SetisSubarrayAvailable(True)
-
-    # time.sleep(2)  # Give time for the state update to reflect
-
-    # logger.info(
-    #     "After setting availability: %s", cm.component.telescope_availability
-    # )
-
-    # Ensure the availability is correctly updated in the component manager
-    cm.component.telescope_availability["tmc_subarrays"][
-        MID_SUBARRAY_DEVICE
-    ] = True
-
-    # Check if subarray is available
-    # check_if_subarray_is_available(cm)
-
-    # Call assign_resources
     cm.assign_resources(assign_input_str, task_callback=task_callback)
-
-    # Assert calls are happening in correct sequence
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -85,57 +60,13 @@ def test_assign_resources_command_completed(tango_context, task_callback):
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-
-    # Add a slight delay before checking COMPLETED to avoid race conditions
-    time.sleep(40)
-
     task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
             "result": (ResultCode.OK, "Command Completed"),
         },
-        lookahead=10,  # Increased lookahead to 10 for safety
+        lookahead=5,
     )
-
-    logger.info("Test completed successfully")
-
-
-# @pytest.mark.assign_resources_completed
-# def test_assign_resources_command_completed(tango_context, task_callback):
-#     """Tests assign Resources completed"""
-#     logger.info("%s", tango_context)
-#     cm, start_time = create_cm()
-#     elapsed_time = time.time() - start_time
-#     logger.info(
-#         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
-#     )
-#     cm.is_dish_vcc_config_set = True
-#     result = cm.is_command_allowed("AssignResources")
-#     logger.info(f"Command allowed result is: {result}")
-
-#     assign_input_str = get_assign_input_str()
-
-#     dev_factory = DevFactory()
-#     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-
-#     subarray_device.SetisSubarrayAvailable(True)
-#     check_if_subarray_is_available(cm)
-
-#     cm.assign_resources(assign_input_str, task_callback=task_callback)
-#     task_callback.assert_against_call(
-#         call_kwargs={"status": TaskStatus.QUEUED}
-#     )
-
-#     task_callback.assert_against_call(
-#         call_kwargs={"status": TaskStatus.IN_PROGRESS}
-#     )
-#     task_callback.assert_against_call(
-#         call_kwargs={
-#             "status": TaskStatus.COMPLETED,
-#             "result": (ResultCode.OK, "Command Completed"),
-#         },
-#         lookahead=5,
-#     )
 
 
 def test_assign_resources_command_with_mkt_ids_completed(

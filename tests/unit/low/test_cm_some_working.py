@@ -77,9 +77,6 @@ def test_low_some_working_other_faulty(tango_context):
         component_state_callback=mock_callback,
     )
 
-    # cm = CNComponentManagerLow(
-    #     op_state_model, _input_parameter=InputParameterLow(None), logger=logger
-    # )
     for dev in DEVICE_LIST_LOW:
         cm.add_device(dev)
     set_devices_unresponsive(cm, FAULTY_LIST)
