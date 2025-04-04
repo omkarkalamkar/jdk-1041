@@ -165,6 +165,21 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     assert json.loads(cm.dish_vcc_validation_status) == {
         "mid-tmc/leaf-node-csp/0": "CSP Master device is unavailable"
     }
+    # Validate Dish Config status flag
+    cm.check_if_csp_all_dish_ready = mock.Mock()
+    cm.check_if_csp_all_dish_ready.return_value = True
+    cm.invoke_load_dish_cfg_command_callback = mock.Mock()
+    cm.handle_dish_vcc_validation_result(
+        MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
+    )
+    assert cm.dish_vcc_command_status == DishConfigStatus.INIT
+
+    cm.check_if_csp_all_dish_ready.return_value = False
+    cm.command_in_progress = ""
+    cm.handle_dish_vcc_validation_result(
+        MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
+    )
+    assert cm.dish_vcc_command_status == DishConfigStatus.FAILED
 
 
 def test_load_dish_cnfg_command_fail_csp_master(tango_context, json_factory):
