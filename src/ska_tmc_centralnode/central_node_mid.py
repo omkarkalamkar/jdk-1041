@@ -127,7 +127,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     def update_imaging_callback(self, imaging):
         """Callback for Update imaging"""
-        self.logger.debug("imaging %s", imaging)
+        self.logger.debug("Imaging %s", imaging)
         self.push_change_archive_events("imaging", imaging)
 
     def update_dishvccconfig_callback(self, isdishvccconfigset):
