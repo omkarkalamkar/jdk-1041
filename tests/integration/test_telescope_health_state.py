@@ -16,6 +16,7 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
 
+@pytest.mark.aki
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_telescope_health_state_mid(tango_context, change_event_callbacks):
@@ -55,7 +56,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
         HealthState.OK, lookahead=4
     )
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
-    time.sleep(0.1)
+    time.sleep(0.3)
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
 

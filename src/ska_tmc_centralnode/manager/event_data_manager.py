@@ -7,10 +7,10 @@ import logging
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Callable, Dict
+from typing import Callable, Dict, Union
 
 from ska_ser_logging import configure_logging
-from ska_tango_base.control_model import HealthState
+from ska_tango_base.control_model import AdminMode, HealthState
 
 configure_logging("DEBUG")
 LOGGER = logging.getLogger(__name__)
@@ -27,12 +27,23 @@ class HealthStateData:
 
 
 @dataclass
+class AdminModeData:
+    """
+    DataClass for AdminMode and its Timestamp
+    """
+
+    admin_mode: AdminMode
+    event_timestamp: datetime
+
+
+@dataclass
 class EventDataStorage:
     """
     A class to store the Events received for different attributes.
     """
 
     health_state_data: dict = field(default_factory=dict)
+    admin_mode_data: dict = field(default_factory=dict)
 
 
 def pre_process(func: Callable) -> Callable:
@@ -41,7 +52,6 @@ def pre_process(func: Callable) -> Callable:
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs):
         """wrapper method for pre process decorator"""
-
         try:
             data_type = kwargs.get("data_type")
             dict_name = self.attribute_mapping.get(data_type)
@@ -53,10 +63,11 @@ def pre_process(func: Callable) -> Callable:
                 func.__name__,
                 dict_name,
             )
+
             target_dict = getattr(self.event_info, dict_name)
 
             match dict_name:
-                case "health_state_data":
+                case "health_state_data" | "admin_mode_data":
                     if device in target_dict:
                         if self.compare_timevals(
                             target_dict[device].event_timestamp,
@@ -95,6 +106,7 @@ class EventDataManager:
 
         self.attribute_mapping: Dict[str, str] = {
             "HealthState": "health_state_data",
+            "AdminMode": "admin_mode_data",
         }
 
         self.eventlock = threading._RLock()
@@ -144,7 +156,7 @@ class EventDataManager:
     def update_event_data(
         self,
         device: str,
-        data: HealthState,
+        data: Union[HealthState, AdminMode],
         data_type: str,
         received_timestamp: datetime = None,
     ):
@@ -163,3 +175,10 @@ class EventDataManager:
                     health_state=data, event_timestamp=received_timestamp
                 )
                 LOGGER.info("HealthState - %s", target_dict[device_name])
+
+            elif data_type == "AdminMode":
+                data = self.get_enum_name_from_value(AdminMode, int(data))
+                target_dict[device_name] = AdminModeData(
+                    admin_mode=data, event_timestamp=received_timestamp
+                )
+                LOGGER.info("AdminMode - %s", target_dict[device_name])

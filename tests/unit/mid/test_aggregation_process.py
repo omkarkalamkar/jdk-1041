@@ -65,7 +65,6 @@ def test_health_aggregation_process(
             f"Testing health state: {test_state} and expected is {expected_state}"
         )
         event_data = generate_data(test_state)
-        logging.info(f"My event data is  {event_data}")
         aggregation_process.event_data_queue.put(event_data)
         time.sleep(0.2)
 
@@ -102,7 +101,6 @@ def test_convert_event_data_to_dict(
             ),
         },
     )
-    logging.info(f"my event data is {event_data}")
     event_data_dict = aggregation_process._convert_event_data_to_dict(
         event_data
     )

@@ -588,45 +588,33 @@ class DishkValueValidationResultAggregator:
 class HealthStateAggregator:
     """New Aggregator class for Mid"""
 
-    # TODO : Will be implemented in upcoming story as rule based approach
-    # def __init__(self, health_state_rules: dict):
-    #     """
-    #     :param obs_state_rules: Rules to use for aggregation
-    #     :type obs_state_rules: dict
-    #     """
-    #     self.health_state_rules = health_state_rules
+    def __init__(self, health_state_rules: dict):
+        """
+        :param obs_state_rules: Rules to use for aggregation
+        :type obs_state_rules: dict
+        """
+        self.health_state_rules = health_state_rules
 
-    # def aggregate(self, event_data: dict) -> HealthState:
-    #     """Aggregate healthState based on event data
-    #     :param event_data: event data dict which contain data required
-    #     for aggregation
-    #     :type event_data: dict
-    #     """
-    #     LOGGER.debug("Got event data for aggregation %s", event_data)
-    #     for (
-    #         health_state,
-    #         health_state_rules,
-    #     ) in self.health_state_rules.items():
-    #         LOGGER.debug("Checking rules for healthState %s", health_state)
-    #         if any(
-    #             obs_state_rule.matches(event_data)
-    #             for obs_state_rule in health_state_rules
-    #         ):
-    #             return (
-    #                 HealthState[health_state]
-    #                 if hasattr(HealthState, health_state)
-    #                 else health_state
-    #             )
     def aggregate(self, event_data: dict) -> HealthState:
-        # TODO: To be refactored in rule based aggregation story
         """Aggregate healthState based on event data
         :param event_data: event data dict which contain data required
         for aggregation
         :type event_data: dict
         """
         LOGGER.info("Got event data for aggregation %s", event_data)
-        if "FAILED" in event_data["all_unique_health_states"]:
-            return HealthState.FAILED
-        if "DEGRADED" in event_data["all_unique_health_states"]:
-            return HealthState.DEGRADED
-        return HealthState.OK
+        for (
+            health_state,
+            health_state_rules,
+        ) in self.health_state_rules.items():
+            LOGGER.info("Checking rules for healthState %s", health_state)
+            if any(
+                health_state_rule.matches(event_data)
+                for health_state_rule in health_state_rules
+            ):
+                return (
+                    HealthState[health_state]
+                    if hasattr(HealthState, health_state)
+                    else health_state
+                )
+        # TODO: What should be returned if not UNKNONW
+        return HealthState.UNKNOWN

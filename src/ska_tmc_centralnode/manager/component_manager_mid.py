@@ -160,7 +160,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
-        self.event_queues.update(
+        self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
                 "dishMode": Queue(),
