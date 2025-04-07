@@ -233,7 +233,7 @@ class AssignResources(AssignReleaseResources):
         )
 
         self.logger.info(
-            "%s | Invoking AssignResources command on: %s",
+            "Command Id: %s | Invoking AssignResources command on: %s",
             self.component_manager.command_id,
             self.tm_subarray_adapter,
         )
@@ -256,7 +256,7 @@ class AssignResources(AssignReleaseResources):
                 ] = message_or_unique_id
 
         self.logger.info(
-            "%s | Resources assigned successfully to: %s",
+            "Command Id: %s | Resources assigned successfully to: %s",
             self.component_manager.command_id,
             self.tm_subarray_adapter,
         )
@@ -387,7 +387,8 @@ class AssignResources(AssignReleaseResources):
         try:
             json_argument = json.loads(argin)
             self.logger.debug(
-                "%s | Executing AssignResources command with arguments: %s",
+                "Command Id: %s | Executing AssignResources "
+                + "command with arguments: %s",
                 self.component_manager.command_id,
                 json_argument,
             )

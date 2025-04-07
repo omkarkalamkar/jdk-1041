@@ -79,7 +79,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     CENTRALNODE_MID: error_message
                 }
                 self.logger.debug(
-                    "%s | Number of retries exhausted",
+                    "Command Id: %s | Number of retries exhausted",
                     self.component_manager.command_id,
                 )
                 task_callback(
@@ -91,7 +91,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 return
 
             self.logger.info(
-                "%s | DishId Vcc Map Json %s",
+                "Command Id: %s | DishId Vcc Map Json %s",
                 json.dumps(
                     dishid_vcc_map_json
                     if isinstance(dishid_vcc_map_json, dict)
@@ -117,7 +117,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
         self.logger.info(
-            "%s | %s ", self.component_manager.command_id, message
+            "Command Id: %s | %s ", self.component_manager.command_id, message
         )
         if ret_code == ResultCode.FAILED:
             task_callback(
@@ -152,7 +152,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         :type message: str
         """
         self.logger.debug(
-            "%s | Calling task callback for LoadDishCfg with result"
+            "Command Id: %s | Calling task callback for "
+            + "LoadDishCfg with result"
             + "%s and message %s",
             self.component_manager.command_id,
             result,
@@ -195,7 +196,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
         self.logger.debug(
-            "%s | The initial params are : %s",
+            "Command Id: %s | The initial params are : %s",
             self.component_manager.command_id,
             initial_params,
         )
@@ -205,7 +206,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 return data[tm_data_filepath].get_dict(), ""
             except Exception as exception:
                 self.logger.exception(
-                    "%s |  Error in Loading Dish VCC map "
+                    "Command Id: %s |  Error in Loading Dish VCC map "
                     + "json file %s, retrying",
                     self.component_manager.command_id,
                     exception,
@@ -235,7 +236,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             self.logger.error(
-                "%s | Failed to initialize adapters: %s",
+                "Command Id: %s | Failed to initialize adapters: %s",
                 self.component_manager.command_id,
                 message,
             )
@@ -243,7 +244,7 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         dishid_vcc_map_params = json.loads(argin)
         self.logger.info(
-            "%s | DishId-VCC map parameters: %s",
+            "Command Id: %s | DishId-VCC map parameters: %s",
             json.dumps(dishid_vcc_map_params, indent=4),
             self.component_manager.command_id,
         )
@@ -263,14 +264,15 @@ class LoadDishCfg(LoadDishCfgCommand):
             ):
                 if return_code == ResultCode.FAILED:
                     self.logger.error(
-                        "%s | Command 'LoadDishCfg' failed with error: %s",
+                        "Command Id: %s | Command 'LoadDishCfg' "
+                        + "failed with error: %s",
                         self.component_manager.command_id,
                         message_or_unique_id,
                     )
                     return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
-            "%s | Successfully invoked 'LoadDishCfg' command on "
+            "Command Id: %s | Successfully invoked 'LoadDishCfg' command on "
             "CSP Master Leaf Node: %s",
             self.component_manager.command_id,
             self.csp_mln_adapter.dev_name,
