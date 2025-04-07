@@ -181,6 +181,7 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     cm.handle_dish_vcc_validation_result(
         MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
     )
+
     assert cm.dish_vcc_command_status == DishConfigStatus.FAILED
 
 
