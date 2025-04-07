@@ -678,6 +678,8 @@ class CNComponentManager(TmcComponentManager):
             if isinstance(devInfo, SubArrayDeviceInfo):
                 self.logger.debug(
                     "Subarray Device resources for device %s: %s",
+                    devInfo.dev_name,
+                    devInfo.resources,
                 )
                 if devInfo.resources is None:
                     return False

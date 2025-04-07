@@ -233,7 +233,9 @@ class AssignResources(AssignReleaseResources):
         )
 
         self.logger.info(
-            f"Invoking AssignResources command on:{self.tm_subarray_adapter}"
+            "%s | Invoking AssignResources command on: %s",
+            self.component_manager.command_id,
+            self.tm_subarray_adapter,
         )
 
         return_codes, message_or_unique_ids = self.send_command(
@@ -254,7 +256,9 @@ class AssignResources(AssignReleaseResources):
                 ] = message_or_unique_id
 
         self.logger.info(
-            f"Resources assigned successfully to:{self.tm_subarray_adapter}"
+            "%s | Resources assigned successfully to: %s",
+            self.component_manager.command_id,
+            self.tm_subarray_adapter,
         )
 
         return (ResultCode.OK, "")
@@ -383,7 +387,8 @@ class AssignResources(AssignReleaseResources):
         try:
             json_argument = json.loads(argin)
             self.logger.debug(
-                "Executing AssignResources command with arguments: %s",
+                "%s | Executing AssignResources command with arguments: %s",
+                self.component_manager.command_id,
                 json_argument,
             )
         except Exception as exception:
