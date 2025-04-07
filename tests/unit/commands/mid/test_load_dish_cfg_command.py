@@ -149,7 +149,9 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     """Test dish vcc validation result of component manager"""
 
     cm, _ = create_cm()
+    cm.dish_vcc_command_status = DishConfigStatus.STAGING
     cm.handle_dish_vcc_validation_result(MID_CSP_MLN_DEVICE, ResultCode.OK)
+    assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     assert json.loads(cm.dish_vcc_validation_status) == {
         "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish Vcc Version is Same"
     }
