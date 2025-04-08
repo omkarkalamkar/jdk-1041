@@ -13,7 +13,8 @@ HEALTH_STATE_RULES = {
     "DEGRADED": [
         Rule(
             '$all(["DEGRADED" in all_unique_health_states'
-            ' or "OFFLINE" in all_unique_admin_modes, "FAILED" not in all_unique_health_states])'
+            ' or "OFFLINE" in all_unique_admin_modes, '
+            '"FAILED" not in all_unique_health_states])'
         )
     ],
     "FAILED": [Rule('"FAILED" in all_unique_health_states')],

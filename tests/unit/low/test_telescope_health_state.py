@@ -2,7 +2,7 @@
 import time
 
 import pytest
-from ska_tango_base.control_model import HealthState, AdminMode
+from ska_tango_base.control_model import AdminMode, HealthState
 from ska_tmc_common import (
     HelperBaseDevice,
     HelperMCCSController,
@@ -61,6 +61,7 @@ def devices_to_load():
             ],
         },
     )
+
 
 @pytest.mark.SKA_low
 def test_set_health_state_ok(tango_context):
