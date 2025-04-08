@@ -709,10 +709,11 @@ class CNComponentManagerMid(CNComponentManager):
         to False
         NOT_ALLOWED | Set is_dish_vcc_config_set to False
         """
+        dish_vcc_validation_result = int(result)
         self.logger.debug(
             "Dish Vcc Validation Event called with dev %s and result %s",
             dev_name,
-            ResultCode(result).name,
+            dish_vcc_validation_result,
         )
         with self.dish_vcc_validation_attr_lock:
             if self.input_parameter.csp_mln_dev_name in dev_name:
