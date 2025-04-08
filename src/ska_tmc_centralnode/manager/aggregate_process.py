@@ -10,7 +10,7 @@ from ska_ser_logging import configure_logging
 
 from ska_tmc_centralnode.manager.aggregators import HealthStateAggregator
 from ska_tmc_centralnode.manager.transition_rules.health_state_rules import (
-    HEALTH_STATE_RULES_LOW,
+    HEALTH_STATE_RULES,
     HEALTH_STATE_RULES_MID,
 )
 
@@ -29,7 +29,7 @@ class HealthAggregatorFactory:
         if telescope == "mid":
             return HealthStateAggregator(HEALTH_STATE_RULES_MID)
         if telescope == "low":
-            return HealthStateAggregator(HEALTH_STATE_RULES_LOW)
+            return HealthStateAggregator(HEALTH_STATE_RULES)
 
         raise ValueError(f"Unknown telescope type: {telescope}")
 

@@ -285,7 +285,7 @@ class CNComponentManager(TmcComponentManager):
                             event_data.device.dev_name(),
                             event_data.argout,
                         )
-                    elif attribute_name == "healthState":
+                    elif attribute_name in ("healthState", "adminMode"):
                         self.event_processing_methods[attribute_name](
                             event_data.device.dev_name(),
                             event_data.attr_value.value,
@@ -295,7 +295,6 @@ class CNComponentManager(TmcComponentManager):
                         self.event_processing_methods[attribute_name](
                             event_data.device.dev_name(),
                             event_data.attr_value.value,
-                            event_data.attr_value.time.todatetime(),
                         )
                 self.event_queue[attribute_name].task_done()
             except Empty:
@@ -710,7 +709,6 @@ class CNComponentManager(TmcComponentManager):
                 identifier in device_name.lower()
                 for identifier in leafnode_identifiers
             ):
-                self.logger.debug(f"I was here with device_name {device_name}")
                 device_info = self.component.get_device(device_name)
                 if device_info is not None:
                     device_info.last_event_arrived = time.time()

@@ -247,6 +247,14 @@ class CentralNodeEventReceiver(EventReceiver):
         """
         self._component_manager.event_queue["assignedResources"].put(event)
 
+    def handle_obs_state_event(self, event: tango.EventData) -> None:
+        """Handles assigned Resources event
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self._component_manager.event_queue["obsState"].put(event)
+
     def handle_dish_mode_event(self, event: tango.EventData) -> None:
         """Method to handle and update the latest value of dishMode
         attribute.
