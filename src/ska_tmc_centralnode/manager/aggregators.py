@@ -483,7 +483,7 @@ class HealthStateAggregator:
         for aggregation
         :type event_data: dict
         """
-        self.logger.info("Received event data for aggregation %s", event_data)
+        self.logger.debug("Received event data for aggregation %s", event_data)
         for (
             health_state,
             health_state_rules,
