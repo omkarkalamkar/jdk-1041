@@ -9,12 +9,27 @@ from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.settings import logger
 
 
+def mock_callback(*args, **kwargs):
+    """Devices to mock_callback"""
+
+
 def test_telescope_on():
     """Test Telescope on"""
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
-        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
+        op_state_model,
+        _input_parameter=InputParameterMid(None),
+        logger=logger,
+        _update_device_callback=mock_callback,
+        _update_telescope_state_callback=mock_callback,
+        _update_telescope_health_state_callback=mock_callback,
+        _update_tmc_op_state_callback=mock_callback,
+        _update_imaging_callback=mock_callback,
+        _telescope_availability_callback=mock_callback,
+        _update_dishvccconfig_callback=mock_callback,
+        _dishvccvalidation_callback=mock_callback,
     )
+
     res_code, message = cm.telescope_on()
     assert res_code == TaskStatus.QUEUED
     assert message == "Task queued"
@@ -23,9 +38,23 @@ def test_telescope_on():
 def test_telescope_off():
     """Test Telescope off"""
     op_state_model = TMCOpStateModel(logger)
+
     cm = CNComponentManagerMid(
-        op_state_model, logger=logger, _input_parameter=InputParameterMid(None)
+        op_state_model,
+        _input_parameter=InputParameterMid(None),
+        logger=logger,
+        _update_device_callback=mock_callback,
+        _update_telescope_state_callback=mock_callback,
+        _update_telescope_health_state_callback=mock_callback,
+        _update_tmc_op_state_callback=mock_callback,
+        _update_imaging_callback=mock_callback,
+        _telescope_availability_callback=mock_callback,
+        # communication_state_callback=mock_callback,
+        # component_state_callback=mock_callback,
+        _update_dishvccconfig_callback=mock_callback,
+        _dishvccvalidation_callback=mock_callback,
     )
+
     res_code, message = cm.telescope_off()
     assert res_code == TaskStatus.QUEUED
     assert message == "Task queued"

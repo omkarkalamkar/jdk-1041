@@ -9,6 +9,7 @@ package.
 import json
 import threading
 import time
+from logging import Logger
 from queue import Queue
 from typing import Callable
 
@@ -46,20 +47,18 @@ class CNComponentManagerMid(CNComponentManager):
         self,
         op_state_model,
         _input_parameter,
-        logger=None,
+        logger: Logger,
+        _update_device_callback: Callable,
+        _update_telescope_state_callback: Callable,
+        _update_telescope_health_state_callback: Callable,
+        _update_tmc_op_state_callback: Callable,
+        _update_imaging_callback: Callable,
+        _telescope_availability_callback: Callable,
+        _update_dishvccconfig_callback: Callable,
+        _dishvccvalidation_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        _telescope_availability_callback=None,
-        _update_dishvccconfig_callback=None,
-        _dishvccvalidation_callback=None,
-        communication_state_callback=None,
-        component_state_callback=None,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -102,17 +101,15 @@ class CNComponentManagerMid(CNComponentManager):
             op_state_model,
             _input_parameter,
             logger,
-            _component,
-            _liveliness_probe,
-            _event_receiver,
             _update_device_callback,
             _update_telescope_state_callback,
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_imaging_callback,
-            communication_state_callback,
             _telescope_availability_callback,
-            component_state_callback,
+            _component,
+            _liveliness_probe,
+            _event_receiver,
             proxy_timeout,
             event_subscription_check_period,
             liveliness_check_period,
@@ -121,6 +118,7 @@ class CNComponentManagerMid(CNComponentManager):
             *args,
             **kwargs,
         )
+
         self.subarray_availability = {
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names
