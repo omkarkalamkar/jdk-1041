@@ -194,7 +194,7 @@ class AssignResources(AssignReleaseResources):
         """
         try:
             self.logger.debug(
-                "Command Id : %s | " + "Loading the JSON string: %s",
+                "Command ID : %s | " + "Loading the JSON string: %s",
                 self.component_manager.command_id,
                 json.dumps(json.loads(argin), indent=4),
             )
@@ -220,7 +220,7 @@ class AssignResources(AssignReleaseResources):
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(
-            "Command Id: %s | " + "Receptor IDs are: %s",
+            "Command ID: %s | " + "Receptor IDs are: %s",
             self.component_manager.command_id,
             receptor_ids,
         )
@@ -231,7 +231,7 @@ class AssignResources(AssignReleaseResources):
                     f"Dish {receptor_id} is already allocated",
                 )
             self.logger.debug(
-                "Command Id: %s | " + "Dish %s is available for assignment.",
+                "Command ID: %s | " + "Dish %s is available for assignment.",
                 self.component_manager.command_id,
                 receptor_ids,
             )
@@ -240,7 +240,7 @@ class AssignResources(AssignReleaseResources):
         )
 
         self.logger.info(
-            "Command Id: %s | Invoking AssignResources command on: %s",
+            "Command ID: %s | Invoking AssignResources command on: %s",
             self.component_manager.command_id,
             self.tm_subarray_adapter,
         )
@@ -263,7 +263,7 @@ class AssignResources(AssignReleaseResources):
                 ] = message_or_unique_id
 
         self.logger.info(
-            "Command Id: %s | Resources assigned successfully to: %s",
+            "Command ID: %s | Resources assigned successfully on: %s",
             self.component_manager.command_id,
             self.tm_subarray_adapter,
         )
@@ -394,7 +394,7 @@ class AssignResources(AssignReleaseResources):
         try:
             json_argument = json.loads(argin)
             self.logger.debug(
-                "Command Id: %s | Executing AssignResources "
+                "Command ID: %s | Executing AssignResources "
                 + "command with arguments: %s",
                 self.component_manager.command_id,
                 json_argument,
@@ -461,7 +461,7 @@ class AssignResources(AssignReleaseResources):
                         self.component_manager.command_id
                     ):
                         self.logger.debug(
-                            "Command Id : %s |"
+                            "Command ID : %s |"
                             + "Adding the id %s to the command mapping"
                             + "dictionary under command_id: %s",
                             self.component_manager.command_id,
@@ -473,7 +473,7 @@ class AssignResources(AssignReleaseResources):
                         ].append(message_or_unique_id)
                     else:
                         self.logger.debug(
-                            "Command Id : %s |"
+                            "Command ID : %s |"
                             + "Creating a command mapping dictionary for id:"
                             + "%s, with unique_id: %s",
                             self.component_manager.command_id,

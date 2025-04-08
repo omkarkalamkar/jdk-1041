@@ -383,8 +383,7 @@ class CNComponentManagerMid(CNComponentManager):
                 case ResultCode.OK:
                     self.command_result = ResultCode.OK
                     self.logger.debug(
-                        "Command with unique_id '%s' "
-                        "on device '%s' succeeded.",
+                        "Command with unique_id '%s' " + "on  '%s' succeeded.",
                         unique_id,
                         dev_name,
                     )
@@ -397,7 +396,7 @@ class CNComponentManagerMid(CNComponentManager):
                     self.logger.debug(
                         "Updating LRCRCallback with result_code '%s' and "
                         "message '%s' "
-                        "for command '%s' on device '%s'.",
+                        "for command '%s' on  '%s'.",
                         result_code,
                         message,
                         unique_id,
