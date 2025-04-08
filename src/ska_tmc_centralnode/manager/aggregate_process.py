@@ -27,9 +27,9 @@ class HealthAggregatorFactory:
     def get_aggregator(telescope: str):
         """Static method to return aggregator class instance"""
         if telescope == "mid":
-            return HealthStateAggregator(HEALTH_STATE_RULES_MID)
+            return HealthStateAggregator(HEALTH_STATE_RULES_MID, LOGGER)
         if telescope == "low":
-            return HealthStateAggregator(HEALTH_STATE_RULES)
+            return HealthStateAggregator(HEALTH_STATE_RULES, LOGGER)
 
         raise ValueError(f"Unknown telescope type: {telescope}")
 

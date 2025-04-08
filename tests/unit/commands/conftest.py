@@ -8,6 +8,9 @@ from ska_tmc_common.test_helpers.helper_dish_device import (
     HelperDishDevice,
     HelperDishLNDevice,
 )
+from ska_tmc_common.test_helpers.helper_sdp_master_leaf_node import (
+    HelperSDPMasterLeafNode,
+)
 from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
 )
@@ -78,11 +81,16 @@ def devices_to_load():
             "devices": [
                 {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_CSP_MASTER_DEVICE},
-                {"name": LOW_SDP_MLN_DEVICE},
                 {"name": LOW_SDP_MASTER_DEVICE},
                 {"name": MID_CSP_MASTER_DEVICE},
-                {"name": MID_SDP_MLN_DEVICE},
                 {"name": MID_SDP_MASTER_DEVICE},
+            ],
+        },
+        {
+            "class": HelperSDPMasterLeafNode,
+            "devices": [
+                {"name": MID_SDP_MLN_DEVICE},
+                {"name": LOW_SDP_MLN_DEVICE},
             ],
         },
         {
