@@ -194,7 +194,8 @@ class AssignResources(AssignReleaseResources):
         """
         try:
             self.logger.debug(
-                "Loading the JSON string: %s",
+                "Command Id : %s | " + "Loading the JSON string: %s",
+                self.component_manager.command_id,
                 json.dumps(json.loads(argin), indent=4),
             )
             json_argument = json.loads(argin)
@@ -218,7 +219,11 @@ class AssignResources(AssignReleaseResources):
             return result_code, message
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
-        self.logger.debug(f"Receptor IDs are: {receptor_ids}")
+        self.logger.debug(
+            "Command Id: %s | " + "Receptor IDs are: %s",
+            self.component_manager.command_id,
+            receptor_ids,
+        )
         for receptor_id in receptor_ids:
             if self.component_manager.is_already_assigned(receptor_id):
                 return (
@@ -226,7 +231,9 @@ class AssignResources(AssignReleaseResources):
                     f"Dish {receptor_id} is already allocated",
                 )
             self.logger.debug(
-                f"Dish {receptor_id} is available for assignment."
+                "Command Id: %s | " + "Dish %s is available for assignment.",
+                self.component_manager.command_id,
+                receptor_ids,
             )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
@@ -454,8 +461,10 @@ class AssignResources(AssignReleaseResources):
                         self.component_manager.command_id
                     ):
                         self.logger.debug(
-                            "Adding the id %s to the command mapping"
+                            "Command Id : %s |"
+                            + "Adding the id %s to the command mapping"
                             + "dictionary under command_id: %s",
+                            self.component_manager.command_id,
                             message_or_unique_id,
                             self.component_manager.command_id,
                         )
@@ -464,8 +473,10 @@ class AssignResources(AssignReleaseResources):
                         ].append(message_or_unique_id)
                     else:
                         self.logger.debug(
-                            "Creating a command mapping dictionary for id:"
+                            "Command Id : %s |"
+                            + "Creating a command mapping dictionary for id:"
                             + "%s, with unique_id: %s",
+                            self.component_manager.command_id,
                             self.component_manager.command_id,
                             message_or_unique_id,
                         )

@@ -181,7 +181,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node %s : %s",
+                "Command Id : %s | "
+                + "Adapter is created for CSP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.command_id,
                 self.component_manager.input_parameter.csp_mln_dev_name,
                 self.csp_mln_adapter,
             )
@@ -196,7 +198,9 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                "Adapter is created for SDP Master Leaf Node %s : %s",
+                "Command Id : %s | "
+                + "Adapter is created for SDP Master Leaf Node %s : %s",
+                self.component_manager.input_parameter.command_id,
                 self.component_manager.input_parameter.sdp_mln_dev_name,
                 self.sdp_mln_adapter,
             )
@@ -222,7 +226,9 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for SubarrayNode {dev_name}"
+                        "Command Id : %s | "
+                        + f"Adapter is created for SubarrayNode {dev_name}",
+                        self.component_manager.input_parameter.command_id,
                     )
                 except Exception as e:
                     self.logger.warning(
@@ -254,11 +260,18 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for DishLeafNode {dev_name}"
+                        "Command Id: %s | "
+                        + "Adapter is created for DishLeafNode %s",
+                        self.component_manager.input_parameter.command_id,
+                        dev_name,
                     )
                 except Exception as e:
                     self.logger.warning(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                        "Command Id: %s | "
+                        "Error in creating adapter for %s: %s",
+                        self.component_manager.input_parameter.command_id,
+                        dev_name,
+                        e,
                     )
                     error_dev_names.append(dev_name)
 

@@ -110,8 +110,8 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_telescope_state_callback(self, telescope_state):
         """Update telescope state callback"""
-        self.logger.info("The current TelescopeState is : %s", telescope_state)
-        self.push_change_archive_events("telescopeState", telescope_state)
+        self.logger.info("The current TelescopeState : %s", telescope_state)
+        self.push_change_archive_events("telescopeStatis e", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         """Update Telescope health state callabacks"""
@@ -402,8 +402,10 @@ class AbstractCentralNode(TMCBaseDevice):
         handler = self.get_command_object("AssignResources")
         result_code, unique_id = handler(argin)
         self.logger.info(
-            "AssignResource command is invoked "
+            "Command Id : %s |"
+            + "AssignResource command is invoked "
             + "Result: %s, unique_id/message is %s",
+            unique_id,
             result_code,
             unique_id,
         )
@@ -438,8 +440,10 @@ class AbstractCentralNode(TMCBaseDevice):
         handler = self.get_command_object("ReleaseResources")
         result_code, unique_id = handler(argin)
         self.logger.info(
-            "ReleaseResources command is invoked "
+            "Command Id : %s |"
+            + "ReleaseResources command is invoked "
             + "Result: %s, unique_id/message is %s",
+            unique_id,
             result_code,
             unique_id,
         )
