@@ -260,7 +260,7 @@ class CNComponentManager(TmcComponentManager):
         if event.err:
             error = event.errors[0]
             self.logger.error(
-                "Error occurred on %s for device: %s - %s, %s",
+                "Event error occurred on %s for device: %s - %s, %s",
                 callback,
                 event.device.dev_name(),
                 error.reason,
@@ -431,7 +431,7 @@ class CNComponentManager(TmcComponentManager):
 
     def check_if_subarrays_are_responsive(self) -> bool:
         """Checks if subarray are responsive"""
-        self.logger.info("Checking if subarrays are responsive")
+        self.logger.debug("Checking if subarrays are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.subarray_dev_names
         )
@@ -517,7 +517,7 @@ class CNComponentManager(TmcComponentManager):
         """
         # Log the device failure with the device name
         message = (
-            f"device: {device_info.dev_name}: {exception}"
+            f"Device: {device_info.dev_name}: {exception}"
             + "failed to respond"
         )
         self.logger.error(message)

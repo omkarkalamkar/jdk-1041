@@ -288,7 +288,9 @@ class LoadDishCfg(LoadDishCfgCommand):
         vcc_map_params info containing vcc_dish mapping
         """
         self.logger.info(
-            f"Invoking LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
+            "Command Id: %s | Invoking LoadDishCfg command on: %s",
+            self.component_manager.command_id,
+            self.csp_mln_adapter.dev_name,
         )
         self.component_manager.dev_names_for_load_dish_cfg.append(
             self.csp_mln_adapter.dev_name
@@ -322,7 +324,9 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter = dish_adapter[0]
                     k_value = vcc_k_map.get("k")
                     self.logger.info(
+                        "Command Id: %s | ",
                         "Invoking SetKValue on dish adapter %s",
+                        self.component_manager.command_id,
                         dish_adapter.dev_name,
                     )
                     dish_adapter.proxy.command_inout_asynch(
