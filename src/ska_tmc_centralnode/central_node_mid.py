@@ -233,8 +233,6 @@ class MidTmcCentralNode(AbstractCentralNode):
             ),
             _update_dishvccconfig_callback=self.update_dishvccconfig_callback,
             _dishvccvalidation_callback=self.dishvccvalidation_callback,
-            communication_state_callback=None,
-            component_state_callback=None,
             command_timeout=self.CommandTimeOut,
             proxy_timeout=self.ProxyTimeout,
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,

@@ -7,6 +7,7 @@ import json
 import re
 import threading
 import time
+from logging import Logger
 from multiprocessing import Event
 from multiprocessing import Lock as ProcessLock
 from multiprocessing import Manager
@@ -93,18 +94,16 @@ class CNComponentManager(TmcComponentManager):
         self,
         op_state_model,
         _input_parameter,
-        logger=None,
+        logger: Logger,
+        _update_device_callback: Callable,
+        _update_telescope_state_callback: Callable,
+        _update_telescope_health_state_callback: Callable,
+        _update_tmc_op_state_callback: Callable,
+        _update_imaging_callback: Callable,
+        _telescope_availability_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
-        _event_receiver=True,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        communication_state_callback=None,
-        _telescope_availability_callback=None,
-        component_state_callback=None,
+        _event_receiver: bool = True,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -143,8 +142,6 @@ class CNComponentManager(TmcComponentManager):
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
             _event_receiver=False,
-            communication_state_callback=communication_state_callback,
-            component_state_callback=component_state_callback,
             proxy_timeout=proxy_timeout,
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
