@@ -12,7 +12,7 @@ import time
 from queue import Queue
 from typing import Callable
 
-from ska_control_model import HealthState
+from ska_control_model import HealthState, ObsState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
@@ -712,14 +712,15 @@ class CNComponentManagerMid(CNComponentManager):
         self.logger.debug(
             "Dish Vcc Validation Event called with dev %s and result %s",
             dev_name,
-            dish_vcc_validation_result,
+            ObsState(dish_vcc_validation_result).name,
         )
         with self.dish_vcc_validation_attr_lock:
             if self.input_parameter.csp_mln_dev_name in dev_name:
                 # Handle Csp Master Leaf Node event
                 csp_validation_result = int(result)
                 self.logger.debug(
-                    "Csp Validation Result is %s", csp_validation_result
+                    "Csp Validation Result is %s",
+                    ResultCode(csp_validation_result).name,
                 )
                 if (
                     csp_validation_result == ResultCode.UNKNOWN

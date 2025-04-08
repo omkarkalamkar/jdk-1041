@@ -198,7 +198,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.logger.debug(
             "Command ID: %s | The initial params are : %s",
             self.component_manager.command_id,
-            initial_params,
+            json.dumps(initial_params, indent=2),
         )
         if data_sources and tm_data_filepath:
             try:
@@ -245,8 +245,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         dishid_vcc_map_params = json.loads(argin)
         self.logger.info(
             "Command ID: %s | DishId-VCC map parameters: %s",
-            json.dumps(dishid_vcc_map_params, indent=4),
             self.component_manager.command_id,
+            json.dumps(dishid_vcc_map_params, indent=4),
         )
 
         dishid_vcc_map_json, _ = self.get_dishid_vcc_map_json(
@@ -324,8 +324,8 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter = dish_adapter[0]
                     k_value = vcc_k_map.get("k")
                     self.logger.info(
-                        "Command ID: %s | ",
-                        "Invoking SetKValue on dish adapter %s",
+                        "Command ID: %s | "
+                        + "Invoking SetKValue on dish adapter %s",
                         self.component_manager.command_id,
                         dish_adapter.dev_name,
                     )
