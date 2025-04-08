@@ -4,6 +4,21 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
+[0.19.0]
+********
+Added
+-----
+* Added the Rule engine based approach for health state aggregation
+* The health state aggregation rule will be running in a seperate process
+* AdminMode will be considered for healthstate aggregation.
+* Example - If any controller device has adminmode as OFFLINE the healthstate will be degraded.
+
+Update
+------
+* Updated the ska-tmc-common to v0.25.4 to include master helper leafnode device to set the controller admin mode
+Removed
+-------
+* Old healthstate aggregation code
 
 [0.18.0]
 ********

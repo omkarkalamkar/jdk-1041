@@ -21,7 +21,6 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
 
-@pytest.mark.aki
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_telescope_health_state_mid(tango_context, change_event_callbacks):

@@ -483,12 +483,14 @@ class HealthStateAggregator:
         for aggregation
         :type event_data: dict
         """
-        LOGGER.info("Received event data for aggregation %s", event_data)
+        self.logger.info("Received event data for aggregation %s", event_data)
         for (
             health_state,
             health_state_rules,
         ) in self.health_state_rules.items():
-            LOGGER.info("Checking rules for healthState %s", health_state)
+            self.logger.debug(
+                "Checking rules for healthState %s", health_state
+            )
             if any(
                 health_state_rule.matches(event_data)
                 for health_state_rule in health_state_rules
@@ -498,5 +500,4 @@ class HealthStateAggregator:
                     if hasattr(HealthState, health_state)
                     else health_state
                 )
-        # TODO: What should be returned if not UNKNONW
         return HealthState.UNKNOWN

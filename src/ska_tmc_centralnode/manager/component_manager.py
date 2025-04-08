@@ -695,7 +695,8 @@ class CNComponentManager(TmcComponentManager):
         :type admin_mode: AdminMode
         """
         self.logger.debug(
-            "admin mode event for %s: %s", device_name, admin_mode
+            f"AdminMode event for {device_name}: "
+            + f"{AdminMode(admin_mode).name}"
         )
         with self.lock:
             leafnode_identifiers = [
