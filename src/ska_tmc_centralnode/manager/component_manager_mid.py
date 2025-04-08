@@ -712,7 +712,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.logger.debug(
             "Dish Vcc Validation Event called with dev %s and result %s",
             dev_name,
-            result,
+            ResultCode(result).name,
         )
         with self.dish_vcc_validation_attr_lock:
             if self.input_parameter.csp_mln_dev_name in dev_name:

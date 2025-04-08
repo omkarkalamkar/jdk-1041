@@ -517,8 +517,9 @@ class CNComponentManager(TmcComponentManager):
         """
         # Log the device failure with the device name
         message = (
-            f"Device: {device_info.dev_name}: {exception}"
-            + "failed to respond"
+            "Device: %s : %s " + "failed to respond",
+            device_info.dev_name,
+            exception,
         )
         self.logger.error(message)
 
