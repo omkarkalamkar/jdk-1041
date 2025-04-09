@@ -2743,7 +2743,7 @@ typing_extensions = "*"
 type = "git"
 url = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common"
 reference = "hm-639"
-resolved_reference = "b0b52889541261df94630a2b43c791d6ccc3b950"
+resolved_reference = "fd48355e51e51e01e76f24a17cefad41b3e561d3"
 
 [[package]]
 name = "smmap"
