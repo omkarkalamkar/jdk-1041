@@ -2,7 +2,7 @@
 import time
 
 import pytest
-from ska_tango_base.control_model import HealthState
+from ska_tango_base.control_model import AdminMode, HealthState
 from ska_tmc_common import (
     HelperBaseDevice,
     HelperMCCSController,
@@ -66,9 +66,13 @@ def devices_to_load():
 @pytest.mark.SKA_low
 def test_set_health_state_ok(tango_context):
     """Test set healthstate ok"""
+    devFactory = DevFactory()
+    proxy = devFactory.get_device(MCCS_MLN_DEVICE)
+    proxy.SetMccsControllerAdminMode(AdminMode.ONLINE)
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, _input_parameter=InputParameterLow(None)
     )
+
     start_time = time.time()
     elapsed_time = 0
     # need to wait for the first event to come just after the subscription

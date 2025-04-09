@@ -9,6 +9,10 @@ from multiprocessing import Event, Process, Queue
 from ska_ser_logging import configure_logging
 
 from ska_tmc_centralnode.manager.aggregators import HealthStateAggregator
+from ska_tmc_centralnode.manager.transition_rules.health_state_rules import (
+    HEALTH_STATE_RULES,
+    HEALTH_STATE_RULES_MID,
+)
 
 configure_logging("DEBUG")
 
@@ -23,9 +27,9 @@ class HealthAggregatorFactory:
     def get_aggregator(telescope: str):
         """Static method to return aggregator class instance"""
         if telescope == "mid":
-            return HealthStateAggregator()
+            return HealthStateAggregator(HEALTH_STATE_RULES_MID, LOGGER)
         if telescope == "low":
-            return HealthStateAggregator()
+            return HealthStateAggregator(HEALTH_STATE_RULES, LOGGER)
 
         raise ValueError(f"Unknown telescope type: {telescope}")
 
@@ -105,7 +109,13 @@ class HealthStateAggregationProcessor:
                     health_data.health_state
                     for health_data in event_data.health_state_data.values()
                 )
-            )
+            ),
+            "all_unique_admin_modes": list(
+                set(
+                    admin_mode.admin_mode
+                    for admin_mode in event_data.admin_mode_data.values()
+                )
+            ),
         }
         return event_data_dict
 

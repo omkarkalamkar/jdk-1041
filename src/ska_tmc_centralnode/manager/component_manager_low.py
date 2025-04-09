@@ -113,7 +113,6 @@ class CNComponentManagerLow(CNComponentManager):
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
         self.mccs_mln_availability = False
-
         telescope_availability = self.get_telescope_availability()
 
         telescope_availability["tmc_subarrays"] = self.subarray_availability
@@ -124,7 +123,7 @@ class CNComponentManagerLow(CNComponentManager):
         )
         self.event_dict: dict = {}
         self.error_count: int = 0
-        self.event_queues.update(
+        self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
                 "isSubsystemAvailable": Queue(),

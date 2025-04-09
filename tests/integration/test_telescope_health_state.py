@@ -3,14 +3,19 @@ import time
 
 import pytest
 import tango
-from ska_tango_base.control_model import HealthState
+from ska_tango_base.control_model import AdminMode, HealthState
 from ska_tmc_common.dev_factory import DevFactory
 
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
     CENTRALNODE_MID,
+    LOW_CSP_MLN_DEVICE,
     LOW_SDP_MASTER_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    MCCS_MLN_DEVICE,
+    MID_CSP_MLN_DEVICE,
     MID_SDP_MASTER_DEVICE,
+    MID_SDP_MLN_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
@@ -22,9 +27,12 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
     """test telescope health state mid"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
+    sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
-
+    sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
+    csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
     ensure_checked_devices(central_node)
     central_node.subscribe_event(
         "telescopeHealthState",
@@ -55,7 +63,7 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
         HealthState.OK, lookahead=4
     )
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
-    time.sleep(0.1)
+    time.sleep(0.3)
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
 
@@ -66,8 +74,13 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     """test telescope health state low"""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
+    mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
-
+    mccs_mln.SetMccsControllerAdminMode(AdminMode.ONLINE)
+    sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
+    csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
     ensure_checked_devices(central_node)
     central_node.subscribe_event(
         "telescopeHealthState",
@@ -79,7 +92,7 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     sdp_master.SetDirectHealthState(HealthState.DEGRADED)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.DEGRADED, lookahead=2
+        HealthState.DEGRADED, lookahead=4
     )
     assert central_node.telescopeHealthState == HealthState.DEGRADED
 

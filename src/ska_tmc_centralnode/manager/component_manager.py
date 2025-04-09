@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
 import tango
-from ska_control_model import HealthState
+from ska_control_model import AdminMode, HealthState
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.control_model import ObsState
@@ -66,6 +66,13 @@ from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
+)
+from ska_tmc_centralnode.utils.constants import (
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    MCCS_MLN_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
 )
 
 
@@ -202,6 +209,7 @@ class CNComponentManager(TmcComponentManager):
             "obsState": Queue(),
             "assignedResources": Queue(),
             "healthState": Queue(),
+            "adminMode": Queue(),
         }
 
         self.event_processing_methods: Dict[
@@ -210,6 +218,7 @@ class CNComponentManager(TmcComponentManager):
             "obsState": self.update_device_obs_state,
             "assignedResources": self.update_device_assigned_resource,
             "healthState": self.update_device_health_state,
+            "adminMode": self.update_device_admin_mode,
         }
         self.aggregate_process_manager = Manager()
         self.event_data_queue = self.aggregate_process_manager.Queue()
@@ -223,14 +232,14 @@ class CNComponentManager(TmcComponentManager):
         self.aggregate_process_monitor_thread.start()
 
     @property
-    def event_queues(self):
+    def event_queue(self):
         """event queue property"""
         with self.rlock:
             return self.__event_queues
 
     def _start_event_processing_threads(self) -> None:
         """Start all the event processing threads."""
-        for attribute in self.event_queues:
+        for attribute in self.event_queue:
             thread = threading.Thread(
                 target=self.process_event, args=[attribute], name=attribute
             )
@@ -256,7 +265,7 @@ class CNComponentManager(TmcComponentManager):
     def process_event(self, attribute_name: str) -> None:
         """
         Process the given attribute's event using the data from the
-            event_queues and invoke corresponding process method.
+            event_queue and invoke corresponding process method.
         :param attribute_name: Name of the attribute for which event is to be
             processed
         :type attribute_name: str
@@ -264,7 +273,7 @@ class CNComponentManager(TmcComponentManager):
         """
         while True:
             try:
-                event_data = self.event_queues[attribute_name].get()
+                event_data = self.event_queue[attribute_name].get()
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
                 ):
@@ -273,7 +282,7 @@ class CNComponentManager(TmcComponentManager):
                             event_data.device.dev_name(),
                             event_data.argout,
                         )
-                    elif attribute_name == "healthState":
+                    elif attribute_name in ("healthState", "adminMode"):
                         self.event_processing_methods[attribute_name](
                             event_data.device.dev_name(),
                             event_data.attr_value.value,
@@ -284,7 +293,7 @@ class CNComponentManager(TmcComponentManager):
                             event_data.device.dev_name(),
                             event_data.attr_value.value,
                         )
-                self.event_queues[attribute_name].task_done()
+                self.event_queue[attribute_name].task_done()
             except Empty:
                 # If an empty exception is raised by the Queue, we can
                 # safely ignore it.
@@ -427,6 +436,18 @@ class CNComponentManager(TmcComponentManager):
         """
         return self.input_parameter.sdp_subarray_dev_names
 
+    def get_sdp_master_leaf_node_dev_name(self) -> str:
+        """
+        Return Sdp master leaf node device name
+        """
+        return self.input_parameter.sdp_mln_dev_name
+
+    def get_csp_master_leaf_node_dev_name(self) -> str:
+        """
+        Return Csp master leaf node device name
+        """
+        return self.input_parameter.csp_mln_dev_name
+
     def get_csp_subarray_dev_names(self) -> list:
         """
         Return Csp Subarray device names
@@ -438,6 +459,18 @@ class CNComponentManager(TmcComponentManager):
         Return Sdp Master device name
         """
         return self.input_parameter.sdp_master_dev_name
+
+    def get_mccs_master_dev_name(self) -> str:
+        """
+        Return Sdp Master device name
+        """
+        return self.input_parameter.mccs_master_dev_name
+
+    def get_mccs_master_leaf_node_dev_name(self) -> str:
+        """
+        Return MCCS master leaf node device name
+        """
+        return self.input_parameter.mccs_mln_dev_name
 
     def get_csp_master_dev_name(self) -> str:
         """
@@ -646,6 +679,46 @@ class CNComponentManager(TmcComponentManager):
                     data_type="HealthState",
                 )
                 self.component._invoke_device_callback(devInfo)
+
+    def update_device_admin_mode(
+        self, device_name: str, admin_mode: AdminMode, timestamp
+    ):
+        """
+        Update a monitored device admin mode
+
+        :param device_name: name of the device
+        :type device_name: str
+        :param admin_mode: admin mode of the device
+        :type admin_mode: AdminMode
+        """
+        self.logger.debug(
+            f"AdminMode event for {device_name}: "
+            + f"{AdminMode(admin_mode).name}"
+        )
+        with self.lock:
+            leafnode_identifiers = [
+                MID_SDP_MLN_DEVICE,
+                MID_CSP_MLN_DEVICE,
+                LOW_SDP_MLN_DEVICE,
+                LOW_CSP_MLN_DEVICE,
+                MCCS_MLN_DEVICE,
+            ]
+            if any(
+                identifier in device_name.lower()
+                for identifier in leafnode_identifiers
+            ):
+                device_info = self.component.get_device(device_name)
+                if device_info is not None:
+                    device_info.last_event_arrived = time.time()
+                    device_info.update_unresponsive(False)
+                    device_info.admin_mode = admin_mode
+                    self.event_data_manager.update_event_data(
+                        device=device_name,
+                        data=admin_mode,
+                        data_type="AdminMode",
+                        received_timestamp=timestamp,
+                    )
+                    self.component._invoke_device_callback(device_info)
 
     def update_device_obs_state(
         self, dev_name: str, obs_state: ObsState

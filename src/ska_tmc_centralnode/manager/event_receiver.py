@@ -44,6 +44,7 @@ class CentralNodeEventReceiver(EventReceiver):
         self.attribute_dictionary = {
             "state": self.handle_state_event,
             "healthState": self.handle_health_state_event,
+            "adminMode": self.handle_admin_mode_event,
         }
         self.device_subscribed = {}
         self.dish_name = ""
@@ -69,11 +70,13 @@ class CentralNodeEventReceiver(EventReceiver):
 
             self.subscribe_events(
                 dev_info=device_info,
-                attribute_dictionary=(self.attribute_dictionary),
+                attribute_tobe_subscribed=(self.attribute_dictionary),
             )
 
     def subscribe_events(
-        self, dev_info: DeviceInfo, attribute_dictionary: Optional[dict] = None
+        self,
+        dev_info: DeviceInfo,
+        attribute_tobe_subscribed: Optional[dict] = None,
     ) -> None:
         """Subscribe events for central node event receiver"""
 
@@ -86,7 +89,10 @@ class CentralNodeEventReceiver(EventReceiver):
             )
         else:
             try:
-                for attribute, callable_value in attribute_dictionary.items():
+                for (
+                    attribute,
+                    callable_value,
+                ) in attribute_tobe_subscribed.items():
                     self._logger.info(
                         "Subscribing event for attribute: %s", attribute
                     )
@@ -159,7 +165,6 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_masterln_availability_event,
                         stateless=True,
                     )
-
                     if dev_info.dev_name == MID_CSP_MLN_DEVICE:
                         proxy.subscribe_event(
                             "longRunningCommandResult",
@@ -180,7 +185,33 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_lrcr_event,
                         stateless=True,
                     )
+                    proxy.subscribe_event(
+                        "mccsControllerAdminMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_admin_mode_event,
+                        stateless=True,
+                    )
+                if dev_info.dev_name in {
+                    LOW_CSP_MLN_DEVICE,
+                    MID_CSP_MLN_DEVICE,
+                }:
+                    proxy.subscribe_event(
+                        "cspControllerAdminMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_admin_mode_event,
+                        stateless=True,
+                    )
 
+                if dev_info.dev_name in {
+                    LOW_SDP_MLN_DEVICE,
+                    MID_SDP_MLN_DEVICE,
+                }:
+                    proxy.subscribe_event(
+                        "sdpControllerAdminMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_admin_mode_event,
+                        stateless=True,
+                    )
             except Exception as e:
                 self._logger.error(
                     "Event not working for device %s: %s", proxy.dev_name, e
@@ -194,13 +225,19 @@ class CentralNodeEventReceiver(EventReceiver):
         """
         It handles the health state events of different devices
         """
-        self._component_manager.event_queues["healthState"].put(event)
+        self._component_manager.event_queue["healthState"].put(event)
+
+    def handle_admin_mode_event(self, event: tango.EventData) -> None:
+        """
+        It handles the admin mode events of different devices
+        """
+        self._component_manager.event_queue["adminMode"].put(event)
 
     def handle_state_event(self, event: tango.EventData) -> None:
         """
         It handles the state events of different devices
         """
-        self._component_manager.event_queues["state"].put(event)
+        self._component_manager.event_queue["state"].put(event)
 
     def handle_assigned_resource_event(self, event: tango.EventData) -> None:
         """Handles assigned Resources event
@@ -208,7 +245,15 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._component_manager.event_queues["assignedResources"].put(event)
+        self._component_manager.event_queue["assignedResources"].put(event)
+
+    def handle_obs_state_event(self, event: tango.EventData) -> None:
+        """Handles assigned Resources event
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self._component_manager.event_queue["obsState"].put(event)
 
     def handle_dish_mode_event(self, event: tango.EventData) -> None:
         """Method to handle and update the latest value of dishMode
@@ -218,7 +263,7 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._component_manager.event_queues["dishMode"].put(event)
+        self._component_manager.event_queue["dishMode"].put(event)
 
     def handle_lrcr_event(self, event: tango.EventData) -> None:
         """Method to handle and update the latest value of
@@ -228,7 +273,7 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._component_manager.event_queues["longRunningCommandResult"].put(
+        self._component_manager.event_queue["longRunningCommandResult"].put(
             event
         )
 
@@ -244,12 +289,12 @@ class CentralNodeEventReceiver(EventReceiver):
             change in event.
         """
         if getattr(event, "attr_value", False):
-            self._component_manager.event_queues["loadDishConfigResult"].put(
+            self._component_manager.event_queue["loadDishConfigResult"].put(
                 event
             )
         # In case of Async callback get command result from argout
         elif getattr(event, "argout", False):
-            self._component_manager.event_queues[
+            self._component_manager.event_queue[
                 "loadDishConfigResultAsync"
             ].put(event)
 
@@ -260,13 +305,13 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._component_manager.event_queues["kValueValidationResult"].put(
+        self._component_manager.event_queue["kValueValidationResult"].put(
             event
         )
 
     def handle_dish_vcc_k_value_validation_event(self, event: tango.EventData):
         """Handle DishVccMapValidationResult change event."""
-        self._component_manager.event_queues["DishVccMapValidationResult"].put(
+        self._component_manager.event_queue["DishVccMapValidationResult"].put(
             event
         )
 
@@ -280,7 +325,7 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._component_manager.event_queues["isSubsystemAvailable"].put(event)
+        self._component_manager.event_queue["isSubsystemAvailable"].put(event)
 
     def handle_subarray_availability_event(
         self, event: tango.EventData
@@ -292,4 +337,4 @@ class CentralNodeEventReceiver(EventReceiver):
             event_data (tango.EventType.CHANGE_EVENT): to flag the
             change in event.
         """
-        self._component_manager.event_queues["isSubarrayAvailable"].put(event)
+        self._component_manager.event_queue["isSubarrayAvailable"].put(event)
