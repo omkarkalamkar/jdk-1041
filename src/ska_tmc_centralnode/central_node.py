@@ -402,10 +402,8 @@ class AbstractCentralNode(TMCBaseDevice):
         handler = self.get_command_object("AssignResources")
         result_code, unique_id = handler(argin)
         self.logger.info(
-            "Command ID : %s |"
-            + "AssignResource command is invoked "
+            "AssignResource command is invoked "
             + "Result: %s, unique_id/message: %s",
-            unique_id,
             result_code,
             unique_id,
         )
@@ -440,10 +438,8 @@ class AbstractCentralNode(TMCBaseDevice):
         handler = self.get_command_object("ReleaseResources")
         result_code, unique_id = handler(argin)
         self.logger.info(
-            "Command ID : %s |"
-            + "ReleaseResources command is invoked "
+            "ReleaseResources command is invoked "
             + "Result: %s, unique_id/message: %s",
-            unique_id,
             result_code,
             unique_id,
         )

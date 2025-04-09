@@ -105,8 +105,7 @@ class CentralNodeCommand(TMCCommand):
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
                 self.logger.info(
-                    f"Command ID : {message_or_unique_id[0]} "
-                    + f"Invoked {command_name} on  {adapter.dev_name}"
+                    f"Invoked {command_name} on  {adapter.dev_name}"
                 )
 
         except Exception as e:
