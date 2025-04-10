@@ -62,7 +62,7 @@ class TelescopeStateAggregatorMid(Aggregator):
 
         if not sdp_master and not csp_master:
             self._logger.info(
-                "Responsive device: "
+                "Checking if sdp and csp master are responsive: "
                 + "%s,responsive : %s "
                 + "%s, responsive: %s ",
                 self._component_manager.input_parameter.sdp_master_dev_name,
@@ -144,7 +144,7 @@ class TelescopeStateAggregatorLow(Aggregator):
         self._logger.info(f"Telescope state list is : {telescopeStateList}")
         if not sdp_master and not csp_master and not mccs_master:
             self._logger.info(
-                "Responsive devices: "
+                "Checking if sdp, csp and mccs master are responsive: "
                 + "%s , responsive :%s,"
                 + "%s, responsive : %s"
                 + "%s, responsive : %s",
