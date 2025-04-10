@@ -23,6 +23,7 @@ from tests.settings import (
     MID_SUBARRAY_DEVICE,
     NUM_DISHES,
     count_faulty_devices,
+    dish_vcc_process_callback,
     logger,
     set_devices_unresponsive,
 )
@@ -71,6 +72,7 @@ def test_some_working_other_faulty(tango_context):
 
     cm = CNComponentManagerMid(
         op_state_model,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         _input_parameter=InputParameterMid(None),
         logger=logger,
         _update_device_callback=mock_callback,

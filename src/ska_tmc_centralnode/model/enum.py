@@ -8,3 +8,13 @@ class ModesAvailability(IntEnum):
 
     not_available = 0
     available = 1
+
+
+class DishConfigStatus(IntEnum):
+    """Status for Dish Vcc Configuration"""
+
+    STAGING = 0
+    INIT = 1
+    IN_PROGRESS = 2
+    COMPLETED = 3
+    FAILED = 4

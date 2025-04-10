@@ -20,6 +20,7 @@ from ska_tmc_centralnode.manager.component_manager_low import (
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
@@ -128,6 +129,11 @@ def count_faulty_devices(cm):
     return result
 
 
+def dish_vcc_process_callback(event):
+    """Dummy dish vcc process callback for testing"""
+    logger.debug("Dish Vcc process callback called with event %s", event)
+
+
 def mock_update_device_callback(devInfo):
     """Dummy method for Update device callabacks"""
     logger.debug("Update device callabacks devInfo: %s", devInfo)
@@ -174,6 +180,7 @@ def create_cm(
             op_state_model,
             _input_parameter=InputParameterMid(None),
             logger=logger,
+            _dish_vcc_command_status_callback=dish_vcc_process_callback,
             _update_device_callback=mock_update_device_callback,
             _update_telescope_state_callback=(
                 mock_update_telescope_state_callback
@@ -198,6 +205,7 @@ def create_cm(
         # command.
         DEVICE_LIST = DEVICE_LIST_MID
         cm.is_dish_vcc_config_set = True
+        cm.dish_vcc_command_status = DishConfigStatus.COMPLETED
     else:
         cm = CNComponentManagerLow(
             op_state_model,

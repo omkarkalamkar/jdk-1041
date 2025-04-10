@@ -20,6 +20,12 @@ Removed
 -------
 * Old healthstate aggregation code
 
+[0.18.2]
+********
+* DishVccCommandStatus attribute added for central node
+* LoadDishCfg command is rejected if DishVccCommandStatus is STAGING or IN PROGRESS
+* After Central Node Initialization complete DishVccCommandStatus changed to COMPLETED or FAILED
+
 [0.18.0]
 ********
 * Tag release with ADR-9 changes

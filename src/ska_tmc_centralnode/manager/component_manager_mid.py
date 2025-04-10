@@ -30,6 +30,7 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -48,6 +49,7 @@ class CNComponentManagerMid(CNComponentManager):
         op_state_model,
         _input_parameter,
         logger: Logger,
+        _dish_vcc_command_status_callback: callable,
         _update_device_callback: Callable,
         _update_telescope_state_callback: Callable,
         _update_telescope_health_state_callback: Callable,
@@ -158,6 +160,10 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
+        self._dish_vcc_command_status = DishConfigStatus.STAGING
+        self.dish_vcc_command_status_callback = (
+            _dish_vcc_command_status_callback
+        )
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -209,6 +215,18 @@ class CNComponentManagerMid(CNComponentManager):
     def get_load_disg_cfg_resultcode(self):
         """Return Aggregated command result for Load Dish Cfg command"""
         return self.load_dish_cfg_aggregated_result
+
+    @property
+    def dish_vcc_command_status(self):
+        """Return dish vcc command status"""
+        return self._dish_vcc_command_status
+
+    @dish_vcc_command_status.setter
+    def dish_vcc_command_status(self, value: DishConfigStatus):
+        """Set dish vcc command status and invoke callback"""
+        self.logger.debug("Setting dish config status %s", value)
+        self._dish_vcc_command_status = value
+        self.dish_vcc_command_status_callback(value)
 
     @property
     def is_dish_vcc_config_set(self):
@@ -722,18 +740,34 @@ class CNComponentManagerMid(CNComponentManager):
 
                     self.command_in_progress = "LoadDishCfg"
                     if self.check_if_csp_all_dish_ready():
+                        self.dish_vcc_command_status = DishConfigStatus.INIT
                         self.invoke_load_dish_cfg_command_callback()
                     else:
                         self.logger.info(
                             "Time Out while waiting for Dishes to be ready"
                         )
                         self.command_in_progress = ""
+                        # Initialization Failed so mark
+                        # process status as failed
+                        self.dish_vcc_command_status = DishConfigStatus.FAILED
                 elif (
                     csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
                 ):
                     if csp_validation_result == ResultCode.OK:
+                        # Update dish config status to completed only
+                        # during central node initialization.
+                        # This handle scenario when dish vcc already set
+                        # and central node restart
+                        if (
+                            self.dish_vcc_command_status
+                            == DishConfigStatus.STAGING
+                        ):
+                            self.dish_vcc_command_status = (
+                                DishConfigStatus.COMPLETED
+                            )
                         self.update_dish_vcc_flag(True)
                     else:
+                        self.dish_vcc_command_status = DishConfigStatus.FAILED
                         self.update_dish_vcc_flag(False)
                     self.dish_vcc_validation_status = {
                         MID_CSP_MLN_DEVICE: DISH_VCC_VALIDATION_RESULT_STATUS[
@@ -750,6 +784,20 @@ class CNComponentManagerMid(CNComponentManager):
         loadishcfg_command = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
+        self.logger.debug(
+            "command status "
+            f"{DishConfigStatus(self.dish_vcc_command_status).name}"
+        )
+        if self.dish_vcc_command_status in (
+            DishConfigStatus.STAGING,
+            DishConfigStatus.IN_PROGRESS,
+        ):
+            message = (
+                "Dish Vcc Configuration is in Progress. "
+                "dish vcc command status "
+                f"{DishConfigStatus(self.dish_vcc_command_status).name}"
+            )
+            return loadishcfg_command.reject_command(message)
 
         try:
             dishid_vcc_map_params = json.loads(argin)
@@ -914,3 +962,4 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_data_download_error = False
+        self.dish_vcc_command_status = DishConfigStatus.COMPLETED

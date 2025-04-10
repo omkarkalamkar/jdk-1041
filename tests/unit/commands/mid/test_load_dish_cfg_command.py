@@ -13,6 +13,7 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 from tango import ApiUtil
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 
 # Helper Dish LN device is using Database API and in Unit test Database API
@@ -49,6 +50,7 @@ def test_load_dish_cfg_command(
         },
         lookahead=8,
     )
+    assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     # Validate memorizedDishVccMap attribute set
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
@@ -147,7 +149,9 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     """Test dish vcc validation result of component manager"""
 
     cm, _ = create_cm()
+    cm.dish_vcc_command_status = DishConfigStatus.STAGING
     cm.handle_dish_vcc_validation_result(MID_CSP_MLN_DEVICE, ResultCode.OK)
+    assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     assert json.loads(cm.dish_vcc_validation_status) == {
         "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish Vcc Version is Same"
     }
@@ -163,6 +167,22 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     assert json.loads(cm.dish_vcc_validation_status) == {
         "mid-tmc/leaf-node-csp/0": "CSP Master device is unavailable"
     }
+    # Validate Dish Config status flag
+    cm.check_if_csp_all_dish_ready = mock.Mock()
+    cm.check_if_csp_all_dish_ready.return_value = True
+    cm.invoke_load_dish_cfg_command_callback = mock.Mock()
+    cm.handle_dish_vcc_validation_result(
+        MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
+    )
+    assert cm.dish_vcc_command_status == DishConfigStatus.INIT
+
+    cm.check_if_csp_all_dish_ready.return_value = False
+    cm.command_in_progress = ""
+    cm.handle_dish_vcc_validation_result(
+        MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
+    )
+
+    assert cm.dish_vcc_command_status == DishConfigStatus.FAILED
 
 
 def test_load_dish_cnfg_command_fail_csp_master(tango_context, json_factory):
@@ -177,3 +197,21 @@ def test_load_dish_cnfg_command_fail_csp_master(tango_context, json_factory):
     load_dish_cnfg_command = LoadDishCfg(cm, adapter_factory, logger=logger)
     (res_code, _) = load_dish_cnfg_command.do(dish_cfg_input_str)
     assert res_code == ResultCode.FAILED
+
+
+def test_load_dish_config_command_fail(
+    tango_context, json_factory, task_callback
+):
+    # Validate load dish cfg is rejected if dish vcc process status
+    # is in progress
+    cm, _ = create_cm()
+    cm.dish_vcc_command_status = DishConfigStatus.IN_PROGRESS
+    cm.is_command_allowed("LoadDishCfg")
+    dish_cfg_input_str = json_factory("command_load_dish_cfg_invalid")
+
+    dish_cfg_input = json.loads(dish_cfg_input_str)
+
+    result_code, message = cm.load_dish_cfg(
+        json.dumps(dish_cfg_input), task_callback=task_callback
+    )
+    assert result_code == TaskStatus.REJECTED

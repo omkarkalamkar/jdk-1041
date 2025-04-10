@@ -11,6 +11,7 @@ from ska_telmodel.data import TMData
 from ska_tmc_centralnode.commands.central_node_command import (
     LoadDishCfgCommand,
 )
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.config_json_validator import DishConfigValidator
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 
@@ -64,6 +65,9 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "LoadDishCfg"
         self.component_manager.command_result = ResultCode.STARTED
+        self.component_manager.dish_vcc_command_status = (
+            DishConfigStatus.IN_PROGRESS
+        )
         self.component_manager.start_timer(
             self.timeout_id,
             self.component_manager.command_timeout,
@@ -79,6 +83,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     CENTRALNODE_MID: error_message
                 }
                 self.logger.debug("Number of retries exhausted")
+                self.component_manager.reset_load_dish_cfg_data()
                 task_callback(
                     status=TaskStatus.COMPLETED,
                     result=(ResultCode.FAILED, error_message),
@@ -95,6 +100,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 self.component_manager.dish_vcc_validation_status = {
                     CENTRALNODE_MID: message
                 }
+                self.component_manager.reset_load_dish_cfg_data()
                 task_callback(
                     status=TaskStatus.COMPLETED,
                     result=(ResultCode.FAILED, message),
@@ -106,12 +112,12 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.dish_cfg_params = dish_cfg_params
         self.logger.info(message)
         if ret_code == ResultCode.FAILED:
+            self.component_manager.reset_load_dish_cfg_data()
             task_callback(
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.FAILED, message),
                 exception=message,
             )
-            self.component_manager.reset_load_dish_cfg_data()
         else:
             self.start_tracker_thread(
                 "get_load_disg_cfg_resultcode",

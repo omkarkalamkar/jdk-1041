@@ -7,6 +7,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
 from tango import DeviceProxy
 
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 from tests.common_utils import (
     is_device_ready,
@@ -54,6 +55,12 @@ def load_dish_cfg(
         change_event_callbacks["longRunningCommandResult"],
     )
 
+    central_node.subscribe_event(
+        "DishVccCommandStatus",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["DishVccCommandStatus"],
+    )
+
     result, unique_id = central_node.LoadDishCfg(config_str)
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
@@ -63,10 +70,20 @@ def load_dish_cfg(
 
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
+    change_event_callbacks.assert_change_event(
+        "DishVccCommandStatus",
+        DishConfigStatus.IN_PROGRESS,
+        lookahead=4,
+    )
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+    change_event_callbacks.assert_change_event(
+        "DishVccCommandStatus",
+        DishConfigStatus.COMPLETED,
         lookahead=4,
     )
 
@@ -86,6 +103,62 @@ def load_dish_cfg(
         csp_master_ln_device,
         config_str,
     )
+
+
+def load_dish_cfg_rejected(
+    tango_context, central_node_name, config_str, change_event_callbacks
+):
+    """Test LoadDishCfg rejected when existing
+    LoadDishCfg command is in progress"""
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+
+    ensure_checked_devices(central_node)
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    central_node.subscribe_event(
+        "DishVccCommandStatus",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["DishVccCommandStatus"],
+    )
+    # Set delay for load dish cfg command
+    csp_master_ln_device.SetDelay(5)
+    result, unique_id = central_node.LoadDishCfg(config_str)
+    logger.info(
+        "LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        result,
+    )
+
+    assert unique_id[0].endswith("LoadDishCfg")
+    assert result[0] == ResultCode.QUEUED
+    change_event_callbacks.assert_change_event(
+        "DishVccCommandStatus",
+        DishConfigStatus.IN_PROGRESS,
+        lookahead=4,
+    )
+    # Invoke Another LoadDishCfg command
+    second_result, second_unique_id = central_node.LoadDishCfg(config_str)
+    logger.info("second result is %s", second_unique_id)
+    assert second_result[0] == ResultCode.REJECTED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+    change_event_callbacks.assert_change_event(
+        "DishVccCommandStatus",
+        DishConfigStatus.COMPLETED,
+        lookahead=4,
+    )
+    csp_master_ln_device.SetDelay(2)
 
 
 def load_dish_cfg_when_csp_is_defective(
@@ -273,6 +346,29 @@ def test_load_dish_cfg(
 ):
     """Test cases for Load_Dish_Config command"""
     return load_dish_cfg(
+        tango_context,
+        central_node_name,
+        json_factory("command_load_dish_cfg"),
+        change_event_callbacks,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [(CENTRALNODE_MID)],
+)
+def test_load_dish_cfg_rejected(
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+):
+    """Test LoadDishCfg command rejected
+    when existing command is in progress
+    """
+    return load_dish_cfg_rejected(
         tango_context,
         central_node_name,
         json_factory("command_load_dish_cfg"),

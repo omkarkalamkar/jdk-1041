@@ -6,7 +6,7 @@ from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.settings import logger
+from tests.settings import dish_vcc_process_callback, logger
 
 
 def mock_callback(*args, **kwargs):
@@ -20,6 +20,7 @@ def test_telescope_on():
         op_state_model,
         _input_parameter=InputParameterMid(None),
         logger=logger,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         _update_device_callback=mock_callback,
         _update_telescope_state_callback=mock_callback,
         _update_telescope_health_state_callback=mock_callback,
@@ -43,6 +44,7 @@ def test_telescope_off():
         op_state_model,
         _input_parameter=InputParameterMid(None),
         logger=logger,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         _update_device_callback=mock_callback,
         _update_telescope_state_callback=mock_callback,
         _update_telescope_health_state_callback=mock_callback,

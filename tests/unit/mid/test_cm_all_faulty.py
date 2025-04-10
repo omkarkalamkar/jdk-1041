@@ -11,6 +11,7 @@ from tests.settings import (
     DEVICE_LIST_MID,
     DISH_LEAF_NODE_PREFIX,
     NUM_DISHES,
+    dish_vcc_process_callback,
     logger,
     set_devices_unresponsive,
 )
@@ -39,6 +40,7 @@ def test_all_devices_faulty(tango_context):
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         _input_parameter=InputParameterMid(None),
         logger=logger,
         _update_device_callback=mock_callback,

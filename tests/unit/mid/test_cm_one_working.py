@@ -22,6 +22,7 @@ from tests.settings import (
     MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
     NUM_DISHES,
+    dish_vcc_process_callback,
     logger,
     set_devices_unresponsive,
 )
@@ -68,6 +69,7 @@ def test_one_working_other_faulty(tango_context):
         op_state_model,
         _input_parameter=InputParameterMid(None),
         logger=logger,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         _update_device_callback=mock_callback,
         _update_telescope_state_callback=mock_callback,
         _update_telescope_health_state_callback=mock_callback,
