@@ -9,10 +9,10 @@ package.
 import json
 import threading
 import time
+from logging import Logger
 from queue import Queue
 from typing import Callable
 
-from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
@@ -20,9 +20,11 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
+from ska_tmc_centralnode.manager.aggregate_process import (
+    HealthStateAggregationProcessor,
+)
 from ska_tmc_centralnode.manager.aggregators import (
     DishkValueValidationResultAggregator,
-    HealthStateAggregatorMid,
     LoadDishCfgCommandResultAggregator,
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
@@ -46,21 +48,19 @@ class CNComponentManagerMid(CNComponentManager):
         self,
         op_state_model,
         _input_parameter,
-        _dish_vcc_command_status_callback,
-        logger=None,
+        logger: Logger,
+        _dish_vcc_command_status_callback: callable,
+        _update_device_callback: Callable,
+        _update_telescope_state_callback: Callable,
+        _update_telescope_health_state_callback: Callable,
+        _update_tmc_op_state_callback: Callable,
+        _update_imaging_callback: Callable,
+        _telescope_availability_callback: Callable,
+        _update_dishvccconfig_callback: Callable,
+        _dishvccvalidation_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        _telescope_availability_callback=None,
-        _update_dishvccconfig_callback=None,
-        _dishvccvalidation_callback=None,
-        communication_state_callback=None,
-        component_state_callback=None,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -103,17 +103,15 @@ class CNComponentManagerMid(CNComponentManager):
             op_state_model,
             _input_parameter,
             logger,
-            _component,
-            _liveliness_probe,
-            _event_receiver,
             _update_device_callback,
             _update_telescope_state_callback,
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_imaging_callback,
-            communication_state_callback,
             _telescope_availability_callback,
-            component_state_callback,
+            _component,
+            _liveliness_probe,
+            _event_receiver,
             proxy_timeout,
             event_subscription_check_period,
             liveliness_check_period,
@@ -122,6 +120,7 @@ class CNComponentManagerMid(CNComponentManager):
             *args,
             **kwargs,
         )
+
         self.subarray_availability = {
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names
@@ -165,7 +164,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_command_status_callback = (
             _dish_vcc_command_status_callback
         )
-        self.event_queues.update(
+        self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
                 "dishMode": Queue(),
@@ -197,6 +196,14 @@ class CNComponentManagerMid(CNComponentManager):
             }
         )
         self._start_event_processing_threads()
+        # start the aggregation process
+        self.aggregation_process = HealthStateAggregationProcessor(
+            self.event_data_queue,
+            self.aggregated_health_state,
+            self.aggregate_value_update_event,
+            telescope="mid",
+        )
+        self.aggregation_process.start_aggregation_process()
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""
@@ -571,24 +578,9 @@ class CNComponentManagerMid(CNComponentManager):
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
-    def _aggregate_health_state(self):
-        """
-        Aggregates all health states
-        and call the relative callback if available
-        """
-        if self._health_state_aggregator is None:
-            self._health_state_aggregator = HealthStateAggregatorMid(
-                self, self.logger
-            )
-
-        with self.rlock:
-            self.component.telescope_health_state = (
-                self._health_state_aggregator.aggregate()
-            )
-            self.logger.debug(
-                "SubarrayNode aggregated healthState: "
-                + f"{HealthState(self.component.telescope_health_state).name}"
-            )
+    def stop_aggregation_process(self):
+        """Stop aggregation process"""
+        self.aggregation_process.stop_aggregation_process()
 
     def is_command_allowed(self, command_name=None):
         """

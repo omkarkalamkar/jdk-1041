@@ -7,10 +7,12 @@ import time
 import pytest
 from ska_tmc_common import (
     HelperBaseDevice,
+    HelperCspMasterLeafDevice,
     HelperDishDevice,
     HelperDishLNDevice,
     HelperMCCSController,
     HelperMCCSMasterLeafNode,
+    HelperSDPMasterLeafNode,
 )
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
@@ -82,13 +84,9 @@ def devices_to_load():
         {
             "class": HelperBaseDevice,
             "devices": [
-                {"name": MID_CSP_MLN_DEVICE},
                 {"name": MID_CSP_MASTER_DEVICE},
-                {"name": MID_SDP_MLN_DEVICE},
                 {"name": MID_SDP_MASTER_DEVICE},
-                {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_CSP_MASTER_DEVICE},
-                {"name": LOW_SDP_MLN_DEVICE},
                 {"name": LOW_SDP_MASTER_DEVICE},
             ],
         },
@@ -96,6 +94,20 @@ def devices_to_load():
             "class": HelperMCCSMasterLeafNode,
             "devices": [
                 {"name": MCCS_MLN_DEVICE},
+            ],
+        },
+        {
+            "class": HelperSDPMasterLeafNode,
+            "devices": [
+                {"name": MID_SDP_MLN_DEVICE},
+                {"name": LOW_SDP_MLN_DEVICE},
+            ],
+        },
+        {
+            "class": HelperCspMasterLeafDevice,
+            "devices": [
+                {"name": MID_CSP_MLN_DEVICE},
+                {"name": LOW_CSP_MLN_DEVICE},
             ],
         },
         {

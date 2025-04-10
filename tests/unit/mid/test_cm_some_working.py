@@ -60,17 +60,31 @@ FAULTY_LIST = [
 ]
 
 
+def mock_callback(*args, **kwargs):
+    """Devices to mock_callback"""
+
+
 def test_some_working_other_faulty(tango_context):
     """Test with some working and some faulty devices"""
     logger.info("%s", tango_context)
 
     op_state_model = TMCOpStateModel(logger)
+
     cm = CNComponentManagerMid(
         op_state_model,
         _dish_vcc_command_status_callback=dish_vcc_process_callback,
         _input_parameter=InputParameterMid(None),
         logger=logger,
+        _update_device_callback=mock_callback,
+        _update_telescope_state_callback=mock_callback,
+        _update_telescope_health_state_callback=mock_callback,
+        _update_tmc_op_state_callback=mock_callback,
+        _update_imaging_callback=mock_callback,
+        _telescope_availability_callback=mock_callback,
+        _update_dishvccconfig_callback=mock_callback,
+        _dishvccvalidation_callback=mock_callback,
     )
+
     dishes = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
         cm.add_device(dev)

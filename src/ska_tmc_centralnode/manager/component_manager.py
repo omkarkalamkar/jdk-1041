@@ -7,12 +7,16 @@ import json
 import re
 import threading
 import time
+from logging import Logger
+from multiprocessing import Event
+from multiprocessing import Lock as ProcessLock
+from multiprocessing import Manager
 from queue import Empty, Queue
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
 import tango
-from ska_control_model import HealthState
+from ska_control_model import AdminMode, HealthState
 from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.control_model import ObsState
@@ -52,6 +56,7 @@ from ska_tmc_centralnode.input_validator import (
     ReleaseResourceValidator,
 )
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
+from ska_tmc_centralnode.manager.event_data_manager import EventDataManager
 from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import (
     CentralComponent,
@@ -61,6 +66,13 @@ from ska_tmc_centralnode.model.enum import ModesAvailability
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
+)
+from ska_tmc_centralnode.utils.constants import (
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
+    MCCS_MLN_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
 )
 
 
@@ -82,18 +94,16 @@ class CNComponentManager(TmcComponentManager):
         self,
         op_state_model,
         _input_parameter,
-        logger=None,
+        logger: Logger,
+        _update_device_callback: Callable,
+        _update_telescope_state_callback: Callable,
+        _update_telescope_health_state_callback: Callable,
+        _update_tmc_op_state_callback: Callable,
+        _update_imaging_callback: Callable,
+        _telescope_availability_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
-        _event_receiver=True,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        communication_state_callback=None,
-        _telescope_availability_callback=None,
-        component_state_callback=None,
+        _event_receiver: bool = True,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -132,8 +142,6 @@ class CNComponentManager(TmcComponentManager):
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
             _event_receiver=False,
-            communication_state_callback=communication_state_callback,
-            component_state_callback=component_state_callback,
             proxy_timeout=proxy_timeout,
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
@@ -142,8 +150,10 @@ class CNComponentManager(TmcComponentManager):
         )
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
+        self.event_data_manager = EventDataManager(self)
         self.event_receiver = True
         self.command_timeout = command_timeout
+        self.process_lock = ProcessLock()
         self.assignresources_interface = assignresources_interface
         self.releaseresources_interface = releaseresources_interface
         self.event_receiver = _event_receiver
@@ -186,6 +196,7 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_availability_aggregator = Aggregator(
             self, logger=logger
         )
+        self._stop_thread: bool = False
         self._liveliness_probe = None
         self.supported_commands_for_responsive_check = [
             "TelescopeOn",
@@ -198,6 +209,7 @@ class CNComponentManager(TmcComponentManager):
             "obsState": Queue(),
             "assignedResources": Queue(),
             "healthState": Queue(),
+            "adminMode": Queue(),
         }
 
         self.event_processing_methods: Dict[
@@ -206,26 +218,54 @@ class CNComponentManager(TmcComponentManager):
             "obsState": self.update_device_obs_state,
             "assignedResources": self.update_device_assigned_resource,
             "healthState": self.update_device_health_state,
+            "adminMode": self.update_device_admin_mode,
         }
+        self.aggregate_process_manager = Manager()
+        self.event_data_queue = self.aggregate_process_manager.Queue()
+        self.aggregated_health_state = self.aggregate_process_manager.list(
+            [""]
+        )
+        self.aggregate_value_update_event = Event()
+        self.aggregate_process_monitor_thread = threading.Thread(
+            target=self.aggregate_process_monitor
+        )
+        self.aggregate_process_monitor_thread.start()
 
     @property
-    def event_queues(self):
+    def event_queue(self):
         """event queue property"""
         with self.rlock:
             return self.__event_queues
 
     def _start_event_processing_threads(self) -> None:
         """Start all the event processing threads."""
-        for attribute in self.event_queues:
+        for attribute in self.event_queue:
             thread = threading.Thread(
                 target=self.process_event, args=[attribute], name=attribute
             )
             thread.start()
 
+    def aggregate_process_monitor(self):
+        """This method keep tracking aggregate health state changed
+        from aggregation process
+        """
+        while not self._stop_thread:
+            if self.aggregate_value_update_event.is_set():
+                self.aggregate_value_update_event.clear()
+                current_health_state = self.aggregated_health_state[0]
+                self.component.telescope_health_state = current_health_state
+                self.logger.debug(
+                    "Aggregate telescope health state called %s",
+                    current_health_state,
+                )
+
+            time.sleep(0.1)
+        self.logger.debug("aggregation process monitor thread stopped")
+
     def process_event(self, attribute_name: str) -> None:
         """
         Process the given attribute's event using the data from the
-            event_queues and invoke corresponding process method.
+            event_queue and invoke corresponding process method.
         :param attribute_name: Name of the attribute for which event is to be
             processed
         :type attribute_name: str
@@ -233,7 +273,7 @@ class CNComponentManager(TmcComponentManager):
         """
         while True:
             try:
-                event_data = self.event_queues[attribute_name].get()
+                event_data = self.event_queue[attribute_name].get()
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
                 ):
@@ -242,12 +282,18 @@ class CNComponentManager(TmcComponentManager):
                             event_data.device.dev_name(),
                             event_data.argout,
                         )
+                    elif attribute_name in ("healthState", "adminMode"):
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.attr_value.value,
+                            event_data.attr_value.time.todatetime(),
+                        )
                     else:
                         self.event_processing_methods[attribute_name](
                             event_data.device.dev_name(),
                             event_data.attr_value.value,
                         )
-                self.event_queues[attribute_name].task_done()
+                self.event_queue[attribute_name].task_done()
             except Empty:
                 # If an empty exception is raised by the Queue, we can
                 # safely ignore it.
@@ -274,6 +320,24 @@ class CNComponentManager(TmcComponentManager):
         """Stops the event receiver."""
         if self.event_receiver:
             self.event_receiver_object.stop()
+
+    def stop_aggregation_process(self):
+        """Override this method in mid and low"""
+        raise NotImplementedError
+
+    def stop_all_process(self):
+        """This stop aggregation process"""
+        with self.process_lock:
+            self.stop_aggregation_process()
+            del self.event_data_queue
+            del self.aggregated_health_state
+            self.aggregate_process_manager.shutdown()
+            self.logger.debug("aggregation process stopped")
+
+    def __del__(self):
+        """shutdown aggregation process"""
+        self.logger.debug("component destructor called")
+        self.stop_all_process()
 
     def reset(
         self: CNComponentManager, task_callback: Optional[Callable] = None
@@ -302,6 +366,7 @@ class CNComponentManager(TmcComponentManager):
         """stops liveliness probe"""
         self.stop_liveliness_probe()
         self.stop_event_receiver()
+        self._stop_thread = True
 
     @property
     def input_parameter(self):
@@ -371,6 +436,18 @@ class CNComponentManager(TmcComponentManager):
         """
         return self.input_parameter.sdp_subarray_dev_names
 
+    def get_sdp_master_leaf_node_dev_name(self) -> str:
+        """
+        Return Sdp master leaf node device name
+        """
+        return self.input_parameter.sdp_mln_dev_name
+
+    def get_csp_master_leaf_node_dev_name(self) -> str:
+        """
+        Return Csp master leaf node device name
+        """
+        return self.input_parameter.csp_mln_dev_name
+
     def get_csp_subarray_dev_names(self) -> list:
         """
         Return Csp Subarray device names
@@ -382,6 +459,18 @@ class CNComponentManager(TmcComponentManager):
         Return Sdp Master device name
         """
         return self.input_parameter.sdp_master_dev_name
+
+    def get_mccs_master_dev_name(self) -> str:
+        """
+        Return Sdp Master device name
+        """
+        return self.input_parameter.mccs_master_dev_name
+
+    def get_mccs_master_leaf_node_dev_name(self) -> str:
+        """
+        Return MCCS master leaf node device name
+        """
+        return self.input_parameter.mccs_mln_dev_name
 
     def get_csp_master_dev_name(self) -> str:
         """
@@ -538,7 +627,7 @@ class CNComponentManager(TmcComponentManager):
             self.component._invoke_device_callback(devInfo)
 
     def update_device_health_state(
-        self, device_name: str, health_state: HealthState
+        self, device_name: str, health_state: HealthState, timestamp
     ) -> None:
         """
         Update a monitored device health state
@@ -583,9 +672,53 @@ class CNComponentManager(TmcComponentManager):
                 )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
+                self.event_data_manager.update_event_data(
+                    device=device_name,
+                    data=health_state,
+                    received_timestamp=timestamp,
+                    data_type="HealthState",
+                )
                 self.component._invoke_device_callback(devInfo)
 
-        self._aggregate_health_state()
+    def update_device_admin_mode(
+        self, device_name: str, admin_mode: AdminMode, timestamp
+    ):
+        """
+        Update a monitored device admin mode
+
+        :param device_name: name of the device
+        :type device_name: str
+        :param admin_mode: admin mode of the device
+        :type admin_mode: AdminMode
+        """
+        self.logger.debug(
+            f"AdminMode event for {device_name}: "
+            + f"{AdminMode(admin_mode).name}"
+        )
+        with self.lock:
+            leafnode_identifiers = [
+                MID_SDP_MLN_DEVICE,
+                MID_CSP_MLN_DEVICE,
+                LOW_SDP_MLN_DEVICE,
+                LOW_CSP_MLN_DEVICE,
+                MCCS_MLN_DEVICE,
+            ]
+            if any(
+                identifier in device_name.lower()
+                for identifier in leafnode_identifiers
+            ):
+                device_info = self.component.get_device(device_name)
+                if device_info is not None:
+                    device_info.last_event_arrived = time.time()
+                    device_info.update_unresponsive(False)
+                    device_info.admin_mode = admin_mode
+                    self.event_data_manager.update_event_data(
+                        device=device_name,
+                        data=admin_mode,
+                        data_type="AdminMode",
+                        received_timestamp=timestamp,
+                    )
+                    self.component._invoke_device_callback(device_info)
 
     def update_device_obs_state(
         self, dev_name: str, obs_state: ObsState
@@ -1177,12 +1310,6 @@ class CNComponentManager(TmcComponentManager):
             + " Please use TelescopeStandby command"
         )
         return TaskStatus.REJECTED, message
-
-    def _aggregate_health_state(self):
-        """
-        Aggregates all health states
-        and call the relative callback if available
-        """
 
     def _aggregate_telescope_state(self):
         """

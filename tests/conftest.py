@@ -2,8 +2,10 @@
 # pylint: disable=unused-argument
 # pylint: disable=redefined-outer-name
 import logging
+from multiprocessing import Manager
 from os.path import dirname, join
 
+import mock
 import pytest
 import tango
 from ska_tango_testing.mock import MockCallable
@@ -13,6 +15,9 @@ from ska_tango_testing.mock.tango.event_callback import (
 from ska_tmc_common.dev_factory import DevFactory
 from tango.test_context import MultiDeviceTestContext
 
+from ska_tmc_centralnode.manager.aggregate_process import (
+    HealthStateAggregationProcessor,
+)
 from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
@@ -195,3 +200,37 @@ def is_dish_vcc_set(request):
             "isDishVccConfigSet",
             True,
         ), "Timeout while waiting for validating attribute value"
+
+
+@pytest.fixture
+def aggregation_process_mid():
+    """Create aggregation process mid object"""
+    process_manager = Manager()
+    event_queue = process_manager.Queue()
+    aggregated_obs_state = process_manager.list([""])
+    mock_obj = mock.Mock()
+
+    aggregation_process = HealthStateAggregationProcessor(
+        event_queue, aggregated_obs_state, mock_obj
+    )
+
+    yield aggregation_process
+
+    aggregation_process.stop_aggregation_process()
+    process_manager.shutdown()
+
+
+@pytest.fixture
+def aggregation_process_low():
+    """Create aggregation process low object"""
+    process_manager = Manager()
+    event_queue = process_manager.Queue()
+    aggregated_obs_state = process_manager.list([""])
+    mock_obj = mock.Mock()
+    aggregation_process = HealthStateAggregationProcessor(
+        event_queue, aggregated_obs_state, mock_obj
+    )
+
+    yield aggregation_process
+    aggregation_process.stop_aggregation_process()
+    process_manager.shutdown()

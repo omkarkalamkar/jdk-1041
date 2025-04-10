@@ -134,6 +134,36 @@ def dish_vcc_process_callback(event):
     logger.debug("Dish Vcc process callback called with event %s", event)
 
 
+def mock_update_device_callback(devInfo):
+    """Dummy method for Update device callabacks"""
+    logger.debug("Update device callabacks devInfo: %s", devInfo)
+
+
+def mock_update_telescope_state_callback(telescope_state):
+    """Dummy method for update telescope state callback"""
+    logger.debug("telescope state: %s", telescope_state)
+
+
+def mock_update_telescope_health_state_callback(telescope_health_state):
+    """Dummy method for update telescope health state callback"""
+    logger.debug("telescope health state: %s", telescope_health_state)
+
+
+def mock_update_tmc_op_state_callback(tmc_op_state):
+    """Dummy method for update tmc op state callback"""
+    logger.debug("tmc op state: %s", tmc_op_state)
+
+
+def mock_update_imaging_callback(imaging):
+    """Callback for Update imaging"""
+    logger.debug("imaging %s", imaging)
+
+
+def mock_telescope_availability_callback(telescope_availability):
+    """Dummy method for update telescope availability callback"""
+    logger.debug("telescope availability: %s", telescope_availability)
+
+
 def create_cm(
     p_liveliness_probe=False,
     p_event_receiver=True,
@@ -151,11 +181,23 @@ def create_cm(
             _input_parameter=InputParameterMid(None),
             logger=logger,
             _dish_vcc_command_status_callback=dish_vcc_process_callback,
-            enable_dish_vcc_init=False,
-            _event_receiver=p_event_receiver,
-            _dishvccvalidation_callback=task_callback,
+            _update_device_callback=mock_update_device_callback,
+            _update_telescope_state_callback=(
+                mock_update_telescope_state_callback
+            ),
+            _update_telescope_health_state_callback=(
+                mock_update_telescope_health_state_callback
+            ),
+            _update_tmc_op_state_callback=(mock_update_tmc_op_state_callback),
+            _update_imaging_callback=mock_update_imaging_callback,
+            _telescope_availability_callback=(
+                mock_telescope_availability_callback
+            ),
             _update_dishvccconfig_callback=task_callback,
+            _dishvccvalidation_callback=task_callback,
+            _event_receiver=p_event_receiver,
             _liveliness_probe=LivelinessProbeType.NONE,
+            enable_dish_vcc_init=False,
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
@@ -169,6 +211,18 @@ def create_cm(
             op_state_model,
             _input_parameter=InputParameterLow(None),
             logger=logger,
+            _update_device_callback=mock_update_device_callback,
+            _update_telescope_state_callback=(
+                mock_update_telescope_state_callback
+            ),
+            _update_telescope_health_state_callback=(
+                mock_update_telescope_health_state_callback
+            ),
+            _update_tmc_op_state_callback=(mock_update_tmc_op_state_callback),
+            _update_imaging_callback=mock_update_imaging_callback,
+            _telescope_availability_callback=(
+                mock_telescope_availability_callback
+            ),
             _event_receiver=p_event_receiver,
             _liveliness_probe=LivelinessProbeType.NONE,
         )
