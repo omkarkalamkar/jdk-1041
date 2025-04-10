@@ -244,7 +244,7 @@ class TelescopeStandby(TelescopeOnOff):
         """Turns subarrays to standby"""
         self.logger.info(
             "Invoking Standby command: %s",
-            [str(adapter) for adapter in self.subarray_adapters],
+            [str(adapter.dev_name) for adapter in self.subarray_adapters],
         )
         return self.send_command(
             self.subarray_adapters,
@@ -318,7 +318,7 @@ class TelescopeStandby(TelescopeOnOff):
         """Turns off the dishes"""
         self.logger.info(
             "Invoking Standby command on: %s",
-            [str(adapter) for adapter in self.dish_adapters],
+            [str(adapter.dev_name) for adapter in self.dish_adapters],
         )
         return self.send_command(
             self.dish_adapters,

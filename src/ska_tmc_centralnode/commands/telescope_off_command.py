@@ -186,7 +186,7 @@ class TelescopeOff(TelescopeOnOff):
         """Turn off the subarrays"""
         self.logger.info(
             "Invoking Off command on: %s",
-            [str(adapter) for adapter in self.subarray_adapters],
+            [str(adapter.dev_name) for adapter in self.subarray_adapters],
         )
 
         return self.send_command(
@@ -199,7 +199,7 @@ class TelescopeOff(TelescopeOnOff):
         """Turn off the dishes"""
         self.logger.info(
             "Invoking Off command on: %s",
-            [str(adapter) for adapter in self.dish_adapters],
+            [str(adapter.dev_name) for adapter in self.dish_adapters],
         )
         return self.send_command(
             self.dish_adapters,
