@@ -162,7 +162,7 @@ class TelescopeOn(TelescopeOnOff):
         """Turns on the subarrays"""
         self.logger.info(
             "Invoking On command on: %s",
-            [str(adapter.devname) for adapter in self.subarray_adapters],
+            [str(adapter.dev_name) for adapter in self.subarray_adapters],
         )
 
         return self.send_command(
