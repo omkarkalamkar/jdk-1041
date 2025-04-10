@@ -243,7 +243,8 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_subarrays(self):
         """Turns subarrays to standby"""
         self.logger.info(
-            f"Invoking Standby command for {self.subarray_adapters} devices"
+            "Invoking Standby command: %s",
+            [str(adapter) for adapter in self.subarray_adapters],
         )
         return self.send_command(
             self.subarray_adapters,
@@ -254,8 +255,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_sdp(self):
         """Turns sdp to standby"""
         self.logger.info(
-            f"Invoking Standby command for {self.sdp_mln_adapter.dev_name}"
-            + "devices"
+            f"Invoking Standby command on: {self.sdp_mln_adapter.dev_name}"
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
@@ -275,7 +275,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_csp(self):
         """Turns csp to standby"""
         self.logger.info(
-            "Invoking Standby command for"
+            "Invoking Standby command on: "
             + self.csp_mln_adapter.dev_name
             + "devices"
         )
@@ -297,7 +297,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_mccs(self):
         """Turns MCCS into standby"""
         self.logger.info(
-            f"Invoking Standby command on  {self.mccs_mln_adapter.dev_name}"
+            f"Invoking Standby command on:  {self.mccs_mln_adapter.dev_name}"
         )
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(
@@ -317,7 +317,8 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_off_dishes(self):
         """Turns off the dishes"""
         self.logger.info(
-            f"Invoking Off command on Dish Leaf Nodes: {self.dish_adapters}"
+            "Invoking Standby command on: %s",
+            [str(adapter) for adapter in self.dish_adapters],
         )
         return self.send_command(
             self.dish_adapters,

@@ -137,7 +137,7 @@ class CentralNodeCommand(TMCCommand):
     def reject_command(self, message: str) -> Tuple[ResultCode, str]:
         """Rejects command method for logs error message."""
         self.logger.error(
-            "Command execution failed on due to reason : %s",
+            "Command execution failed due to reason : %s",
             message,
         )
         return TaskStatus.REJECTED, message

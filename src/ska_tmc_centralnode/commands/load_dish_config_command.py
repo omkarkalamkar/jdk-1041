@@ -264,7 +264,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             ):
                 if return_code == ResultCode.FAILED:
                     self.logger.error(
-                        "Command ID: %s | Command 'LoadDishCfg' "
+                        "Command ID: %s | Command LoadDishCfg "
                         + "failed with error: %s",
                         self.component_manager.command_id,
                         message_or_unique_id,
@@ -272,8 +272,8 @@ class LoadDishCfg(LoadDishCfgCommand):
                     return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
-            "Command ID: %s | Successfully invoked 'LoadDishCfg' command on "
-            "CSP Master Leaf Node: %s",
+            "Command ID: %s | Successfully invoked LoadDishCfg command on "
+            " %s",
             self.component_manager.command_id,
             self.csp_mln_adapter.dev_name,
         )
@@ -324,8 +324,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter = dish_adapter[0]
                     k_value = vcc_k_map.get("k")
                     self.logger.info(
-                        "Command ID: %s | "
-                        + "Invoking SetKValue on dish adapter %s",
+                        "Command ID: %s | " + "Invoking SetKValue on %s",
                         self.component_manager.command_id,
                         dish_adapter.dev_name,
                     )
@@ -346,10 +345,14 @@ class LoadDishCfg(LoadDishCfgCommand):
                     self.logger.info(error_message)
         except Exception as e:
             self.logger.exception(
-                "Error in Calling setKvalue command on dish adapter %s", e
+                "Error in Calling setKvalue command on %s : %s",
+                dish_adapter.dev_name,
+                e,
             )
             return [ResultCode.FAILED], [
-                f"Error in Calling setKvalue command on dish adapter {e}"
+                "Error in Calling setKvalue command on %s : %s",
+                dish_adapter.dev_name,
+                e,
             ]
 
         return return_codes, message_or_unique_ids

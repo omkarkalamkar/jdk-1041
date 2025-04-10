@@ -194,7 +194,7 @@ class CNComponentManager(TmcComponentManager):
             "AssignResources",
             "ReleaseResources",
         ]
-        self.__event_queues_cn: Dict[str, Queue] = {
+        self.__event_queue: Dict[str, Queue] = {
             "obsState": Queue(),
             "assignedResources": Queue(),
             "healthState": Queue(),
@@ -209,14 +209,14 @@ class CNComponentManager(TmcComponentManager):
         }
 
     @property
-    def event_queues_cn(self):
+    def event_queue(self):
         """event queue property"""
         with self.rlock:
-            return self.__event_queues_cn
+            return self.__event_queue
 
     def _start_event_processing_threads(self) -> None:
         """Start all the event processing threads."""
-        for attribute in self.event_queues_cn:
+        for attribute in self.event_queue:
             thread = threading.Thread(
                 target=self.process_event, args=[attribute], name=attribute
             )
@@ -225,7 +225,7 @@ class CNComponentManager(TmcComponentManager):
     def process_event(self, attribute_name: str) -> None:
         """
         Process the given attribute's event using the data from the
-            event_queues_cn and invoke corresponding process method.
+            event_queue and invoke corresponding process method.
         :param attribute_name: Name of the attribute for which event is to be
             processed
         :type attribute_name: str
@@ -233,7 +233,7 @@ class CNComponentManager(TmcComponentManager):
         """
         while True:
             try:
-                event_data = self.event_queues_cn[attribute_name].get()
+                event_data = self.event_queue[attribute_name].get()
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
                 ):
@@ -247,7 +247,7 @@ class CNComponentManager(TmcComponentManager):
                             event_data.device.dev_name(),
                             event_data.attr_value.value,
                         )
-                self.event_queues_cn[attribute_name].task_done()
+                self.event_queue[attribute_name].task_done()
             except Empty:
                 # If an empty exception is raised by the Queue, we can
                 # safely ignore it.

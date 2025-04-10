@@ -159,7 +159,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
-        self.event_queues_cn.update(
+        self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
                 "dishMode": Queue(),
@@ -768,7 +768,7 @@ class CNComponentManagerMid(CNComponentManager):
                 CENTRALNODE_MID: "JsonDecodeError"
             }
             return loadishcfg_command.reject_command(
-                f"The JSON string is malformed. Error: {str(e)}"
+                f"The JSON string is malformed. Error: {str(e)}",
             )
         (
             dishid_vcc_map_json,
@@ -796,7 +796,9 @@ class CNComponentManagerMid(CNComponentManager):
         if not is_valid_dish_cfg:
             if message:
                 self.dish_vcc_validation_status = {CENTRALNODE_MID: message}
-            return loadishcfg_command.reject_command(message)
+            return loadishcfg_command.reject_command(
+                message,
+            )
 
         task_status, response = self.submit_task(
             loadishcfg_command.load_dish_cfg,

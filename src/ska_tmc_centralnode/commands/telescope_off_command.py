@@ -149,7 +149,7 @@ class TelescopeOff(TelescopeOnOff):
     def turn_off_csp(self):
         """Turn off the CSP devices"""
         self.logger.info(
-            "Invoking Off command for CSP devices: %s",
+            "Invoking Off command on: %s",
             self.csp_mln_adapter.dev_name,
         )
         if self.component_manager.check_if_csp_mln_is_available():
@@ -167,7 +167,7 @@ class TelescopeOff(TelescopeOnOff):
     def turn_off_sdp(self):
         """Turn off the SDP devices"""
         self.logger.info(
-            "Invoking Off command for SDP devices: %s",
+            "Invoking Off command on: %s",
             self.sdp_mln_adapter.dev_name,
         )
         if self.component_manager.check_if_sdp_mln_is_available():
@@ -185,9 +185,10 @@ class TelescopeOff(TelescopeOnOff):
     def turn_off_subarrays(self):
         """Turn off the subarrays"""
         self.logger.info(
-            "Invoking Off command for subarray devices: %s",
-            self.subarray_adapters,
+            "Invoking Off command on: %s",
+            [str(adapter) for adapter in self.subarray_adapters],
         )
+
         return self.send_command(
             self.subarray_adapters,
             "Error in calling Off command for subarray devices",
@@ -197,8 +198,8 @@ class TelescopeOff(TelescopeOnOff):
     def turn_off_dishes(self):
         """Turn off the dishes"""
         self.logger.info(
-            "Invoking Off command for dish devices: %s",
-            self.dish_adapters,
+            "Invoking Off command on: %s",
+            [str(adapter) for adapter in self.dish_adapters],
         )
         return self.send_command(
             self.dish_adapters,
@@ -289,7 +290,7 @@ class TelescopeOff(TelescopeOnOff):
     def turn_off_mccs(self):
         """Turn off the MCCS devices"""
         self.logger.info(
-            "Invoking Off command for MCCS devices: %s",
+            "Invoking Off command on: %s",
             self.mccs_mln_adapter.dev_name,
         )
         if self.component_manager.check_if_mccs_mln_is_available():
