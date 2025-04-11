@@ -89,15 +89,18 @@ class CentralNodeEventReceiver(EventReceiver):
             )
         else:
             try:
-                for (attribute,) in attribute_tobe_subscribed.items():
+                for (
+                    attribute,
+                    callable_value,
+                ) in attribute_tobe_subscribed.items():
                     self._logger.info(
                         "Subscribing event for attribute: %s", attribute
                     )
-                    handle_event = self.event_handling_methods[attribute]
+
                     proxy.subscribe_event(
                         attribute,
                         tango.EventType.CHANGE_EVENT,
-                        handle_event,
+                        callable_value,
                         stateless=True,
                     )
 

@@ -356,9 +356,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 e,
             )
             return [ResultCode.FAILED], [
-                "Error in Calling setKvalue command on %s : %s",
-                dish_adapter.dev_name,
-                e,
+                f"Error in Calling setKvalue command on dish adapter {e}"
             ]
 
         return return_codes, message_or_unique_ids

@@ -317,7 +317,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_off_dishes(self):
         """Turns off the dishes"""
         self.logger.info(
-            "Invoking Standby command on: %s",
+            "Invoking Off command on: %s",
             [str(adapter.dev_name) for adapter in self.dish_adapters],
         )
         return self.send_command(
