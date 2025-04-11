@@ -82,7 +82,10 @@ class LoadDishCfg(LoadDishCfgCommand):
                 self.component_manager.dish_vcc_validation_status = {
                     CENTRALNODE_MID: error_message
                 }
-                self.logger.debug("Number of retries exhausted")
+                self.logger.debug(
+                    "Command ID | %s " + "Number of retries exhausted",
+                    self.component_manager.command_id,
+                )
                 self.component_manager.reset_load_dish_cfg_data()
                 task_callback(
                     status=TaskStatus.COMPLETED,

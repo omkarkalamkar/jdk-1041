@@ -1,5 +1,5 @@
 """Event Receiver class for central node"""
-from typing import List, Optional
+from typing import Optional
 
 import tango
 from ska_tmc_common.device_info import DeviceInfo
@@ -89,10 +89,7 @@ class CentralNodeEventReceiver(EventReceiver):
             )
         else:
             try:
-                for (
-                    attribute,
-                    callable_value,
-                ) in attribute_tobe_subscribed.items():
+                for (attribute,) in attribute_tobe_subscribed.items():
                     self._logger.info(
                         "Subscribing event for attribute: %s", attribute
                     )

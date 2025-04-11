@@ -13,8 +13,8 @@ from logging import Logger
 from queue import Queue
 from typing import Callable
 
-from ska_tango_base.commands import ResultCode
 from ska_control_model import ObsState
+from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
