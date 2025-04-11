@@ -41,11 +41,11 @@ class CentralNodeEventReceiver(EventReceiver):
             event_subscription_check_period=event_subscription_check_period,
         )
         self._component_manager = component_manager
-        self.attribute_tobe_subscribed = [
-            "state",
-            "healthState",
-        ]
-
+        self.attribute_dictionary = {
+            "state": self.handle_state_event,
+            "healthState": self.handle_health_state_event,
+            "adminMode": self.handle_admin_mode_event,
+        }
         self.device_subscribed = {}
         self.dish_name = ""
         self.input_parameter = self._component_manager.input_parameter
@@ -70,14 +70,14 @@ class CentralNodeEventReceiver(EventReceiver):
 
             self.subscribe_events(
                 dev_info=device_info,
-                attribute_tobe_subscribed=(self.attribute_tobe_subscribed),
+                attribute_tobe_subscribed=(self.attribute_dictionary),
             )
 
     def subscribe_events(
         self,
         dev_info: DeviceInfo,
-        attribute_tobe_subscribed: Optional[List[str]] = None,
-    ):
+        attribute_tobe_subscribed: Optional[dict] = None,
+    ) -> None:
         """Subscribe events for central node event receiver"""
 
         input_param = self._component_manager.input_parameter
@@ -89,7 +89,10 @@ class CentralNodeEventReceiver(EventReceiver):
             )
         else:
             try:
-                for attribute in self.attribute_tobe_subscribed:
+                for (
+                    attribute,
+                    callable_value,
+                ) in attribute_tobe_subscribed.items():
                     self._logger.info(
                         "Subscribing event for attribute: %s", attribute
                     )
@@ -164,7 +167,6 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_masterln_availability_event,
                         stateless=True,
                     )
-
                     if dev_info.dev_name == MID_CSP_MLN_DEVICE:
                         proxy.subscribe_event(
                             "longRunningCommandResult",
@@ -185,7 +187,33 @@ class CentralNodeEventReceiver(EventReceiver):
                         self.handle_lrcr_event,
                         stateless=True,
                     )
+                    proxy.subscribe_event(
+                        "mccsControllerAdminMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_admin_mode_event,
+                        stateless=True,
+                    )
+                if dev_info.dev_name in {
+                    LOW_CSP_MLN_DEVICE,
+                    MID_CSP_MLN_DEVICE,
+                }:
+                    proxy.subscribe_event(
+                        "cspControllerAdminMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_admin_mode_event,
+                        stateless=True,
+                    )
 
+                if dev_info.dev_name in {
+                    LOW_SDP_MLN_DEVICE,
+                    MID_SDP_MLN_DEVICE,
+                }:
+                    proxy.subscribe_event(
+                        "sdpControllerAdminMode",
+                        tango.EventType.CHANGE_EVENT,
+                        self.handle_admin_mode_event,
+                        stateless=True,
+                    )
             except Exception as e:
                 self._logger.error(
                     "Event not working for device %s: %s", proxy.dev_name, e
@@ -200,6 +228,12 @@ class CentralNodeEventReceiver(EventReceiver):
         It handles the health state events of different devices
         """
         self._component_manager.event_queue["healthState"].put(event)
+
+    def handle_admin_mode_event(self, event: tango.EventData) -> None:
+        """
+        It handles the admin mode events of different devices
+        """
+        self._component_manager.event_queue["adminMode"].put(event)
 
     def handle_state_event(self, event: tango.EventData) -> None:
         """

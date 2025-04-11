@@ -1,5 +1,8 @@
 """Aggregation method for telescope state Aggregating for Mid"""
+import logging
+
 from ska_control_model import HealthState
+from ska_ser_logging import configure_logging
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.aggregators import Aggregator
 from ska_tmc_common.enum import DishMode
@@ -8,6 +11,10 @@ from tango import DevState
 from ska_tmc_centralnode.utils.constants import (
     DISH_KVALUE_VALIDATION_RESULT_STATUS,
 )
+
+configure_logging("DEBUG")
+
+LOGGER = logging.getLogger(__name__)
 
 
 class TelescopeStateAggregatorMid(Aggregator):
@@ -167,128 +174,6 @@ class TelescopeStateAggregatorLow(Aggregator):
         if DevState.STANDBY in telescopeSetStateList:
             return DevState.STANDBY
         return DevState.UNKNOWN
-
-
-class HealthStateAggregatorMid(Aggregator):
-    """Class for HealthStateAggregation for Mid Telescope"""
-
-    def __init__(self, cm, logger) -> None:
-        self.logger = logger
-        super().__init__(cm, logger)
-
-    def aggregate(self):
-        """Aggregation method for HealthState for Mid Telescope"""
-        # import debugpy; debugpy.debug_this_thread()
-        healthStateList = []
-        subarray_count = 0
-        dish_count = 0
-        csp_master = False
-        sdp_master = False
-        # get states of CspMaster, SdpMaster and DishMaster devices
-        # what if one of them is not working (i.e. faulty flag)? i.e.
-        # Csp, Sdp or dishes
-        # number of dishes is also variable
-
-        for device in self._component_manager.checked_devices:
-            name = device.dev_name
-            if device.unresponsive:
-                continue
-            if (
-                name
-                == self._component_manager.input_parameter.csp_master_dev_name
-            ):
-                healthStateList.append(device.health_state)
-                csp_master = True
-            elif (
-                name
-                == self._component_manager.input_parameter.sdp_master_dev_name
-            ):
-                healthStateList.append(device.health_state)
-                sdp_master = True
-            elif (
-                name
-                in self._component_manager.input_parameter.subarray_dev_names
-            ):
-                healthStateList.append(device.health_state)
-                subarray_count += 1
-            elif name in self._component_manager.get_dish_device_names():
-                healthStateList.append(device.health_state)
-                dish_count += 1
-
-        healthStateSetList = set(healthStateList)
-        if not sdp_master and not csp_master:
-            return HealthState.UNKNOWN
-        if subarray_count == 0:
-            return HealthState.UNKNOWN
-        if dish_count == 0:
-            return HealthState.UNKNOWN
-        if healthStateSetList == set([HealthState.OK]):
-            return HealthState.OK
-        if HealthState.FAILED in healthStateSetList:
-            return HealthState.FAILED
-        if HealthState.DEGRADED in healthStateSetList:
-            return HealthState.DEGRADED
-        return HealthState.UNKNOWN
-
-
-class HealthStateAggregatorLow(Aggregator):
-    """Class for TelescopeStateAggregation for low Telescope"""
-
-    def __init__(self, cm, logger) -> None:
-        self.logger = logger
-        super().__init__(cm, logger)
-
-    def aggregate(self):
-        """aggregate method for HealthStateAggregation"""
-        # import debugpy; debugpy.debug_this_thread()
-        healthStateList = []
-        subarray_count = 0
-        csp_master = False
-        sdp_master = False
-        mccs_master = False
-        # get health states of sdp, csp and mccs master devices
-        for device in self._component_manager.checked_devices:
-            name = device.dev_name.lower()
-            if device.unresponsive:
-                continue
-            if (
-                name
-                == self._component_manager.input_parameter.csp_master_dev_name
-            ):
-                healthStateList.append(device.health_state)
-                csp_master = True
-            elif (
-                name
-                == self._component_manager.input_parameter.sdp_master_dev_name
-            ):
-                healthStateList.append(device.health_state)
-                sdp_master = True
-            elif (
-                name
-                in self._component_manager.input_parameter.subarray_dev_names
-            ):
-                healthStateList.append(device.health_state)
-                subarray_count += 1
-            elif (
-                name
-                in self._component_manager.input_parameter.mccs_master_dev_name
-            ):
-                healthStateList.append(device.health_state)
-                mccs_master = True
-
-        healthStateSetList = set(healthStateList)
-        self._logger.info("Health state list : %s", healthStateList)
-        if subarray_count == 0:
-            return HealthState.UNKNOWN
-        if not sdp_master and not csp_master and not mccs_master:
-            return HealthState.UNKNOWN
-        if healthStateSetList == set([HealthState.OK]):
-            return HealthState.OK
-        if HealthState.FAILED in healthStateSetList:
-            return HealthState.FAILED
-        if HealthState.DEGRADED in healthStateSetList:
-            return HealthState.DEGRADED
-        return HealthState.UNKNOWN
 
 
 class TMCOpStateAggregator(Aggregator):
@@ -581,3 +466,43 @@ class DishkValueValidationResultAggregator:
             # Update the Central Node result attribute.
             if self.is_events_received_percentage_valid():
                 self.update_central_node_with_result()
+
+
+class HealthStateAggregator:
+    """New Aggregator class for Mid"""
+
+    def __init__(self, health_state_rules: dict, logger):
+        """
+        :param health_state_rules: Rules to use for aggregation
+        :type health_state_rules: dict
+        :param cm: Central Node Component Manager
+        :param type: component manager
+        :param logger: Logger
+        """
+        self.health_state_rules = health_state_rules
+        self.logger = logger
+
+    def aggregate(self, event_data: dict) -> HealthState:
+        """Aggregate healthState based on event data
+        :param event_data: event data dict which contain data required
+        for aggregation
+        :type event_data: dict
+        """
+        self.logger.debug("Received event data for aggregation %s", event_data)
+        for (
+            health_state,
+            health_state_rules,
+        ) in self.health_state_rules.items():
+            self.logger.debug(
+                "Checking rules for healthState %s", health_state
+            )
+            if any(
+                health_state_rule.matches(event_data)
+                for health_state_rule in health_state_rules
+            ):
+                return (
+                    HealthState[health_state]
+                    if hasattr(HealthState, health_state)
+                    else health_state
+                )
+        return HealthState.UNKNOWN

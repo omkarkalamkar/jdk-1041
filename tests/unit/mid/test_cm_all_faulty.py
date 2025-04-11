@@ -11,6 +11,7 @@ from tests.settings import (
     DEVICE_LIST_MID,
     DISH_LEAF_NODE_PREFIX,
     NUM_DISHES,
+    dish_vcc_process_callback,
     logger,
     set_devices_unresponsive,
 )
@@ -29,14 +30,27 @@ def devices_to_load():
     )
 
 
+def mock_callback(*args, **kwargs):
+    """Devices to mock_callback"""
+
+
 def test_all_devices_faulty(tango_context):
     """Test with all devices faulty"""
     logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
     cm = CNComponentManagerMid(
         op_state_model,
+        _dish_vcc_command_status_callback=dish_vcc_process_callback,
         _input_parameter=InputParameterMid(None),
         logger=logger,
+        _update_device_callback=mock_callback,
+        _update_telescope_state_callback=mock_callback,
+        _update_telescope_health_state_callback=mock_callback,
+        _update_tmc_op_state_callback=mock_callback,
+        _update_imaging_callback=mock_callback,
+        _telescope_availability_callback=mock_callback,
+        _update_dishvccconfig_callback=mock_callback,
+        _dishvccvalidation_callback=mock_callback,
     )
     dishes = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     cm.add_multiple_devices(DEVICE_LIST_MID)

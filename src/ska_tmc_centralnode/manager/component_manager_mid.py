@@ -9,25 +9,29 @@ package.
 import json
 import threading
 import time
+from logging import Logger
 from queue import Queue
 from typing import Callable
 
-from ska_control_model import HealthState, ObsState
 from ska_tango_base.commands import ResultCode
+from ska_control_model import ObsState
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
+from ska_tmc_centralnode.manager.aggregate_process import (
+    HealthStateAggregationProcessor,
+)
 from ska_tmc_centralnode.manager.aggregators import (
     DishkValueValidationResultAggregator,
-    HealthStateAggregatorMid,
     LoadDishCfgCommandResultAggregator,
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -45,20 +49,19 @@ class CNComponentManagerMid(CNComponentManager):
         self,
         op_state_model,
         _input_parameter,
-        logger=None,
+        logger: Logger,
+        _dish_vcc_command_status_callback: callable,
+        _update_device_callback: Callable,
+        _update_telescope_state_callback: Callable,
+        _update_telescope_health_state_callback: Callable,
+        _update_tmc_op_state_callback: Callable,
+        _update_imaging_callback: Callable,
+        _telescope_availability_callback: Callable,
+        _update_dishvccconfig_callback: Callable,
+        _dishvccvalidation_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_receiver=True,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        _telescope_availability_callback=None,
-        _update_dishvccconfig_callback=None,
-        _dishvccvalidation_callback=None,
-        communication_state_callback=None,
-        component_state_callback=None,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -101,17 +104,15 @@ class CNComponentManagerMid(CNComponentManager):
             op_state_model,
             _input_parameter,
             logger,
-            _component,
-            _liveliness_probe,
-            _event_receiver,
             _update_device_callback,
             _update_telescope_state_callback,
             _update_telescope_health_state_callback,
             _update_tmc_op_state_callback,
             _update_imaging_callback,
-            communication_state_callback,
             _telescope_availability_callback,
-            component_state_callback,
+            _component,
+            _liveliness_probe,
+            _event_receiver,
             proxy_timeout,
             event_subscription_check_period,
             liveliness_check_period,
@@ -120,6 +121,7 @@ class CNComponentManagerMid(CNComponentManager):
             *args,
             **kwargs,
         )
+
         self.subarray_availability = {
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names
@@ -159,6 +161,10 @@ class CNComponentManagerMid(CNComponentManager):
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
         self.dish_vcc_data_download_error = False
+        self._dish_vcc_command_status = DishConfigStatus.STAGING
+        self.dish_vcc_command_status_callback = (
+            _dish_vcc_command_status_callback
+        )
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -191,6 +197,14 @@ class CNComponentManagerMid(CNComponentManager):
             }
         )
         self._start_event_processing_threads()
+        # start the aggregation process
+        self.aggregation_process = HealthStateAggregationProcessor(
+            self.event_data_queue,
+            self.aggregated_health_state,
+            self.aggregate_value_update_event,
+            telescope="mid",
+        )
+        self.aggregation_process.start_aggregation_process()
 
     def check_if_dishes_are_responsive(self):
         """Checks whether dishes are responsive"""
@@ -202,6 +216,18 @@ class CNComponentManagerMid(CNComponentManager):
     def get_load_disg_cfg_resultcode(self):
         """Return Aggregated command result for Load Dish Cfg command"""
         return self.load_dish_cfg_aggregated_result
+
+    @property
+    def dish_vcc_command_status(self):
+        """Return dish vcc command status"""
+        return self._dish_vcc_command_status
+
+    @dish_vcc_command_status.setter
+    def dish_vcc_command_status(self, value: DishConfigStatus):
+        """Set dish vcc command status and invoke callback"""
+        self.logger.debug("Setting dish config status %s", value)
+        self._dish_vcc_command_status = value
+        self.dish_vcc_command_status_callback(value)
 
     @property
     def is_dish_vcc_config_set(self):
@@ -552,24 +578,9 @@ class CNComponentManagerMid(CNComponentManager):
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
-    def _aggregate_health_state(self):
-        """
-        Aggregates all health states
-        and call the relative callback if available
-        """
-        if self._health_state_aggregator is None:
-            self._health_state_aggregator = HealthStateAggregatorMid(
-                self, self.logger
-            )
-
-        with self.rlock:
-            self.component.telescope_health_state = (
-                self._health_state_aggregator.aggregate()
-            )
-            self.logger.debug(
-                "SubarrayNode aggregated healthState: "
-                + f"{HealthState(self.component.telescope_health_state).name}"
-            )
+    def stop_aggregation_process(self):
+        """Stop aggregation process"""
+        self.aggregation_process.stop_aggregation_process()
 
     def is_command_allowed(self, command_name=None):
         """
@@ -731,18 +742,34 @@ class CNComponentManagerMid(CNComponentManager):
 
                     self.command_in_progress = "LoadDishCfg"
                     if self.check_if_csp_all_dish_ready():
+                        self.dish_vcc_command_status = DishConfigStatus.INIT
                         self.invoke_load_dish_cfg_command_callback()
                     else:
                         self.logger.info(
                             "Time Out while waiting for Dishes to be ready"
                         )
                         self.command_in_progress = ""
+                        # Initialization Failed so mark
+                        # process status as failed
+                        self.dish_vcc_command_status = DishConfigStatus.FAILED
                 elif (
                     csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
                 ):
                     if csp_validation_result == ResultCode.OK:
+                        # Update dish config status to completed only
+                        # during central node initialization.
+                        # This handle scenario when dish vcc already set
+                        # and central node restart
+                        if (
+                            self.dish_vcc_command_status
+                            == DishConfigStatus.STAGING
+                        ):
+                            self.dish_vcc_command_status = (
+                                DishConfigStatus.COMPLETED
+                            )
                         self.update_dish_vcc_flag(True)
                     else:
+                        self.dish_vcc_command_status = DishConfigStatus.FAILED
                         self.update_dish_vcc_flag(False)
                     self.dish_vcc_validation_status = {
                         MID_CSP_MLN_DEVICE: DISH_VCC_VALIDATION_RESULT_STATUS[
@@ -759,6 +786,20 @@ class CNComponentManagerMid(CNComponentManager):
         loadishcfg_command = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
+        self.logger.debug(
+            "command status "
+            f"{DishConfigStatus(self.dish_vcc_command_status).name}"
+        )
+        if self.dish_vcc_command_status in (
+            DishConfigStatus.STAGING,
+            DishConfigStatus.IN_PROGRESS,
+        ):
+            message = (
+                "Dish Vcc Configuration is in Progress. "
+                "dish vcc command status "
+                f"{DishConfigStatus(self.dish_vcc_command_status).name}"
+            )
+            return loadishcfg_command.reject_command(message)
 
         try:
             dishid_vcc_map_params = json.loads(argin)
@@ -928,3 +969,4 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_data_download_error = False
+        self.dish_vcc_command_status = DishConfigStatus.COMPLETED

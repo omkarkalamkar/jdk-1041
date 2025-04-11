@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-tmc-centralnode"
-version = "0.18.1"
+version = "0.19.0"
 description = "Central Node is a coordinator of the complete M&C system"
 authors = ["Team SAHYADRI & Team HIMALAYA <telmgt-internal@googlegroups.com>"]
 license = "BSD-3-Clause"
@@ -46,6 +46,7 @@ referencing = "^0.35.0"
 jsonschema-specifications = "^2023.12.1"
 rpds-py = "^0.18.0"
 retry2 = "0.9.5"
+rule-engine = "^4.5.0"
 
 [tool.poetry.dev-dependencies]
 black = "^23.3.0"
