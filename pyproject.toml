@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-tmc-centralnode"
-version = "0.19.0"
+version = "0.19.1"
 description = "Central Node is a coordinator of the complete M&C system"
 authors = ["Team SAHYADRI & Team HIMALAYA <telmgt-internal@googlegroups.com>"]
 license = "BSD-3-Clause"
@@ -25,13 +25,13 @@ url = 'https://pypi.org/simple'
 [tool.poetry.dependencies]
 python = ">=3.10,<3.11"
 marshmallow = "^3.14.1"
-fire = "^0.6.0"
+fire = ">=0.6.0,<0.7.0"
 numpy = "^1.23.0"
 pytango = "9.5.0"
 ska-ser-logging = "^0.4.1"
 ska-tango-base = "1.2.0"
 ska-tmc-cdm = "7.3.1"
-ska-tmc-common = "0.25.4"
+ska-tmc-common = "0.26.1"
 ska-tango-testing = "0.6.1"
 ska-ser-log-transactions = "*"
 ska-ser-skuid = "*"

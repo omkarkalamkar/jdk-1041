@@ -38,7 +38,7 @@ def task_callback_default(
         + "There is no action taken under this callback."
         + "Please provide task callback."
     )
-    LOGGER.info(
+    LOGGER.debug(
         "long running command status: %s, progress: %s ,result:%s ,"
         + "exception %s",
         status,
@@ -104,8 +104,8 @@ class CentralNodeCommand(TMCCommand):
                 return_code, message_or_unique_id = command_caller(adapter)
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
-                self.logger.debug(
-                    f"Invoked {command_name} on device {adapter.dev_name}"
+                self.logger.info(
+                    f"Invoked {command_name} on  {adapter.dev_name}"
                 )
 
         except Exception as e:
@@ -222,7 +222,7 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for SubarrayNode {dev_name}"
+                        f"Adapter is created for SubarrayNode {dev_name}",
                     )
                 except Exception as e:
                     self.logger.warning(
@@ -254,11 +254,14 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for DishLeafNode {dev_name}"
+                        "Adapter is created for DishLeafNode %s",
+                        dev_name,
                     )
                 except Exception as e:
                     self.logger.warning(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                        "Error in creating adapter for %s: %s",
+                        dev_name,
+                        e,
                     )
                     error_dev_names.append(dev_name)
 

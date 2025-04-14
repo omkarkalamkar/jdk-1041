@@ -164,7 +164,7 @@ class CNComponentManagerLow(CNComponentManager):
         self.event_dict.clear()
         self.error_count = 0
         del self.command_mapping[command_id]
-        self.logger.info(
+        self.logger.debug(
             "Updated command mapping dictionary is: %s", self.command_mapping
         )
 
@@ -226,7 +226,7 @@ class CNComponentManagerLow(CNComponentManager):
                         {dev_name: ResultCode.OK}
                     )
                     self.command_mapping[self.command_id].remove(unique_id)
-                    self.logger.info(
+                    self.logger.debug(
                         "Updated command mapping dictionary is: %s",
                         self.command_mapping,
                     )
@@ -242,7 +242,7 @@ class CNComponentManagerLow(CNComponentManager):
                     )
                     self.error_count += 1
                     self.command_mapping[self.command_id].remove(unique_id)
-                    self.logger.info(
+                    self.logger.debug(
                         "Updated command mapping dictionary is: %s",
                         self.command_mapping,
                     )
@@ -279,7 +279,7 @@ class CNComponentManagerLow(CNComponentManager):
                     exception_message += (
                         f"{self.command_id}: {devname}: " + f"{error_message}"
                     )
-            self.logger.info(
+            self.logger.debug(
                 "Updating LRCRCallback with following values: "
                 + "command_id: %s, resultcode: %s, message: %s",
                 self.command_id,

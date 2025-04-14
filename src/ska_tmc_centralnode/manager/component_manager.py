@@ -205,7 +205,7 @@ class CNComponentManager(TmcComponentManager):
             "AssignResources",
             "ReleaseResources",
         ]
-        self.__event_queues: Dict[str, Queue] = {
+        self.__event_queue: Dict[str, Queue] = {
             "obsState": Queue(),
             "assignedResources": Queue(),
             "healthState": Queue(),
@@ -235,7 +235,7 @@ class CNComponentManager(TmcComponentManager):
     def event_queue(self):
         """event queue property"""
         with self.rlock:
-            return self.__event_queues
+            return self.__event_queue
 
     def _start_event_processing_threads(self) -> None:
         """Start all the event processing threads."""
@@ -306,7 +306,7 @@ class CNComponentManager(TmcComponentManager):
         if event.err:
             error = event.errors[0]
             self.logger.error(
-                "Error occurred on %s for device: %s - %s, %s",
+                "Event error occurred on %s for device: %s - %s, %s",
                 callback,
                 event.device.dev_name(),
                 error.reason,
@@ -520,7 +520,7 @@ class CNComponentManager(TmcComponentManager):
 
     def check_if_subarrays_are_responsive(self) -> bool:
         """Checks if subarray are responsive"""
-        self.logger.info("Checking if subarrays are responsive")
+        self.logger.debug("Checking if subarrays are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.subarray_dev_names
         )
@@ -606,8 +606,7 @@ class CNComponentManager(TmcComponentManager):
         """
         # Log the device failure with the device name
         message = (
-            f"device: {device_info.dev_name}: {exception}"
-            + "failed to respond"
+            f"Device: {device_info.dev_name} failed to respond: {exception}"
         )
         self.logger.error(message)
 
@@ -773,7 +772,7 @@ class CNComponentManager(TmcComponentManager):
         :type assign_resources: str
         """
         with self.lock:
-            self.logger.info(
+            self.logger.debug(
                 "Updating assigned resources for device %s: %s",
                 dev_name,
                 assign_resources,
@@ -811,6 +810,8 @@ class CNComponentManager(TmcComponentManager):
             if isinstance(devInfo, SubArrayDeviceInfo):
                 self.logger.debug(
                     "Subarray Device resources for device %s: %s",
+                    devInfo.dev_name,
+                    devInfo.resources,
                 )
                 if devInfo.resources is None:
                     return False
@@ -1075,7 +1076,7 @@ class CNComponentManager(TmcComponentManager):
             return TaskStatus.REJECTED, subarray_id_or_message
 
         # Execute the command if the input JSON is valid
-        self.logger.info("Calling component manager assign_resources method")
+        self.logger.debug("Calling component manager assign_resources method")
         assign_resources_command = AssignResources(
             self,
             adapter_factory=self.adapter_factory,

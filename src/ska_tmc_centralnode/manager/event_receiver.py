@@ -62,8 +62,8 @@ class CentralNodeEventReceiver(EventReceiver):
         :rtype: None
         """
         if device_info.dev_name not in self.device_subscribed:
-            self._logger.info(
-                "Subscribed events device_info.dev_name %s and %s",
+            self._logger.debug(
+                "Subscribed events on device :  %s " + "and : %s",
                 device_info.dev_name,
                 self.device_subscribed,
             )
@@ -96,12 +96,14 @@ class CentralNodeEventReceiver(EventReceiver):
                     self._logger.info(
                         "Subscribing event for attribute: %s", attribute
                     )
+
                     proxy.subscribe_event(
                         attribute,
                         tango.EventType.CHANGE_EVENT,
                         callable_value,
                         stateless=True,
                     )
+
                 if ("subarray" in dev_info.dev_name) and (
                     "leaf" not in dev_info.dev_name
                 ):

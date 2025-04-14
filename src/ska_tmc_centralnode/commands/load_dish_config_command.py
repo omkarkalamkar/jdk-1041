@@ -82,7 +82,10 @@ class LoadDishCfg(LoadDishCfgCommand):
                 self.component_manager.dish_vcc_validation_status = {
                     CENTRALNODE_MID: error_message
                 }
-                self.logger.debug("Number of retries exhausted")
+                self.logger.debug(
+                    "Command ID | %s " + "Number of retries exhausted",
+                    self.component_manager.command_id,
+                )
                 self.component_manager.reset_load_dish_cfg_data()
                 task_callback(
                     status=TaskStatus.COMPLETED,
@@ -92,7 +95,16 @@ class LoadDishCfg(LoadDishCfgCommand):
                 self.component_manager.dish_vcc_data_download_error = False
                 return
 
-            self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
+            self.logger.info(
+                "Command ID: %s | DishId Vcc Map Json %s",
+                json.dumps(
+                    dishid_vcc_map_json
+                    if isinstance(dishid_vcc_map_json, dict)
+                    else json.loads(dishid_vcc_map_json),
+                    indent=4,
+                ),
+                self.component_manager.command_id,
+            )
             is_valid_dish_cfg, message = self.load_dish_config_json_validator(
                 dishid_vcc_map_json
             )
@@ -110,7 +122,9 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
-        self.logger.info(message)
+        self.logger.info(
+            "Command ID: %s | %s ", self.component_manager.command_id, message
+        )
         if ret_code == ResultCode.FAILED:
             self.component_manager.reset_load_dish_cfg_data()
             task_callback(
@@ -143,9 +157,11 @@ class LoadDishCfg(LoadDishCfgCommand):
         :param message: any message returned as a part of command
         :type message: str
         """
-        self.logger.info(
-            "Calling task callback for LoadDishCfg with result \
-                %s and message %s",
+        self.logger.debug(
+            "Command ID: %s | Calling task callback for "
+            + "LoadDishCfg with result"
+            + "%s and message %s",
+            self.component_manager.command_id,
             result,
             exception,
         )
@@ -185,14 +201,20 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
-        self.logger.info("The initial params are : %s", initial_params)
+        self.logger.debug(
+            "Command ID: %s | The initial params are : %s",
+            self.component_manager.command_id,
+            json.dumps(initial_params, indent=2),
+        )
         if data_sources and tm_data_filepath:
             try:
                 data = TMData(data_sources)
                 return data[tm_data_filepath].get_dict(), ""
             except Exception as exception:
                 self.logger.exception(
-                    "Error in Loading Dish VCC map json file %s, retrying",
+                    "Command ID: %s |  Error in Loading Dish VCC map "
+                    + "json file %s, retrying",
+                    self.component_manager.command_id,
                     exception,
                 )
                 return (
@@ -219,12 +241,18 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
-            self.logger.error("Failed to initialize adapters: %s", message)
+            self.logger.error(
+                "Command ID: %s | Failed to initialize adapters: %s",
+                self.component_manager.command_id,
+                message,
+            )
             return result_code, message
 
         dishid_vcc_map_params = json.loads(argin)
         self.logger.info(
-            "DishId-VCC map parameters: %s", dishid_vcc_map_params
+            "Command ID: %s | DishId-VCC map parameters: %s",
+            self.component_manager.command_id,
+            json.dumps(dishid_vcc_map_params, indent=4),
         )
 
         dishid_vcc_map_json, _ = self.get_dishid_vcc_map_json(
@@ -242,14 +270,17 @@ class LoadDishCfg(LoadDishCfgCommand):
             ):
                 if return_code == ResultCode.FAILED:
                     self.logger.error(
-                        "Command 'LoadDishCfg' failed with error: %s",
+                        "Command ID: %s | Command LoadDishCfg "
+                        + "failed with error: %s",
+                        self.component_manager.command_id,
                         message_or_unique_id,
                     )
                     return ResultCode.FAILED, message_or_unique_id
 
         self.logger.info(
-            "Successfully invoked 'LoadDishCfg' command on "
-            "CSP Master Leaf Node: %s",
+            "Command ID: %s | Successfully invoked LoadDishCfg command on "
+            " %s",
+            self.component_manager.command_id,
             self.csp_mln_adapter.dev_name,
         )
         return ResultCode.OK, ""
@@ -262,8 +293,10 @@ class LoadDishCfg(LoadDishCfgCommand):
         :param dishid_vcc_map_params:
         vcc_map_params info containing vcc_dish mapping
         """
-        self.logger.debug(
-            f"Invoking LoadDishCfg command on:{self.csp_mln_adapter.dev_name}"
+        self.logger.info(
+            "Command ID: %s | Invoking LoadDishCfg command on: %s",
+            self.component_manager.command_id,
+            self.csp_mln_adapter.dev_name,
         )
         self.component_manager.dev_names_for_load_dish_cfg.append(
             self.csp_mln_adapter.dev_name
@@ -297,7 +330,8 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter = dish_adapter[0]
                     k_value = vcc_k_map.get("k")
                     self.logger.info(
-                        "Invoking SetKValue on dish adapter %s",
+                        "Command ID: %s | " + "Invoking SetKValue on %s",
+                        self.component_manager.command_id,
                         dish_adapter.dev_name,
                     )
                     dish_adapter.proxy.command_inout_asynch(
@@ -316,8 +350,10 @@ class LoadDishCfg(LoadDishCfgCommand):
                     )
                     self.logger.info(error_message)
         except Exception as e:
-            self.logger.info(
-                "Error in Calling setKvalue command on dish adapter %s", e
+            self.logger.exception(
+                "Error in Calling setKvalue command on %s : %s",
+                dish_adapter.dev_name,
+                e,
             )
             return [ResultCode.FAILED], [
                 f"Error in Calling setKvalue command on dish adapter {e}"

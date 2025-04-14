@@ -13,6 +13,7 @@ from logging import Logger
 from queue import Queue
 from typing import Callable
 
+from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
@@ -407,9 +408,8 @@ class CNComponentManagerMid(CNComponentManager):
             match int(result_code):
                 case ResultCode.OK:
                     self.command_result = ResultCode.OK
-                    self.logger.info(
-                        "Command with unique_id '%s' "
-                        "on device '%s' succeeded.",
+                    self.logger.debug(
+                        "Command with unique_id '%s' " + "on  '%s' succeeded.",
                         unique_id,
                         dev_name,
                     )
@@ -419,10 +419,10 @@ class CNComponentManagerMid(CNComponentManager):
                     | ResultCode.NOT_ALLOWED
                     | ResultCode.ABORTED
                 ):
-                    self.logger.info(
+                    self.logger.debug(
                         "Updating LRCRCallback with result_code '%s' and "
                         "message '%s' "
-                        "for command '%s' on device '%s'.",
+                        "for command '%s' on  '%s'.",
                         result_code,
                         message,
                         unique_id,
@@ -658,7 +658,7 @@ class CNComponentManagerMid(CNComponentManager):
         """Update dish vcc flag and call telescope state
         aggregator
         """
-        self.logger.info("Updating dish vcc config set flag to %s", value)
+        self.logger.debug("Updating dish vcc config set flag to %s", value)
         self.is_dish_vcc_config_set = value
         self.update_dishvccconfig_callback(self.is_dish_vcc_config_set)
         self._aggregate_telescope_state()
@@ -719,17 +719,19 @@ class CNComponentManagerMid(CNComponentManager):
         to False
         NOT_ALLOWED | Set is_dish_vcc_config_set to False
         """
-        self.logger.info(
+        dish_vcc_validation_result = int(result)
+        self.logger.debug(
             "Dish Vcc Validation Event called with dev %s and result %s",
             dev_name,
-            result,
+            ObsState(dish_vcc_validation_result).name,
         )
         with self.dish_vcc_validation_attr_lock:
             if self.input_parameter.csp_mln_dev_name in dev_name:
                 # Handle Csp Master Leaf Node event
                 csp_validation_result = int(result)
-                self.logger.info(
-                    "Csp Validation Result is %s", csp_validation_result
+                self.logger.debug(
+                    "Csp Validation Result is %s",
+                    ResultCode(csp_validation_result).name,
                 )
                 if (
                     csp_validation_result == ResultCode.UNKNOWN
@@ -807,7 +809,7 @@ class CNComponentManagerMid(CNComponentManager):
                 CENTRALNODE_MID: "JsonDecodeError"
             }
             return loadishcfg_command.reject_command(
-                f"The JSON string is malformed. Error: {str(e)}"
+                f"The JSON string is malformed. Error: {str(e)}",
             )
         (
             dishid_vcc_map_json,
@@ -822,17 +824,22 @@ class CNComponentManagerMid(CNComponentManager):
                 task_callback=task_callback,
             )
             return task_status, response
-        self.logger.info("DishId Vcc Map Json %s", dishid_vcc_map_json)
+        self.logger.debug(
+            "DishId Vcc Map Json %s", json.dumps(dishid_vcc_map_json, indent=4)
+        )
         (
             is_valid_dish_cfg,
             message,
         ) = loadishcfg_command.load_dish_config_json_validator(
             dishid_vcc_map_json
         )
+
         if not is_valid_dish_cfg:
             if message:
                 self.dish_vcc_validation_status = {CENTRALNODE_MID: message}
-            return loadishcfg_command.reject_command(message)
+            return loadishcfg_command.reject_command(
+                message,
+            )
 
         task_status, response = self.submit_task(
             loadishcfg_command.load_dish_cfg,
@@ -884,7 +891,7 @@ class CNComponentManagerMid(CNComponentManager):
         ('1698838234.9087641-LoadDishCfg',
         'Exception occurred, command failed.')
         """
-        self.logger.info(
+        self.logger.debug(
             "longRunningCommandResult event for device: %s, with value: %s",
             dev_name,
             value,
@@ -894,14 +901,14 @@ class CNComponentManagerMid(CNComponentManager):
             if is_async_result:
                 # Set result code and message
                 self.logger.debug(
-                    "event from asynchronous command result callback %s",
+                    "Event from asynchronous command result callback %s",
                     value,
                 )
                 result_code_or_exception = [value[0][0], value[1][0]]
 
             else:
                 self.logger.debug(
-                    "event from long command result callback %s",
+                    "Event from long command result callback %s",
                     value,
                 )
                 unique_id, resultcode_message = value
@@ -912,7 +919,7 @@ class CNComponentManagerMid(CNComponentManager):
                     result_code_or_exception = json.loads(resultcode_message)
             if result_code_or_exception and self.dev_names_for_load_dish_cfg:
                 self.result_codes_mapping[dev_name] = result_code_or_exception
-                self.logger.info(
+                self.logger.debug(
                     "Dev names for load_dish_cfg values %s "
                     + "and result_codes_mapping are %s",
                     self.dev_names_for_load_dish_cfg,

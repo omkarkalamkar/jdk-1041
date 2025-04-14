@@ -55,9 +55,9 @@ class TelescopeStateAggregatorMid(Aggregator):
                 subsystem_states.add(device.state)
                 sdp_master = True
 
-        self._logger.info(
-            "telescopeSetStateset : %s , dishmodeset :\
-                  %s dish_vcc_config_set: %s",
+        self._logger.debug(
+            "telescopeSetStateset : %s , dishmodeset : "
+            + "%s dish_vcc_config_set: %s",
             subsystem_states,
             dish_modes,
             self._component_manager.is_dish_vcc_config_set,
@@ -69,7 +69,9 @@ class TelescopeStateAggregatorMid(Aggregator):
 
         if not sdp_master and not csp_master:
             self._logger.info(
-                "missing devices: %s=%s %s=%s",
+                "Checking if sdp and csp master are responsive: "
+                + "%s,responsive : %s "
+                + "%s, responsive: %s ",
                 self._component_manager.input_parameter.sdp_master_dev_name,
                 sdp_master,
                 self._component_manager.input_parameter.csp_master_dev_name,
@@ -77,7 +79,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             )
             return DevState.UNKNOWN
         if dish_count == 0:
-            self._logger.info("dish_count == 0")
+            self._logger.debug("dish_count == 0")
             return DevState.UNKNOWN
         if (
             subsystem_states == {DevState.ON}
@@ -149,7 +151,10 @@ class TelescopeStateAggregatorLow(Aggregator):
         self._logger.info(f"Telescope state list is : {telescopeStateList}")
         if not sdp_master and not csp_master and not mccs_master:
             self._logger.info(
-                "missing devices: %s=%s %s=%s %s=%s",
+                "Checking if sdp, csp and mccs master are responsive: "
+                + "%s , responsive :%s,"
+                + "%s, responsive : %s"
+                + "%s, responsive : %s",
                 self._component_manager.input_parameter.sdp_master_dev_name,
                 sdp_master,
                 self._component_manager.input_parameter.csp_master_dev_name,
@@ -350,14 +355,14 @@ class LoadDishCfgCommandResultAggregator:
         """
         result_code = ""
         message = ""
-        self.logger.info(
-            "Aggregating result for longRunningCommandResult attribute\
-                  with values %s",
+        self.logger.debug(
+            "Aggregating result for longRunningCommandResult attribute"
+            + "with values %s",
             self._component_manager.result_codes_mapping.values(),
         )
         result_codes, failed_messages = self._get_result_codes_and_failed_msg()
         failed_devices = [msg.split(":")[0] for msg in failed_messages]
-        self.logger.info(
+        self.logger.debug(
             "Result codes are %s, failed messages are %s, "
             "TMC components with errors are %s",
             result_codes,
@@ -454,7 +459,7 @@ class DishkValueValidationResultAggregator:
             ] = DISH_KVALUE_VALIDATION_RESULT_STATUS[
                 dish_kvalue_validation_result
             ]
-            self.logger.info(
+            self.logger.debug(
                 "kValueValidationResult dictionary: %s",
                 self.dln_kvalue_validation_results,
             )

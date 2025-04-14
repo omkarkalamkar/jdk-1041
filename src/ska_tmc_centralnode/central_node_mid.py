@@ -132,7 +132,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     def update_imaging_callback(self, imaging):
         """Callback for Update imaging"""
-        self.logger.info("imaging %s", imaging)
+        self.logger.debug("Imaging %s", imaging)
         self.push_change_archive_events("imaging", imaging)
 
     def update_dishvccconfig_callback(self, isdishvccconfigset):
@@ -143,7 +143,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             )
 
         except Exception as exception:
-            self.logger.info(
+            self.logger.exception(
                 "Exception while pushing event for isDishVccConfigSet - %s",
                 exception,
             )
@@ -171,7 +171,7 @@ class MidTmcCentralNode(AbstractCentralNode):
                 "DishVccValidationStatus", dishvccvalidationstatus
             )
         except Exception as exception:
-            self.logger.info(
+            self.logger.exception(
                 "Exception while pushing event for "
                 "DishVccValidationStatus - %s",
                 exception,

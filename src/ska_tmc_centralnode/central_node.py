@@ -110,7 +110,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_telescope_state_callback(self, telescope_state):
         """Update telescope state callback"""
-        self.logger.info("telescopeState %s", telescope_state)
+        self.logger.info("The current TelescopeState : %s", telescope_state)
         self.push_change_archive_events("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
@@ -401,8 +401,11 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         handler = self.get_command_object("AssignResources")
         result_code, unique_id = handler(argin)
-        self.logger.debug(
-            "ResultCode, unique_id/message is %s, %s", result_code, unique_id
+        self.logger.info(
+            "AssignResource command is invoked "
+            + "Result: %s, unique_id/message: %s",
+            result_code,
+            unique_id,
         )
 
         return [[result_code], [str(unique_id)]]
@@ -434,8 +437,11 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         handler = self.get_command_object("ReleaseResources")
         result_code, unique_id = handler(argin)
-        self.logger.debug(
-            "ResultCode, unique_id/message is %s, %s", result_code, unique_id
+        self.logger.info(
+            "ReleaseResources command is invoked "
+            + "Result: %s, unique_id/message: %s",
+            result_code,
+            unique_id,
         )
 
         return [[result_code], [str(unique_id)]]
@@ -447,6 +453,9 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         Initialises the command handlers for commands supported by this device.
         """
+        registered_commands = []
+        failed_to_register_commands = []
+
         super().init_command_objects()
         for command_name, method_name in [
             ("TelescopeOn", "telescope_on"),
@@ -465,4 +474,24 @@ class AbstractCentralNode(TMCBaseDevice):
                     logger=None,
                 ),
             )
-            self.logger.info("Commands registered.")
+
+            try:
+                registered_commands.append(command_name)
+            except Exception as e:
+                failed_to_register_commands.append(command_name)
+                self.logger.error(
+                    "Failed to register command %s : %s ",
+                    command_name,
+                    e,
+                )
+        if registered_commands:
+            commands_list = ", ".join(registered_commands)
+            self.logger.info(
+                "TMC is now ready to process the following "
+                + "registered commands: %s",
+                commands_list,
+            )
+
+        if failed_to_register_commands:
+            failed_list = ", ".join(failed_to_register_commands)
+            self.logger.info("Unable to register commands: %s", failed_list)
