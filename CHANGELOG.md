@@ -4,6 +4,10 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
+[0.19.2]
+********
+* Updated the common version to 0.26.3
+* Fix the failing healthstate test cases
 
 [0.19.1]
 ********
