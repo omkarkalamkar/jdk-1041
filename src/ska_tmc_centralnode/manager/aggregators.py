@@ -1,7 +1,6 @@
 """Aggregation method for telescope state Aggregating for Mid"""
 import logging
 
-from ska_control_model import HealthState
 from ska_ser_logging import configure_logging
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.aggregators import Aggregator
@@ -466,43 +465,3 @@ class DishkValueValidationResultAggregator:
             # Update the Central Node result attribute.
             if self.is_events_received_percentage_valid():
                 self.update_central_node_with_result()
-
-
-class HealthStateAggregator:
-    """New Aggregator class for Mid"""
-
-    def __init__(self, health_state_rules: dict, logger):
-        """
-        :param health_state_rules: Rules to use for aggregation
-        :type health_state_rules: dict
-        :param cm: Central Node Component Manager
-        :param type: component manager
-        :param logger: Logger
-        """
-        self.health_state_rules = health_state_rules
-        self.logger = logger
-
-    def aggregate(self, event_data: dict) -> HealthState:
-        """Aggregate healthState based on event data
-        :param event_data: event data dict which contain data required
-        for aggregation
-        :type event_data: dict
-        """
-        self.logger.debug("Received event data for aggregation %s", event_data)
-        for (
-            health_state,
-            health_state_rules,
-        ) in self.health_state_rules.items():
-            self.logger.debug(
-                "Checking rules for healthState %s", health_state
-            )
-            if any(
-                health_state_rule.matches(event_data)
-                for health_state_rule in health_state_rules
-            ):
-                return (
-                    HealthState[health_state]
-                    if hasattr(HealthState, health_state)
-                    else health_state
-                )
-        return HealthState.UNKNOWN
