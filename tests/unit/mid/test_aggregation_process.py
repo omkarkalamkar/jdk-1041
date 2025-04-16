@@ -94,7 +94,7 @@ def test_health_aggregation_process(
         time.sleep(0.2)
 
         assert (
-            aggregation_process.aggregated_health_state[0]
+            aggregation_process.aggregated_state[0]
             == HealthState[expected_state]
         )
 
@@ -134,8 +134,10 @@ def test_convert_event_data_to_dict(
             ),
         },
     )
-    event_data_dict = aggregation_process._convert_event_data_to_dict(
-        event_data
+    event_data_dict = (
+        aggregation_process._convert_event_data_to_dict_for_rule_engine(
+            event_data
+        )
     )
     expected_event_data_dict = {
         "all_unique_admin_modes": ["ONLINE"],
