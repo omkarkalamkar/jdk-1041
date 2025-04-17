@@ -58,7 +58,7 @@ class HealthStateAggregationProcessor(AggregationProcess):
         )
 
     def _convert_event_data_to_dict_for_rule_engine(self, event_data):
-        """Extract relevant fields from health event data into a dictionary."""
+        """Extract relevant fields from event data into a dictionary."""
         event_data_dict = {
             "all_unique_health_states": list(
                 set(
