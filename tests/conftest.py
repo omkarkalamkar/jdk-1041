@@ -207,11 +207,11 @@ def aggregation_process_mid():
     """Create aggregation process mid object"""
     process_manager = Manager()
     event_queue = process_manager.Queue()
-    aggregated_obs_state = process_manager.list([""])
+    aggregated_health_state = process_manager.list([""])
     mock_obj = mock.Mock()
 
     aggregation_process = HealthStateAggregationProcessor(
-        event_queue, aggregated_obs_state, mock_obj
+        event_queue, aggregated_health_state, mock_obj
     )
 
     yield aggregation_process
@@ -225,10 +225,10 @@ def aggregation_process_low():
     """Create aggregation process low object"""
     process_manager = Manager()
     event_queue = process_manager.Queue()
-    aggregated_obs_state = process_manager.list([""])
+    aggregated_health_state = process_manager.list([""])
     mock_obj = mock.Mock()
     aggregation_process = HealthStateAggregationProcessor(
-        event_queue, aggregated_obs_state, mock_obj
+        event_queue, aggregated_health_state, mock_obj
     )
 
     yield aggregation_process

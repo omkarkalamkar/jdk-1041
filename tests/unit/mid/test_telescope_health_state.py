@@ -131,3 +131,36 @@ def test_set_health_state_unknown(tango_context):
     cm = create_cm_no_faulty_devices(tango_context, True, True)
     set_device_unknown(devFactory, cm)
     assert cm.component.telescope_health_state == HealthState.UNKNOWN
+
+
+@pytest.mark.parametrize(
+    "direct_health_state, expected_cm_health_state",
+    [
+        (HealthState.DEGRADED, HealthState.DEGRADED),
+        (HealthState.FAILED, HealthState.FAILED),
+        (HealthState.UNKNOWN, HealthState.UNKNOWN),
+    ],
+)
+def test_dish_master_health_states(
+    tango_context,
+    direct_health_state,
+    expected_cm_health_state,
+    expected_elapsed_time=10,
+):
+    devFactory = DevFactory()
+    cm = create_cm_no_faulty_devices(tango_context, True, True)
+    proxy = devFactory.get_device(DISH_MASTER_DEVICE)
+
+    proxy.SetDirectHealthState(direct_health_state)
+    assert proxy.HealthState == direct_health_state
+
+    start_time = time.time()
+    elapsed_time = 0
+
+    while cm.component.telescope_health_state != expected_cm_health_state:
+        elapsed_time = time.time() - start_time
+        time.sleep(0.1)
+        if elapsed_time > expected_elapsed_time:
+            pytest.fail("Timeout occurred while executing the test")
+
+    assert elapsed_time < expected_elapsed_time
