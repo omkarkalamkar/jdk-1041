@@ -178,12 +178,24 @@ class TelescopeOn(TelescopeOnOff):
             if adapter.dishMode != DishMode.STANDBY_FP:
                 invoke_on_adapters.append(adapter)
 
-        return self.send_command(
-            invoke_on_adapters,
-            "Error in calling SetStandbyFPMode()"
-            f" command on {invoke_on_adapters}",
-            "SetStandbyFPMode",
-        )
+        failed_dishes = []
+        for adapter in invoke_on_adapters:
+            return_code, message = self.send_command(
+                [adapter],
+                "Error in calling SetStandbyFPMode()"
+                f" command on {invoke_on_adapters}",
+                "SetStandbyFPMode",
+            )
+            if return_code == ResultCode.FAILED:
+                self.logger.error(message)
+                failed_dishes.append(adapter.dev_name)
+
+        if failed_dishes:
+            return [ResultCode.FAILED], [
+                f"Failed to turn on dishes: {', '.join(failed_dishes)}"
+            ]
+
+        return return_code, message
 
     def do_low(self, argin=None):
         """

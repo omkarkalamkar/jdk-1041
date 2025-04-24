@@ -320,11 +320,23 @@ class TelescopeStandby(TelescopeOnOff):
             "Invoking Off command on: %s",
             [str(adapter.dev_name) for adapter in self.dish_adapters],
         )
-        return self.send_command(
-            self.dish_adapters,
-            f"Error in calling Off() on Dish Leaf Nodes:{self.dish_adapters}",
-            "Off",
-        )
+        failed_dishes = []
+        for adapter in self.dish_adapters:
+            return_code, message = self.send_command(
+                [adapter],
+                f"Error in calling Off command for {adapter.dev_name}",
+                "Off",
+            )
+            if return_code == ResultCode.FAILED:
+                self.logger.error(message)
+                failed_dishes.append(adapter.dev_name)
+
+        if failed_dishes:
+            return [ResultCode.FAILED], [
+                f"Failed to turn off dishes: {', '.join(failed_dishes)}"
+            ]
+
+        return return_code, message
 
     def update_task_status(self):
         """blank method for resolving pylint errors"""
