@@ -3,7 +3,7 @@
 import logging
 import operator
 import time
-from typing import Any, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from ska_ser_logging import configure_logging
 from ska_tango_base.base import TaskCallbackType
@@ -91,28 +91,28 @@ class CentralNodeCommand(TMCCommand):
 
     def invoke_command(
         self,
-        adapters: list,
+        adapters: List,
         command_caller,
         err_msg: str,
         command_name: str,
-    ) -> Tuple[ResultCode, str]:
+    ) -> tuple[List[ResultCode | Any], List[str | Any]]:
         """Invokes command on adapter"""
         return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
         message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
-        try:
-            for adapter in adapters:
+
+        for adapter in adapters:
+            try:
                 return_code, message_or_unique_id = command_caller(adapter)
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
                 self.logger.info(
                     f"Invoked {command_name} on  {adapter.dev_name}"
                 )
-
-        except Exception as e:
-            return (
-                [ResultCode.FAILED],
-                [f"{err_msg} {adapter.dev_name}: {e}"],
-            )
+            except Exception as e:
+                return_codes.append(ResultCode.FAILED)
+                message_or_unique_ids.append(
+                    f"{err_msg} {adapter.dev_name}: {e}"
+                )
         return return_codes, message_or_unique_ids
 
     def send_command(

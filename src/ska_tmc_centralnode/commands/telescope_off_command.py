@@ -201,23 +201,11 @@ class TelescopeOff(TelescopeOnOff):
             "Invoking Off command on: %s",
             [str(adapter.dev_name) for adapter in self.dish_adapters],
         )
-        failed_dishes = []
-        for adapter in self.dish_adapters:
-            return_code, message = self.send_command(
-                [adapter],
-                f"Error in calling Off command for {adapter.dev_name}",
-                "Off",
-            )
-            if return_code == ResultCode.FAILED:
-                self.logger.error(message)
-                failed_dishes.append(adapter.dev_name)
-
-        if failed_dishes:
-            return [ResultCode.FAILED], [
-                f"Failed to turn off dishes: {', '.join(failed_dishes)}"
-            ]
-
-        return return_code, message
+        return self.send_command(
+            self.dish_adapters,
+            "Error in calling Off command for dish devices",
+            "Off",
+        )
 
     def do_low(self, argin=None):
         """
