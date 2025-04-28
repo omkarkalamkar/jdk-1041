@@ -114,10 +114,8 @@ class CentralNodeCommand(TMCCommand):
                     f"{err_msg} {adapter.dev_name}: {e}"
                 )
                 self.logger.error(
-                    "Error in invoking %s on %s: %s",
-                    command_name,
-                    adapter.dev_name,
-                    e,
+                    f"Error in invoking {command_name} on "
+                    f"{adapter.dev_name}: {e}"
                 )
         return return_codes, message_or_unique_ids
 
