@@ -202,7 +202,6 @@ def test_telescope_on_command_rejected(tango_context, task_callback):
     assert f"['{DISH_LEAF_NODE_DEVICE}'] not available" in data["result"][1]
 
 
-@pytest.mark.new
 def test_telescope_on_command_fail_dish(tango_context):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
