@@ -108,15 +108,14 @@ class TelescopeStandby(TelescopeOnOff):
         while not all_empty:
             all_empty = True
             for adapter in self.subarray_adapters:
-                if (
-                    not self.component_manager.get_device(
-                        adapter.dev_name
-                    ).obs_state
-                    == ObsState.EMPTY
-                ):
+                obs_state = self.component_manager.get_device(
+                    adapter.dev_name
+                ).obs_state
+                if obs_state != ObsState.EMPTY:
                     self.logger.error(
                         "Subarray current ObsState %s, while "
-                        "waiting for ObsState.EMPTY. "
+                        "waiting for ObsState.EMPTY. ",
+                        obs_state,
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time
