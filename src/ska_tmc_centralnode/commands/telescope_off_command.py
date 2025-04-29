@@ -112,7 +112,6 @@ class TelescopeOff(TelescopeOnOff):
                     self.logger.error(
                         "Subarray current ObsState %s, while "
                         "waiting for ObsState.EMPTY. ",
-                        adapter.dev_name,
                         obs_state,
                     )
                     all_empty = False
