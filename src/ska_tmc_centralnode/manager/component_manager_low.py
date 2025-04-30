@@ -285,12 +285,12 @@ class CNComponentManagerLow(CNComponentManager):
                 + "command_id: %s, resultcode: %s, message: %s",
                 self.command_id,
                 str(ResultCode.FAILED),
-                str(exception_message),
+                exception_message,
             )
             self.long_running_result_callback(
                 self.command_id,
                 str(ResultCode.FAILED),
-                str(exception_msg=exception_message),
+                exception_msg=exception_message,
             )
             self.observable.notify_observers(command_exception=True)
         self.reset_event_count(self.command_id)
