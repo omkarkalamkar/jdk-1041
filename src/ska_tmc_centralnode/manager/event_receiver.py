@@ -65,7 +65,7 @@ class CentralNodeEventReceiver(EventReceiver):
             self._logger.debug(
                 "Subscribed events on device :  %s " + "and : %s",
                 device_info.dev_name,
-                self.device_subscribed,
+                str(self.device_subscribed),
             )
 
             self.subscribe_events(
@@ -85,7 +85,7 @@ class CentralNodeEventReceiver(EventReceiver):
             proxy = self._dev_factory.get_device(dev_info.dev_name)
         except Exception as e:
             self._logger.error(
-                "Exception occurred while creating proxy: %s", e
+                "Exception occurred while creating proxy: %s", str(e)
             )
         else:
             try:

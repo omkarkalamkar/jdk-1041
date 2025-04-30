@@ -112,7 +112,7 @@ class TelescopeOff(TelescopeOnOff):
                     self.logger.error(
                         "Subarray current ObsState %s, while "
                         "waiting for ObsState.EMPTY. ",
-                        obs_state,
+                        str(obs_state),
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time
@@ -253,7 +253,7 @@ class TelescopeOff(TelescopeOnOff):
                     self.logger.debug(
                         "Subarray %s is still not empty, current state: %s",
                         adapter.dev_name,
-                        obs_state,
+                        str(obs_state),
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time

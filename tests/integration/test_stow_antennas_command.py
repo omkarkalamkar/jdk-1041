@@ -35,5 +35,5 @@ def test_stow_antennas_command(tango_context):
 
     for command in central_node.commandExecuted:
         if command[0] == unique_id[0]:
-            logger.info("command result: %s", command)
+            logger.info("command result: %s", str(command))
             assert command[2] == "ResultCode.OK"

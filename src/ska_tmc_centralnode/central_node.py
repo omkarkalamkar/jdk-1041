@@ -480,9 +480,7 @@ class AbstractCentralNode(TMCBaseDevice):
             except Exception as e:
                 failed_to_register_commands.append(command_name)
                 self.logger.error(
-                    "Failed to register command %s : %s ",
-                    command_name,
-                    e,
+                    "Failed to register command %s : %s ", command_name, e
                 )
         if registered_commands:
             commands_list = ", ".join(registered_commands)

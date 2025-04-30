@@ -256,7 +256,7 @@ class CNComponentManager(TmcComponentManager):
                 self.component.telescope_health_state = current_health_state
                 self.logger.debug(
                     "Aggregate telescope health state called %s",
-                    current_health_state,
+                    str(current_health_state),
                 )
 
             time.sleep(0.1)
@@ -299,7 +299,7 @@ class CNComponentManager(TmcComponentManager):
                 # safely ignore it.
                 pass
             except Exception as exception:
-                self.logger.error(exception)
+                self.logger.error(str(exception))
 
     def check_event_error(self, event: tango.EventData, callback: str):
         """Method for checking event error."""
@@ -811,7 +811,7 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.debug(
                     "Subarray Device resources for device %s: %s",
                     devInfo.dev_name,
-                    devInfo.resources,
+                    str(devInfo.resources),
                 )
                 if devInfo.resources is None:
                     return False
@@ -1096,7 +1096,7 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.exception(
                     "Exception occurred while validating for "
                     + "assignresource json : %s ",
-                    exception,
+                    str(exception),
                 )
                 return assign_resources_command.reject_command(str(exception))
 

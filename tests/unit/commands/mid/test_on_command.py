@@ -5,6 +5,7 @@ import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_tango_testing.mock.placeholders import Anything
+from ska_tmc_common import AdapterType
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -232,7 +233,7 @@ def test_telescope_on_command_fail_dish(tango_context):
     attrs = {"On.side_effect": Exception}
     dishMasterLeafMock = mock.Mock(**attrs)
     my_adapter_factory.get_or_create_adapter(
-        failing_dev, proxy=dishMasterLeafMock
+        failing_dev, proxy=dishMasterLeafMock, adapter_type=AdapterType.DISH
     )
     unique_id = f"{time.time()}_TelescopeOn"
     task_callback = MockCallable(unique_id)
