@@ -289,7 +289,7 @@ class CNComponentManagerLow(CNComponentManager):
             )
             self.long_running_result_callback(
                 self.command_id,
-                str(ResultCode.FAILED),
+                ResultCode.FAILED,
                 exception_msg=exception_message,
             )
             self.observable.notify_observers(command_exception=True)
