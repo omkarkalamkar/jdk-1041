@@ -124,7 +124,7 @@ class StowAntennas(CentralNodeCommand):
                         return ResultCode.FAILED, message_or_unique_id
                     self.logger.error(
                         "Failed to stow receptor: %s with message: %s",
-                        arg,
+                        str(arg),
                         message_or_unique_id,
                     )
         return (ResultCode.OK, "Command Completed")

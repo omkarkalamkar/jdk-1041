@@ -129,7 +129,7 @@ def call_command(central_node, command_name, json_factory):
 def check_internal_model(device_list):
     """checks internal model"""
     json_model = json.loads(pytest.internal_model)
-    logger.info("Json model is %s", str(json_model))
+    logger.info("Json model is %s", json_model)
     for dev in json_model["devices"]:
         running_dev = None
         for exported_dev in device_list.value_string:

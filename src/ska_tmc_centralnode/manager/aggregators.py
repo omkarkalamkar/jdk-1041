@@ -365,7 +365,7 @@ class LoadDishCfgCommandResultAggregator:
             "Result codes are %s, failed messages are %s, "
             "TMC components with errors are %s",
             str(result_codes),
-            failed_messages,
+            str(failed_messages),
             str(failed_devices),
         )
 

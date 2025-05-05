@@ -189,7 +189,7 @@ class TelescopeOnOff(CentralNodeCommand):
             self.logger.debug(
                 "Adapter is created for CSP Master Leaf Node %s : %s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
-                self.csp_mln_adapter,
+                str(self.csp_mln_adapter),
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -204,7 +204,7 @@ class TelescopeOnOff(CentralNodeCommand):
             self.logger.debug(
                 "Adapter is created for SDP Master Leaf Node %s : %s",
                 self.component_manager.input_parameter.sdp_mln_dev_name,
-                self.sdp_mln_adapter,
+                str(self.sdp_mln_adapter),
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -312,7 +312,7 @@ class TelescopeOnOff(CentralNodeCommand):
             self.logger.debug(
                 "Adapter is created for MCCS Master Leaf Node %s : %s",
                 self.component_manager.input_parameter.mccs_mln_dev_name,
-                self.mccs_mln_adapter,
+                str(self.mccs_mln_adapter),
             )
 
         except Exception as e:
@@ -328,7 +328,7 @@ class TelescopeOnOff(CentralNodeCommand):
             self.logger.debug(
                 "Adapter is created for SDP Master Leaf Node %s : %s",
                 self.component_manager.input_parameter.sdp_mln_dev_name,
-                self.sdp_mln_adapter,
+                str(self.sdp_mln_adapter),
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -540,7 +540,7 @@ class LoadDishCfgCommand(CentralNodeCommand):
             self.logger.debug(
                 "Adapter is created for CSP Master Leaf Node %s : %s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
-                self.csp_mln_adapter,
+                str(self.csp_mln_adapter),
             )
         except Exception as e:
             return self.adapter_error_message(

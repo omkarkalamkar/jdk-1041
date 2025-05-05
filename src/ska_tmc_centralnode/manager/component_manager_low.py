@@ -204,7 +204,7 @@ class CNComponentManagerLow(CNComponentManager):
             "Received longRunningCommandResult event for device: \
                 %s, with value: %s",
             dev_name,
-            value,
+            str(value),
         )
         unique_ids = self.get_unique_ids()
 

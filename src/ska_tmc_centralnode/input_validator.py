@@ -52,7 +52,7 @@ class AssignResourceValidator:
         for subarray in subarray_list:
             tokens = subarray.split("/")
             self._subarrays.append(int(tokens[2]))
-        self.logger.debug("Available subarray ids: %s", self._subarrays)
+        self.logger.debug("Available subarray ids: %s", str(self._subarrays))
 
         # Populate the list of receptor ids from list of existing dishleaf node
         # FQDNs. The list is used later to search for any invalid receptor id
@@ -61,7 +61,7 @@ class AssignResourceValidator:
             self._receptor_list.append(
                 receptor.replace(dish_leaf_node_prefix, "SKA")
             )
-        self.logger.debug("Available dish ids: %s", self._receptor_list)
+        self.logger.debug("Available dish ids: %s", str(self._receptor_list))
 
     def _subarray_exists(self, subarray_id):
         """Checks if subarray is present.

@@ -222,7 +222,7 @@ class AssignResources(AssignReleaseResources):
         self.logger.debug(
             "Command ID: %s | " + "Receptor IDs are: %s",
             self.component_manager.command_id,
-            receptor_ids,
+            str(receptor_ids),
         )
         for receptor_id in receptor_ids:
             if self.component_manager.is_already_assigned(receptor_id):
@@ -233,7 +233,7 @@ class AssignResources(AssignReleaseResources):
             self.logger.debug(
                 "Command ID: %s | " + "Dish %s is available for assignment.",
                 self.component_manager.command_id,
-                receptor_ids,
+                str(receptor_ids),
             )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"

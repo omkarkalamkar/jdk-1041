@@ -264,7 +264,7 @@ def create_cm_no_faulty_devices(
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", str(num_faulty), str(elapsed_time))
+    logger.info("checked %d devices in %f", num_faulty, elapsed_time)
     return cm
 
 

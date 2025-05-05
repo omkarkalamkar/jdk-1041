@@ -225,7 +225,7 @@ class CNComponentManagerMid(CNComponentManager):
     @dish_vcc_command_status.setter
     def dish_vcc_command_status(self, value: DishConfigStatus):
         """Set dish vcc command status and invoke callback"""
-        self.logger.debug("Setting dish config status %s", value)
+        self.logger.debug("Setting dish config status %s", str(value))
         self._dish_vcc_command_status = value
         self.dish_vcc_command_status_callback(value)
 
@@ -363,7 +363,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self.get_device(device).state
                 for device in devices_to_check_list
             ]
-            self.logger.debug("Current device states: %s", dev_state_list)
+            self.logger.debug("Current device states: %s", str(dev_state_list))
             count += 1
             if count == self.dish_vcc_init_timeout:
                 break
@@ -425,7 +425,7 @@ class CNComponentManagerMid(CNComponentManager):
                         "for command '%s' on  '%s'.",
                         str(result_code),
                         message,
-                        unique_id,
+                        str(unique_id),
                         dev_name,
                     )
 
@@ -542,7 +542,7 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.debug(
                 "Updated DishMode of %s: %s",
                 dev_info.dev_name,
-                str(DishMode(dev_info.dish_mode).name),
+                DishMode(dev_info.dish_mode).name,
             )
             dev_info.last_event_arrived = time.time()
             dev_info.update_unresponsive(False)
@@ -723,7 +723,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.logger.debug(
             "Dish Vcc Validation Event called with dev %s and result %s",
             dev_name,
-            str(ObsState(dish_vcc_validation_result).name),
+            ObsState(dish_vcc_validation_result).name,
         )
         with self.dish_vcc_validation_attr_lock:
             if self.input_parameter.csp_mln_dev_name in dev_name:
@@ -731,7 +731,7 @@ class CNComponentManagerMid(CNComponentManager):
                 csp_validation_result = int(result)
                 self.logger.debug(
                     "Csp Validation Result is %s",
-                    str(ResultCode(csp_validation_result).name),
+                    ResultCode(csp_validation_result).name,
                 )
                 if (
                     csp_validation_result == ResultCode.UNKNOWN
@@ -825,8 +825,7 @@ class CNComponentManagerMid(CNComponentManager):
             )
             return task_status, response
         self.logger.debug(
-            "DishId Vcc Map Json %s",
-            str(json.dumps(dishid_vcc_map_json, indent=4)),
+            "DishId Vcc Map Json %s", json.dumps(dishid_vcc_map_json, indent=4)
         )
         (
             is_valid_dish_cfg,
@@ -912,9 +911,6 @@ class CNComponentManagerMid(CNComponentManager):
                     "Event from long command result callback %s", str(value)
                 )
                 unique_id, resultcode_message = value
-                self.logger.debug(
-                    f"unique id {unique_id}," + f"{resultcode_message}"
-                )
                 if unique_id.endswith("LoadDishCfg"):
                     result_code_or_exception = json.loads(resultcode_message)
             if result_code_or_exception and self.dev_names_for_load_dish_cfg:

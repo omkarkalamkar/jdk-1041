@@ -216,7 +216,9 @@ class CentralNodeEventReceiver(EventReceiver):
                     )
             except Exception as e:
                 self._logger.error(
-                    "Event not working for device %s: %s", proxy.dev_name, e
+                    "Event not working for device %s: %s",
+                    proxy.dev_name,
+                    str(e),
                 )
             else:
                 # Add device info in subscribed device

@@ -162,7 +162,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             + "LoadDishCfg with result"
             + "%s and message %s",
             self.component_manager.command_id,
-            result,
+            str(result),
             exception,
         )
         if result[0] == ResultCode.FAILED:
