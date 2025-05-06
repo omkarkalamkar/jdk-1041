@@ -110,7 +110,6 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_telescope_state_callback(self, telescope_state):
         """Update telescope state callback"""
-        self.logger.info("The current TelescopeState : %s", telescope_state)
         self.push_change_archive_events("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
@@ -404,7 +403,7 @@ class AbstractCentralNode(TMCBaseDevice):
         self.logger.info(
             "AssignResource command is invoked "
             + "Result: %s, unique_id/message: %s",
-            result_code,
+            str(result_code),
             unique_id,
         )
 
@@ -440,7 +439,7 @@ class AbstractCentralNode(TMCBaseDevice):
         self.logger.info(
             "ReleaseResources command is invoked "
             + "Result: %s, unique_id/message: %s",
-            result_code,
+            str(result_code),
             unique_id,
         )
 
@@ -480,16 +479,14 @@ class AbstractCentralNode(TMCBaseDevice):
             except Exception as e:
                 failed_to_register_commands.append(command_name)
                 self.logger.error(
-                    "Failed to register command %s : %s ",
-                    command_name,
-                    e,
+                    "Failed to register command %s : %s ", command_name, str(e)
                 )
         if registered_commands:
             commands_list = ", ".join(registered_commands)
             self.logger.info(
                 "TMC is now ready to process the following "
                 + "registered commands: %s",
-                commands_list,
+                str(commands_list),
             )
 
         if failed_to_register_commands:

@@ -165,7 +165,8 @@ class CNComponentManagerLow(CNComponentManager):
         self.error_count = 0
         del self.command_mapping[command_id]
         self.logger.debug(
-            "Updated command mapping dictionary is: %s", self.command_mapping
+            "Updated command mapping dictionary is: %s",
+            str(self.command_mapping),
         )
 
     def get_unique_ids(self) -> list:
@@ -203,7 +204,7 @@ class CNComponentManagerLow(CNComponentManager):
             "Received longRunningCommandResult event for device: \
                 %s, with value: %s",
             dev_name,
-            value,
+            str(value),
         )
         unique_ids = self.get_unique_ids()
 
@@ -228,7 +229,7 @@ class CNComponentManagerLow(CNComponentManager):
                     self.command_mapping[self.command_id].remove(unique_id)
                     self.logger.debug(
                         "Updated command mapping dictionary is: %s",
-                        self.command_mapping,
+                        str(self.command_mapping),
                     )
 
                 case (
@@ -244,12 +245,12 @@ class CNComponentManagerLow(CNComponentManager):
                     self.command_mapping[self.command_id].remove(unique_id)
                     self.logger.debug(
                         "Updated command mapping dictionary is: %s",
-                        self.command_mapping,
+                        str(self.command_mapping),
                     )
                     self.logger.error(
                         "Exception occurred with value: %s for %s \
                             command_id for device: %s",
-                        value,
+                        str(value),
                         self.command_id,
                         dev_name,
                     )
@@ -260,7 +261,7 @@ class CNComponentManagerLow(CNComponentManager):
                 "Exception occurred while processing"
                 + "long running command result"
                 + "attribute event: %s",
-                exception,
+                str(exception),
             )
 
     def update_long_running_command_result_callback(self) -> None:
@@ -283,7 +284,7 @@ class CNComponentManagerLow(CNComponentManager):
                 "Updating LRCRCallback with following values: "
                 + "command_id: %s, resultcode: %s, message: %s",
                 self.command_id,
-                ResultCode.FAILED,
+                str(ResultCode.FAILED),
                 exception_message,
             )
             self.long_running_result_callback(

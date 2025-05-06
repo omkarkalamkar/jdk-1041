@@ -39,7 +39,7 @@ def assign_resources(
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -72,7 +72,7 @@ def assign_resources(
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     # assert unique_id[0].endswith("AssignResources")

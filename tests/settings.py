@@ -131,7 +131,7 @@ def count_faulty_devices(cm):
 
 def dish_vcc_process_callback(event):
     """Dummy dish vcc process callback for testing"""
-    logger.debug("Dish Vcc process callback called with event %s", event)
+    logger.debug("Dish Vcc process callback called with event %s", str(event))
 
 
 def mock_update_device_callback(devInfo):
@@ -141,27 +141,27 @@ def mock_update_device_callback(devInfo):
 
 def mock_update_telescope_state_callback(telescope_state):
     """Dummy method for update telescope state callback"""
-    logger.debug("telescope state: %s", telescope_state)
+    logger.debug("telescope state: %s", str(telescope_state))
 
 
 def mock_update_telescope_health_state_callback(telescope_health_state):
     """Dummy method for update telescope health state callback"""
-    logger.debug("telescope health state: %s", telescope_health_state)
+    logger.debug("telescope health state: %s", str(telescope_health_state))
 
 
 def mock_update_tmc_op_state_callback(tmc_op_state):
     """Dummy method for update tmc op state callback"""
-    logger.debug("tmc op state: %s", tmc_op_state)
+    logger.debug("tmc op state: %s", str(tmc_op_state))
 
 
 def mock_update_imaging_callback(imaging):
     """Callback for Update imaging"""
-    logger.debug("imaging %s", imaging)
+    logger.debug("imaging %s", str(imaging))
 
 
 def mock_telescope_availability_callback(telescope_availability):
     """Dummy method for update telescope availability callback"""
-    logger.debug("telescope availability: %s", telescope_availability)
+    logger.debug("telescope availability: %s", str(telescope_availability))
 
 
 def create_cm(
@@ -264,7 +264,7 @@ def create_cm_no_faulty_devices(
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
     elapsed_time = time.time() - start_time
-    logger.info("checked %s devices in %s", num_faulty, elapsed_time)
+    logger.info("checked %d devices in %f", num_faulty, elapsed_time)
     return cm
 
 
@@ -278,7 +278,7 @@ def ensure_telescope_state(cm, state, expected_elapsed_time):
         if elapsed_time > TIMEOUT:
             logger.error(
                 "The current telescope state is %s",
-                cm.component.telescope_state,
+                str(cm.component.telescope_state),
             )
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time

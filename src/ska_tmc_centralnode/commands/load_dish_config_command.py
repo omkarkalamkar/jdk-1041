@@ -162,7 +162,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             + "LoadDishCfg with result"
             + "%s and message %s",
             self.component_manager.command_id,
-            result,
+            str(result[0]),
             exception,
         )
         if result[0] == ResultCode.FAILED:
@@ -215,7 +215,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     "Command ID: %s |  Error in Loading Dish VCC map "
                     + "json file %s, retrying",
                     self.component_manager.command_id,
-                    exception,
+                    str(exception),
                 )
                 return (
                     {},
@@ -353,7 +353,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.logger.exception(
                 "Error in Calling setKvalue command on %s : %s",
                 dish_adapter.dev_name,
-                e,
+                str(e),
             )
             return [ResultCode.FAILED], [
                 f"Error in Calling setKvalue command on dish adapter {e}"

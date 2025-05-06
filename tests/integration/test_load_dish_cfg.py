@@ -65,7 +65,7 @@ def load_dish_cfg(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -133,7 +133,7 @@ def load_dish_cfg_rejected(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -185,7 +185,7 @@ def load_dish_cfg_when_csp_is_defective(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -211,7 +211,7 @@ def load_dish_cfg_when_csp_is_defective(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     change_event_callbacks.assert_change_event(
@@ -478,7 +478,7 @@ def load_dish_cfg_with_wrong_path(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("LoadDishCfg")

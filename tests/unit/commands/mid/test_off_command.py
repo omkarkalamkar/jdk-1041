@@ -168,3 +168,47 @@ def test_telescope_off_command_rejected(tango_context, task_callback):
     )
     assert ResultCode.REJECTED == data["result"][0]
     assert f"['{DISH_LEAF_NODE_DEVICE}'] not available" in data["result"][1]
+
+
+def test_telescope_off_command_fail_dish(tango_context):
+    logger.info("%s", tango_context)
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    dev_factory = DevFactory()
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_mln.SetSubsystemAvailable(True)
+    sdp_mln.SetSubsystemAvailable(True)
+    check_cspmln_availability(cm, True)
+    check_sdpmln_availability(cm, True)
+    assert (cm.component.telescope_availability)[
+        "csp_master_leaf_node"
+    ] is True
+    assert (cm.component.telescope_availability)[
+        "sdp_master_leaf_node"
+    ] is True
+    cm.is_dish_vcc_config_set = True
+    cm.is_command_allowed("TelescopeOff")
+    my_adapter_factory = HelperAdapterFactory()
+
+    # Include exception in Off command
+    failing_dev = DISH_LEAF_NODE_DEVICE
+    err_msg = "Error in calling Off command for dish devices"
+    attrs = {"Off.side_effect": Exception}
+    dishMasterLeafMock = mock.Mock(**attrs)
+    my_adapter_factory.get_or_create_adapter(
+        failing_dev, proxy=dishMasterLeafMock
+    )
+    unique_id = f"{time.time()}_TelescopeOff"
+    task_callback = MockCallable(unique_id)
+
+    off_command = TelescopeOff(cm, my_adapter_factory, logger=logger)
+    cm.adapter_factory = my_adapter_factory
+    off_command.telescope_off(logger=logger, task_callback=task_callback)
+    assert task_callback.status == TaskStatus.COMPLETED
+    assert task_callback.result[0] == ResultCode.FAILED
+    assert err_msg in task_callback.result[1]
+    assert failing_dev in task_callback.result[1]

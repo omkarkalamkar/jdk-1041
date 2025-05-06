@@ -145,7 +145,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         except Exception as exception:
             self.logger.exception(
                 "Exception while pushing event for isDishVccConfigSet - %s",
-                exception,
+                str(exception),
             )
 
     def dishvcccommandstatus_cb(
@@ -161,7 +161,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             self.logger.info(
                 "Exception while pushing event for "
                 "dish_vcc_command_status - %s",
-                exception,
+                str(exception),
             )
 
     def dishvccvalidation_callback(self, dishvccvalidationstatus):
@@ -174,7 +174,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             self.logger.exception(
                 "Exception while pushing event for "
                 "DishVccValidationStatus - %s",
-                exception,
+                str(exception),
             )
 
     # ---------------
