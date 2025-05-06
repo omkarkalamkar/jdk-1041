@@ -266,10 +266,14 @@ class CNComponentManager(TmcComponentManager):
         """
         Process the given attribute's event using the data from the
             event_queue and invoke corresponding process method.
+
         :param attribute_name: Name of the attribute for which event is to be
             processed
+
         :type attribute_name: str
+
         :returns: None
+
         """
         while True:
             try:
