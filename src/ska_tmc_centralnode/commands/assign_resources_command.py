@@ -231,7 +231,7 @@ class AssignResources(AssignReleaseResources):
                     f"Dish {receptor_id} is already allocated",
                 )
             self.logger.debug(
-                "Command ID: %s | " + "Dish %s is available for assignment.",
+                "Command ID: %s | Dish %s is available for assignment.",
                 self.component_manager.command_id,
                 str(receptor_ids),
             )

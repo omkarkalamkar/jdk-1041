@@ -232,8 +232,8 @@ class TelescopeOnOff(CentralNodeCommand):
                         f"Adapter is created for SubarrayNode {dev_name}",
                     )
                 except Exception as e:
-                    self.logger.error(
-                        "Error in creating adapter for %s: %s",
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
                         dev_name,
                         str(e),
                     )
@@ -262,12 +262,10 @@ class TelescopeOnOff(CentralNodeCommand):
                         )
                     )
                     num_working += 1
-                    self.logger.debug(
-                        "Adapter is created for DishLeafNode %s", dev_name
-                    )
+                    self.logger.debug("Adapter is created for %s", dev_name)
                 except Exception as e:
-                    self.logger.error(
-                        "Error in creating adapter for %s: %s",
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
                         dev_name,
                         str(e),
                     )
@@ -350,8 +348,8 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                     num_working += 1
                 except Exception as e:
-                    self.logger.error(
-                        "Error in creating adapter for %s: %s",
+                    self.logger.exception(
+                        "Exception in creating adapter for %s , Exception: %s",
                         dev_name,
                         str(e),
                     )
@@ -407,8 +405,8 @@ class AssignReleaseResources(CentralNodeCommand):
                         f"Adapter is created for SubarrayNode {dev_name}"
                     )
                 except Exception as e:
-                    self.logger.error(
-                        "Error in creating adapter for %s: %s",
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
                         dev_name,
                         str(e),
                     )
@@ -440,8 +438,8 @@ class AssignReleaseResources(CentralNodeCommand):
                         f"Adapter is created for DishLeafNode {dev_name}"
                     )
                 except Exception as e:
-                    self.logger.error(
-                        "Error in creating adapter for %s: %s",
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
                         dev_name,
                         str(e),
                     )
@@ -489,8 +487,8 @@ class AssignReleaseResources(CentralNodeCommand):
                     )
                     num_working += 1
                 except Exception as e:
-                    self.logger.error(
-                        "Error in creating adapter for %s: %s",
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
                         dev_name,
                         str(e),
                     )
@@ -562,8 +560,8 @@ class LoadDishCfgCommand(CentralNodeCommand):
                         f"Adapter is created for DishLeafNode {dev_name}"
                     )
                 except Exception as e:
-                    self.logger.error(
-                        "Error in creating adapter for %s: %s",
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
                         dev_name,
                         str(e),
                     )
