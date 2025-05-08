@@ -7,6 +7,7 @@ import json
 import re
 import threading
 import time
+from collections import defaultdict
 from logging import Logger
 from multiprocessing import Event
 from multiprocessing import Lock as ProcessLock
@@ -38,6 +39,7 @@ from ska_tmc_common import (
     SubarrayNotPresentError,
 )
 from ska_tmc_common.v1.tmc_component_manager import TmcComponentManager
+from ska_tmc_common.v2.event_manager import EventManager
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
@@ -57,7 +59,6 @@ from ska_tmc_centralnode.input_validator import (
 )
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_data_manager import EventDataManager
-from ska_tmc_centralnode.manager.event_receiver import CentralNodeEventReceiver
 from ska_tmc_centralnode.model.component import (
     CentralComponent,
     MCCSDeviceInfo,
@@ -151,22 +152,28 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
         self.event_data_manager = EventDataManager(self)
-        self.event_receiver = True
+        # self.event_receiver = True
         self.command_timeout = command_timeout
         self.process_lock = ProcessLock()
         self.assignresources_interface = assignresources_interface
         self.releaseresources_interface = releaseresources_interface
-        self.event_receiver = _event_receiver
-        if self.event_receiver:
-            evt_sub_check_period = self.event_subscription_check_period
-            self.event_receiver_object = CentralNodeEventReceiver(
-                self,
-                logger=self.logger,
-                proxy_timeout=self.proxy_timeout,
-                event_subscription_check_period=evt_sub_check_period,
-            )
-            self.start_event_receiver()
-
+        # self.event_receiver = _event_receiver
+        # if self.event_receiver:
+        #     evt_sub_check_period = self.event_subscription_check_period
+        #     self.event_receiver_object = CentralNodeEventReceiver(
+        #         self,
+        #         logger=self.logger,
+        #         proxy_timeout=self.proxy_timeout,
+        #         event_subscription_check_period=evt_sub_check_period,
+        #     )
+        #     self.start_event_receiver()
+        # # Event manager
+        self.event_manager: EventManager = EventManager(
+            self,
+            subscription_configuration=self.build_device_attribute_map(),
+            logger=self.logger,
+        )
+        self.event_manager.start_event_subscription()
         self._component.set_op_callbacks(
             _update_device_callback,
             _update_telescope_state_callback,
@@ -230,6 +237,86 @@ class CNComponentManager(TmcComponentManager):
             target=self.aggregate_process_monitor
         )
         self.aggregate_process_monitor_thread.start()
+
+    def build_device_attribute_map(
+        self,
+    ):
+        """
+        Builds a dictionary mapping device names to
+        lists of attributes to be subscribed.
+
+        Parameters:
+            dev_info: An object containing the
+                device name (`dev_info.dev_name`)
+
+        Returns:
+            dict: A mapping from device names to list of attributes.
+        """
+        device_attribute_map = defaultdict(list)
+        dev_name = self.devices
+
+        if "subarray" in dev_name and "leaf" not in dev_name:
+            device_attribute_map[dev_name].extend(
+                [
+                    "assignedResources",
+                    "obsState",
+                ]
+            )
+
+        if (
+            isinstance(self.input_parameter, InputParameterMid)
+            and dev_name in self.input_parameter.dish_leaf_node_dev_names
+        ):
+            device_attribute_map[dev_name].extend(
+                [
+                    "dishMode",
+                    "kValueValidationResult",
+                ]
+            )
+
+        if dev_name in self.input_parameter.subarray_dev_names:
+            device_attribute_map[dev_name].extend(
+                [
+                    "longRunningCommandResult",
+                    "isSubarrayAvailable",
+                ]
+            )
+
+        for device in [
+            MID_CSP_MLN_DEVICE,
+            MID_SDP_MLN_DEVICE,
+            LOW_CSP_MLN_DEVICE,
+            LOW_SDP_MLN_DEVICE,
+            MCCS_MLN_DEVICE,
+        ]:
+            device_attribute_map[device].append("isSubsystemAvailable")
+
+        device_attribute_map[MID_CSP_MLN_DEVICE].extend(
+            [
+                "longRunningCommandResult",
+                "DishVccMapValidationResult",
+                "cspControllerAdminMode",
+            ]
+        )
+
+        device_attribute_map[LOW_CSP_MLN_DEVICE].append(
+            "cspControllerAdminMode"
+        )
+        device_attribute_map[MID_SDP_MLN_DEVICE].append(
+            "sdpControllerAdminMode"
+        )
+        device_attribute_map[LOW_SDP_MLN_DEVICE].append(
+            "sdpControllerAdminMode"
+        )
+
+        device_attribute_map[MCCS_MLN_DEVICE].extend(
+            [
+                "longRunningCommandResult",
+                "mccsControllerAdminMode",
+            ]
+        )
+
+        return device_attribute_map
 
     @property
     def event_queue(self):
@@ -1320,3 +1407,115 @@ class CNComponentManager(TmcComponentManager):
         """
         Aggregates telescope state
         """
+
+    def healthState_event_callback(self, event: tango.EventData) -> None:
+        """
+        It handles the health state events of different devices
+        """
+        self.event_queue["healthState"].put(event)
+
+    def adminMode_event_callback(self, event: tango.EventData) -> None:
+        """
+        It handles the admin mode events of different devices
+        """
+        self.event_queue["adminMode"].put(event)
+
+    def state_event_callback(self, event: tango.EventData) -> None:
+        """
+        It handles the state events of different devices
+        """
+        self.event_queue["state"].put(event)
+
+    def assignedresources_event_callback(self, event: tango.EventData) -> None:
+        """Handles assigned Resources event
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self.event_queue["assignedResources"].put(event)
+
+    def obsstate_event_callback(self, event: tango.EventData) -> None:
+        """Handles assigned Resources event
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self.event_queue["obsState"].put(event)
+
+    def dishMode_event_callback(self, event: tango.EventData) -> None:
+        """Method to handle and update the latest value of dishMode
+        attribute.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self.event_queue["dishMode"].put(event)
+
+    def longrunningcommandresult_event_callback(
+        self, event: tango.EventData
+    ) -> None:
+        """Method to handle and update the latest value of
+        longRunningCommandResult attribute.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self.event_queue["longRunningCommandResult"].put(event)
+
+    def loadDishConfigResultAsync_event_callback(
+        self, event: tango.EventData
+    ) -> None:
+        """This callback is called in following two scenario
+        1. LongrunningResult returned from CspMasterLeafNode for
+          LoadDishCfg command
+        2. SetKValue command result returned from DishLeafNodes
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        if getattr(event, "attr_value", False):
+            self.event_queue["loadDishConfigResult"].put(event)
+        # In case of Async callback get command result from argout
+        elif getattr(event, "argout", False):
+            self.event_queue["loadDishConfigResultAsync"].put(event)
+
+    def kValueValidationResult_event_callback(self, event: tango.EventData):
+        """Method to handle kValueValidationResult from dish
+        leaf node.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self.event_queue["kValueValidationResult"].put(event)
+
+    def DishVccMapValidationResult_event_callback(
+        self, event: tango.EventData
+    ):
+        """Handle DishVccMapValidationResult change event."""
+        self.event_queue["DishVccMapValidationResult"].put(event)
+
+    def isSubsystemAvailable_event_callback(
+        self, event: tango.EventData
+    ) -> None:
+        """Method to handle and update the latest value of isSubsystemAvailable
+        attribute.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self.event_queue["isSubsystemAvailable"].put(event)
+
+    def isSubarrayAvailable_event_callback(
+        self, event: tango.EventData
+    ) -> None:
+        """Method to handle and update the latest value of isSubarrayAvailable
+        attribute.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
+        self.event_queue["isSubarrayAvailable"].put(event)
