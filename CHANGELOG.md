@@ -11,6 +11,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 * Fixed minor bugs in logs on telescope_off_command and telescope_standby_command involving incorrect number of variables provided to parametrized logs.
 * Implemented string typecasting in lazy logging to deal with the logging errors involving MemoryError.
 
+[0.19.4]
+********
+* Updated the common version to 0.27.4
+* Added minor changes to loggers.
 
 [0.19.2]
 ********
