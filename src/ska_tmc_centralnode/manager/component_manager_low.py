@@ -200,7 +200,7 @@ class CNComponentManagerLow(CNComponentManager):
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
         """
-        self.logger.info(
+        self.logger.debug(
             "Received longRunningCommandResult event for device: \
                 %s, with value: %s",
             dev_name,
@@ -402,8 +402,8 @@ class CNComponentManagerLow(CNComponentManager):
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availability"""
         with self.rlock:
-            self.logger.debug(f"device_name is: {device_name}")
-            self.logger.debug(f"event_value is: {event_value}")
+            self.logger.debug(f"Device name is: {device_name}")
+            self.logger.debug(f"Event value is: {event_value}")
 
             if device_name in self.input_parameter.subarray_dev_names:
                 self.subarray_availability[device_name] = event_value

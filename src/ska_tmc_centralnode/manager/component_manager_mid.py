@@ -389,7 +389,7 @@ class CNComponentManagerMid(CNComponentManager):
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
         """
-        self.logger.info(
+        self.logger.debug(
             "longRunningCommandResult event for device '%s'. Event value: %s",
             dev_name,
             str(value),
@@ -423,7 +423,7 @@ class CNComponentManagerMid(CNComponentManager):
                         "Updating LRCRCallback with ResultCode: %s and "
                         "Message: %s "
                         "for command %s on  %s.",
-                        str(result_code),
+                        ResultCode(result_code),
                         message,
                         str(unique_id),
                         dev_name,
@@ -721,7 +721,7 @@ class CNComponentManagerMid(CNComponentManager):
         """
         dish_vcc_validation_result = int(result)
         self.logger.debug(
-            "Dish Vcc Validation Event called with dev %s and result %s",
+            "Dish Vcc Validation Event called with %s and Result: %s",
             dev_name,
             ObsState(dish_vcc_validation_result).name,
         )

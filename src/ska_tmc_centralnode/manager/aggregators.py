@@ -379,7 +379,7 @@ class LoadDishCfgCommandResultAggregator:
             result_code = ResultCode.OK
         self.logger.info(
             "Returning ResultCode %s and Message %s",
-            str(result_code),
+            result_code,
             message,
         )
         return result_code, message

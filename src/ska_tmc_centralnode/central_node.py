@@ -403,7 +403,7 @@ class AbstractCentralNode(TMCBaseDevice):
         self.logger.info(
             "AssignResource command is invoked "
             + "Result: %s, unique_id/message: %s",
-            str(result_code),
+            result_code,
             unique_id,
         )
 
@@ -439,7 +439,7 @@ class AbstractCentralNode(TMCBaseDevice):
         self.logger.info(
             "ReleaseResources command is invoked "
             + "Result: %s, unique_id/message: %s",
-            str(result_code),
+            result_code,
             unique_id,
         )
 

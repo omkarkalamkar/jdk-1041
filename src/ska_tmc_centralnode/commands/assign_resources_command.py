@@ -218,7 +218,7 @@ class AssignResources(AssignReleaseResources):
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(
-            "Command ID: %s | " + "Receptor IDs are: %s",
+            "Command ID: %s | Receptor IDs are: %s",
             self.component_manager.command_id,
             str(receptor_ids),
         )
