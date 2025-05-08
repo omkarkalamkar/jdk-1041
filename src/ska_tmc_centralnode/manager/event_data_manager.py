@@ -147,7 +147,7 @@ class EventDataManager:
         """
         with self.component_manager.process_lock:
             current_event_info = copy.deepcopy(self.event_info)
-            table_lines = ["EventDataStorage:"]
+            table_lines = ["event_info objects contents ,EventDataStorage:"]
 
             # Define headers for the table
             headers = ["Device", "StateType", "State", "Timestamp"]
@@ -208,7 +208,6 @@ class EventDataManager:
                 )
 
             LOGGER.info("\n".join(table_lines))
-            LOGGER.info("event_info objects contents  %s", self.event_info)
             self.component_manager.event_data_queue.put(current_event_info)
 
         LOGGER.info("Lock released from update_aggragation_queue ")
