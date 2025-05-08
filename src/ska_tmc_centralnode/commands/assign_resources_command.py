@@ -194,9 +194,7 @@ class AssignResources(AssignReleaseResources):
         """
         try:
             self.logger.debug(
-                "Command ID : %s | " + "Loading the JSON string: %s",
-                self.component_manager.command_id,
-                json.dumps(json.loads(argin), indent=2),
+                "Command ID : %s | Loading the  AssignResource JSON string"
             )
             json_argument = json.loads(argin)
         except Exception as e:

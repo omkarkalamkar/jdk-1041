@@ -85,7 +85,8 @@ class StowAntennas(CentralNodeCommand):
                     num_working += 1
                 except Exception as e:
                     self.logger.exception(
-                        "Error in creating adapter for %s: %s",
+                        "Exception occured in creating adapter for "
+                        + "%s, Exception: %s",
                         dev_name,
                         str(e),
                     )

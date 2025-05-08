@@ -147,6 +147,67 @@ class EventDataManager:
         """
         with self.component_manager.process_lock:
             current_event_info = copy.deepcopy(self.event_info)
+            table_lines = ["EventDataStorage:"]
+
+            # Define headers for the table
+            headers = ["Device", "StateType", "State", "Timestamp"]
+            col_widths = {
+                "Device": len(headers[0]),
+                "StateType": len(headers[1]),
+                "State": len(headers[2]),
+                "Timestamp": len(headers[3]),
+            }
+            data_entries = []
+
+            def format_timestamp(timestamp):
+                return timestamp.isoformat() + "Z" if timestamp else "None"
+
+            def update_col_widths(dev, state_type, state_str, timestamp_str):
+                col_widths["Device"] = max(col_widths["Device"], len(str(dev)))
+                col_widths["StateType"] = max(
+                    col_widths["StateType"], len(str(state_type))
+                )
+                col_widths["State"] = max(
+                    col_widths["State"], len(str(state_str))
+                )
+                col_widths["Timestamp"] = max(
+                    col_widths["Timestamp"], len(str(timestamp_str))
+                )
+
+            for dev, data in self.event_info.health_state_data.items():
+                timestamp_str = format_timestamp(data.event_timestamp)
+                state_str = str(data.health_state)
+                data_entries.append(
+                    (dev, "HealthState", state_str, timestamp_str)
+                )
+                update_col_widths(dev, "HealthState", state_str, timestamp_str)
+
+            for dev, data in self.event_info.admin_mode_data.items():
+                timestamp_str = format_timestamp(data.event_timestamp)
+                state_str = str(data.admin_mode)
+                data_entries.append(
+                    (dev, "AdminMode", state_str, timestamp_str)
+                )
+                update_col_widths(dev, "AdminMode", state_str, timestamp_str)
+
+            data_entries.sort(key=lambda x: x[0])
+
+            table_lines.append(
+                f"  {headers[0]:<{col_widths['Device']}} "
+                f"{headers[1]:<{col_widths['StateType']}} "
+                f"{headers[2]:<{col_widths['State']}} "
+                f"{headers[3]:<{col_widths['Timestamp']}}"
+            )
+
+            for dev, state_type, state, timestamp in data_entries:
+                table_lines.append(
+                    f"  {str(dev):<{col_widths['Device']}} "
+                    f"{str(state_type):<{col_widths['StateType']}} "
+                    f"{str(state):<{col_widths['State']}} "
+                    f"{str(timestamp):<{col_widths['Timestamp']}}"
+                )
+
+            LOGGER.info("\n".join(table_lines))
             LOGGER.info("event_info objects contents  %s", self.event_info)
             self.component_manager.event_data_queue.put(current_event_info)
 

@@ -247,9 +247,9 @@ class CNComponentManagerLow(CNComponentManager):
                         "Updated command mapping dictionary is: %s",
                         str(self.command_mapping),
                     )
-                    self.logger.error(
-                        "Exception occurred with value: %s for %s \
-                            command_id for device: %s",
+                    self.logger.exception(
+                        "Exception occurred with value: %s for %s "
+                        + "command_id for device: %s",
                         str(value),
                         self.command_id,
                         dev_name,
@@ -282,7 +282,7 @@ class CNComponentManagerLow(CNComponentManager):
                     )
             self.logger.debug(
                 "Updating LRCRCallback with following values: "
-                + "command_id: %s, resultcode: %s, message: %s",
+                + "command_id: %s, ResultCode: %s, Message: %s",
                 self.command_id,
                 str(ResultCode.FAILED),
                 exception_message,

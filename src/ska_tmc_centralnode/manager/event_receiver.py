@@ -63,7 +63,7 @@ class CentralNodeEventReceiver(EventReceiver):
         """
         if device_info.dev_name not in self.device_subscribed:
             self._logger.debug(
-                "Subscribed events on device :  %s " + "and : %s",
+                "Subscribed events on: %s and %s",
                 device_info.dev_name,
                 str(self.device_subscribed),
             )

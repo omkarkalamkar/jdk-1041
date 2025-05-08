@@ -378,7 +378,7 @@ class LoadDishCfgCommandResultAggregator:
         if result_codes_set == set([ResultCode.OK]):
             result_code = ResultCode.OK
         self.logger.info(
-            "Returning result code %s and message %s",
+            "Returning ResultCode %s and Message %s",
             str(result_code),
             message,
         )
