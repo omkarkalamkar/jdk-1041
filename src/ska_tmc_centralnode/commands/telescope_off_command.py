@@ -90,6 +90,12 @@ class TelescopeOff(TelescopeOnOff):
             "Device states before executing TelescopeOff command."
         )
 
+        self.logger.info(
+            "Command ID: %s | Invoking Off command on "
+            + "the lower level devices",
+            self.component_manager.command_id,
+        )
+
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids

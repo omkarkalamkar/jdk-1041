@@ -125,8 +125,10 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
-        self.logger.info(
-            "Command ID: %s | %s ", self.component_manager.command_id, message
+        self.logger.debug(
+            "Command ID: %s | Message: %s ",
+            self.component_manager.command_id,
+            message,
         )
         if ret_code == ResultCode.FAILED:
             self.component_manager.reset_load_dish_cfg_data()
@@ -333,7 +335,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter = dish_adapter[0]
                     k_value = vcc_k_map.get("k")
                     self.logger.info(
-                        "Command ID: %s | Invoking SetKValue command on %s",
+                        "Command ID: %s | Invoking SetKValue command on: %s",
                         self.component_manager.command_id,
                         dish_adapter.dev_name,
                     )
@@ -355,7 +357,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         except Exception as e:
             self.logger.exception(
                 "Exception occured in Calling setKvalue command on %s, "
-                + "Exception : %s",
+                + "Exception: %s",
                 dish_adapter.dev_name,
                 str(e),
             )

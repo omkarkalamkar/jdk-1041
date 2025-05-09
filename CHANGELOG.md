@@ -13,7 +13,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [0.19.4]
 ********
-* Updated the common version to 0.27.4
+* Utilized the latest common version to 0.27.4
 * Added minor changes to loggers.
 
 [0.19.2]

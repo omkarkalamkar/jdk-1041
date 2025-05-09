@@ -202,8 +202,8 @@ class CNComponentManagerLow(CNComponentManager):
         :type value: tuple
         """
         self.logger.debug(
-            "Received longRunningCommandResult event for device: \
-                %s, with value: %s",
+            "Received longRunningCommandResult event for device: "
+            "%s, with value: %s",
             dev_name,
             str(value),
         )

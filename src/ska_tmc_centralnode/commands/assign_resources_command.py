@@ -195,7 +195,7 @@ class AssignResources(AssignReleaseResources):
         """
         try:
             self.logger.debug(
-                "Command ID : %s | Loading the  AssignResource JSON string",
+                "Command ID: %s | Loading the  AssignResource JSON string",
                 self.component_manager.command_id,
             )
             json_argument = json.loads(argin)
@@ -462,7 +462,7 @@ class AssignResources(AssignReleaseResources):
                     ):
                         self.logger.debug(
                             "Command ID : %s |"
-                            + "Adding the id %s to the command mapping"
+                            + "Adding the ID %s to the command mapping"
                             + "dictionary under command_id: %s",
                             self.component_manager.command_id,
                             message_or_unique_id,
@@ -473,7 +473,7 @@ class AssignResources(AssignReleaseResources):
                         ].append(message_or_unique_id)
                     else:
                         self.logger.debug(
-                            "Command ID : %s |"
+                            "Command ID: %s |"
                             + "Creating a command mapping dictionary for id:"
                             + "%s, with unique_id: %s",
                             self.component_manager.command_id,

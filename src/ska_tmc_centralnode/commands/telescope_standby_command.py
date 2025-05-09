@@ -147,7 +147,9 @@ class TelescopeStandby(TelescopeOnOff):
                     )
 
         if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            self.logger.info(
+                "Unavailable devices are %s ", unavailable_devices
+            )
             return (
                 ResultCode.OK,
                 f"Unavailable devices are {unavailable_devices}",
@@ -178,7 +180,11 @@ class TelescopeStandby(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info("Invoking Standby command on the lower level devices")
+        self.logger.info(
+            "Command ID: %s | Invoking Standby command "
+            + "on the lower level devices",
+            self.component_manager.command_id,
+        )
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -232,7 +238,9 @@ class TelescopeStandby(TelescopeOnOff):
                     )
 
         if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            self.logger.info(
+                "Unavailable devices are %s ", unavailable_devices
+            )
             return (
                 ResultCode.OK,
                 f"Unavailable devices are {unavailable_devices}",
@@ -255,7 +263,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_sdp(self):
         """Turns sdp to standby"""
         self.logger.info(
-            f"Invoking Standby command on: {self.sdp_mln_adapter.dev_name}"
+            "Invoking Standby command on: %s", self.sdp_mln_adapter.dev_name
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
@@ -296,7 +304,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_mccs(self):
         """Turns MCCS into standby"""
         self.logger.info(
-            f"Invoking Standby command on:  {self.mccs_mln_adapter.dev_name}"
+            "Invoking Standby command on: %s ", self.mccs_mln_adapter.dev_name
         )
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(

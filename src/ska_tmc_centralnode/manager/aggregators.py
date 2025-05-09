@@ -148,9 +148,11 @@ class TelescopeStateAggregatorLow(Aggregator):
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
-        self._logger.info(f"Telescope state list is : {telescopeStateList}")
+        self._logger.info(
+            "Telescope state list is : %s", str(telescopeStateList)
+        )
         if not sdp_master and not csp_master and not mccs_master:
-            self._logger.info(
+            self._logger.debug(
                 "Checking if sdp, csp and mccs master are responsive: "
                 + "%s , responsive :%s,"
                 + "%s, responsive : %s"

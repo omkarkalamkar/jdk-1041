@@ -107,7 +107,7 @@ class CentralNodeCommand(TMCCommand):
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
                 self.logger.info(
-                    f"Invoked {command_name} on  {adapter.dev_name}"
+                    "%s invoked on %s ", command_name, adapter.dev_name
                 )
 
             except Exception as e:
@@ -116,13 +116,13 @@ class CentralNodeCommand(TMCCommand):
                     f"{err_msg} {adapter.dev_name}: {e}"
                 )
                 self.logger.error(
-                    "Error in invoking %s on %s: %s",
+                    "Error in invoking %s on %s, Exception: %s",
                     command_name,
                     adapter.dev_name,
                     str(e),
                 )
         self.logger.info(
-            "Current message_or_uniques_ids" + str(message_or_unique_ids)
+            "Current message_or_uniques_ids: %s", str(message_or_unique_ids)
         )
         return return_codes, message_or_unique_ids
 
@@ -148,7 +148,7 @@ class CentralNodeCommand(TMCCommand):
     def reject_command(self, message: str) -> Tuple[ResultCode, str]:
         """Rejects command method for logs error message."""
         self.logger.error(
-            "Command execution failed due to reason : %s", message
+            "Command execution failed due to reason: %s", message
         )
         return TaskStatus.REJECTED, message
 
@@ -191,7 +191,7 @@ class TelescopeOnOff(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node %s",
+                "Adapter is created for CSP Master Leaf Node: %s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
             )
         except Exception as e:
@@ -205,7 +205,7 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                "Adapter is created for SDP Master Leaf Node %s",
+                "Adapter is created for SDP Master Leaf Node: %s",
                 self.component_manager.input_parameter.sdp_mln_dev_name,
             )
         except Exception as e:
@@ -230,7 +230,7 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for SubarrayNode {dev_name}",
+                        "Adapter is created for SubarrayNode: %s", dev_name
                     )
                 except Exception as e:
                     self.logger.exception(
@@ -292,7 +292,7 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.csp_mln_dev_name
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node %s",
+                "Adapter is created for CSP Master Leaf Node: %s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
             )
         except Exception as e:
@@ -309,7 +309,7 @@ class TelescopeOnOff(CentralNodeCommand):
                 )
             )
             self.logger.debug(
-                "Adapter is created for MCCS Master Leaf Node %s",
+                "Adapter is created for MCCS Master Leaf Node: %s",
                 self.component_manager.input_parameter.mccs_mln_dev_name,
             )
 
@@ -324,7 +324,7 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                "Adapter is created for SDP Master Leaf Node %s",
+                "Adapter is created for SDP Master Leaf Node: %s",
                 self.component_manager.input_parameter.sdp_mln_dev_name,
             )
         except Exception as e:
@@ -403,7 +403,7 @@ class AssignReleaseResources(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for SubarrayNode {dev_name}"
+                        "Adapter is created for SubarrayNode: %s ", dev_name
                     )
                 except Exception as e:
                     self.logger.exception(
@@ -436,7 +436,7 @@ class AssignReleaseResources(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for DishLeafNode {dev_name}"
+                        "Adapter is created for DishLeafNode: %s", dev_name
                     )
                 except Exception as e:
                     self.logger.exception(
@@ -535,7 +535,7 @@ class LoadDishCfgCommand(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node %s",
+                "Adapter is created for CSP Master Leaf Node: %s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
             )
         except Exception as e:
@@ -558,7 +558,7 @@ class LoadDishCfgCommand(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for DishLeafNode {dev_name}"
+                        "Adapter is created for DishLeafNode: %s", dev_name
                     )
                 except Exception as e:
                     self.logger.exception(

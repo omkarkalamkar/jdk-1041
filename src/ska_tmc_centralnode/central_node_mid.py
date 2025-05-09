@@ -145,7 +145,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         except Exception as exception:
             self.logger.exception(
-                "Exception while pushing event for isDishVccConfigSet - %s",
+                "Exception while pushing event for isDishVccConfigSet: %s",
                 exception,
             )
 
@@ -159,9 +159,9 @@ class MidTmcCentralNode(AbstractCentralNode):
             )
 
         except Exception as exception:
-            self.logger.info(
+            self.logger.exception(
                 "Exception while pushing event for "
-                "dish_vcc_command_status - %s",
+                "Dish Vcc command status: %s",
                 exception,
             )
 
@@ -174,7 +174,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         except Exception as exception:
             self.logger.exception(
                 "Exception while pushing event for "
-                "DishVccValidationStatus - %s",
+                "Dish Vcc Validation Status: %s",
                 exception,
             )
 
