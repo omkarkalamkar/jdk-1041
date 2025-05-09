@@ -390,7 +390,9 @@ class CNComponentManagerMid(CNComponentManager):
         :type value: tuple
         """
         self.logger.debug(
-            "longRunningCommandResult event for device '%s'. Event value: %s",
+            "Command ID: %s | longRunningCommandResult event for "
+            + "device %s. Event value: %s",
+            self.command_id,
             dev_name,
             str(value),
         )
@@ -409,7 +411,9 @@ class CNComponentManagerMid(CNComponentManager):
                 case ResultCode.OK:
                     self.command_result = ResultCode.OK
                     self.logger.debug(
-                        "Command with unique_id %s on  %s succeeded.",
+                        "Command ID: %s | Command with Unique ID %s on "
+                        + "%s succeeded.",
+                        self.command_id,
                         str(unique_id),
                         dev_name,
                     )
@@ -420,9 +424,10 @@ class CNComponentManagerMid(CNComponentManager):
                     | ResultCode.ABORTED
                 ):
                     self.logger.debug(
-                        "Updating LRCRCallback with ResultCode: %s and "
-                        "Message: %s "
-                        "for command %s on  %s.",
+                        "Command ID: %s | Updating LRCRCallback with "
+                        + "ResultCode: %s and Message: %s "
+                        + "for command %s on  %s.",
+                        self.command_id,
                         ResultCode(result_code),
                         message,
                         str(unique_id),
@@ -442,9 +447,9 @@ class CNComponentManagerMid(CNComponentManager):
                     self.observable.notify_observers(command_exception=True)
         except Exception as exception:
             self.logger.exception(
-                "Exception occurred while processing long running "
-                "command result "
-                "for device %s: %s",
+                "Command ID: %s | Exception occurred while processing "
+                + "long running command result on %s: %s",
+                self.command_id,
                 dev_name,
                 exception,
             )
