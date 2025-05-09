@@ -1,4 +1,5 @@
 """Abstract Command class for central node"""
+
 # pylint:disable =abstract-method
 import logging
 import operator

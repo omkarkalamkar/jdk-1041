@@ -1,6 +1,7 @@
 """
 AssignResources Command class for CentralNode.
 """
+
 import json
 import time
 from typing import Optional, Tuple
@@ -194,7 +195,8 @@ class AssignResources(AssignReleaseResources):
         """
         try:
             self.logger.debug(
-                "Command ID : %s | Loading the  AssignResource JSON string"
+                "Command ID : %s | Loading the  AssignResource JSON string",
+                self.component_manager.command_id,
             )
             json_argument = json.loads(argin)
         except Exception as e:
@@ -220,7 +222,7 @@ class AssignResources(AssignReleaseResources):
         self.logger.debug(
             "Command ID: %s | Receptor IDs are: %s",
             self.component_manager.command_id,
-            str(receptor_ids),
+            receptor_ids,
         )
         for receptor_id in receptor_ids:
             if self.component_manager.is_already_assigned(receptor_id):
@@ -231,7 +233,7 @@ class AssignResources(AssignReleaseResources):
             self.logger.debug(
                 "Command ID: %s | Dish %s is available for assignment.",
                 self.component_manager.command_id,
-                str(receptor_ids),
+                receptor_ids,
             )
         self.component_manager.log_state(
             "Device states before executing AssignResources command"

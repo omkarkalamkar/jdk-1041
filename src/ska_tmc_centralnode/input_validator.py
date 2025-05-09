@@ -1,4 +1,5 @@
 """Input Validator class for central node"""
+
 # -*- coding: utf-8 -*-
 #
 # This file is part of the centralnode project
@@ -33,7 +34,6 @@ module_logger = logging.getLogger(__name__)
 
 
 class AssignResourceValidator:
-
     """Class to validate the input string of AssignResources command
     of Central Node"""
 
@@ -208,7 +208,6 @@ class AssignResourceValidator:
 
 
 class ReleaseResourceValidator:
-
     """Class to validate the input string of ReleaseResources command
     of Central Node"""
 

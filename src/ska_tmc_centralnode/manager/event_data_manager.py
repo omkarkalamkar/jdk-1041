@@ -1,6 +1,7 @@
 """
 Use event manager to manage all event related data
 """
+
 import copy
 import functools
 import logging

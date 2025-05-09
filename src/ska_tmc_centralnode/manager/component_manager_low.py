@@ -6,6 +6,7 @@ It is component Manager for Low Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+
 import json
 import time
 from logging import Logger
@@ -261,7 +262,7 @@ class CNComponentManagerLow(CNComponentManager):
                 "Exception occurred while processing"
                 + "long running command result"
                 + "attribute event: %s",
-                str(exception),
+                exception,
             )
 
     def update_long_running_command_result_callback(self) -> None:

@@ -1,4 +1,5 @@
 """Test module for assign resources unavailability"""
+
 import json
 
 import pytest
@@ -91,7 +92,7 @@ def assign_resources(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_assign_res_command_mid_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory
@@ -110,7 +111,7 @@ def test_assign_res_command_mid_unavailable_subarray(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_LOW)],
+    [CENTRALNODE_LOW],
 )
 def test_assign_res_command_low_unavailable_subarray(
     tango_context, central_node_name, change_event_callbacks, json_factory

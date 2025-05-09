@@ -1,4 +1,5 @@
 """Conf test module for integration tests"""
+
 # pylint: disable=redefined-outer-name
 import json
 import logging

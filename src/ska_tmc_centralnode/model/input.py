@@ -1,4 +1,5 @@
 """Input Parameter class for central node"""
+
 from typing import Callable, List
 
 from ska_tmc_centralnode.utils.constants import (

@@ -1,4 +1,5 @@
 """Command class for TelescopeOn()"""
+
 import threading
 from typing import Callable, List, Optional, Tuple
 

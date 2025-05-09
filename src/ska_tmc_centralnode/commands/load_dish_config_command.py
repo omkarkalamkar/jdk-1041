@@ -1,4 +1,5 @@
 """Commad class for Load_dish_config_command"""
+
 import json
 import threading
 from typing import Callable, Optional, Tuple
@@ -98,9 +99,11 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.logger.info(
                 "Command ID: %s | DishId Vcc Map Json %s",
                 json.dumps(
-                    dishid_vcc_map_json
-                    if isinstance(dishid_vcc_map_json, dict)
-                    else json.loads(dishid_vcc_map_json),
+                    (
+                        dishid_vcc_map_json
+                        if isinstance(dishid_vcc_map_json, dict)
+                        else json.loads(dishid_vcc_map_json)
+                    ),
                     indent=4,
                 ),
                 self.component_manager.command_id,
@@ -215,7 +218,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     "Command ID: %s |  Error in Loading Dish VCC map "
                     + "json file %s, retrying",
                     self.component_manager.command_id,
-                    str(exception),
+                    exception,
                 )
                 return (
                     {},

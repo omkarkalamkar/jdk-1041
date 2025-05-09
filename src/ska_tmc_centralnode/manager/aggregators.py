@@ -1,4 +1,5 @@
 """Aggregation method for telescope state Aggregating for Mid"""
+
 import logging
 
 from ska_ser_logging import configure_logging

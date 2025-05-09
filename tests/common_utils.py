@@ -1,4 +1,5 @@
 """Utils folder for class test cases"""
+
 import json
 import logging
 import time

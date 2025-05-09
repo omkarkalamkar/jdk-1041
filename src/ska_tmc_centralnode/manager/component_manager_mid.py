@@ -6,6 +6,7 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+
 import json
 import threading
 import time
@@ -446,7 +447,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "command result "
                 "for device %s: %s",
                 dev_name,
-                str(exception),
+                exception,
             )
 
     def get_command_id(self, unique_id: int) -> str:

@@ -1,4 +1,5 @@
 """Test cases for rlease resources command"""
+
 import json
 
 import pytest

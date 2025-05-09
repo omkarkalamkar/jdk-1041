@@ -1,4 +1,5 @@
 """Command class for TelescopeStandby command"""
+
 import threading
 import time
 from typing import Callable, Optional

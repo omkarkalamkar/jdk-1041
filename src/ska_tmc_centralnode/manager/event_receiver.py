@@ -1,4 +1,5 @@
 """Event Receiver class for central node"""
+
 from typing import Optional
 
 import tango

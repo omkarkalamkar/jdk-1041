@@ -1,4 +1,5 @@
 """Command class for TelescopeOff()"""
+
 import threading
 import time
 from typing import Callable, Optional

@@ -3,6 +3,7 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
+
 # pylint:disable = attribute-defined-outside-init
 import json
 
