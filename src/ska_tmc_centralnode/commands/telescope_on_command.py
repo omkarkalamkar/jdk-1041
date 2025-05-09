@@ -87,11 +87,7 @@ class TelescopeOn(TelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
 
-        self.logger.info(
-            "Command ID: %s | Invoking On command on "
-            + "the lower level devices",
-            self.component_manager.command_in_progress_id,
-        )
+        self.logger.info("Invoking On command on the lower level devices")
 
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
@@ -210,9 +206,7 @@ class TelescopeOn(TelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
         self.logger.info(
-            "Command ID: %s | Invoking On command on "
-            + "the lower level devices",
-            self.component_manager.command_in_progress_id,
+            "Invoking On command on the lower level devices",
         )
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()

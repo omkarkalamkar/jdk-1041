@@ -91,9 +91,7 @@ class TelescopeOff(TelescopeOnOff):
         )
 
         self.logger.info(
-            "Command ID: %s | Invoking Off command on "
-            + "the lower level devices",
-            self.component_manager.command_in_progress_id,
+            "Invoking Off command on the lower level devices",
         )
 
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
@@ -229,9 +227,7 @@ class TelescopeOff(TelescopeOnOff):
         """
         self.component_manager.component.desired_telescope_state = DevState.OFF
         self.logger.info(
-            "Command ID: %s | Invoking Off command on "
-            + "the lower level devices",
-            self.component_manager.command_in_progress_id,
+            "Invoking Off command on the lower level devices",
         )
 
         ret_code, message = self.init_adapters()
@@ -242,9 +238,7 @@ class TelescopeOff(TelescopeOnOff):
             "Device states before executing TelescopeOff command."
         )
         self.logger.info(
-            "Command ID: %s | Invoking Off command on "
-            + "the lower level devices",
-            self.component_manager.command_in_progress_id,
+            "Invoking Off command on the lower level devices",
         )
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
         for return_code, message_or_unique_id in zip(

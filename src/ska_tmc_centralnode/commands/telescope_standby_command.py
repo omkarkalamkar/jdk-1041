@@ -92,11 +92,7 @@ class TelescopeStandby(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info(
-            "Command ID: %s | Invoking Standby command on "
-            + "the lower level devices",
-            self.component_manager.command_in_progress_id,
-        )
+        self.logger.info("Invoking Standby command on the lower level devices")
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -184,11 +180,7 @@ class TelescopeStandby(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info(
-            "Command ID: %s | Invoking Standby command "
-            + "on the lower level devices",
-            self.component_manager.command_id,
-        )
+        self.logger.info("Invoking Standby command on the lower level devices")
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
