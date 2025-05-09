@@ -148,7 +148,8 @@ class EventDataManager:
         """
         with self.component_manager.process_lock:
             current_event_info = copy.deepcopy(self.event_info)
-            table_lines = ["event_info objects contents ,EventDataStorage:"]
+
+            table_lines = ["event_info objects contents, EventDataStorage:"]
 
             # Define headers for the table
             headers = ["Device", "StateType", "State", "Timestamp"]
@@ -161,9 +162,11 @@ class EventDataManager:
             data_entries = []
 
             def format_timestamp(timestamp):
+                """Format timestamp to ISO string"""
                 return timestamp.isoformat() + "Z" if timestamp else "None"
 
             def update_col_widths(dev, state_type, state_str, timestamp_str):
+                """Update column widths for table display"""
                 col_widths["Device"] = max(col_widths["Device"], len(str(dev)))
                 col_widths["StateType"] = max(
                     col_widths["StateType"], len(str(state_type))
