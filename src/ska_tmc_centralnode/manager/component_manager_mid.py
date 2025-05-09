@@ -6,7 +6,6 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
-
 import json
 import threading
 import time
@@ -788,8 +787,8 @@ class CNComponentManagerMid(CNComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
         self.logger.debug(
-            "Command Status: %s",
-            DishConfigStatus(self.dish_vcc_command_status).name,
+            "Command Status "
+            f"{DishConfigStatus(self.dish_vcc_command_status).name}"
         )
         if self.dish_vcc_command_status in (
             DishConfigStatus.STAGING,
@@ -797,8 +796,8 @@ class CNComponentManagerMid(CNComponentManager):
         ):
             message = (
                 "Dish Vcc Configuration is in Progress. "
-                "dish vcc command status: %s",
-                DishConfigStatus(self.dish_vcc_command_status).name,
+                "dish vcc command status "
+                f"{DishConfigStatus(self.dish_vcc_command_status).name}"
             )
             return loadishcfg_command.reject_command(message)
 
