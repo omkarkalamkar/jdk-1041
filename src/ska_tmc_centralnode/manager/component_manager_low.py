@@ -44,7 +44,7 @@ class CNComponentManagerLow(CNComponentManager):
         _telescope_availability_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
-        _event_receiver=True,
+        _event_manager=True,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -69,7 +69,7 @@ class CNComponentManagerLow(CNComponentManager):
             managed; for testing purposes only
         :param _input_parameter : specify input parameter for low.
         :param _liveliness_probe:allows to enable/disable LivelinessProbe usage
-        :param _event_receiver : allows to enable/disable EventReceiver usage
+        :param _event_manager : allows to enable/disable EventReceiver usage
         :param max_workers: Optional. Maximum worker threads for
             monitoring purpose.
         :param proxy_timeout: Optional. Time period to wait for
@@ -93,7 +93,7 @@ class CNComponentManagerLow(CNComponentManager):
             _telescope_availability_callback,
             _component,
             _liveliness_probe,
-            _event_receiver,
+            _event_manager,
             proxy_timeout,
             skuid_service=skuid_service,
             command_timeout=command_timeout,
@@ -387,15 +387,15 @@ class CNComponentManagerLow(CNComponentManager):
             )
         return True
 
-    def check_device_responsiveness(self, command_name) -> None:
+    def check_device_responsiveness(self, device_name) -> None:
         """
         This method overrides the method from super class
         to add responsive checks for the devices
         :param command_name: Command name for the check
         :type command_name: str
         """
-        if command_name in self.supported_commands_for_responsive_check:
-            self.logger.debug(f"Checking low devices for {command_name}")
+        if device_name in self.supported_commands_for_responsive_check:
+            self.logger.debug(f"Checking low devices for {device_name}")
             self.check_if_mccs_mln_is_responsive()
             self.check_if_subarrays_are_responsive()
 

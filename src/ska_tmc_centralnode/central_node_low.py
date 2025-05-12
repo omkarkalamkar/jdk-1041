@@ -105,6 +105,7 @@ class LowTmcCentralNode(AbstractCentralNode):
         cm.input_parameter.csp_subarray_dev_names = self.CspSubarrayLeafNodes
         cm.input_parameter.sdp_subarray_dev_names = self.SdpSubarrayLeafNodes
         cm.update_input_parameter()
+        cm.setup_event_subscription()
         return cm
 
 

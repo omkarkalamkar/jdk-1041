@@ -38,8 +38,9 @@ from ska_tmc_common import (
     SubArrayDeviceInfo,
     SubarrayNotPresentError,
 )
-from ska_tmc_common.v1.tmc_component_manager import TmcComponentManager
-from ska_tmc_common.v2.event_manager import EventManager
+
+# from ska_tmc_common.v2.event_manager import EventManager
+from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
@@ -104,7 +105,7 @@ class CNComponentManager(TmcComponentManager):
         _telescope_availability_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
-        _event_receiver: bool = True,
+        _event_manager: bool = True,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -130,7 +131,7 @@ class CNComponentManager(TmcComponentManager):
             managed; for testing purposes only
         :param _liveliness_probe: allows to enable/disable
             LivelinessProbe usage
-        :param _event_receiver: allows to enable/disable
+        :param _event_manager: allows to enable/disable
             EventReceiver usage
 
         """
@@ -142,7 +143,7 @@ class CNComponentManager(TmcComponentManager):
             logger,
             _component=self._component,
             _liveliness_probe=_liveliness_probe,
-            _event_receiver=False,
+            _event_manager=False,
             proxy_timeout=proxy_timeout,
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
@@ -152,28 +153,11 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
         self.event_data_manager = EventDataManager(self)
-        # self.event_receiver = True
+        self.event_manager = _event_manager
         self.command_timeout = command_timeout
         self.process_lock = ProcessLock()
         self.assignresources_interface = assignresources_interface
         self.releaseresources_interface = releaseresources_interface
-        # self.event_receiver = _event_receiver
-        # if self.event_receiver:
-        #     evt_sub_check_period = self.event_subscription_check_period
-        #     self.event_receiver_object = CentralNodeEventReceiver(
-        #         self,
-        #         logger=self.logger,
-        #         proxy_timeout=self.proxy_timeout,
-        #         event_subscription_check_period=evt_sub_check_period,
-        #     )
-        #     self.start_event_receiver()
-        # # Event manager
-        self.event_manager: EventManager = EventManager(
-            self,
-            subscription_configuration=self.build_device_attribute_map(),
-            logger=self.logger,
-        )
-        self.event_manager.start_event_subscription()
         self._component.set_op_callbacks(
             _update_device_callback,
             _update_telescope_state_callback,
@@ -238,83 +222,111 @@ class CNComponentManager(TmcComponentManager):
         )
         self.aggregate_process_monitor_thread.start()
 
-    def build_device_attribute_map(
-        self,
-    ):
+    def setup_event_subscription(self):
         """
-        Builds a dictionary mapping device names to
-        lists of attributes to be subscribed.
+        Sets up the event subscription after input parameters are updated.
+        """
+        if self.event_manager:
+            self.start_event_manager(
+                self.build_device_attribute_map(), timeout=1000
+            )
 
-        Parameters:
-            dev_info: An object containing the
-                device name (`dev_info.dev_name`)
+    def build_device_attribute_map(self):
+        """
+        Builds a dictionary mapping device names to lists of attributes
+        to be subscribed.
 
         Returns:
             dict: A mapping from device names to list of attributes.
         """
         device_attribute_map = defaultdict(list)
-        dev_name = self.devices
 
-        if "subarray" in dev_name and "leaf" not in dev_name:
-            device_attribute_map[dev_name].extend(
-                [
-                    "assignedResources",
-                    "obsState",
-                ]
-            )
-
-        if (
-            isinstance(self.input_parameter, InputParameterMid)
-            and dev_name in self.input_parameter.dish_leaf_node_dev_names
-        ):
-            device_attribute_map[dev_name].extend(
-                [
-                    "dishMode",
-                    "kValueValidationResult",
-                ]
-            )
-
-        if dev_name in self.input_parameter.subarray_dev_names:
-            device_attribute_map[dev_name].extend(
-                [
-                    "longRunningCommandResult",
-                    "isSubarrayAvailable",
-                ]
-            )
-
-        for device in [
+        # Define subsystem devices once
+        subsystem_devices = [
             MID_CSP_MLN_DEVICE,
             MID_SDP_MLN_DEVICE,
             LOW_CSP_MLN_DEVICE,
             LOW_SDP_MLN_DEVICE,
             MCCS_MLN_DEVICE,
-        ]:
-            device_attribute_map[device].append("isSubsystemAvailable")
+        ]
 
-        device_attribute_map[MID_CSP_MLN_DEVICE].extend(
-            [
-                "longRunningCommandResult",
-                "DishVccMapValidationResult",
-                "cspControllerAdminMode",
-            ]
-        )
+        for dev_info in self.devices:
+            dev_name = dev_info.dev_name
+            self.logger.info(f"My device is {dev_name}")
 
-        device_attribute_map[LOW_CSP_MLN_DEVICE].append(
-            "cspControllerAdminMode"
-        )
-        device_attribute_map[MID_SDP_MLN_DEVICE].append(
-            "sdpControllerAdminMode"
-        )
-        device_attribute_map[LOW_SDP_MLN_DEVICE].append(
-            "sdpControllerAdminMode"
-        )
+            # Add basic attributes to all devices
+            device_attribute_map[dev_name].extend(
+                [
+                    "state",
+                    "healthState",
+                    "adminMode",
+                ]
+            )
 
-        device_attribute_map[MCCS_MLN_DEVICE].extend(
-            [
-                "longRunningCommandResult",
-                "mccsControllerAdminMode",
-            ]
-        )
+            # Subarray-specific attributes (excluding leaf nodes)
+            if "subarray" in dev_name and "leaf" not in dev_name:
+                device_attribute_map[dev_name].extend(
+                    [
+                        "assignedResources",
+                        "obsState",
+                    ]
+                )
+
+            # Dish leaf node-specific attributes
+            if (
+                isinstance(self.input_parameter, InputParameterMid)
+                and dev_name in self.input_parameter.dish_leaf_node_dev_names
+            ):
+                device_attribute_map[dev_name].extend(
+                    [
+                        "dishMode",
+                        "kValueValidationResult",
+                    ]
+                )
+
+            # Subarray dev-specific attributes
+            if dev_name in self.input_parameter.subarray_dev_names:
+                device_attribute_map[dev_name].extend(
+                    [
+                        "longRunningCommandResult",
+                        "isSubarrayAvailable",
+                    ]
+                )
+
+            # Subsystem availability attribute
+            if dev_name in subsystem_devices:
+                device_attribute_map[dev_name].append("isSubsystemAvailable")
+
+        # Add specific subsystem attributes if present
+        if MID_CSP_MLN_DEVICE in device_attribute_map:
+            device_attribute_map[MID_CSP_MLN_DEVICE].extend(
+                [
+                    "longRunningCommandResult",
+                    "DishVccMapValidationResult",
+                    "cspControllerAdminMode",
+                ]
+            )
+        if LOW_CSP_MLN_DEVICE in device_attribute_map:
+            device_attribute_map[LOW_CSP_MLN_DEVICE].append(
+                "cspControllerAdminMode"
+            )
+        if MID_SDP_MLN_DEVICE in device_attribute_map:
+            device_attribute_map[MID_SDP_MLN_DEVICE].append(
+                "sdpControllerAdminMode"
+            )
+        if LOW_SDP_MLN_DEVICE in device_attribute_map:
+            device_attribute_map[LOW_SDP_MLN_DEVICE].append(
+                "sdpControllerAdminMode"
+            )
+        if MCCS_MLN_DEVICE in device_attribute_map:
+            device_attribute_map[MCCS_MLN_DEVICE].extend(
+                [
+                    "longRunningCommandResult",
+                    "mccsControllerAdminMode",
+                ]
+            )
+
+        self.logger.info(f"My final dict is {device_attribute_map}")
 
         return device_attribute_map
 
@@ -407,11 +419,6 @@ class CNComponentManager(TmcComponentManager):
             return True
         return False
 
-    def stop_event_receiver(self):
-        """Stops the event receiver."""
-        if self.event_receiver:
-            self.event_receiver_object.stop()
-
     def stop_aggregation_process(self):
         """Override this method in mid and low"""
         raise NotImplementedError
@@ -452,12 +459,6 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_state_aggregator = _telescope_state_aggregator
         self._health_state_aggregator = _health_state_aggregator
         self._op_state_aggregator = _op_state_aggregator
-
-    def stop(self) -> None:
-        """stops liveliness probe"""
-        self.stop_liveliness_probe()
-        self.stop_event_receiver()
-        self._stop_thread = True
 
     @property
     def input_parameter(self):
@@ -1134,7 +1135,7 @@ class CNComponentManager(TmcComponentManager):
 
         return is_subarray_in_right_obs_state
 
-    def check_device_responsiveness(self, command_name: str) -> None:
+    def check_device_responsiveness(self, device_name: str) -> None:
         """
         Override this method to add responsive checks for the devices
         :param command_name: Command name for the check
@@ -1420,7 +1421,7 @@ class CNComponentManager(TmcComponentManager):
         """
         self.event_queue["adminMode"].put(event)
 
-    def state_event_callback(self, event: tango.EventData) -> None:
+    def State_event_callback(self, event: tango.EventData) -> None:
         """
         It handles the state events of different devices
         """
@@ -1434,7 +1435,7 @@ class CNComponentManager(TmcComponentManager):
         """
         self.event_queue["assignedResources"].put(event)
 
-    def obsstate_event_callback(self, event: tango.EventData) -> None:
+    def obsState_event_callback(self, event: tango.EventData) -> None:
         """Handles assigned Resources event
         Args:
             event_data (tango.EventType.CHANGE_EVENT): to flag the
@@ -1452,7 +1453,7 @@ class CNComponentManager(TmcComponentManager):
         """
         self.event_queue["dishMode"].put(event)
 
-    def longrunningcommandresult_event_callback(
+    def longRunningCommandResult_event_callback(
         self, event: tango.EventData
     ) -> None:
         """Method to handle and update the latest value of
