@@ -226,10 +226,10 @@ class CNComponentManager(TmcComponentManager):
         """
         Sets up the event subscription after input parameters are updated.
         """
-        if self.event_manager:
-            self.start_event_manager(
-                self.build_device_attribute_map(), timeout=1000
-            )
+
+        self.start_event_manager(
+            self.build_device_attribute_map(), timeout=1000
+        )
 
     def build_device_attribute_map(self):
         """
@@ -1427,7 +1427,7 @@ class CNComponentManager(TmcComponentManager):
         """
         self.event_queue["state"].put(event)
 
-    def assignedresources_event_callback(self, event: tango.EventData) -> None:
+    def assignedResources_event_callback(self, event: tango.EventData) -> None:
         """Handles assigned Resources event
         Args:
             event_data (tango.EventType.CHANGE_EVENT): to flag the
