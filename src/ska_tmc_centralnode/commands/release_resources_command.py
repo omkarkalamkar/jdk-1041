@@ -1,6 +1,7 @@
 """
 ReleaseResources class for CentralNode.
 """
+
 import json
 import time
 from typing import Optional, Tuple

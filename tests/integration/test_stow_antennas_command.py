@@ -1,4 +1,5 @@
 """Test cases for stow antennas command"""
+
 import time
 
 import pytest

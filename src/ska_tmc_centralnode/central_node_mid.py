@@ -3,6 +3,7 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
+
 # pylint:disable = attribute-defined-outside-init
 import json
 
@@ -144,8 +145,8 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         except Exception as exception:
             self.logger.exception(
-                "Exception while pushing event for isDishVccConfigSet - %s",
-                str(exception),
+                "Exception while pushing event for isDishVccConfigSet: %s",
+                exception,
             )
 
     def dishvcccommandstatus_cb(
@@ -158,10 +159,10 @@ class MidTmcCentralNode(AbstractCentralNode):
             )
 
         except Exception as exception:
-            self.logger.info(
+            self.logger.exception(
                 "Exception while pushing event for "
-                "dish_vcc_command_status - %s",
-                str(exception),
+                "Dish Vcc command status: %s",
+                exception,
             )
 
     def dishvccvalidation_callback(self, dishvccvalidationstatus):
@@ -173,8 +174,8 @@ class MidTmcCentralNode(AbstractCentralNode):
         except Exception as exception:
             self.logger.exception(
                 "Exception while pushing event for "
-                "DishVccValidationStatus - %s",
-                str(exception),
+                "Dish Vcc Validation Status: %s",
+                exception,
             )
 
     # ---------------
@@ -266,9 +267,9 @@ class MidTmcCentralNode(AbstractCentralNode):
             liveliness_check_period=self.LivelinessCheckPeriod,
             skuid_service=self.SkuidService,
             dish_vcc_uri=self.DishVccUri if self.DishVccUri else "",
-            dish_vcc_file_path=self.DishVccFilePath
-            if self.DishVccFilePath
-            else "",
+            dish_vcc_file_path=(
+                self.DishVccFilePath if self.DishVccFilePath else ""
+            ),
             dish_vcc_init_timeout=self.DishVccInitTimeout,
             dishKvalueAggregationAllowedPercent=(
                 self.DishKvalueAggregationAllowedPercent

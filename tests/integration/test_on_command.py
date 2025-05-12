@@ -1,4 +1,5 @@
 """Test cases for ON command"""
+
 import json
 
 import pytest

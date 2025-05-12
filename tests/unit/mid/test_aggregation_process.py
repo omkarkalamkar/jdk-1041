@@ -1,6 +1,7 @@
 """This unit test is used for testing
 aggregation using aggregation process
 """
+
 import logging
 import time
 from datetime import datetime

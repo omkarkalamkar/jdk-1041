@@ -1,4 +1,5 @@
 """A module for mocking the task callback functionality"""
+
 from typing import Callable
 
 from ska_tango_base.executor import TaskStatus

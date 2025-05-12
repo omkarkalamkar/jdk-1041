@@ -1,4 +1,5 @@
 """Test telescope health state"""
+
 import time
 
 import pytest

@@ -1,5 +1,5 @@
-"""Common constant used in centralnode
-"""
+"""Common constant used in centralnode"""
+
 from ska_control_model.result_code import ResultCode
 
 MID_CSP_MLN_DEVICE = "mid-tmc/leaf-node-csp/0"

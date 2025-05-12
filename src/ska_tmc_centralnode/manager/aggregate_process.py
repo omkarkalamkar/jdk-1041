@@ -1,6 +1,7 @@
 """
 This module contain process for aggregation
 """
+
 import logging
 from multiprocessing import Event, Queue
 

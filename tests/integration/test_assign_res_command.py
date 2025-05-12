@@ -1,4 +1,5 @@
 """Test module for AssignResources command."""
+
 import json
 import time
 
@@ -170,7 +171,7 @@ def assign_resources(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_assign_res_command_mid(
     tango_context,
@@ -194,7 +195,7 @@ def test_assign_res_command_mid(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_LOW)],
+    [CENTRALNODE_LOW],
 )
 def test_assign_res_command_low(
     tango_context,
@@ -269,7 +270,7 @@ def assign_resources_with_invalid_json(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_LOW)],
+    [CENTRALNODE_LOW],
 )
 def test_assign_res_command_low_invalid_json(
     tango_context,
@@ -361,7 +362,7 @@ def assign_resources_without_subarray_id(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_assign_res_command_mid_without_subarray_id(
     tango_context,

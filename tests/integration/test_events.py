@@ -1,4 +1,5 @@
 """Test Events on centralnode"""
+
 import json
 import time
 
