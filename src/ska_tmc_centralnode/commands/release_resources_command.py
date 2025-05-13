@@ -111,9 +111,8 @@ class ReleaseResources(AssignReleaseResources):
             "receptor_ids": []
             }
 
-            :return: A tuple containing a return code and a string msg.
-                For Example:
-                (ResultCode.OK, "")
+        :return: A tuple containing a return code and a string msg. For
+        Example: (ResultCode.OK, "")
         """
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -199,7 +198,7 @@ class ReleaseResources(AssignReleaseResources):
             KeyError if input argument json string contains invalid key
 
             DevFailed if the command execution or command invocation on
-              SubarrayNode is not successful
+            SubarrayNode is not successful
 
         """
         ret_code, message = self.init_adapters()

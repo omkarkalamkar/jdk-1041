@@ -10,6 +10,7 @@ Subpackages
    ska_tmc_centralnode.commands
    ska_tmc_centralnode.manager
    ska_tmc_centralnode.model
+   ska_tmc_centralnode.utils
 
 Submodules
 ----------
