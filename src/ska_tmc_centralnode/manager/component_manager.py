@@ -444,6 +444,7 @@ class CNComponentManager(TmcComponentManager):
     def stop(self) -> None:
         """stops liveliness probe"""
         self.stop_liveliness_probe()
+        self.stop_event_manager()
         self._stop_thread = True
 
     def reset(
