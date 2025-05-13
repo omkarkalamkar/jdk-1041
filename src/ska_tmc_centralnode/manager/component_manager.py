@@ -232,6 +232,7 @@ class CNComponentManager(TmcComponentManager):
         self.start_event_manager(
             self.build_device_attribute_map(), timeout=1000
         )
+        self.logger.debug("Successfully subscribed the events")
 
     def build_device_attribute_map(self):
         """

@@ -307,7 +307,6 @@ class MidTmcCentralNode(AbstractCentralNode):
         cm.input_parameter.dish_master_identifier = self.DishMasterIdentifier
 
         cm.update_input_parameter()
-        self.logger.info("was i here")
         cm.setup_event_subscription()
         return cm
 

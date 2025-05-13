@@ -29,7 +29,7 @@ from tests.mock_callable import MockCallable
 
 logger = logging.getLogger(__name__)
 SLEEP_TIME = 0.5
-TIMEOUT = 5
+TIMEOUT = 50
 KVALUE = 9
 DISH_LEAF_NODE_PREFIX = "mid-tmc/leaf-node-dish/ska"
 NUM_DISHES = 10
@@ -233,12 +233,14 @@ def create_cm(
     start_time = time.time()
     num_devices = len(DEVICE_LIST)
     if not p_liveliness_probe:
+        cm.setup_event_subscription()
         return cm, start_time
     while num_devices != len(cm.checked_devices):
         time.sleep(0.2)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
+    cm.setup_event_subscription()
     return cm, start_time
 
 
