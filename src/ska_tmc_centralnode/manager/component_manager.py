@@ -1,6 +1,7 @@
 """
 This module provided an implementation of the Central Node ComponentManager.
 """
+
 from __future__ import annotations
 
 import json
@@ -406,7 +407,7 @@ class CNComponentManager(TmcComponentManager):
                 # safely ignore it.
                 pass
             except Exception as exception:
-                self.logger.error(str(exception))
+                self.logger.error(exception)
 
     def check_event_error(self, event: tango.EventData, callback: str):
         """Method for checking event error."""
@@ -1198,7 +1199,7 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.exception(
                     "Exception occurred while validating for "
                     + "assignresource json : %s ",
-                    str(exception),
+                    exception,
                 )
                 return assign_resources_command.reject_command(str(exception))
 

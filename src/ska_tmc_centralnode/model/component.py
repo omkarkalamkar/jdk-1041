@@ -1,4 +1,5 @@
-""" Component class for central node"""
+"""Component class for central node"""
+
 import json
 import threading
 from typing import List, Optional

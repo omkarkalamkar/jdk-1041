@@ -3,6 +3,7 @@ Central Node is a coordinator of the complete M&C system.
 Central Node implements the standard set
 of state and mode attributes defined by the SKA Control Model.
 """
+
 # pylint:disable = attribute-defined-outside-init
 import json
 
@@ -401,9 +402,9 @@ class AbstractCentralNode(TMCBaseDevice):
         handler = self.get_command_object("AssignResources")
         result_code, unique_id = handler(argin)
         self.logger.info(
-            "AssignResource command is invoked "
+            "AssignResource command is invoked, "
             + "Result: %s, unique_id/message: %s",
-            str(result_code),
+            result_code,
             unique_id,
         )
 
@@ -437,9 +438,9 @@ class AbstractCentralNode(TMCBaseDevice):
         handler = self.get_command_object("ReleaseResources")
         result_code, unique_id = handler(argin)
         self.logger.info(
-            "ReleaseResources command is invoked "
+            "ReleaseResources command is invoked, "
             + "Result: %s, unique_id/message: %s",
-            str(result_code),
+            result_code,
             unique_id,
         )
 
@@ -478,8 +479,10 @@ class AbstractCentralNode(TMCBaseDevice):
                 registered_commands.append(command_name)
             except Exception as e:
                 failed_to_register_commands.append(command_name)
-                self.logger.error(
-                    "Failed to register command %s : %s ", command_name, str(e)
+                self.logger.exception(
+                    "Failed to register command %s, Exception: %s ",
+                    command_name,
+                    str(e),
                 )
         if registered_commands:
             commands_list = ", ".join(registered_commands)
@@ -491,4 +494,4 @@ class AbstractCentralNode(TMCBaseDevice):
 
         if failed_to_register_commands:
             failed_list = ", ".join(failed_to_register_commands)
-            self.logger.info("Unable to register commands: %s", failed_list)
+            self.logger.error("Unable to register commands: %s", failed_list)

@@ -1,4 +1,5 @@
 """Test cases for release resources command"""
+
 import json
 
 import pytest

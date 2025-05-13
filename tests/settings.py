@@ -1,4 +1,5 @@
 """Settings file for test module"""
+
 import json
 import logging
 import time

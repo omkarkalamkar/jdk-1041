@@ -1,4 +1,5 @@
 """Test cases for standby command"""
+
 import json
 
 import pytest

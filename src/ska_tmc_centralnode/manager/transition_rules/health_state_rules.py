@@ -1,5 +1,4 @@
-"""This Lists all rules required for ObsState aggregation
-"""
+"""This Lists all rules required for ObsState aggregation"""
 
 from rule_engine import Rule
 

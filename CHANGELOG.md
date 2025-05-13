@@ -4,6 +4,16 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
+
+[0.19.5]
+********
+* Utlized refactored event manager in central node
+
+[0.19.4]
+********
+* Utilized the latest common version to 0.27.4
+* Added minor changes to loggers.
+
 [0.19.3]
 ********
 * Updated the common version to 0.27.2

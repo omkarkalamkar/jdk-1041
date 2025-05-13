@@ -1,4 +1,5 @@
 """Test cases for reset command"""
+
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory

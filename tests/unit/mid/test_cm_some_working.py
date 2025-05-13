@@ -1,4 +1,5 @@
 """Test cases file"""
+
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
