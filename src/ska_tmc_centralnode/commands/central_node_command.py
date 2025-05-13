@@ -1,4 +1,4 @@
-"""Abstract Command class for central node"""
+"""Command class for central node"""
 
 # pylint:disable =abstract-method
 import logging
@@ -51,7 +51,7 @@ def task_callback_default(
 
 # pylint:disable=keyword-arg-before-vararg
 class CentralNodeCommand(TMCCommand):
-    """Central node abstract command class"""
+    """Central node command class"""
 
     def __init__(
         self,

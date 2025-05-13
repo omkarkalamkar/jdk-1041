@@ -346,7 +346,7 @@ class AssignResources(AssignReleaseResources):
 
         Example:
 
-        .. code-block::
+        .. code-block:: JSON
 
         {'interface':'https://schema.skao.int/ska-low-tmc-assignresources/4.0',
         'transaction_id':'txn-....-00001','subarray_id':1,'mccs':{'interface':

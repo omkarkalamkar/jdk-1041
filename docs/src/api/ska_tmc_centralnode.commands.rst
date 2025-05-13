@@ -4,8 +4,8 @@ ska\_tmc\_centralnode.commands package
 Submodules
 ----------
 
-ska\_tmc\_centralnode.commands.abstract\_command module
--------------------------------------------------------
+ska\_tmc\_centralnode.commands.central\_node\_command module
+------------------------------------------------------------
 
 .. automodule:: ska_tmc_centralnode.commands.central_node_command
    :members:
