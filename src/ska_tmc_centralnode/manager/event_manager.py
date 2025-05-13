@@ -49,9 +49,7 @@ class CentralNodeEventManager(EventManager):
         """
         It handles the adminMode events of csp controller device.
         """
-        self._component_manager.event_queue["cspControllerAdminMode"].put(
-            event
-        )
+        self._component_manager.event_queue["adminMode"].put(event)
 
     def sdpcontrolleradminmode_event_callback(
         self, event: tango.EventData
@@ -59,9 +57,7 @@ class CentralNodeEventManager(EventManager):
         """
         It handles the adminMode events of sdp controller device.
         """
-        self._component_manager.event_queue["sdpControllerAdminMode"].put(
-            event
-        )
+        self._component_manager.event_queue["adminMode"].put(event)
 
     def mccscontrolleradminmode_event_callback(
         self, event: tango.EventData
@@ -69,9 +65,7 @@ class CentralNodeEventManager(EventManager):
         """
         It handles the adminMode events of mccs controller device.
         """
-        self._component_manager.event_queue["mccsControllerAdminMode"].put(
-            event
-        )
+        self._component_manager.event_queue["adminMode"].put(event)
 
     def healthstate_event_callback(self, event: tango.EventData) -> None:
         """
@@ -103,15 +97,6 @@ class CentralNodeEventManager(EventManager):
         """Method to handle and update the latest
         value of dishMode attribute."""
         self._component_manager.event_queue["dishMode"].put(event)
-
-    # def longrunningcommandresult_event_callback(
-    #     self, event: tango.EventData
-    # ) -> None:
-    #     """Method to handle and update the latest value of
-    #     longRunningCommandResult attribute."""
-    #     self._component_manager.event_queue["longRunningCommandResult"].put(
-    #         event
-    #     )
 
     def kvaluevalidationresult_event_callback(self, event: tango.EventData):
         """Method to handle kValueValidationResult from dish

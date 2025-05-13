@@ -288,6 +288,7 @@ class CNComponentManager(TmcComponentManager):
 
             # Subarray dev-specific attributes
             if dev_name in self.input_parameter.subarray_dev_names:
+                self.logger.info(f"my dev name is {dev_name}")
                 device_attribute_map[dev_name].extend(
                     [
                         "longRunningCommandResult",
