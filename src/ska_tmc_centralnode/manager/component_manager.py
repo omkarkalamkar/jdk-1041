@@ -256,8 +256,6 @@ class CNComponentManager(TmcComponentManager):
 
         for dev_info in self.devices:
             dev_name = dev_info.dev_name
-            self.logger.info(f"My device is {dev_name}")
-
             # Add basic attributes to all devices
             device_attribute_map[dev_name].extend(
                 [
@@ -290,7 +288,6 @@ class CNComponentManager(TmcComponentManager):
 
             # Subarray dev-specific attributes
             if dev_name in self.input_parameter.subarray_dev_names:
-                self.logger.info(f"my dev name is {dev_name}")
                 device_attribute_map[dev_name].extend(
                     [
                         "longRunningCommandResult",
@@ -330,9 +327,9 @@ class CNComponentManager(TmcComponentManager):
                     "mccsControllerAdminMode",
                 ]
             )
-
-        self.logger.info(f"My final dict is {device_attribute_map}")
-
+        self.logger.debug(
+            "Device attribute map dictionary : %s", device_attribute_map
+        )
         return device_attribute_map
 
     @property
