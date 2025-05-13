@@ -38,8 +38,6 @@ from ska_tmc_common import (
     SubArrayDeviceInfo,
     SubarrayNotPresentError,
 )
-
-# from ska_tmc_common.v2.event_manager import EventManager
 from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
 from tango import DevState
 
@@ -60,6 +58,7 @@ from ska_tmc_centralnode.input_validator import (
 )
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_data_manager import EventDataManager
+from ska_tmc_centralnode.manager.event_manager import CentralNodeEventManager
 from ska_tmc_centralnode.model.component import (
     CentralComponent,
     MCCSDeviceInfo,
@@ -221,6 +220,9 @@ class CNComponentManager(TmcComponentManager):
             target=self.aggregate_process_monitor
         )
         self.aggregate_process_monitor_thread.start()
+        self.event_manager_object = CentralNodeEventManager(
+            self, logger=logger
+        )
 
     def setup_event_subscription(self):
         """
@@ -1119,7 +1121,7 @@ class CNComponentManager(TmcComponentManager):
             :return: return boolean value if command in valid obstate else
                 return exception.
             """
-            self.check_device_responsiveness(command_name)
+            self.check_device_responsiveness_command(command_name)
             if subarray_id and desired_obsstate:
                 subarray_devices = self.input_parameter.subarray_dev_names
                 for device in subarray_devices:
@@ -1135,7 +1137,7 @@ class CNComponentManager(TmcComponentManager):
 
         return is_subarray_in_right_obs_state
 
-    def check_device_responsiveness(self, device_name: str) -> None:
+    def check_device_responsiveness_command(self, command_name: str) -> None:
         """
         Override this method to add responsive checks for the devices
         :param command_name: Command name for the check
@@ -1408,115 +1410,3 @@ class CNComponentManager(TmcComponentManager):
         """
         Aggregates telescope state
         """
-
-    def healthState_event_callback(self, event: tango.EventData) -> None:
-        """
-        It handles the health state events of different devices
-        """
-        self.event_queue["healthState"].put(event)
-
-    def adminMode_event_callback(self, event: tango.EventData) -> None:
-        """
-        It handles the admin mode events of different devices
-        """
-        self.event_queue["adminMode"].put(event)
-
-    def State_event_callback(self, event: tango.EventData) -> None:
-        """
-        It handles the state events of different devices
-        """
-        self.event_queue["state"].put(event)
-
-    def assignedResources_event_callback(self, event: tango.EventData) -> None:
-        """Handles assigned Resources event
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-            change in event.
-        """
-        self.event_queue["assignedResources"].put(event)
-
-    def obsState_event_callback(self, event: tango.EventData) -> None:
-        """Handles assigned Resources event
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-            change in event.
-        """
-        self.event_queue["obsState"].put(event)
-
-    def dishMode_event_callback(self, event: tango.EventData) -> None:
-        """Method to handle and update the latest value of dishMode
-        attribute.
-
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-            change in event.
-        """
-        self.event_queue["dishMode"].put(event)
-
-    def longRunningCommandResult_event_callback(
-        self, event: tango.EventData
-    ) -> None:
-        """Method to handle and update the latest value of
-        longRunningCommandResult attribute.
-
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-            change in event.
-        """
-        self.event_queue["longRunningCommandResult"].put(event)
-
-    def loadDishConfigResultAsync_event_callback(
-        self, event: tango.EventData
-    ) -> None:
-        """This callback is called in following two scenario
-        1. LongrunningResult returned from CspMasterLeafNode for
-          LoadDishCfg command
-        2. SetKValue command result returned from DishLeafNodes
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-            change in event.
-        """
-        if getattr(event, "attr_value", False):
-            self.event_queue["loadDishConfigResult"].put(event)
-        # In case of Async callback get command result from argout
-        elif getattr(event, "argout", False):
-            self.event_queue["loadDishConfigResultAsync"].put(event)
-
-    def kValueValidationResult_event_callback(self, event: tango.EventData):
-        """Method to handle kValueValidationResult from dish
-        leaf node.
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-            change in event.
-        """
-        self.event_queue["kValueValidationResult"].put(event)
-
-    def DishVccMapValidationResult_event_callback(
-        self, event: tango.EventData
-    ):
-        """Handle DishVccMapValidationResult change event."""
-        self.event_queue["DishVccMapValidationResult"].put(event)
-
-    def isSubsystemAvailable_event_callback(
-        self, event: tango.EventData
-    ) -> None:
-        """Method to handle and update the latest value of isSubsystemAvailable
-        attribute.
-
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-            change in event.
-        """
-        self.event_queue["isSubsystemAvailable"].put(event)
-
-    def isSubarrayAvailable_event_callback(
-        self, event: tango.EventData
-    ) -> None:
-        """Method to handle and update the latest value of isSubarrayAvailable
-        attribute.
-
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-            change in event.
-        """
-        self.event_queue["isSubarrayAvailable"].put(event)

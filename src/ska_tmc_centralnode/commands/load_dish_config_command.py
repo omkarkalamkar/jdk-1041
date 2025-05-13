@@ -41,7 +41,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
-        self.dish_cfg = self.component_manager.event_receiver_object
+        self.dish_cfg = self.component_manager.event_manager_object
         self.dish_cfg_params: str = ""
 
     def load_dish_cfg(
@@ -337,7 +337,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter.proxy.command_inout_asynch(
                         "SetKValue",
                         k_value,
-                        self.dish_cfg.handle_load_dish_cfg_result_callback,
+                        self.dish_cfg._handle_load_dish_cfg_result_callback,
                     )
                     # Append dish dev names to track on which dish
                     # SetKValue is invoked
