@@ -441,6 +441,11 @@ class CNComponentManager(TmcComponentManager):
         self.logger.debug("component destructor called")
         self.stop_all_process()
 
+    def stop(self) -> None:
+        """stops liveliness probe"""
+        self.stop_liveliness_probe()
+        self._stop_thread = True
+
     def reset(
         self: CNComponentManager, task_callback: Optional[Callable] = None
     ) -> tuple[TaskStatus, str]:
