@@ -69,8 +69,8 @@ class TelescopeOff(TelescopeOnOff):
     def do_mid(self, argin=None):
         """
         Method to invoke Off command on lower level devices.
-        param:
-        None
+
+        :param argin: None
 
         return:
             A tuple containing a return code and a string message indicating
@@ -214,8 +214,8 @@ class TelescopeOff(TelescopeOnOff):
     def do_low(self, argin=None):
         """
         Method to invoke Off command on lower level devices.
-        param:
-        None
+
+        :param argin: None
 
         return:
             A tuple containing a return code and a string message indicating

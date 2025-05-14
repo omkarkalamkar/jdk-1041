@@ -97,7 +97,18 @@ class CentralNodeCommand(TMCCommand):
         err_msg: str,
         command_name: str,
     ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
-        """Invokes command on adapter"""
+        """Invokes command on adapters
+
+        :param adapters: list of the adapters.
+        :param command_caller: command caller.
+        :param err_msg: error message.
+        :param command_name: Command name.
+
+        :return: A tuple containing a list of return codes and a list
+                 of string msg.
+            For Example:
+            (ResultCode.OK, "")
+        """
         return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
         message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
 
@@ -133,7 +144,13 @@ class CentralNodeCommand(TMCCommand):
         command: str,
         argin=None,
     ):
-        """Submit command in progress"""
+        """Submit command in progress
+
+        :param adapters: list of the adapters.
+        :param description: message.
+        :param command: Command name.
+        :param argin: Command input argument.
+        """
         if argin is None:
             return self.invoke_command(
                 adapters, operator.methodcaller(command), description, command
@@ -145,8 +162,13 @@ class CentralNodeCommand(TMCCommand):
             command,
         )
 
-    def reject_command(self, message: str) -> Tuple[ResultCode, str]:
-        """Rejects command method for logs error message."""
+    def reject_command(self, message: str) -> Tuple[TaskStatus, str]:
+        """Rejects command method for logs error message.
+
+        :return: A tuple containing a return code and a string msg.
+            For Example:
+            (TaskStatus.REJECTED, "")
+        """
         self.logger.error(
             "Command execution failed due to reason: %s", message
         )
@@ -155,7 +177,15 @@ class CentralNodeCommand(TMCCommand):
     def adapter_error_message(
         self, dev_name: str, error
     ) -> Tuple[ResultCode, str]:
-        """Adapter Error message"""
+        """Adapter Error message
+
+        :param dev_name: name of the device.
+        :param error: error message.
+
+        :return: A tuple containing a return code and a string msg.
+            For Example:
+            (ResultCode.FAILED, "")
+        """
         message = f"Adapter creation failed for {dev_name}: {str(error)}"
         self.logger.error(message)
         return ResultCode.FAILED, message
@@ -384,7 +414,7 @@ class AssignReleaseResources(CentralNodeCommand):
         self.subarray_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
-        """Initialises adapter for mid"""
+        """Initialises adapters for mid"""
         self.dish_adapters = []
         self.subarray_adapters = []
         error_dev_names = []

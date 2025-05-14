@@ -73,8 +73,14 @@ class TelescopeOn(TelescopeOnOff):
         """
         Method to invoke On command on Lower level devices.
 
-        param argin:
-            None.
+        param argin: None.
+
+        return:
+            A tuple containing a return code and a string message indicating
+            status.
+
+        rtype:
+            (ResultCode, str)
 
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
@@ -192,8 +198,14 @@ class TelescopeOn(TelescopeOnOff):
         """
         Method to invoke On command on Lower level devices.
 
-        param argin:
-            None.
+        param argin: None.
+
+        return:
+            A tuple containing a return code and a string message indicating
+            status.
+
+        rtype:
+            (ResultCode, str)
 
         """
         self.component_manager.component.desired_telescope_state = DevState.ON

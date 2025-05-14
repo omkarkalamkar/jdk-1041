@@ -74,11 +74,14 @@ class TelescopeStandby(TelescopeOnOff):
         Master Leaf Nodes. Also to invoke StandbyFP and then StandbyLP commands
         on Dish Leaf Nodes.
 
-        param:
-            None
+        param argin: None
 
         return:
-            A tuple containing a return code and a message
+            A tuple containing a return code and a string message indicating
+            status.
+
+        rtype:
+            (ResultCode, str)
 
         """
         self.component_manager.component.desired_telescope_state = (
@@ -162,11 +165,14 @@ class TelescopeStandby(TelescopeOnOff):
         Method to invoke Standby command on SubarrayNode and MCCS
         Master Leaf Node.
 
-        param:
-            None
+        param argin: None
 
         return:
-            A tuple containing a return code and a message
+            A tuple containing a return code and a string message indicating
+            status.
+
+        rtype:
+            (ResultCode, str)
 
         """
         self.component_manager.component.desired_telescope_state = (
