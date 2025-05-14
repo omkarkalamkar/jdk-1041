@@ -167,7 +167,7 @@ def mock_telescope_availability_callback(telescope_availability):
 
 def create_cm(
     p_liveliness_probe=False,
-    p_event_receiver=True,
+    p_event_manager=True,
     _input_parameter=InputParameterMid(None),
 ):
     """Creates component manager instance"""
@@ -196,7 +196,7 @@ def create_cm(
             ),
             _update_dishvccconfig_callback=task_callback,
             _dishvccvalidation_callback=task_callback,
-            _event_receiver=p_event_receiver,
+            _event_manager=p_event_manager,
             _liveliness_probe=LivelinessProbeType.NONE,
             enable_dish_vcc_init=False,
         )
@@ -224,7 +224,7 @@ def create_cm(
             _telescope_availability_callback=(
                 mock_telescope_availability_callback
             ),
-            _event_receiver=p_event_receiver,
+            _event_manager=p_event_manager,
             _liveliness_probe=LivelinessProbeType.NONE,
         )
         DEVICE_LIST = DEVICE_LIST_LOW
@@ -234,19 +234,21 @@ def create_cm(
     start_time = time.time()
     num_devices = len(DEVICE_LIST)
     if not p_liveliness_probe:
+        cm.setup_event_subscription()
         return cm, start_time
     while num_devices != len(cm.checked_devices):
         time.sleep(0.2)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
+    cm.setup_event_subscription()
     return cm, start_time
 
 
 def create_cm_no_faulty_devices(
     tango_context,
     p_liveliness_probe,
-    p_event_receiver,
+    p_event_manager,
     _input_parameter=InputParameterMid(None),
 ):
     """creates component manager with no faulty devices"""
@@ -254,13 +256,13 @@ def create_cm_no_faulty_devices(
     if isinstance(_input_parameter, InputParameterMid):
         _input_parameter = InputParameterMid(None)
         cm, start_time = create_cm(
-            p_liveliness_probe, p_event_receiver, _input_parameter
+            p_liveliness_probe, p_event_manager, _input_parameter
         )
         cm.is_dish_vcc_config_set = True
     else:
         _input_parameter = InputParameterLow(None)
         cm, start_time = create_cm(
-            p_liveliness_probe, p_event_receiver, _input_parameter
+            p_liveliness_probe, p_event_manager, _input_parameter
         )
     num_faulty = count_faulty_devices(cm)
     assert num_faulty == 0
