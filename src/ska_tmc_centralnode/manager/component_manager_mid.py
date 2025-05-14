@@ -225,7 +225,7 @@ class CNComponentManagerMid(CNComponentManager):
     @dish_vcc_command_status.setter
     def dish_vcc_command_status(self, value: DishConfigStatus):
         """Set dish vcc command status and invoke callback"""
-        self.logger.debug("Setting dish config status %s", value)
+        self.logger.debug("Setting dish config status %s", str(value))
         self._dish_vcc_command_status = value
         self.dish_vcc_command_status_callback(value)
 
@@ -363,7 +363,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self.get_device(device).state
                 for device in devices_to_check_list
             ]
-            self.logger.debug("Current device states: %s", dev_state_list)
+            self.logger.debug("Current device states: %s", str(dev_state_list))
             count += 1
             if count == self.dish_vcc_init_timeout:
                 break
@@ -389,10 +389,12 @@ class CNComponentManagerMid(CNComponentManager):
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
         """
-        self.logger.info(
-            "longRunningCommandResult event for device '%s'. Event value: %s",
+        self.logger.debug(
+            "Command ID: %s | longRunningCommandResult event for "
+            + "device %s. Event value: %s",
+            self.command_id,
             dev_name,
-            value,
+            str(value),
         )
         unique_id, result_code_or_exception_or_task_status = value
         if (
@@ -409,8 +411,10 @@ class CNComponentManagerMid(CNComponentManager):
                 case ResultCode.OK:
                     self.command_result = ResultCode.OK
                     self.logger.debug(
-                        "Command with unique_id '%s' " + "on  '%s' succeeded.",
-                        unique_id,
+                        "Command ID: %s | Command with Unique ID %s on "
+                        + "%s succeeded.",
+                        self.command_id,
+                        str(unique_id),
                         dev_name,
                     )
                 case (
@@ -420,12 +424,13 @@ class CNComponentManagerMid(CNComponentManager):
                     | ResultCode.ABORTED
                 ):
                     self.logger.debug(
-                        "Updating LRCRCallback with result_code '%s' and "
-                        "message '%s' "
-                        "for command '%s' on  '%s'.",
-                        result_code,
+                        "Command ID: %s | Updating LRCRCallback with "
+                        + "ResultCode: %s and Message: %s "
+                        + "for command %s on  %s.",
+                        self.command_id,
+                        ResultCode(result_code),
                         message,
-                        unique_id,
+                        str(unique_id),
                         dev_name,
                     )
 
@@ -442,9 +447,9 @@ class CNComponentManagerMid(CNComponentManager):
                     self.observable.notify_observers(command_exception=True)
         except Exception as exception:
             self.logger.exception(
-                "Exception occurred while processing long running "
-                "command result "
-                "for device '%s': %s",
+                "Command ID: %s | Exception occurred while processing "
+                + "long running command result on %s: %s",
+                self.command_id,
                 dev_name,
                 exception,
             )
@@ -613,7 +618,7 @@ class CNComponentManagerMid(CNComponentManager):
             DevState.DISABLE,
         ]:
             self.logger.info(
-                f"Command '{command_name}' is not supported "
+                f"{command_name} command is not supported "
                 + f"in {self.op_state_model.op_state} for CentralNode"
             )
             raise CommandNotAllowed(
@@ -694,7 +699,7 @@ class CNComponentManagerMid(CNComponentManager):
                     self.logger.info("All dishes are available and ready.")
                 return True
             except Exception as e:
-                self.logger.exception("Error %s", e)
+                self.logger.exception("Error %s", str(e))
             count += 1
             time.sleep(1)
         return False
@@ -721,7 +726,7 @@ class CNComponentManagerMid(CNComponentManager):
         """
         dish_vcc_validation_result = int(result)
         self.logger.debug(
-            "Dish Vcc Validation Event called with dev %s and result %s",
+            "Dish Vcc Validation Event called with %s and Result: %s",
             dev_name,
             ObsState(dish_vcc_validation_result).name,
         )
@@ -745,7 +750,7 @@ class CNComponentManagerMid(CNComponentManager):
                         self.dish_vcc_command_status = DishConfigStatus.INIT
                         self.invoke_load_dish_cfg_command_callback()
                     else:
-                        self.logger.info(
+                        self.logger.debug(
                             "Time Out while waiting for Dishes to be ready"
                         )
                         self.command_in_progress = ""
@@ -787,8 +792,8 @@ class CNComponentManagerMid(CNComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
         self.logger.debug(
-            "command status "
-            f"{DishConfigStatus(self.dish_vcc_command_status).name}"
+            "Command Status: %s ",
+            str(DishConfigStatus(self.dish_vcc_command_status).name),
         )
         if self.dish_vcc_command_status in (
             DishConfigStatus.STAGING,
@@ -796,8 +801,8 @@ class CNComponentManagerMid(CNComponentManager):
         ):
             message = (
                 "Dish Vcc Configuration is in Progress. "
-                "dish vcc command status "
-                f"{DishConfigStatus(self.dish_vcc_command_status).name}"
+                "Dish Vcc command status: %s ",
+                str(DishConfigStatus(self.dish_vcc_command_status).name),
             )
             return loadishcfg_command.reject_command(message)
 
@@ -825,7 +830,8 @@ class CNComponentManagerMid(CNComponentManager):
             )
             return task_status, response
         self.logger.debug(
-            "DishId Vcc Map Json %s", json.dumps(dishid_vcc_map_json, indent=4)
+            "DishId Vcc Map Json: %s",
+            json.dumps(dishid_vcc_map_json, indent=4),
         )
         (
             is_valid_dish_cfg,
@@ -894,7 +900,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.logger.debug(
             "longRunningCommandResult event for device: %s, with value: %s",
             dev_name,
-            value,
+            str(value),
         )
         with self.rlock:
             result_code_or_exception = []
@@ -902,19 +908,15 @@ class CNComponentManagerMid(CNComponentManager):
                 # Set result code and message
                 self.logger.debug(
                     "Event from asynchronous command result callback %s",
-                    value,
+                    str(value),
                 )
                 result_code_or_exception = [value[0][0], value[1][0]]
 
             else:
                 self.logger.debug(
-                    "Event from long command result callback %s",
-                    value,
+                    "Event from long command result callback %s", str(value)
                 )
                 unique_id, resultcode_message = value
-                self.logger.debug(
-                    f"unique id {unique_id}," + f"{resultcode_message}"
-                )
                 if unique_id.endswith("LoadDishCfg"):
                     result_code_or_exception = json.loads(resultcode_message)
             if result_code_or_exception and self.dev_names_for_load_dish_cfg:
@@ -922,8 +924,8 @@ class CNComponentManagerMid(CNComponentManager):
                 self.logger.debug(
                     "Dev names for load_dish_cfg values %s "
                     + "and result_codes_mapping are %s",
-                    self.dev_names_for_load_dish_cfg,
-                    self.result_codes_mapping,
+                    str(self.dev_names_for_load_dish_cfg),
+                    str(self.result_codes_mapping),
                 )
 
             # When all events received from dishes and Csp master leaf node
@@ -932,7 +934,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self.result_codes_mapping
             ):
                 # Aggregate the result
-                self.logger.info(
+                self.logger.debug(
                     "All Events received for load dish cfg Aggregating results"
                 )
                 self.aggregate_load_dish_cfg_results()

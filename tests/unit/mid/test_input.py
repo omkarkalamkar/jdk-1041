@@ -1,4 +1,5 @@
 """Test cases file"""
+
 from ska_tmc_centralnode.model.input import InputParameterMid
 
 

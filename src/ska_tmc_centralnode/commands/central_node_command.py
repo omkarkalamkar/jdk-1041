@@ -1,9 +1,10 @@
 """Abstract Command class for central node"""
+
 # pylint:disable =abstract-method
 import logging
 import operator
 import time
-from typing import Any, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from ska_ser_logging import configure_logging
 from ska_tango_base.base import TaskCallbackType
@@ -91,28 +92,38 @@ class CentralNodeCommand(TMCCommand):
 
     def invoke_command(
         self,
-        adapters: list,
+        adapters: List,
         command_caller,
         err_msg: str,
         command_name: str,
-    ) -> Tuple[ResultCode, str]:
+    ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
         """Invokes command on adapter"""
         return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
         message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
-        try:
-            for adapter in adapters:
+
+        for adapter in adapters:
+            try:
                 return_code, message_or_unique_id = command_caller(adapter)
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
                 self.logger.info(
-                    f"Invoked {command_name} on  {adapter.dev_name}"
+                    "%s invoked on %s ", command_name, adapter.dev_name
                 )
 
-        except Exception as e:
-            return (
-                [ResultCode.FAILED],
-                [f"{err_msg} {adapter.dev_name}: {e}"],
-            )
+            except Exception as e:
+                return_codes.append(ResultCode.FAILED)
+                message_or_unique_ids.append(
+                    f"{err_msg} {adapter.dev_name}: {e}"
+                )
+                self.logger.error(
+                    "Error in invoking %s on %s, Exception: %s",
+                    command_name,
+                    adapter.dev_name,
+                    str(e),
+                )
+        self.logger.info(
+            "Current message_or_uniques_ids: %s", str(message_or_unique_ids)
+        )
         return return_codes, message_or_unique_ids
 
     def send_command(
@@ -137,8 +148,7 @@ class CentralNodeCommand(TMCCommand):
     def reject_command(self, message: str) -> Tuple[ResultCode, str]:
         """Rejects command method for logs error message."""
         self.logger.error(
-            "Command execution failed due to reason : %s",
-            message,
+            "Command execution failed due to reason: %s", message
         )
         return TaskStatus.REJECTED, message
 
@@ -181,9 +191,8 @@ class TelescopeOnOff(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node %s : %s",
+                "Adapter is created for CSP Master Leaf Node: %s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
-                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -196,9 +205,8 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                "Adapter is created for SDP Master Leaf Node %s : %s",
+                "Adapter is created for SDP Master Leaf Node: %s",
                 self.component_manager.input_parameter.sdp_mln_dev_name,
-                self.sdp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -222,11 +230,13 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for SubarrayNode {dev_name}",
+                        "Adapter is created for SubarrayNode: %s", dev_name
                     )
                 except Exception as e:
-                    self.logger.warning(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
+                        dev_name,
+                        str(e),
                     )
                     error_dev_names.append(dev_name)
 
@@ -253,15 +263,12 @@ class TelescopeOnOff(CentralNodeCommand):
                         )
                     )
                     num_working += 1
-                    self.logger.debug(
-                        "Adapter is created for DishLeafNode %s",
-                        dev_name,
-                    )
+                    self.logger.debug("Adapter is created for %s", dev_name)
                 except Exception as e:
-                    self.logger.warning(
-                        "Error in creating adapter for %s: %s",
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
                         dev_name,
-                        e,
+                        str(e),
                     )
                     error_dev_names.append(dev_name)
 
@@ -285,9 +292,8 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.csp_mln_dev_name
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node %s : %s",
+                "Adapter is created for CSP Master Leaf Node: %s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
-                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -303,9 +309,8 @@ class TelescopeOnOff(CentralNodeCommand):
                 )
             )
             self.logger.debug(
-                "Adapter is created for MCCS Master Leaf Node %s : %s",
+                "Adapter is created for MCCS Master Leaf Node: %s",
                 self.component_manager.input_parameter.mccs_mln_dev_name,
-                self.mccs_mln_adapter,
             )
 
         except Exception as e:
@@ -319,9 +324,8 @@ class TelescopeOnOff(CentralNodeCommand):
                 self.component_manager.input_parameter.sdp_mln_dev_name
             )
             self.logger.debug(
-                "Adapter is created for SDP Master Leaf Node %s : %s",
+                "Adapter is created for SDP Master Leaf Node: %s",
                 self.component_manager.input_parameter.sdp_mln_dev_name,
-                self.sdp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -345,8 +349,10 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                     num_working += 1
                 except Exception as e:
-                    self.logger.warning(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                    self.logger.exception(
+                        "Exception in creating adapter for %s , Exception: %s",
+                        dev_name,
+                        str(e),
                     )
                     error_dev_names.append(dev_name)
 
@@ -397,11 +403,13 @@ class AssignReleaseResources(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for SubarrayNode {dev_name}"
+                        "Adapter is created for SubarrayNode: %s ", dev_name
                     )
                 except Exception as e:
-                    self.logger.warning(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
+                        dev_name,
+                        str(e),
                     )
                     error_dev_names.append(dev_name)
 
@@ -428,11 +436,13 @@ class AssignReleaseResources(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for DishLeafNode {dev_name}"
+                        "Adapter is created for DishLeafNode: %s", dev_name
                     )
                 except Exception as e:
-                    self.logger.warning(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
+                        dev_name,
+                        str(e),
                     )
                     error_dev_names.append(dev_name)
 
@@ -478,8 +488,10 @@ class AssignReleaseResources(CentralNodeCommand):
                     )
                     num_working += 1
                 except Exception as e:
-                    self.logger.warning(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
+                        dev_name,
+                        str(e),
                     )
                     error_dev_names.append(dev_name)
 
@@ -523,9 +535,8 @@ class LoadDishCfgCommand(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node %s : %s",
+                "Adapter is created for CSP Master Leaf Node: %s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
-                self.csp_mln_adapter,
             )
         except Exception as e:
             return self.adapter_error_message(
@@ -547,11 +558,13 @@ class LoadDishCfgCommand(CentralNodeCommand):
                     )
                     num_working += 1
                     self.logger.debug(
-                        f"Adapter is created for DishLeafNode {dev_name}"
+                        "Adapter is created for DishLeafNode: %s", dev_name
                     )
                 except Exception as e:
                     self.logger.exception(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                        "Exception in creating adapter for %s, Exception: %s",
+                        dev_name,
+                        str(e),
                     )
                     error_dev_names.append(dev_name)
 

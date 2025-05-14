@@ -1,4 +1,5 @@
 """Test cases for rlease resources command"""
+
 import json
 
 import pytest
@@ -207,7 +208,7 @@ def release_resources_without_subarray_id(
     logger.info(
         "Telscope Off Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
     assert unique_id[0].endswith("TelescopeOff")
     assert result[0] == ResultCode.QUEUED
@@ -258,7 +259,7 @@ def test_release_resources_error_propagation(
     logger.info(
         "TelescopeID Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -283,7 +284,7 @@ def test_release_resources_error_propagation(
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -313,7 +314,7 @@ def test_release_resources_error_propagation(
     logger.info(
         "ReleaseResources Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("ReleaseResources")
@@ -354,7 +355,9 @@ def test_release_resources_mid_timeout(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        "TelescopeOn Command ID: %s Returned result: %s", unique_id, result
+        "TelescopeOn Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -379,7 +382,7 @@ def test_release_resources_mid_timeout(
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -408,7 +411,7 @@ def test_release_resources_mid_timeout(
     logger.info(
         "ReleaseResources Command ID: %s Returned result: %s ",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("ReleaseResources")
@@ -454,7 +457,7 @@ def test_release_resources_low_timeout(
     logger.info(
         "TelescopeOn Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -479,7 +482,7 @@ def test_release_resources_low_timeout(
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -508,7 +511,7 @@ def test_release_resources_low_timeout(
     logger.info(
         "ReleaseResources Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("ReleaseResources")
@@ -554,7 +557,7 @@ def test_release_resources_error_aggregation(
     logger.info(
         "TelescopeOn Command ID: %s  Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("TelescopeOn")
@@ -579,7 +582,9 @@ def test_release_resources_error_aggregation(
     )
 
     logger.info(
-        "AssignResources Command ID: %s Returned result: %s", unique_id, result
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
     )
 
     assert unique_id[0].endswith("AssignResources")
@@ -606,7 +611,7 @@ def test_release_resources_error_aggregation(
     logger.info(
         "ReleaseResources Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("ReleaseResources")

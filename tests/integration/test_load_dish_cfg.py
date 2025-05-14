@@ -1,4 +1,5 @@
 """Test cases for Load_Dish_Config command"""
+
 import json
 
 import pytest
@@ -65,7 +66,7 @@ def load_dish_cfg(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -133,7 +134,7 @@ def load_dish_cfg_rejected(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -185,7 +186,7 @@ def load_dish_cfg_when_csp_is_defective(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -211,7 +212,7 @@ def load_dish_cfg_when_csp_is_defective(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     change_event_callbacks.assert_change_event(
@@ -336,7 +337,7 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_load_dish_cfg(
     tango_context,
@@ -357,7 +358,7 @@ def test_load_dish_cfg(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_load_dish_cfg_rejected(
     tango_context,
@@ -380,7 +381,7 @@ def test_load_dish_cfg_rejected(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_load_dish_cfg_when_csp_is_defective(
     tango_context,
@@ -407,7 +408,7 @@ def test_load_dish_cfg_when_csp_is_defective(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_load_dish_cfg_after_central_node_init(
     tango_context,
@@ -430,7 +431,7 @@ def test_load_dish_cfg_after_central_node_init(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
     tango_context,
@@ -478,7 +479,7 @@ def load_dish_cfg_with_wrong_path(
     logger.info(
         "LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
-        result,
+        str(result),
     )
 
     assert unique_id[0].endswith("LoadDishCfg")
@@ -508,7 +509,7 @@ def load_dish_cfg_with_wrong_path(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
-    [(CENTRALNODE_MID)],
+    [CENTRALNODE_MID],
 )
 def test_load_dish_cfg_with_wrong_path(
     tango_context,

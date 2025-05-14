@@ -1,4 +1,5 @@
 """Command class for TelescopeOn()"""
+
 import threading
 from typing import Callable, List, Optional, Tuple
 
@@ -109,7 +110,9 @@ class TelescopeOn(TelescopeOnOff):
                     )
 
         if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            self.logger.info(
+                "Unavailable devices are %s ", unavailable_devices
+            )
             return (
                 ResultCode.OK,
                 f"Unavailable devices are {unavailable_devices}",
@@ -120,7 +123,7 @@ class TelescopeOn(TelescopeOnOff):
     def turn_on_sdp(self):
         """Turns on the SDP"""
         self.logger.info(
-            f"Invoking On command on: {self.sdp_mln_adapter.dev_name} "
+            "Invoking On command on: %s ", self.sdp_mln_adapter.dev_name
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
@@ -141,7 +144,7 @@ class TelescopeOn(TelescopeOnOff):
     def turn_on_csp(self):
         """Turns on the csp"""
         self.logger.info(
-            f"Invoking On command on: {self.csp_mln_adapter.dev_name} "
+            "Invoking On command on: %s ", self.csp_mln_adapter.dev_name
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
@@ -202,6 +205,9 @@ class TelescopeOn(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeOn command"
         )
+        self.logger.info(
+            "Invoking On command on the lower level devices",
+        )
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()
         unavailable_devices = []
@@ -225,7 +231,9 @@ class TelescopeOn(TelescopeOnOff):
                     )
 
         if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            self.logger.info(
+                "Unavailable devices are: %s", unavailable_devices
+            )
             return (
                 ResultCode.OK,
                 f"Unavailable devices are {unavailable_devices}",
@@ -236,7 +244,7 @@ class TelescopeOn(TelescopeOnOff):
     def turn_on_mccs(self):
         """Turns on the MCCS"""
         self.logger.info(
-            f"Invoking On command on: {self.mccs_mln_adapter.dev_name} "
+            "Invoking On command on: %s ", self.mccs_mln_adapter.dev_name
         )
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(

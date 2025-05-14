@@ -1,6 +1,7 @@
 """
 This module provided an implementation of the Central Node ComponentManager.
 """
+
 from __future__ import annotations
 
 import json
@@ -256,7 +257,7 @@ class CNComponentManager(TmcComponentManager):
                 self.component.telescope_health_state = current_health_state
                 self.logger.debug(
                     "Aggregate telescope health state called %s",
-                    current_health_state,
+                    str(current_health_state),
                 )
 
             time.sleep(0.1)
@@ -266,10 +267,14 @@ class CNComponentManager(TmcComponentManager):
         """
         Process the given attribute's event using the data from the
             event_queue and invoke corresponding process method.
+
         :param attribute_name: Name of the attribute for which event is to be
             processed
+
         :type attribute_name: str
+
         :returns: None
+
         """
         while True:
             try:
@@ -811,7 +816,7 @@ class CNComponentManager(TmcComponentManager):
                 self.logger.debug(
                     "Subarray Device resources for device %s: %s",
                     devInfo.dev_name,
-                    devInfo.resources,
+                    str(devInfo.resources),
                 )
                 if devInfo.resources is None:
                     return False

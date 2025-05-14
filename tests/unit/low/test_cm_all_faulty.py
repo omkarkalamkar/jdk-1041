@@ -1,6 +1,5 @@
 """Test case for cm all faulty"""
 
-
 import pytest
 from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel

@@ -1,4 +1,5 @@
 """Aggregation method for telescope state Aggregating for Mid"""
+
 import logging
 
 from ska_ser_logging import configure_logging
@@ -57,8 +58,8 @@ class TelescopeStateAggregatorMid(Aggregator):
         self._logger.debug(
             "telescopeSetStateset : %s , dishmodeset : "
             + "%s dish_vcc_config_set: %s",
-            subsystem_states,
-            dish_modes,
+            str(subsystem_states),
+            str(dish_modes),
             self._component_manager.is_dish_vcc_config_set,
         )
         # If Dish VCC config is not set then set telescope state to UNKNOWN
@@ -147,9 +148,11 @@ class TelescopeStateAggregatorLow(Aggregator):
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
-        self._logger.info(f"Telescope state list is : {telescopeStateList}")
+        self._logger.info(
+            "Telescope state list is : %s", str(telescopeStateList)
+        )
         if not sdp_master and not csp_master and not mccs_master:
-            self._logger.info(
+            self._logger.debug(
                 "Checking if sdp, csp and mccs master are responsive: "
                 + "%s , responsive :%s,"
                 + "%s, responsive : %s"
@@ -357,16 +360,16 @@ class LoadDishCfgCommandResultAggregator:
         self.logger.debug(
             "Aggregating result for longRunningCommandResult attribute"
             + "with values %s",
-            self._component_manager.result_codes_mapping.values(),
+            str(self._component_manager.result_codes_mapping.values()),
         )
         result_codes, failed_messages = self._get_result_codes_and_failed_msg()
         failed_devices = [msg.split(":")[0] for msg in failed_messages]
         self.logger.debug(
             "Result codes are %s, failed messages are %s, "
             "TMC components with errors are %s",
-            result_codes,
-            failed_messages,
-            failed_devices,
+            str(result_codes),
+            str(failed_messages),
+            str(failed_devices),
         )
 
         if ResultCode.FAILED in result_codes:
@@ -378,7 +381,9 @@ class LoadDishCfgCommandResultAggregator:
         if result_codes_set == set([ResultCode.OK]):
             result_code = ResultCode.OK
         self.logger.info(
-            "Returning result code %s and message %s", result_code, message
+            "Returning ResultCode %s and Message %s",
+            result_code,
+            message,
         )
         return result_code, message
 
@@ -460,7 +465,7 @@ class DishkValueValidationResultAggregator:
             ]
             self.logger.debug(
                 "kValueValidationResult dictionary: %s",
-                self.dln_kvalue_validation_results,
+                str(self.dln_kvalue_validation_results),
             )
             # Update the Central Node result attribute.
             if self.is_events_received_percentage_valid():

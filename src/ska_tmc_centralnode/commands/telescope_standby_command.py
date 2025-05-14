@@ -1,4 +1,5 @@
 """Command class for TelescopeStandby command"""
+
 import threading
 import time
 from typing import Callable, Optional
@@ -108,15 +109,14 @@ class TelescopeStandby(TelescopeOnOff):
         while not all_empty:
             all_empty = True
             for adapter in self.subarray_adapters:
-                if (
-                    not self.component_manager.get_device(
-                        adapter.dev_name
-                    ).obs_state
-                    == ObsState.EMPTY
-                ):
+                obs_state = self.component_manager.get_device(
+                    adapter.dev_name
+                ).obs_state
+                if obs_state != ObsState.EMPTY:
                     self.logger.error(
                         "Subarray current ObsState %s, while "
-                        "waiting for ObsState.EMPTY. "
+                        "waiting for ObsState.EMPTY. ",
+                        str(obs_state),
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time
@@ -147,7 +147,9 @@ class TelescopeStandby(TelescopeOnOff):
                     )
 
         if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            self.logger.info(
+                "Unavailable devices are %s ", unavailable_devices
+            )
             return (
                 ResultCode.OK,
                 f"Unavailable devices are {unavailable_devices}",
@@ -232,7 +234,9 @@ class TelescopeStandby(TelescopeOnOff):
                     )
 
         if unavailable_devices:
-            self.logger.info(f"Unavailable devices are {unavailable_devices}")
+            self.logger.info(
+                "Unavailable devices are %s ", unavailable_devices
+            )
             return (
                 ResultCode.OK,
                 f"Unavailable devices are {unavailable_devices}",
@@ -243,7 +247,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_subarrays(self):
         """Turns subarrays to standby"""
         self.logger.info(
-            "Invoking Standby command: %s",
+            "Invoking Standby command on: %s",
             [str(adapter.dev_name) for adapter in self.subarray_adapters],
         )
         return self.send_command(
@@ -255,7 +259,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_sdp(self):
         """Turns sdp to standby"""
         self.logger.info(
-            f"Invoking Standby command on: {self.sdp_mln_adapter.dev_name}"
+            "Invoking Standby command on: %s", self.sdp_mln_adapter.dev_name
         )
         if self.component_manager.check_if_sdp_mln_is_available() is True:
             return self.send_command(
@@ -275,9 +279,8 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_csp(self):
         """Turns csp to standby"""
         self.logger.info(
-            "Invoking Standby command on: "
-            + self.csp_mln_adapter.dev_name
-            + "devices"
+            "Invoking Standby command on: %s ",
+            self.csp_mln_adapter.dev_name,
         )
         if self.component_manager.check_if_csp_mln_is_available() is True:
             return self.send_command(
@@ -297,7 +300,7 @@ class TelescopeStandby(TelescopeOnOff):
     def turn_standby_mccs(self):
         """Turns MCCS into standby"""
         self.logger.info(
-            f"Invoking Standby command on:  {self.mccs_mln_adapter.dev_name}"
+            "Invoking Standby command on: %s ", self.mccs_mln_adapter.dev_name
         )
         if self.component_manager.check_if_mccs_mln_is_available() is True:
             return self.send_command(

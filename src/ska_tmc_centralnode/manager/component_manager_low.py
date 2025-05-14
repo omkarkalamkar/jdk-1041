@@ -6,6 +6,7 @@ It is component Manager for Low Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+
 import json
 import time
 from logging import Logger
@@ -165,7 +166,8 @@ class CNComponentManagerLow(CNComponentManager):
         self.error_count = 0
         del self.command_mapping[command_id]
         self.logger.debug(
-            "Updated command mapping dictionary is: %s", self.command_mapping
+            "Updated command mapping dictionary is: %s",
+            str(self.command_mapping),
         )
 
     def get_unique_ids(self) -> list:
@@ -199,11 +201,12 @@ class CNComponentManagerLow(CNComponentManager):
         :param value: longRunningCommandResult attribute event.
         :type value: tuple
         """
-        self.logger.info(
-            "Received longRunningCommandResult event for device: \
-                %s, with value: %s",
+        self.logger.debug(
+            "Command ID: %s | Received longRunningCommandResult event "
+            + "for device: %s, with value: %s",
+            self.command_id,
             dev_name,
-            value,
+            str(value),
         )
         unique_ids = self.get_unique_ids()
 
@@ -228,7 +231,7 @@ class CNComponentManagerLow(CNComponentManager):
                     self.command_mapping[self.command_id].remove(unique_id)
                     self.logger.debug(
                         "Updated command mapping dictionary is: %s",
-                        self.command_mapping,
+                        str(self.command_mapping),
                     )
 
                 case (
@@ -244,12 +247,13 @@ class CNComponentManagerLow(CNComponentManager):
                     self.command_mapping[self.command_id].remove(unique_id)
                     self.logger.debug(
                         "Updated command mapping dictionary is: %s",
-                        self.command_mapping,
+                        str(self.command_mapping),
                     )
-                    self.logger.error(
-                        "Exception occurred with value: %s for %s \
-                            command_id for device: %s",
-                        value,
+                    self.logger.exception(
+                        "Command ID: %s | Exception occurred with value: %s "
+                        + "for %s command_id for device: %s",
+                        self.command_id,
+                        str(value),
                         self.command_id,
                         dev_name,
                     )
@@ -257,9 +261,11 @@ class CNComponentManagerLow(CNComponentManager):
                 self.update_long_running_command_result_callback()
         except Exception as exception:
             self.logger.exception(
-                "Exception occurred while processing"
+                "Command ID: %s | "
+                + "Exception occurred while processing"
                 + "long running command result"
                 + "attribute event: %s",
+                self.command_id,
                 exception,
             )
 
@@ -280,10 +286,10 @@ class CNComponentManagerLow(CNComponentManager):
                         f"{self.command_id}: {devname}: " + f"{error_message}"
                     )
             self.logger.debug(
-                "Updating LRCRCallback with following values: "
-                + "command_id: %s, resultcode: %s, message: %s",
+                "Command ID: %s | Updating LRCRCallback with following"
+                + " values: Command ID: %s, ResultCode: %s, Message: %s",
                 self.command_id,
-                ResultCode.FAILED,
+                str(ResultCode.FAILED),
                 exception_message,
             )
             self.long_running_result_callback(
@@ -306,7 +312,7 @@ class CNComponentManagerLow(CNComponentManager):
         :type state: DevState
         """
         with self.lock:
-            self.logger.debug(f"State event for {device_name}: {state}")
+            self.logger.debug("State event for %s: %s", device_name, state)
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN in case of
                 # real SDP
@@ -324,7 +330,7 @@ class CNComponentManagerLow(CNComponentManager):
             if devInfo is not None:
                 devInfo.state = state
                 self.logger.debug(
-                    f"Updated State of {devInfo.dev_name}: {devInfo.state}"
+                    "Updated State of %s: %s ", devInfo.dev_name, devInfo.state
                 )
                 devInfo.last_event_arrived = time.time()
                 devInfo.update_unresponsive(False)
@@ -394,15 +400,15 @@ class CNComponentManagerLow(CNComponentManager):
         :type command_name: str
         """
         if command_name in self.supported_commands_for_responsive_check:
-            self.logger.debug(f"Checking low devices for {command_name}")
+            self.logger.debug("Checking low devices for: %s", command_name)
             self.check_if_mccs_mln_is_responsive()
             self.check_if_subarrays_are_responsive()
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availability"""
         with self.rlock:
-            self.logger.debug(f"device_name is: {device_name}")
-            self.logger.debug(f"event_value is: {event_value}")
+            self.logger.debug("Device name is: %s", device_name)
+            self.logger.debug("Event value is: %s", event_value)
 
             if device_name in self.input_parameter.subarray_dev_names:
                 self.subarray_availability[device_name] = event_value

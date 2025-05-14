@@ -97,7 +97,7 @@ def test_low_assign_resources_command_fail_subarray(
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+        "checked %s devices in %s", len(cm.checked_devices), str(elapsed_time)
     )
 
     adapter_factory = HelperAdapterFactory()
@@ -237,7 +237,7 @@ def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+        "checked %s devices in %s", len(cm.checked_devices), str(elapsed_time)
     )
     cm.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):

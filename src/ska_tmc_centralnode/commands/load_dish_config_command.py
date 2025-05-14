@@ -1,4 +1,5 @@
 """Commad class for Load_dish_config_command"""
+
 import json
 import threading
 from typing import Callable, Optional, Tuple
@@ -83,7 +84,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     CENTRALNODE_MID: error_message
                 }
                 self.logger.debug(
-                    "Command ID | %s " + "Number of retries exhausted",
+                    "Command ID: %s | Number of retries exhausted",
                     self.component_manager.command_id,
                 )
                 self.component_manager.reset_load_dish_cfg_data()
@@ -98,9 +99,11 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.logger.info(
                 "Command ID: %s | DishId Vcc Map Json %s",
                 json.dumps(
-                    dishid_vcc_map_json
-                    if isinstance(dishid_vcc_map_json, dict)
-                    else json.loads(dishid_vcc_map_json),
+                    (
+                        dishid_vcc_map_json
+                        if isinstance(dishid_vcc_map_json, dict)
+                        else json.loads(dishid_vcc_map_json)
+                    ),
                     indent=4,
                 ),
                 self.component_manager.command_id,
@@ -122,8 +125,10 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
-        self.logger.info(
-            "Command ID: %s | %s ", self.component_manager.command_id, message
+        self.logger.debug(
+            "Command ID: %s | Message: %s ",
+            self.component_manager.command_id,
+            message,
         )
         if ret_code == ResultCode.FAILED:
             self.component_manager.reset_load_dish_cfg_data()
@@ -159,10 +164,10 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         self.logger.debug(
             "Command ID: %s | Calling task callback for "
-            + "LoadDishCfg with result"
-            + "%s and message %s",
+            + "LoadDishCfg with Result: "
+            + "%s and Message: %s",
             self.component_manager.command_id,
-            result,
+            str(result[0]),
             exception,
         )
         if result[0] == ResultCode.FAILED:
@@ -270,7 +275,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             ):
                 if return_code == ResultCode.FAILED:
                     self.logger.error(
-                        "Command ID: %s | Command LoadDishCfg "
+                        "Command ID: %s | LoadDishCfg command "
                         + "failed with error: %s",
                         self.component_manager.command_id,
                         message_or_unique_id,
@@ -330,7 +335,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter = dish_adapter[0]
                     k_value = vcc_k_map.get("k")
                     self.logger.info(
-                        "Command ID: %s | " + "Invoking SetKValue on %s",
+                        "Command ID: %s | Invoking SetKValue command on: %s",
                         self.component_manager.command_id,
                         dish_adapter.dev_name,
                     )
@@ -351,9 +356,10 @@ class LoadDishCfg(LoadDishCfgCommand):
                     self.logger.info(error_message)
         except Exception as e:
             self.logger.exception(
-                "Error in Calling setKvalue command on %s : %s",
+                "Exception occured in Calling setKvalue command on %s, "
+                + "Exception: %s",
                 dish_adapter.dev_name,
-                e,
+                str(e),
             )
             return [ResultCode.FAILED], [
                 f"Error in Calling setKvalue command on dish adapter {e}"

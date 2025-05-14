@@ -1,4 +1,5 @@
 """Command class for StowAntennas()"""
+
 from typing import List, Tuple
 
 from ska_tango_base.commands import ResultCode
@@ -85,7 +86,10 @@ class StowAntennas(CentralNodeCommand):
                     num_working += 1
                 except Exception as e:
                     self.logger.exception(
-                        "Error in creating adapter for %s: %s", dev_name, e
+                        "Exception occured in creating adapter for "
+                        + "%s, Exception: %s",
+                        dev_name,
+                        str(e),
                     )
                     error_dev_names.append(dev_name)
 
@@ -122,7 +126,7 @@ class StowAntennas(CentralNodeCommand):
                         return ResultCode.FAILED, message_or_unique_id
                     self.logger.error(
                         "Failed to stow receptor: %s with message: %s",
-                        arg,
+                        str(arg),
                         message_or_unique_id,
                     )
         return (ResultCode.OK, "Command Completed")

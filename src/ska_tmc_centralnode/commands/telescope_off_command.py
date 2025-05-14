@@ -1,4 +1,5 @@
 """Command class for TelescopeOff()"""
+
 import threading
 import time
 from typing import Callable, Optional
@@ -89,6 +90,10 @@ class TelescopeOff(TelescopeOnOff):
             "Device states before executing TelescopeOff command."
         )
 
+        self.logger.info(
+            "Invoking Off command on the lower level devices",
+        )
+
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -112,8 +117,7 @@ class TelescopeOff(TelescopeOnOff):
                     self.logger.error(
                         "Subarray current ObsState %s, while "
                         "waiting for ObsState.EMPTY. ",
-                        adapter.dev_name,
-                        obs_state,
+                        str(obs_state),
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time
@@ -222,6 +226,9 @@ class TelescopeOff(TelescopeOnOff):
 
         """
         self.component_manager.component.desired_telescope_state = DevState.OFF
+        self.logger.info(
+            "Invoking Off command on the lower level devices",
+        )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -230,7 +237,9 @@ class TelescopeOff(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeOff command."
         )
-
+        self.logger.info(
+            "Invoking Off command on the lower level devices",
+        )
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -254,7 +263,7 @@ class TelescopeOff(TelescopeOnOff):
                     self.logger.debug(
                         "Subarray %s is still not empty, current state: %s",
                         adapter.dev_name,
-                        obs_state,
+                        str(obs_state),
                     )
                     all_empty = False
             elapsed_time = time.time() - start_time

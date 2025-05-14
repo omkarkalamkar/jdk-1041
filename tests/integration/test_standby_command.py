@@ -1,4 +1,5 @@
 """Test cases for standby command"""
+
 import json
 
 import pytest
@@ -46,11 +47,12 @@ def test_standby_command_mid(
         lookahead=8,
     )
     logger.info(
-        "longRunningCommandResult: %s", central_node.longRunningCommandResult
+        "longRunningCommandResult: %s",
+        str(central_node.longRunningCommandResult),
     )
 
     result, unique_id = central_node.TelescopeStandby()
-    logger.info("Result is: %s", result)
+    logger.info("Result is: %s", str(result))
     logger.info("Unique id: %s", unique_id)
 
     # Check whether the command is QUEUED
@@ -79,7 +81,8 @@ def test_standby_command_mid(
         lookahead=4,
     )
     logger.info(
-        "longRunningCommandResult: %s", central_node.longRunningCommandResult
+        "longRunningCommandResult: %s",
+        str(central_node.longRunningCommandResult),
     )
 
     central_node.subscribe_event(
@@ -92,7 +95,7 @@ def test_standby_command_mid(
     change_event_callbacks.assert_change_event(
         "telescopeState", DevState.STANDBY, lookahead=12
     )
-    logger.info("telescopeState: %s", central_node.telescopeState)
+    logger.info("telescopeState: %s", str(central_node.telescopeState))
 
     assert central_node.telescopeState == DevState.STANDBY
 
@@ -123,11 +126,12 @@ def test_standby_command_low(
         lookahead=8,
     )
     logger.info(
-        "longRunningCommandResult: %s", central_node.longRunningCommandResult
+        "longRunningCommandResult: %s",
+        str(central_node.longRunningCommandResult),
     )
 
     result, unique_id = central_node.TelescopeStandby()
-    logger.info("Result is: %s. Unique ID is %s", result, unique_id)
+    logger.info("Result is: %s. Unique ID is %s", str(result), unique_id)
 
     # Check whether the command is QUEUED
     assert unique_id[0].endswith("TelescopeStandby")
@@ -140,7 +144,8 @@ def test_standby_command_low(
         lookahead=3,
     )
     logger.info(
-        "longRunningCommandResult: %s", central_node.longRunningCommandResult
+        "longRunningCommandResult: %s",
+        str(central_node.longRunningCommandResult),
     )
 
     mccs_master = dev_factory.get_device(MCCS_MASTER_DEVICE)
@@ -159,6 +164,6 @@ def test_standby_command_low(
     change_event_callbacks.assert_change_event(
         "telescopeState", DevState.STANDBY, lookahead=4
     )
-    logger.info("telescopeState: %s", central_node.telescopeState)
+    logger.info("telescopeState: %s", str(central_node.telescopeState))
 
     assert central_node.telescopeState == DevState.STANDBY
