@@ -61,7 +61,7 @@ class CNComponentManagerMid(CNComponentManager):
         _dishvccvalidation_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
-        _event_receiver=True,
+        _event_manager=True,
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
@@ -88,7 +88,7 @@ class CNComponentManagerMid(CNComponentManager):
             managed; for testing purposes only
         :param _input_parameter : specify input parameter for mid.
         :param _liveliness_probe:allows to enable/disable LivelinessProbe usage
-        :param _event_receiver : allows to enable/disable EventReceiver usage
+        :param _event_manager : allows to enable/disable EventManager usage
         :param max_workers: Optional. Maximum worker threads for
             monitoring purpose.
         :param proxy_timeout: Optional. Time period to wait for
@@ -112,7 +112,7 @@ class CNComponentManagerMid(CNComponentManager):
             _telescope_availability_callback,
             _component,
             _liveliness_probe,
-            _event_receiver,
+            _event_manager,
             proxy_timeout,
             event_subscription_check_period,
             liveliness_check_period,
@@ -627,7 +627,7 @@ class CNComponentManagerMid(CNComponentManager):
             )
         return True
 
-    def check_device_responsiveness(self, command_name) -> None:
+    def check_device_responsiveness_command(self, command_name) -> None:
         """
         This method overrides the method from super class
         to add responsive checks for the devices
