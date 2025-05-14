@@ -132,7 +132,7 @@ class CNComponentManager(TmcComponentManager):
         :param _liveliness_probe: allows to enable/disable
             LivelinessProbe usage
         :param _event_manager: allows to enable/disable
-            EventReceiver usage
+            EventManager usage
 
         """
 
@@ -225,7 +225,7 @@ class CNComponentManager(TmcComponentManager):
             self, logger=logger
         )
 
-    def setup_event_subscription(self):
+    def setup_event_subscription(self) -> None:
         """
         Sets up the event subscription after input parameters are updated.
         """
@@ -235,13 +235,14 @@ class CNComponentManager(TmcComponentManager):
         )
         self.logger.debug("Successfully subscribed the events")
 
-    def build_device_attribute_map(self):
+    def build_device_attribute_map(self) -> Dict[str, List[str]]:
         """
         Builds a dictionary mapping device names to lists of attributes
         to be subscribed.
 
         Returns:
-            dict: A mapping from device names to list of attributes.
+            Dict[str, List[str]]: A mapping from device names to list of
+            attributes.
         """
         device_attribute_map = defaultdict(list)
 

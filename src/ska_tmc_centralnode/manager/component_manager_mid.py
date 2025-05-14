@@ -88,7 +88,7 @@ class CNComponentManagerMid(CNComponentManager):
             managed; for testing purposes only
         :param _input_parameter : specify input parameter for mid.
         :param _liveliness_probe:allows to enable/disable LivelinessProbe usage
-        :param _event_manager : allows to enable/disable EventReceiver usage
+        :param _event_manager : allows to enable/disable EventManager usage
         :param max_workers: Optional. Maximum worker threads for
             monitoring purpose.
         :param proxy_timeout: Optional. Time period to wait for

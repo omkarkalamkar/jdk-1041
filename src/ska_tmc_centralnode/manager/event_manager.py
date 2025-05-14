@@ -48,6 +48,9 @@ class CentralNodeEventManager(EventManager):
     ) -> None:
         """
         It handles the adminMode events of csp controller device.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
         """
         self._component_manager.event_queue["adminMode"].put(event)
 
@@ -56,6 +59,9 @@ class CentralNodeEventManager(EventManager):
     ) -> None:
         """
         It handles the adminMode events of sdp controller device.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
         """
         self._component_manager.event_queue["adminMode"].put(event)
 
@@ -64,42 +70,75 @@ class CentralNodeEventManager(EventManager):
     ) -> None:
         """
         It handles the adminMode events of mccs controller device.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
         """
         self._component_manager.event_queue["adminMode"].put(event)
 
     def healthstate_event_callback(self, event: tango.EventData) -> None:
         """
-        It handles the health state events of different devices.
+        It handles the health state events of subsystem's
+        controller and subarray devices.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
         """
         self._component_manager.event_queue["healthState"].put(event)
 
     def adminmode_event_callback(self, event: tango.EventData) -> None:
         """
-        It handles the admin mode events of different devices.
+        It handles the admin mode events of subsystem's
+        controller and subaray devices.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
         """
         self._component_manager.event_queue["adminMode"].put(event)
 
     def state_event_callback(self, event: tango.EventData) -> None:
         """
-        It handles the state events of different devices.
+        It handles the state events of subsystem's
+        controller and subaray devices.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
         """
         self._component_manager.event_queue["state"].put(event)
 
     def assignedresources_event_callback(self, event: tango.EventData) -> None:
-        """Handles assigned Resources event."""
+        """
+        Handles assigned Resources event.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
         self._component_manager.event_queue["assignedResources"].put(event)
 
     def obsstate_event_callback(self, event: tango.EventData) -> None:
-        """Handles obs state event."""
+        """
+        Handles observation state event.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
         self._component_manager.event_queue["obsState"].put(event)
 
     def dishmode_event_callback(self, event: tango.EventData) -> None:
-        """Method to handle and update the latest
-        value of dishMode attribute."""
+        """
+        Method to handle and update the latest
+        value of dishMode attribute.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
         self._component_manager.event_queue["dishMode"].put(event)
 
-    def kvaluevalidationresult_event_callback(self, event: tango.EventData):
-        """Method to handle kValueValidationResult from dish
+    def kvaluevalidationresult_event_callback(
+        self, event: tango.EventData
+    ) -> None:
+        """
+        Method to handle kValueValidationResult from dish
         leaf node.
         Args:
             event_data (tango.EventType.CHANGE_EVENT): to flag the
@@ -111,8 +150,13 @@ class CentralNodeEventManager(EventManager):
 
     def dishvccmapvalidationresult_event_callback(
         self, event: tango.EventData
-    ):
-        """Handle DishVccMapValidationResult change event."""
+    ) -> None:
+        """
+        Handle DishVccMapValidationResult change event.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
         self._component_manager.event_queue["DishVccMapValidationResult"].put(
             event
         )
@@ -120,7 +164,8 @@ class CentralNodeEventManager(EventManager):
     def issubsystemavailable_event_callback(
         self, event: tango.EventData
     ) -> None:
-        """Method to handle and update the latest value of isSubsystemAvailable
+        """
+        Method to handle and update the latest value of isSubsystemAvailable
         attribute.
 
         Args:
@@ -132,7 +177,8 @@ class CentralNodeEventManager(EventManager):
     def issubarrayavailable_event_callback(
         self, event: tango.EventData
     ) -> None:
-        """Method to handle and update the latest value of isSubarrayAvailable
+        """
+        Method to handle and update the latest value of isSubarrayAvailable
         attribute.
 
         Args:
@@ -144,9 +190,13 @@ class CentralNodeEventManager(EventManager):
     def longrunningcommandresult_event_callback(
         self, event: tango.EventData
     ) -> None:
-        """Callback for longRunningCommandResult attribute.
+        """
+        Callback for longRunningCommandResult attribute.
 
         Delegates to specific handlers based on device type.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
         """
         if MID_CSP_MLN_DEVICE in event.attr_name:
             self._handle_load_dish_cfg_result_callback(event)
@@ -158,7 +208,12 @@ class CentralNodeEventManager(EventManager):
     def _handle_load_dish_cfg_result_callback(
         self, event: tango.EventData
     ) -> None:
-        """Special handler for LoadDishCfg and SetKValue result events."""
+        """
+        Special handler for LoadDishCfg and SetKValue result events.
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+            change in event.
+        """
         if getattr(event, "attr_value", False):
             self._component_manager.event_queue["loadDishConfigResult"].put(
                 event

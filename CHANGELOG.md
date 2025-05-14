@@ -7,7 +7,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [0.19.5]
 ********
-* Utlized refactored event manager in central node
+Updated
+-------
+* Utilized refactored event manager in central node from v2 in ska-tmc-common
+* ska-tmc-common version updated to 0.27.5
 
 [0.19.4]
 ********
