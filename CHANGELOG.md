@@ -46,6 +46,7 @@ Added
 Update
 ------
 * Updated the ska-tmc-common to v0.25.4 to include master helper leafnode device to set the controller admin mode
+
 Removed
 -------
 * Old healthstate aggregation code

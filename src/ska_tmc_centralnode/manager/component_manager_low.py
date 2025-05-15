@@ -359,6 +359,11 @@ class CNComponentManagerLow(CNComponentManager):
         """
         Returns boolean value based on availability of MccsMasterLeafNode,
         which indicated availability of Mccs Master.
+
+        Returns:
+            bool: boolean value based on availability of
+            MccsMasterLeafNode
+
         """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["mccs_master_leaf_node"] is True:
@@ -392,12 +397,14 @@ class CNComponentManagerLow(CNComponentManager):
             )
         return True
 
-    def check_device_responsiveness_command(self, command_name) -> None:
+    def check_device_responsiveness_command(self, command_name: str) -> None:
         """
         This method overrides the method from super class
         to add responsive checks for the devices
-        :param command_name: Command name for the check
-        :type command_name: str
+
+        Args:
+            command_name (str): Command name for the check
+
         """
         if command_name in self.supported_commands_for_responsive_check:
             self.logger.debug("Checking low devices for: %s", command_name)

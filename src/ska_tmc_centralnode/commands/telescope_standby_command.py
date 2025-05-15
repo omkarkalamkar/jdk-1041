@@ -1,8 +1,9 @@
 """Command class for TelescopeStandby command"""
 
+import logging
 import threading
 import time
-from typing import Callable, Optional
+from typing import Any, Callable, List, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
@@ -36,20 +37,20 @@ class TelescopeStandby(TelescopeOnOff):
 
     def telescope_standby(
         self,
-        logger,
+        logger: logging.Logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
-    ):
-        """This is a long running method for TelescopeStandby command,
+    ) -> None:
+        """
+        This is a long running method for TelescopeStandby command,
         it executes do hook,
         invokes TelescopeStandby command on lower level devices.
 
-        :param logger: logger
-        :type logger: logging.Logger
-        :param task_callback: Update task state, defaults to None
-        :type task_callback: Callable, optional
-        :param task_abort_event: Check for abort, defaults to None
-        :type task_abort_event: Event, optional
+        Args:
+            logger: logger
+            task_callback: Update task state, defaults to None
+            task_abort_event: Check for abort, defaults to None
+
         """
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
@@ -68,20 +69,18 @@ class TelescopeStandby(TelescopeOnOff):
                 result=(ResultCode.OK, message),
             )
 
-    def do_mid(self, argin=None):
+    def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
         """
         Method to invoke TelescopeStandby command on SubarrayNode, CSP and SDP
         Master Leaf Nodes. Also to invoke StandbyFP and then StandbyLP commands
         on Dish Leaf Nodes.
 
-        param argin: None
+        Args:
+            argin (str): Default is None in case of TelescopeStandby.
 
-        return:
-            A tuple containing a return code and a string message indicating
-            status.
-
-        rtype:
-            (ResultCode, str)
+        Returns:
+            Tuple(List, List): tuple containing a return code
+            and a string message indicating status.
 
         """
         self.component_manager.component.desired_telescope_state = (
@@ -160,19 +159,17 @@ class TelescopeStandby(TelescopeOnOff):
 
         return (ResultCode.OK, "Command Completed")
 
-    def do_low(self, argin=None):
+    def do_low(self, argin=None) -> Tuple[ResultCode, str]:
         """
         Method to invoke Standby command on SubarrayNode and MCCS
         Master Leaf Node.
 
-        param argin: None
+        Args:
+            argin (str): Default None.
 
-        return:
-            A tuple containing a return code and a string message indicating
-            status.
-
-        rtype:
-            (ResultCode, str)
+        Returns:
+            Tuple(ResultCode, str): tuple containing a return code
+            and a string message indicating status.
 
         """
         self.component_manager.component.desired_telescope_state = (
@@ -250,8 +247,17 @@ class TelescopeStandby(TelescopeOnOff):
 
         return (ResultCode.OK, "Command Completed")
 
-    def turn_standby_subarrays(self):
-        """Turns subarrays to standby"""
+    def turn_standby_subarrays(
+        self,
+    ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
+        """
+        Turns subarrays to standby
+
+        Returns:
+            Tuple(List, List): tuple of list of ResultCodes
+            and list of messages.
+
+        """
         self.logger.info(
             "Invoking Standby command on: %s",
             [str(adapter.dev_name) for adapter in self.subarray_adapters],
@@ -262,8 +268,17 @@ class TelescopeStandby(TelescopeOnOff):
             "Standby",
         )
 
-    def turn_standby_sdp(self):
-        """Turns sdp to standby"""
+    def turn_standby_sdp(
+        self,
+    ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
+        """
+        Turns sdp to standby
+
+        Returns:
+            Tuple(List, List): tuple of list of ResultCodes
+            and list of messages.
+
+        """
         self.logger.info(
             "Invoking Standby command on: %s", self.sdp_mln_adapter.dev_name
         )
@@ -282,8 +297,17 @@ class TelescopeStandby(TelescopeOnOff):
             ],
         )
 
-    def turn_standby_csp(self):
-        """Turns csp to standby"""
+    def turn_standby_csp(
+        self,
+    ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
+        """
+        Turns csp to standby
+
+        Returns:
+            Tuple(List, List): tuple of list of ResultCodes
+            and list of messages.
+
+        """
         self.logger.info(
             "Invoking Standby command on: %s ",
             self.csp_mln_adapter.dev_name,
@@ -303,8 +327,17 @@ class TelescopeStandby(TelescopeOnOff):
             ],
         )
 
-    def turn_standby_mccs(self):
-        """Turns MCCS into standby"""
+    def turn_standby_mccs(
+        self,
+    ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
+        """
+        Turns MCCS into standby
+
+        Returns:
+            Tuple(List, List): tuple of list of ResultCodes
+            and list of messages.
+
+        """
         self.logger.info(
             "Invoking Standby command on: %s ", self.mccs_mln_adapter.dev_name
         )
@@ -323,8 +356,17 @@ class TelescopeStandby(TelescopeOnOff):
             ],
         )
 
-    def turn_off_dishes(self):
-        """Turns off the dishes"""
+    def turn_off_dishes(
+        self,
+    ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
+        """
+        Turns off the dishes
+
+        Returns:
+            Tuple(List, List): tuple of list of ResultCodes
+            and list of messages.
+
+        """
         self.logger.info(
             "Invoking Off command on: %s",
             [str(adapter.dev_name) for adapter in self.dish_adapters],

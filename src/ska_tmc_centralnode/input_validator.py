@@ -105,23 +105,26 @@ class AssignResourceValidator:
         self.logger.debug(non_existing_receptors)
         return non_existing_receptors
 
-    def loads(self, input_string):
+    def loads(self, input_string) -> dict:
         """
         Validates the input string received as an argument of AssignResources
         command. If the request is correct, returns the deserialized JSON
         object. The ska-tmc-cdm is used to validate the JSON.
 
-        :param: input_string: A JSON string
+        Args:
+            input_string (str): A JSON string
 
-        :return: Deserialized JSON object if successful.
+        Returns:
+            dict: Deserialized JSON object if successful.
 
-        :throws:
+        Raises:
             InvalidJSONError: When the JSON string is not formatted properly.
 
             SubarrayNotPresentError: If the subarray is not present.
 
             ResourceNotPresentError: When a receptor in the
-            receptor_id_list is not present.
+                receptor_id_list is not present.
+
         """
 
         try:
@@ -222,17 +225,20 @@ class ReleaseResourceValidator:
         The ska-tmc-cdm
         is used to validate the JSON.
 
-        :param: input_string: A JSON string
+        Args:
+            input_string (str): A JSON string
 
-        :return: Deserialized JSON object if successful.
+        Returns:
+            dict: Deserialized JSON object if successful.
 
-        :throws:
+        Raises:
             InvalidJSONError: When the JSON string is not formatted properly.
 
             SubarrayNotPresentError: If the subarray is not present.
 
             ResourceNotPresentError: When a receptor in the receptor_id_list
-            is not present.
+                is not present.
+
         """
 
         # Check if JSON is correct

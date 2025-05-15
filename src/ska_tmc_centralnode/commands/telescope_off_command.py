@@ -1,8 +1,9 @@
 """Command class for TelescopeOff()"""
 
+import logging
 import threading
 import time
-from typing import Callable, Optional
+from typing import Callable, List, Optional, Tuple
 
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
@@ -15,7 +16,7 @@ from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
 class TelescopeOff(TelescopeOnOff):
     """
     A class for CentralNode's TelescopeOff() command. Sets the
-      CentralNode into telescopeState to OFF.
+    CentralNode into telescopeState to OFF.
     """
 
     def __init__(
@@ -37,18 +38,19 @@ class TelescopeOff(TelescopeOnOff):
 
     def telescope_off(
         self,
-        logger,
+        logger: logging.Logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
-    ):
-        """This is a long running method
+    ) -> None:
+        """
+        This is a long running method
 
-        :param logger: logger
-        :type logger: logging.Logger
-        :param task_callback: Update task state, defaults to None
-        :type task_callback: Callable, optional
-        :param task_abort_event: Check for abort, defaults to None
-        :type task_abort_event: Event, optional
+        Args:
+            logger: logger
+            task_callback: Update task state, defaults to None
+            task_abort_event: Check for abort, defaults to None
+            task_abort_event: Event, optional
+
         """
 
         task_callback(status=TaskStatus.IN_PROGRESS)
@@ -66,18 +68,16 @@ class TelescopeOff(TelescopeOnOff):
                 status=TaskStatus.COMPLETED, result=(ResultCode.OK, message)
             )
 
-    def do_mid(self, argin=None):
+    def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
         """
         Method to invoke Off command on lower level devices.
 
-        :param argin: None
+        Args:
+            argin (str): Default is None.
 
-        return:
-            A tuple containing a return code and a string message indicating
-            status.
-
-        rtype:
-            (ResultCode, str)
+        Returns:
+            Tuple(ResultCode, str): tuple containing a return code
+            and a string message indicating status.
 
         """
         self.component_manager.component.desired_telescope_state = DevState.OFF
@@ -150,8 +150,15 @@ class TelescopeOff(TelescopeOnOff):
 
         return (ResultCode.OK, "Command Completed")
 
-    def turn_off_csp(self):
-        """Turn off the CSP devices"""
+    def turn_off_csp(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turn off the CSP devices
+
+        Returns:
+            Tuple(List, List): Tuple containing
+            list of ResultCodes and list of messages
+
+        """
         self.logger.info(
             "Invoking Off command on: %s",
             self.csp_mln_adapter.dev_name,
@@ -168,8 +175,15 @@ class TelescopeOff(TelescopeOnOff):
             "is not available to receive Off command"
         ]
 
-    def turn_off_sdp(self):
-        """Turn off the SDP devices"""
+    def turn_off_sdp(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turn off the SDP devices
+
+        Returns:
+            Tuple(List, List): Tuple containing
+            list of ResultCodes and list of messages
+
+        """
         self.logger.info(
             "Invoking Off command on: %s",
             self.sdp_mln_adapter.dev_name,
@@ -186,8 +200,15 @@ class TelescopeOff(TelescopeOnOff):
             "is not available to receive Off command"
         ]
 
-    def turn_off_subarrays(self):
-        """Turn off the subarrays"""
+    def turn_off_subarrays(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turn off the subarrays
+
+        Returns:
+            Tuple(List, List): tuple containing list of ReturnCodes
+            and list of string message indicating status.
+
+        """
         self.logger.info(
             "Invoking Off command on: %s",
             [str(adapter.dev_name) for adapter in self.subarray_adapters],
@@ -199,8 +220,15 @@ class TelescopeOff(TelescopeOnOff):
             "Off",
         )
 
-    def turn_off_dishes(self):
-        """Turn off the dishes"""
+    def turn_off_dishes(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turn off the dishes
+
+        Returns:
+            Tuple(List, List): tuple containing list of ReturnCodes
+            and list of string message indicating status.
+
+        """
         self.logger.info(
             "Invoking Off command on: %s",
             [str(adapter.dev_name) for adapter in self.dish_adapters],
@@ -211,18 +239,16 @@ class TelescopeOff(TelescopeOnOff):
             "Off",
         )
 
-    def do_low(self, argin=None):
+    def do_low(self, argin=None) -> Tuple[ResultCode, str]:
         """
         Method to invoke Off command on lower level devices.
 
-        :param argin: None
+        Args:
+            argin (Str): Default is None.
 
-        return:
-            A tuple containing a return code and a string message indicating
-            status.
-
-        rtype:
-            (ResultCode, str)
+        Returns:
+            Tuple(ResultCode, str): tuple containing a return code
+            and a string message indicating status.
 
         """
         self.component_manager.component.desired_telescope_state = DevState.OFF
@@ -296,8 +322,15 @@ class TelescopeOff(TelescopeOnOff):
 
         return (ResultCode.OK, "Command Completed")
 
-    def turn_off_mccs(self):
-        """Turn off the MCCS devices"""
+    def turn_off_mccs(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turn off the MCCS devices
+
+        Returns:
+            Tuple(List, List): Tuple of list of Resultcodes
+            and list of messages.
+
+        """
         self.logger.info(
             "Invoking Off command on: %s",
             self.mccs_mln_adapter.dev_name,

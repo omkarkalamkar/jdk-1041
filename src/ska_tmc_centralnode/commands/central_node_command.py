@@ -97,17 +97,20 @@ class CentralNodeCommand(TMCCommand):
         err_msg: str,
         command_name: str,
     ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
-        """Invokes command on adapters
+        """
+        Invokes command on adapters
 
-        :param adapters: list of the adapters.
-        :param command_caller: command caller.
-        :param err_msg: error message.
-        :param command_name: Command name.
+        Args:
+            adapters: list of the adapters.
+            command_caller: command caller.
+            err_msg (str): error message.
+            command_name (str): Command name.
 
-        :return: A tuple containing a list of return codes and a list
-                 of string msg.
-            For Example:
-            (ResultCode.OK, "")
+        Returns:
+            Tuple(List, List): tuple containing a
+            list of return codes and a listof string msg.
+            For Example: (ResultCode.OK, "").
+
         """
         return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
         message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
@@ -143,13 +146,20 @@ class CentralNodeCommand(TMCCommand):
         description: str,
         command: str,
         argin=None,
-    ):
-        """Submit command in progress
+    ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
+        """
+        Submit command in progress
 
-        :param adapters: list of the adapters.
-        :param description: message.
-        :param command: Command name.
-        :param argin: Command input argument.
+        Args:
+            adapters: list of the adapters.
+            description (str): message.
+            command (str): Command name.
+            argin: Command input argument.
+
+        Returns:
+            Tuple(List, List): Tuple of list of ResultCodes
+            and messages
+
         """
         if argin is None:
             return self.invoke_command(
@@ -163,11 +173,16 @@ class CentralNodeCommand(TMCCommand):
         )
 
     def reject_command(self, message: str) -> Tuple[TaskStatus, str]:
-        """Rejects command method for logs error message.
+        """
+        Rejects command method for logs error message.
 
-        :return: A tuple containing a return code and a string msg.
-            For Example:
-            (TaskStatus.REJECTED, "")
+        Args:
+            message (str): Error message
+
+        Returns:
+            A tuple containing a return code and a string msg.
+            For Example: (TaskStatus.REJECTED, "")
+
         """
         self.logger.error(
             "Command execution failed due to reason: %s", message
@@ -177,14 +192,17 @@ class CentralNodeCommand(TMCCommand):
     def adapter_error_message(
         self, dev_name: str, error
     ) -> Tuple[ResultCode, str]:
-        """Adapter Error message
+        """
+        Adapter Error message
 
-        :param dev_name: name of the device.
-        :param error: error message.
+        Args:
+            dev_name (str): name of the device.
+            error: error message.
 
-        :return: A tuple containing a return code and a string msg.
-            For Example:
-            (ResultCode.FAILED, "")
+        Returns:
+            A tuple containing a return code and a string msg.
+            For Example: (ResultCode.FAILED, "")
+
         """
         message = f"Adapter creation failed for {dev_name}: {str(error)}"
         self.logger.error(message)
@@ -210,7 +228,14 @@ class TelescopeOnOff(CentralNodeCommand):
         self.dish_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
-        """Initialises adapters for mid"""
+        """
+        Initialises adapters for mid
+
+        Returns:
+            Tuple(ResultCode, str): Tuple containing
+            ResultCode and message
+
+        """
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         self.subarray_adapters = []
@@ -311,7 +336,14 @@ class TelescopeOnOff(CentralNodeCommand):
         return ResultCode.OK, ""
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
-        """Initialises adapter low"""
+        """
+        Initialises adapter low
+
+        Returns:
+            Tuple(ResultCode, str): Tuple containing
+            ResultCode and message
+
+        """
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
         self.mccs_mln_adapter = None
@@ -414,7 +446,14 @@ class AssignReleaseResources(CentralNodeCommand):
         self.subarray_adapters = []
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
-        """Initialises adapters for mid"""
+        """
+        Initialises adapters for mid
+
+        Returns:
+            Tuple(ResultCode, str):
+            tuple of ResultCode and message.
+
+        """
         self.dish_adapters = []
         self.subarray_adapters = []
         error_dev_names = []
@@ -485,7 +524,14 @@ class AssignReleaseResources(CentralNodeCommand):
         return (ResultCode.OK, "")
 
     def init_adapters_low(self) -> Tuple[ResultCode, str]:
-        """Initialises adapter for central node low"""
+        """
+        Initialises adapter for central node low
+
+        Returns:
+            Tuple(ResultCode, str):
+            tuple of ResultCode and message.
+
+        """
         self.mccs_mln_adapter = None
         self.subarray_adapters = []
 

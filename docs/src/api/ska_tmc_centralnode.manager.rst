@@ -65,10 +65,10 @@ ska\_tmc\_centralnode.manager.event\_data\_manager module
    :show-inheritance:
 
 
-ska\_tmc\_centralnode.manager.event\_receiver module
+ska\_tmc\_centralnode.manager.event\_manager module
 ----------------------------------------------------
 
-.. automodule:: ska_tmc_centralnode.manager.event_receiver
+.. automodule:: ska_tmc_centralnode.manager.event_manager
    :members:
    :undoc-members:
    :show-inheritance:

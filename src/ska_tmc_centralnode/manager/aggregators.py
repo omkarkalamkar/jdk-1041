@@ -24,8 +24,14 @@ class TelescopeStateAggregatorMid(Aggregator):
         self.logger = logger
         super().__init__(cm, logger)
 
-    def aggregate(self):
-        """Aggregate method for TelescopeStateAggregateMid"""
+    def aggregate(self) -> DevState:
+        """
+        Aggregate method for TelescopeStateAggregateMid
+
+        Returns:
+            DevState: Aggregates TelescopeState for mid
+
+        """
         # import debugpy; debugpy.debug_this_thread()
         subsystem_states = set()
         dish_modes = set()
@@ -117,8 +123,14 @@ class TelescopeStateAggregatorLow(Aggregator):
         self.logger = logger
         super().__init__(cm, logger)
 
-    def aggregate(self):
-        """Aggregate method for TelescopeStateAggregatorLow"""
+    def aggregate(self) -> DevState:
+        """
+        Aggregate method for TelescopeStateAggregatorLow
+
+        Returns:
+            DevState: Aggregates TeleScopeState for low
+
+        """
         telescopeStateList = []
         mccs_master = False
         csp_master = False
@@ -185,8 +197,14 @@ class TMCOpStateAggregator(Aggregator):
         self.logger = logger
         super().__init__(cm, logger)
 
-    def aggregate(self):
-        """Aggregate method for TMC Op State"""
+    def aggregate(self) -> DevState:
+        """
+        Aggregate method for TMC Op State
+
+        Returns:
+            DevState: Aggregates TMC Op state
+
+        """
         tmcStateList = []
         # get states of all TM devices
         # what if one of them is not working? i.e. tm subarray
@@ -218,7 +236,7 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
         super().__init__(cm, logger)
         self.logger = logger
 
-    def aggregate(self):
+    def aggregate(self) -> None:
         """Aggregate method for Mid Telescope Availability"""
         telescope_availability = (
             self._component_manager.get_telescope_availability()
@@ -268,7 +286,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
         super().__init__(cm, logger)
         self.logger = logger
 
-    def aggregate(self):
+    def aggregate(self) -> None:
         """Aggregate method for Low Telescope Availability"""
         telescope_availability = (
             self._component_manager.get_telescope_availability()
@@ -350,10 +368,13 @@ class LoadDishCfgCommandResultAggregator:
                 failed_messages.append(failed_message)
         return result_codes, failed_messages
 
-    def aggregate(self) -> tuple:
-        """Aggregate the results and return Final Result code
-        :retrun: result code and message
-        :return type: tuple
+    def aggregate(self) -> tuple[ResultCode, str]:
+        """
+        Aggregate the results and return Final Result code
+
+        Returns:
+            tuple (ResultCode, str): result code and message
+
         """
         result_code = ""
         message = ""
@@ -405,9 +426,14 @@ class DishkValueValidationResultAggregator:
         self.input_parameter_obj = self._component_manager.input_parameter
 
     def is_events_received_percentage_valid(self) -> bool:
-        """Verify the percent of kvalue validation result event received
+        """
+        Verify the percent of kvalue validation result event received
         as specified by DishKvalueAggregationAllowedPercent property.
-        :rtype: bool
+
+        Returns:
+            bool: `True`, if Events recieved percentage is valid.
+            `False`, otherwise.
+
         """
         if self.dln_kvalue_validation_results:
             total_events = len(self.dln_kvalue_validation_results.values())
@@ -423,8 +449,8 @@ class DishkValueValidationResultAggregator:
         return False
 
     def update_central_node_with_result(self) -> None:
-        """This method updates the DishVccValidationStatus of Central Node.
-        :rtype: None
+        """
+        This method updates the DishVccValidationStatus of Central Node.
         """
         flag = set(self.dln_kvalue_validation_results.values()) == set(
             ["k-value identical"]
@@ -441,17 +467,19 @@ class DishkValueValidationResultAggregator:
             }
 
     def aggregate(
-        self, dish_leaf_node_fqdn, kvalue_validation_result: str
+        self, dish_leaf_node_fqdn: str, kvalue_validation_result: str
     ) -> None:
-        """Aggregate the k-value validation result received from
-        Dish leaf nodes and provide the aggregated k-value report result
-        to Central Node.
-        :param dish_leaf_node_fqdn: dish leaf node fqdn
-        :type dish_leaf_node_fqdn: str
-        :param kvalue_validation_result: kvalue validation result code
-        :type kvalue_validation_result: str
-        :return: : None
-        :rtype: None
+        """
+        Aggregate the k-value validation result received from
+        Dish leaf nodes and provide the aggregated k-value report
+        result to Central Node.
+
+        Args:
+            dish_leaf_node_fqdn (str):
+                dish leaf node fqdn
+            kvalue_validation_result (str):
+                kvalue validation result code
+
         """
         with self._component_manager.dish_vcc_validation_attr_lock:
             dish_leaf_node_name = dish_leaf_node_fqdn.split("/")[-1]

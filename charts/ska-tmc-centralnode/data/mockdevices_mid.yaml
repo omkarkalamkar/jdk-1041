@@ -1,7 +1,7 @@
 name: "mocks-{{.Release.Name}}"
 function: testing
 domain: mocks
-instances: ["01","02","03","04","05","06","07"]
+instances: ["01","02","03","04","05","06","07", "08","09","10"]
 entrypoints:
   - name: "ska_tmc_common.test_helpers.helper_base_device.HelperBaseDevice"
   - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
@@ -55,6 +55,22 @@ server:
       - name: "HelperSDPMasterLeafNode"
         devices:
         - name: "mid-tmc/leaf-node-sdp/0"
+    - name: "08"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska036"
+    - name: "09"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska063"
+    - name: "10"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska100"
+        
 depends_on:
   - device: sys/database/2
 image:

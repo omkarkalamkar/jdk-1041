@@ -75,32 +75,41 @@ class DishConfigValidator:
                 return False, f"Invalid Dish id {dish_id} provided in Json"
         return True, ""
 
-    def is_json_valid(self) -> tuple:
-        """This methid validate json as per following rules
-        1. DishIDs are valid dishIDs (SKA001-133, MKT000-063)
-        2. DishIDs are unique
-        3. vcc_ids are unique
-        4. valid range of k values (integer in the range 1-2222)
+    def is_json_valid(self) -> tuple[bool, str]:
+        """
+        This method validate json as per following rules\n
+        1. DishIDs are valid dishIDs (SKA001-133, MKT000-063)\n
+        2. DishIDs are unique\n
+        3. vcc_ids are unique\n
+        4. valid range of k values (integer in the range 1-2222)\n
         5. valid range of vcc_ids
 
-        Sample Json: "dish_parameters": {
-                "SKA001": {
-                    "vcc": 1,
-                    "k"  : 11
-                },
-                "SKA100": {
-                    "vcc": 2,
-                    "k"  : 101
-                },
-                "SKA036": {
-                    "vcc": 3,
-                    "k"  : 1127
-                },
-                "SKA063": {
-                    "vcc": 4,
-                    "k"  : 620
+        Sample Json:
+            .. code-block:: json
+
+                "dish_parameters": {
+                    "SKA001": {
+                        "vcc": 1,
+                        "k"  : 11
+                    },
+                    "SKA100": {
+                        "vcc": 2,
+                        "k"  : 101
+                    },
+                    "SKA036": {
+                        "vcc": 3,
+                        "k"  : 1127
+                    },
+                    "SKA063": {
+                        "vcc": 4,
+                        "k"  : 620
+                    }
                 }
-            }
+
+        Returns:
+            Tuple of bool and str. `True, ""` if
+            json is valid, `False`, `message` otherwise
+
         """
         dish_parameters = self.dish_config_json.get("dish_parameters")
         dish_ids = dish_parameters.keys()
