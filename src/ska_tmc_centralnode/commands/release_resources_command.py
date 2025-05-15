@@ -110,7 +110,7 @@ class ReleaseResources(AssignReleaseResources):
         Args:
             argin (str): Input argument for the command
 
-        .. literalinclude:: ../../examples/ReleaseResources_mid.json
+        .. literalinclude:: ../../tests/data/command_ReleaseResources.json
             :language: json
             :caption: Example JSON for Release Resources mid
 
@@ -183,7 +183,7 @@ class ReleaseResources(AssignReleaseResources):
         Args:
             argin (str): Input argument for the command
 
-        .. literalinclude:: ../../examples/ReleaseResources_low.json
+        .. literalinclude:: ../../tests/data/command_release_resource_low.json
             :language: json
             :caption: Example JSON for Release Resources low
 

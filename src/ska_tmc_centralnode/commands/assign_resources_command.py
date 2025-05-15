@@ -118,7 +118,7 @@ class AssignResources(AssignReleaseResources):
         Args:
             argin (str): Input argument for the command
 
-        .. literalinclude:: ../../examples/AssignResources_mid.json
+        .. literalinclude:: ../../tests/data/command_AssignResources.json
             :language: json
             :caption: Example JSON for Assign Resources mid
 
@@ -273,7 +273,7 @@ class AssignResources(AssignReleaseResources):
         Args:
             argin (str): Input argument for the command
 
-        .. literalinclude:: ../../examples/AssignResources_low.json
+        .. literalinclude:: ../../tests/data/command_assign_resource_low.json
             :language: json
             :caption: Example JSON for Assign Resources low
 
