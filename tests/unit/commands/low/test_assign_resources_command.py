@@ -32,7 +32,7 @@ def test_low_assign_resources_command(
     subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     cm.assign_resources(assign_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
@@ -54,7 +54,7 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
     del json_argument["sdp"]["processing_blocks"]
@@ -69,7 +69,7 @@ def test_assign_resources_missing_sdp_key(
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
@@ -82,7 +82,7 @@ def test_assign_resources_missing_csp_key(
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["csp"]
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
@@ -111,7 +111,7 @@ def test_low_assign_resources_command_fail_subarray(
     adapter_factory.get_or_create_adapter(
         LOW_SUBARRAY_DEVICE, proxy=subarrayMock
     )
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     assign_res_command = AssignResources(
         cm, adapter_factory, skuid, logger=logger
     )
@@ -125,7 +125,7 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assert cm.is_command_allowed("AssignResources")
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["subarray_beams"][0]["subarray_beam_id"]
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
@@ -167,7 +167,7 @@ def test_low_assign_resources_missing_subarray_id(
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
     (res_code, message) = cm.assign_resources(json.dumps(json_argument))
@@ -182,7 +182,7 @@ def test_low_assign_resources_command_missing_mccs(
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assert cm.is_command_allowed("AssignResources")
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]
     res_code, message = cm.assign_resources(
@@ -199,7 +199,7 @@ def test_low_assign_resources_command_missing_aperture_id(
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assert cm.is_command_allowed("AssignResources")
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["subarray_beams"][0]["apertures"][0][
         "aperture_id"
@@ -219,7 +219,7 @@ def test_low_assign_resources_command_missing_station_ids(
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
 
     assert cm.is_command_allowed("AssignResources")
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["subarray_beams"][0]["apertures"][0][
         "station_id"
@@ -270,7 +270,7 @@ def test_low_assign_resources_raises_state_model_exception(
     check_if_subarray_is_available(cm)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
-    assign_input_str = json_factory("command_assign_resource_low")
+    assign_input_str = json_factory("assign_resource_low")
     cm.assign_resources(assign_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}

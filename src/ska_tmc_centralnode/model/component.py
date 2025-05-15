@@ -14,7 +14,16 @@ from ska_tmc_centralnode.model.enum import ModesAvailability
 
 
 def dev_state_2_str(value: DevState) -> str:
-    """Converts DevState to strings"""
+    """
+    Converts DevState to strings
+
+    Args:
+        value (DevState): DevState
+
+    Returns:
+        str: DevState converted to string
+
+    """
     dev_state_map = {
         DevState.ON: "DevState.ON",
         DevState.OFF: "DevState.OFF",
@@ -391,9 +400,12 @@ class CentralComponent(TmcComponent):
             self._pst = value
 
     def to_json(self) -> str:
-        """Converts dictionary to json
-        :return: Json string
-        :rtype: str
+        """
+        Converts dictionary to json
+
+        Returns:
+            str: Json string
+
         """
         return json.dumps(self.to_dict())
 
@@ -435,17 +447,23 @@ class MCCSDeviceInfo(DeviceInfo):
             return self.dev_name == other.dev_name
         return False
 
-    def to_json(self):
+    def to_json(self) -> str:
         """
         This method Converts DevInfo to Json
-        :return: Json string
-        :rtype: str"""
+
+        Returns:
+            str: Json string
+
+        """
         return json.dumps(self.to_dict())
 
-    def to_dict(self):
-        """This method Converts Devinfo to Dict
-        :return: resources json
-        :rtype: dict
+    def to_dict(self) -> dict:
+        """
+        This method Converts Devinfo to Dict
+
+        Returns:
+            dict: resources json
+
         """
         super_dict = super().to_dict()
         super_dict["resources"] = self.resources

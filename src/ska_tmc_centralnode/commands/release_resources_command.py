@@ -73,8 +73,18 @@ class ReleaseResources(AssignReleaseResources):
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
-    ):
-        """Updates the task status for command ReleaseResources"""
+    ) -> None:
+        """
+        Updates the task status for command ReleaseResources
+
+        Args:
+            result: A tuple containing the result code and a message.
+                The result code indicates whether the command
+                succeeded or failed.
+            exception (str): A string representing any exception message.
+                This is used when the result indicates a failure.
+                Default is an empty string.
+        """
         if result[0] == ResultCode.FAILED:
             self.task_callback(
                 result=result,
@@ -97,23 +107,17 @@ class ReleaseResources(AssignReleaseResources):
         """
         Method to invoke ReleaseResources command on Subarray.
 
-        :param argin: DevString
+        Args:
+            argin (str): Input argument for the command
 
-        Example:
+        .. literalinclude:: ../../../tests/data/command_ReleaseResources.json
+            :language: json
+            :caption: Example JSON for Release Resources mid
 
-        .. code-block::
+        Returns:
+            A tuple containing a return code and a string msg.
+            For Example: (ResultCode.OK, "")
 
-            {"interface":
-            "https://schema.skao.int/ska-tmc-releaseresources/2.0",
-            "transaction_id": "txn-....-00001",
-            "subarray_id": 1,
-            "release_all": true,
-            "receptor_ids": []
-            }
-
-            :return: A tuple containing a return code and a string msg.
-                For Example:
-                (ResultCode.OK, "")
         """
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -176,22 +180,16 @@ class ReleaseResources(AssignReleaseResources):
         """
         Method to invoke ReleaseResources command on Subarray Node.
 
-        :param: argin
-        :type: DevString
+        Args:
+            argin (str): Input argument for the command
 
-        Example:
+        .. literalinclude:: ../../../tests/data/release_resource_low.json
+            :language: json
+            :caption: Example JSON for Release Resources low
 
-        .. code-block::
-
-            {"interface":
-            "https://schema.skao.int/ska-low-tmc-releaseresources/2.0",
-            "transaction_id":"txn-....-00001","subarray_id":1,
-            "release_all":true}
-
-        :return:
+        Returns:
             A tuple containing a return code and a string msg.
-            For Example:
-            (ResultCode.OK, "")
+            For Example: (ResultCode.OK, "")
 
         :raises:
             ValueError if input argument json string contains invalid value
@@ -199,7 +197,7 @@ class ReleaseResources(AssignReleaseResources):
             KeyError if input argument json string contains invalid key
 
             DevFailed if the command execution or command invocation on
-              SubarrayNode is not successful
+            SubarrayNode is not successful
 
         """
         ret_code, message = self.init_adapters()
@@ -271,8 +269,20 @@ class ReleaseResources(AssignReleaseResources):
                             ] = [message_or_unique_id]
         return (ResultCode.OK, "")
 
-    def release_all_resources(self, adapter):
-        """Releases all resources"""
+    def release_all_resources(
+        self, adapter
+    ) -> Tuple[list[ResultCode], list[str]]:
+        """
+        Releases all resources
+
+        Args:
+            adapter: Adapter
+
+        Returns:
+            Tuple(list, list): Tuple of list of ResulCodes
+            and lists of messages.
+
+        """
         return self.send_command(
             [adapter],
             f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
@@ -280,8 +290,20 @@ class ReleaseResources(AssignReleaseResources):
             "ReleaseAllResources",
         )
 
-    def release_all_resources_mccs(self, adapter, argin):
-        """Releases all resources mccs"""
+    def release_all_resources_mccs(
+        self, adapter, argin
+    ) -> Tuple[list[ResultCode], list[str]]:
+        """
+        Releases all resources mccs
+
+        Args:
+            adapter: Adapter
+
+        Returns:
+            Tuple(list, list): Tuple of list of ResulCodes
+            and lists of messages.
+
+        """
         return self.send_command(
             [adapter],
             f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
@@ -291,7 +313,16 @@ class ReleaseResources(AssignReleaseResources):
         )
 
     def create_mccs_input_data(self, json_argument: dict) -> dict:
-        """Creates mccs input strings"""
+        """
+        Creates mccs input strings
+
+        Args:
+            json_argument (dict): Json argument
+
+        Returns:
+            dict: MCCS input data json
+
+        """
         try:
             if "interface" in json_argument:
                 del json_argument["interface"]

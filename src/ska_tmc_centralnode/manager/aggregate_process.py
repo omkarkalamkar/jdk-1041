@@ -25,8 +25,17 @@ class HealthAggregatorFactory:
     HealthStateAggregator instance."""
 
     @staticmethod
-    def get_aggregator(telescope: str):
-        """Static method to return aggregator class instance"""
+    def get_aggregator(telescope: str) -> StateAggregator:
+        """
+        Static method to return aggregator class instance
+
+        Returns:
+            StateAggregator: StateAggregator instance
+
+        Raises:
+            ValueError: If Unknown telescope type is provided
+
+        """
         if telescope == "mid":
             return StateAggregator(HealthState, HEALTH_STATE_RULES_MID)
         if telescope == "low":
@@ -76,7 +85,14 @@ class HealthStateAggregationProcessor(AggregationProcess):
         }
         return event_data_dict
 
-    def set_state_aggregator(self):
-        """Return an instance of HealthStateAggregator
-        for the given telescope."""
+    def set_state_aggregator(self) -> HealthAggregatorFactory:
+        """
+        Return an instance of HealthStateAggregator
+        for the given telescope.
+
+        Returns:
+            HealthAggregatorFactory:
+                HealthAggregatorFactory Instance
+
+        """
         return HealthAggregatorFactory.get_aggregator(self.telescope)

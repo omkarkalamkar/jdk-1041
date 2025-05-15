@@ -38,16 +38,18 @@ class StowAntennas(CentralNodeCommand):
         self.dish_adapters = []
         self.init_adapters()
 
-    def check_allowed(self):
+    def check_allowed(self) -> bool:
         """
         Checks whether this command is allowed
         It checks that the device is in a state
         to perform this command and that all the
         component needed for the operation are not faulty
 
-        :return: True if this command is allowed
+        Returns:
+            bool: True if this command is allowed
 
-        :rtype: boolean
+        Raises:
+            CommandNotAllowed: If command is not allowed
 
         """
         if self.op_state_model.op_state in [
@@ -66,7 +68,15 @@ class StowAntennas(CentralNodeCommand):
 
         return True
 
-    def init_adapters(self):
+    def init_adapters(self) -> Tuple[ResultCode, str]:
+        """
+        Initialise adapters
+
+        Returns:
+            Tuple(ResultCode, str): Tuple of ResultCode
+            and status message.
+
+        """
         self.dish_adapters = []
 
         error_dev_names = []
@@ -106,8 +116,13 @@ class StowAntennas(CentralNodeCommand):
         """
         Method to invoke StowAntennas command.
 
-        param argin:
-            List of Receptors to be stowed.
+        Args:
+            argin:
+                List of Receptors to be stowed.
+
+        Returns:
+            Tuple(ResultCode, str): Tuple of ReultCode
+            and message.
 
         """
 
@@ -131,8 +146,20 @@ class StowAntennas(CentralNodeCommand):
                     )
         return (ResultCode.OK, "Command Completed")
 
-    def set_stow_mode_dishes(self, adapters):
-        """Method for set stow mode for dish"""
+    def set_stow_mode_dishes(
+        self, adapters
+    ) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Method for set stow mode for dish
+
+        Args:
+            adapters: Adapters
+
+        Returns:
+            Tuple(List, List): Tuple containing list of ResultCodes
+            and list of messages
+
+        """
         return self.send_command(
             [adapters],
             "Error in calling StowAntennasCommand() on TMC Dish leaf node",

@@ -143,7 +143,7 @@ def test_release_res_command_low(
     return release_resources(
         tango_context,
         CENTRALNODE_LOW,
-        json_factory("command_assign_resource_low"),
-        json_factory("command_release_resource_low"),
+        json_factory("assign_resource_low"),
+        json_factory("release_resource_low"),
         change_event_callbacks,
     )

@@ -95,6 +95,15 @@ ERROR_PROPAGATION_DEFECT = json.dumps(
     }
 )
 
+DISH_DEFECT = json.dumps(
+    {
+        "enabled": True,
+        "fault_type": FaultType.FAILED_RESULT,
+        "error_message": "Error in calling command for dish devices",
+        "result": ResultCode.FAILED,
+    }
+)
+
 
 RESET_DEFECT = json.dumps(
     {

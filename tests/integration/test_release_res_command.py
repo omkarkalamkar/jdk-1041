@@ -130,8 +130,8 @@ def test_release_res_command_low(
     return release_resources(
         tango_context,
         CENTRALNODE_LOW,
-        json_factory("command_assign_resource_low"),
-        json_factory("command_release_resource_low"),
+        json_factory("assign_resource_low"),
+        json_factory("release_resource_low"),
         change_event_callbacks,
     )
 
@@ -476,7 +476,7 @@ def test_release_resources_low_timeout(
     )
 
     result, unique_id = central_node.AssignResources(
-        json_factory("command_assign_resource_low")
+        json_factory("assign_resource_low")
     )
 
     logger.info(
@@ -505,7 +505,7 @@ def test_release_resources_low_timeout(
     check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
 
     result, unique_id = central_node.ReleaseResources(
-        json_factory("command_release_resource_low")
+        json_factory("release_resource_low")
     )
 
     logger.info(
@@ -578,7 +578,7 @@ def test_release_resources_error_aggregation(
     check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
 
     result, unique_id = central_node.AssignResources(
-        json_factory("command_assign_resource_low")
+        json_factory("assign_resource_low")
     )
 
     logger.info(
@@ -605,7 +605,7 @@ def test_release_resources_error_aggregation(
     subarray_proxy.SetDefective(ERROR_PROPAGATION_DEFECT)
 
     result, unique_id = central_node.ReleaseResources(
-        json_factory("command_release_resource_low")
+        json_factory("release_resource_low")
     )
 
     logger.info(

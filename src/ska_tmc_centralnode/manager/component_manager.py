@@ -84,11 +84,11 @@ class CNComponentManager(TmcComponentManager):
 
     It supports:
 
-    Monitoring its component, e.g. detect that it has been turned off
-        or on
+    1. Monitoring its component, e.g. detect that it has been turned off
+    or on\n
 
-    Receiving the change events from lower level devices and trigger
-        the TMC and telescope state aggregation
+    2. Receiving the change events from lower level devices and trigger
+    the TMC and telescope state aggregation
     """
 
     # pylint:disable=keyword-arg-before-vararg
@@ -451,10 +451,13 @@ class CNComponentManager(TmcComponentManager):
     ) -> tuple[TaskStatus, str]:
         """
         Placeholder method for reset command.
-        :param task_callback: Update task status, defaults to None
-        :type task_callback: Callable, optional
-        :return: task_status, message
-        :rtype: tuple
+
+        Args:
+            task_callback: Update task status, defaults to None
+
+        Returns:
+            tuple(TaskStatus, str): task_status, message
+
         """
         return TaskStatus.REJECTED, "Reset command is not implemented"
 
@@ -656,8 +659,10 @@ class CNComponentManager(TmcComponentManager):
     def add_device(self, device_name: str) -> None:
         """
         Add device to the liveliness probe function
-        :param dev_name: device name
-        :type dev_name: str
+
+        Args:
+            dev_name (str): device name
+
         """
         if "subarray" in device_name.lower():
             devInfo = SubArrayDeviceInfo(device_name, False)
@@ -686,8 +691,9 @@ class CNComponentManager(TmcComponentManager):
         """
         Update a device with correct responsiveness information.
 
-        :param dev_name: name of the device
-        :type dev_name: str
+        Args:
+            dev_name (str): name of the device
+
         """
         with self.rlock:
             dev_info = self.get_device(device_name)
@@ -700,10 +706,10 @@ class CNComponentManager(TmcComponentManager):
         """
         Set a device to failed and call the relative callback if available.
 
-        :param device_info: Information about the device
-        :type device_info: DeviceInfo
-        :param exception: Exception raised during the ping failure
-        :type exception: Exception
+        Args:
+            device_info (DeviceInfo): Information about the device
+            exception (Exception): Exception raised during the ping failure
+
         """
         # Log the device failure with the device name
         message = (
@@ -719,7 +725,13 @@ class CNComponentManager(TmcComponentManager):
             self._telescope_availability_aggregator.aggregate()
 
     def update_event_failure(self, device_name: str) -> None:
-        """updates event failures in Dev info"""
+        """
+        updates event failures in Dev info
+
+        Args:
+            device_name (str): Device name
+
+        """
         with self.rlock:
             devInfo = self.component.get_device(device_name)
             devInfo.last_event_arrived = time.time()
@@ -733,10 +745,11 @@ class CNComponentManager(TmcComponentManager):
         Update a monitored device health state
         aggregate the health states available
 
-        :param dev_name: name of the device
-        :type dev_name: str
-        :param health_state: health state of the device
-        :type health_state: HealthState
+        Args:
+            dev_name (str): name of the device
+            health_state (HealthState): health state of the device
+            timstamp: timestamp
+
         """
         with self.lock:
             self.logger.debug(
@@ -1087,8 +1100,12 @@ class CNComponentManager(TmcComponentManager):
         """
         Checks subarray id is present in json or not.
 
-        param json_argument: input json string
-        :type json_argument: str
+        Args:
+            json_argument (str): input json string
+
+        Returns:
+            Tuple(bool, str):
+
         """
         try:
             subarray_id = json_argument["subarray_id"]
@@ -1112,6 +1129,7 @@ class CNComponentManager(TmcComponentManager):
             subarray_id (int): subarray_id
             desired_obsstate (List): desired observation state
             command_name (str): command name
+
         """
 
         def is_subarray_in_right_obs_state() -> bool:
@@ -1147,8 +1165,10 @@ class CNComponentManager(TmcComponentManager):
     def check_device_responsiveness_command(self, command_name: str) -> None:
         """
         Override this method to add responsive checks for the devices
-        :param command_name: Command name for the check
-        :type command_name: str
+
+        Args:
+            command_name (str): Command name for the check
+
         """
         return True
 

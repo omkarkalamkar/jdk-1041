@@ -155,12 +155,14 @@ class LoadDishCfg(LoadDishCfgCommand):
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
-    ):
-        """Updates the task status for command
-        :param result: Result code of command
-        :type: ResultCode enum
-        :param message: any message returned as a part of command
-        :type message: str
+    ) -> None:
+        """
+        Updates the task status for command
+
+        Args:
+            result: Result code of command
+            exception (str): any message returned as a part of command
+
         """
         self.logger.debug(
             "Command ID: %s | Calling task callback for "
@@ -191,7 +193,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.component_manager.reset_load_dish_cfg_data()
 
     def update_memorized_attribute(self) -> None:
-        """Update memorized attribute so after restart this
+        """
+        Update memorized attribute so after restart this
         attribute used to get dish map vcc version set before
         restart
         """
@@ -200,9 +203,18 @@ class LoadDishCfg(LoadDishCfgCommand):
     def get_dishid_vcc_map_json(
         self, initial_params: dict
     ) -> Tuple[dict, str]:
-        """Get DishId-VCC map json from initial params
-        :param initial_param: this param containg tm data source uri
-        and file path which is used for extracting vcc_map json file
+        """
+        Get DishId-VCC map json from initial params
+
+        Args:
+            initial_param (dict): this param containg tm
+                data source uri and file path which is used
+                for extracting vcc_map json file
+
+        Returns:
+            Tuple(dict, str): tuple having `DishId-VCC map json` and
+            `Error message` if any
+
         """
         data_sources = initial_params.get("tm_data_sources", None)
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
@@ -231,17 +243,19 @@ class LoadDishCfg(LoadDishCfgCommand):
     # pylint:disable=signature-differs
     def do(self, argin: str) -> Tuple[ResultCode, str]:
         """
-        This command performs the following steps:
-        1. Loads the content of the DishId-VCC mapping file from CAR URI.
-        2. Validates the JSON.
-        3. Invokes a command on the CSP master leaf node.
+        This command performs the following steps:\n
+        1. Loads the content of the DishId-VCC mapping file from CAR URI.\n
+        2. Validates the JSON.\n
+        3. Invokes a command on the CSP master leaf node.\n
         4. Invokes the SetKValue command on the Dish Leaf Node for each dish ID
-        provided in the DishId-VCC map.
+        provided in the DishId-VCC map.\n
 
-        :param argin: DishId-VCC map parameters in JSON string format.
-        :type argin: str
-        :return: Result code and message
-        :rtype: Tuple[ResultCode, str]
+        Args:
+            argin (str): DishId-VCC map parameters in JSON string format.
+
+        Returns:
+            Tuple(ResultCode, str): Result code and message
+
         """
 
         result_code, message = self.init_adapters()
@@ -293,10 +307,18 @@ class LoadDishCfg(LoadDishCfgCommand):
     def _invoke_load_dish_cfg_on_csp_master_ln(
         self, dishid_vcc_map_params: str
     ) -> Tuple[ResultCode, list]:
-        """Invoke LoadDishCfg command on Csp Master with
-         vcc_map_params argument
-        :param dishid_vcc_map_params:
-        vcc_map_params info containing vcc_dish mapping
+        """
+        Invoke LoadDishCfg command on Csp Master with
+        vcc_map_params argument
+
+        Args:
+            dishid_vcc_map_params (str): vcc_map_params
+                info containing vcc_dish mapping
+
+        Returns:
+            Tuple(ResultCode, str): tuple containing
+            ResultCode and message
+
         """
         self.logger.info(
             "Command ID: %s | Invoking LoadDishCfg command on: %s",
@@ -317,8 +339,17 @@ class LoadDishCfg(LoadDishCfgCommand):
     def _set_k_numbers_to_dish(
         self, dish_parameters: dict
     ) -> Tuple[ResultCode, str]:
-        """Set K numbers to Dish by invoking setKValue command on dish ln
-        :params dish_parametes: Dish paramters with dishid and k values
+        """
+        Set K numbers to Dish by invoking setKValue command on dish ln
+
+        Args:
+            dish_parameters (dict): Dish paramters
+                with dishid and k values
+
+        Returns:
+            Tuple(ResultCode, str): tuple containing
+            ResultCode and message
+
         """
         return_codes = []
         message_or_unique_ids = []
@@ -367,9 +398,18 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         return return_codes, message_or_unique_ids
 
-    def load_dish_config_json_validator(self, argin):
+    def load_dish_config_json_validator(self, argin) -> tuple[bool, str]:
         """
         Method to validate the JSON for LoadDishConfig Command
+
+        Args:
+            argin: Input argument for DishConfigValidator
+
+        Returns:
+            Tuple(bool, str): Tuple of `boolean`
+            representing `valid dish config`
+            and `string` representing `message`
+
         """
         config_json_validator = DishConfigValidator(
             argin,
@@ -380,6 +420,16 @@ class LoadDishCfg(LoadDishCfgCommand):
         return is_valid_dish_cfg, message
 
     @retry(tries=3, delay=1)
-    def fetch_dishid_vcc_map(self, dish_cfg_params):
-        """Fetch the DishId-VCC map JSON."""
+    def fetch_dishid_vcc_map(self, dish_cfg_params: str) -> Tuple[dict, str]:
+        """
+        Fetch the DishId-VCC map JSON.
+
+        Args:
+            dish_cfg_params (str): Dish config parameters
+
+        Returns:
+            Tuple(dict, str): tuple of `DishId-VCC map JSON`
+            and `error message` if any
+
+        """
         return self.get_dishid_vcc_map_json(json.loads(dish_cfg_params))
