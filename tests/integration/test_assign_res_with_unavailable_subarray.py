@@ -120,7 +120,7 @@ def test_assign_res_command_low_unavailable_subarray(
     return assign_resources(
         tango_context,
         central_node_name,
-        json_factory("command_assign_resource_low"),
+        json_factory("assign_resource_low"),
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
     )
