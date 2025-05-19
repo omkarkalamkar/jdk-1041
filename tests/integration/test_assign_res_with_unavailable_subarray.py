@@ -77,7 +77,7 @@ def assign_resources(
     )
 
     # assert unique_id[0].endswith("AssignResources")
-    assert result[0] == ResultCode.REJECTED
+    assert result[0] == ResultCode.QUEUED
 
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
