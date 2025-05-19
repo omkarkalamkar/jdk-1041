@@ -640,6 +640,7 @@ class CNComponentManager(TmcComponentManager):
     )
     def _check_if_device_is_responsive(self, dev_names: List[str]):
         """checks if the device is responsive"""
+        self.logger.debug("Retrying device responsive check")
         count = 0
         for dev_name in dev_names:
             dev_info = self.get_device(dev_name)
