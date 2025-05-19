@@ -44,7 +44,7 @@ def assign_resources(
     )
 
     assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.REJECTED
+    assert result[0] == ResultCode.QUEUED
 
     central_node_proxy.subscribe_event(
         "longRunningCommandResult",
@@ -77,7 +77,7 @@ def assign_resources(
     )
 
     # assert unique_id[0].endswith("AssignResources")
-    assert result[0] == ResultCode.QUEUED
+    assert result[0] == ResultCode.REJECTED
 
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
