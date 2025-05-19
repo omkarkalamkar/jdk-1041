@@ -107,7 +107,6 @@ def test_assign_res_command_mid_unavailable_subarray(
     )
 
 
-@pytest.mark.testing
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(

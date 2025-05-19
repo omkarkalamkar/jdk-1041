@@ -1,4 +1,5 @@
 """Event manager class for CentralNode"""
+
 import logging
 from typing import Callable, Optional
 

@@ -6,6 +6,7 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+
 import json
 import threading
 import time

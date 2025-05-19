@@ -1263,16 +1263,16 @@ class CNComponentManager(TmcComponentManager):
         #         )
 
         # validate processing block
-        (
-            is_processing_block_present,
-            processing_block_error_msg,
-        ) = assign_resources_command._validate_and_update_resource_config(
-            json_argument
-        )
-        if not is_processing_block_present:
-            return assign_resources_command.reject_command(
-                processing_block_error_msg
-            )
+        # (
+        #     is_processing_block_present,
+        #     processing_block_error_msg,
+        # ) = assign_resources_command._validate_and_update_resource_config(
+        #     json_argument
+        # )
+        # if not is_processing_block_present:
+        #     return assign_resources_command.reject_command(
+        #         processing_block_error_msg
+        #     )
 
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
