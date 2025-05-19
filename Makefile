@@ -89,12 +89,6 @@ ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context
 MARK = $(shell echo $(TELESCOPE) | sed s/-/_/) and (post_deployment or acceptance)
 endif
-K8S_TEST_COUNT ?= 1
-ifeq ($(MAKECMDGOALS),k8s-test)
-ADD_ARGS += --true-context --count=$(K8S_TEST_COUNT)
-MARK=testing
-#MARK = $(shell echo $(TELESCOPE) | sed s/-/_/) and (post_deployment or acceptance)
-endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
 
@@ -126,7 +120,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set global.cluster_domain=$(CLUSTER_DOMAIN) \
 	--set global.tango_host=$(TANGO_HOST) \
 	--set global.exposeAllDS=false \
-	--set global.operator=TRUE \
+	--set global.operator=true \
 	--set ska-tango-base.display=$(DISPLAY) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
