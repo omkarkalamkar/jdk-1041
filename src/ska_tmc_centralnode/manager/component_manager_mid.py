@@ -12,7 +12,7 @@ import threading
 import time
 from logging import Logger
 from queue import Queue
-from typing import Callable
+from typing import Callable, Tuple
 
 from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
@@ -78,28 +78,54 @@ class CNComponentManagerMid(CNComponentManager):
         k_value_valid_range_lower_limit=1,
         *args,
         **kwargs,
-    ):
+    ) -> None:
         """
         Initialise a new ComponentManager instance for mid.
 
-        :param op_state_model: the op state model used by this component
-            manager
-        :param logger: a logger for this component manager
-        :param _component: allows setting of the component to be
-            managed; for testing purposes only
-        :param _input_parameter : specify input parameter for mid.
-        :param _liveliness_probe:allows to enable/disable LivelinessProbe usage
-        :param _event_manager : allows to enable/disable EventManager usage
-        :param max_workers: Optional. Maximum worker threads for
-            monitoring purpose.
-        :param proxy_timeout: Optional. Time period to wait for
-            event and responses.
-        :param event_subscription_check_period: (int) Time in seconds for sleep
-            intervals in the event subsription thread.
-        :param liveliness_check_period: (int) Period for the liveliness probe
-            to monitor each device in a loop
-        :param timeout : Optional. Time period to wait for
-            intialization of adapter.
+        Args:
+            op_state_model: the op state model used by this
+                component manager
+            logger:
+                a logger for this component manager
+            _component: allows setting of the component to be
+                managed; for testing purposes only
+            _input_parameter :
+                specify input parameter for mid.
+            _liveliness_probe:
+                allows to enable/disable LivelinessProbe usage
+            _event_manager : allows to enable/disable
+                EventManager usage
+            max_workers: Optional. Maximum worker
+                threads for monitoring purpose.
+            proxy_timeout: Optional. Time period to wait for
+                event and responses.
+            event_subscription_check_period (int): Time in seconds
+                for sleep intervals in the event subsription thread.
+            liveliness_check_period (int): Period for the
+                liveliness probe to monitor each device in a loop
+            timeout : Optional. Time period to wait for
+                intialization of adapter.
+            skuid_service:
+                SKUId service
+            command_timeout:
+                Command timeout
+            dish_vcc_uri:
+                Dish vcc uri
+            dish_vcc_file_path:
+                dish vcc file path
+            dish_vcc_init_timeout:
+                dish vcc default timeout
+            dishKvalueAggregationAllowedPercent:
+                dish Kvalue aggregation default
+            invoke_load_dish_cfg_command_callback:
+                callback for invoke load dish
+            enable_dish_vcc_init:
+                enable dish vcc
+            k_value_valid_range_upper_limit:
+                k value upper limit
+            k_value_valid_range_lower_limit:
+                k value lower limit.
+
         """
         super().__init__(
             op_state_model,
@@ -207,15 +233,28 @@ class CNComponentManagerMid(CNComponentManager):
         )
         self.aggregation_process.start_aggregation_process()
 
-    def check_if_dishes_are_responsive(self):
-        """Checks whether dishes are responsive"""
+    def check_if_dishes_are_responsive(self) -> bool:
+        """
+        Checks whether dishes are responsive
+
+        Returns:
+            True, if dishes are responsive,
+            False otherwise
+
+        """
         self.logger.info("Checking if dishes are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )
 
-    def get_load_disg_cfg_resultcode(self):
-        """Return Aggregated command result for Load Dish Cfg command"""
+    def get_load_disg_cfg_resultcode(self) -> ResultCode:
+        """
+        Return Aggregated command result for Load Dish Cfg command
+
+        Returns:
+            Aggregated command result for Load Dish Cfg command
+
+        """
         return self.load_dish_cfg_aggregated_result
 
     @property
@@ -241,46 +280,63 @@ class CNComponentManagerMid(CNComponentManager):
         self._is_dish_vcc_config_set = value
 
     @property
-    def dish_vcc_validation_status(self):
-        """Getter method for dish vcc validation status"""
+    def dish_vcc_validation_status(self) -> dict:
+        """
+        Getter method for dish vcc validation status
+
+        Returns:
+            dish: dish vcc validation status
+
+        """
         return self._dish_vcc_validation_status
 
     @dish_vcc_validation_status.setter
     def dish_vcc_validation_status(self, validation_status: dict):
-        """This method does the aggregation from Dish and CSPMLN
-         and sets the updated validation result.
-         Ex1:
-         current_dish_vcc_validation_status = '{
-                "ska001": "k-value not set",
-                "ska036": "k-value not set",
+        """
+        This method does the aggregation from Dish and CSPMLN
+        and sets the updated validation result.
+
+        Ex1:
+            .. code-block:: json
+
+                current_dish_vcc_validation_status = '{
+                    "ska001": "k-value not set",
+                    "ska036": "k-value not set",
+                    "ska063": "k-value not set",
+                    "ska100": "k-value not set",
+                    "mid-tmc/leaf-node-csp/0":
+                    "TMC and CSP Master Dish Vcc Version is Same",
+                }'
+                validation_status = {
+                    "ska001": "k-value identical",
+                    "ska036": "k-value identical",
+                    "ska063": "k-value not set",
+                    "ska100": "k-value not set",
+                }
+
+        if validation_status received and current validation status is
+        as above then this method will aggregate like below:
+
+        .. code-block:: json
+            self._dish_vcc_validation_status = '{
+                "ska001": "k-value identical",
+                "ska036": "k-value identical",
                 "ska063": "k-value not set",
                 "ska100": "k-value not set",
                 "mid-tmc/leaf-node-csp/0":
                 "TMC and CSP Master Dish Vcc Version is Same",
             }'
-         validation_status = {
-                "ska001": "k-value identical",
-                "ska036": "k-value identical",
-                "ska063": "k-value not set",
-                "ska100": "k-value not set",
-         }
-         if validation_status received and current validation status is
-         as above then this method will aggregate like below:
-         self._dish_vcc_validation_status = '{
-                "ska001": "k-value identical",
-                "ska036": "k-value identical",
-                "ska063": "k-value not set",
-                "ska100": "k-value not set",
-                "mid-tmc/leaf-node-csp/0":
-                "TMC and CSP Master Dish Vcc Version is Same",
-            }'
+
         or Ex2:
-         if validation_status = {"dish":"ALL DISH OK"}
-         then:
-         self._dish_vcc_validation_status = '{
+        if validation_status = {"dish":"ALL DISH OK"}
+        then:
+
+        .. code-block:: json
+            self._dish_vcc_validation_status = '{
                 "dish":"ALL DISH OK",
                 "TMC and CSP Master Dish Vcc Version is Same",
             }'
+
         """
         csp_validation_status = ""
         # Copying here as dictionary is getting passed by reference.
@@ -344,8 +400,14 @@ class CNComponentManagerMid(CNComponentManager):
         updated_validation_status = {}
 
     def is_csp_dish_ready(self) -> bool:
-        """This method wait for csp master leaf node and
+        """
+        his method wait for csp master leaf node and
         dish leaf nodes to become ready to accept request
+
+        Returns:
+            True, if csp master leaf node and
+            dish leaf nodes are ready, False otherwise
+
         """
         count = 0
         devices_to_check_list = [self.input_parameter.csp_mln_dev_name]
@@ -370,8 +432,11 @@ class CNComponentManagerMid(CNComponentManager):
                 break
         return False
 
-    def update_long_running_command_result(self, dev_name: str, value: tuple):
-        """Updates the LRCR callback with received event.
+    def update_long_running_command_result(
+        self, dev_name: str, value: tuple
+    ) -> None:
+        """
+        Updates the LRCR callback with received event.
 
         Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
         or (unique_id,TaskStatus)
@@ -384,11 +449,11 @@ class CNComponentManagerMid(CNComponentManager):
         If there is no command_mapping present the event
         might be of old command.
 
-        :param dev_name: name of the device who's event has been
-        captured in this method
-        :type dev_name: str
-        :param value: longRunningCommandResult attribute event.
-        :type value: tuple
+        Args:
+            dev_name (str): name of the device who's event has been
+                captured in this method
+            value: longRunningCommandResult attribute event.
+
         """
         self.logger.debug(
             "Command ID: %s | longRunningCommandResult event for "
@@ -456,7 +521,8 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
     def get_command_id(self, unique_id: int) -> str:
-        """This Method is used to get command
+        """
+        This Method is used to get command
         it from the command mapping dictionary
 
         Args:
@@ -464,6 +530,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         Returns:
             str: returns the command id with reference to unique id.
+
         """
         index_of_unique_id = list(self.command_mapping.values()).index(
             unique_id
@@ -473,16 +540,16 @@ class CNComponentManagerMid(CNComponentManager):
         ]  # command id mapped to unique id
         return command_id
 
-    def update_device_state(self, device_name, state):
+    def update_device_state(self, device_name: str, state: DevState) -> None:
         """
         Update a monitored device state,
         aggregate the states available
         and call the relative callbacks if available
 
-        :param dev_name: name of the device
-        :type dev_name: str
-        :param state: state of the device
-        :type state: DevState
+        Args:
+            dev_name (str): name of the device
+            state: state of the device
+
         """
         with self.rlock:
             self.logger.debug(f"State event for {device_name}: {state}")
@@ -522,15 +589,24 @@ class CNComponentManagerMid(CNComponentManager):
     def get_dish_leaf_node_device_names(self) -> tuple:
         """
         Return Dish leaf node device names
+
+        Returns:
+            A tuple of dish leaf node devices names
+
         """
         return self.input_parameter.dish_leaf_node_dev_names
 
-    def update_device_dish_mode(self, dev_name, dish_mode: DishMode) -> None:
+    def update_device_dish_mode(
+        self, dev_name: str, dish_mode: DishMode
+    ) -> None:
         """
         Update the dish mode of the given dish leaf node
         and call the relative callbacks if available.
-        :param dishMode: Dish mode of the device
-        :type dishMode: DishMode
+
+        Args:
+            dev_name (str): Device name
+            dishMode: Dish mode of the device
+
         """
         with self.rlock:
             self.logger.debug(
@@ -556,14 +632,17 @@ class CNComponentManagerMid(CNComponentManager):
         self._aggregate_state()
         self._update_imaging()
 
-    def add_dishes(self, dln_prefix, num_dishes):
+    def add_dishes(self, dln_prefix: str, num_dishes: int) -> list:
         """
         Add dishes to the liveliness probe function
 
-        :param dln_prefix: prefix of the dish
-        :type dln_prefix: str
-        :param num_dishes: number of dishes
-        :type num_dishes: int
+        Args:
+            dln_prefix (str): prefix of the dish
+            num_dishes (int): number of dishes
+
+        Returns:
+            List of dishes
+
         """
         result = []
         for dish in range(1, (num_dishes + 1)):
@@ -571,7 +650,7 @@ class CNComponentManagerMid(CNComponentManager):
             result.append(f"{dln_prefix}{dish:03d}")
         return result
 
-    def _aggregate_telescope_state(self):
+    def _aggregate_telescope_state(self) -> None:
         """
         Aggregates telescope state
         """
@@ -584,22 +663,23 @@ class CNComponentManagerMid(CNComponentManager):
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
-    def stop_aggregation_process(self):
+    def stop_aggregation_process(self) -> None:
         """Stop aggregation process"""
         self.aggregation_process.stop_aggregation_process()
 
-    def is_command_allowed(self, command_name=None):
+    def is_command_allowed(self, command_name=None) -> bool:
         """
         Checks whether this command is allowed
         It checks that the device is in a state
         to perform this command and that all the
         component needed for the operation are not unresponsive
 
-        :param command_name: name of the command
-        :type command_name: str
-        :return: True if this command is allowed
+        Args:
+            command_name (str): name of the command
 
-        :rtype: boolean
+        Returns:
+            True if this command is allowed
+
         """
         if self.enable_dish_vcc_init:
             if not self.is_dish_vcc_config_set and command_name not in [
@@ -628,29 +708,44 @@ class CNComponentManagerMid(CNComponentManager):
             )
         return True
 
-    def check_device_responsiveness_command(self, command_name) -> None:
+    def check_device_responsiveness_command(self, command_name: str) -> None:
         """
         This method overrides the method from super class
         to add responsive checks for the devices
-        :param command_name: Command name for the check
-        :type command_name: str
+
+        Args:
+            command_name (str): Command name for the check
+
         """
         if command_name in self.supported_commands_for_responsive_check:
             self.logger.debug(f"Checking mid devices for {command_name}")
             self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
 
-    def update_k_value_validation(self, dev_name: str, kvalue: ResultCode):
-        """Updates the k value validation value and starts the aggregation.
+    def update_k_value_validation(
+        self, dev_name: str, kvalue: ResultCode
+    ) -> None:
+        """
+        Updates the k value validation value and starts the aggregation.
 
         Args:
             dev_name (str): device name
             kvalue (ResultCode): k value validation result
+
         """
         self.dish_kvalue_validation_aggregator.aggregate(dev_name, kvalue)
 
-    def update_telescope_availability(self, device_name, event_value):
-        """Updates telescope availablity status"""
+    def update_telescope_availability(
+        self, device_name: str, event_value
+    ) -> None:
+        """
+        Updates telescope availablity status
+
+        Args:
+            device_name (str): Device name
+            event_value: Event value
+
+        """
         with self.rlock:
             if device_name in self.input_parameter.subarray_dev_names:
                 self.subarray_availability[device_name] = event_value
@@ -661,24 +756,42 @@ class CNComponentManagerMid(CNComponentManager):
             self._telescope_availability_aggregator.aggregate()
 
     def update_dish_vcc_flag(self, value: bool) -> None:
-        """Update dish vcc flag and call telescope state
+        """
+        Update dish vcc flag and call telescope state
         aggregator
+
+        Args:
+            value (bool): Value of the dish vcc config flag
+
         """
         self.logger.debug("Updating dish vcc config set flag to %s", value)
         self.is_dish_vcc_config_set = value
         self.update_dishvccconfig_callback(self.is_dish_vcc_config_set)
         self._aggregate_telescope_state()
 
-    def get_default_dish_vcc_config_params(self):
-        """Return default dish vcc config json"""
+    def get_default_dish_vcc_config_params(self) -> dict:
+        """
+        Return default dish vcc config json
+
+        Returns:
+            Default dish vcc config json
+
+        """
         return {
             "interface": DISH_VCC_CONFIG_INTERFACE_VERSION,
             "tm_data_sources": [self.dish_vcc_uri],
             "tm_data_filepath": self.dish_vcc_file_path,
         }
 
-    def check_if_csp_all_dish_ready(self):
-        """Check and validate all dish and csp master is ready"""
+    def check_if_csp_all_dish_ready(self) -> bool:
+        """
+        Check and validate all dish and csp master is ready
+
+        Returns:
+            `True`, if all dish and csp master is ready,
+            `False`, otherwise.
+
+        """
         count = 0
         num_of_dish_values = {}
         # This loop keep checking for kvalueValidationResult values
@@ -708,22 +821,28 @@ class CNComponentManagerMid(CNComponentManager):
     def handle_dish_vcc_validation_result(
         self, dev_name: str, result: ResultCode
     ) -> None:
-        """Handle Dish Vcc Validation Result
-        Based on following table Result codes handled and attributes updated
+        """
+        Handle Dish Vcc Validation Result
+        Based on following table Result codes handled and attributes updated\n
 
-        Result Code | Meaning
-        UNKNOWN     | Dish Vcc Config not set on CSP
-        OK          | Dish Vcc Config on CSP LN and CSP match
-        FAILED      | Mismatch in dish vcc version on CSP LN and CSP Master
-        NOT_ALLOWED | CSP master is not available
+        Result Code | Meaning\n
+        UNKNOWN     | Dish Vcc Config not set on CSP\n
+        OK          | Dish Vcc Config on CSP LN and CSP match\n
+        FAILED      | Mismatch in dish vcc version on CSP LN and CSP Master\n
+        NOT_ALLOWED | CSP master is not available\n\n
 
-        Result Code | Action
-        UNKNOWN     | Load Dish Config using LoadDishCfg command
+        Result Code | Action\n
+        UNKNOWN     | Load Dish Config using LoadDishCfg command\n
         OK          | Dish Vcc already set so set is_dish_vcc_config_set
-        to True
+        to True\n
         FAILED      | Dish Vcc is mismatch so set set is_dish_vcc_config_set
-        to False
+        to False\n
         NOT_ALLOWED | Set is_dish_vcc_config_set to False
+
+        Args:
+            dev_name (str): Device name
+            result (ResultCode): ResultCode
+
         """
         dish_vcc_validation_result = int(result)
         self.logger.debug(
@@ -783,11 +902,18 @@ class CNComponentManagerMid(CNComponentManager):
                         ]
                     }
 
-    def load_dish_cfg(self, argin: str, task_callback: Callable = None):
+    def load_dish_cfg(
+        self, argin: str, task_callback: Callable = None
+    ) -> Tuple[ResultCode, str]:
         """
         Load Dish Cfg command for Dish-VCC map.
-        :param argin: Dish Id Vcc map initial params
-        :return: a result code and message
+
+        Args:
+            argin (str): Dish Id Vcc map initial params
+
+        Returns:
+            a result code and message
+
         """
         loadishcfg_command = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
@@ -858,14 +984,15 @@ class CNComponentManagerMid(CNComponentManager):
     def update_load_dish_cfg_results_async(
         self, dev_name: str, value: tuple
     ) -> None:
-        """This method is used to update the result returned
+        """
+        This method is used to update the result returned
         from Csp Master Leaf Node
         and returned from Dish Leaf Nodes for SetKValue command.
-        :param dev_name: name of the device who's event has been
-        captured in this method
-        :type dev_name: str
-        :param value: longRunningCommandResult attribute event.
-        :type value: tuple
+
+        Args:
+            dev_name (str): name of the device who's event
+                has been captured in this method
+            value: longRunningCommandResult attribute event.
 
         """
         self.update_load_dish_cfg_results(
@@ -875,7 +1002,8 @@ class CNComponentManagerMid(CNComponentManager):
     def update_load_dish_cfg_results(
         self, dev_name: str, value: tuple, is_async_result: bool = False
     ) -> None:
-        """This method is used to update the result returned
+        """
+        This method is used to update the result returned
         from Csp Master Leaf Node
         and returned from Dish Leaf Nodes for SetKValue command.
         Update result_codes_mapping with dev name as a key and
@@ -884,19 +1012,24 @@ class CNComponentManagerMid(CNComponentManager):
         the result
         Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
         or (unique_id,TaskStatus)
-        :param dev_name: name of the device who's event has been
-        captured in this method
-        :type dev_name: str
-        :param value: longRunningCommandResult attribute event.
-        :type value: tuple
-        :param is_async_result: Whether this callback is called
-        from Async command result call or
-        longRunningCommandResult attribute callback
-        Examples of value
-        Async callback value: [array([0], dtype=int32), ['']]
-        LongRunningCommandResultCallBack value:
-        ('1698838234.9087641-LoadDishCfg',
-        'Exception occurred, command failed.')
+
+        Args:
+            dev_name (str): name of the device who's event has been
+                captured in this method
+            value (tuple): longRunningCommandResult attribute event.
+            is_async_result (bool): Whether this callback is called
+                from Async command result call or
+                longRunningCommandResult attribute callback
+
+        Examples of value:
+            .. code-block:: python
+
+                Async callback value: [array([0], dtype=int32), ['']]
+
+                LongRunningCommandResultCallBack value:
+                ('1698838234.9087641-LoadDishCfg',
+                'Exception occurred, command failed.')
+
         """
         self.logger.debug(
             "longRunningCommandResult event for device: %s, with value: %s",
@@ -941,7 +1074,8 @@ class CNComponentManagerMid(CNComponentManager):
                 self.aggregate_load_dish_cfg_results()
 
     def aggregate_load_dish_cfg_results(self) -> None:
-        """This method aggregate load dish cfg command result based on
+        """
+        This method aggregate load dish cfg command result based on
         generated data
         """
         load_dish_cfg_aggregator = LoadDishCfgCommandResultAggregator(

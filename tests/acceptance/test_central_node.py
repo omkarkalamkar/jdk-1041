@@ -88,7 +88,7 @@ def call_command(central_node, command_name, json_factory):
                     central_node, LOW_SUBARRAY_DEVICE, True
                 )
 
-                assign_res_string = json_factory("command_assign_resource_low")
+                assign_res_string = json_factory("assign_resource_low")
 
                 pytest.command_result = central_node.command_inout(
                     command_name, assign_res_string
@@ -113,9 +113,7 @@ def call_command(central_node, command_name, json_factory):
                     central_node, LOW_SUBARRAY_DEVICE, True
                 )
                 subarray_proxy.SetDirectObsState(ObsState.IDLE)
-                release_res_string = json_factory(
-                    "command_release_resource_low"
-                )
+                release_res_string = json_factory("release_resource_low")
                 pytest.command_result = central_node.command_inout(
                     command_name, release_res_string
                 )

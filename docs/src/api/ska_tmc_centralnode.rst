@@ -1,6 +1,8 @@
 ska\_tmc\_centralnode package
 =============================
 
+Link to the TMC User documentation is `here <https://confluence.skatelescope.org/display/UD/TMC+User+Documentation>`_.
+
 Subpackages
 -----------
 
@@ -10,6 +12,7 @@ Subpackages
    ska_tmc_centralnode.commands
    ska_tmc_centralnode.manager
    ska_tmc_centralnode.model
+   ska_tmc_centralnode.utils
 
 Submodules
 ----------

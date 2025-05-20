@@ -34,7 +34,7 @@ def test_low_release_resources_command(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    release_input_str = json_factory("command_release_resource_low")
+    release_input_str = json_factory("release_resource_low")
     cm.release_resources(release_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
@@ -69,7 +69,7 @@ def test_low_release_resources_command_fail_subarray(
     adapter_factory.get_or_create_adapter(
         LOW_SUBARRAY_DEVICE, proxy=subarrayMock
     )
-    release_input_str = json_factory("command_release_resource_low")
+    release_input_str = json_factory("release_resource_low")
     assign_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
     (res_code, _) = assign_res_command.do(release_input_str)
     assert res_code == ResultCode.FAILED
@@ -103,7 +103,7 @@ def test_low_release_resources_missing_subarray_id(
     tango_context, task_callback, json_factory
 ):
     cm, _ = create_cm()
-    release_input_str = json_factory("command_release_resource_low")
+    release_input_str = json_factory("release_resource_low")
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
     cm.release_resources(
@@ -154,7 +154,7 @@ def test_low_release_resources_raises_state_model_exception(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    release_input_str = json_factory("command_release_resource_low")
+    release_input_str = json_factory("release_resource_low")
     cm.release_resources(release_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}

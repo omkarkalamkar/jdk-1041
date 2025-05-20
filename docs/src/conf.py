@@ -55,6 +55,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../../src"))
+sys.path.insert(1, os.path.abspath("../.."))
 
 
 
@@ -84,7 +85,9 @@ extensions = [
     "sphinx.ext.doctest",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
-    "recommonmark"
+    "recommonmark",
+    "sphinx.ext.intersphinx",
+    "sphinx_autodoc_typehints",
 ]
 
 # Add any paths that contain templates here, relative to this directory.

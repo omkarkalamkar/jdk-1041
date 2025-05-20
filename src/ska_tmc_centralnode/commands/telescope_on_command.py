@@ -1,5 +1,6 @@
 """Command class for TelescopeOn()"""
 
+import logging
 import threading
 from typing import Callable, List, Optional, Tuple
 
@@ -37,20 +38,20 @@ class TelescopeOn(TelescopeOnOff):
 
     def telescope_on(
         self,
-        logger,
+        logger: logging.Logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
-    ):
-        """This is a long running method for TelescopeOn command, it executes
-        do hook,
+    ) -> None:
+        """
+        This is a long running method for TelescopeOn command,
+        it executes do hook,
         invokes TelescopeOn command on lowe level devices.
 
-        :param logger: logger
-        :type logger: logging.Logger
-        :param task_callback: Update task state, defaults to None
-        :type task_callback: Callable, optional
-        :param task_abort_event: Check for abort, defaults to None
-        :type task_abort_event: Event, optional
+        Args:
+            logger: logger
+            task_callback: Update task state, defaults to None
+            task_abort_event: Check for abort, defaults to None
+
         """
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
@@ -69,12 +70,16 @@ class TelescopeOn(TelescopeOnOff):
                 result=(ResultCode.OK, message),
             )
 
-    def do_mid(self, argin=None):
+    def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
         """
         Method to invoke On command on Lower level devices.
 
-        param argin:
-            None.
+        Args:
+            argin (str): Defaults to None in case of TelescopeOn.
+
+        Returns:
+            Tuple(ResultCode, str): tuple containing a return code
+            and a string message indicating status.
 
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
@@ -120,8 +125,15 @@ class TelescopeOn(TelescopeOnOff):
 
         return (ResultCode.OK, "Command Completed")
 
-    def turn_on_sdp(self):
-        """Turns on the SDP"""
+    def turn_on_sdp(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turns on the SDP
+
+        Returns:
+            Tuple(List, List): Tuple containing list of return codes
+            and list of string message indicating status.
+
+        """
         self.logger.info(
             "Invoking On command on: %s ", self.sdp_mln_adapter.dev_name
         )
@@ -141,8 +153,16 @@ class TelescopeOn(TelescopeOnOff):
             ],
         )
 
-    def turn_on_csp(self):
-        """Turns on the csp"""
+    def turn_on_csp(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turns on the csp
+
+        Returns:
+            Tuple(List, List): A tuple containing list of
+            return codes and list of string message
+            indicating status.
+
+        """
         self.logger.info(
             "Invoking On command on: %s ", self.csp_mln_adapter.dev_name
         )
@@ -161,8 +181,15 @@ class TelescopeOn(TelescopeOnOff):
             ],
         )
 
-    def turn_on_subarrays(self) -> None:
-        """Turns on the subarrays"""
+    def turn_on_subarrays(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turns on the subarrays
+
+        Returns:
+            Tuple(List, List): Tuple containing list of return codes
+            and list of string message indicating status.
+
+        """
         self.logger.info(
             "Invoking On command on: %s",
             [str(adapter.dev_name) for adapter in self.subarray_adapters],
@@ -175,7 +202,14 @@ class TelescopeOn(TelescopeOnOff):
         )
 
     def set_standby_fp_mode_dishes(self) -> Tuple[List[ResultCode], List[str]]:
-        """Sets standby fb mode in dishes"""
+        """
+        Sets standby fb mode in dishes
+
+        Returns:
+            Tuple(List, List): Tuple containing list of return codes
+            and list of string message indicating status.
+
+        """
         invoke_on_adapters = []
         for adapter in self.dish_adapters:
             if adapter.dishMode != DishMode.STANDBY_FP:
@@ -188,12 +222,16 @@ class TelescopeOn(TelescopeOnOff):
             "SetStandbyFPMode",
         )
 
-    def do_low(self, argin=None):
+    def do_low(self, argin=None) -> Tuple[ResultCode, str]:
         """
         Method to invoke On command on Lower level devices.
 
-        param argin:
-            None.
+        Args:
+            argin (str): Default to None in case of TelescopeOn.
+
+        Returns:
+            Tuple(ReSultCode, str): Tuple containing a return code
+            and a string message indicating status.
 
         """
         self.component_manager.component.desired_telescope_state = DevState.ON
@@ -241,8 +279,15 @@ class TelescopeOn(TelescopeOnOff):
 
         return (ResultCode.OK, "Command Completed")
 
-    def turn_on_mccs(self):
-        """Turns on the MCCS"""
+    def turn_on_mccs(self) -> Tuple[List[ResultCode], List[str]]:
+        """
+        Turns on the MCCS
+
+        Returns:
+            Tuple(List, List): Tuple containing list of ResultCodes
+            and list of messages
+
+        """
         self.logger.info(
             "Invoking On command on: %s ", self.mccs_mln_adapter.dev_name
         )

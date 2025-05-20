@@ -5,11 +5,15 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-[0.19.6]
+[0.19.7]
 ********
 Added 
 -------
-* Added retry mechanism to device responsiveness check in component manager. 
+* Added retry mechanism to device responsiveness check in component manager to fix SKB-860 .
+
+[0.19.6]
+********
+* Resolved bug SKB-808 on CentralNode
 
 [0.19.5]
 ********
@@ -29,7 +33,6 @@ Updated
 * Updated the invoke_command logic to make sure that each failure in Central node command execution is logged.
 * Fixed minor bugs in logs on telescope_off_command and telescope_standby_command involving incorrect number of variables provided to parametrized logs.
 * Implemented string typecasting in lazy logging to deal with the logging errors involving MemoryError.
-
 
 [0.19.2]
 ********

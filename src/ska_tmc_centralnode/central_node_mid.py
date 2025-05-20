@@ -151,8 +151,15 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     def dishvcccommandstatus_cb(
         self, dish_vcc_command_status: DishConfigStatus
-    ):
-        """Update dish_vcc_command_status callbacks"""
+    ) -> None:
+        """
+        Update dish_vcc_command_status callbacks
+
+        Args:
+            dish_vcc_command_status (DishConfigStatus):
+                Dish VCC command status
+
+        """
         try:
             self.push_change_archive_events(
                 "DishVccCommandStatus", dish_vcc_command_status
@@ -165,8 +172,14 @@ class MidTmcCentralNode(AbstractCentralNode):
                 exception,
             )
 
-    def dishvccvalidation_callback(self, dishvccvalidationstatus):
-        """Update DishVccValidationStatus callbacks"""
+    def dishvccvalidation_callback(self, dishvccvalidationstatus) -> None:
+        """
+        Update DishVccValidationStatus callbacks
+
+        Args:
+            dishvccvalidationstatus: Dish VCC Validation status
+
+        """
         try:
             self.push_change_archive_events(
                 "DishVccValidationStatus", dishvccvalidationstatus
@@ -358,19 +371,20 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         LoadDishCfg command to load dishID-vcc map config.
         This command get dishid-vcc map json string from Telmodel
-        based on tm data sources provided in argin
-        Example:
+        based on tm data sources provided in argin.
 
         .. code-block::
+            :caption: Example
 
             {
-            "interface":
-            "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
-            "tm_data_sources":["car://gitlab.com/ska-telescope/
-            ska-tmc/ska-tmc-simulators?main#tmdata"],
-            "tm_data_filepath": "instrument/dishid_vcc_map_configuration/
-            mid_cbf_initial_parameters.json"
+                "interface":
+                "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2",
+                "tm_data_sources":["car://gitlab.com/ska-telescope/
+                ska-tmc/ska-tmc-simulators?main#tmdata"],
+                "tm_data_filepath": "instrument/dishid_vcc_map_configuration/
+                mid_cbf_initial_parameters.json"
             }
+
         """
         handler = self.get_command_object("LoadDishCfg")
         result_code, unique_id = handler(argin)

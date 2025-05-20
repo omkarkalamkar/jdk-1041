@@ -216,7 +216,16 @@ class InputParameter:
             self._changed_callback()
 
     def update(self, component_manager) -> List[str]:
-        """Update method for input parameter"""
+        """
+        Update method for input parameter
+
+        Args:
+            component_manager: Component manager
+
+        Returns:
+            List: List of device names
+
+        """
         list_dev_names: List[str] = []
         for dev_name in self.subarray_dev_names:
             if component_manager.get_device(dev_name) is None:
@@ -321,8 +330,14 @@ class InputParameterLow(InputParameter):
         if self._changed_callback is not None:
             self._changed_callback()
 
-    def update(self, component_manager):
-        """Update method for input parameter"""
+    def update(self, component_manager) -> None:
+        """
+        Update method for input parameter
+
+        Args:
+            component_manager: Component manager
+
+        """
         list_dev_names = super().update(component_manager)
         dev_name = self.mccs_mln_dev_name
         if dev_name and component_manager.get_device(dev_name) is None:
@@ -461,8 +476,14 @@ class InputParameterMid(InputParameter):
         if self._changed_callback is not None:
             self._changed_callback()
 
-    def update(self, component_manager):
-        """Update method for input parameters"""
+    def update(self, component_manager) -> None:
+        """
+        Update method for input parameters
+
+        Args:
+            component_manager: Component manager
+
+        """
         list_dev_names = super().update(component_manager)
         for dev_name in self.dish_leaf_node_dev_names:
             if component_manager.get_device(dev_name) is None:

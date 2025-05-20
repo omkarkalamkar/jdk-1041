@@ -46,7 +46,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.19.6
+    tag: 0.19.7
     pullPolicy: IfNotPresent
 
 resources:
@@ -84,7 +84,7 @@ deviceServers:
       DishLeafNodePrefix: "mid-tmc/leaf-node-dish/"
       DishType: "ska"
       DishMasterIdentifier: "elt/master"
-      DishIDs: ["SKA001", "MKT001"]
+      DishIDs: ["SKA001", "MKT001", "SKA036", "SKA063", "SKA100"]
       DishVccConfig:
         DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
         DishVccFilePath: "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"

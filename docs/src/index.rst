@@ -43,3 +43,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Link to the TMC User documentation is `here <https://confluence.skatelescope.org/display/UD/TMC+User+Documentation>`_.
