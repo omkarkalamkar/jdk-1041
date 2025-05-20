@@ -122,6 +122,8 @@ class CNComponentManager(TmcComponentManager):
         command_timeout=30,
         assignresources_interface: str = "",
         releaseresources_interface: str = "",
+        retry_attempts: int = 5,
+        retry_delay: float = 3.0,
         *args,
         **kwargs,
     ):
@@ -143,6 +145,8 @@ class CNComponentManager(TmcComponentManager):
         """
 
         self._component = _component or CentralComponent(logger)
+        self.retry_attempts = retry_attempts
+        self.retry_delay = retry_delay
 
         super().__init__(
             _input_parameter,
@@ -640,12 +644,18 @@ class CNComponentManager(TmcComponentManager):
 
     @retry(
         stop=stop_after_attempt(5),
-        wait=wait_fixed(3),
+        wait=wait_fixed(3.0),
         retry=retry_if_exception_type(CommandNotAllowed),
         reraise=True,
     )
     def _check_if_device_is_responsive(self, dev_names: List[str]):
         """checks if the device is responsive"""
+        self._check_if_device_is_responsive.retry.stop = stop_after_attempt(
+            self.retry_attempts
+        )
+        self._check_if_device_is_responsive.retry.wait = wait_fixed(
+            self.retry_delay
+        )
         self.logger.debug("Retrying device responsive check")
         count = 0
         for dev_name in dev_names:
