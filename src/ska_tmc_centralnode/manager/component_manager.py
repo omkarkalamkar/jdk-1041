@@ -626,7 +626,13 @@ class CNComponentManager(TmcComponentManager):
         return True
 
     def check_if_subarrays_are_responsive(self) -> bool:
-        """Checks if subarray are responsive"""
+        """
+        Checks if subarray are responsive
+
+        :return: True if at least one subarray device is responsive,
+                 False otherwise.
+        :rtype: bool
+        """
         self.logger.debug("Checking if subarrays are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.subarray_dev_names
