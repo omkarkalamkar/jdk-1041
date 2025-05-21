@@ -680,7 +680,7 @@ class CNComponentManager(TmcComponentManager):
                 raise SubarrayNotPresentError(
                     f"Subarray devices not available: {dev_names}"
                 )
-            raise CommandNotAllowed(f"Devices not available: {dev_names}")
+            raise CommandNotAllowed(f"{dev_names} not available")
 
     def add_multiple_devices(self, device_list: List[str]):
         """
