@@ -670,7 +670,7 @@ class CNComponentManager(TmcComponentManager):
                 )
                 count += 1
         if count == 0:
-            raise CommandNotAllowed(f"{dev_names} not available")
+            raise SubarrayNotPresentError(f"{dev_names} not available")
 
     def add_multiple_devices(self, device_list: List[str]):
         """
