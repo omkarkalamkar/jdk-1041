@@ -648,7 +648,9 @@ class CNComponentManager(TmcComponentManager):
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_fixed(3.0),
-        retry=retry_if_exception_type(CommandNotAllowed),
+        retry=retry_if_exception_type(
+            (CommandNotAllowed, SubarrayNotPresentError)
+        ),
         reraise=True,
     )
     def _check_if_device_is_responsive(self, dev_names: List[str]):
@@ -670,7 +672,15 @@ class CNComponentManager(TmcComponentManager):
                 )
                 count += 1
         if count == 0:
-            raise SubarrayNotPresentError(f"{dev_names} not available")
+            subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
+            if any(
+                re.match(subarray_pattern, dev_name.lower())
+                for dev_name in dev_names
+            ):
+                raise SubarrayNotPresentError(
+                    f"Subarray devices not available: {dev_names}"
+                )
+            raise CommandNotAllowed(f"Devices not available: {dev_names}")
 
     def add_multiple_devices(self, device_list: List[str]):
         """
