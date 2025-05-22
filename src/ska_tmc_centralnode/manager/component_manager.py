@@ -41,12 +41,6 @@ from ska_tmc_common import (
 )
 from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
 from tango import DevState
-from tenacity import (
-    retry,
-    retry_if_exception_type,
-    stop_after_attempt,
-    wait_fixed,
-)
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
@@ -82,6 +76,13 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
 )
+
+# from tenacity import (
+#     retry,
+#     retry_if_exception_type,
+#     stop_after_attempt,
+#     wait_fixed,
+# )
 
 
 class CNComponentManager(TmcComponentManager):
@@ -645,14 +646,14 @@ class CNComponentManager(TmcComponentManager):
             self.input_parameter.subarray_dev_names
         )
 
-    @retry(
-        stop=stop_after_attempt(5),
-        wait=wait_fixed(3.0),
-        retry=retry_if_exception_type(
-            (CommandNotAllowed, SubarrayNotPresentError)
-        ),
-        reraise=True,
-    )
+    # @retry(
+    #     stop=stop_after_attempt(5),
+    #     wait=wait_fixed(3.0),
+    #     retry=retry_if_exception_type(
+    #         (CommandNotAllowed, SubarrayNotPresentError)
+    #     ),
+    #     reraise=True,
+    # )
     def _check_if_device_is_responsive(self, dev_names: List[str]):
         """checks if the device is responsive"""
         # self._check_if_device_is_responsive.retry.stop = stop_after_attempt(
