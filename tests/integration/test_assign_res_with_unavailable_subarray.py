@@ -7,6 +7,7 @@ import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
+from tango.db import Database
 
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
@@ -62,6 +63,9 @@ def assign_resources(
 
     subarray_proxy.SetisSubarrayAvailable(False)
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
+
+    db = Database()
+    db.delete_device(subarray_fqdn)
 
     if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
