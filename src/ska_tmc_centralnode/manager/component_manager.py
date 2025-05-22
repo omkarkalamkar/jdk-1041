@@ -41,6 +41,12 @@ from ska_tmc_common import (
 )
 from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
 from tango import DevState
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_fixed,
+)
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
@@ -76,13 +82,6 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
     MID_SDP_MLN_DEVICE,
 )
-
-# from tenacity import (
-#     retry,
-#     retry_if_exception_type,
-#     stop_after_attempt,
-#     wait_fixed,
-# )
 
 
 class CNComponentManager(TmcComponentManager):
@@ -646,42 +645,42 @@ class CNComponentManager(TmcComponentManager):
             self.input_parameter.subarray_dev_names
         )
 
-    # @retry(
-    #     stop=stop_after_attempt(5),
-    #     wait=wait_fixed(3.0),
-    #     retry=retry_if_exception_type(
-    #         (CommandNotAllowed, SubarrayNotPresentError)
-    #     ),
-    #     reraise=True,
-    # )
+    @retry(
+        stop=stop_after_attempt(5),
+        wait=wait_fixed(3.0),
+        retry=retry_if_exception_type(
+            (CommandNotAllowed, SubarrayNotPresentError)
+        ),
+        reraise=True,
+    )
     def _check_if_device_is_responsive(self, dev_names: List[str]):
         """checks if the device is responsive"""
-        # self._check_if_device_is_responsive.retry.stop = stop_after_attempt(
-        #     self.retry_attempts
-        # )
-        # self._check_if_device_is_responsive.retry.wait = wait_fixed(
-        #     self.retry_delay
-        # )
-        # self.logger.debug("Retrying device responsive check")
-        # count = 0
-        # for dev_name in dev_names:
-        #     dev_info = self.get_device(dev_name)
-        #     if dev_info is not None and not dev_info.unresponsive:
-        #         self.logger.debug(
-        #             f"Device {dev_name} dev_info.unresponsive:"
-        #             + f" {dev_info.unresponsive} "
-        #         )
-        #         count += 1
-        # if count == 0:
-        subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
-        if any(
-            re.match(subarray_pattern, dev_name.lower())
-            for dev_name in dev_names
-        ):
-            raise SubarrayNotPresentError(
-                f"Subarray devices not available: {dev_names}"
-            )
-        raise CommandNotAllowed(f"{dev_names} not available")
+        self._check_if_device_is_responsive.retry.stop = stop_after_attempt(
+            self.retry_attempts
+        )
+        self._check_if_device_is_responsive.retry.wait = wait_fixed(
+            self.retry_delay
+        )
+        self.logger.debug("Retrying device responsive check")
+        count = 0
+        for dev_name in dev_names:
+            dev_info = self.get_device(dev_name)
+            if dev_info is not None and not dev_info.unresponsive:
+                self.logger.debug(
+                    f"Device {dev_name} dev_info.unresponsive:"
+                    + f" {dev_info.unresponsive} "
+                )
+                count += 1
+        if count == 0:
+            subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
+            if any(
+                re.match(subarray_pattern, dev_name.lower())
+                for dev_name in dev_names
+            ):
+                raise SubarrayNotPresentError(
+                    f"Subarray devices not available: {dev_names}"
+                )
+            raise CommandNotAllowed(f"{dev_names} not available")
 
     def add_multiple_devices(self, device_list: List[str]):
         """
