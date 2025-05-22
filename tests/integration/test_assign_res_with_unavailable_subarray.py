@@ -1,7 +1,6 @@
 """Test module for assign resources unavailability"""
 
 import json
-import time
 
 import pytest
 import tango
@@ -79,15 +78,27 @@ def assign_resources(
 
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
-    time.sleep(10)
     logger.info(
         "Central_node ResultCode: %s",
         central_node_proxy.longRunningCommandResult,
     )
-    assert result[0] == ResultCode.REJECTED
-    assert result[1] == f"Subarray devices not available: {subarray_fqdn}"
 
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            json.dumps(
+                (
+                    int(ResultCode.REJECTED),
+                    "Subarray devices not available: %s",
+                    subarray_fqdn,
+                )
+            ),
+        ),
+        lookahead=4,
+    )
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
+    subarray_proxy.SetisSubarrayAvailable(True)
 
     # Teardown
     result, unique_id = central_node_proxy.TelescopeOff()
