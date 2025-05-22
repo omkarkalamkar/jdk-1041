@@ -110,6 +110,7 @@ def assign_resources(
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     subarray_proxy.SetisSubarrayAvailable(True)
     subarray_device = tango.DeviceProxy("dserver/mocks/03")
+    subarray_device.RestartServer()
 
     add_device_to_db(
         device_name=subarray_fqdn,
