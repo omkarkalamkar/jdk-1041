@@ -1,6 +1,7 @@
 """Test module for assign resources unavailability"""
 
 import json
+import time
 
 import pytest
 import tango
@@ -66,8 +67,8 @@ def assign_resources(
 
     db = Database()
     db.delete_device(subarray_fqdn)
-    subarray_device = tango.DeviceProxy("dserver/mocks/03")
-    subarray_device.RestartServer()
+
+    time.sleep(3)
 
     if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
@@ -97,7 +98,8 @@ def assign_resources(
             json.dumps(
                 (
                     int(ResultCode.REJECTED),
-                    f"Subarray devices not available: {subarray_fqdn}",
+                    "Exception from 'is_cmd_allowed' method: "
+                    "Subarray devices not available: ['low-tmc/subarray/01']",
                 )
             ),
         ),
