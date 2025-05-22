@@ -66,6 +66,7 @@ def assign_resources(
     subarray_proxy.SetisSubarrayAvailable(False)
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
 
+    subarray_device = tango.DeviceProxy("dserver/mocks/03")
     db = Database()
     db.delete_device(subarray_fqdn)
 
@@ -115,6 +116,7 @@ def assign_resources(
         server_name="mocks/03",
         class_name="CNHelperSubArrayDevice",
     )
+    subarray_device.RestartServer()
 
     # Teardown
     result, unique_id = central_node_proxy.TelescopeOff()
