@@ -655,32 +655,32 @@ class CNComponentManager(TmcComponentManager):
     )
     def _check_if_device_is_responsive(self, dev_names: List[str]):
         """checks if the device is responsive"""
-        self._check_if_device_is_responsive.retry.stop = stop_after_attempt(
-            self.retry_attempts
-        )
-        self._check_if_device_is_responsive.retry.wait = wait_fixed(
-            self.retry_delay
-        )
-        self.logger.debug("Retrying device responsive check")
-        count = 0
-        for dev_name in dev_names:
-            dev_info = self.get_device(dev_name)
-            if dev_info is not None and not dev_info.unresponsive:
-                self.logger.debug(
-                    f"Device {dev_name} dev_info.unresponsive:"
-                    + f" {dev_info.unresponsive} "
-                )
-                count += 1
-        if count == 0:
-            subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
-            if any(
-                re.match(subarray_pattern, dev_name.lower())
-                for dev_name in dev_names
-            ):
-                raise SubarrayNotPresentError(
-                    f"Subarray devices not available: {dev_names}"
-                )
-            raise CommandNotAllowed(f"{dev_names} not available")
+        # self._check_if_device_is_responsive.retry.stop = stop_after_attempt(
+        #     self.retry_attempts
+        # )
+        # self._check_if_device_is_responsive.retry.wait = wait_fixed(
+        #     self.retry_delay
+        # )
+        # self.logger.debug("Retrying device responsive check")
+        # count = 0
+        # for dev_name in dev_names:
+        #     dev_info = self.get_device(dev_name)
+        #     if dev_info is not None and not dev_info.unresponsive:
+        #         self.logger.debug(
+        #             f"Device {dev_name} dev_info.unresponsive:"
+        #             + f" {dev_info.unresponsive} "
+        #         )
+        #         count += 1
+        # if count == 0:
+        subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
+        if any(
+            re.match(subarray_pattern, dev_name.lower())
+            for dev_name in dev_names
+        ):
+            raise SubarrayNotPresentError(
+                f"Subarray devices not available: {dev_names}"
+            )
+        raise CommandNotAllowed(f"{dev_names} not available")
 
     def add_multiple_devices(self, device_list: List[str]):
         """
