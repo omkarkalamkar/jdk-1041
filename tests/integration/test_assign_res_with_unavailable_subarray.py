@@ -36,6 +36,7 @@ def assign_resources(
     dev_factory = DevFactory()
     central_node_proxy = dev_factory.get_device(central_node_fqdn)
     subarray_proxy = dev_factory.get_device(subarray_fqdn)
+    subarray_device = tango.DeviceProxy("dserver/mocks/03")
 
     ensure_checked_devices(central_node_proxy)
 
@@ -107,15 +108,14 @@ def assign_resources(
         ),
         lookahead=4,
     )
-    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
-    subarray_proxy.SetisSubarrayAvailable(True)
-    subarray_device = tango.DeviceProxy("dserver/mocks/03")
     subarray_device.RestartServer()
-
+    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
+    subarray_proxy.SetisSubarrayAvailable(True)  
+    
     add_device_to_db(
         device_name=subarray_fqdn,
         server_name="mocks/03",
-        class_name="HelperSubArrayDevice",
+        class_name="CNHelperSubArrayDevice",
     )
     subarray_device.RestartServer()
 
