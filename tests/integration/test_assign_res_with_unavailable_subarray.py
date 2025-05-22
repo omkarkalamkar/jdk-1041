@@ -90,8 +90,7 @@ def assign_resources(
             json.dumps(
                 (
                     int(ResultCode.REJECTED),
-                    "Subarray devices not available: %s",
-                    subarray_fqdn,
+                    f"Subarray devices not available: {subarray_fqdn}",
                 )
             ),
         ),
