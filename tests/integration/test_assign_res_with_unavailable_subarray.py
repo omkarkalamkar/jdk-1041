@@ -110,8 +110,8 @@ def assign_resources(
     )
     subarray_device.RestartServer()
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
-    subarray_proxy.SetisSubarrayAvailable(True)  
-    
+    subarray_proxy.SetisSubarrayAvailable(True)
+
     add_device_to_db(
         device_name=subarray_fqdn,
         server_name="mocks/03",
