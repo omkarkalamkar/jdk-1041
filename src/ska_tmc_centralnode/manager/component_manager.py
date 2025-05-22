@@ -1288,37 +1288,36 @@ class CNComponentManager(TmcComponentManager):
 
         # Reject command if Subarray is not available
         json_argument = json.loads(argin)
-        # subarray_id = json_argument["subarray_id"]
-        # subarray_suffics = "/" + str(subarray_id).zfill(2)
-        # subarrays_list = list(
-        #     self._component.telescope_availability["tmc_subarrays"].keys()
-        # )
-        # for subarray in subarrays_list:
-        #     telescope_availability = self.get_telescope_availability()
-        #     self.logger.debug(
-        #         f"Telescope availability is: {telescope_availability}"
-        #     )
-        #     self.logger.debug(f"subarrays_list is: {subarrays_list}")
-        #     if (
-        #         subarray.endswith(subarray_suffics)
-        #         and
-        #         telescope_availability["tmc_subarrays"][subarray] is False
-        #     ):
-        #         return assign_resources_command.reject_command(
-        #             f"Subarray {subarray} is not available."
-        #         )
+        subarray_id = json_argument["subarray_id"]
+        subarray_suffics = "/" + str(subarray_id).zfill(2)
+        subarrays_list = list(
+            self._component.telescope_availability["tmc_subarrays"].keys()
+        )
+        for subarray in subarrays_list:
+            telescope_availability = self.get_telescope_availability()
+            self.logger.debug(
+                f"Telescope availability is: {telescope_availability}"
+            )
+            self.logger.debug(f"subarrays_list is: {subarrays_list}")
+            if (
+                subarray.endswith(subarray_suffics)
+                and telescope_availability["tmc_subarrays"][subarray] is False
+            ):
+                return assign_resources_command.reject_command(
+                    f"Subarray {subarray} is not available."
+                )
 
-        # # validate processing block
-        # (
-        #     is_processing_block_present,
-        #     processing_block_error_msg,
-        # ) = assign_resources_command._validate_and_update_resource_config(
-        #     json_argument
-        # )
-        # if not is_processing_block_present:
-        #     return assign_resources_command.reject_command(
-        #         processing_block_error_msg
-        #     )
+        # validate processing block
+        (
+            is_processing_block_present,
+            processing_block_error_msg,
+        ) = assign_resources_command._validate_and_update_resource_config(
+            json_argument
+        )
+        if not is_processing_block_present:
+            return assign_resources_command.reject_command(
+                processing_block_error_msg
+            )
 
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
