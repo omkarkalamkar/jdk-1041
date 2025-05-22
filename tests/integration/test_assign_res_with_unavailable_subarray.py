@@ -1,6 +1,7 @@
 """Test module for assign resources unavailability"""
 
 import json
+import time
 
 import pytest
 import tango
@@ -59,6 +60,7 @@ def assign_resources(
     )
 
     subarray_proxy.SetisSubarrayAvailable(False)
+    time.sleep(15)
 
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
 
