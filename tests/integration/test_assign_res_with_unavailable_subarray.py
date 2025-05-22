@@ -79,7 +79,11 @@ def assign_resources(
 
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
-    time.sleep(50)
+    time.sleep(10)
+    logger.info(
+        "Central_node ResultCode: %s",
+        central_node_proxy.longRunningCommandResult,
+    )
     assert result[0] == ResultCode.REJECTED
     assert result[1] == f"Subarray devices not available: {subarray_fqdn}"
 
