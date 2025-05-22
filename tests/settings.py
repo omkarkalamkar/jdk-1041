@@ -14,6 +14,7 @@ from ska_tango_testing.mock.tango.event_callback import (
 )
 from ska_tmc_common import FaultType, LivelinessProbeType
 from ska_tmc_common.op_state_model import TMCOpStateModel
+from tango.db import Database, DbDevInfo
 
 from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
@@ -418,6 +419,16 @@ def event_remover(group_callback, attributes: List[str]) -> None:
                 node.drop()
         except KeyError:
             pass
+
+
+def add_device_to_db(device_name, class_name, server_name):
+    """Add Device to DB"""
+    db = Database()
+    dev_info = DbDevInfo()
+    dev_info.name = device_name
+    dev_info._class = class_name
+    dev_info.server = server_name
+    db.add_device(dev_info)
 
 
 def check_lrcr_events(

@@ -18,6 +18,7 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
+    add_device_to_db,
     check_subarray_availability,
     logger,
 )
@@ -68,6 +69,7 @@ def assign_resources(
     db = Database()
     db.delete_device(subarray_fqdn)
 
+    # Waiting for event from central node
     time.sleep(3)
 
     if "mid-tmc" in central_node_fqdn:
@@ -99,7 +101,7 @@ def assign_resources(
                 (
                     int(ResultCode.REJECTED),
                     "Exception from 'is_cmd_allowed' method: "
-                    "Subarray devices not available: ['low-tmc/subarray/01']",
+                    f"Subarray devices not available: ['{subarray_fqdn}']",
                 )
             ),
         ),
@@ -107,6 +109,12 @@ def assign_resources(
     )
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     subarray_proxy.SetisSubarrayAvailable(True)
+
+    add_device_to_db(
+        device_name=subarray_fqdn,
+        server_name="mocks/03",
+        class_name="CNHelperSubArrayDevice",
+    )
 
     # Teardown
     result, unique_id = central_node_proxy.TelescopeOff()
