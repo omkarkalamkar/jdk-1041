@@ -78,6 +78,7 @@ def assign_resources(
 
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.REJECTED
+    assert result[1] == f"Subarray devices not available: {subarray_fqdn}"
 
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
@@ -107,6 +108,7 @@ def test_assign_res_command_mid_unavailable_subarray(
     )
 
 
+@pytest.mark.test1
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
