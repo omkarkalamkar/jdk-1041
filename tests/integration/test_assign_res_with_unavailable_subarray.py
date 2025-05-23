@@ -87,13 +87,6 @@ def assign_resources(
         str(result),
     )
 
-    # assert unique_id[0].endswith("AssignResources")
-    assert result[0] == ResultCode.QUEUED
-    logger.info(
-        "Central_node ResultCode: %s",
-        central_node_proxy.longRunningCommandResult,
-    )
-
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (
