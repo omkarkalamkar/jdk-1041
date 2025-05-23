@@ -105,7 +105,7 @@ def assign_resources(
         lookahead=4,
     )
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
-    subarray_proxy.SetisSubarrayAvailable(True)
+
     export_device(db, db_device_info)
     time.sleep(3)
 
