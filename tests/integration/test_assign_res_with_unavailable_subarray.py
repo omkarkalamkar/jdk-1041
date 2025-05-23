@@ -1,6 +1,7 @@
 """Test module for assign resources unavailability"""
 
 import json
+import time
 
 import pytest
 import tango
@@ -70,6 +71,7 @@ def assign_resources(
     db.delete_device(subarray_fqdn)
 
     # Waiting for event from central node
+    time.sleep(3)
 
     if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
@@ -86,11 +88,11 @@ def assign_resources(
     )
 
     # assert unique_id[0].endswith("AssignResources")
-    # assert result[0] == ResultCode.QUEUED
-    # logger.info(
-    #     "Central_node ResultCode: %s",
-    #     central_node_proxy.longRunningCommandResult,
-    # )
+    assert result[0] == ResultCode.QUEUED
+    logger.info(
+        "Central_node ResultCode: %s",
+        central_node_proxy.longRunningCommandResult,
+    )
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
@@ -143,7 +145,6 @@ def test_assign_res_command_mid_unavailable_subarray(
     )
 
 
-@pytest.mark.test1
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
