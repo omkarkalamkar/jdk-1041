@@ -94,6 +94,20 @@ def assign_resources(
     # Waiting for event from central node
     time.sleep(3)
 
+    if "mid-tmc" in central_node_fqdn:
+        result, unique_id = central_node_proxy.AssignResources(
+            assign_input_str
+        )
+    else:
+        result, unique_id = central_node_proxy.AssignResources(
+            assign_input_str
+        )
+    logger.info(
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+
     assert result[0] == ResultCode.QUEUED
 
     change_event_callbacks.assert_change_event(
