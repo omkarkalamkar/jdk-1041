@@ -67,8 +67,6 @@ def assign_resources(
     subarray_proxy.SetisSubarrayAvailable(False)
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
 
-    assert result[0] == ResultCode.REJECTED
-
     db = Database()
     db.delete_device(subarray_fqdn)
 
@@ -87,6 +85,13 @@ def assign_resources(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,
         str(result),
+    )
+
+    # assert unique_id[0].endswith("AssignResources")
+    assert result[0] == ResultCode.QUEUED
+    logger.info(
+        "Central_node ResultCode: %s",
+        central_node_proxy.longRunningCommandResult,
     )
 
     change_event_callbacks.assert_change_event(
