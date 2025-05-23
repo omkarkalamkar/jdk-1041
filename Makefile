@@ -89,11 +89,6 @@ ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context
 MARK = $(shell echo $(TELESCOPE) | sed s/-/_/) and (post_deployment or acceptance)
 endif
-K8S_TEST_COUNT ?= 1
-ifeq ($(MAKECMDGOALS),k8s-test)
-ADD_ARGS += --true-context --count=$(K8S_TEST_COUNT)
-MARK = test1
-endif
 
 PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
 
