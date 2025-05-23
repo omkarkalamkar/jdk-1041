@@ -424,7 +424,7 @@ def event_remover(group_callback, attributes: List[str]) -> None:
 
 
 def export_device(db, db_info):
-    """Export data in database"""
+    """Export device in database"""
     dev_export = tango.DbDevExportInfo()
     dev_export.name = db_info.name
     dev_export.ior = db_info.ior
