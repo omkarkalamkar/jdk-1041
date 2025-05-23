@@ -2,10 +2,12 @@
 
 import json
 import logging
+import os
 import time
 from typing import List
 
 import pytest
+import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_testing.mock.placeholders import Anything
@@ -14,7 +16,6 @@ from ska_tango_testing.mock.tango.event_callback import (
 )
 from ska_tmc_common import FaultType, LivelinessProbeType
 from ska_tmc_common.op_state_model import TMCOpStateModel
-from tango.db import Database, DbDevInfo
 
 from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
@@ -30,6 +31,7 @@ from ska_tmc_centralnode.model.input import (
 from tests.mock_callable import MockCallable
 
 logger = logging.getLogger(__name__)
+TANGO_HOST = os.getenv("TANGO_HOST")
 SLEEP_TIME = 0.5
 TIMEOUT = 50
 KVALUE = 9
@@ -421,14 +423,15 @@ def event_remover(group_callback, attributes: List[str]) -> None:
             pass
 
 
-def add_device_to_db(device_name, class_name, server_name):
-    """Add Device to DB"""
-    db = Database()
-    dev_info = DbDevInfo()
-    dev_info.name = device_name
-    dev_info._class = class_name
-    dev_info.server = server_name
-    db.add_device(dev_info)
+def export_device(db, db_info):
+    dev_export = tango.DbDevExportInfo()
+    dev_export.name = db_info.name
+    dev_export.ior = db_info.ior
+    dev_export.host = TANGO_HOST
+    dev_export.version = db_info.version
+    dev_export.pid = db_info.pid
+
+    db.export_device(dev_export)
 
 
 def check_lrcr_events(
