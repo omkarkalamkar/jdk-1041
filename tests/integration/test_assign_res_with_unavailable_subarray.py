@@ -1,12 +1,14 @@
 """Test module for assign resources unavailability"""
 
 import json
+import time
 
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
+from tango.db import Database
 
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
@@ -19,11 +21,6 @@ from tests.settings import (  # add_device_to_db,
     check_subarray_availability,
     logger,
 )
-
-# from tango.db import Database
-
-
-# import time
 
 
 def assign_resources(
@@ -84,43 +81,43 @@ def assign_resources(
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.REJECTED
 
-    # subarray_proxy.SetisSubarrayAvailable(True)
-    # check_subarray_availability(central_node_proxy, subarray_fqdn, True)
-    # subarray_proxy.SetisSubarrayAvailable(False)
-    # check_subarray_availability(central_node_proxy, subarray_fqdn, False)
-
-    # db = Database()
-    # db.delete_device(subarray_fqdn)
-
-    # # Waiting for event from central node
-    # time.sleep(3)
-
-    # assert result[0] == ResultCode.QUEUED
-
-    # change_event_callbacks.assert_change_event(
-    #     "longRunningCommandResult",
-    #     (
-    #         unique_id[0],
-    #         json.dumps(
-    #             (
-    #                 int(ResultCode.REJECTED),
-    #                 "Exception from 'is_cmd_allowed' method: "
-    #                 f"Subarray devices not available: ['{subarray_fqdn}']",
-    #             )
-    #         ),
-    #     ),
-    #     lookahead=4,
-    # )
-
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
+
     subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
+    subarray_proxy.SetisSubarrayAvailable(False)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, False)
+
+    db = Database()
+    db.delete_device(subarray_fqdn)
+
+    # Waiting for event from central node
+    time.sleep(3)
+
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            json.dumps(
+                (
+                    int(ResultCode.REJECTED),
+                    "Exception from 'is_cmd_allowed' method: "
+                    f"Subarray devices not available: ['{subarray_fqdn}']",
+                )
+            ),
+        ),
+        lookahead=4,
+    )
 
     # add_device_to_db(
     #     device_name=subarray_fqdn,
     #     server_name="mocks/03",
     #     class_name="CNHelperSubArrayDevice",
     # )
-
+    subarray_proxy.SetisSubarrayAvailable(True)
+    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node_proxy.TelescopeOff()
 
