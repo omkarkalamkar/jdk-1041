@@ -408,8 +408,8 @@ class CNComponentManagerLow(CNComponentManager):
         """
         if command_name in self.supported_commands_for_responsive_check:
             self.logger.debug("Checking low devices for: %s", command_name)
-            self.check_if_subarrays_are_responsive()
             self.check_if_mccs_mln_is_responsive()
+            self.check_if_subarrays_are_responsive()
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availability"""
