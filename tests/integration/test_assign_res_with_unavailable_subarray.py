@@ -67,6 +67,8 @@ def assign_resources(
     subarray_proxy.SetisSubarrayAvailable(False)
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
 
+    assert result[0] == ResultCode.REJECTED
+
     db = Database()
     db.delete_device(subarray_fqdn)
 
