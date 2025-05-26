@@ -175,7 +175,12 @@ def test_telescope_standby_command_rejected(tango_context, task_callback):
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     dev_info_dishln = cm.get_device(MCCS_MLN_DEVICE)
-    dev_info_dishln.update_unresponsive(True)
+    timeout_retry = 16
+    timeout = 0
+    while timeout <= timeout_retry:
+        dev_info_dishln.update_unresponsive(True)
+        timeout += 1
+        time.sleep(0.5)
     cm.is_command_allowed("TelescopeStandby")
     cm.telescope_standby(task_callback=task_callback)
 
