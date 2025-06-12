@@ -275,11 +275,11 @@ class MidTmcCentralNode(AbstractCentralNode):
             _update_dishvccconfig_callback=self.update_dishvccconfig_callback,
             _dishvccvalidation_callback=self.dishvccvalidation_callback,
             command_timeout=self.CommandTimeOut,
+            subarray_pattern=self.SubarrayPattern,
             proxy_timeout=self.ProxyTimeout,
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,
             liveliness_check_period=self.LivelinessCheckPeriod,
             skuid_service=self.SkuidService,
-            subarray_pattern=self.SubarrayPattern,
             dish_vcc_uri=self.DishVccUri if self.DishVccUri else "",
             dish_vcc_file_path=(
                 self.DishVccFilePath if self.DishVccFilePath else ""
