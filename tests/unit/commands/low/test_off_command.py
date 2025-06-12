@@ -1,3 +1,4 @@
+import threading
 import time
 
 import mock
@@ -25,6 +26,39 @@ from tests.settings import (
     create_cm,
     logger,
 )
+
+
+def set_device_unresponsive(
+    dev_info, max_attempts=16, interval=0.5, timeout=8.0
+):
+    """Set device unresponsive with retries"""
+    attempts = [0]
+
+    def attempt_unresponsive():
+        attempts[0] += 1
+        try:
+            dev_info.update_unresponsive(True)
+            return True
+        except Exception:
+            if attempts[0] >= max_attempts:
+                raise TimeoutError(
+                    f"Failed to set {dev_info.name} unresponsive after {max_attempts} attempts"
+                )
+            # Schedule next attempt
+            timer = threading.Timer(interval, attempt_unresponsive)
+            timer.start()
+            return False
+
+    attempt_unresponsive()
+
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        if dev_info.is_unresponsive():
+            return
+        time.sleep(0.1)
+    raise TimeoutError(
+        f"Timeout waiting for {dev_info.name} to become unresponsive after {timeout}s"
+    )
 
 
 @pytest.mark.SKA_low
@@ -169,13 +203,7 @@ def test_telescope_off_command_rejected(tango_context, task_callback):
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     dev_info_dishln = cm.get_device(MCCS_MLN_DEVICE)
-    # Retries setting device responsiveness to True
-    timeout_retry = 16
-    timeout = 0
-    while timeout <= timeout_retry:
-        dev_info_dishln.update_unresponsive(True)
-        timeout += 1
-        time.sleep(0.5)
+    set_device_unresponsive(dev_info_dishln)
     cm.is_command_allowed("TelescopeOff")
     cm.telescope_off(task_callback=task_callback)
 
