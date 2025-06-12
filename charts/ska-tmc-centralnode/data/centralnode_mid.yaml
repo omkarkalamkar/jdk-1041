@@ -67,6 +67,9 @@ server:
         - name: "SkuidService"
           values:
           - "{{.Values.deviceServers.centralnode.SkuidService}}"
+        - name: "SubarrayPattern"  
+          values:
+          - "{{.Values.deviceServers.centralnode.SubarrayPattern}}"
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}

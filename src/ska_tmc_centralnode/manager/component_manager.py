@@ -109,6 +109,7 @@ class CNComponentManager(TmcComponentManager):
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
+        SubarrayPattern=r"^(low-tmc|mid-tmc)/subarray/\d{2}$",
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager: bool = True,
@@ -186,6 +187,7 @@ class CNComponentManager(TmcComponentManager):
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()
+        self.subarray_pattern = SubarrayPattern
 
         self.no_of_events_for_command = 0
 
@@ -672,9 +674,10 @@ class CNComponentManager(TmcComponentManager):
                 )
                 count += 1
         if count == 0:
-            subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
+            # Match device names to subarray pattern to
+            # raise specific error for subarray failures
             if any(
-                re.match(subarray_pattern, dev_name.lower())
+                re.match(self.subarray_pattern, dev_name.lower())
                 for dev_name in dev_names
             ):
                 raise SubarrayNotPresentError(

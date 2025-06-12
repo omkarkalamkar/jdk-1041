@@ -178,6 +178,7 @@ def test_telescope_off_command_rejected(tango_context, task_callback):
     #     timeout += 1
     #     time.sleep(0.5)
     set_unresponsive(cm, MCCS_MLN_DEVICE, max_retries=16, delay=0.5)
+    assert cm.get_device(MCCS_MLN_DEVICE).unresponsive
     cm.is_command_allowed("TelescopeOff")
     cm.telescope_off(task_callback=task_callback)
 

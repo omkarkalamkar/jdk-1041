@@ -492,11 +492,16 @@ def set_unresponsive(cm, fqdn, max_retries=16, delay=0.5):
     while timeout <= max_retries:
         try:
             proxy = dev_factory.get_device(fqdn)
-            response_time = proxy.ping()
-            dev_info.ping = response_time
+            response = proxy.ping()
+            if response:
+                logger.info("Ping to %s successful", fqdn)
+                dev_info.update_unresponsive(False)
+            else:
+                logger.warning("Ping to %s failed", fqdn)
+                dev_info.update_unresponsive(True)
         except Exception as e:
             logger.warning("Ping to %s failed: %s ", fqdn, str(e))
-            dev_info.update_unresponsive(True, str(e))
+            dev_info.update_unresponsive(True)
             return True
         timeout += 1
         time.sleep(delay)

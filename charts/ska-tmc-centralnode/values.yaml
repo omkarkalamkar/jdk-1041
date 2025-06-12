@@ -70,6 +70,7 @@ deviceServers:
     instances: ["01"]
     subarray_count: 1
     SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
+    SubarrayPattern: "^(low-tmc|mid-tmc)/subarray/\d{2}$"
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
