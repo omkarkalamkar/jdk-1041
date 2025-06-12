@@ -18,6 +18,7 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
+    check_subarray_availability,
     export_device,
     logger,
 )
@@ -60,11 +61,14 @@ def assign_resources(
         lookahead=4,
     )
 
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
+
+    # subarray_proxy.SetisSubarrayAvailable(False)
+    # check_subarray_availability(central_node_proxy, subarray_fqdn, False)
     db = Database()
     db_device_info = db.get_device_info(subarray_fqdn)
     db.unexport_device(subarray_fqdn)
-
-    # Waiting for event from central node
     time.sleep(3)
 
     if "mid-tmc" in central_node_fqdn:
@@ -104,6 +108,7 @@ def assign_resources(
     time.sleep(3)
 
     subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
 
     # Teardown
     result, unique_id = central_node_proxy.TelescopeOff()
