@@ -105,10 +105,10 @@ def assign_resources(
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
     export_device(db, db_device_info)
-    time.sleep(3)
+    time.sleep(10)
 
     subarray_proxy.SetisSubarrayAvailable(True)
-    # check_subarray_availability(central_node_proxy, subarray_fqdn, True)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
 
     # Teardown
     result, unique_id = central_node_proxy.TelescopeOff()
