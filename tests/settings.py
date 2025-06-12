@@ -473,7 +473,8 @@ def check_lrcr_events(
 
 def set_unresponsive(cm, fqdn, max_retries=16, delay=0.5):
     """
-    Pings a Tango device using its FQDN and sets its unresponsiveness to True if unavailable.
+    Pings a Tango device using its FQDN and
+    sets its unresponsiveness to True if unavailable.
 
     Args:
         cm: Component manager instance to access device information.
@@ -494,7 +495,7 @@ def set_unresponsive(cm, fqdn, max_retries=16, delay=0.5):
             response_time = proxy.ping()
             dev_info.ping = response_time
         except Exception as e:
-            logger.warning(f"Ping to {fqdn} failed: {str(e)}")
+            logger.warning("Ping to %s failed: %s ", fqdn, str(e))
             dev_info.update_unresponsive(True, str(e))
             return True
         timeout += 1
