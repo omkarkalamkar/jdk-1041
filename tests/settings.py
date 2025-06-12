@@ -14,7 +14,7 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
-from ska_tmc_common import FaultType, LivelinessProbeType
+from ska_tmc_common import DevFactory, FaultType, LivelinessProbeType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -468,4 +468,35 @@ def check_lrcr_events(
         time.sleep(1)
     if flag:
         return True
+    return False
+
+
+def set_unresponsive(cm, fqdn, max_retries=16, delay=0.5):
+    """
+    Pings a Tango device using its FQDN and sets its unresponsiveness to True if unavailable.
+
+    Args:
+        cm: Component manager instance to access device information.
+        fqdn (str): Fully Qualified Domain Name of the device to ping.
+        max_retries (int): Maximum number of ping attempts. Default is 16.
+        delay (float): Delay between ping attempts in seconds. Default is 0.5.
+
+    Returns:
+        bool: True if the device is marked unresponsive, False otherwise.
+    """
+    dev_info = cm.get_device(fqdn)
+    dev_factory = DevFactory()
+    timeout = 0
+
+    while timeout <= max_retries:
+        try:
+            proxy = dev_factory.get_device(fqdn)
+            response_time = proxy.ping()
+            dev_info.ping = response_time
+        except Exception as e:
+            logger.warning(f"Ping to {fqdn} failed: {str(e)}")
+            dev_info.update_unresponsive(True, str(e))
+            return True
+        timeout += 1
+        time.sleep(delay)
     return False
