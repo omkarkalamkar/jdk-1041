@@ -109,7 +109,6 @@ class CNComponentManager(TmcComponentManager):
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
-        SubarrayPattern=r"^(low-tmc|mid-tmc)/subarray/\d{2}$",
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager: bool = True,
@@ -120,6 +119,7 @@ class CNComponentManager(TmcComponentManager):
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
         ),
+        SubarrayPattern=r"^(low-tmc|mid-tmc)/subarray/\d{2}$",
         command_timeout=30,
         assignresources_interface: str = "",
         releaseresources_interface: str = "",
