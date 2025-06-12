@@ -60,6 +60,12 @@ def assign_resources(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
+
+    subarray_proxy.SetisSubarrayAvailable(False)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, False)
     db = Database()
     db_device_info = db.get_device_info(subarray_fqdn)
     db.unexport_device(subarray_fqdn)
