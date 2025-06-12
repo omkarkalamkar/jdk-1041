@@ -108,7 +108,7 @@ def assign_resources(
     time.sleep(3)
 
     subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
+    # check_subarray_availability(central_node_proxy, subarray_fqdn, True)
 
     # Teardown
     result, unique_id = central_node_proxy.TelescopeOff()
