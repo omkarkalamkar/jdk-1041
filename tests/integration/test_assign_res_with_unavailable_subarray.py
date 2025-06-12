@@ -1,7 +1,6 @@
 """Test module for assign resources unavailability"""
 
 import json
-import time
 
 import pytest
 import tango
@@ -64,12 +63,11 @@ def assign_resources(
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node_proxy, subarray_fqdn, True)
 
-    # subarray_proxy.SetisSubarrayAvailable(False)
-    # check_subarray_availability(central_node_proxy, subarray_fqdn, False)
+    subarray_proxy.SetisSubarrayAvailable(False)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, False)
     db = Database()
     db_device_info = db.get_device_info(subarray_fqdn)
     db.unexport_device(subarray_fqdn)
-    time.sleep(3)
 
     if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
@@ -105,7 +103,6 @@ def assign_resources(
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
     export_device(db, db_device_info)
-    time.sleep(10)
 
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node_proxy, subarray_fqdn, True)
