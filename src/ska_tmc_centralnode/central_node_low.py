@@ -93,7 +93,7 @@ class LowTmcCentralNode(AbstractCentralNode):
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,
             liveliness_check_period=self.LivelinessCheckPeriod,
             skuid_service=self.SkuidService,
-            # subarray_pattern=self.SubarrayPattern,
+            subarray_pattern_low=self.SubarrayPatternLow,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.mccs_mln_dev_name = (

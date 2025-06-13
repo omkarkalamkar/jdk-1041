@@ -275,7 +275,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             _update_dishvccconfig_callback=self.update_dishvccconfig_callback,
             _dishvccvalidation_callback=self.dishvccvalidation_callback,
             command_timeout=self.CommandTimeOut,
-            # subarray_pattern=self.SubarrayPattern,
+            subarray_pattern_mid=self.SubarrayPatternMid,
             proxy_timeout=self.ProxyTimeout,
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,
             liveliness_check_period=self.LivelinessCheckPeriod,

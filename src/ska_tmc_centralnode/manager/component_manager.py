@@ -110,7 +110,8 @@ class CNComponentManager(TmcComponentManager):
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
         _component=None,
-        # subarray_pattern: str = "",
+        subarray_pattern_mid: str = "",
+        subarray_pattern_low: str = "",
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager: bool = True,
         proxy_timeout=500,
@@ -120,7 +121,8 @@ class CNComponentManager(TmcComponentManager):
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
         ),
-        # SubarrayPattern=r"^(low-tmc|mid-tmc)/subarray/\d{2}$",
+        SubarrayPatternMid="mid-tmc/subarray/",
+        SubarrayPatternLow="low-tmc/subarray/",
         command_timeout=30,
         assignresources_interface: str = "",
         releaseresources_interface: str = "",
@@ -149,7 +151,8 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
-        # self._subarray_pattern = subarray_pattern
+        self._subarray_pattern_mid = subarray_pattern_mid
+        self._subarray_pattern_low = subarray_pattern_low
         super().__init__(
             _input_parameter,
             logger,
@@ -188,7 +191,8 @@ class CNComponentManager(TmcComponentManager):
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()
-        # self.subarray_pattern = SubarrayPattern
+        self.subarray_pattern_mid = SubarrayPatternMid
+        self.subarray_pattern_low = SubarrayPatternLow
 
         self.no_of_events_for_command = 0
 

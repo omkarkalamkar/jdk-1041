@@ -179,7 +179,7 @@ def test_telescope_off_command_rejected(tango_context, task_callback):
     #     time.sleep(0.5)
     dev_factory = DevFactory()
     mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
-    set_unresponsive(cm, MCCS_MLN_DEVICE, max_retries=16, delay=0.5)
+    set_unresponsive(cm, MCCS_MLN_DEVICE, max_retries=0.8, delay=0.5)
     assert cm.get_device(MCCS_MLN_DEVICE).unresponsive
 
     mccs_mln.SetSubsystemAvailable(False)

@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import time
-from threading import Lock, Timer
 from typing import List
 
 import pytest
@@ -472,41 +471,51 @@ def check_lrcr_events(
     return False
 
 
-def set_unresponsive(cm, fqdn, max_retries=16, delay=0.5):
+def set_unresponsive(cm, fqdn, max_retries=8.0, delay=0.5):
     """
-    Sets a device to unresponsive state with
-    retries using a Timer object and a lock.
+    Tries to set the device to unresponsive state within a total timeout duration.
 
     Args:
         cm: Component manager instance.
         fqdn (str): Fully qualified domain name of the device.
-        max_retries (int): Maximum number of retry attempts (default: 16).
-        delay (float): Delay between retry attempts in seconds (default: 0.5).
+        timeout_secs (float): Maximum time to keep retrying in seconds.
+        delay (float): Delay between retries in seconds.
     """
-    # Lock to serialize access to Tango resources
-    tango_lock = Lock()
+    dev_info = cm.get_device(fqdn)
+    if not dev_info:
+        logger.error("Device %s not found", fqdn)
+        return
 
-    def try_set_unresponsive(attempt):
-        with tango_lock:
-            dev_info = cm.get_device(fqdn)
-            dev_info.update_unresponsive(True)
+    start_time = time.time()
+    end_time = start_time + max_retries
+    attempt = 1
 
-            # Check if the device is unresponsive or if max retries are reached
-            if dev_info.unresponsive or attempt >= max_retries:
-                if not dev_info.unresponsive:
-                    logger.warning(
-                        "Failed to set %f unresponsive after %f attempts",
-                        fqdn,
-                        max_retries,
-                    )
-                return
+    while time.time() < end_time:
+        dev_info.update_unresponsive(True)
 
-        # Schedule the next retry
-        timer = Timer(delay, try_set_unresponsive, args=(attempt + 1,))
-        timer.start()
+        if dev_info.unresponsive:
+            logger.info(
+                "Device %s marked unresponsive " + "after %d attempt(s)",
+                fqdn,
+                attempt,
+            )
+            return
 
-    # Start the first attempt
-    try_set_unresponsive(0)
+        logger.debug(
+            "Attempt %d: Device %s not yet unresponsive. "
+            + "Retrying in %.1f seconds...",
+            attempt,
+            fqdn,
+            delay,
+        )
+        attempt += 1
+        time.sleep(delay)
+
+    logger.warning(
+        "Timeout reached. Failed to set device %s unresponsive within %.1f seconds",
+        fqdn,
+        max_retries,
+    )
 
 
 def wait_for_device_available(device_fqdn, timeout=3, poll_interval=0.1):
