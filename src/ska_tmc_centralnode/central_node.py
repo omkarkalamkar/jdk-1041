@@ -73,11 +73,11 @@ class AbstractCentralNode(TMCBaseDevice):
 
     CommandTimeOut = device_property(dtype="DevUShort", default_value=30)
 
-    SubarrayPattern = device_property(
-        dtype="str",
-        default_value=r"^(low-tmc|mid-tmc)/subarray/\d{2}$",
-        doc="Pattern to match subarray names.",
-    )
+    # SubarrayPattern = device_property(
+    #     dtype="str",
+    #     default_value=r"^(low-tmc|mid-tmc)/subarray/\d{2}$",
+    #     doc="Pattern to match subarray names.",
+    # )
     # ----------
     # Attributes
     # ----------

@@ -191,6 +191,7 @@ def test_telescope_off_command_rejected(tango_context, task_callback):
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
+
     data = task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.REJECTED,

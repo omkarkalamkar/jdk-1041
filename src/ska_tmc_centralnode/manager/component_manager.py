@@ -110,7 +110,7 @@ class CNComponentManager(TmcComponentManager):
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
         _component=None,
-        subarray_pattern: str = "",
+        # subarray_pattern: str = "",
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager: bool = True,
         proxy_timeout=500,
@@ -120,7 +120,7 @@ class CNComponentManager(TmcComponentManager):
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
         ),
-        SubarrayPattern=r"^(low-tmc|mid-tmc)/subarray/\d{2}$",
+        # SubarrayPattern=r"^(low-tmc|mid-tmc)/subarray/\d{2}$",
         command_timeout=30,
         assignresources_interface: str = "",
         releaseresources_interface: str = "",
@@ -149,7 +149,7 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
-        self._subarray_pattern = subarray_pattern
+        # self._subarray_pattern = subarray_pattern
         super().__init__(
             _input_parameter,
             logger,
@@ -188,7 +188,7 @@ class CNComponentManager(TmcComponentManager):
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()
-        self.subarray_pattern = SubarrayPattern
+        # self.subarray_pattern = SubarrayPattern
 
         self.no_of_events_for_command = 0
 
@@ -674,11 +674,12 @@ class CNComponentManager(TmcComponentManager):
                     + f" {dev_info.unresponsive} "
                 )
                 count += 1
+        subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
         if count == 0:
             # Match device names to subarray pattern to
             # raise specific error for subarray failures
             if any(
-                re.match(self.subarray_pattern, dev_name.lower())
+                re.match(subarray_pattern, dev_name.lower())
                 for dev_name in dev_names
             ):
                 raise SubarrayNotPresentError(
