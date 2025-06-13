@@ -29,7 +29,7 @@ server:
           - "{{.Values.deviceServers.centralnode.SkuidService}}"
         - name: "SubarrayPattern"  
           values:
-          - "{{.Values.deviceServers.centralnode.SubarrayPattern}}"
+          - '{{ .Values.deviceServers.centralnode.SubarrayPattern }}'
         - name: "MCCSMasterLeafNodeFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.low.MCCSMasterLeafNodeFQDN}}"
