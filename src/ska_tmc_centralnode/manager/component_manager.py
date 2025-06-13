@@ -110,6 +110,7 @@ class CNComponentManager(TmcComponentManager):
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
         _component=None,
+        subarray_pattern: str = "",
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager: bool = True,
         proxy_timeout=500,
@@ -148,7 +149,7 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
-
+        self._subarray_pattern = subarray_pattern
         super().__init__(
             _input_parameter,
             logger,
