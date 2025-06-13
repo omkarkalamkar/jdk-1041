@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import time
+from threading import Lock, Timer
 from typing import List
 
 import pytest
@@ -14,7 +15,7 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
-from ska_tmc_common import DevFactory, FaultType, LivelinessProbeType
+from ska_tmc_common import FaultType, LivelinessProbeType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -473,36 +474,36 @@ def check_lrcr_events(
 
 def set_unresponsive(cm, fqdn, max_retries=16, delay=0.5):
     """
-    Pings a Tango device using its FQDN and
-    sets its unresponsiveness to True if unavailable.
+    Sets a device to unresponsive state with
+    retries using a Timer object and a lock.
 
     Args:
-        cm: Component manager instance to access device information.
-        fqdn (str): Fully Qualified Domain Name of the device to ping.
-        max_retries (int): Maximum number of ping attempts. Default is 16.
-        delay (float): Delay between ping attempts in seconds. Default is 0.5.
-
-    Returns:
-        bool: True if the device is marked unresponsive, False otherwise.
+        cm: Component manager instance.
+        fqdn (str): Fully qualified domain name of the device.
+        max_retries (int): Maximum number of retry attempts (default: 16).
+        delay (float): Delay between retry attempts in seconds (default: 0.5).
     """
-    dev_info = cm.get_device(fqdn)
-    dev_factory = DevFactory()
-    timeout = 0
+    # Lock to serialize access to Tango resources
+    tango_lock = Lock()
 
-    while timeout <= max_retries:
-        try:
-            proxy = dev_factory.get_device(fqdn)
-            response = proxy.ping()
-            if response:
-                logger.info("Ping to %s successful", fqdn)
-                dev_info.update_unresponsive(False)
-            else:
-                logger.warning("Ping to %s failed", fqdn)
-                dev_info.update_unresponsive(True)
-        except Exception as e:
-            logger.warning("Ping to %s failed: %s ", fqdn, str(e))
+    def try_set_unresponsive(attempt):
+        with tango_lock:
+            dev_info = cm.get_device(fqdn)
             dev_info.update_unresponsive(True)
-            return True
-        timeout += 1
-        time.sleep(delay)
-    return False
+
+            # Check if the device is unresponsive or if max retries are reached
+            if dev_info.unresponsive or attempt >= max_retries:
+                if not dev_info.unresponsive:
+                    logger.warning(
+                        "Failed to set %f unresponsive after %f attempts",
+                        fqdn,
+                        max_retries,
+                    )
+                return
+
+        # Schedule the next retry
+        timer = Timer(delay, try_set_unresponsive, args=(attempt + 1,))
+        timer.start()
+
+    # Start the first attempt
+    try_set_unresponsive(0)
