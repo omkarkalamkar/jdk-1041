@@ -30,6 +30,11 @@ class LowTmcCentralNode(AbstractCentralNode):
     MCCSMasterLeafNodeFQDN = device_property(dtype="str")
 
     MCCSMasterFQDN = device_property(dtype="str")
+    SubarrayPatternLow = device_property(
+        dtype="str",
+        default_value="low-tmc/subarray/",
+        doc="Pattern to match subarray names.",
+    )
 
     # ----------
     # Attributes

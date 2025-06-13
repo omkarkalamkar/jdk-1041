@@ -131,6 +131,12 @@ class MidTmcCentralNode(AbstractCentralNode):
         access=AttrWriteType.READ,
     )
 
+    SubarrayPatternMid = device_property(
+        dtype="str",
+        default_value="mid-tmc/subarray/",
+        doc="Pattern to match subarray names.",
+    )
+
     def update_imaging_callback(self, imaging):
         """Callback for Update imaging"""
         self.logger.debug("Imaging %s", imaging)

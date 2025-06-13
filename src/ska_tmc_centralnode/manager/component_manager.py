@@ -678,12 +678,14 @@ class CNComponentManager(TmcComponentManager):
                     + f" {dev_info.unresponsive} "
                 )
                 count += 1
-        subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
         if count == 0:
             # Match device names to subarray pattern to
             # raise specific error for subarray failures
             if any(
-                re.match(subarray_pattern, dev_name.lower())
+                (
+                    self.subarray_pattern_mid in dev_name.lower()
+                    or self.subarray_pattern_low in dev_name.lower()
+                )
                 for dev_name in dev_names
             ):
                 raise SubarrayNotPresentError(
