@@ -509,7 +509,7 @@ def set_unresponsive(cm, fqdn, max_retries=16, delay=0.5):
     try_set_unresponsive(0)
 
 
-def wait_for_device_available(device_fqdn, timeout=TIMEOUT, poll_interval=0.1):
+def wait_for_device_available(device_fqdn, timeout=3, poll_interval=0.1):
     """
     Waits until the specified Tango device is available (responds to ping).
 
@@ -540,9 +540,7 @@ def wait_for_device_available(device_fqdn, timeout=TIMEOUT, poll_interval=0.1):
     )
 
 
-def wait_for_device_unavailable(
-    device_fqdn, timeout=TIMEOUT, poll_interval=0.1
-):
+def wait_for_device_unavailable(device_fqdn, timeout=3, poll_interval=0.1):
     """
     Waits until the specified Tango device becomes unavailable (ping fails).
 
