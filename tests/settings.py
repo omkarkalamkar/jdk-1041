@@ -471,9 +471,10 @@ def check_lrcr_events(
     return False
 
 
-def set_unresponsive(cm, fqdn, max_retries=8.0, delay=0.5):
+def set_unresponsive(cm, fqdn, timeout_secs=8.0, delay=0.5):
     """
-    Tries to set the device to unresponsive state within a total timeout duration.
+    Tries to set the device to unresponsive
+    state within a total timeout duration.
 
     Args:
         cm: Component manager instance.
@@ -487,7 +488,7 @@ def set_unresponsive(cm, fqdn, max_retries=8.0, delay=0.5):
         return
 
     start_time = time.time()
-    end_time = start_time + max_retries
+    end_time = start_time + timeout_secs
     attempt = 1
 
     while time.time() < end_time:
@@ -495,15 +496,15 @@ def set_unresponsive(cm, fqdn, max_retries=8.0, delay=0.5):
 
         if dev_info.unresponsive:
             logger.info(
-                "Device %s marked unresponsive " + "after %d attempt(s)",
+                "Device %s marked unresponsive after %d attempt(s)",
                 fqdn,
                 attempt,
             )
             return
 
         logger.debug(
-            "Attempt %d: Device %s not yet unresponsive. "
-            + "Retrying in %.1f seconds...",
+            "Attempt %d: Device %s "
+            "not yet unresponsive. Retrying in %.1f seconds...",
             attempt,
             fqdn,
             delay,
@@ -512,9 +513,10 @@ def set_unresponsive(cm, fqdn, max_retries=8.0, delay=0.5):
         time.sleep(delay)
 
     logger.warning(
-        "Timeout reached. Failed to set device %s unresponsive within %.1f seconds",
+        "Timeout reached. Failed to set device "
+        "%s unresponsive within %.1f seconds",
         fqdn,
-        max_retries,
+        timeout_secs,
     )
 
 

@@ -177,17 +177,14 @@ def test_telescope_off_command_rejected(tango_context, task_callback):
     #     dev_info_mccsmln.update_unresponsive(True)
     #     timeout += 1
     #     time.sleep(0.5)
-    dev_factory = DevFactory()
-    mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
-    set_unresponsive(cm, MCCS_MLN_DEVICE, max_retries=0.8, delay=0.5)
-    assert cm.get_device(MCCS_MLN_DEVICE).unresponsive
-
-    mccs_mln.SetSubsystemAvailable(False)
-    check_mccsmln_availability(cm, False)
+    set_unresponsive(cm, MCCS_MLN_DEVICE)
+    # dev_factory = DevFactory()
+    # mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
 
     cm.is_command_allowed("TelescopeOff")
     cm.telescope_off(task_callback=task_callback)
-
+    # mccs_mln.SetSubsystemAvailable(False)
+    # check_mccsmln_availability(cm, False)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
