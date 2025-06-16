@@ -76,7 +76,7 @@ class CNComponentManagerMid(CNComponentManager):
         enable_dish_vcc_init=True,
         k_value_valid_range_upper_limit=1177,
         k_value_valid_range_lower_limit=1,
-        subarray_trl_prefix_trl: str = "mid-tmc/subarray",
+        subarray_trl_prefix: str = "mid-tmc/subarray",
         *args,
         **kwargs,
     ) -> None:
@@ -146,7 +146,7 @@ class CNComponentManagerMid(CNComponentManager):
             liveliness_check_period,
             skuid_service,
             command_timeout,
-            subarray_trl_prefix_trl,
+            subarray_trl_prefix,
             *args,
             **kwargs,
         )

@@ -471,55 +471,6 @@ def check_lrcr_events(
     return False
 
 
-def set_unresponsive(cm, fqdn, timeout_secs=8.0, delay=0.5):
-    """
-    Tries to set the device to unresponsive
-    state within a total timeout duration.
-
-    Args:
-        cm: Component manager instance.
-        fqdn (str): Fully qualified domain name of the device.
-        timeout_secs (float): Maximum time to keep retrying in seconds.
-        delay (float): Delay between retries in seconds.
-    """
-    dev_info = cm.get_device(fqdn)
-    if not dev_info:
-        logger.error("Device %s not found", fqdn)
-        return
-
-    start_time = time.time()
-    end_time = start_time + timeout_secs
-    attempt = 1
-
-    while time.time() < end_time:
-        dev_info.update_unresponsive(True)
-
-        if dev_info.unresponsive:
-            logger.info(
-                "Device %s marked unresponsive after %d attempt(s)",
-                fqdn,
-                attempt,
-            )
-            return
-
-        logger.debug(
-            "Attempt %d: Device %s "
-            "not yet unresponsive. Retrying in %.1f seconds...",
-            attempt,
-            fqdn,
-            delay,
-        )
-        attempt += 1
-        time.sleep(delay)
-
-    logger.warning(
-        "Timeout reached. Failed to set device "
-        "%s unresponsive within %.1f seconds",
-        fqdn,
-        timeout_secs,
-    )
-
-
 def wait_for_device_available(device_fqdn, timeout=3, poll_interval=0.1):
     """
     Waits until the specified Tango device is available (responds to ping).

@@ -124,7 +124,7 @@ class CNComponentManager(TmcComponentManager):
         releaseresources_interface: str = "",
         retry_attempts: int = 5,
         retry_delay: float = 3.0,
-        subarray_trl_prefix_trl: str = "",
+        subarray_trl_prefix: str = "",
         *args,
         **kwargs,
     ):
@@ -148,7 +148,7 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
-        self.subarray_trl_prefix_trl = subarray_trl_prefix_trl
+        self.subarray_trl_prefix = subarray_trl_prefix
         super().__init__(
             _input_parameter,
             logger,
@@ -672,9 +672,11 @@ class CNComponentManager(TmcComponentManager):
                     + f" {dev_info.unresponsive} "
                 )
                 count += 1
+        # Raise SubarrayNotPresentError if fqdn matches subarray prefix,
+        # else CommandNotAllowed
         if count == 0:
             if any(
-                dev_name.lower().startswith(self.subarray_trl_prefix_trl)
+                dev_name.lower().startswith(self.subarray_trl_prefix)
                 for dev_name in dev_names
             ):
                 raise SubarrayNotPresentError(
