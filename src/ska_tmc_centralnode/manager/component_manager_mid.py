@@ -76,7 +76,7 @@ class CNComponentManagerMid(CNComponentManager):
         enable_dish_vcc_init=True,
         k_value_valid_range_upper_limit=1177,
         k_value_valid_range_lower_limit=1,
-        subarray_prefix: str = "",
+        subarray_prefix: str = "mid-tmc/subarray",
         *args,
         **kwargs,
     ) -> None:
