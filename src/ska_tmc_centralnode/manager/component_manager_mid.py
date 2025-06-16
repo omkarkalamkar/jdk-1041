@@ -60,7 +60,6 @@ class CNComponentManagerMid(CNComponentManager):
         _telescope_availability_callback: Callable,
         _update_dishvccconfig_callback: Callable,
         _dishvccvalidation_callback: Callable,
-        subarray_pattern_mid: str = "",
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager=True,
@@ -77,6 +76,7 @@ class CNComponentManagerMid(CNComponentManager):
         enable_dish_vcc_init=True,
         k_value_valid_range_upper_limit=1177,
         k_value_valid_range_lower_limit=1,
+        subarray_trl_prefix_trl: str = "mid-tmc/subarray",
         *args,
         **kwargs,
     ) -> None:
@@ -138,7 +138,6 @@ class CNComponentManagerMid(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             _telescope_availability_callback,
-            subarray_pattern_mid,
             _component,
             _liveliness_probe,
             _event_manager,
@@ -147,6 +146,7 @@ class CNComponentManagerMid(CNComponentManager):
             liveliness_check_period,
             skuid_service,
             command_timeout,
+            subarray_trl_prefix_trl,
             *args,
             **kwargs,
         )

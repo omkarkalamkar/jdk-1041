@@ -43,7 +43,6 @@ class CNComponentManagerLow(CNComponentManager):
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
-        subarray_pattern_low="",
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager=True,
@@ -58,6 +57,7 @@ class CNComponentManagerLow(CNComponentManager):
         releaseresources_interface: str = (
             "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
         ),
+        subarray_trl_prefix_trl: str = "low-tmc/subarray",
         *args,
         **kwargs,
     ):
@@ -93,7 +93,6 @@ class CNComponentManagerLow(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             _telescope_availability_callback,
-            subarray_pattern_low,
             _component,
             _liveliness_probe,
             _event_manager,
@@ -104,6 +103,7 @@ class CNComponentManagerLow(CNComponentManager):
             liveliness_check_period=liveliness_check_period,
             assignresources_interface=assignresources_interface,
             releaseresources_interface=releaseresources_interface,
+            subarray_trl_prefix_trl=subarray_trl_prefix_trl,
             *args,
             **kwargs,
         )

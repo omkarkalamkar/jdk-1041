@@ -131,12 +131,6 @@ class MidTmcCentralNode(AbstractCentralNode):
         access=AttrWriteType.READ,
     )
 
-    SubarrayPatternMid = device_property(
-        dtype="str",
-        default_value="mid-tmc/subarray/",
-        doc="Pattern to match subarray names.",
-    )
-
     def update_imaging_callback(self, imaging):
         """Callback for Update imaging"""
         self.logger.debug("Imaging %s", imaging)
@@ -281,7 +275,6 @@ class MidTmcCentralNode(AbstractCentralNode):
             _update_dishvccconfig_callback=self.update_dishvccconfig_callback,
             _dishvccvalidation_callback=self.dishvccvalidation_callback,
             command_timeout=self.CommandTimeOut,
-            subarray_pattern_mid=self.SubarrayPatternMid,
             proxy_timeout=self.ProxyTimeout,
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,
             liveliness_check_period=self.LivelinessCheckPeriod,
@@ -300,6 +293,7 @@ class MidTmcCentralNode(AbstractCentralNode):
                 self.invoke_load_dish_cfg_command_callback
             ),
             enable_dish_vcc_init=self.EnableDishVccInit,
+            subarray_trl_prefix_trl=self.SubarrayPrefix,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []

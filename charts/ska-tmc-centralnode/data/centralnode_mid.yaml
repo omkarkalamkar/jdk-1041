@@ -24,6 +24,9 @@ server:
         - name: "CspMasterFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.mid.CspMasterFQDN}}"
+        - name: "SubarrayPrefix"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.SubarrayPrefix}}"
         - name: "SdpMasterLeafNodeFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.mid.SdpMasterLeafNodeFQDN}}"
@@ -67,9 +70,6 @@ server:
         - name: "SkuidService"
           values:
           - "{{.Values.deviceServers.centralnode.SkuidService}}"
-        - name: "SubarrayPatternMid"  
-           values:
-           - "{{ .Values.deviceServers.centralnode.SubarrayPatternMid }}""
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}

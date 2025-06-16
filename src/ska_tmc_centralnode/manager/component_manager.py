@@ -110,8 +110,6 @@ class CNComponentManager(TmcComponentManager):
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
         _component=None,
-        subarray_pattern_mid: str = "",
-        subarray_pattern_low: str = "",
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager: bool = True,
         proxy_timeout=500,
@@ -121,13 +119,12 @@ class CNComponentManager(TmcComponentManager):
             "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
             + ".skao.int:9870"
         ),
-        SubarrayPatternMid="mid-tmc/subarray/",
-        SubarrayPatternLow="low-tmc/subarray/",
         command_timeout=30,
         assignresources_interface: str = "",
         releaseresources_interface: str = "",
         retry_attempts: int = 5,
         retry_delay: float = 3.0,
+        subarray_trl_prefix_trl: str = "",
         *args,
         **kwargs,
     ):
@@ -151,8 +148,7 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
-        self._subarray_pattern_mid = subarray_pattern_mid
-        self._subarray_pattern_low = subarray_pattern_low
+        self.subarray_trl_prefix_trl = subarray_trl_prefix_trl
         super().__init__(
             _input_parameter,
             logger,
@@ -191,8 +187,6 @@ class CNComponentManager(TmcComponentManager):
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()
-        self.subarray_pattern_mid = SubarrayPatternMid
-        self.subarray_pattern_low = SubarrayPatternLow
 
         self.no_of_events_for_command = 0
 
@@ -679,13 +673,8 @@ class CNComponentManager(TmcComponentManager):
                 )
                 count += 1
         if count == 0:
-            # Match device names to subarray pattern to
-            # raise specific error for subarray failures
             if any(
-                (
-                    self.subarray_pattern_mid in dev_name.lower()
-                    or self.subarray_pattern_low in dev_name.lower()
-                )
+                dev_name.lower().startswith(self.subarray_trl_prefix_trl)
                 for dev_name in dev_names
             ):
                 raise SubarrayNotPresentError(
