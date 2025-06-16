@@ -14,7 +14,7 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
-from ska_tmc_common import DevFactory, FaultType, LivelinessProbeType
+from ska_tmc_common import FaultType, LivelinessProbeType
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -469,67 +469,3 @@ def check_lrcr_events(
     if flag:
         return True
     return False
-
-
-def wait_for_device_available(device_fqdn, timeout=3, poll_interval=0.1):
-    """
-    Waits until the specified Tango device is available (responds to ping).
-
-    Args:
-        device_fqdn (str): FQDN of the Tango device.
-        timeout (float): Max wait time in seconds.
-        poll_interval (float): Interval between pings in seconds.
-
-    Raises:
-        pytest.fail: If the device doesn't respond within the timeout.
-    """
-    dev_factory = DevFactory()
-    proxy = dev_factory.get_device(device_fqdn)
-    start_time = time.time()
-    elapsed_time = 0
-
-    while elapsed_time < timeout:
-        try:
-            proxy.ping()
-            logger.info("Device %s is available.", device_fqdn)
-            return
-        except tango.DevFailed as e:
-            logger.debug("Device %s is not yet available: %s", device_fqdn, e)
-        time.sleep(poll_interval)
-        elapsed_time = time.time() - start_time
-    pytest.fail(
-        "Timeout waiting for device %s to become available.", device_fqdn
-    )
-
-
-def wait_for_device_unavailable(device_fqdn, timeout=3, poll_interval=0.1):
-    """
-    Waits until the specified Tango device becomes unavailable (ping fails).
-
-    Args:
-        device_fqdn (str): FQDN of the Tango device.
-        timeout (float): Max wait time in seconds.
-        poll_interval (float): Interval between pings in seconds.
-
-    Raises:
-        pytest.fail: If the device remains available after the timeout.
-    """
-
-    dev_factory = DevFactory()
-    proxy = dev_factory.get_device(device_fqdn)
-    start_time = time.time()
-    elapsed_time = 0
-
-    while elapsed_time < timeout:
-        try:
-            proxy.ping()
-        except tango.DevFailed as e:
-            logger.info(
-                "Device %s is unavailable as expected: %s", device_fqdn, e
-            )
-            return
-        time.sleep(poll_interval)
-        elapsed_time = time.time() - start_time
-    pytest.fail(
-        "Timeout waiting for device %s to become unavailable.", device_fqdn
-    )
