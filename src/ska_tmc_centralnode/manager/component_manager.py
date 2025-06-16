@@ -124,6 +124,7 @@ class CNComponentManager(TmcComponentManager):
         releaseresources_interface: str = "",
         retry_attempts: int = 5,
         retry_delay: float = 3.0,
+        subarray_prefix: str = "",
         *args,
         **kwargs,
     ):
@@ -147,7 +148,7 @@ class CNComponentManager(TmcComponentManager):
         self._component = _component or CentralComponent(logger)
         self.retry_attempts = retry_attempts
         self.retry_delay = retry_delay
-
+        self.subarray_prefix = subarray_prefix
         super().__init__(
             _input_parameter,
             logger,
@@ -672,9 +673,8 @@ class CNComponentManager(TmcComponentManager):
                 )
                 count += 1
         if count == 0:
-            subarray_pattern = r"^(low-tmc|mid-tmc)/subarray/\d{2}$"
             if any(
-                re.match(subarray_pattern, dev_name.lower())
+                dev_name.lower().startswith(self.subarray_prefix)
                 for dev_name in dev_names
             ):
                 raise SubarrayNotPresentError(

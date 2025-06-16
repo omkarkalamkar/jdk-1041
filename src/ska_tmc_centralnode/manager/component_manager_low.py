@@ -57,6 +57,7 @@ class CNComponentManagerLow(CNComponentManager):
         releaseresources_interface: str = (
             "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
         ),
+        subarray_prefix: str = "",
         *args,
         **kwargs,
     ):
@@ -102,6 +103,7 @@ class CNComponentManagerLow(CNComponentManager):
             liveliness_check_period=liveliness_check_period,
             assignresources_interface=assignresources_interface,
             releaseresources_interface=releaseresources_interface,
+            subarray_prefix=subarray_prefix,
             *args,
             **kwargs,
         )
