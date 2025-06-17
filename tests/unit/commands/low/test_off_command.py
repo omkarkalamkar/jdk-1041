@@ -168,14 +168,21 @@ def test_telescope_off_command_rejected(tango_context, task_callback):
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    dev_info_dishln = cm.get_device(MCCS_MLN_DEVICE)
-    dev_info_dishln.update_unresponsive(True)
+    dev_info_mccsmln = cm.get_device(MCCS_MLN_DEVICE)
+    # Retries setting device responsiveness to True
+    timeout_retry = 16
+    timeout = 0
+    while timeout <= timeout_retry:
+        dev_info_mccsmln.update_unresponsive(True)
+        timeout += 1
+        time.sleep(0.5)
+
     cm.is_command_allowed("TelescopeOff")
     cm.telescope_off(task_callback=task_callback)
-
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
+
     data = task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.REJECTED,

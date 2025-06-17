@@ -41,6 +41,12 @@ from ska_tmc_common import (
 )
 from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
 from tango import DevState
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_fixed,
+)
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
@@ -116,6 +122,9 @@ class CNComponentManager(TmcComponentManager):
         command_timeout=30,
         assignresources_interface: str = "",
         releaseresources_interface: str = "",
+        retry_attempts: int = 5,
+        retry_delay: float = 3.0,
+        subarray_trl_prefix: str = "",
         *args,
         **kwargs,
     ):
@@ -137,7 +146,9 @@ class CNComponentManager(TmcComponentManager):
         """
 
         self._component = _component or CentralComponent(logger)
-
+        self.retry_attempts = retry_attempts
+        self.retry_delay = retry_delay
+        self.subarray_trl_prefix = subarray_trl_prefix
         super().__init__(
             _input_parameter,
             logger,
@@ -623,14 +634,35 @@ class CNComponentManager(TmcComponentManager):
         return True
 
     def check_if_subarrays_are_responsive(self) -> bool:
-        """Checks if subarray are responsive"""
+        """
+        Checks if subarray are responsive
+
+        :return: True if at least one subarray device is responsive,
+                 False otherwise.
+        :rtype: bool
+        """
         self.logger.debug("Checking if subarrays are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.subarray_dev_names
         )
 
+    @retry(
+        stop=stop_after_attempt(5),
+        wait=wait_fixed(3.0),
+        retry=retry_if_exception_type(
+            (CommandNotAllowed, SubarrayNotPresentError)
+        ),
+        reraise=True,
+    )
     def _check_if_device_is_responsive(self, dev_names: List[str]):
         """checks if the device is responsive"""
+        self._check_if_device_is_responsive.retry.stop = stop_after_attempt(
+            self.retry_attempts
+        )
+        self._check_if_device_is_responsive.retry.wait = wait_fixed(
+            self.retry_delay
+        )
+        self.logger.debug("Retrying device responsive check")
         count = 0
         for dev_name in dev_names:
             dev_info = self.get_device(dev_name)
@@ -640,7 +672,17 @@ class CNComponentManager(TmcComponentManager):
                     + f" {dev_info.unresponsive} "
                 )
                 count += 1
+        # Raise SubarrayNotPresentError if fqdn matches subarray prefix,
+        # else CommandNotAllowed
         if count == 0:
+            if any(
+                name.lower().startswith(self.subarray_trl_prefix)
+                and "dish" not in name.lower()
+                for name in dev_names
+            ):
+                raise SubarrayNotPresentError(
+                    f"Subarray devices not available: {dev_names}"
+                )
             raise CommandNotAllowed(f"{dev_names} not available")
 
     def add_multiple_devices(self, device_list: List[str]):
@@ -1249,37 +1291,6 @@ class CNComponentManager(TmcComponentManager):
 
         # Reject command if Subarray is not available
         json_argument = json.loads(argin)
-        subarray_id = json_argument["subarray_id"]
-        subarray_suffics = "/" + str(subarray_id).zfill(2)
-        subarrays_list = list(
-            self._component.telescope_availability["tmc_subarrays"].keys()
-        )
-        for subarray in subarrays_list:
-            telescope_availability = self.get_telescope_availability()
-            self.logger.debug(
-                f"Telescope availability is: {telescope_availability}"
-            )
-            self.logger.debug(f"subarrays_list is: {subarrays_list}")
-            if (
-                subarray.endswith(subarray_suffics)
-                and telescope_availability["tmc_subarrays"][subarray] is False
-            ):
-                return assign_resources_command.reject_command(
-                    f"Subarray {subarray} is not available."
-                )
-
-        # validate processing block
-        (
-            is_processing_block_present,
-            processing_block_error_msg,
-        ) = assign_resources_command._validate_and_update_resource_config(
-            json_argument
-        )
-        if not is_processing_block_present:
-            return assign_resources_command.reject_command(
-                processing_block_error_msg
-            )
-
         task_status, response = self.submit_task(
             assign_resources_command.assign_resources,
             kwargs={"argin": json.dumps(json_argument)},

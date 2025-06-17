@@ -1,12 +1,14 @@
 """Test module for assign resources unavailability"""
 
 import json
+import time
 
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
+from tango.db import Database
 
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
@@ -17,6 +19,7 @@ from tests.settings import (
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
     check_subarray_availability,
+    export_device,
     logger,
 )
 
@@ -58,9 +61,17 @@ def assign_resources(
         lookahead=4,
     )
 
-    subarray_proxy.SetisSubarrayAvailable(False)
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
 
+    subarray_proxy.SetisSubarrayAvailable(False)
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
+    db = Database()
+    db_device_info = db.get_device_info(subarray_fqdn)
+    db.unexport_device(subarray_fqdn)
+
+    # Waiting for event from central node
+    time.sleep(3)
 
     if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
@@ -77,9 +88,29 @@ def assign_resources(
     )
 
     # assert unique_id[0].endswith("AssignResources")
-    assert result[0] == ResultCode.REJECTED
+    assert result[0] == ResultCode.QUEUED
 
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            json.dumps(
+                (
+                    int(ResultCode.REJECTED),
+                    "Exception from 'is_cmd_allowed' method: "
+                    f"Subarray devices not available: ['{subarray_fqdn}']",
+                )
+            ),
+        ),
+        lookahead=4,
+    )
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
+
+    export_device(db, db_device_info)
+    time.sleep(3)
+
+    subarray_proxy.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
 
     # Teardown
     result, unique_id = central_node_proxy.TelescopeOff()

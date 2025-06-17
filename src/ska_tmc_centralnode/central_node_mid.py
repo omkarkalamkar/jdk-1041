@@ -293,6 +293,7 @@ class MidTmcCentralNode(AbstractCentralNode):
                 self.invoke_load_dish_cfg_command_callback
             ),
             enable_dish_vcc_init=self.EnableDishVccInit,
+            subarray_trl_prefix=self.SubarrayPrefix,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []

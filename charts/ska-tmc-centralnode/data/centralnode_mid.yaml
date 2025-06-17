@@ -24,6 +24,9 @@ server:
         - name: "CspMasterFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.mid.CspMasterFQDN}}"
+        - name: "SubarrayPrefix"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.SubarrayPrefix}}"
         - name: "SdpMasterLeafNodeFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.mid.SdpMasterLeafNodeFQDN}}"

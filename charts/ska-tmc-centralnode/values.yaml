@@ -46,7 +46,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.19.6
+    tag: 0.19.7
     pullPolicy: IfNotPresent
 
 resources:
@@ -95,6 +95,7 @@ deviceServers:
       DishKvalueAggregationAllowedPercent: 100.0
       DishVccInitTimeout: 120
       CommandTimeOut: 30
+      SubarrayPrefix: "mid-tmc/subarray/"
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "low-tmc/leaf-node-csp/0"
@@ -106,6 +107,7 @@ deviceServers:
       AssignResourcesInterface: "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
       ReleaseResourcesInterface: "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
       CommandTimeOut: 30
+      SubarrayPrefix: "low-tmc/subarray/"
 
 
 nodeSelector: {}

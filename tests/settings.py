@@ -2,10 +2,12 @@
 
 import json
 import logging
+import os
 import time
 from typing import List
 
 import pytest
+import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_testing.mock.placeholders import Anything
@@ -29,6 +31,7 @@ from ska_tmc_centralnode.model.input import (
 from tests.mock_callable import MockCallable
 
 logger = logging.getLogger(__name__)
+TANGO_HOST = os.getenv("TANGO_HOST")
 SLEEP_TIME = 0.5
 TIMEOUT = 50
 KVALUE = 9
@@ -418,6 +421,18 @@ def event_remover(group_callback, attributes: List[str]) -> None:
                 node.drop()
         except KeyError:
             pass
+
+
+def export_device(db, db_info):
+    """Export device in database"""
+    dev_export = tango.DbDevExportInfo()
+    dev_export.name = db_info.name
+    dev_export.ior = db_info.ior
+    dev_export.host = TANGO_HOST
+    dev_export.version = db_info.version
+    dev_export.pid = db_info.pid
+
+    db.export_device(dev_export)
 
 
 def check_lrcr_events(
