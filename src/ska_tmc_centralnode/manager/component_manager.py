@@ -676,8 +676,9 @@ class CNComponentManager(TmcComponentManager):
         # else CommandNotAllowed
         if count == 0:
             if any(
-                dev_name.lower().startswith(self.subarray_trl_prefix)
-                for dev_name in dev_names
+                name.lower().startswith(self.subarray_trl_prefix)
+                and "dish" not in name.lower()
+                for name in dev_names
             ):
                 raise SubarrayNotPresentError(
                     f"Subarray devices not available: {dev_names}"

@@ -57,7 +57,7 @@ class CNComponentManagerLow(CNComponentManager):
         releaseresources_interface: str = (
             "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
         ),
-        subarray_trl_prefix: str = "low-tmc/subarray",
+        subarray_trl_prefix: str = "low-tmc/subarray/",
         *args,
         **kwargs,
     ):
