@@ -6,6 +6,7 @@ Feature: Central Node acceptance
 	Scenario Outline: Monitor Telescope Components
 		Given a TANGO ecosystem with a set of devices deployed
 		And a CentralNode device
+		And subsystem controllers are in adminMode ONLINE
 		When I get the attribute InternalModel of the CentralNode device
 		Then it correctly reports the failed and working devices
 
@@ -14,6 +15,7 @@ Feature: Central Node acceptance
 	@XTP-3612 @XTP-3614 @post_deployment @acceptance
 	Scenario: Ability to run commands on central node
 		Given a CentralNode device
+		And subsystem controllers are in adminMode ONLINE
 		When I call the command <command_name>
 		Then the <command_name> command is executed successfully on lower level devices
 
