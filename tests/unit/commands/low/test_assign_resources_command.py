@@ -23,7 +23,10 @@ from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 @pytest.mark.SKA_low
 def test_low_assign_resources_command(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
@@ -50,7 +53,10 @@ def test_low_assign_resources_command(
 
 @pytest.mark.SKA_low
 def test_assign_resources_missing_eb_id_key_and_processing_blocks(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
@@ -65,7 +71,10 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
 
 
 def test_assign_resources_missing_sdp_key(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
@@ -78,7 +87,10 @@ def test_assign_resources_missing_sdp_key(
 
 
 def test_assign_resources_missing_csp_key(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
@@ -91,7 +103,10 @@ def test_assign_resources_missing_csp_key(
 
 
 def test_low_assign_resources_command_fail_subarray(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
@@ -120,7 +135,10 @@ def test_low_assign_resources_command_fail_subarray(
 
 
 def test_low_assign_resources_command_missing_subarray_beam_ids_key(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
@@ -135,7 +153,7 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
 
 @pytest.mark.SKA_low
 def test_low_assign_resources_command_empty_input_json(
-    tango_context, task_callback
+    tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -145,7 +163,10 @@ def test_low_assign_resources_command_empty_input_json(
 
 
 def test_low_assign_resources_command_with_invalide_key(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
@@ -162,7 +183,10 @@ def test_low_assign_resources_command_with_invalide_key(
 
 @pytest.mark.SKA_low
 def test_low_assign_resources_missing_subarray_id(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -176,7 +200,10 @@ def test_low_assign_resources_missing_subarray_id(
 
 
 def test_low_assign_resources_command_missing_mccs(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -193,7 +220,10 @@ def test_low_assign_resources_command_missing_mccs(
 
 
 def test_low_assign_resources_command_missing_aperture_id(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -212,7 +242,10 @@ def test_low_assign_resources_command_missing_aperture_id(
 
 
 def test_low_assign_resources_command_missing_station_ids(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -232,7 +265,9 @@ def test_low_assign_resources_command_missing_station_ids(
 
 
 @pytest.mark.SKA_low
-def test_telescope_low_assign_resources_fail_check_allowed(tango_context):
+def test_telescope_low_assign_resources_fail_check_allowed(
+    tango_context, set_low_sdp_csp_mccs_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -260,7 +295,10 @@ def check_if_subarray_is_available(cm):
 
 @pytest.mark.SKA_low
 def test_low_assign_resources_raises_state_model_exception(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     dev_factory = DevFactory()

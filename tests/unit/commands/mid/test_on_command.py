@@ -27,7 +27,7 @@ from tests.settings import (
 )
 
 
-def test_telescope_on_command(tango_context):
+def test_telescope_on_command(tango_context, set_mid_sdp_csp_admin_modes):
     """Test telescope On Command"""
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
@@ -57,7 +57,9 @@ def test_telescope_on_command(tango_context):
     assert task_callback.status == TaskStatus.QUEUED
 
 
-def test_telescope_on_command_unavailability(tango_context):
+def test_telescope_on_command_unavailability(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
@@ -88,7 +90,9 @@ def test_telescope_on_command_unavailability(tango_context):
     assert task_callback.result[0] == ResultCode.OK
 
 
-def test_telescope_on_command_fail_subarray(tango_context):
+def test_telescope_on_command_fail_subarray(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -127,7 +131,9 @@ def test_telescope_on_command_fail_subarray(tango_context):
     assert task_callback.result[0] == ResultCode.FAILED
 
 
-def test_telescope_on_command_task_completed(tango_context):
+def test_telescope_on_command_task_completed(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -161,7 +167,9 @@ def test_telescope_on_command_task_completed(tango_context):
     assert task_callback.status == TaskStatus.COMPLETED
 
 
-def test_telescope_on_fail_check_allowed(tango_context):
+def test_telescope_on_fail_check_allowed(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -174,7 +182,9 @@ def test_telescope_on_fail_check_allowed(tango_context):
         cm.is_command_allowed("TelescopeOn")
 
 
-def test_telescope_on_command_rejected(tango_context, task_callback):
+def test_telescope_on_command_rejected(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
@@ -203,7 +213,9 @@ def test_telescope_on_command_rejected(tango_context, task_callback):
     assert f"['{DISH_LEAF_NODE_DEVICE}'] not available" in data["result"][1]
 
 
-def test_telescope_on_command_fail_dish(tango_context):
+def test_telescope_on_command_fail_dish(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time

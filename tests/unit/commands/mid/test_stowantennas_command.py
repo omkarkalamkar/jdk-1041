@@ -17,7 +17,9 @@ from tests.settings import create_cm, logger
 @pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
-def test_telescope_stow_antennas_command(tango_context):
+def test_telescope_stow_antennas_command(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
 
@@ -38,7 +40,9 @@ def test_telescope_stow_antennas_command(tango_context):
 @pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
-def test_telescope_stow_antennas_fail_dish(tango_context):
+def test_telescope_stow_antennas_fail_dish(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -66,7 +70,9 @@ def test_telescope_stow_antennas_fail_dish(tango_context):
 @pytest.mark.skip(
     reason="Test needs update as per v0.13. Can be done as a part of further commands refactoring."
 )
-def test_telescope_stow_antennas_fail_check_allowed(tango_context):
+def test_telescope_stow_antennas_fail_check_allowed(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time

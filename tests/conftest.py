@@ -9,6 +9,7 @@ from os.path import dirname, join
 import mock
 import pytest
 import tango
+from ska_control_model import AdminMode
 from ska_tango_testing.mock import MockCallable
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
@@ -235,3 +236,56 @@ def aggregation_process_low():
     yield aggregation_process
     aggregation_process.stop_aggregation_process()
     process_manager.shutdown()
+
+
+@pytest.fixture
+def set_mid_sdp_csp_admin_modes():
+    """
+    Setting mid Csp controller and Sdp controller adminModes
+    attribute as Online.
+    """
+    dev_factory = DevFactory()
+    proxy_csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    proxy_csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
+
+    proxy_sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    proxy_sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
+
+    logging.debug(
+        "CspControllerAdminMode attrubte is: %s",
+        proxy_csp_mln.cspControllerAdminMode,
+    )
+    logging.debug(
+        "SdpControllerAdminMode attrubte is: %s",
+        proxy_sdp_mln.sdpControllerAdminMode,
+    )
+
+
+@pytest.fixture
+def set_low_sdp_csp_mccs_admin_modes():
+    """
+    Setting low Csp controller and Sdp controller and Mccs controller
+    adminModes attribute as Online.
+    """
+    dev_factory = DevFactory()
+    proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    proxy_csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
+
+    proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    proxy_sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
+
+    proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+    proxy_mccs_mln.SetMccsControllerAdminMode(AdminMode.ONLINE)
+    logging.debug(
+        "cspControllerAdminMode attrubte is: %s",
+        proxy_csp_mln.cspControllerAdminMode,
+    )
+    logging.debug(
+        "sdpControllerAdminMode attrubte is: %s",
+        proxy_sdp_mln.sdpControllerAdminMode,
+    )
+
+    logging.debug(
+        "mccsControllerAdminMode attrubte is: %s",
+        proxy_mccs_mln.mccsControllerAdminMode,
+    )

@@ -23,7 +23,10 @@ from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 @pytest.mark.SKA_low
 def test_low_release_resources_command(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     cm.is_command_allowed("ReleaseResources")
@@ -55,6 +58,7 @@ def test_low_release_resources_command_fail_subarray(
     tango_context,
     task_callback,
     json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -76,7 +80,9 @@ def test_low_release_resources_command_fail_subarray(
 
 
 @pytest.mark.SKA_low
-def test_low_release_resources_empty_input_json(tango_context, task_callback):
+def test_low_release_resources_empty_input_json(
+    tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
+):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     cm.release_resources("", task_callback=task_callback)
     (res_code, _) = cm.release_resources(" ")
@@ -85,7 +91,10 @@ def test_low_release_resources_empty_input_json(tango_context, task_callback):
 
 @pytest.mark.SKA_low
 def test_low_release_resources_command_with_invalide_key(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     release_input_str = json_factory("invalid_key_ReleaseResources")
@@ -100,7 +109,10 @@ def test_low_release_resources_command_with_invalide_key(
 
 @pytest.mark.SKA_low
 def test_low_release_resources_missing_subarray_id(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     cm, _ = create_cm()
     release_input_str = json_factory("release_resource_low")
@@ -117,7 +129,9 @@ def test_low_release_resources_missing_subarray_id(
 
 
 @pytest.mark.SKA_low
-def test_low_release_resources_fail_check_allowed(tango_context):
+def test_low_release_resources_fail_check_allowed(
+    tango_context, set_low_sdp_csp_mccs_admin_modes
+):
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -143,7 +157,10 @@ def check_if_subarray_is_available(cm):
 
 @pytest.mark.SKA_low
 def test_low_release_resources_raises_state_model_exception(
-    tango_context, task_callback, json_factory
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     cm.is_command_allowed("ReleaseResources")
