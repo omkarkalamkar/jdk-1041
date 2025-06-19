@@ -68,7 +68,7 @@ def set_admin_mode(central_node):
         csp_proxy = DeviceProxy(MID_CSP_MLN_DEVICE)
         sdp_proxy = DeviceProxy(MID_SDP_MLN_DEVICE)
         csp_proxy.SetCspControllerAdminMode(AdminMode.ONLINE)
-        sdp_proxy.SetSspControllerAdminMode(AdminMode.ONLINE)
+        sdp_proxy.SetSdpControllerAdminMode(AdminMode.ONLINE)
 
     elif "low-tmc" in dev_name:
         csp_proxy = DeviceProxy(LOW_CSP_MLN_DEVICE)
