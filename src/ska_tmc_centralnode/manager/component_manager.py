@@ -1400,22 +1400,6 @@ class CNComponentManager(TmcComponentManager):
         )
         self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
 
-    def get_adapter_by_device_name(self, device_name: str):
-        """
-        The get_adapter_by_device_name method takes a device_name as
-        input and searches for an adapter object in the adapter_factory
-        object's adapters attribute that matches the input device_name.
-        If a matching adapter object is found, it is returned. If no
-        matching adapter object is found, first adapter is returned.
-
-        Args:
-            device_name (str): The name of the device to search for.
-
-        Returns:
-            An adapter object if a matching device is found,
-            otherwise first adapter object is returned.
-
-        """
         if not self.adapter_factory.adapters:
             return None
         for adapter in self.adapter_factory.adapters:
