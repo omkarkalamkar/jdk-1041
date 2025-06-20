@@ -39,7 +39,7 @@ mock = "^4.0.3"
 katpoint = "1.0a2"
 pandas="1.4.2"
 ipython = "8.5.0"
-ska-telmodel = "^1.20.0"
+ska-telmodel = { git = "https://gitlab.com/ska-telescope/ska-telmodel.git", branch = "hm-692" }
 ska-control-model="1.0.0"
 attrs = "^23.2.0"
 referencing = "^0.35.0"
