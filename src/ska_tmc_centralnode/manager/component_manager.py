@@ -1400,12 +1400,35 @@ class CNComponentManager(TmcComponentManager):
         )
         self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
 
+    def get_adapter_by_device_name(self, device_name: str):
+        """
+        The get_adapter_by_device_name method takes a device_name as
+        input and searches for an adapter object in the adapter_factory
+        object's adapters attribute that matches the input device_name.
+        If a matching adapter object is found, it is returned. If no
+        matching adapter object is found, first adapter is returned.
+
+        Args:
+            device_name (str): The name of the device to search for.
+
+        Returns:
+            An adapter object if a matching device is found,
+            otherwise first adapter object is returned.
+
+        """
+        if not self.adapter_factory.adapters:
+            return None
+        for adapter in self.adapter_factory.adapters:
+            if adapter.dev_name == device_name:
+                return adapter
+        return self.adapter_factory.adapters[0]
+
     def get_sdp_controller_admin_mode(self) -> AdminMode:
         """
         Retrieve the adminMode of sdp controller
-        :return: This method returns the adminMode of the
+        Returns:
+            This method returns the adminMode of the
             TMC sdp controller leaf Node.
-        :rtype: AdminMode
         """
         sdp_mln_adapter = self.adapter_factory.get_or_create_adapter(
             self.get_sdp_master_leaf_node_dev_name(),
@@ -1416,9 +1439,9 @@ class CNComponentManager(TmcComponentManager):
     def get_csp_controller_admin_mode(self) -> AdminMode:
         """
         Retrieve the adminMode of csp controller
-        :return: This method returns the adminMode of the
+        Return:
+            This method returns the adminMode of the
             TMC csp controller leaf Node.
-        :rtype: AdminMode
         """
         csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
             self.get_csp_master_leaf_node_dev_name(),
@@ -1429,9 +1452,9 @@ class CNComponentManager(TmcComponentManager):
     def get_mccs_controller_admin_mode(self) -> AdminMode:
         """
         Retrieve the adminMode of mccs controller
-        :return: This method returns the adminMode of the
+        Returns:
+            This method returns the adminMode of the
             TMC mccs controller leaf Node.
-        :rtype: AdminMode
 
         """
         mccs_mln_adapter = self.adapter_factory.get_or_create_adapter(
