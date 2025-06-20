@@ -1400,13 +1400,6 @@ class CNComponentManager(TmcComponentManager):
         )
         self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
 
-        if not self.adapter_factory.adapters:
-            return None
-        for adapter in self.adapter_factory.adapters:
-            if adapter.dev_name == device_name:
-                return adapter
-        return self.adapter_factory.adapters[0]
-
     def get_sdp_controller_admin_mode(self) -> AdminMode:
         """
         Retrieve the adminMode of sdp controller
