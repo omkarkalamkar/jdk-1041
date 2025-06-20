@@ -73,13 +73,13 @@ def devices_to_load():
         {
             "class": HelperCspMasterLeafDevice,
             "devices": [
+                {"name": LOW_CSP_MLN_DEVICE},
                 {"name": MID_CSP_MLN_DEVICE},
             ],
         },
         {
             "class": HelperBaseDevice,
             "devices": [
-                {"name": LOW_CSP_MLN_DEVICE},
                 {"name": LOW_CSP_MASTER_DEVICE},
                 {"name": LOW_SDP_MASTER_DEVICE},
                 {"name": MID_CSP_MASTER_DEVICE},

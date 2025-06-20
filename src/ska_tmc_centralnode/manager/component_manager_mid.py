@@ -14,7 +14,7 @@ from logging import Logger
 from queue import Queue
 from typing import Callable, Tuple
 
-from ska_control_model import ObsState
+from ska_control_model import AdminMode, ObsState
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
@@ -669,6 +669,32 @@ class CNComponentManagerMid(CNComponentManager):
         """Stop aggregation process"""
         self.aggregation_process.stop_aggregation_process()
 
+    def is_valid_admin_mode(self) -> bool:
+        """
+        Validates that all relevant subarray devices are in a valid admin mode.
+
+        Returns:
+            bool: True if all subarrays are in a valid mode, False otherwise.
+
+
+        """
+        sdp_admin_mode = self.get_sdp_controller_admin_mode()
+        csp_admin_mode = self.get_csp_controller_admin_mode()
+
+        admin_modes = [sdp_admin_mode, csp_admin_mode]
+
+        if any(
+            mode in [AdminMode.OFFLINE, AdminMode.NOT_FITTED]
+            for mode in admin_modes
+        ):
+            self.logger.debug(
+                "AdminMode check failed: SDP=%s, CSP=%s",
+                sdp_admin_mode,
+                csp_admin_mode,
+            )
+            return False
+        return True
+
     def is_command_allowed(self, command_name=None) -> bool:
         """
         Checks whether this command is allowed
@@ -683,6 +709,12 @@ class CNComponentManagerMid(CNComponentManager):
             True if this command is allowed
 
         """
+        if not self.is_valid_admin_mode():
+            raise CommandNotAllowed(
+                "One or more controller devices are in "
+                "adminMode OFFLINE or NOT-FITTED"
+            )
+
         if self.enable_dish_vcc_init:
             if not self.is_dish_vcc_config_set and command_name not in [
                 "TelescopeOff",

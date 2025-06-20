@@ -27,6 +27,7 @@ from ska_tango_base.faults import StateModelError
 from ska_telmodel.schema import validate
 from ska_tmc_common import (
     AdapterFactory,
+    AdapterType,
     Aggregator,
     CommandNotAllowed,
     DeviceInfo,
@@ -1398,6 +1399,69 @@ class CNComponentManager(TmcComponentManager):
             {"Devices": device_names, "STATE": dev_states}
         )
         self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
+
+    def get_adapter_by_device_name(self, device_name: str):
+        """
+        The get_adapter_by_device_name method takes a device_name as
+        input and searches for an adapter object in the adapter_factory
+        object's adapters attribute that matches the input device_name.
+        If a matching adapter object is found, it is returned. If no
+        matching adapter object is found, first adapter is returned.
+
+        Args:
+            device_name (str): The name of the device to search for.
+
+        Returns:
+            An adapter object if a matching device is found,
+            otherwise first adapter object is returned.
+
+        """
+        if not self.adapter_factory.adapters:
+            return None
+        for adapter in self.adapter_factory.adapters:
+            if adapter.dev_name == device_name:
+                return adapter
+        return self.adapter_factory.adapters[0]
+
+    def get_sdp_controller_admin_mode(self) -> AdminMode:
+        """
+        Retrieve the adminMode of sdp controller
+        Returns:
+            This method returns the adminMode of the
+            TMC sdp controller leaf Node.
+        """
+        sdp_mln_adapter = self.adapter_factory.get_or_create_adapter(
+            self.get_sdp_master_leaf_node_dev_name(),
+            adapter_type=AdapterType.SDP_MASTER_LEAF_NODE,
+        )
+        return sdp_mln_adapter.sdpControllerAdminMode
+
+    def get_csp_controller_admin_mode(self) -> AdminMode:
+        """
+        Retrieve the adminMode of csp controller
+        Return:
+            This method returns the adminMode of the
+            TMC csp controller leaf Node.
+        """
+        csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
+            self.get_csp_master_leaf_node_dev_name(),
+            adapter_type=AdapterType.CSP_MASTER_LEAF_NODE,
+        )
+        return csp_mln_adapter.cspControllerAdminMode
+
+    def get_mccs_controller_admin_mode(self) -> AdminMode:
+        """
+        Retrieve the adminMode of mccs controller
+        Returns:
+            This method returns the adminMode of the
+            TMC mccs controller leaf Node.
+
+        """
+        mccs_mln_adapter = self.adapter_factory.get_or_create_adapter(
+            self.get_mccs_master_leaf_node_dev_name(),
+            adapter_type=AdapterType.MCCS_MASTER_LEAF_NODE,
+        )
+        return mccs_mln_adapter.mccsControllerAdminMode
 
     def is_command_allowed(self):
         """This method needs to be overridden by the child classes

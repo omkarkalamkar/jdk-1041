@@ -13,6 +13,7 @@ from logging import Logger
 from queue import Queue
 from typing import Callable
 
+from ska_control_model import AdminMode
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -388,6 +389,11 @@ class CNComponentManagerLow(CNComponentManager):
 
         :rtype: boolean
         """
+        if not self.is_valid_admin_mode():
+            raise CommandNotAllowed(
+                "One or more controller devices are in "
+                "adminMode OFFLINE or NOT-FITTED"
+            )
         if self.op_state_model.op_state in [
             DevState.FAULT,
             DevState.UNKNOWN,
@@ -428,3 +434,31 @@ class CNComponentManagerLow(CNComponentManager):
             elif self.input_parameter.mccs_mln_dev_name == device_name:
                 self.mccs_mln_availability = event_value
             self._telescope_availability_aggregator.aggregate()
+
+    def is_valid_admin_mode(self) -> bool:
+        """
+        Extends the base admin mode validation with MCCS
+        check for LOW telescope.
+
+        Returns:
+            bool: True if all controllers including MCCS
+            are in valid admin mode.
+        """
+        sdp_admin_mode = self.get_sdp_controller_admin_mode()
+        csp_admin_mode = self.get_csp_controller_admin_mode()
+        mccs_admin_mode = self.get_mccs_controller_admin_mode()
+        admin_modes = [sdp_admin_mode, csp_admin_mode, mccs_admin_mode]
+
+        if any(
+            mode in [AdminMode.OFFLINE, AdminMode.NOT_FITTED]
+            for mode in admin_modes
+        ):
+            self.logger.debug(
+                "AdminMode check failed: SDP=%s, CSP=%s, MCCS=%s",
+                sdp_admin_mode,
+                csp_admin_mode,
+                mccs_admin_mode,
+            )
+            return False
+
+        return True

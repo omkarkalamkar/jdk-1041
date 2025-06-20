@@ -5,6 +5,16 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.20.0]
+********
+Added
+-----
+
+Added
+-----
+* Added logic to allow command when the adminmode of subsystems controllers is ONLINE
+* Updated common version to 0.27.7
+
 [0.19.7]
 ********
 Added 

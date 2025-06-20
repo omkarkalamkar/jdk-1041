@@ -31,7 +31,9 @@ def get_release_input_str(release_input_file="command_ReleaseResources.json"):
     return release_input_str
 
 
-def test_mid_release_resources_command_with_ok(tango_context, task_callback):
+def test_mid_release_resources_command_with_ok(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("ReleaseResources")
@@ -58,7 +60,7 @@ def test_mid_release_resources_command_with_ok(tango_context, task_callback):
 
 
 def test_mid_release_resources_command_fail_subarray(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     cm, start_time = create_cm(_input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
@@ -81,7 +83,7 @@ def test_mid_release_resources_command_fail_subarray(
 
 
 def test_mid_release_resources_command_empty_input_json(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
@@ -91,7 +93,9 @@ def test_mid_release_resources_command_empty_input_json(
     assert res_code == TaskStatus.REJECTED
 
 
-def test_telescope_release_resources_fail_check_allowed(tango_context):
+def test_telescope_release_resources_fail_check_allowed(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -104,7 +108,7 @@ def test_telescope_release_resources_fail_check_allowed(tango_context):
 
 
 def test_mid_release_resources_command_with_invalide_key(
-    tango_context, task_callback, json_factory
+    tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm()
@@ -120,7 +124,9 @@ def test_mid_release_resources_command_with_invalide_key(
     assert result_code == TaskStatus.REJECTED
 
 
-def test_release_resources_command_timeout(tango_context, task_callback):
+def test_release_resources_command_timeout(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     cm.command_timeout = 2
@@ -163,7 +169,9 @@ def test_release_resources_command_timeout(tango_context, task_callback):
     subarray_device.SetDefective(json.dumps({"enabled": False}))
 
 
-def test_release_resources_exception_on_sn(tango_context, task_callback):
+def test_release_resources_exception_on_sn(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -214,7 +222,7 @@ def check_if_subarray_is_available(cm):
 
 
 def test_mid_release_resources_raises_state_model_exception(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True

@@ -28,7 +28,9 @@ from tests.settings import (
 
 
 @pytest.mark.SKA_low
-def test_low_telescope_off_command(tango_context, task_callback):
+def test_low_telescope_off_command(
+    tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
@@ -66,7 +68,9 @@ def test_low_telescope_off_command(tango_context, task_callback):
 
 
 @pytest.mark.SKA_low
-def test_telescope_off_command_unavailability(tango_context):
+def test_telescope_off_command_unavailability(
+    tango_context, set_low_sdp_csp_mccs_admin_modes
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
@@ -103,7 +107,9 @@ def test_telescope_off_command_unavailability(tango_context):
 
 
 @pytest.mark.SKA_low
-def test_telescope_off_command_fail_subarray(tango_context, task_callback):
+def test_telescope_off_command_fail_subarray(
+    tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -147,7 +153,9 @@ def test_telescope_off_command_fail_subarray(tango_context, task_callback):
 
 
 @pytest.mark.SKA_low
-def test_low_telescope_off_fail_check_allowed(tango_context):
+def test_low_telescope_off_fail_check_allowed(
+    tango_context, set_low_sdp_csp_mccs_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -160,7 +168,9 @@ def test_low_telescope_off_fail_check_allowed(tango_context):
 
 
 @pytest.mark.SKA_low
-def test_telescope_off_command_rejected(tango_context, task_callback):
+def test_telescope_off_command_rejected(
+    tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
+):
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))

@@ -1,6 +1,7 @@
 {
     "test_plans": [
-        "XTP-3616"
+        "XTP-3616",
+        "XTP-3614",
     ],
     "name": "Central Node Test Execution Results",
     "chart_info": "charts/ska-tmc-centralnode/Chart.yaml",

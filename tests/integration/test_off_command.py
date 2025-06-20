@@ -33,6 +33,7 @@ def test_off_command_mid(
     tango_context,
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
+    set_mid_sdp_csp_admin_modes,
 ):
     """Test cases for Off command"""
     dev_factory = DevFactory()

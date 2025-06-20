@@ -32,7 +32,9 @@ def get_assign_input_str(assign_input_file="command_AssignResources.json"):
     return assign_input_str
 
 
-def test_assign_resources_command_completed(tango_context, task_callback):
+def test_assign_resources_command_completed(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     """Tests assign Resources completed"""
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -70,7 +72,7 @@ def test_assign_resources_command_completed(tango_context, task_callback):
 
 
 def test_assign_resources_command_with_mkt_ids_completed(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     """test assign resources command with meerkat id"""
     logger.info("%s", tango_context)
@@ -109,7 +111,9 @@ def test_assign_resources_command_with_mkt_ids_completed(
     )
 
 
-def test_assign_resources_exception_on_sn(tango_context, task_callback):
+def test_assign_resources_exception_on_sn(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     """Tests assign resources exception on sn"""
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -144,7 +148,7 @@ def test_assign_resources_exception_on_sn(tango_context, task_callback):
 
 
 def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     """Test Assign Resources command missing eb id"""
     logger.info("%s", tango_context)
@@ -173,7 +177,9 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     assert res_code == TaskStatus.REJECTED
 
 
-def test_assign_resources_command_with_ok(tango_context, task_callback):
+def test_assign_resources_command_with_ok(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     cm, _ = create_cm()
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -200,7 +206,7 @@ def test_assign_resources_command_with_ok(tango_context, task_callback):
 
 
 def test_assign_resources_command_with_mkt_ids_ok(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm()
@@ -231,7 +237,9 @@ def test_assign_resources_command_with_mkt_ids_ok(
     )
 
 
-def test_assign_resources_command_fail_subarray(tango_context, task_callback):
+def test_assign_resources_command_fail_subarray(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -260,7 +268,7 @@ def test_assign_resources_command_fail_subarray(tango_context, task_callback):
 
 
 def test_telescope_assign_resources_command_empty_input_json(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm()
@@ -271,7 +279,9 @@ def test_telescope_assign_resources_command_empty_input_json(
     assert res_code == TaskStatus.REJECTED
 
 
-def test_assign_resources_fail_check_allowed(tango_context):
+def test_assign_resources_fail_check_allowed(
+    tango_context, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
@@ -284,7 +294,9 @@ def test_assign_resources_fail_check_allowed(tango_context):
         cm.is_command_allowed("AssignResources")
 
 
-def test_assign_resources_command_timeout(tango_context, task_callback):
+def test_assign_resources_command_timeout(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
     cm.command_timeout = 2
@@ -327,7 +339,7 @@ def test_assign_resources_command_timeout(tango_context, task_callback):
 
 
 def test_assign_resources_command_already_assigned(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     logger.info("%s", tango_context)
     cm, start_time = create_cm()
@@ -375,7 +387,7 @@ def check_if_subarray_is_available(cm):
 
 
 def test_mid_assign_resources_raises_state_model_exception(
-    tango_context, task_callback
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     cm, _ = create_cm()
     dev_factory = DevFactory()

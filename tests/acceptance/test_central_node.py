@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 import tango
 from pytest_bdd import given, parsers, scenarios, then, when
+from ska_control_model import AdminMode
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
 from ska_tmc_common.dev_factory import DevFactory
@@ -14,8 +15,13 @@ from tango import Database, DeviceProxy
 
 from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.settings import (
+    LOW_CSP_MLN_DEVICE,
+    LOW_SDP_MLN_DEVICE,
     LOW_SUBARRAY_DEVICE,
+    MCCS_MLN_DEVICE,
     MID_CENTRAL_NODE,
+    MID_CSP_MLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
     MID_SUBARRAY_DEVICE,
     check_subarray_availability,
     logger,
@@ -51,6 +57,26 @@ def central_node():
             True,
         ), "Timeout while waiting for validating attribute value"
         return DeviceProxy(instance)
+
+
+@given("subsystem controllers are in adminMode ONLINE")
+def set_admin_mode(central_node):
+    """Set the adminMode for devices"""
+    dev_name = central_node.dev_name()
+
+    if "mid-tmc" in dev_name:
+        csp_proxy = DeviceProxy(MID_CSP_MLN_DEVICE)
+        sdp_proxy = DeviceProxy(MID_SDP_MLN_DEVICE)
+        csp_proxy.SetCspControllerAdminMode(AdminMode.ONLINE)
+        sdp_proxy.SetSdpControllerAdminMode(AdminMode.ONLINE)
+
+    elif "low-tmc" in dev_name:
+        csp_proxy = DeviceProxy(LOW_CSP_MLN_DEVICE)
+        sdp_proxy = DeviceProxy(LOW_SDP_MLN_DEVICE)
+        mccs_proxy = DeviceProxy(MCCS_MLN_DEVICE)
+        csp_proxy.SetCspControllerAdminMode(AdminMode.ONLINE)
+        sdp_proxy.SetSdpControllerAdminMode(AdminMode.ONLINE)
+        mccs_proxy.SetMccsControllerAdminMode(AdminMode.ONLINE)
 
 
 @when("I get the attribute InternalModel of the CentralNode device")

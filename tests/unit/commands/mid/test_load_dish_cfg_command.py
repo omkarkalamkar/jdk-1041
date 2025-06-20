@@ -24,7 +24,10 @@ from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
 def test_load_dish_cfg_command(
-    _set_k_numbers_to_dish, tango_context, task_callback, json_factory
+    _set_k_numbers_to_dish,
+    tango_context,
+    task_callback,
+    json_factory,
 ):
     """Test load dish cfg invoke on devices with task status as completed"""
     # This need to be set to enable async command callback event
@@ -49,7 +52,7 @@ def test_load_dish_cfg_command(
             "status": TaskStatus.COMPLETED,
             "result": (ResultCode.OK, "Command Completed"),
         },
-        lookahead=8,
+        lookahead=20,
     )
     assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     # Validate memorizedDishVccMap attribute set
@@ -59,7 +62,7 @@ def test_load_dish_cfg_command(
 
 
 def test_load_dish_cfg_command_invalid_json(
-    tango_context, task_callback, json_factory
+    tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
     """Test LoadDishCfg command rejected when invalid json provided"""
     logger.info("%s", tango_context)
@@ -93,7 +96,7 @@ def test_load_dish_cfg_command_invalid_json(
 
 
 def test_load_dish_cfg_command_kvalue_out_of_range(
-    tango_context, task_callback, json_factory
+    tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
     """Test LoadDishCfg command rejected when kvalue is out of range"""
     logger.info("%s", tango_context)
@@ -110,7 +113,7 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
 
 
 def test_load_dish_cfg_command_invalid_file_name(
-    tango_context, task_callback, json_factory
+    tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
     """Test LoadDishCfg command rejected when invalid json provided"""
     logger.info("%s", tango_context)
@@ -186,7 +189,9 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     assert cm.dish_vcc_command_status == DishConfigStatus.FAILED
 
 
-def test_load_dish_cnfg_command_fail_csp_master(tango_context, json_factory):
+def test_load_dish_cnfg_command_fail_csp_master(
+    tango_context, json_factory, set_mid_sdp_csp_admin_modes
+):
     cm, _ = create_cm()
     adapter_factory = HelperAdapterFactory()
     attrs = {"LoadDishCfg.side_effect": Exception}
@@ -201,7 +206,7 @@ def test_load_dish_cnfg_command_fail_csp_master(tango_context, json_factory):
 
 
 def test_load_dish_config_command_fail(
-    tango_context, json_factory, task_callback
+    tango_context, json_factory, task_callback, set_mid_sdp_csp_admin_modes
 ):
     # Validate load dish cfg is rejected if dish vcc process status
     # is in progress
