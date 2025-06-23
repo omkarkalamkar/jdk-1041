@@ -27,6 +27,10 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorLow,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.utils.constants import (
+    LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
+    LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
+)
 
 
 class CNComponentManagerLow(CNComponentManager):
@@ -52,12 +56,6 @@ class CNComponentManagerLow(CNComponentManager):
         liveliness_check_period=1,
         skuid_service="",
         command_timeout=30,
-        assignresources_interface: str = (
-            "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
-        ),
-        releaseresources_interface: str = (
-            "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
-        ),
         subarray_trl_prefix: str = "low-tmc/subarray/",
         *args,
         **kwargs,
@@ -102,8 +100,6 @@ class CNComponentManagerLow(CNComponentManager):
             command_timeout=command_timeout,
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
-            assignresources_interface=assignresources_interface,
-            releaseresources_interface=releaseresources_interface,
             subarray_trl_prefix=subarray_trl_prefix,
             *args,
             **kwargs,
@@ -118,7 +114,12 @@ class CNComponentManagerLow(CNComponentManager):
         self.sdp_mln_availability = False
         self.mccs_mln_availability = False
         telescope_availability = self.get_telescope_availability()
-
+        self._assign_resources_schema_version: str = (
+            LOW_ASSIGN_RESOURCES_SCHEMA_VERSION
+        )
+        self._release_resources_schema_version: str = (
+            LOW_RELEASE_RESOURCES_SCHEMA_VERSION
+        )
         telescope_availability["tmc_subarrays"] = self.subarray_availability
         self.set_telescope_availability = telescope_availability
 
@@ -155,6 +156,52 @@ class CNComponentManagerLow(CNComponentManager):
             telescope="low",
         )
         self.aggregation_process.start_aggregation_process()
+
+    @property
+    def assign_resources_schema_version(self) -> str:
+        """
+        Gets the schema version assigned to resources.
+
+        Returns:
+            str: The current value of the assign_resources_schema_version.
+        """
+
+        return self._assign_resources_schema_version
+
+    @assign_resources_schema_version.setter
+    def assign_resources_schema_version(self, value: str) -> None:
+        """
+        Sets the schema version for assigned resources.
+
+        Args:
+            value (str): The new schema version to be set.
+        """
+
+        if self._assign_resources_schema_version != value:
+            self._assign_resources_schema_version = value
+
+    @property
+    def release_resources_schema_version(self) -> str:
+        """
+        Gets the schema version release the assigned resources.
+
+        Returns:
+            str: The current value of the release_resources_schema_version.
+        """
+
+        return self._release_resources_schema_version
+
+    @release_resources_schema_version.setter
+    def release_resources_schema_version(self, value: str) -> None:
+        """
+        Sets the schema version for release the assigned resources.
+
+        Args:
+            value (str): The new schema version to be set.
+        """
+
+        if self._release_resources_schema_version != value:
+            self._release_resources_schema_version = value
 
     def check_if_mccs_mln_is_responsive(self):
         """Checks whether mccs mln is responsive"""

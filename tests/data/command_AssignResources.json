@@ -1,12 +1,12 @@
 {
-  "interface": "https://schema.skao.int/ska-tmc-assignresources/2.1",
+  "interface": "https://schema.skao.int/ska-tmc-assignresources/2.2",
   "transaction_id": "txn-....-00001",
   "subarray_id": 1,
   "dish": {
       "receptor_ids": ["SKA001"]
   },
   "sdp": {
-      "interface": "https://schema.skao.int/ska-sdp-assignres/0.4",
+      "interface": "https://schema.skao.int/ska-sdp-assignres/1.0",
       "execution_block": {
           "eb_id": "eb-mvp01-20210623-00000",
           "max_length": 100.0,
@@ -129,16 +129,20 @@
               "polarisations_id": "all",
               "corr_type": ["XX", "XY", "YY", "YX"]
           }],
-          "fields": [{
-              "field_id": "field_a",
-              "phase_dir": {
-                  "ra": [123, 0.1],
-                  "dec": [80, 0.1],
-                  "reference_time": "...",
-                  "reference_frame": "ICRF3"
-              },
-              "pointing_fqdn": "low-tmc/telstate/0/pointing"
-          }]
+          "fields": [
+            {
+                "field_id": "field_a",
+                "phase_dir": {
+                    "target_name": "target_a",
+                    "reference_frame": "icrs",
+                    "attrs": {
+                        "c1": 201.365,
+                        "c2": -43.0191667
+                    }
+                },
+                "pointing_fqdn": "low-tmc/telstate/0/pointing"
+            }
+        ]
       },
       "processing_blocks": [{
           "pb_id": "pb-mvp01-20210623-00000",

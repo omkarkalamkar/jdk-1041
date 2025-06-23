@@ -121,8 +121,6 @@ class CNComponentManager(TmcComponentManager):
             + ".skao.int:9870"
         ),
         command_timeout=30,
-        assignresources_interface: str = "",
-        releaseresources_interface: str = "",
         retry_attempts: int = 5,
         retry_delay: float = 3.0,
         subarray_trl_prefix: str = "",
@@ -168,8 +166,6 @@ class CNComponentManager(TmcComponentManager):
         self.event_manager = _event_manager
         self.command_timeout = command_timeout
         self.process_lock = ProcessLock()
-        self.assignresources_interface = assignresources_interface
-        self.releaseresources_interface = releaseresources_interface
         self._component.set_op_callbacks(
             _update_device_callback,
             _update_telescope_state_callback,
@@ -178,6 +174,8 @@ class CNComponentManager(TmcComponentManager):
             _update_imaging_callback,
             _telescope_availability_callback,
         )
+        self._assign_resources_schema_version = ""
+        self._release_resources_schema_version = ""
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._op_state_aggregator = None
@@ -1251,7 +1249,7 @@ class CNComponentManager(TmcComponentManager):
         if isinstance(self.input_parameter, InputParameterLow):
             try:
                 validate(
-                    version=self.assignresources_interface,
+                    version=self._assign_resources_schema_version,
                     config=json.loads(argin),
                     strictness=2,
                 )
@@ -1340,7 +1338,7 @@ class CNComponentManager(TmcComponentManager):
         if isinstance(self.input_parameter, InputParameterLow):
             try:
                 validate(
-                    version=self.releaseresources_interface,
+                    version=self._release_resources_schema_version,
                     config=json.loads(argin),
                     strictness=2,
                 )

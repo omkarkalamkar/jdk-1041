@@ -33,17 +33,6 @@ class AbstractCentralNode(TMCBaseDevice):
         doc="List of TMC Mid Subarray Node devices",
         default_value=tuple(),
     )
-
-    AssignResourcesInterface = device_property(
-        dtype="str",
-        doc="Interface value of AsignResources schema",
-    )
-
-    ReleaseResourcesInterface = device_property(
-        dtype="str",
-        doc="Interface value of ReleaseResources schema",
-    )
-
     CspMasterLeafNodeFQDN = device_property(dtype="str")
 
     CspMasterFQDN = device_property(dtype="str")

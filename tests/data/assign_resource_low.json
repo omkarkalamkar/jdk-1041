@@ -1,5 +1,5 @@
 {
-  "interface": "https://schema.skao.int/ska-low-tmc-assignresources/4.0",
+  "interface": "https://schema.skao.int/ska-low-tmc-assignresources/4.1",
   "transaction_id": "txn-....-00001",
   "subarray_id": 1,
   "mccs": {
@@ -38,7 +38,7 @@
     
   },
   "sdp": {
-    "interface": "https://schema.skao.int/ska-sdp-assignres/0.4",
+    "interface": "https://schema.skao.int/ska-sdp-assignres/1.0",
     "resources": {
       "receptors": [
         "SKA001",
@@ -144,19 +144,16 @@
         {
           "field_id": "field_a",
           "phase_dir": {
-            "ra": [
-              123.0
-            ],
-            "dec": [
-              -60.0
-            ],
-            "reference_time": "...",
-            "reference_frame": "ICRF3"
-            
+              "target_name": "target_a",
+              "reference_frame": "icrs",
+              "attrs": {
+                  "c1": 201.365,
+                  "c2": -43.0191667
+              }
           },
-          "pointing_fqdn": "..."
-          
-        },
+          "pointing_fqdn": "low-tmc/telstate/0/pointing"
+      }
+      ,
         {
           "field_id": "field_b",
           "phase_dir": {

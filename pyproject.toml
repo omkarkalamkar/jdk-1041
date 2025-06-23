@@ -30,7 +30,7 @@ numpy = "^1.23.0"
 pytango = "9.5.0"
 ska-ser-logging = "^0.4.1"
 ska-tango-base = "1.2.0"
-ska-tmc-cdm = "7.3.1"
+ska-tmc-cdm = { git = "https://gitlab.com/ska-telescope/ska-tmc-cdm.git", branch = "hm-692" }
 ska-tmc-common = "0.27.7"
 ska-tango-testing = "0.6.1"
 ska-ser-log-transactions = "*"

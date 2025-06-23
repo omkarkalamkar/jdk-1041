@@ -51,3 +51,11 @@ DISH_KVALUE_VALIDATION_RESULT_STATUS = {
 DISH_VCC_CONFIG_INTERFACE_VERSION = (
     "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0"
 )
+
+LOW_ASSIGN_RESOURCES_SCHEMA_VERSION = (
+    "https://schema.skao.int/ska-low-tmc-assignresources/4.1"
+)
+
+LOW_RELEASE_RESOURCES_SCHEMA_VERSION = (
+    "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
+)
