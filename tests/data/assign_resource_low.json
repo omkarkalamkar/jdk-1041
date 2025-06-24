@@ -152,25 +152,7 @@
               }
           },
           "pointing_fqdn": "low-tmc/telstate/0/pointing"
-      }
-      ,
-        {
-          "field_id": "field_b",
-          "phase_dir": {
-            "ra": [
-              123.0
-            ],
-            "dec": [
-              -60.0
-            ],
-            "reference_time": "...",
-            "reference_frame": "ICRF3"
-            
-          },
-          "pointing_fqdn": "..."
-          
-        }
-        
+      } 
       ]
       
     },
