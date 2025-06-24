@@ -171,7 +171,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     )
     assert (
         "JSON validation error: data is not compliant with"
-        + " https://schema.skao.int/ska-tmc-assignresources/2.1"
+        + " https://schema.skao.int/ska-tmc-assignresources/2.2"
         in message
     )
     assert res_code == TaskStatus.REJECTED
