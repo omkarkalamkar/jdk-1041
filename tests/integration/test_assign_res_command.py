@@ -171,8 +171,10 @@ def assign_resources(
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name, input_json",
-    [(CENTRALNODE_MID,"command_AssignResources"),
-     (CENTRALNODE_MID,"command_AssignResources_2_1")],
+    [
+        (CENTRALNODE_MID, "command_AssignResources"),
+        (CENTRALNODE_MID, "command_AssignResources_2_1"),
+    ],
 )
 def test_assign_res_command_mid(
     tango_context,
@@ -197,8 +199,10 @@ def test_assign_res_command_mid(
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
     "central_node_name, input_json",
-    [(CENTRALNODE_LOW,"assign_resource_low"),
-     (CENTRALNODE_LOW,"assign_resource_low_4_0")],
+    [
+        (CENTRALNODE_LOW, "assign_resource_low"),
+        (CENTRALNODE_LOW, "assign_resource_low_4_0"),
+    ],
 )
 def test_assign_res_command_low(
     tango_context,
