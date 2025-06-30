@@ -104,8 +104,6 @@ deviceServers:
       SdpMasterFQDN: "low-sdp/control/0"
       MCCSMasterLeafNodeFQDN: "low-tmc/leaf-node-mccs/0"
       MCCSMasterFQDN: "low-mccs/control/control"
-      AssignResourcesInterface: "https://schema.skao.int/ska-low-tmc-assignresources/4.0"
-      ReleaseResourcesInterface: "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
       CommandTimeOut: 30
       SubarrayPrefix: "low-tmc/subarray/"
 

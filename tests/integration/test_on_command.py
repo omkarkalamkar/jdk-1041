@@ -98,7 +98,6 @@ def test_on_command_mid(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.new
 @pytest.mark.parametrize(
     "device_name",
     [DISH_LEAF_NODE_1],

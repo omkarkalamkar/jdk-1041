@@ -146,7 +146,7 @@ class CNComponentManagerMid(CNComponentManager):
             liveliness_check_period,
             skuid_service,
             command_timeout,
-            subarray_trl_prefix,
+            subarray_trl_prefix=subarray_trl_prefix,
             *args,
             **kwargs,
         )
