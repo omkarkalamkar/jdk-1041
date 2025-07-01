@@ -1341,8 +1341,12 @@ class CNComponentManager(TmcComponentManager):
         # Execute the command if the input JSON is valid
         if isinstance(self.input_parameter, InputParameterLow):
             try:
+                interface = (
+                    json.loads(argin).get("interface", None)
+                    or self._release_resources_schema_version
+                )
                 validate(
-                    version=self._release_resources_schema_version,
+                    version=interface,
                     config=json.loads(argin),
                     strictness=2,
                 )
