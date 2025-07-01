@@ -15,7 +15,7 @@ Updated
 --------
 * Telmodel version 1.23.0
 * CDM version 12.10.0
-* Test assign resource jsons to MID v2.2 and LOW v4.1 
+* Test assign resource jsons to MID v2.2 and LOW v4.1. 
 
 [0.20.0]
 ********
