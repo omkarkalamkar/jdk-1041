@@ -9,7 +9,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ********
 Added
 ------
-* Attribute to update default assign resources interface and release resource interface for low.
+* Added attribute to update default assign resources interface and release resource interface for low.
 
 Updated
 --------
