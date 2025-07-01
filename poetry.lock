@@ -3512,24 +3512,25 @@ reference = "ska-nexus"
 
 [[package]]
 name = "ska-tmc-cdm"
-version = "12.9.0"
+version = "12.10.0"
 description = "SKA Control Data Model serialisation library"
 optional = false
-python-versions = "^3.10"
+python-versions = ">=3.10,<4.0"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "ska_tmc_cdm-12.10.0-py3-none-any.whl", hash = "sha256:afc6c570231f3b38680e21542aced50b697dfdd18c2c219545830fdfa0f63fae"},
+    {file = "ska_tmc_cdm-12.10.0.tar.gz", hash = "sha256:7d990ad1681b6b810b47da4f708433732310e776b38dd90b74278b22145a27a2"},
+]
 
 [package.dependencies]
-pydantic = "^2.10.6"
-ska-ost-osd = "^2.3.1"
-ska-telmodel = "^1.23.0"
+pydantic = ">=2.10.6,<3.0.0"
+ska-ost-osd = ">=2.3.1,<3.0.0"
+ska-telmodel = ">=1.23.0,<2.0.0"
 
 [package.source]
-type = "git"
-url = "https://gitlab.com/ska-telescope/ska-tmc-cdm.git"
-reference = "hm-692"
-resolved_reference = "6436314f28baf8a8c0f2870953c1a90af97a2d21"
+type = "legacy"
+url = "https://artefact.skao.int/repository/pypi-internal/simple"
+reference = "ska-nexus"
 
 [[package]]
 name = "ska-tmc-common"
@@ -4178,4 +4179,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "815eecc667ce6ee215316b4490b1ab767db2918e7d74b9bfd171c3e726df84f2"
+content-hash = "44bf8bed880c73f777d0902cb6e1b3657dfdd06c59a1f041010afd896fb84e47"
