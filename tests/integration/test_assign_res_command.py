@@ -170,12 +170,16 @@ def assign_resources(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
-    "central_node_name",
-    [CENTRALNODE_MID],
+    "central_node_name, input_json",
+    [
+        (CENTRALNODE_MID, "command_AssignResources"),
+        (CENTRALNODE_MID, "command_AssignResources_2_1"),
+    ],
 )
 def test_assign_res_command_mid(
     tango_context,
     central_node_name,
+    input_json,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
@@ -184,7 +188,7 @@ def test_assign_res_command_mid(
     return assign_resources(
         tango_context,
         central_node_name,
-        json_factory("command_AssignResources"),
+        json_factory(input_json),
         json_factory("command_ReleaseResources"),
         change_event_callbacks,
         MID_SUBARRAY_DEVICE,
@@ -194,12 +198,16 @@ def test_assign_res_command_mid(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
-    "central_node_name",
-    [CENTRALNODE_LOW],
+    "central_node_name, input_json",
+    [
+        (CENTRALNODE_LOW, "assign_resource_low"),
+        (CENTRALNODE_LOW, "assign_resource_low_4_0"),
+    ],
 )
 def test_assign_res_command_low(
     tango_context,
     central_node_name,
+    input_json,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
@@ -208,7 +216,7 @@ def test_assign_res_command_low(
     return assign_resources(
         tango_context,
         central_node_name,
-        json_factory("assign_resource_low"),
+        json_factory(input_json),
         json_factory("release_resource_low"),
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,

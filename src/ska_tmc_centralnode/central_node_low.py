@@ -6,7 +6,8 @@ of state and mode attributes defined by the SKA Control Model.
 
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.op_state_model import TMCOpStateModel
-from tango.server import device_property, run
+from tango import AttrWriteType
+from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -66,6 +67,48 @@ class LowTmcCentralNode(AbstractCentralNode):
     # Attributes methods
     # ------------------
 
+    @attribute(
+        dtype=str,
+        access=AttrWriteType.READ_WRITE,
+        doc="Schema version used for AssignResources.",
+    )
+    def assignResourcesSchemaVersion(self) -> str:
+        """Get the version of the AssignResources schema being used."""
+        return self.component_manager.assign_resources_schema_version
+
+    @assignResourcesSchemaVersion.write
+    def assignResourcesSchemaVersion_write(self, version: str) -> None:
+        """Set or update the AssignResources schema version."""
+        self.component_manager.assign_resources_schema_version = version
+        self.push_change_archive_events(
+            "assignResourcesSchemaVersion", version
+        )
+        self.logger.debug(
+            "assignResourcesSchemaVersion updated via callback to: %s",
+            version,
+        )
+
+    @attribute(
+        dtype=str,
+        access=AttrWriteType.READ_WRITE,
+        doc="Schema version used for ReleaseResources.",
+    )
+    def releaseResourcesSchemaVersion(self) -> str:
+        """Get the version of the ReleaseResources schema being used."""
+        return self.component_manager.release_resources_schema_version
+
+    @releaseResourcesSchemaVersion.write
+    def releaseResourcesSchemaVersion_write(self, version: str) -> None:
+        """Set or update the ReleaseResources schema version."""
+        self.component_manager.release_resources_schema_version = version
+        self.push_change_archive_events(
+            "releaseResourcesSchemaVersion", version
+        )
+        self.logger.debug(
+            "releaseResourcesSchemaVersion updated via callback to: %s",
+            version,
+        )
+
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
@@ -86,8 +129,6 @@ class LowTmcCentralNode(AbstractCentralNode):
                 self.update_telescope_availability_callback
             ),
             command_timeout=self.CommandTimeOut,
-            assignresources_interface=self.AssignResourcesInterface,
-            releaseresources_interface=self.ReleaseResourcesInterface,
             proxy_timeout=self.ProxyTimeout,
             _input_parameter=InputParameterLow(None),
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,

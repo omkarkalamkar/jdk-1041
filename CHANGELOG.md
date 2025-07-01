@@ -5,6 +5,18 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.20.1]
+********
+Added
+------
+* Added attribute to update default assign resources interface and release resource interface for low.
+
+Updated
+--------
+* Telmodel version 1.23.0.
+* CDM version 12.10.0.
+* Test assign resource jsons to MID v2.2 and LOW v4.1 compatible with SDP v1.0 assign json. 
+
 [0.20.0]
 ********
 Added

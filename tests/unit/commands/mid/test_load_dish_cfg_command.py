@@ -1,6 +1,7 @@
 """Test module for command load dish cfg"""
 
 import json
+import time
 from unittest.mock import patch
 
 import mock
@@ -20,6 +21,15 @@ from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 # Helper Dish LN device is using Database API and in Unit test Database API
 # is not callable
 # Patch this particular method which mock return value from SetKValue command
+
+
+def _wait_for_dish_vcc_status_completion(cm, timeout: int = 10):
+    start_time = time.time()
+    while (time.time() - start_time) < timeout:
+        if cm.dish_vcc_command_status == DishConfigStatus.COMPLETED:
+            return True
+        time.sleep(1)
+    return False
 
 
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
@@ -54,7 +64,7 @@ def test_load_dish_cfg_command(
         },
         lookahead=20,
     )
-    assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
+    assert _wait_for_dish_vcc_status_completion(cm)
     # Validate memorizedDishVccMap attribute set
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)

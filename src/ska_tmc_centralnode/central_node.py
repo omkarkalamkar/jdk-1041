@@ -33,17 +33,6 @@ class AbstractCentralNode(TMCBaseDevice):
         doc="List of TMC Mid Subarray Node devices",
         default_value=tuple(),
     )
-
-    AssignResourcesInterface = device_property(
-        dtype="str",
-        doc="Interface value of AsignResources schema",
-    )
-
-    ReleaseResourcesInterface = device_property(
-        dtype="str",
-        doc="Interface value of ReleaseResources schema",
-    )
-
     CspMasterLeafNodeFQDN = device_property(dtype="str")
 
     CspMasterFQDN = device_property(dtype="str")
@@ -288,6 +277,7 @@ class AbstractCentralNode(TMCBaseDevice):
         return self.component_manager.is_command_allowed("TelescopeOff")
 
     @command(dtype_out="DevVarLongStringArray")
+    @DebugIt()
     def TelescopeOff(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
@@ -339,6 +329,7 @@ class AbstractCentralNode(TMCBaseDevice):
     @command(
         dtype_out="DevVarLongStringArray",
     )
+    @DebugIt()
     def Off(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode,

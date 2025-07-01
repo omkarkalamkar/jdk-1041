@@ -170,9 +170,8 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
         json_argument, task_callback=task_callback
     )
     assert (
-        "JSON validation error: data is not compliant with"
-        + " https://schema.skao.int/ska-tmc-assignresources/2.1"
-        in message
+        "JSON validation error: Validation"
+        " 'Mid TMC assign resources 2.2'" in message
     )
     assert res_code == TaskStatus.REJECTED
 
@@ -367,8 +366,7 @@ def test_assign_resources_command_already_assigned(
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    (res_code, message) = assign_res_command.do(assign_input_str)
+    (res_code, _) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
 
 

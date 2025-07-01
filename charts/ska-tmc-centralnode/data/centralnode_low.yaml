@@ -39,12 +39,6 @@ server:
         - name: "CommandTimeOut"
           values:
           - "{{.Values.deviceServers.centralnode.low.CommandTimeOut}}"
-        - name: "AssignResourcesInterface"
-          values:
-          - "{{.Values.deviceServers.centralnode.low.AssignResourcesInterface}}"
-        - name: "ReleaseResourcesInterface"
-          values:
-          - "{{.Values.deviceServers.centralnode.low.ReleaseResourcesInterface}}"
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}

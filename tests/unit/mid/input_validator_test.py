@@ -6,6 +6,7 @@ import json
 
 import pytest
 from ska_tmc_common.exceptions import (
+    InvalidJSONError,
     InvalidReceptorIdError,
     ResourceNotPresentError,
     SubarrayNotPresentError,
@@ -333,6 +334,10 @@ class TestAssignResourceValidator:
             "mid-tmc/leaf-node-dish/ska",
         )
 
+        with pytest.raises(InvalidJSONError) as excinfo:
+            input_validator.loads(json.dumps(input_json))
+
+        input_json["subarray_id"] = 15
         with pytest.raises(SubarrayNotPresentError) as excinfo:
             input_validator.loads(json.dumps(input_json))
 
