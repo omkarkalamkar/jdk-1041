@@ -277,6 +277,7 @@ class AbstractCentralNode(TMCBaseDevice):
         return self.component_manager.is_command_allowed("TelescopeOff")
 
     @command(dtype_out="DevVarLongStringArray")
+    @DebugIt()
     def TelescopeOff(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
@@ -328,6 +329,7 @@ class AbstractCentralNode(TMCBaseDevice):
     @command(
         dtype_out="DevVarLongStringArray",
     )
+    @DebugIt()
     def Off(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode,
