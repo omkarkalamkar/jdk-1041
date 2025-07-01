@@ -333,11 +333,11 @@ class CNComponentManagerLow(CNComponentManager):
                 if isinstance(data, dict):
                     error_message = data["error"]
                     exception_message += (
-                        f"{self.command_id}: {devname}: " + f"{error_message}"
+                        f"{self.command_id}: {devname}: {error_message}"
                     )
             self.logger.debug(
                 "Command ID: %s | Updating LRCRCallback with following"
-                + " values: Command ID: %s, ResultCode: %s, Message: %s",
+                + " values: ResultCode: %s, Message: %s",
                 self.command_id,
                 str(ResultCode.FAILED),
                 exception_message,
