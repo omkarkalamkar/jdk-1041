@@ -44,6 +44,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self._step_sleep = step_sleep
         self.dish_cfg = self.component_manager.event_manager_object
         self.dish_cfg_params: str = ""
+        self.dish_vcc_config_json: dict = {}
 
     def load_dish_cfg(
         self,
@@ -75,7 +76,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.timeout_callback,
         )
         (
-            _,
+            dish_vcc_map_json,
             error_message,
         ) = self.check_and_validate_dish_vcc_data(dish_cfg_params)
         if error_message:
@@ -93,57 +94,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 exception=error_message,
             )
             return
-
-        # if self.component_manager.dish_vcc_data_download_error is True:
-        #     (
-        #         dishid_vcc_map_json,
-        #         error_message,
-        #     ) = self.fetch_dishid_vcc_map(dish_cfg_params)
-        #     if error_message:
-        #         self.component_manager.dish_vcc_validation_status = {
-        #             CENTRALNODE_MID: error_message
-        #         }
-        #         self.logger.debug(
-        #             "Command ID: %s | Number of retries exhausted",
-        #             self.component_manager.command_id,
-        #         )
-        #         self.component_manager.reset_load_dish_cfg_data()
-        #         task_callback(
-        #             status=TaskStatus.COMPLETED,
-        #             result=(ResultCode.FAILED, error_message),
-        #             exception=error_message,
-        #         )
-        #         self.component_manager.dish_vcc_data_download_error = False
-        #         return
-        #
-        #     self.logger.info(
-        #         "Command ID: %s | DishId Vcc Map Json %s",
-        #         json.dumps(
-        #             (
-        #                 dishid_vcc_map_json
-        #                 if isinstance(dishid_vcc_map_json, dict)
-        #                 else json.loads(dishid_vcc_map_json)
-        #             ),
-        #             indent=4,
-        #         ),
-        #         self.component_manager.command_id,
-        #     )
-        #     is_valid_dish_cfg, message = self.
-        #     load_dish_config_json_validator(
-        #         dishid_vcc_map_json
-        #     )
-        #     if not is_valid_dish_cfg:
-        #         self.component_manager.dish_vcc_validation_status = {
-        #             CENTRALNODE_MID: message
-        #         }
-        #         self.component_manager.reset_load_dish_cfg_data()
-        #         task_callback(
-        #             status=TaskStatus.COMPLETED,
-        #             result=(ResultCode.FAILED, message),
-        #             exception=message,
-        #         )
-        #         return
-
+        self.dish_vcc_config_json = dish_vcc_map_json
         ret_code, message = self.do(dish_cfg_params)
         self.dish_cfg_params = dish_cfg_params
         self.logger.debug(
@@ -295,11 +246,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             json.dumps(dishid_vcc_map_params, indent=4),
         )
 
-        dishid_vcc_map_json, _ = self.get_dishid_vcc_map_json(
-            dishid_vcc_map_params
-        )
-
-        dish_parameters = dishid_vcc_map_json.get("dish_parameters")
+        dish_parameters = self.dish_vcc_config_json.get("dish_parameters")
 
         for return_codes, message_or_unique_ids in [
             self._invoke_load_dish_cfg_on_csp_master_ln(dishid_vcc_map_params),
