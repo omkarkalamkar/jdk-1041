@@ -189,7 +189,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
-        self.dish_vcc_data_download_error = False
         self._dish_vcc_command_status = DishConfigStatus.STAGING
         self.dish_vcc_command_status_callback = (
             _dish_vcc_command_status_callback
@@ -1109,5 +1108,4 @@ class CNComponentManagerMid(CNComponentManager):
         self.dev_names_for_load_dish_cfg = []
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
-        self.dish_vcc_data_download_error = False
         self.dish_vcc_command_status = DishConfigStatus.COMPLETED
