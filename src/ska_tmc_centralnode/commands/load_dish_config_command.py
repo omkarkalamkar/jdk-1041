@@ -403,7 +403,12 @@ class LoadDishCfg(LoadDishCfgCommand):
             and `error message` if any
 
         """
-        return self.get_dishid_vcc_map_json(json.loads(dish_cfg_params))
+        dish_vcc_map_json, error_message = self.get_dishid_vcc_map_json(
+            json.loads(dish_cfg_params)
+        )
+        if error_message:
+            raise Exception(error_message)
+        return dish_vcc_map_json, error_message
 
     def check_and_validate_dish_vcc_data(
         self, dishid_vcc_map_params: str
@@ -417,12 +422,13 @@ class LoadDishCfg(LoadDishCfgCommand):
             Tuple[dict, str]: A tuple containing the dish VCC map JSON
                 and an error message string (empty if no error).
         """
-        (
-            dishid_vcc_map_json,
-            error_message,
-        ) = self.fetch_dishid_vcc_map(dishid_vcc_map_params)
-        if error_message:
-            return "", error_message
+        try:
+            (
+                dishid_vcc_map_json,
+                _,
+            ) = self.fetch_dishid_vcc_map(dishid_vcc_map_params)
+        except Exception as exp:
+            return "", str(exp)
         self.logger.debug(
             "DishId Vcc Map Json: %s",
             json.dumps(dishid_vcc_map_json, indent=4),
