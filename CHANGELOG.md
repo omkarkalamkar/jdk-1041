@@ -5,6 +5,12 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.20.2]
+********
+Updated
+--------
+* Telmodel Download part moved to LoadDishCfg command class to resolve tango corba exception
+
 [0.20.1]
 ********
 Added

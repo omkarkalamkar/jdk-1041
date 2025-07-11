@@ -189,7 +189,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
         self.update_dishvccconfig_callback = _update_dishvccconfig_callback
         self.dishvccvalidation_callback = _dishvccvalidation_callback
-        self.dish_vcc_data_download_error = False
         self._dish_vcc_command_status = DishConfigStatus.STAGING
         self.dish_vcc_command_status_callback = (
             _dish_vcc_command_status_callback
@@ -968,7 +967,7 @@ class CNComponentManagerMid(CNComponentManager):
             return loadishcfg_command.reject_command(message)
 
         try:
-            dishid_vcc_map_params = json.loads(argin)
+            json.loads(argin)
             self.logger.debug("JSON argin is in correct format.")
         except json.JSONDecodeError as e:
             self.dish_vcc_validation_status = {
@@ -976,36 +975,6 @@ class CNComponentManagerMid(CNComponentManager):
             }
             return loadishcfg_command.reject_command(
                 f"The JSON string is malformed. Error: {str(e)}",
-            )
-        (
-            dishid_vcc_map_json,
-            error_message,
-        ) = loadishcfg_command.get_dishid_vcc_map_json(dishid_vcc_map_params)
-        if error_message:
-            self.dish_vcc_validation_status = {CENTRALNODE_MID: error_message}
-            self.dish_vcc_data_download_error = True
-            task_status, response = self.submit_task(
-                loadishcfg_command.load_dish_cfg,
-                args=[argin, self.logger],
-                task_callback=task_callback,
-            )
-            return task_status, response
-        self.logger.debug(
-            "DishId Vcc Map Json: %s",
-            json.dumps(dishid_vcc_map_json, indent=4),
-        )
-        (
-            is_valid_dish_cfg,
-            message,
-        ) = loadishcfg_command.load_dish_config_json_validator(
-            dishid_vcc_map_json
-        )
-
-        if not is_valid_dish_cfg:
-            if message:
-                self.dish_vcc_validation_status = {CENTRALNODE_MID: message}
-            return loadishcfg_command.reject_command(
-                message,
             )
 
         task_status, response = self.submit_task(
@@ -1139,5 +1108,3 @@ class CNComponentManagerMid(CNComponentManager):
         self.dev_names_for_load_dish_cfg = []
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
-        self.dish_vcc_data_download_error = False
-        self.dish_vcc_command_status = DishConfigStatus.COMPLETED

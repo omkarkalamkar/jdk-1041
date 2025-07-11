@@ -1,7 +1,6 @@
 """Test module for command load dish cfg"""
 
 import json
-import time
 from unittest.mock import patch
 
 import mock
@@ -21,15 +20,6 @@ from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 # Helper Dish LN device is using Database API and in Unit test Database API
 # is not callable
 # Patch this particular method which mock return value from SetKValue command
-
-
-def _wait_for_dish_vcc_status_completion(cm, timeout: int = 10):
-    start_time = time.time()
-    while (time.time() - start_time) < timeout:
-        if cm.dish_vcc_command_status == DishConfigStatus.COMPLETED:
-            return True
-        time.sleep(1)
-    return False
 
 
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
@@ -64,7 +54,7 @@ def test_load_dish_cfg_command(
         },
         lookahead=20,
     )
-    assert _wait_for_dish_vcc_status_completion(cm)
+    assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     # Validate memorizedDishVccMap attribute set
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
@@ -118,8 +108,22 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
         dish_cfg_input_str, task_callback=task_callback
     )
     exception_message = "K values are not in range (1 to 1177)"
-    assert result_code == TaskStatus.REJECTED
-    assert message == exception_message
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (
+                ResultCode.FAILED,
+                exception_message,
+            ),
+            "exception": exception_message,
+        },
+    )
 
 
 def test_load_dish_cfg_command_invalid_file_name(
@@ -211,6 +215,12 @@ def test_load_dish_cnfg_command_fail_csp_master(
     )
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
     load_dish_cnfg_command = LoadDishCfg(cm, adapter_factory, logger=logger)
+    (
+        load_dish_cnfg_command.dish_vcc_config_json,
+        _,
+    ) = load_dish_cnfg_command.check_and_validate_dish_vcc_data(
+        dish_cfg_input_str
+    )
     (res_code, _) = load_dish_cnfg_command.do(dish_cfg_input_str)
     assert res_code == ResultCode.FAILED
 
