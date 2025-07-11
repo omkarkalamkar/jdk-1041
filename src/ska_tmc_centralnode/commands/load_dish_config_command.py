@@ -144,6 +144,9 @@ class LoadDishCfg(LoadDishCfgCommand):
             str(result[0]),
             exception,
         )
+        self.component_manager.dish_vcc_command_status = (
+            DishConfigStatus.COMPLETED
+        )
         if result[0] == ResultCode.FAILED:
             self.component_manager.update_dish_vcc_flag(False)
             self.task_callback(
@@ -402,11 +405,18 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         return self.get_dishid_vcc_map_json(json.loads(dish_cfg_params))
 
-    def check_and_validate_dish_vcc_data(self, dishid_vcc_map_params):
-        """This method download dish vcc json from telmodel
-        and validate the data.
+    def check_and_validate_dish_vcc_data(
+        self, dishid_vcc_map_params: str
+    ) -> Tuple[dict, str]:
+        """This method downloads dish vcc json from telmodel
+        and validates the data.
+        Args:
+            dishid_vcc_map_params (str): JSON string containing parameters
+                to fetch the dish VCC map.
+        Returns:
+            Tuple[dict, str]: A tuple containing the dish VCC map JSON
+                and an error message string (empty if no error).
         """
-        # Fetch the dish vcc config from telmodel
         (
             dishid_vcc_map_json,
             error_message,
