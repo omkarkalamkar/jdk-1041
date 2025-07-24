@@ -36,9 +36,7 @@ server:
         - name: "MCCSMasterFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.low.MCCSMasterFQDN}}"
-        - name: "CommandTimeOut"
-          values:
-          - "{{.Values.deviceServers.centralnode.low.CommandTimeOut}}"
+
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
