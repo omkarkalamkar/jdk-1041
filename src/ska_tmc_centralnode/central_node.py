@@ -100,6 +100,7 @@ class AbstractCentralNode(TMCBaseDevice):
         dtype=int,
         access=AttrWriteType.READ_WRITE,
         doc="Command Timeout",
+        default_value=30,
     )
     def commandTimeOut(self) -> str:
         """Get the version of the commandTimeOut"""
