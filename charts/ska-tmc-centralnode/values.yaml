@@ -68,6 +68,7 @@ deviceServers:
   centralnode:
     enabled: true
     instances: ["01"]
+    command: "CentralNodeDS"
     subarray_count: 1
     SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     LivelinessCheckPeriod: 1.0

@@ -8,7 +8,7 @@ instances: ["01"]
 
 {{- if ge $KValueValidRangeUpperLimit $KValueValidRangeLowerLimit }}
 entrypoints:
-  - name: "central_node_mid"
+  - name: "ska_tmc_centralnode.central_node_mid.MidTmcCentralNode"
 server:
   name: "central_node_mid"
   instances:
