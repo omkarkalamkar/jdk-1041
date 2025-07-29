@@ -68,7 +68,7 @@ class AbstractCentralNode(TMCBaseDevice):
     # Attributes
     # ----------
 
-    # commandTimeOut = attribute(dtype="DevUShort", default_value=30)
+    commandTimeOut = attribute(dtype="DevUShort")
 
     telescopeHealthState = attribute(
         dtype=HealthState,
@@ -96,20 +96,16 @@ class AbstractCentralNode(TMCBaseDevice):
         access=AttrWriteType.READ,
     )
 
-    @attribute(
-        dtype=int,
-        access=AttrWriteType.READ_WRITE,
-        doc="Command Timeout",
-        default_value=30,
-    )
-    def commandTimeOut(self) -> str:
-        """Get the version of the commandTimeOut"""
-        return self.component_manager.command_timeout
+    # command_timeout = attribute(
+    #     dtype="str",
+    #     access=AttrWriteType.READ_WRITE
+    # )
 
     @commandTimeOut.write
     def commandTimeOut_write(self, timeout_value: int) -> None:
         """Set or update the commandTimeOut"""
         self.component_manager.command_timeout = timeout_value
+        # self.command_timeout = timeout_value
 
     def update_device_callback(self, devInfo):
         """Update device callabacks"""
@@ -178,6 +174,8 @@ class AbstractCentralNode(TMCBaseDevice):
             )
             self._device._health_state = HealthState.OK
             self._device.op_state_model.perform_action("component_on")
+            self.command_timeout = 30
+
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
@@ -192,6 +190,11 @@ class AbstractCentralNode(TMCBaseDevice):
     # ------------------
     # Attributes methods
     # ------------------
+
+    def read_commandTimeOut(self) -> str:
+        """Get the version of the commandTimeOut"""
+        return self.component_manager.command_timeout
+        # return self.command_timeout
 
     def read_telescopeHealthState(self):
         """Read value of telescopeHealthState"""
