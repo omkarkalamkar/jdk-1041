@@ -1,8 +1,9 @@
 ARG BUILD_IMAGE="artefact.skao.int/ska-tango-images-pytango-builder:9.5.0"
 ARG BASE_IMAGE="artefact.skao.int/ska-tango-images-pytango-runtime:9.5.0"
+FROM $BUILD_IMAGE AS buildenv
 FROM $BASE_IMAGE
 
-FROM $BUILD_IMAGE AS buildenv
+
 
 
 
@@ -13,7 +14,7 @@ ENV SETUPTOOLS_USE_DISTUTILS=stdlib
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
     poetry config virtualenvs.create false
 WORKDIR /app
-
+COPY --from=buildenv /app /app
 COPY --chown=tango:tango . /app
 # Install runtime dependencies and the app
 RUN poetry install --only main

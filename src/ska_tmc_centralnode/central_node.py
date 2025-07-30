@@ -96,16 +96,10 @@ class AbstractCentralNode(TMCBaseDevice):
         access=AttrWriteType.READ,
     )
 
-    # command_timeout = attribute(
-    #     dtype="str",
-    #     access=AttrWriteType.READ_WRITE
-    # )
-
     @commandTimeOut.write
     def commandTimeOut_write(self, timeout_value: int) -> None:
         """Set or update the commandTimeOut"""
         self.component_manager.command_timeout = timeout_value
-        # self.command_timeout = timeout_value
 
     def update_device_callback(self, devInfo):
         """Update device callabacks"""
@@ -174,7 +168,6 @@ class AbstractCentralNode(TMCBaseDevice):
             )
             self._device._health_state = HealthState.OK
             self._device.op_state_model.perform_action("component_on")
-            self.command_timeout = 30
 
             return (ResultCode.OK, "")
 
