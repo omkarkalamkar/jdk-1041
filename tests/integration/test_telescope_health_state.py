@@ -108,3 +108,15 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
     time.sleep(0.1)
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_telescope_command_timeout(tango_context, change_event_callbacks):
+    """test telescope health state mid"""
+    logger.info("%s", tango_context)
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
+    logger.info("Command Timeout Initial %s", central_node.commandTimeOut)
+    central_node.commandTimeOut = 200
+    logger.info("Command Timeout after %s", central_node.commandTimeOut)
