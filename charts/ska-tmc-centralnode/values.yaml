@@ -94,8 +94,7 @@ deviceServers:
         max: 1177
       DishKvalueAggregationAllowedPercent: 100.0
       DishVccInitTimeout: 120
-      CommandTimeOut: 30
-
+      CommandTimeOutDefault: 30
       SubarrayPrefix: "mid-tmc/subarray/"
     low:
       file: "data/centralnode_low.yaml"
@@ -106,7 +105,7 @@ deviceServers:
       MCCSMasterLeafNodeFQDN: "low-tmc/leaf-node-mccs/0"
       MCCSMasterFQDN: "low-mccs/control/control"
       SubarrayPrefix: "low-tmc/subarray/"
-      CommandTimeOut: 30
+      CommandTimeOutDefault: 30
 
 
 nodeSelector: {}
