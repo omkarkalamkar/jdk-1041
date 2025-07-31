@@ -1,14 +1,13 @@
 """Test cases file"""
-import pytest
+
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.settings import MID_CENTRAL_NODE, dish_vcc_process_callback, logger
+from tests.settings import dish_vcc_process_callback, logger
 
 
 def mock_callback(*args, **kwargs):
@@ -62,36 +61,3 @@ def test_telescope_off():
     res_code, message = cm.telescope_off()
     assert res_code == TaskStatus.QUEUED
     assert message == "Task queued"
-
-
-@pytest.mark.ut1
-def test_commandTimeout(tango_context):
-    """Test Telescope off"""
-    op_state_model = TMCOpStateModel(logger)
-
-    cm = CNComponentManagerMid(
-        op_state_model,
-        _input_parameter=InputParameterMid(None),
-        logger=logger,
-        _dish_vcc_command_status_callback=dish_vcc_process_callback,
-        _update_device_callback=mock_callback,
-        _update_telescope_state_callback=mock_callback,
-        _update_telescope_health_state_callback=mock_callback,
-        _update_tmc_op_state_callback=mock_callback,
-        _update_imaging_callback=mock_callback,
-        _telescope_availability_callback=mock_callback,
-        # communication_state_callback=mock_callback,
-        # component_state_callback=mock_callback,
-        _update_dishvccconfig_callback=mock_callback,
-        _dishvccvalidation_callback=mock_callback,
-    )
-
-    logger.info("commandtime out initial is " "- %s", cm.command_timeout)
-
-    devFactory = DevFactory()
-
-    proxy = devFactory.get_device(MID_CENTRAL_NODE)
-    proxy.commandTimeOut = 100
-    logger.info("commandtime out after is " "- %s", cm.command_timeout)
-
-    assert False

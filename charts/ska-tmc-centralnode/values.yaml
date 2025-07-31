@@ -94,6 +94,7 @@ deviceServers:
         max: 1177
       DishKvalueAggregationAllowedPercent: 100.0
       DishVccInitTimeout: 120
+      commandTimeout: 30
 
       SubarrayPrefix: "mid-tmc/subarray/"
     low:
