@@ -117,6 +117,6 @@ def test_telescope_command_timeout(tango_context, change_event_callbacks):
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
-    logger.info("Command Timeout Initial %s", central_node.commandTimeOut)
     central_node.commandTimeOut = 200
     logger.info("Command Timeout after %s", central_node.commandTimeOut)
+    assert central_node.commandTimeOut == 200

@@ -64,6 +64,10 @@ class AbstractCentralNode(TMCBaseDevice):
         dtype="DevString",
         default_value="",
     )
+
+    CommandTimeOutDefault = device_property(
+        dtype="DevUShort", default_value=30
+    )
     # ----------
     # Attributes
     # ----------
