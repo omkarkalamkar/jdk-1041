@@ -54,7 +54,9 @@ server:
         - name: "DishVccInitTimeout"
           values:
           - "{{.Values.deviceServers.centralnode.mid.DishVccInitTimeout}}"
-
+        - name: "CommandTimeOut"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.CommandTimeOut}}"
         - name: "DishIDs"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}

@@ -68,7 +68,7 @@ class AbstractCentralNode(TMCBaseDevice):
     # Attributes
     # ----------
 
-    commandTimeOut = attribute(dtype="DevUShort")
+    CommandTimeOut = attribute(dtype="DevUShort")
 
     telescopeHealthState = attribute(
         dtype=HealthState,
@@ -96,9 +96,9 @@ class AbstractCentralNode(TMCBaseDevice):
         access=AttrWriteType.READ,
     )
 
-    @commandTimeOut.write
-    def commandTimeOut_write(self, timeout_value: int) -> None:
-        """Set or update the commandTimeOut"""
+    @CommandTimeOut.write
+    def CommandTimeOut_write(self, timeout_value: int) -> None:
+        """Set or update the CommandTimeOut"""
         self.component_manager.command_timeout = timeout_value
 
     def update_device_callback(self, devInfo):
@@ -184,8 +184,8 @@ class AbstractCentralNode(TMCBaseDevice):
     # Attributes methods
     # ------------------
 
-    def read_commandTimeOut(self) -> str:
-        """Get the version of the commandTimeOut"""
+    def read_CommandTimeOut(self) -> str:
+        """Get the version of the CommandTimeOut"""
         return self.component_manager.command_timeout
         # return self.command_timeout
 
