@@ -106,6 +106,7 @@ deviceServers:
       MCCSMasterLeafNodeFQDN: "low-tmc/leaf-node-mccs/0"
       MCCSMasterFQDN: "low-mccs/control/control"
       SubarrayPrefix: "low-tmc/subarray/"
+      commandTimeout: 30
 
 
 nodeSelector: {}
