@@ -5,6 +5,12 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.20.3]
+********
+Added
+--------
+* CommandTimeout attribute is introduced which can help to update timeout without deployment.
+
 [0.20.2]
 ********
 Updated
