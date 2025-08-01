@@ -191,7 +191,6 @@ class AbstractCentralNode(TMCBaseDevice):
     def read_CommandTimeOut(self) -> str:
         """Get the version of the CommandTimeOut"""
         return self.component_manager.command_timeout
-        # return self.command_timeout
 
     def read_telescopeHealthState(self):
         """Read value of telescopeHealthState"""
