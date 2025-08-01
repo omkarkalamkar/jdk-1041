@@ -9,7 +9,9 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ********
 Added
 --------
-* CommandTimeout attribute is introduced which can help to update timeout without deployment.
+* CommandTimeout attribute is introduced which can help to update timeout without redeployment.
+* CommandTimeOutDefault property is introduced which 
+  can be used to set default value at the time of deployment.
 
 [0.20.2]
 ********
