@@ -54,7 +54,7 @@ $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH
 # name of the pod running the k8s_tests
 K8S_TEST_RUNNER = test-runner-$(HELM_RELEASE)
 
-ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.9
+ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.5.0
 
 ## override so that this picks up setup.cfg from the project root
 PYTHON_TEST_FILE ?=
@@ -137,7 +137,7 @@ test-requirements:
 k8s-pre-test: python-pre-test test-requirements
 
 requirements: ## Install Dependencies
-	poetry install
+	poetry install 
 
 # .PHONY is additive
 .PHONY: unit-test
