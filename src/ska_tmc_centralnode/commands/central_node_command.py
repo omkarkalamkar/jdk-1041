@@ -578,6 +578,52 @@ class AssignReleaseResources(CentralNodeCommand):
 
         return (ResultCode.OK, "")
 
+    def put_result_in_command_mapping_dict(
+        self, return_codes, message_or_unique_ids
+    ):
+        """Update command_mapping dictionary to sdd the resultCode and
+        unique_id for the command executed"""
+
+        for return_code, message_or_unique_id in zip(
+            return_codes, message_or_unique_ids
+        ):
+            if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
+                return (
+                    ResultCode.FAILED,
+                    message_or_unique_id,
+                )
+
+            # even if command is rejected by subarraynode ,
+            # it will be resultcode failed for centralnode
+            if return_code in [ResultCode.QUEUED, ResultCode.OK]:
+                if self.component_manager.command_mapping.get(
+                    self.component_manager.command_id
+                ):
+                    self.logger.debug(
+                        "Command ID : %s |"
+                        + "Adding the ID %s to the command mapping"
+                        + "dictionary under command_id: %s",
+                        self.component_manager.command_id,
+                        message_or_unique_id,
+                        self.component_manager.command_id,
+                    )
+                    self.component_manager.command_mapping[
+                        self.component_manager.command_id
+                    ].append(message_or_unique_id)
+                else:
+                    self.logger.debug(
+                        "Command ID: %s |"
+                        + "Creating a command mapping dictionary for id:"
+                        + "%s, with unique_id: %s",
+                        self.component_manager.command_id,
+                        self.component_manager.command_id,
+                        message_or_unique_id,
+                    )
+                    self.component_manager.command_mapping[
+                        self.component_manager.command_id
+                    ] = [message_or_unique_id]
+        return (ResultCode.OK, "")
+
 
 class LoadDishCfgCommand(CentralNodeCommand):
     """This command class for LoadDishConfig command which

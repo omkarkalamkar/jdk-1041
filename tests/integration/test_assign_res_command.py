@@ -195,7 +195,6 @@ def test_assign_res_command_mid(
     )
 
 
-@pytest.mark.sah1753
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
@@ -215,7 +214,6 @@ def test_assign_res_command_low(
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
-    set_low_sdp_csp_mccs_admin_modes,
 ):
     """Test assign Resources command for low"""
     return assign_resources(
