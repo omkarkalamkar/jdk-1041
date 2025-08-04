@@ -50,7 +50,7 @@ rule-engine = "^4.5.0"
 tenacity = "^8.5.0"
 
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 isort = "^5.10.1"
 flake8 = "^5.0.4"

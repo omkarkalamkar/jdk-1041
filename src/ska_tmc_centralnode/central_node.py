@@ -60,10 +60,13 @@ class AbstractCentralNode(TMCBaseDevice):
     )
     ProxyTimeout = device_property(dtype="DevUShort", default_value=500)
 
-    CommandTimeOut = device_property(dtype="DevUShort", default_value=30)
     SubarrayPrefix = device_property(
         dtype="DevString",
         default_value="",
+    )
+
+    CommandTimeOutDefault = device_property(
+        dtype="DevUShort", default_value=30
     )
     # ----------
     # Attributes
@@ -94,6 +97,21 @@ class AbstractCentralNode(TMCBaseDevice):
         dtype="str",
         access=AttrWriteType.READ,
     )
+
+    @attribute(
+        dtype="DevUShort",
+        access=AttrWriteType.READ_WRITE,
+        doc="Command execution time limit.",
+        label="Command Time",
+    )
+    def commandTimeOut(self) -> str:
+        """Get the version of the commandTimeOut"""
+        return self.component_manager.command_timeout
+
+    @commandTimeOut.write
+    def commandTimeOut_write(self, timeout_value: int) -> None:
+        """Set or update the commandTimeOut"""
+        self.component_manager.command_timeout = timeout_value
 
     def update_device_callback(self, devInfo):
         """Update device callabacks"""
@@ -162,6 +180,7 @@ class AbstractCentralNode(TMCBaseDevice):
             )
             self._device._health_state = HealthState.OK
             self._device.op_state_model.perform_action("component_on")
+
             return (ResultCode.OK, "")
 
     def always_executed_hook(self):
