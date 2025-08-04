@@ -36,6 +36,7 @@ def test_low_release_resources_command(
     subarray_device.SetDirectObsState(ObsState.IDLE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
+    cm.subsystems_to_config = ["mccs", "csp", "sdp"]
 
     release_input_str = json_factory("release_resource_low")
     cm.release_resources(release_input_str, task_callback=task_callback)
@@ -61,6 +62,7 @@ def test_low_release_resources_command_fail_subarray(
     set_low_sdp_csp_mccs_admin_modes,
 ):
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
+    cm.subsystems_to_config = ["mccs", "csp", "sdp"]
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
