@@ -54,7 +54,7 @@ $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH
 # name of the pod running the k8s_tests
 K8S_TEST_RUNNER = test-runner-$(HELM_RELEASE)
 
-ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.3.9
+ITANGO_DOCKER_IMAGE = $(CAR_OCI_REGISTRY_HOST)/ska-tango-images-tango-itango:9.5.2
 
 ## override so that this picks up setup.cfg from the project root
 PYTHON_TEST_FILE ?=
@@ -71,19 +71,17 @@ ADD_ARGS ?= -x ## Additional args to pass to pytest
 
 CI_REGISTRY ?= gitlab.com
 CUSTOM_VALUES = --set central_node.centralnode.image.tag=$(VERSION)
-K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/$(PROJECT):$(VERSION)
+K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/ska-build-python:0.3.1
 ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnode.image.image=$(PROJECT) \
 	--set central_node.centralnode.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
 	--set central_node.centralnode.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
-
-K8S_TEST_IMAGE_TO_TEST=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT)/$(PROJECT):$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
 endif
 
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
-ADD_ARGS += --forked  
-MARK = not post_deployment and not acceptance 
+ADD_ARGS += --forked
+MARK = not post_deployment and not acceptance
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)
 ADD_ARGS +=  --true-context

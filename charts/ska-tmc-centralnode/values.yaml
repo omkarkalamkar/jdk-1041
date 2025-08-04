@@ -39,14 +39,14 @@ itango:
   image:
     registry: artefact.skao.int
     image: ska-tango-images-tango-itango
-    tag: 9.4.3
+    tag: 9.5.0
     pullPolicy: IfNotPresent
 
 centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.20.2-dirty
+    tag: 0.20.3
     pullPolicy: IfNotPresent
 
 resources:
@@ -68,6 +68,7 @@ deviceServers:
   centralnode:
     enabled: true
     instances: ["01"]
+    command: "CentralNodeDS"
     subarray_count: 1
     SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     LivelinessCheckPeriod: 1.0
@@ -94,7 +95,7 @@ deviceServers:
         max: 1177
       DishKvalueAggregationAllowedPercent: 100.0
       DishVccInitTimeout: 120
-
+      CommandTimeOutDefault: 30
       SubarrayPrefix: "mid-tmc/subarray/"
     low:
       file: "data/centralnode_low.yaml"
@@ -105,6 +106,7 @@ deviceServers:
       MCCSMasterLeafNodeFQDN: "low-tmc/leaf-node-mccs/0"
       MCCSMasterFQDN: "low-mccs/control/control"
       SubarrayPrefix: "low-tmc/subarray/"
+      CommandTimeOutDefault: 30
 
 
 nodeSelector: {}

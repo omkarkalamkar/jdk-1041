@@ -274,7 +274,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             ),
             _update_dishvccconfig_callback=self.update_dishvccconfig_callback,
             _dishvccvalidation_callback=self.dishvccvalidation_callback,
-            command_timeout=self.commandTimeOut.get_write_value(),
+            command_timeout=self.CommandTimeOutDefault,
             proxy_timeout=self.ProxyTimeout,
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,
             liveliness_check_period=self.LivelinessCheckPeriod,
