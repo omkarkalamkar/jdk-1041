@@ -308,7 +308,7 @@ class CNComponentManagerLow(CNComponentManager):
                         dev_name,
                     )
 
-            if len(self.subsystems_to_config) <= 2:
+            if len(self.subsystems_to_config) >= 2:
                 expected_event_dict_len = 2
             else:
                 expected_event_dict_len = 1
