@@ -327,27 +327,27 @@ class AssignResources(AssignReleaseResources):
                 ("SubArray Id %s is not existing!", subarrayID),
             )
 
-        if ("csp" in self.component_manager.subsystems_to_config) or (
-            "sdp" in self.component_manager.subsystems_to_config
-        ):
-            return_codes, message_or_unique_ids = self.send_command(
-                [self.tm_subarray_adapter],
-                "Error in calling AssignResources on subarray:"
-                + self.tm_subarray_adapter.dev_name,
-                "AssignResources",
-                json.dumps(json_argument),
-            )
-            (
-                return_code,
+        # if ("csp" in self.component_manager.subsystems_to_config) or (
+        #     "sdp" in self.component_manager.subsystems_to_config
+        # ):
+        return_codes, message_or_unique_ids = self.send_command(
+            [self.tm_subarray_adapter],
+            "Error in calling AssignResources on subarray:"
+            + self.tm_subarray_adapter.dev_name,
+            "AssignResources",
+            json.dumps(json_argument),
+        )
+        (
+            return_code,
+            message_or_unique_id,
+        ) = self.put_result_in_command_mapping_dict(
+            return_codes, message_or_unique_ids
+        )
+        if return_code == ResultCode.FAILED:
+            return (
+                ResultCode.FAILED,
                 message_or_unique_id,
-            ) = self.put_result_in_command_mapping_dict(
-                return_codes, message_or_unique_ids
             )
-            if return_code == ResultCode.FAILED:
-                return (
-                    ResultCode.FAILED,
-                    message_or_unique_id,
-                )
 
         if "mccs" in self.component_manager.subsystems_to_config:
             try:

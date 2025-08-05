@@ -307,8 +307,10 @@ class CNComponentManagerLow(CNComponentManager):
                         self.command_id,
                         dev_name,
                     )
-
-            if len(self.subsystems_to_config) >= 2:
+            # If mccs is present in subsystems_to_config list, two LRCR events
+            # need to be considered as the command gets invoked on both
+            # SubarrayNode and MCCS subsystem.
+            if "mccs" in self.subsystems_to_config:
                 expected_event_dict_len = 2
             else:
                 expected_event_dict_len = 1
