@@ -236,24 +236,24 @@ class ReleaseResources(AssignReleaseResources):
             )
 
         if json_argument["release_all"] is True:
-            if ("csp" in self.component_manager.subsystems_to_config) or (
-                "sdp" in self.component_manager.subsystems_to_config
-            ):
-                (
-                    return_codes,
-                    message_or_unique_ids,
-                ) = self.release_all_resources(self.subarray_adapter)
-                (
-                    return_code,
+            # if ("csp" in self.component_manager.subsystems_to_config) or (
+            #     "sdp" in self.component_manager.subsystems_to_config
+            # ):
+            (
+                return_codes,
+                message_or_unique_ids,
+            ) = self.release_all_resources(self.subarray_adapter)
+            (
+                return_code,
+                message_or_unique_id,
+            ) = self.put_result_in_command_mapping_dict(
+                return_codes, message_or_unique_ids
+            )
+            if return_code == ResultCode.FAILED:
+                return (
+                    ResultCode.FAILED,
                     message_or_unique_id,
-                ) = self.put_result_in_command_mapping_dict(
-                    return_codes, message_or_unique_ids
                 )
-                if return_code == ResultCode.FAILED:
-                    return (
-                        ResultCode.FAILED,
-                        message_or_unique_id,
-                    )
 
             if "mccs" in self.component_manager.subsystems_to_config:
                 try:
