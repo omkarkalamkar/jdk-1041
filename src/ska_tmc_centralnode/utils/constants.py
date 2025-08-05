@@ -59,3 +59,5 @@ LOW_ASSIGN_RESOURCES_SCHEMA_VERSION = (
 LOW_RELEASE_RESOURCES_SCHEMA_VERSION = (
     "https://schema.skao.int/ska-low-tmc-releaseresources/3.0"
 )
+
+SUB_SYSTEMS = {"mccs", "csp", "sdp"}

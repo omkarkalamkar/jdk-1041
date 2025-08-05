@@ -19,8 +19,7 @@ from ska_tmc_common.v1.timeout_tracker import timeout_tracker
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
 )
-
-SUB_SYSTEMS = {"mccs", "csp", "sdp"}
+from ska_tmc_centralnode.utils.constants import SUB_SYSTEMS
 
 
 class AssignResources(AssignReleaseResources):
@@ -327,9 +326,6 @@ class AssignResources(AssignReleaseResources):
                 ("SubArray Id %s is not existing!", subarrayID),
             )
 
-        # if ("csp" in self.component_manager.subsystems_to_config) or (
-        #     "sdp" in self.component_manager.subsystems_to_config
-        # ):
         return_codes, message_or_unique_ids = self.send_command(
             [self.tm_subarray_adapter],
             "Error in calling AssignResources on subarray:"

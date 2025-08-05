@@ -236,9 +236,6 @@ class ReleaseResources(AssignReleaseResources):
             )
 
         if json_argument["release_all"] is True:
-            # if ("csp" in self.component_manager.subsystems_to_config) or (
-            #     "sdp" in self.component_manager.subsystems_to_config
-            # ):
             (
                 return_codes,
                 message_or_unique_ids,
