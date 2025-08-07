@@ -128,7 +128,7 @@ class LowTmcCentralNode(AbstractCentralNode):
             _telescope_availability_callback=(
                 self.update_telescope_availability_callback
             ),
-            command_timeout=self.CommandTimeOut,
+            command_timeout=self.CommandTimeOutDefault,
             proxy_timeout=self.ProxyTimeout,
             _input_parameter=InputParameterLow(None),
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,
