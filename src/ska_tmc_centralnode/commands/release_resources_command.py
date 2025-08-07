@@ -101,6 +101,7 @@ class ReleaseResources(AssignReleaseResources):
                 self.component_manager.command_id
             )
         self.component_manager.command_in_progress = ""
+        self.component_manager.subsystems_to_config = []
 
     # pylint:disable=signature-differs
     def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
@@ -233,40 +234,52 @@ class ReleaseResources(AssignReleaseResources):
                 ResultCode.FAILED,
                 f"Subarray Id {subarray_id} doesn't exit!",
             )
-        try:
-            input_mccs_master = self.create_mccs_input_data(json_argument)
-        except Exception as exception:
-            return (
-                ResultCode.FAILED,
-                ("Error in MCCS JSON argument: %s", exception),
-            )
+
         if json_argument["release_all"] is True:
-            for return_codes, message_or_unique_ids in (
-                self.release_all_resources(self.subarray_adapter),
-                self.release_all_resources_mccs(
+            (
+                return_codes,
+                message_or_unique_ids,
+            ) = self.release_all_resources(self.subarray_adapter)
+            (
+                return_code,
+                message_or_unique_id,
+            ) = self.put_result_in_command_mapping_dict(
+                return_codes, message_or_unique_ids
+            )
+            if return_code == ResultCode.FAILED:
+                return (
+                    ResultCode.FAILED,
+                    message_or_unique_id,
+                )
+
+            if "mccs" in self.component_manager.subsystems_to_config:
+                try:
+                    input_mccs_master = self.create_mccs_input_data(
+                        json_argument
+                    )
+                except Exception as exception:
+                    return (
+                        ResultCode.FAILED,
+                        ("Error in MCCS JSON argument: %s", exception),
+                    )
+
+                (
+                    return_codes,
+                    message_or_unique_ids,
+                ) = self.release_all_resources_mccs(
                     self.mccs_mln_adapter, input_mccs_master
-                ),
-            ):
-                for return_code, message_or_unique_id in zip(
+                )
+                (
+                    return_code,
+                    message_or_unique_id,
+                ) = self.put_result_in_command_mapping_dict(
                     return_codes, message_or_unique_ids
-                ):
-                    if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                        return (
-                            ResultCode.FAILED,
-                            message_or_unique_id,
-                        )  # even if command is rejected by subarraynode ,
-                        # it will be resultcode failed for centralnode
-                    if return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                        if self.component_manager.command_mapping.get(
-                            self.component_manager.command_id
-                        ):
-                            self.component_manager.command_mapping[
-                                self.component_manager.command_id
-                            ].append(message_or_unique_id)
-                        else:
-                            self.component_manager.command_mapping[
-                                self.component_manager.command_id
-                            ] = [message_or_unique_id]
+                )
+                if return_code == ResultCode.FAILED:
+                    return (
+                        ResultCode.FAILED,
+                        message_or_unique_id,
+                    )
         return (ResultCode.OK, "")
 
     def release_all_resources(

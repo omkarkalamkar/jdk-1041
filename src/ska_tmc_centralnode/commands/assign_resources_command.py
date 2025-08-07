@@ -19,6 +19,7 @@ from ska_tmc_common.v1.timeout_tracker import timeout_tracker
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
 )
+from ska_tmc_centralnode.utils.constants import SUB_SYSTEMS
 
 
 class AssignResources(AssignReleaseResources):
@@ -291,6 +292,7 @@ class AssignResources(AssignReleaseResources):
 
         """
         try:
+            self.component_manager.subsystems_to_config = []
             json_argument = json.loads(argin)
             self.logger.debug(
                 "Command ID: %s | Executing AssignResources "
@@ -303,6 +305,10 @@ class AssignResources(AssignReleaseResources):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", exception),
             )
+
+        self.component_manager.subsystems_to_config = SUB_SYSTEMS.intersection(
+            json_argument.keys()
+        )
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
@@ -320,68 +326,56 @@ class AssignResources(AssignReleaseResources):
                 ("SubArray Id %s is not existing!", subarrayID),
             )
 
-        try:
-            input_mccs_master = self.create_mccs_cmd_data(json_argument)
-        except Exception as exception:
+        return_codes, message_or_unique_ids = self.send_command(
+            [self.tm_subarray_adapter],
+            "Error in calling AssignResources on subarray:"
+            + self.tm_subarray_adapter.dev_name,
+            "AssignResources",
+            json.dumps(json_argument),
+        )
+        (
+            return_code,
+            message_or_unique_id,
+        ) = self.put_result_in_command_mapping_dict(
+            return_codes, message_or_unique_ids
+        )
+        if return_code == ResultCode.FAILED:
             return (
                 ResultCode.FAILED,
-                ("JSON arguments error:: %s", exception),
+                message_or_unique_id,
             )
 
-        self.component_manager.log_state(
-            "Device states before executing AssignResources command"
-        )
-        for return_codes, message_or_unique_ids in [
-            self.send_command(
-                [self.tm_subarray_adapter],
-                "Error in calling AssignResources on subarray:"
-                + self.tm_subarray_adapter.dev_name,
-                "AssignResources",
-                json.dumps(json_argument),
-            ),
-            self.send_command(
+        if "mccs" in self.component_manager.subsystems_to_config:
+            try:
+                input_mccs_master = self.create_mccs_cmd_data(json_argument)
+            except Exception as exception:
+                return (
+                    ResultCode.FAILED,
+                    ("JSON arguments error:: %s", exception),
+                )
+
+            self.component_manager.log_state(
+                "Device states before executing AssignResources command"
+            )
+
+            return_codes, message_or_unique_ids = self.send_command(
                 [self.mccs_mln_adapter],
                 "Error in calling AssignResources command"
                 + " on MCCS Master Leaf Node ",
                 "AssignResources",
                 json.dumps(input_mccs_master),
-            ),
-        ]:
-            for return_code, message_or_unique_id in zip(
+            )
+            (
+                return_code,
+                message_or_unique_id,
+            ) = self.put_result_in_command_mapping_dict(
                 return_codes, message_or_unique_ids
-            ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return (
-                        ResultCode.FAILED,
-                        message_or_unique_id,
-                    )
-                if return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                    if self.component_manager.command_mapping.get(
-                        self.component_manager.command_id
-                    ):
-                        self.logger.debug(
-                            "Command ID : %s |"
-                            + "Adding the ID %s to the command mapping"
-                            + "dictionary under command_id: %s",
-                            self.component_manager.command_id,
-                            message_or_unique_id,
-                            self.component_manager.command_id,
-                        )
-                        self.component_manager.command_mapping[
-                            self.component_manager.command_id
-                        ].append(message_or_unique_id)
-                    else:
-                        self.logger.debug(
-                            "Command ID: %s |"
-                            + "Creating a command mapping dictionary for id:"
-                            + "%s, with unique_id: %s",
-                            self.component_manager.command_id,
-                            self.component_manager.command_id,
-                            message_or_unique_id,
-                        )
-                        self.component_manager.command_mapping[
-                            self.component_manager.command_id
-                        ] = [message_or_unique_id]
+            )
+            if return_code == ResultCode.FAILED:
+                return (
+                    ResultCode.FAILED,
+                    message_or_unique_id,
+                )
 
         return (ResultCode.OK, "")
 

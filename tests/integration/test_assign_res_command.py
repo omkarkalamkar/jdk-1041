@@ -202,6 +202,9 @@ def test_assign_res_command_mid(
     [
         (CENTRALNODE_LOW, "assign_resource_low"),
         (CENTRALNODE_LOW, "assign_resource_low_4_0"),
+        (CENTRALNODE_LOW, "assign_resource_low_without_mccs_4_2"),
+        (CENTRALNODE_LOW, "assign_resource_low_without_csp_4_2"),
+        (CENTRALNODE_LOW, "assign_resource_low_without_sdp_4_2"),
     ],
 )
 def test_assign_res_command_low(

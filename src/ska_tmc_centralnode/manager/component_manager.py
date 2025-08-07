@@ -186,6 +186,7 @@ class CNComponentManager(TmcComponentManager):
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()
+        self.subsystems_to_config = []
 
         self.no_of_events_for_command = 0
 
