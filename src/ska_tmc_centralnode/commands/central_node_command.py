@@ -581,7 +581,7 @@ class AssignReleaseResources(CentralNodeCommand):
     def put_result_in_command_mapping_dict(
         self, return_codes, message_or_unique_ids
     ):
-        """Update command_mapping dictionary to add the resultCode and
+        """Update command_mapping dictionary to add the ResultCode and
         unique_id for the command executed"""
 
         for return_code, message_or_unique_id in zip(
