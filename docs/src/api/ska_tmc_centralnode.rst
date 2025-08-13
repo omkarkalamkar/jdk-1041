@@ -96,7 +96,8 @@ Properties in Central Node
 +-------------------------------+-----------------+--------------------------------------------------------------------------------+
 | EventSubscriptionCheckPeriod  | DevFloat        | Period for the event subscriber to check the device subscriptions in a loop    |
 +-------------------------------+-----------------+--------------------------------------------------------------------------------+
-
+| CommandTimeOutDefault         | DevUShort       | Default Timeout for the command execution                                              |
++-----------------------------------+-----------------+----------------------------------------------------------------------------+
 
 #########################################
 Additional Properties in Central Node Mid
