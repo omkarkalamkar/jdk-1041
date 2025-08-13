@@ -53,7 +53,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
     ) -> None:
-        """:param logger: logger
+        """
+        :param logger: logger
         :param dish_cfg_params: dishid vcc map params
         :type logger: logging.Logger
         :param task_callback: Update task state, defaults to None
@@ -417,7 +418,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         and validates the data.
         Args:
             dishid_vcc_map_params (str): JSON string containing parameters
-                to fetch the dish VCC map.
+        to fetch the dish VCC map.
+
         Returns:
             Tuple[dict, str]: A tuple containing the dish VCC map JSON
                 and an error message string (empty if no error).

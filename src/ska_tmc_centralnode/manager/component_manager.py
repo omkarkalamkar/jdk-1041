@@ -1432,7 +1432,8 @@ class CNComponentManager(TmcComponentManager):
 
     def get_sdp_controller_admin_mode(self) -> AdminMode:
         """
-        Retrieve the adminMode of sdp controller
+        Retrieve the adminMode of sdp controller.
+
         Returns:
             This method returns the adminMode of the
             TMC sdp controller leaf Node.
@@ -1445,10 +1446,10 @@ class CNComponentManager(TmcComponentManager):
 
     def get_csp_controller_admin_mode(self) -> AdminMode:
         """
-        Retrieve the adminMode of csp controller
-        Return:
-            This method returns the adminMode of the
-            TMC csp controller leaf Node.
+        Retrieve the adminMode of CSP controller.
+
+        Returns:
+            str: The adminMode of the TMC CSP controller Leaf Node.
         """
         csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
             self.get_csp_master_leaf_node_dev_name(),
@@ -1458,7 +1459,8 @@ class CNComponentManager(TmcComponentManager):
 
     def get_mccs_controller_admin_mode(self) -> AdminMode:
         """
-        Retrieve the adminMode of mccs controller
+        Retrieve the adminMode of mccs controller.
+
         Returns:
             This method returns the adminMode of the
             TMC mccs controller leaf Node.
