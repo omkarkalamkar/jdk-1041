@@ -416,9 +416,10 @@ class LoadDishCfg(LoadDishCfgCommand):
     ) -> Tuple[dict, str]:
         """This method downloads dish vcc json from telmodel
         and validates the data.
+
         Args:
             dishid_vcc_map_params (str): JSON string containing parameters
-        to fetch the dish VCC map.
+                to fetch the dish VCC map.
 
         Returns:
             Tuple[dict, str]: A tuple containing the dish VCC map JSON
