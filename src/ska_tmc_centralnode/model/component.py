@@ -243,7 +243,7 @@ class CentralComponent(TmcComponent):
             self._invoke_telescope_state_callback()
 
     @property
-    def telescope_availability(self) -> str:
+    def telescope_availability(self) -> dict:
         """
         Returns the telescope availability
 
