@@ -127,6 +127,12 @@ def telescope_availability(
         "telescopeAvailability attribute value:%s",
         central_node.telescopeAvailability,
     )
+    if "mid-tmc" in central_node_fqdn:
+        assert (
+            "mccs_master_leaf_node" not in central_node.telescopeAvailability
+        )
+    else:
+        assert "mccs_master_leaf_node" in central_node.telescopeAvailability
 
     subarray_node.SetisSubarrayAvailable(True)
     assert subarray_node.isSubarrayAvailable is True

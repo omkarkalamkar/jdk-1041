@@ -5,6 +5,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.21.2]
+********
+Fixed
+-----
+* Resolve bug SKB-813
+* TelescopeAvailability attribute for mid deployment does not reflect mccs master leafnode availability 
+
 [0.21.1]
 ********
 Updated

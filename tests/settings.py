@@ -365,9 +365,10 @@ def check_cspmln_availability(cm, expected_status):
     """checks cspmln availablity"""
     start_time = time.time()
     elapsed_time = 0
-    while (cm.component.telescope_availability)[
-        "csp_master_leaf_node"
-    ] != expected_status:
+    while (
+        cm.component.telescope_availability.get("csp_master_leaf_node")
+        != expected_status
+    ):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
@@ -381,9 +382,10 @@ def check_sdpmln_availability(cm, expected_status):
     """checks sdpmln availability"""
     start_time = time.time()
     elapsed_time = 0
-    while (cm.component.telescope_availability)[
-        "sdp_master_leaf_node"
-    ] != expected_status:
+    while (
+        cm.component.telescope_availability.get("sdp_master_leaf_node")
+        != expected_status
+    ):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
@@ -397,9 +399,10 @@ def check_mccsmln_availability(cm, expected_status):
     """checks mccs mln availability"""
     start_time = time.time()
     elapsed_time = 0
-    while (cm.component.telescope_availability)[
-        "mccs_master_leaf_node"
-    ] != expected_status:
+    while (
+        cm.component.telescope_availability.get("mccs_master_leaf_node")
+        != expected_status
+    ):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:

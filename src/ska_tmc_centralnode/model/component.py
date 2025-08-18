@@ -73,12 +73,7 @@ class CentralComponent(TmcComponent):
         self._update_tmc_op_state_callback = None
         self._telescope_availability_callback = None
         self._update_imaging_callback = None
-        self._telescope_availability = {
-            "tmc_subarrays": {},
-            "csp_master_leaf_node": False,
-            "sdp_master_leaf_node": False,
-            "mccs_master_leaf_node": False,
-        }
+        self._telescope_availability = {}
         self.lock = threading.Lock()
         self._desired_telescope_state = DevState.ON
 
@@ -248,7 +243,7 @@ class CentralComponent(TmcComponent):
             self._invoke_telescope_state_callback()
 
     @property
-    def telescope_availability(self) -> str:
+    def telescope_availability(self) -> dict:
         """
         Returns the telescope availability
 
