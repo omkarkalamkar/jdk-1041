@@ -9,7 +9,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ********
 Fixed
 -----
-Fixed issue in LoadDishcfg command
+* Fixed issue in LoadDishcfg command
 
 [0.21.2]
 ********
