@@ -9,7 +9,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ********
 Fixed
 -----
-* Fixed issue in LoadDishcfg command
+* Dish Vcc Command Status changed to COMPLETED after LoadDishCfg command failure.
 
 [0.21.2]
 ********
