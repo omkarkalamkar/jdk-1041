@@ -89,28 +89,6 @@ def assign_resources(
                 return device
         return None
 
-    # TODO Uncomment below code during integration of MCCS
-    # def get_mccs_device_resources(json_model):
-    #     for device in json_model["devices"]:
-    #         if device["dev_name"] == "low-tmc/leaf-node-mccs/0":
-    #             return device
-    #     len_subarray_beam_ids = 0
-    #     if "subarray_beam_ids" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["subarray_beam_ids"]
-    #         )
-    #     len_station_ids = 0
-    #     if "station_ids" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["station_ids"]
-    #         )
-    #     len_channel_blocks = 0
-    #     if "channel_blocks" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["channel_blocks"]
-    #         )
-    #     return len_subarray_beam_ids + len_station_ids + len_channel_blocks
-
     device = get_subarray_device(json.loads(central_node.internalModel))
     logger.debug("InternalModel attribute value is:%s", device)
     start_time = time.time()
@@ -135,32 +113,6 @@ def assign_resources(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-
-    # TODO Uncomment below code during integration of MCCS
-    # if "ska_low" in central_node_name:
-    #     device = get_mccs_device_resources(
-    #         json.loads(central_node.internalModel)
-    #     )
-    #     start_time = time.time()
-    #     while len(device["resources"]) == 0:
-    #         time.sleep(SLEEP_TIME)
-    #         device = get_mccs_device_resources(
-    #             json.loads(central_node.internalModel)
-    #         )
-    #         elapsed_time = time.time() - start_time
-    #         if elapsed_time > TIMEOUT:
-    #             pytest.fail("Timeout occurred while executing the test")
-    # while resources_len == 0:
-    #     time.sleep(SLEEP_TIME)
-    #     resources_len = get_mccs_device_resources(
-    #         json.loads(central_node.internalModel)
-    #     )
-    #     elapsed_time = time.time() - start_time
-    #     if elapsed_time > TIMEOUT:
-    #         pytest.fail("Timeout occurred while executing the test")
-    # assert len(device["resources"]) > 0
-
-    # teardown subarray, setting ObsState = Empty
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 

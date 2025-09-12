@@ -545,5 +545,6 @@ def set_auto_recovery_for_low(central_node_name: str, enabled: bool = True):
         )
         central_node = dev_factory.get_device(central_node_name)
         central_node.init()
+        time.sleep(5)
         set_low_devices_admin_mode()
         set_low_devices_availability()
