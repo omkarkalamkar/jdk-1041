@@ -432,6 +432,14 @@ class CNComponentManager(TmcComponentManager):
         self.logger.debug("component destructor called")
         self.stop_all_process()
 
+    def stop_event_manager(self) -> None:
+        """Stops the Event Receiver"""
+        if self.event_manager:
+            self.event_manager_object.cancel_subscription_thread(
+                self.event_thread_id
+            )
+            self.event_manager.unsubscribe_events()
+
     def stop(self) -> None:
         """stops liveliness probe"""
         self.stop_liveliness_probe()
