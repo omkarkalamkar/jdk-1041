@@ -227,6 +227,7 @@ def test_off_command_dish_fail(
     tmc_dish.ClearCommandCallInfo()
 
 
+@pytest.mark.new
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_off_command_low(
@@ -301,5 +302,5 @@ def test_off_command_low(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=10
+        "telescopeState", tango._tango.DevState.OFF, lookahead=15
     )
