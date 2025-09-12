@@ -623,8 +623,6 @@ class CNComponentManagerLow(CNComponentManager):
         :rtype: tuple
         """
         try:
-            self.validate_release_json(argin)
-
             release_resources_command = ReleaseResourcesLow(
                 self,
                 adapter_factory=self.adapter_factory,
