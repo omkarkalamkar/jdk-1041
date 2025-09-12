@@ -98,7 +98,6 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_telescope_state_callback(self, telescope_state):
         """Update telescope state callback"""
-        self.logger.debug("pushing telescope state %s", telescope_state)
         self.push_change_archive_events("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
