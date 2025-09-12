@@ -71,7 +71,7 @@ def assign_resources(
     db.unexport_device(subarray_fqdn)
 
     # Waiting for event from central node
-    time.sleep(3)
+    time.sleep(5)
 
     if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
@@ -102,7 +102,7 @@ def assign_resources(
                 )
             ),
         ),
-        lookahead=4,
+        lookahead=8,
     )
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
