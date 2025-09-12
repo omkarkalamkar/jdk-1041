@@ -19,12 +19,10 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import pandas as pd
 import tango
 from ska_control_model import AdminMode, HealthState
-from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
 from ska_tango_base.faults import StateModelError
-from ska_telmodel.schema import validate
 from ska_tmc_common import (
     AdapterFactory,
     AdapterType,
@@ -33,10 +31,8 @@ from ska_tmc_common import (
     DeviceInfo,
     DishDeviceInfo,
     InvalidJSONError,
-    InvalidReceptorIdError,
     LivelinessProbeType,
     LRCRCallback,
-    ResourceNotPresentError,
     SubArrayDeviceInfo,
     SubarrayNotPresentError,
 )
@@ -49,20 +45,10 @@ from tenacity import (
     wait_fixed,
 )
 
-from ska_tmc_centralnode.commands.assign_resources_command import (
-    AssignResources,
-)
-from ska_tmc_centralnode.commands.release_resources_command import (
-    ReleaseResources,
-)
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
 from ska_tmc_centralnode.commands.telescope_standby_command import (
     TelescopeStandby,
-)
-from ska_tmc_centralnode.input_validator import (
-    AssignResourceValidator,
-    ReleaseResourceValidator,
 )
 from ska_tmc_centralnode.manager.aggregators import TMCOpStateAggregator
 from ska_tmc_centralnode.manager.event_data_manager import EventDataManager
@@ -116,10 +102,6 @@ class CNComponentManager(TmcComponentManager):
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
-        skuid_service=(
-            "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal"
-            + ".skao.int:9870"
-        ),
         command_timeout=30,
         retry_attempts: int = 5,
         retry_delay: float = 3.0,
@@ -179,7 +161,6 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_state_aggregator = None
         self._health_state_aggregator = None
         self._op_state_aggregator = None
-        self.skuid_service = skuid_service
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
         self.subarray_devname: str = ""
@@ -1159,6 +1140,16 @@ class CNComponentManager(TmcComponentManager):
                 (f"{exp}:{e}"),
             )
 
+    def get_subarray_id(self, argin: str) -> int:
+        """Provides subarray id from assign json.
+
+        :param argin: Assign json string
+        :type argin: str
+        :return: returns subarray id
+        :rtype: _type_
+        """
+        return json.loads(argin).get("subarray_id")
+
     def command_not_allowed_callable(
         self,
         subarray_id: int = 0,
@@ -1214,184 +1205,17 @@ class CNComponentManager(TmcComponentManager):
         """
         return True
 
-    def assign_resources(
-        self, argin: str, task_callback: Optional[Callable] = None
-    ):
+    def validate_subarray_id(self, json_argument: dict):
+        """Validates the subarray id in the assign resources json.
+
+        :param json_argument: Assign Resources json.
+        :type json_argument: dict
+        :raises InvalidJSONError: Raises error if subarray_id is not present.
         """
-        Submit the AssignResources command in queue.
-
-        :param argin: input json string for assign resource command
-        :type argin: str
-        :param task_callback: Update task state, defaults to None
-        :type task_callback: Callable, optional
-        :return: task_status
-        :rtype: tuple
-        """
-
-        is_json_valid, input_json_or_message = self.is_input_json_valid(argin)
-        if not is_json_valid:
-            return TaskStatus.REJECTED, input_json_or_message
-
-        result, subarray_id_or_message = self.check_subarray_id_in_json(
-            input_json_or_message
-        )
-        if not result:
-            return TaskStatus.REJECTED, subarray_id_or_message
-
-        # Execute the command if the input JSON is valid
-        self.logger.debug("Calling component manager assign_resources method")
-        assign_resources_command = AssignResources(
-            self,
-            adapter_factory=self.adapter_factory,
-            skuid=SkuidClient(self.skuid_service),
-            logger=self.logger,
-        )
-
-        if isinstance(self.input_parameter, InputParameterLow):
-            try:
-                interface = (
-                    json.loads(argin).get("interface", None)
-                    or self._assign_resources_schema_version
-                )
-                validate(
-                    version=interface,
-                    config=json.loads(argin),
-                    strictness=2,
-                )
-            except Exception as exception:
-                # Catch other unexpected exceptions
-                self.logger.exception(
-                    "Exception occurred while validating for "
-                    + "assignresource json : %s ",
-                    exception,
-                )
-                return assign_resources_command.reject_command(str(exception))
-
-        elif isinstance(self.input_parameter, InputParameterMid):
-            # Utilize CDM to validate json.
-            available_subarrays_list = self.input_parameter.subarray_dev_names
-            dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
-            available_dish_leaf_node_devices = (
-                self.input_parameter.dish_leaf_node_dev_names
+        if not json_argument.get("subarray_id"):
+            raise InvalidJSONError(
+                "subarray_id key is not present in the input json argument"
             )
-            try:
-                assign_validator = AssignResourceValidator(
-                    available_subarrays_list,
-                    available_dish_leaf_node_devices,
-                    dish_leaf_node_prefix,
-                    self.logger,
-                )
-
-                json_argument = assign_validator.loads(argin)
-
-            except (
-                InvalidJSONError,
-                SubarrayNotPresentError,
-                ResourceNotPresentError,
-                ValueError,
-                InvalidReceptorIdError,
-            ) as e:
-                return assign_resources_command.reject_command(str(e))
-
-        # Reject command if Subarray is not available
-        json_argument = json.loads(argin)
-        task_status, response = self.submit_task(
-            assign_resources_command.assign_resources,
-            kwargs={"argin": json.dumps(json_argument)},
-            task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                subarray_id_or_message,
-                [ObsState.EMPTY, ObsState.IDLE],
-                "AssignResources",
-            ),
-        )
-        self.logger.info(
-            "AssignResources command's status: "
-            + f"{task_status.name}, and response: {response}"
-        )
-
-        return task_status, response
-
-    def release_resources(
-        self, argin: str, task_callback: Optional[Callable] = None
-    ):
-        """
-        Submit the ReleaseResource command in queue.
-
-        :param argin: input json string for release resource command
-        :type argin: str
-        :param task_callback: Update task state, defaults to None
-        :type task_callback: Callable, optional
-        :return: task_status
-        :rtype: tuple
-        """
-        is_json_valid, input_json_or_message = self.is_input_json_valid(argin)
-        if not is_json_valid:
-            return TaskStatus.REJECTED, input_json_or_message
-
-        result, subarray_id_or_message = self.check_subarray_id_in_json(
-            input_json_or_message
-        )
-        if not result:
-            return TaskStatus.REJECTED, subarray_id_or_message
-
-        release_resources_command = ReleaseResources(
-            self, adapter_factory=self.adapter_factory, logger=self.logger
-        )
-
-        # Execute the command if the input JSON is valid
-        if isinstance(self.input_parameter, InputParameterLow):
-            try:
-                interface = (
-                    json.loads(argin).get("interface", None)
-                    or self._release_resources_schema_version
-                )
-                validate(
-                    version=interface,
-                    config=json.loads(argin),
-                    strictness=2,
-                )
-            except Exception as e:
-                return release_resources_command.reject_command(str(e))
-        elif isinstance(self.input_parameter, InputParameterMid):
-            self.logger.info(f"Json argument::{input_json_or_message}")
-            # Utilize CDM to validate json.
-            try:
-                release_validator = ReleaseResourceValidator(self.logger)
-                input_json_or_message = release_validator.loads(argin)
-            except InvalidJSONError as e:
-                return release_resources_command.reject_command(str(e))
-
-        # Reject command if Subarray is not available
-        subarray_id = subarray_id_or_message
-        subarray_suffics = "/" + str(subarray_id).zfill(2)
-        subarrays_list = list(
-            self._component.telescope_availability["tmc_subarrays"].keys()
-        )
-        for subarray in subarrays_list:
-            telescope_availability = self.get_telescope_availability()
-            if (
-                subarray.endswith(subarray_suffics)
-                and telescope_availability["tmc_subarrays"][subarray] is False
-            ):
-                return release_resources_command.reject_command(
-                    f"Subarray {subarray} is not available."
-                )
-
-        task_status, response = self.submit_task(
-            release_resources_command.release_resources,
-            kwargs={"argin": json.dumps(input_json_or_message)},
-            task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                subarray_id_or_message, [ObsState.IDLE], "ReleaseResources"
-            ),
-        )
-        self.logger.info(
-            "ReleaseResources command's status: "
-            + f"{task_status.name}, and response: {response}"
-        )
-
-        return task_status, response
 
     def log_state(self, msg: str = "Device States") -> None:
         """Log state method for"""
@@ -1521,3 +1345,24 @@ class CNComponentManager(TmcComponentManager):
         """
         Aggregates telescope state
         """
+
+    def check_availability_for_release(self, argin: str):
+        """Checks the subarray availability before release based on id
+        present in the json.
+
+        :param argin: release resource input json.
+        :type argin: str
+        :raises Exception: Raises Exception if subarray is not available.
+        """
+        subarray_id = self.get_subarray_id(argin)
+        subarray_suffics = "/" + str(subarray_id).zfill(2)
+        subarrays_list = list(
+            self._component.telescope_availability["tmc_subarrays"].keys()
+        )
+        for subarray in subarrays_list:
+            telescope_availability = self.get_telescope_availability()
+            if (
+                subarray.endswith(subarray_suffics)
+                and telescope_availability["tmc_subarrays"][subarray] is False
+            ):
+                raise Exception(f"Subarray {subarray} is not available.")

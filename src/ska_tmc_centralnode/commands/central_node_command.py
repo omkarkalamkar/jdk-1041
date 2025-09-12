@@ -60,7 +60,7 @@ class CentralNodeCommand(TMCCommand):
         logger: logging.Logger = LOGGER,
         **kwargs,
     ):
-        super().__init__(component_manager, *args, logger=logger, **kwargs)
+        super().__init__(component_manager, logger, *args, **kwargs)
         self.timeout_id: str = f"{time.time()}_{self.__class__.__name__}"
         self.timeout_callback: TimeoutCallback = TimeoutCallback(
             self.timeout_id, self.logger

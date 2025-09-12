@@ -15,8 +15,8 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 )
 from tango import DevState
 
-from ska_tmc_centralnode.commands.release_resources_command import (
-    ReleaseResources,
+from ska_tmc_centralnode.commands.release_resources_command_mid import (
+    ReleaseResourcesMid,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
@@ -77,7 +77,9 @@ def test_mid_release_resources_command_fail_subarray(
         MID_SUBARRAY_DEVICE, proxy=subarrayMock
     )
     release_input_str = get_release_input_str()
-    assign_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
+    assign_res_command = ReleaseResourcesMid(
+        cm, adapter_factory, logger=logger
+    )
     (res_code, _) = assign_res_command.do(release_input_str)
     assert res_code == ResultCode.FAILED
 
@@ -88,8 +90,7 @@ def test_mid_release_resources_command_empty_input_json(
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("ReleaseResources")
-    cm.release_resources("", task_callback=task_callback)
-    (res_code, _) = cm.release_resources("")
+    (res_code, _) = cm.release_resources("", task_callback=task_callback)
     assert res_code == TaskStatus.REJECTED
 
 

@@ -70,7 +70,6 @@ deviceServers:
     instances: ["01"]
     command: "CentralNodeDS"
     subarray_count: 1
-    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
@@ -107,8 +106,7 @@ deviceServers:
       MCCSMasterFQDN: "low-mccs/control/control"
       SubarrayPrefix: "low-tmc/subarray/"
       CommandTimeOutDefault: 30
-
-
+      IsAutoRecoveryEnabled: "false"
 nodeSelector: {}
 
 affinity: {}

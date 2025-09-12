@@ -26,6 +26,7 @@ from tests.settings import (
     TIMEOUT_DEFECT,
     check_subarray_availability,
     logger,
+    set_auto_recovery_for_low,
 )
 
 
@@ -219,6 +220,36 @@ def test_assign_res_command_low(
     return assign_resources(
         tango_context,
         central_node_name,
+        json_factory(input_json),
+        json_factory("release_resource_low"),
+        change_event_callbacks,
+        LOW_SUBARRAY_DEVICE,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+@pytest.mark.parametrize(
+    "input_json",
+    [
+        ("assign_resource_low"),
+        ("assign_resource_low_4_0"),
+        ("assign_resource_low_without_mccs_4_2"),
+        ("assign_resource_low_without_csp_4_2"),
+        ("assign_resource_low_without_sdp_4_2"),
+    ],
+)
+def test_assign_res_command_low_with_auto_recovery(
+    tango_context,
+    input_json,
+    change_event_callbacks,
+    json_factory,
+):
+    """Test assign Resources command for low"""
+    set_auto_recovery_for_low(CENTRALNODE_LOW)
+    return assign_resources(
+        tango_context,
+        CENTRALNODE_LOW,
         json_factory(input_json),
         json_factory("release_resource_low"),
         change_event_callbacks,

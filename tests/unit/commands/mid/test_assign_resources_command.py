@@ -18,8 +18,8 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 )
 from tango import DevState
 
-from ska_tmc_centralnode.commands.assign_resources_command import (
-    AssignResources,
+from ska_tmc_centralnode.commands.assign_resources_command_mid import (
+    AssignResourcesMid,
 )
 from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
@@ -248,9 +248,6 @@ def test_assign_resources_command_fail_subarray(
 
     adapter_factory = HelperAdapterFactory()
 
-    attrs = {"fetch_skuid.return_value": 123}
-    skuid = mock.Mock(**attrs)
-
     # include exception in AssignResources command
     attrs = {"AssignResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
@@ -259,9 +256,7 @@ def test_assign_resources_command_fail_subarray(
     )
 
     assign_input_str = get_assign_input_str()
-    assign_res_command = AssignResources(
-        cm, adapter_factory, skuid, logger=logger
-    )
+    assign_res_command = AssignResourcesMid(cm, adapter_factory, logger=logger)
     (res_code, _) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
 
@@ -273,8 +268,7 @@ def test_telescope_assign_resources_command_empty_input_json(
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
-    cm.assign_resources("", task_callback=task_callback)
-    (res_code, _) = cm.assign_resources(" ")
+    (res_code, _) = cm.assign_resources("", task_callback=task_callback)
     assert res_code == TaskStatus.REJECTED
 
 
@@ -351,12 +345,7 @@ def test_assign_resources_command_already_assigned(
     cm.is_command_allowed("AssignResources")
     adapter_factory = HelperAdapterFactory()
 
-    attrs = {"fetch_skuid.return_value": 123}
-    skuid = mock.Mock(**attrs)
-
-    assign_res_command = AssignResources(
-        cm, adapter_factory, skuid, logger=logger
-    )
+    assign_res_command = AssignResourcesMid(cm, adapter_factory, logger=logger)
     # SKA001 is assigned to Subarray1
     for devInfo in cm.devices:
         if isinstance(devInfo, SubArrayDeviceInfo):

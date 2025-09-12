@@ -23,6 +23,7 @@ from tests.settings import (
     TIMEOUT_DEFECT,
     check_subarray_availability,
     logger,
+    set_auto_recovery_for_low,
 )
 
 
@@ -127,6 +128,22 @@ def test_release_res_command_low(
     set_low_devices_availability_for_aggregation,
 ):
     """Test cases for release resources command"""
+    return release_resources(
+        tango_context,
+        CENTRALNODE_LOW,
+        json_factory("assign_resource_low"),
+        json_factory("release_resource_low"),
+        change_event_callbacks,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_low
+def test_release_res_command_low_with_auto_recovery(
+    tango_context, change_event_callbacks, json_factory
+):
+    """Test cases for release resources command"""
+    set_auto_recovery_for_low(CENTRALNODE_LOW)
     return release_resources(
         tango_context,
         CENTRALNODE_LOW,

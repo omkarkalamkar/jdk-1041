@@ -19,9 +19,6 @@ dependencies:
     version: 0.21.3
     repository: file://../ska-tmc-centralnode
     alias: central_node
-  - name: ska-ser-skuid
-    version: 3.3.3
-    repository: https://artefact.skao.int/repository/helm-internal
   - name: ska-taranta
     version: 1.0.29
     repository: https://artefact.skao.int/repository/helm-internal

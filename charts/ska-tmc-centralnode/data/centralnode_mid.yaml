@@ -67,9 +67,6 @@ server:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
           - "{{ . | lower }}/{{ $DishMasterIdentifier }}"
           {{- end }}
-        - name: "SkuidService"
-          values:
-          - "{{.Values.deviceServers.centralnode.SkuidService}}"
         - name: "TMCSubarrayNodes"
           values:
           {{- range  ( regexSplit " " ((.Values.deviceServers.centralnode.subarray_count | int) | seq ) -1 )  }}
