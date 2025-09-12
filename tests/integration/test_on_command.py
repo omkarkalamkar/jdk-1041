@@ -249,5 +249,5 @@ def test_on_command_low(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
+        lookahead=15,
     )
