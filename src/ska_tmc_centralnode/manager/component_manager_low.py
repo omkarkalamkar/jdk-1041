@@ -383,7 +383,7 @@ class CNComponentManagerLow(CNComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug("State event for %s: %s", device_name, state)
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN in case of
@@ -419,7 +419,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 

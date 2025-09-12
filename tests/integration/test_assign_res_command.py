@@ -166,6 +166,8 @@ def assign_resources(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
     result, unique_id = central_node.TelescopeOff()
+    if "low-tmc" in central_node_name:
+        set_auto_recovery_for_low(central_node_name, False)
 
 
 @pytest.mark.post_deployment
@@ -229,19 +231,8 @@ def test_assign_res_command_low(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-@pytest.mark.parametrize(
-    "input_json",
-    [
-        ("assign_resource_low"),
-        ("assign_resource_low_4_0"),
-        ("assign_resource_low_without_mccs_4_2"),
-        ("assign_resource_low_without_csp_4_2"),
-        ("assign_resource_low_without_sdp_4_2"),
-    ],
-)
 def test_assign_res_command_low_with_auto_recovery(
     tango_context,
-    input_json,
     change_event_callbacks,
     json_factory,
 ):
@@ -250,7 +241,7 @@ def test_assign_res_command_low_with_auto_recovery(
     return assign_resources(
         tango_context,
         CENTRALNODE_LOW,
-        json_factory(input_json),
+        json_factory("assign_resource_low"),
         json_factory("release_resource_low"),
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,

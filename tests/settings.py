@@ -528,7 +528,7 @@ def set_low_devices_admin_mode():
     )
 
 
-def set_auto_recovery_for_low(central_node_name: str):
+def set_auto_recovery_for_low(central_node_name: str, enabled: bool = True):
     """Sets the auto recovery property to True
 
     :param central_node_name: central node fqdn
@@ -536,8 +536,14 @@ def set_auto_recovery_for_low(central_node_name: str):
     """
     db = tango.Database()
     dev_factory = DevFactory()
-    db.put_device_property(central_node_name, {"IsAutoRecoveryEnabled": True})
-    central_node = dev_factory.get_device(central_node_name)
-    central_node.init()
-    set_low_devices_admin_mode()
-    set_low_devices_availability()
+    if (
+        db.get_device_property(central_node_name, "IsAutoRecoveryEnabled")
+        != enabled
+    ):
+        db.put_device_property(
+            central_node_name, {"IsAutoRecoveryEnabled": enabled}
+        )
+        central_node = dev_factory.get_device(central_node_name)
+        central_node.init()
+        set_low_devices_admin_mode()
+        set_low_devices_availability()

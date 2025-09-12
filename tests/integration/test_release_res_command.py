@@ -98,6 +98,8 @@ def release_resources(
 
     # Teardown
     result, unique_id = central_node.TelescopeOff()
+    if "low-tmc" in central_node_name:
+        set_auto_recovery_for_low(central_node_name, False)
 
 
 @pytest.mark.post_deployment
