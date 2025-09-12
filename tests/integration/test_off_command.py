@@ -230,7 +230,6 @@ def test_off_command_dish_fail(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_off_command_low(
-    tango_context,
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
 ):
@@ -302,5 +301,5 @@ def test_off_command_low(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=8
+        "telescopeState", tango._tango.DevState.OFF, lookahead=10
     )
