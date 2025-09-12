@@ -25,6 +25,8 @@ global:
     domain: "mid-tmc"
   low:
     domain: "low-tmc"
+  labels:
+    app: ska-tmc-centralnode
 
 dsconfig:
   configuration_file: data/configuration.json
