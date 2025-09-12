@@ -28,7 +28,6 @@ from tests.settings import (
 
 
 def release_resources(
-    tango_context,
     central_node_name,
     assign_input_str,
     release_input_string,
@@ -104,14 +103,12 @@ def release_resources(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test cases for rlease resources command for low"""
     return release_resources(
-        tango_context,
         CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources"),
@@ -122,14 +119,12 @@ def test_release_res_command_mid(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
     """Test cases for release resources command"""
     return release_resources(
-        tango_context,
         CENTRALNODE_LOW,
         json_factory("assign_resource_low"),
         json_factory("release_resource_low"),
@@ -140,12 +135,11 @@ def test_release_res_command_low(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low_with_auto_recovery(
-    tango_context, change_event_callbacks, json_factory
+    change_event_callbacks, json_factory
 ):
     """Test cases for release resources command"""
     set_auto_recovery_for_low(CENTRALNODE_LOW)
     return release_resources(
-        tango_context,
         CENTRALNODE_LOW,
         json_factory("assign_resource_low"),
         json_factory("release_resource_low"),
@@ -154,7 +148,6 @@ def test_release_res_command_low_with_auto_recovery(
 
 
 def release_resources_without_subarray_id(
-    tango_context,
     central_node_name,
     assign_input_str,
     invalid_release_input_string,
@@ -240,14 +233,12 @@ def release_resources_without_subarray_id(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid_without_subarray_id(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test cases for release resources command without subarray id"""
     return release_resources_without_subarray_id(
-        tango_context,
         CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources_without_subarray_id"),
@@ -259,13 +250,11 @@ def test_release_res_command_mid_without_subarray_id(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_resources_error_propagation(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test cases for release resources error propagation command."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -357,13 +346,11 @@ def test_release_resources_error_propagation(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_resources_mid_timeout(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test cases for release resources command for mid timeout."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -457,13 +444,11 @@ def test_release_resources_mid_timeout(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_resources_low_timeout(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
     """Test cases for release resources command for low timeout."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
@@ -557,13 +542,11 @@ def test_release_resources_low_timeout(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_resources_error_aggregation(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
     """Test Release Resources error propagation."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)

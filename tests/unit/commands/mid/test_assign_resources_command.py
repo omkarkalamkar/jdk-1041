@@ -256,7 +256,9 @@ def test_assign_resources_command_fail_subarray(
     )
 
     assign_input_str = get_assign_input_str()
-    assign_res_command = AssignResourcesMid(cm, adapter_factory, logger=logger)
+    assign_res_command = AssignResourcesMid(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
     (res_code, _) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
 
