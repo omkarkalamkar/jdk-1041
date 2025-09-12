@@ -108,6 +108,9 @@ class CentralComponent(TmcComponent):
     def _invoke_telescope_state_callback(self) -> None:
         """invokes telescope state callback"""
         if self._update_telescope_state_callback is not None:
+            self.logger.debug(
+                "Updating telescope state %s", self.telescope_state
+            )
             self._update_telescope_state_callback(self.telescope_state)
 
     def _invoke_telescope_health_state_callback(self) -> None:
