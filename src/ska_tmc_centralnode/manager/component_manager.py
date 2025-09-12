@@ -438,7 +438,8 @@ class CNComponentManager(TmcComponentManager):
             self.event_manager_object.cancel_subscription_thread(
                 self.event_thread_id
             )
-            self.event_manager.unsubscribe_events()
+            for device in self.build_device_attribute_map():
+                self.event_manager_object.unsubscribe_events(device)
 
     def stop(self) -> None:
         """stops liveliness probe"""
