@@ -124,9 +124,8 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set central_node.telescope=$(TELESCOPE) \
 	--set central_node.deviceServers.mocks.enabled=$(FAKE_DEVICES) \
 	--set ska-taranta.enabled=$(TARANTA) \
-	$(CUSTOM_VALUES) \
-	--values gilab_values.yaml
-
+	$(CUSTOM_VALUES) 
+	
 test-requirements:
 	@poetry export --without-hashes --with dev --format requirements.txt --output tests/requirements.txt
 
