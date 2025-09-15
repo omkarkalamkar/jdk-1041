@@ -32,6 +32,11 @@ class LowTmcCentralNode(AbstractCentralNode):
 
     MCCSMasterFQDN = device_property(dtype="str")
 
+    IsAutoRecoveryEnabled = device_property(
+        dtype=bool,
+        default_value=False,
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -133,8 +138,8 @@ class LowTmcCentralNode(AbstractCentralNode):
             _input_parameter=InputParameterLow(None),
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,
             liveliness_check_period=self.LivelinessCheckPeriod,
-            skuid_service=self.SkuidService,
             subarray_trl_prefix=self.SubarrayPrefix,
+            is_auto_recovery_enabled=self.IsAutoRecoveryEnabled,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.mccs_mln_dev_name = (

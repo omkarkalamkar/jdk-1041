@@ -15,13 +15,24 @@ from queue import Queue
 from typing import Callable, Tuple
 
 from ska_control_model import AdminMode, ObsState
+from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
+from ska_tmc_centralnode.commands.assign_resources_command_mid import (
+    AssignResourcesMid,
+)
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
+from ska_tmc_centralnode.commands.release_resources_command_mid import (
+    ReleaseResourcesMid,
+)
+from ska_tmc_centralnode.input_validator import (
+    AssignResourceValidator,
+    ReleaseResourceValidator,
+)
 from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
@@ -66,7 +77,6 @@ class CNComponentManagerMid(CNComponentManager):
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
-        skuid_service="",
         command_timeout=30,
         dish_vcc_uri=None,
         dish_vcc_file_path=None,
@@ -106,8 +116,6 @@ class CNComponentManagerMid(CNComponentManager):
                 liveliness probe to monitor each device in a loop
             timeout : Optional. Time period to wait for
                 intialization of adapter.
-            skuid_service:
-                SKUId service
             command_timeout:
                 Command timeout
             dish_vcc_uri:
@@ -144,7 +152,6 @@ class CNComponentManagerMid(CNComponentManager):
             proxy_timeout,
             event_subscription_check_period,
             liveliness_check_period,
-            skuid_service,
             command_timeout,
             subarray_trl_prefix=subarray_trl_prefix,
             *args,
@@ -581,7 +588,6 @@ class CNComponentManagerMid(CNComponentManager):
                     f"{devInfo.state}"
                 )
                 devInfo.last_event_arrived = time.time()
-                devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
@@ -628,7 +634,6 @@ class CNComponentManagerMid(CNComponentManager):
                 DishMode(dev_info.dish_mode).name,
             )
             dev_info.last_event_arrived = time.time()
-            dev_info.update_unresponsive(False)
 
         self._aggregate_state()
         self._update_imaging()
@@ -1109,3 +1114,117 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_command_status = DishConfigStatus.COMPLETED
+
+    def validate_assign_json(self, argin: str):
+        """Validates assign resources json
+
+        :param argin: json input
+        :type argin: str
+        """
+        json_argument = json.loads(argin)
+        self.validate_subarray_id(json_argument)
+        # Utilize CDM to validate json.
+        available_subarrays_list = self.input_parameter.subarray_dev_names
+        dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
+        available_dish_leaf_node_devices = (
+            self.input_parameter.dish_leaf_node_dev_names
+        )
+        assign_validator = AssignResourceValidator(
+            available_subarrays_list,
+            available_dish_leaf_node_devices,
+            dish_leaf_node_prefix,
+            self.logger,
+        )
+
+        assign_validator.loads(argin)
+
+    def assign_resources(self, argin, task_callback: TaskCallbackType):
+        """
+        Submits the AssignResources command in queue.
+
+        :param argin: input json string for assign resource command
+        :type argin: str
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: TaskCallbackType
+        :return: task_status
+        :rtype: tuple
+        """
+        try:
+            # Execute the command if the input JSON is valid
+            self.logger.debug(
+                "Calling component manager assign_resources method"
+            )
+            assign_resources_command = AssignResourcesMid(
+                self,
+                adapter_factory=self.adapter_factory,
+                logger=self.logger,
+            )
+            self.validate_assign_json(argin)
+            task_status, response = self.submit_task(
+                assign_resources_command.assign_resources,
+                kwargs={"argin": argin},
+                task_callback=task_callback,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.EMPTY, ObsState.IDLE],
+                    "AssignResources",
+                ),
+            )
+            self.logger.info(
+                "AssignResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+        except Exception as exception:
+            return assign_resources_command.reject_command(str(exception))
+
+    def validate_release_json(self, argin: str):
+        """Validates the release resource json.
+
+        :param argin: release resource json string.
+        :type argin: str
+        """
+        json_argument = json.loads(argin)
+        self.validate_subarray_id(json_argument)
+        release_validator = ReleaseResourceValidator(self.logger)
+        release_validator.loads(argin)
+
+    def release_resources(self, argin: str, task_callback: TaskCallbackType):
+        """
+        Submit the ReleaseResource command in queue.
+
+        :param argin: input json string for release resource command
+        :type argin: str
+        :param task_callback: Updates task status
+        :type task_callback: TaskCallbackType
+        :return: task_status
+        :rtype: tuple
+        """
+        try:
+            release_resources_command = ReleaseResourcesMid(
+                self, adapter_factory=self.adapter_factory, logger=self.logger
+            )
+            self.validate_release_json(argin)
+
+            self.check_availability_for_release(argin)
+
+            task_status, response = self.submit_task(
+                release_resources_command.release_resources,
+                kwargs={"argin": argin},
+                task_callback=task_callback,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.IDLE],
+                    "ReleaseResources",
+                ),
+            )
+            self.logger.info(
+                "ReleaseResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+
+        except Exception as exception:
+            return release_resources_command.reject_command(str(exception))

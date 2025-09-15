@@ -87,9 +87,7 @@ def check_mccsmln_availability(central_node, expected_status):
             )
 
 
-def telescope_availability(
-    tango_context, central_node_fqdn, change_event_callbacks
-):
+def telescope_availability(central_node_fqdn, change_event_callbacks):
     """Checks telescope availability"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
@@ -162,10 +160,9 @@ def telescope_availability(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_telescope_availability_mid(tango_context, change_event_callbacks):
+def test_telescope_availability_mid(change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(
-        tango_context,
         CENTRALNODE_MID,
         change_event_callbacks,
     )
@@ -173,10 +170,9 @@ def test_telescope_availability_mid(tango_context, change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_telescope_availability_low(tango_context, change_event_callbacks):
+def test_telescope_availability_low(change_event_callbacks):
     """Tests telescope availability mid"""
     telescope_availability(
-        tango_context,
         CENTRALNODE_LOW,
         change_event_callbacks,
     )

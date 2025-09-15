@@ -11,10 +11,10 @@ global:
   - "--tries=10"
   - "--sleep=5"
   DEBUG: 5678
-
-ska-tango-base:
   labels:
     app: ska-tmc-centralnode
+
+ska-tango-base:
   vnc:
     enabled: false
   tangorest:
@@ -28,16 +28,7 @@ ska-tango-base:
   jive:
     enabled: false
 
-## SKUID
-ska-ser-skuid:
-  skuid:
-    use_pv: false
-    config:
-      generator_id: mvp01
-
 central_node:
-  labels:
-    app: ska-tmc-centralnode
   deviceServers:
     mocks:
       enabled: true

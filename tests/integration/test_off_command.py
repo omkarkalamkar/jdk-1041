@@ -30,7 +30,6 @@ from tests.settings import DISH_DEFECT, RESET_DEFECT, logger
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_off_command_mid(
-    tango_context,
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
     set_mid_sdp_csp_admin_modes,
@@ -111,12 +110,10 @@ def test_off_command_mid(
     [DISH_LEAF_NODE_1],
 )
 def test_off_command_dish_fail(
-    tango_context,
     device_name,
     change_event_callbacks,
 ):
     """Test TelescopeOff command failure on dish device"""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
 
@@ -227,10 +224,10 @@ def test_off_command_dish_fail(
     tmc_dish.ClearCommandCallInfo()
 
 
+@pytest.mark.new
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_off_command_low(
-    tango_context,
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
 ):
@@ -302,5 +299,5 @@ def test_off_command_low(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=5
+        "telescopeState", tango._tango.DevState.OFF, lookahead=4
     )

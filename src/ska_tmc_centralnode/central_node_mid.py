@@ -278,7 +278,6 @@ class MidTmcCentralNode(AbstractCentralNode):
             proxy_timeout=self.ProxyTimeout,
             event_subscription_check_period=self.EventSubscriptionCheckPeriod,
             liveliness_check_period=self.LivelinessCheckPeriod,
-            skuid_service=self.SkuidService,
             dish_vcc_uri=self.DishVccUri if self.DishVccUri else "",
             dish_vcc_file_path=(
                 self.DishVccFilePath if self.DishVccFilePath else ""
