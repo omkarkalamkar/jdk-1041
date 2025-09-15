@@ -488,19 +488,6 @@ def set_low_devices_availability():
     proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
     proxy_mccs_mln.SetSubsystemAvailable(True)
 
-    logging.debug(
-        "CspSubarrayLeafNode availability is: %s",
-        proxy_csp_mln.isSubsystemAvailable,
-    )
-    logging.debug(
-        "SdpSubarrayLeafNode availability is: %s",
-        proxy_sdp_mln.isSubsystemAvailable,
-    )
-    logging.debug(
-        "MccsSubarrayLeafNode availability is: %s",
-        proxy_mccs_mln.isSubsystemAvailable,
-    )
-
 
 def set_low_devices_admin_mode():
     """Sets Admin mode for low telescope."""
@@ -513,19 +500,6 @@ def set_low_devices_admin_mode():
 
     proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
     proxy_mccs_mln.SetMccsControllerAdminMode(AdminMode.ONLINE)
-    logging.debug(
-        "cspControllerAdminMode attrubte is: %s",
-        proxy_csp_mln.cspControllerAdminMode,
-    )
-    logging.debug(
-        "sdpControllerAdminMode attrubte is: %s",
-        proxy_sdp_mln.sdpControllerAdminMode,
-    )
-
-    logging.debug(
-        "mccsControllerAdminMode attrubte is: %s",
-        proxy_mccs_mln.mccsControllerAdminMode,
-    )
 
 
 def set_auto_recovery_for_low(central_node_name: str, enabled: bool = True):

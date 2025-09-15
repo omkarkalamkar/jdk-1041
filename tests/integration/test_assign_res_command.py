@@ -174,6 +174,7 @@ def test_assign_res_command_low(
     )
 
 
+@pytest.mark.post_deployment
 @pytest.mark.auto_recovery
 def test_assign_res_command_low_with_auto_recovery(
     change_event_callbacks,

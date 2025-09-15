@@ -302,5 +302,5 @@ def test_off_command_low(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=15
+        "telescopeState", tango._tango.DevState.OFF, lookahead=4
     )

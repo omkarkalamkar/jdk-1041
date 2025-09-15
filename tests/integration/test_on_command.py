@@ -240,7 +240,7 @@ def test_on_command_low(
     )
 
     change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.ON, lookahead=15
+        "telescopeState", tango._tango.DevState.ON, lookahead=4
     )
     assert central_node.telescopeState == tango.DevState.ON
 
@@ -249,5 +249,5 @@ def test_on_command_low(
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=15,
+        lookahead=4,
     )

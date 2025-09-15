@@ -100,7 +100,7 @@ def assign_resources(
                 )
             ),
         ),
-        lookahead=8,
+        lookahead=4,
     )
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
