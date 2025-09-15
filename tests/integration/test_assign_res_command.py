@@ -117,8 +117,6 @@ def assign_resources(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
     result, unique_id = central_node.TelescopeOff()
-    if "low-tmc" in central_node_name:
-        set_auto_recovery_for_low(central_node_name, False)
 
 
 @pytest.mark.post_deployment
@@ -176,8 +174,7 @@ def test_assign_res_command_low(
     )
 
 
-@pytest.mark.post_deployment
-@pytest.mark.SKA_low
+@pytest.mark.auto_recovery
 def test_assign_res_command_low_with_auto_recovery(
     change_event_callbacks,
     json_factory,

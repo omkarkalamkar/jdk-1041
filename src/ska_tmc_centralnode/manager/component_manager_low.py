@@ -405,7 +405,6 @@ class CNComponentManagerLow(CNComponentManager):
                     "Updated State of %s: %s ", devInfo.dev_name, devInfo.state
                 )
                 devInfo.last_event_arrived = time.time()
-                devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()

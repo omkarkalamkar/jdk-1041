@@ -767,7 +767,6 @@ class CNComponentManager(TmcComponentManager):
         with self.rlock:
             devInfo = self.component.get_device(device_name)
             devInfo.last_event_arrived = time.time()
-            devInfo.update_unresponsive(False)
             self.component._invoke_device_callback(devInfo)
 
     def update_device_health_state(
@@ -816,7 +815,6 @@ class CNComponentManager(TmcComponentManager):
                     HealthState(devInfo.health_state).name,
                 )
                 devInfo.last_event_arrived = time.time()
-                devInfo.update_unresponsive(False)
                 self.event_data_manager.update_event_data(
                     device=device_name,
                     data=health_state,
@@ -855,7 +853,6 @@ class CNComponentManager(TmcComponentManager):
                 device_info = self.component.get_device(device_name)
                 if device_info is not None:
                     device_info.last_event_arrived = time.time()
-                    device_info.update_unresponsive(False)
                     device_info.admin_mode = admin_mode
                     self.event_data_manager.update_event_data(
                         device=device_name,
@@ -902,7 +899,6 @@ class CNComponentManager(TmcComponentManager):
                     ObsState(devInfo.obs_state).name,
                 )
                 devInfo.last_event_arrived = time.time()
-                devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
             self.observable.notify_observers(attribute_value_change=True)
 
@@ -937,7 +933,6 @@ class CNComponentManager(TmcComponentManager):
             if dev_info is not None:
                 dev_info.resources = assign_resources
                 dev_info.last_event_arrived = time.time()
-                dev_info.update_unresponsive(False)
                 self.component._invoke_device_callback(dev_info)
 
     def is_already_assigned(self, dish_id: str) -> bool:

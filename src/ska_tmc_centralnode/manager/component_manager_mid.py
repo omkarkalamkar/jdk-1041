@@ -588,7 +588,6 @@ class CNComponentManagerMid(CNComponentManager):
                     f"{devInfo.state}"
                 )
                 devInfo.last_event_arrived = time.time()
-                devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
@@ -635,7 +634,6 @@ class CNComponentManagerMid(CNComponentManager):
                 DishMode(dev_info.dish_mode).name,
             )
             dev_info.last_event_arrived = time.time()
-            dev_info.update_unresponsive(False)
 
         self._aggregate_state()
         self._update_imaging()
