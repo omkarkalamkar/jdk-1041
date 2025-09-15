@@ -5,6 +5,18 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.22.0]
+********
+Added
+-----
+* Added feature flag property "IsAutoRecoveryEnabled".
+
+Updated
+-------
+* Updated the Assign and Release Resources to refrain from invoking command on MCCS leaf node when
+  the feature flag is set.
+* Removed the SKUID dead code from the repository.
+
 [0.21.3]
 ********
 Fixed
