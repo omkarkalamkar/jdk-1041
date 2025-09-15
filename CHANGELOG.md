@@ -9,7 +9,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ********
 Added
 -----
-* Added feature flag property "IsAutoRecoveryEnabled".
+* Added feature flag as property "IsAutoRecoveryEnabled".
 
 Updated
 -------
