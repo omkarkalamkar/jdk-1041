@@ -6,7 +6,7 @@ from ska_tmc_common.test_helpers.helper_subarray_device import (
     HelperSubArrayDevice,
 )
 from tango import AttrWriteType
-from tango.server import attribute, command
+from tango.server import attribute, command, run
 
 
 class CNHelperSubArrayDevice(HelperSubArrayDevice):
@@ -48,3 +48,19 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
                 self.logger.exception(
                     f"Error pushing the isSubarrayAvailable event. {exception}"
                 )
+
+
+def main(args=None, **kwargs):
+    """
+    Runs the HelperDishDevice Tango device.
+    :param args: Arguments internal to TANGO
+
+    :param kwargs: Arguments internal to TANGO
+
+    :return: integer. Exit code of the run method.
+    """
+    return run((CNHelperSubArrayDevice,), args=args, **kwargs)
+
+
+if __name__ == "__main__":
+    main()

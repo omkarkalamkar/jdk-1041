@@ -22,11 +22,14 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
+from ska_tmc_centralnode.commands.set_global_pointing_model import (
+    SetGlobalPointingModel,
+)
 from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
 from ska_tmc_centralnode.manager.aggregators import (
-    DishkValueValidationResultAggregator,
+    DishAttrValueAggregator,
     LoadDishCfgCommandResultAggregator,
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
@@ -77,6 +80,10 @@ class CNComponentManagerMid(CNComponentManager):
         k_value_valid_range_upper_limit=1177,
         k_value_valid_range_lower_limit=1,
         subarray_trl_prefix: str = "mid-tmc/subarray/",
+        gpm_version=None,
+        gpm_interface=None,
+        gpm_data_sources_prefix=None,
+        gpm_file_path_prefix=None,
         *args,
         **kwargs,
     ) -> None:
@@ -126,6 +133,10 @@ class CNComponentManagerMid(CNComponentManager):
                 k value upper limit
             k_value_valid_range_lower_limit:
                 k value lower limit.
+            gpm_version: GPM version
+            gpm_interface: GPM interface,
+            gpm_data_sources_prefix: GPM data sources prefix path,
+            gpm_file_path_prefix: GPM file path prefix,
 
         """
         super().__init__(
@@ -175,14 +186,20 @@ class CNComponentManagerMid(CNComponentManager):
         self.dishKvalueAggregationAllowedPercent = (
             dishKvalueAggregationAllowedPercent
         )
-        self.dish_kvalue_validation_aggregator = (
-            DishkValueValidationResultAggregator(self, self.logger)
+        self.dish_kvalue_validation_aggregator = DishAttrValueAggregator(
+            self, self.logger
         )
         self.dev_names_for_load_dish_cfg = []
+        self.dishln_gpm_data_created_during_command_execution = {}
         self.load_dish_cfg_aggregated_result = None
+        self.gpm_version_aggregated_result = ResultCode.UNKNOWN
+        self.gpm_aggregated_result = True
         self.load_dish_cfg_command_id = None
+        self.set_gpm_version_command_id = None
         self._dish_vcc_validation_status = "{}"
+        self._dish_gpm_version_status = "{}"
         self.dish_vcc_validation_attr_lock = threading.Lock()
+        self.dishln_gpm_lock = threading.RLock()
         self.enable_dish_vcc_init = enable_dish_vcc_init
         self.command_result = None
         self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
@@ -193,6 +210,11 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_command_status_callback = (
             _dish_vcc_command_status_callback
         )
+        self.number_of_gpm_executed = 0
+        self.gpm_version = gpm_version
+        self.gpm_interface = gpm_interface
+        self.gpm_data_sources_prefix = gpm_data_sources_prefix
+        self.gpm_file_path_prefix = gpm_file_path_prefix
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -204,6 +226,8 @@ class CNComponentManagerMid(CNComponentManager):
                 "state": Queue(),
                 "loadDishConfigResult": Queue(),
                 "loadDishConfigResultAsync": Queue(),
+                "setGPMResult": Queue(),
+                "gpmVersion": Queue(),
             }
         )
         handle_dish_vcc = self.handle_dish_vcc_validation_result
@@ -222,6 +246,8 @@ class CNComponentManagerMid(CNComponentManager):
                 "loadDishConfigResultAsync": (
                     self.update_load_dish_cfg_results_async
                 ),
+                "setGPMResult": self.update_set_gpm_results,
+                "gpmVersion": self.handle_gpm_version_event,
             }
         )
         self._start_event_processing_threads()
@@ -257,6 +283,16 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         return self.load_dish_cfg_aggregated_result
+
+    def get_set_gpm_version_resultcode(self) -> ResultCode:
+        """
+        Return Aggregated command result for Load Dish Cfg command
+
+        Returns:
+            Aggregated command result for Load Dish Cfg command
+
+        """
+        return self.gpm_version_aggregated_result
 
     @property
     def dish_vcc_command_status(self):
@@ -399,6 +435,24 @@ class CNComponentManagerMid(CNComponentManager):
         # empty the dictionaries
         current_dish_vcc_validation_status = {}
         updated_validation_status = {}
+
+    @property
+    def dish_gpm_version_status(self) -> dict:
+        """
+        Getter method for dish GPM version status
+
+        Returns:
+            dish: dish GPM version status
+
+        """
+        return self._dish_gpm_version_status
+
+    @dish_gpm_version_status.setter
+    def dish_gpm_version_status(self, gpm_version: dict):
+        """
+        This method does the aggregation from Dish
+        and sets the updated GPM version.
+        """
 
     def is_csp_dish_ready(self) -> bool:
         """
@@ -816,6 +870,21 @@ class CNComponentManagerMid(CNComponentManager):
             "tm_data_filepath": self.dish_vcc_file_path,
         }
 
+    def get_default_gpm_version_params(self) -> dict:
+        """
+        Return default GPM version parameters
+
+        Returns:
+            Default GPM version parameters
+
+        """
+        return {
+            "version": self.gpm_version,
+            "interface": self.gpm_interface,
+            "tm_data_sources": [self.gpm_data_sources_prefix],
+            "tm_data_filepath": self.gpm_file_path_prefix,
+        }
+
     def check_if_csp_all_dish_ready(self) -> bool:
         """
         Check and validate all dish and csp master is ready
@@ -984,6 +1053,45 @@ class CNComponentManagerMid(CNComponentManager):
         )
         return task_status, response
 
+    def set_gpm_version(
+        self, argin: str, task_callback: Callable = None
+    ) -> Tuple[ResultCode, str]:
+        """
+        Set GPM version for Dish.
+
+        Args:
+            argin (str): Dish Id's with the specified bands and version.
+
+        Returns:
+            a result code and message
+
+        """
+        set_gpm_version_command = SetGlobalPointingModel(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+        # self.logger.debug(
+        #     "Command Status: %s ",
+        #     str(DishConfigStatus(self.dish_vcc_command_status).name),
+        # )
+
+        try:
+            json.loads(argin)
+            self.logger.debug("JSON argin is in correct format.")
+        except json.JSONDecodeError as e:
+            # self.dish_vcc_validation_status = {
+            #     CENTRALNODE_MID: "JsonDecodeError"
+            # }
+            return set_gpm_version_command.reject_command(
+                f"The JSON string is malformed. Error: {str(e)}",
+            )
+
+        task_status, response = self.submit_task(
+            set_gpm_version_command.apply_gpm,
+            args=[argin, self.logger],
+            task_callback=task_callback,
+        )
+        return task_status, response
+
     def update_load_dish_cfg_results_async(
         self, dev_name: str, value: tuple
     ) -> None:
@@ -1109,3 +1217,120 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_command_status = DishConfigStatus.COMPLETED
+
+    def handle_gpm_version_event(
+        self, dev_name: str, gpmVersion: dict
+    ) -> None:
+        """
+        Handle the GPM version
+        Based on following table Result codes handled and attributes updated\n
+
+        String       | Meaning\n
+        UNKNOWN      | GPM version not set on Dish\n
+        Version      | GPM is already invoked \n
+
+        String      | Action\n
+        UNKNOWN     | Apply GPM using SetGlobalPointingModel command\n
+        Version     | Version is set, no need to invoke SetGlobalPointingModel
+                      command
+
+        Args:
+            dev_name (str): Device name
+            result (ResultCode): ResultCode
+
+        """
+        self.logger.info("$$$$$$$$ %s", gpmVersion)
+
+    def reset_gpm_data(self) -> None:
+        """Reset GPM data"""
+        self.logger.info("Resetting SetGlobalPointingModel data")
+        self.gpm_result_codes_mapping = {}
+        self.gpm_version_aggregated_result = True
+        self.set_gpm_version_command_id = None
+        self.number_of_gpm_executed = 0
+        self.dishln_gpm_data_created_during_command_execution = {}
+
+    def update_set_gpm_results(
+        self, dev_name: str, value: tuple, is_async_result: bool = False
+    ) -> None:
+        self.logger.info(
+            "GPM longRunningCommandResult event for device: %s, with value: %s",
+            dev_name,
+            str(value),
+        )
+        with self.dishln_gpm_lock:
+            dishln_id = dev_name.split("/")[-1]
+            result_code_or_exception = []
+            unique_id, resultcode_message = value
+            if unique_id.endswith("ApplyPointingModel"):
+                result_code_or_exception = json.loads(resultcode_message)
+            # self.logger.info(">>>>>>>> %s %s", dishln_id, result_code_or_exception)
+            if result_code_or_exception:
+                if (
+                    dishln_id
+                    in self.dishln_gpm_data_created_during_command_execution
+                ):
+                    dishln_gpm_data = (
+                        self.dishln_gpm_data_created_during_command_execution[
+                            dishln_id
+                        ]
+                    )
+                    for band_name, band_value in dishln_gpm_data.items():
+                        if band_value is None:
+                            self.dishln_gpm_data_created_during_command_execution[
+                                dishln_id
+                            ][
+                                band_name
+                            ] = result_code_or_exception
+                self.logger.info(
+                    "\n\n &&&&& Dev names for set gpm  %s \n %s ",
+                    str(self.dishln_gpm_data_created_during_command_execution),
+                    self.number_of_gpm_executed,
+                )
+            # all_bands_processed = False
+            # # When all events received from dishes leaf nodes
+            # for node_id, bands in self.dishln_gpm_data_created_during_command_execution.items():
+            #     all_bands_processed = all(value is not None for value in bands.values())
+            if self.number_of_gpm_executed > 0:
+                self.number_of_gpm_executed -= 1
+            if not self.number_of_gpm_executed:
+                self.logger.info(
+                    "All Events received for set GPM version, Aggregating results"
+                )
+                self.aggregate_set_gpm_results()
+                self.gpm_version_aggregated_result = ResultCode.OK
+                self.observable.notify_observers(command_exception=True)
+
+    def aggregate_set_gpm_results(self) -> None:
+        """
+        This method aggregate load dish cfg command result based on
+        generated data
+        """
+        break_outer = False
+        self.gpm_aggregated_result = True
+        for (
+            dishln_id,
+            bands,
+        ) in self.dishln_gpm_data_created_during_command_execution.items():
+            if isinstance(bands, list):
+                self.gpm_aggregated_result = False
+                break_outer = True
+                break
+            for band_name, result in bands.items():
+                first_value = result[0]
+                # Convert enum or any value with int() support
+                if not isinstance(first_value, int):
+                    try:
+                        first_value = int(first_value)
+                    except (ValueError, TypeError):
+                        self.logger.exception(
+                            "Invalid Value found %s -> %s result",
+                            dishln_id,
+                            band_name,
+                        )
+                if first_value != int(ResultCode.OK):
+                    self.gpm_aggregated_result = False
+                    break_outer = True
+                    break
+            if break_outer:
+                break

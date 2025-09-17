@@ -409,7 +409,7 @@ class LoadDishCfgCommandResultAggregator:
         return result_code, message
 
 
-class DishkValueValidationResultAggregator:
+class DishAttrValueAggregator:
     """This Class Aggregate k-value validation results
     received from Dish Leaf Nodes.
     """
@@ -423,6 +423,7 @@ class DishkValueValidationResultAggregator:
         self._component_manager = cm
         self.logger = logger
         self.dln_kvalue_validation_results = {}
+        self.gpm_version_set_on_dlns = {}
         self.input_parameter_obj = self._component_manager.input_parameter
 
     def is_events_received_percentage_valid(self) -> bool:
@@ -498,3 +499,28 @@ class DishkValueValidationResultAggregator:
             # Update the Central Node result attribute.
             if self.is_events_received_percentage_valid():
                 self.update_central_node_with_result()
+
+    def aggregate_gpm(
+        self,
+        dish_leaf_node_fqdn: str,
+        gpm_version: dict,
+    ) -> None:
+        """
+        Aggregate the GPM version received from
+        Dish leaf nodes and provide the list of DLN on which
+        GPM is missing to Central Node.
+
+        Args:
+            dish_leaf_node_fqdn (str):
+                dish leaf node fqdn
+            gpm_version (dict):
+                GPM version on dish leaf node
+
+        """
+        with self._component_manager.self.dishln_gpm_lock:
+            dish_leaf_node_name = dish_leaf_node_fqdn.split("/")[-1]
+            self.gpm_version_set_on_dlns[dish_leaf_node_name] = gpm_version
+            self.logger.debug(
+                "GPM version dictionary: %s",
+                str(self.gpm_version_set_on_dlns),
+            )

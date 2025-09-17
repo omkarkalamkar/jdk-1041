@@ -185,6 +185,7 @@ class CNComponentManager(TmcComponentManager):
         self.subarray_devname: str = ""
         self.command_mapping = {}
         self.result_codes_mapping = {}
+        self.gpm_result_codes_mapping = {}
         self.rlock = threading.RLock()
         self.subsystems_to_config = []
 
@@ -295,6 +296,8 @@ class CNComponentManager(TmcComponentManager):
                     [
                         "dishMode",
                         "kValueValidationResult",
+                        "longrunningcommandresult",
+                        "gpmVersion",
                     ]
                 )
 
@@ -416,7 +419,11 @@ class CNComponentManager(TmcComponentManager):
                 # safely ignore it.
                 pass
             except Exception as exception:
-                self.logger.error(exception)
+                import traceback
+
+                self.logger.error(
+                    ">>>>>>> %s %s", exception, traceback.print_exc()
+                )
 
     def check_event_error(self, event: tango.EventData, callback: str):
         """Method for checking event error."""
@@ -721,8 +728,8 @@ class CNComponentManager(TmcComponentManager):
         else:
             devInfo = DeviceInfo(device_name, False)
         self.component.update_device(devInfo)
-        if self.liveliness_probe_object:
-            self.liveliness_probe_object.add_device(device_name)
+        # if self.liveliness_probe_object:
+        #     self.liveliness_probe_object.add_device(device_name)
 
     def update_input_parameter(self) -> None:
         """updates the input parameter for component manager instance"""
@@ -1021,7 +1028,8 @@ class CNComponentManager(TmcComponentManager):
         :type subarray_dev_name: str
         """
         if self._liveliness_probe is not None:
-            self._liveliness_probe.add_device(subarray_dev_info.dev_name)
+            print()
+            # self._liveliness_probe.add_device(subarray_dev_info.dev_name)
         else:
             # If the monitoring loop is not active
             # I must assume that the subarray is reporting the correct value
