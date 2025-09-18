@@ -31,44 +31,26 @@ class AbstractCentralNode(TMCBaseDevice):
     TMCSubarrayNodes = device_property(
         dtype=("str",),
         doc="List of TMC Mid Subarray Node devices",
-        # default_value=(
-        #     "tango://skancra010:30009/mid-tmc/subarray/01#dbase=no",
-        # ),
+        default_value=tuple(),
     )
-    CspMasterLeafNodeFQDN = device_property(
-        dtype="str",
-        # default_value="tango://skancra010:30003/mid-tmc/leaf-node-csp/0#dbase=no",
-    )
+    CspMasterLeafNodeFQDN = device_property(dtype="str")
 
-    CspMasterFQDN = device_property(
-        dtype="str",
-        # default_value="tango://skancra010:30002/mid-csp/control/0#dbase=no",
-    )
+    CspMasterFQDN = device_property(dtype="str")
 
-    SdpMasterLeafNodeFQDN = device_property(
-        dtype="str",
-        # default_value="tango://skancra010:30007/mid-tmc/leaf-node-sdp/0#dbase=no",
-    )
+    SdpMasterLeafNodeFQDN = device_property(dtype="str")
 
-    SdpMasterFQDN = device_property(
-        dtype="str",
-        # default_value="tango://skancra010:30006/mid-sdp/control/0#dbase=no",
-    )
+    SdpMasterFQDN = device_property(dtype="str")
 
     CspSubarrayLeafNodes = device_property(
         dtype=("str",),
         doc="List of CspSubarrayLeafNode devices",
-        # default_value=(
-        #     "tango://skancra010:30004/mid-tmc/subarray-leaf-node-csp/01#dbase=no",
-        # ),
+        default_value=tuple(),
     )
 
     SdpSubarrayLeafNodes = device_property(
         dtype=("str",),
         doc="List of SdpSubarrayLeafNode devices",
-        # default_value=(
-        #     "tango://skancra010:30008/mid-tmc/subarray-leaf-node-sdp/01#dbase=no",
-        # ),
+        default_value=tuple(),
     )
 
     SkuidService = device_property(
@@ -80,7 +62,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     SubarrayPrefix = device_property(
         dtype="DevString",
-        # default_value="mid-tmc/subarray/",
+        default_value="",
     )
 
     # ----------

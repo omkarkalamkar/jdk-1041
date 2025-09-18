@@ -185,7 +185,6 @@ class CNComponentManager(TmcComponentManager):
         self.subarray_devname: str = ""
         self.command_mapping = {}
         self.result_codes_mapping = {}
-        self.gpm_result_codes_mapping = {}
         self.rlock = threading.RLock()
         self.subsystems_to_config = []
 

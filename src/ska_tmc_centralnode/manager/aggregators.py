@@ -423,7 +423,6 @@ class DishAttrValueAggregator:
         self._component_manager = cm
         self.logger = logger
         self.dln_kvalue_validation_results = {}
-        self.gpm_version_set_on_dlns = {}
         self.input_parameter_obj = self._component_manager.input_parameter
 
     def is_events_received_percentage_valid(self) -> bool:
@@ -500,11 +499,7 @@ class DishAttrValueAggregator:
             if self.is_events_received_percentage_valid():
                 self.update_central_node_with_result()
 
-    def aggregate_gpm(
-        self,
-        dish_leaf_node_fqdn: str,
-        gpm_version: dict,
-    ) -> None:
+    def aggregate_gpm(self) -> list:
         """
         Aggregate the GPM version received from
         Dish leaf nodes and provide the list of DLN on which
@@ -517,10 +512,33 @@ class DishAttrValueAggregator:
                 GPM version on dish leaf node
 
         """
-        with self._component_manager.self.dishln_gpm_lock:
-            dish_leaf_node_name = dish_leaf_node_fqdn.split("/")[-1]
-            self.gpm_version_set_on_dlns[dish_leaf_node_name] = gpm_version
-            self.logger.debug(
-                "GPM version dictionary: %s",
-                str(self.gpm_version_set_on_dlns),
-            )
+        initializing_gpm = True
+        gpm_unknown_dishes = []
+        self.logger.info(
+            "Current GPM Status %s",
+            self._component_manager.global_pointing_model_status,
+        )
+        total_events = len(
+            self._component_manager.global_pointing_model_status.keys()
+        )
+        if total_events == len(
+            self.input_parameter_obj.dish_leaf_node_dev_names
+        ):
+            for (
+                dish_id,
+                bands,
+            ) in self._component_manager.global_pointing_model_status.items():
+                if not isinstance(bands, str):
+                    for _, band_status in bands.items():
+                        if band_status != "UNKNOWN":
+                            initializing_gpm = False
+                            break
+                else:
+                    initializing_gpm = False
+                if initializing_gpm:
+                    gpm_unknown_dishes.append(dish_id)
+                initializing_gpm = True
+        self.logger.info(
+            "Dishes for which GPM version not set: %s", gpm_unknown_dishes
+        )
+        return gpm_unknown_dishes

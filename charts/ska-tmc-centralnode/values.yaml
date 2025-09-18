@@ -97,6 +97,11 @@ deviceServers:
       DishVccInitTimeout: 120
       CommandTimeOutDefault: 30
       SubarrayPrefix: "mid-tmc/subarray/"
+      global_pointing_model:
+        version: 0.0.8
+        interface:"https://schema.skao.int/ska-mid-global-pointing-model/1.0"
+        data_sources_prefix:"car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
+        file_path_prefix: "instrument/ska_mid1/global_pointing_model_data"
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "low-tmc/leaf-node-csp/0"

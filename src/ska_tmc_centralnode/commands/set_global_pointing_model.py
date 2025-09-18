@@ -35,10 +35,9 @@ class SetGlobalPointingModel(SetDishGPM):
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
-        self.gpm_files = None
+        # self.gpm_files = None
         self.gpm_cfg = self.component_manager.event_manager_object
         self.dish_gpm_params: str = ""
-        # self.dish_vcc_config_json: dict = {}
 
     def apply_gpm(
         self,
@@ -67,50 +66,33 @@ class SetGlobalPointingModel(SetDishGPM):
             self.component_manager.command_timeout,
             self.timeout_callback,
         )
+        self.dish_gpm_params = json.loads(dish_gpm_params)
         error_message = ""
-        gpm_files = ""
-        if "receptors" not in dish_gpm_params:
-            (
-                gpm_files,
-                error_message,
-            ) = self.get_gpm_files(dish_gpm_params)
+        if "receptors" not in self.dish_gpm_params:
+            gpm_files = self.get_gpm_files(self.dish_gpm_params)
+            if not gpm_files:
+                error_message = "No GPM files found on set GPM parameters."
+                self.process_update_task_for_command_failure(
+                    task_callback, error_message
+                )
+                return
             gpm_data = self.form_gpm_file_for_each_dish(
-                self.gpm_files, self.dish_gpm_params
+                gpm_files, self.dish_gpm_params
             )
         else:
-            gpm_data = self.form_gpm_path_from_receptors(argin=dish_gpm_params)
-        if error_message:
-            # self.component_manager.gpm_status = {
-            #     CENTRALNODE_MID: error_message
-            # }
-            self.logger.debug(
-                "Command ID: %s",
-                self.component_manager.command_id,
-            )
-            self.component_manager.reset_gpm_data()
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, error_message),
-                exception=error_message,
-            )
-            return
-        self.gpm_files = gpm_files
-        self.dish_gpm_params = dish_gpm_params
+            gpm_data = self.form_gpm_path_from_receptors(self.dish_gpm_params)
 
         ret_code, message = self.do(gpm_data)
-        self.logger.debug(
-            "Command ID: %s | Message: %s ",
-            self.component_manager.command_id,
-            message,
-        )
-        if ret_code == ResultCode.FAILED:
-            self.component_manager.reset_gpm_data()
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, message),
-                exception=message,
+        if ret_code[0] not in [ResultCode.OK, ResultCode.QUEUED]:
+            self.process_update_task_for_command_failure(
+                task_callback, message[0]
             )
         else:
+            self.logger.debug(
+                "Command ID: %s | Message: %s ",
+                self.component_manager.command_id,
+                message,
+            )
             self.start_tracker_thread(
                 "get_set_gpm_version_resultcode",
                 [ResultCode.OK],
@@ -122,70 +104,6 @@ class SetGlobalPointingModel(SetDishGPM):
                     self.component_manager.long_running_result_callback
                 ),
             )
-        self.component_manager.set_gpm_version_command_id = (
-            self.component_manager.command_id
-        )
-
-    def form_gpm_path_from_receptors(self, argin: dict):
-        """"""
-        gpm_data = {}
-        default_params = (
-            self.component_manager.get_default_gpm_version_params()
-        )
-        interface = default_params.get("interface", None)
-        tm_data_sources = default_params.get("tm_data_sources", None)[0]
-        tm_data_sources = (
-            tm_data_sources
-            + "?"
-            + default_params.get("version", None)
-            + "#tmdata"
-        )
-        receptors = json.loads(argin)["receptors"].items()
-        for dish_id, bands in receptors:
-            dish_id = dish_id.lower()
-            for band in bands:
-                file_name = f"gpm-{dish_id.lower()}-{band}.json"
-                if dish_id not in gpm_data:
-                    gpm_data[dish_id] = []
-                tm_data_filepath = (
-                    default_params.get("tm_data_filepath", None)
-                    + "/"
-                    + file_name
-                )
-                gpm_data[dish_id].append(
-                    {
-                        "interface": interface,
-                        "tm_data_sources": tm_data_sources,
-                        "tm_data_filepath": tm_data_filepath,
-                    }
-                )
-        return gpm_data
-
-    def form_gpm_file_for_each_dish(self, gpm_files, dish_gpm_params) -> dict:
-        """Method to form gpm data"""
-        gpm_data = {}
-        try:
-            tm_data_source = dish_gpm_params.get("tm_data_sources", None)
-            tm_data_fpath = dish_gpm_params.get("tm_data_filepath", None)
-            interface = dish_gpm_params.get("interface", None)
-            version = dish_gpm_params.get("version", None)
-            while not gpm_files:
-                file_name = gpm_files.pop()
-                dish_id = file_name.split("-")[1]
-                tm_data_sources = tm_data_source + "?" + version + "#tmdata"
-                tm_data_filepath = tm_data_fpath + file_name
-                if dish_id not in gpm_data:
-                    gpm_data[dish_id] = []
-                gpm_data[dish_id].append(
-                    {
-                        "interface": interface,
-                        "tm_data_sources": tm_data_sources,
-                        "tm_data_filepath": tm_data_filepath,
-                    }
-                )
-        except Exception as e:
-            self.logger.exception("Exception %s occurred", e)
-        return gpm_data
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -199,16 +117,9 @@ class SetGlobalPointingModel(SetDishGPM):
 
         """
         if not self.component_manager.gpm_aggregated_result:
-            result = list(result)
-            result[0] = ResultCode.FAILED
-            result[1] = json.dumps(
-                self.component_manager.dishln_gpm_data_created_during_command_execution
-            )
-            result = tuple(result)
-            self.task_callback(
-                result=result,
-                status=TaskStatus.COMPLETED,
-                exception="Command Failed",
+            error_message = "Command Failed, Command data: "
+            self.process_update_task_for_command_failure(
+                self.task_callback, error_message
             )
         else:
             result = list(result)
@@ -234,32 +145,157 @@ class SetGlobalPointingModel(SetDishGPM):
             )
         self.component_manager.reset_gpm_data()
 
-    def get_gpm_files(self, initial_params: dict) -> Tuple[dict, str]:
+    def process_update_task_for_command_failure(
+        self, task_callback, error_message: str
+    ) -> None:
+        """Method to update the task callback and GPM status
+        with the failure data
+
+        Args:
+            task_callback: Update task state with the failure data
         """
-        Get GPM URI paths from initial params
+
+        if (
+            self.component_manager.dishln_gpm_data_created_during_command_execution
+        ):
+            error_message = error_message + str(
+                self.component_manager.dishln_gpm_data_created_during_command_execution
+            )
+            for (
+                dish_id,
+                result,
+            ) in (
+                self.component_manager.dishln_gpm_data_created_during_command_execution.items()
+            ):
+                if isinstance(result, str):
+                    self.component_manager.global_pointing_model_status[
+                        dish_id
+                    ] = result
+        self.component_manager.reset_gpm_data()
+        task_callback(
+            status=TaskStatus.COMPLETED,
+            result=(ResultCode.FAILED, error_message),
+            exception=error_message,
+        )
+
+    def form_gpm_path_from_receptors(self, argin: dict) -> None:
+        """This method forms the inputs for ApplyPointingModel command
+
+        Args:
+           argin: Dictionary which contains manual command input
+           from operator.
+        """
+        gpm_data = {}
+        default_params = (
+            self.component_manager.get_default_gpm_version_params()
+        )
+        interface = default_params.get("interface", None)
+        tm_data_sources = default_params.get("tm_data_sources", None)[0]
+        tm_data_sources = (
+            tm_data_sources + "?" + argin.get("version", None) + "#tmdata"
+        )
+        receptors = argin["receptors"].items()
+
+        for dish_id, bands in receptors:
+            dish_id = dish_id.lower()
+            for band in bands:
+                file_name = f"gpm-{dish_id.lower()}-{band}.json"
+                if dish_id not in gpm_data:
+                    gpm_data[dish_id] = []
+                tm_data_filepath = (
+                    default_params.get("tm_data_filepath", None)
+                    + "/"
+                    + file_name
+                )
+                gpm_data[dish_id].append(
+                    {
+                        "interface": interface,
+                        "tm_data_sources": tm_data_sources,
+                        "tm_data_filepath": tm_data_filepath,
+                    }
+                )
+        return gpm_data
+
+    def form_gpm_file_for_each_dish(
+        self, gpm_files: list, dish_gpm_params: dict
+    ) -> dict:
+        """Method to form gpm data from gpm files found on GPM
+        data repository.
+
+        Args:
+            gpm_files: GPM files found on data repository.
+            dish_gpm_params: Default parameters set for GPM on initialization.
+        """
+        gpm_data = {}
+        try:
+            tm_data_source = dish_gpm_params.get("tm_data_sources", None)[0]
+            tm_data_fpath = dish_gpm_params.get("tm_data_filepath", None)
+            interface = dish_gpm_params.get("interface", None)
+            version = dish_gpm_params.get("version", None)
+            self.logger.info(">>>>>> %s", type(gpm_files))
+            file_names = []
+            while self.component_manager.gpm_unknown_dishes:
+                dish_id = self.component_manager.gpm_unknown_dishes.pop()
+                file_names = [
+                    f for f in gpm_files if dish_id.lower() in f.lower()
+                ]
+                if not file_names:
+                    self.logger.info("GPM file not found for dish %s", dish_id)
+                    error_message = "No GPM files were found for any of the bands in the provided paths"
+                    self.add_data_to_gpm_dictionary_in_case_of_error(
+                        dish_id, error_message
+                    )
+                for file_name in file_names:
+                    tm_data_sources = (
+                        tm_data_source + "?" + version + "#tmdata"
+                    )
+                    tm_data_filepath = tm_data_fpath + "/" + file_name
+                    if dish_id not in gpm_data:
+                        gpm_data[dish_id] = []
+                    gpm_data[dish_id].append(
+                        {
+                            "interface": interface,
+                            "tm_data_sources": tm_data_sources,
+                            "tm_data_filepath": tm_data_filepath,
+                        }
+                    )
+        except Exception as e:
+            self.logger.exception("Exception %s occurred", e)
+        return gpm_data
+
+    def get_gpm_files(self, initial_params: dict) -> list:
+        """
+        Get GPM files from initial params
         Args:
             initial_param (dict): this param containg tm
                 data source uri and file path which is used
-                for extracting vcc_map json file
+                to get GPM files.
 
         Returns:
-            Tuple(dict, str): tuple having `dish_id with its GPM URI` and
-            `Error message` if any
+            list: containing GPM file names found on data repo.
 
         """
-        data_sources = initial_params.get("tm_data_sources", None)
+
+        gpm_files = []
+        data_sources = initial_params.get("tm_data_sources", None)[0]
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
-        self.logger.debug(
-            "Command ID: %s | The initial params are : %s",
+        data_sources = (
+            data_sources
+            + "?"
+            + initial_params.get("version", None)
+            + "#tmdata"
+        )
+        self.logger.info(
+            "Command ID: %s| The initial params are :  %s",
             self.component_manager.command_id,
-            json.dumps(initial_params, indent=2),
+            initial_params,
         )
         if data_sources and tm_data_filepath:
             try:
-                tmdata = TMData(data_sources)
+                tmdata = TMData([data_sources])
                 gpm_path = tmdata[tm_data_filepath]
                 gpm_files = list(gpm_path)
-                return gpm_files, ""
+                return gpm_files
             except Exception as exception:
                 self.logger.exception(
                     "Command ID: %s |  Error in Loading GPM "
@@ -274,22 +310,21 @@ class SetGlobalPointingModel(SetDishGPM):
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
     # pylint:disable=signature-differs
-    def do(self, argin: str) -> Tuple[ResultCode, str]:
+    def do(self, argin: dict) -> Tuple[ResultCode, str]:
         """
-        This command performs the following steps:\n
-        1. Loads the content of the DishId-VCC mapping file from CAR URI.\n
-        2. Validates the JSON.\n
-        3. Invokes a command on the CSP master leaf node.\n
-        4. Invokes the SetKValue command on the Dish Leaf Node for each dish ID
-        provided in the DishId-VCC map.\n
+        This command performs invokes the ApplyPointingModel
+        command on the dish_id's specified in argin which is a
+        dictionary
 
         Args:
-            argin (str): DishId-VCC map parameters in JSON string format.
+            argin (dict): gpm_data ready for execution.
 
         Returns:
             Tuple(ResultCode, str): Result code and message
 
         """
+        if not argin:
+            return [ResultCode.FAILED], ["Error in processesing GPM data."]
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
@@ -300,15 +335,16 @@ class SetGlobalPointingModel(SetDishGPM):
             )
             return result_code, message
 
-        self._set_gpm_to_dish(argin)
-
+        result_code, message = self._set_gpm_to_dish(argin)
+        if result_code[0] != ResultCode.OK:
+            return (result_code, message)
         self.logger.info(
             "Command ID: %s | Successfully invoked SetGlobalPointingModel command on "
             " %s",
             self.component_manager.command_id,
-            "mid-tmc/leaf-node-dish/ska001",
+            self.component_manager.dishln_gpm_data_created_during_command_execution.keys(),
         )
-        return ResultCode.OK, ""
+        return [ResultCode.OK], [""]
 
     def _set_gpm_to_dish(self, gpm_data: dict) -> Tuple[ResultCode, str]:
         """
@@ -326,6 +362,7 @@ class SetGlobalPointingModel(SetDishGPM):
         return_codes = []
         message_or_unique_ids = []
         dishln_adapter = None
+        self.logger.info("GPM data for command execution:%s", gpm_data)
         try:
             for dish_id, bands in gpm_data.items():
                 if self.component_manager.is_already_assigned(
@@ -386,10 +423,10 @@ class SetGlobalPointingModel(SetDishGPM):
                     ][
                         dishln_band
                     ] = None
-                    self.logger.info(
-                        ">>>>>> DICT :%s",
-                        self.component_manager.dishln_gpm_data_created_during_command_execution,
-                    )
+                self.logger.info(
+                    "GPM data dictionary : %s",
+                    self.component_manager.dishln_gpm_data_created_during_command_execution,
+                )
             if not self.component_manager.number_of_gpm_executed:
                 self.component_manager.aggregate_set_gpm_results()
                 self.component_manager.gpm_version_aggregated_result = (
@@ -411,8 +448,19 @@ class SetGlobalPointingModel(SetDishGPM):
         return return_codes, message_or_unique_ids
 
     def add_data_to_gpm_dictionary_in_case_of_error(
-        self, dish_id, error_message
+        self, dish_id: str, error_message: str
     ):
+        """
+        Update the GPM data with aggregated error for given
+        dish_id
+
+        Args:
+            dish_id (str):
+                Dish leaf node id.
+            error_message (str):
+                Error message.
+
+        """
         if (
             dish_id
             not in self.component_manager.dishln_gpm_data_created_during_command_execution
@@ -422,7 +470,6 @@ class SetGlobalPointingModel(SetDishGPM):
             ] = {}
         self.component_manager.dishln_gpm_data_created_during_command_execution[
             dish_id
-        ] = [
-            ResultCode.FAILED,
-            error_message,
-        ]
+        ] = (
+            "ERROR: " + error_message
+        )

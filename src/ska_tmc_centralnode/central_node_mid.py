@@ -35,37 +35,37 @@ class MidTmcCentralNode(AbstractCentralNode):
     DishIDs = device_property(
         dtype=("str",),
         doc="List of the available dish ids",
-        # default_value=("SKA001",),
+        default_value=tuple(),
     )
 
     DishLeafNodePrefix = device_property(
         dtype="str",
-        # default_value="tango://skancra010:30001/mid-tmc/leaf-node-dish/ska",
+        default_value="",
         doc="Device name prefix for Dish Leaf Node",
     )
 
     DishMasterFQDNs = device_property(
         dtype=("str",),
         doc="List of Dish Master devices",
-        # default_value=("tango://skancra010:30005/ska001/elt/master#dbase=no",),
+        default_value=tuple(),
     )
 
     DishMasterIdentifier = device_property(
         dtype="str",
         doc="Device name tag for Dish Master device",
-        # default_value="elt/master",
+        default_value="",
     )
 
     DishVccUri = device_property(
         dtype="str",
         doc="Default DishVccConfig URI",
-        # default_value="car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata",
+        default_value="",
     )
 
     DishVccFilePath = device_property(
         dtype="str",
         doc="Default DishVccConfig File Path",
-        # default_value="instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json",
+        default_value="",
     )
 
     EnableDishVccInit = device_property(
@@ -92,24 +92,24 @@ class MidTmcCentralNode(AbstractCentralNode):
         doc="the valid k-value range",
     )
 
-    GPMVersion = device_property(dtype="str", default_value="main")
+    GPMVersion = device_property(dtype="str", default_value="0.0.8")
 
     GPMInterface = device_property(
         dtype="str",
         doc="Default GPM interface",
-        default_value="https://schema.skao.int/ska-mid-global-pointing-model/1.0",
+        default_value="",
     )
 
     GPMDataSourcesPrefix = device_property(
         dtype="str",
         doc="Default GPM data source prefix",
-        default_value="car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators",
+        default_value="",
     )
 
     GPMFilePathPrefix = device_property(
         dtype="str",
         doc="Default GPM data file path prefix",
-        default_value="instrument/ska_mid1/global_pointing_model_data",
+        default_value="",
     )
 
     # ----------
@@ -147,6 +147,11 @@ class MidTmcCentralNode(AbstractCentralNode):
     )
 
     DishVccValidationStatus = attribute(
+        dtype=str,
+        access=AttrWriteType.READ,
+    )
+
+    GlobalPointingModelStatus = attribute(
         dtype=str,
         access=AttrWriteType.READ,
     )
@@ -234,6 +239,7 @@ class MidTmcCentralNode(AbstractCentralNode):
                 "isDishVccConfigSet",
                 "DishVccValidationStatus",
                 "DishVccCommandStatus",
+                "GlobalPointingModelStatus",
             ]:
                 self._device.set_change_event(attribute_name, True, False)
                 self._device.set_archive_event(attribute_name, True)
@@ -270,6 +276,10 @@ class MidTmcCentralNode(AbstractCentralNode):
     def read_DishVccCommandStatus(self):
         """Return the DishVccCommandStatus attribute."""
         return self.component_manager.dish_vcc_command_status
+
+    def read_GlobalPointingModelStatus(self):
+        """Return the DishVccCommandStatus attribute."""
+        return json.dumps(self.component_manager.global_pointing_model_status)
 
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
@@ -312,6 +322,9 @@ class MidTmcCentralNode(AbstractCentralNode):
             invoke_load_dish_cfg_command_callback=(
                 self.invoke_load_dish_cfg_command_callback
             ),
+            invoke_set_gpm_command_callback=(
+                self.invoke_set_gpm_command_callback
+            ),
             enable_dish_vcc_init=self.EnableDishVccInit,
             subarray_trl_prefix=self.SubarrayPrefix,
             gpm_version=self.GPMVersion,
@@ -328,14 +341,8 @@ class MidTmcCentralNode(AbstractCentralNode):
             # For now get FQDNs for SKA dishes only
             dish_id = dish[3:]
             cm.input_parameter.dish_leaf_node_dev_names.append(
-                self.DishLeafNodePrefix
-                + dish_id
-                # "tango://skancra010:30001/mid-tmc/leaf-node-dish/ska001#dbase=no"
+                self.DishLeafNodePrefix + dish_id
             )
-            # cm.input_parameter.dish_leaf_node_dev_names.append(
-            #     # self.DishLeafNodePrefix + dish_id
-            #     "tango://skancra010:30011/mid-tmc/leaf-node-dish/ska002#dbase=no"
-            # )
 
         for dish_name in self.DishMasterFQDNs:
             if ("ska" in dish_name) or ("SKA" in dish_name):
@@ -385,6 +392,15 @@ class MidTmcCentralNode(AbstractCentralNode):
             self.component_manager.get_default_dish_vcc_config_params()
         )
         handler(dish_cfg_json)
+
+    def invoke_set_gpm_command_callback(self):
+        """This callback is called when dishVccValidationResult is Unknown
+        and Central Node needs to load dish cfg on csp
+        """
+        handler = self.get_command_object("SetGlobalPointingModel")
+        handler(
+            json.dumps(self.component_manager.get_default_gpm_version_params())
+        )
 
     def is_LoadDishCfg_allowed(self):
         """
