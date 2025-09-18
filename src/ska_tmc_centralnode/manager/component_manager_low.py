@@ -212,12 +212,17 @@ class CNComponentManagerLow(CNComponentManager):
     def reset_event_count(self, command_id: str):
         """Reset count function to reset sdp and csp events count and
         error dictionary"""
-        self.event_dict.clear()
+        self.logger.info("Command_id local: %s", command_id)
+        del self.event_dict[command_id]
         self.error_count = 0
         del self.command_mapping[command_id]
         self.logger.debug(
             "Updated command mapping dictionary is: %s",
             str(self.command_mapping),
+        )
+        self.logger.debug(
+            "Updated event dictionary is: %s",
+            str(self.event_dict),
         )
 
     def get_unique_ids(self) -> list:
@@ -252,14 +257,11 @@ class CNComponentManagerLow(CNComponentManager):
         :type value: tuple
         """
         self.logger.debug(
-            "Command ID: %s | Received longRunningCommandResult event "
-            + "for device: %s, with value: %s",
-            self.command_id,
-            dev_name,
-            str(value),
+            "Command mapping dictionary: %s", str(self.command_mapping)
         )
-        unique_ids = self.get_unique_ids()
+        self.logger.info("Event dictionary: %s", self.event_dict)
 
+        unique_ids = self.get_unique_ids()
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
@@ -267,18 +269,28 @@ class CNComponentManagerLow(CNComponentManager):
             or (unique_id not in unique_ids)
         ):  # ignoring other command events
             return
+
+        command_id = self.get_command_id(unique_id)
+        self.logger.debug(
+            "Command ID: %s | Received longRunningCommandResult event "
+            + "for device: %s, with value: %s",
+            command_id,
+            dev_name,
+            str(value),
+        )
+
         try:
             result_code, message = json.loads(
                 result_code_or_exception_or_task_status
             )
-            if not self.event_dict.get(self.command_id):
-                self.event_dict[self.command_id] = {}
+            if not self.event_dict.get(command_id):
+                self.event_dict[command_id] = {}
             match int(result_code):
                 case ResultCode.OK:
-                    self.event_dict[self.command_id].update(
+                    self.event_dict[command_id].update(
                         {dev_name: ResultCode.OK}
                     )
-                    self.command_mapping[self.command_id].remove(unique_id)
+                    self.command_mapping[command_id].remove(unique_id)
                     self.logger.debug(
                         "Updated command mapping dictionary is: %s",
                         str(self.command_mapping),
@@ -290,11 +302,11 @@ class CNComponentManagerLow(CNComponentManager):
                     | ResultCode.NOT_ALLOWED
                     | ResultCode.ABORTED
                 ):
-                    self.event_dict[self.command_id].update(
+                    self.event_dict[command_id].update(
                         {dev_name: {"error": message}}
                     )
                     self.error_count += 1
-                    self.command_mapping[self.command_id].remove(unique_id)
+                    self.command_mapping[command_id].remove(unique_id)
                     self.logger.debug(
                         "Updated command mapping dictionary is: %s",
                         str(self.command_mapping),
@@ -302,9 +314,9 @@ class CNComponentManagerLow(CNComponentManager):
                     self.logger.exception(
                         "Command ID: %s | Exception occurred with value: %s "
                         + "for %s command_id for device: %s",
-                        self.command_id,
+                        command_id,
                         str(value),
-                        self.command_id,
+                        command_id,
                         dev_name,
                     )
             # If mccs is present in subsystems_to_config list, two LRCR events
@@ -315,22 +327,38 @@ class CNComponentManagerLow(CNComponentManager):
             else:
                 expected_event_dict_len = 1
 
-            if (
-                len(self.event_dict[self.command_id])
-                == expected_event_dict_len
-            ):
-                self.update_long_running_command_result_callback()
+            self.logger.info("Event dict at end: %s", self.event_dict)
+            if len(self.event_dict[command_id]) == expected_event_dict_len:
+                self.logger.info("Moving to updating LRCR callback")
+                self.update_long_running_command_result_callback(command_id)
         except Exception as exception:
             self.logger.exception(
                 "Command ID: %s | "
                 + "Exception occurred while processing"
                 + "long running command result"
                 + "attribute event: %s",
-                self.command_id,
+                command_id,
                 exception,
             )
 
-    def update_long_running_command_result_callback(self) -> None:
+    def get_command_id(self, unique_id: str):
+        """
+        This Method is used to get command
+        it from the command mapping dictionary
+
+        Args:
+            unique_id (int): unique id of the command
+
+        Returns:
+            str: returns the command id with reference to unique id.
+
+        """
+        for k, v in self.command_mapping.items():
+            if unique_id in v:
+                return k
+            return None
+
+    def update_long_running_command_result_callback(self, command_id) -> None:
         """
         This method checks for errors after receiving events from
         all the desired devices. If there are errors it will
@@ -340,26 +368,26 @@ class CNComponentManagerLow(CNComponentManager):
         if self.error_count:
             # modify below message to include value from error_dict
             exception_message = "Exception occurred on the following devices: "
-            for devname, data in self.event_dict[self.command_id].items():
+            for devname, data in self.event_dict[command_id].items():
                 if isinstance(data, dict):
                     error_message = data["error"]
                     exception_message += (
-                        f"{self.command_id}: {devname}: {error_message}"
+                        f"{command_id}: {devname}: {error_message}"
                     )
             self.logger.debug(
                 "Command ID: %s | Updating LRCRCallback with following"
                 + " values: ResultCode: %s, Message: %s",
-                self.command_id,
+                command_id,
                 str(ResultCode.FAILED),
                 exception_message,
             )
             self.long_running_result_callback(
-                self.command_id,
+                command_id,
                 ResultCode.FAILED,
                 exception_msg=exception_message,
             )
             self.observable.notify_observers(command_exception=True)
-        self.reset_event_count(self.command_id)
+        self.reset_event_count(command_id)
 
     def update_device_state(self, device_name, state):
         """

@@ -10,7 +10,7 @@ from ska_ser_skuid.client import SkuidClient
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import AdapterFactory, TimeoutCallback
+from ska_tmc_common import AdapterFactory, TimeKeeper, TimeoutCallback
 from ska_tmc_common.v1.error_propagation_tracker import (
     error_propagation_tracker,
 )
@@ -57,10 +57,35 @@ class AssignResources(AssignReleaseResources):
         self._skuid: SkuidClient = skuid
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
+        self.subarray_id = ""
+        self.timekeeper = TimeKeeper(
+            self.component_manager.command_timeout, logger
+        )
+
+    def get_subarray_obsstate(self):
+        """
+        This method returns obsstate of subarray.
+        """
+        self.logger.info("subarray_id: %s", self.subarray_id)
+        return self.component_manager.get_subarray_obsstate(self.subarray_id)
+
+    def set_command_id(self, command_name: str):
+        """Sets the command id for error propagation.
+        :param command_name: name of the command.
+        :type command_name: str
+        """
+        self.command_id = f"{time.time()}-{command_name}"
+        self.logger.info(
+            "Setting command id as %s for command: %s",
+            self.command_id,
+            command_name,
+        )
 
     @timeout_tracker
     @error_propagation_tracker(
-        "get_subarray_obsstate", [ObsState.RESOURCING, ObsState.IDLE]
+        "get_subarray_obsstate",
+        [ObsState.RESOURCING, ObsState.IDLE],
+        use_command_class_id=True,
     )
     def assign_resources(
         self,
@@ -103,13 +128,10 @@ class AssignResources(AssignReleaseResources):
             self.component_manager.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
+            self.logger.info("AssignResources command completed and returned")
         self.component_manager.command_in_progress = ""
-        if self.component_manager.command_mapping.get(
-            self.component_manager.command_id
-        ):
-            self.component_manager.command_mapping.pop(
-                self.component_manager.command_id
-            )
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
 
     # pylint:disable=signature-differs
     def do_mid(self, argin: str) -> Tuple[ResultCode, str]:
@@ -130,7 +152,7 @@ class AssignResources(AssignReleaseResources):
         try:
             self.logger.debug(
                 "Command ID: %s | Loading the  AssignResource JSON string",
-                self.component_manager.command_id,
+                self.command_id,
             )
             json_argument = json.loads(argin)
         except Exception as e:
@@ -155,7 +177,7 @@ class AssignResources(AssignReleaseResources):
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(
             "Command ID: %s | Receptor IDs are: %s",
-            self.component_manager.command_id,
+            self.command_id,
             receptor_ids,
         )
         for receptor_id in receptor_ids:
@@ -166,7 +188,7 @@ class AssignResources(AssignReleaseResources):
                 )
             self.logger.debug(
                 "Command ID: %s | Dish %s is available for assignment.",
-                self.component_manager.command_id,
+                self.command_id,
                 receptor_ids,
             )
         self.component_manager.log_state(
@@ -175,7 +197,7 @@ class AssignResources(AssignReleaseResources):
 
         self.logger.info(
             "Command ID: %s | Invoking AssignResources command on: %s",
-            self.component_manager.command_id,
+            self.command_id,
             self.tm_subarray_adapter,
         )
 
@@ -193,12 +215,12 @@ class AssignResources(AssignReleaseResources):
 
             if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                 self.component_manager.command_mapping[
-                    self.component_manager.command_id
+                    self.command_id
                 ] = message_or_unique_id
 
         self.logger.info(
             "Command ID: %s | Resources assigned successfully on: %s",
-            self.component_manager.command_id,
+            self.command_id,
             self.tm_subarray_adapter,
         )
 
@@ -297,7 +319,7 @@ class AssignResources(AssignReleaseResources):
             self.logger.debug(
                 "Command ID: %s | Executing AssignResources "
                 + "command with arguments: %s",
-                self.component_manager.command_id,
+                self.command_id,
                 json_argument,
             )
         except Exception as exception:

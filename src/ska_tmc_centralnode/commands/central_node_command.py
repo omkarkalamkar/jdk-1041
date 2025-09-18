@@ -596,32 +596,30 @@ class AssignReleaseResources(CentralNodeCommand):
             # even if command is rejected by subarraynode ,
             # it will be resultcode failed for centralnode
             if return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                if self.component_manager.command_mapping.get(
-                    self.component_manager.command_id
-                ):
+                if self.component_manager.command_mapping.get(self.command_id):
                     self.logger.debug(
-                        "Command ID : %s |"
-                        + "Adding the ID %s to the command mapping"
-                        + "dictionary under command_id: %s",
-                        self.component_manager.command_id,
+                        "Command ID: %s |"
+                        + " Adding the ID %s to the command mapping"
+                        + " dictionary under command_id: %s",
+                        self.command_id,
                         message_or_unique_id,
-                        self.component_manager.command_id,
+                        self.command_id,
                     )
                     self.component_manager.command_mapping[
-                        self.component_manager.command_id
+                        self.command_id
                     ].append(message_or_unique_id)
                 else:
                     self.logger.debug(
                         "Command ID: %s |"
-                        + "Creating a command mapping dictionary for id:"
+                        + " Creating a command mapping dictionary for id: "
                         + "%s, with unique_id: %s",
-                        self.component_manager.command_id,
-                        self.component_manager.command_id,
+                        self.command_id,
+                        self.command_id,
                         message_or_unique_id,
                     )
-                    self.component_manager.command_mapping[
-                        self.component_manager.command_id
-                    ] = [message_or_unique_id]
+                    self.component_manager.command_mapping[self.command_id] = [
+                        message_or_unique_id
+                    ]
         return (ResultCode.OK, "")
 
 

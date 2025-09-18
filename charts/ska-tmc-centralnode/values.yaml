@@ -9,7 +9,7 @@ telescope: SKA-mid
 
 legacy_compatibility: true
 
-subarray_count: 1
+subarray_count: 2
 dishes: ["01"]
 
 labels:
@@ -69,7 +69,7 @@ deviceServers:
     enabled: true
     instances: ["01"]
     command: "CentralNodeDS"
-    subarray_count: 1
+    subarray_count: 2
     SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
@@ -106,7 +106,7 @@ deviceServers:
       MCCSMasterLeafNodeFQDN: "low-tmc/leaf-node-mccs/0"
       MCCSMasterFQDN: "low-mccs/control/control"
       SubarrayPrefix: "low-tmc/subarray/"
-      CommandTimeOutDefault: 30
+      CommandTimeOutDefault: 60
 
 
 nodeSelector: {}

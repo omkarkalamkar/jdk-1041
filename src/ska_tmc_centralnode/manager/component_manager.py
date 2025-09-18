@@ -522,15 +522,16 @@ class CNComponentManager(TmcComponentManager):
         return self.component.devices
 
     # pylint:disable =inconsistent-return-statements
-    def get_subarray_obsstate(self) -> ObsState:
+    def get_subarray_obsstate(self, subarray_id: int) -> ObsState:
         """
         Get Current device obsState
 
         :return: current obsstate
         :rtype: ObsState
         """
+        subarray_devname = f"low-tmc/subarray/0{subarray_id}"
         if self.subarray_devname:
-            return self.get_device(self.subarray_devname).obs_state
+            return self.get_device(subarray_devname).obs_state
 
         # return self.get_device(self.subarray_devname).obs_state
 
@@ -1246,6 +1247,7 @@ class CNComponentManager(TmcComponentManager):
             skuid=SkuidClient(self.skuid_service),
             logger=self.logger,
         )
+        assign_resources_command.subarray_id = subarray_id_or_message
 
         if isinstance(self.input_parameter, InputParameterLow):
             try:

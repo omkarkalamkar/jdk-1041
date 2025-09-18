@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import TimeoutCallback
+from ska_tmc_common import TimeKeeper, TimeoutCallback
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.v1.error_propagation_tracker import (
     error_propagation_tracker,
@@ -53,10 +53,23 @@ class ReleaseResources(AssignReleaseResources):
         self.subarray_adapter = None
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
+        self.subarray_id = ""
+        self.timekeeper = TimeKeeper(
+            self.component_manager.command_timeout, logger
+        )
+
+    def get_subarray_obsstate(self):
+        """
+        This method returns obsstate of subarray.
+        """
+        self.logger.info("subarray_id: %s", self.subarray_id)
+        return self.component_manager.get_subarray_obsstate(self.subarray_id)
 
     @timeout_tracker
     @error_propagation_tracker(
-        "get_subarray_obsstate", [ObsState.RESOURCING, ObsState.EMPTY]
+        "get_subarray_obsstate",
+        [ObsState.RESOURCING, ObsState.EMPTY],
+        use_command_class_id=True,
     )
     def release_resources(
         self,
@@ -94,12 +107,8 @@ class ReleaseResources(AssignReleaseResources):
             self.component_manager.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
-        if self.component_manager.command_mapping.get(
-            self.component_manager.command_id
-        ):
-            self.component_manager.command_mapping.pop(
-                self.component_manager.command_id
-            )
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
         self.component_manager.command_in_progress = ""
         self.component_manager.subsystems_to_config = []
 
@@ -168,7 +177,7 @@ class ReleaseResources(AssignReleaseResources):
                     # it will be resultcode failed for centralnode
                 if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                     self.component_manager.command_mapping[
-                        self.component_manager.command_id
+                        self.command_id
                     ] = message_or_unique_id
             return (ResultCode.OK, "")
         return (
