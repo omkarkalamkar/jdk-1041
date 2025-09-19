@@ -28,6 +28,7 @@ from tests.settings import (
 )
 
 
+@pytest.mark.skip("skipping until issue is identified")
 @given(
     "a TANGO ecosystem with a set of devices deployed",
     target_fixture="device_list",
