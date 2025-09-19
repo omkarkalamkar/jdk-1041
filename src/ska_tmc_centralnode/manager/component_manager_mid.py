@@ -1115,31 +1115,38 @@ class CNComponentManagerMid(CNComponentManager):
         invalid_input = False
         error_message = ""
         break_outer = False
-        source_prefix = "data_sources_prefix"
-        path_prefix = "file_path_prefix"
+        allowed_keys = {
+            "version",
+            "interface",
+            "data_sources_prefix",
+            "file_path_prefix",
+            "receptors",
+        }
+        allowed_bands = {
+            "Band_1",
+            "Band_2",
+            "Band_3",
+            "Band_4",
+            "Band_5a",
+            "Band_5b",
+        }
+        must_have_keys = [
+            "interface",
+            "data_sources_prefix",
+            "file_path_prefix",
+            "version",
+        ]
         try:
-            allowed_keys = {
-                "version",
-                "interface",
-                "data_sources_prefix",
-                "file_path_prefix",
-                "receptors",
-            }
-            allowed_bands = {
-                "Band_1",
-                "Band_2",
-                "Band_3",
-                "Band_4",
-                "Band_5a",
-                "Band_5b",
-            }
-
             if "receptors" not in argin.keys():
-                if source_prefix not in argin.keys():
-                    return True, f"{source_prefix} not found in gpm input"
-
-                if path_prefix not in argin.keys():
-                    return True, f"{path_prefix} not found in gpm input"
+                for key in must_have_keys:
+                    if key not in argin.keys():
+                        return True, f"{key} key is missing from the input"
+            else:
+                if must_have_keys[-1] not in argin.keys():
+                    return (
+                        True,
+                        f"{must_have_keys[-1]} key is missing from the input",
+                    )
 
             for key in argin.keys():
                 if key not in allowed_keys:
@@ -1160,7 +1167,9 @@ class CNComponentManagerMid(CNComponentManager):
                         if break_outer:
                             break
         except Exception as e:
-            print("Exception while processing GPM argin: %s", e)
+            self.logger.exception(
+                "Exception while processing GPM argin: %s", e
+            )
             invalid_input = True
             error_message = e
 
