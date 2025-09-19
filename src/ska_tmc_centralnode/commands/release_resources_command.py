@@ -54,6 +54,7 @@ class ReleaseResources(AssignReleaseResources):
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
         self.subarray_id = ""
+        self.subarray_devname = ""
         self.timekeeper = TimeKeeper(
             self.component_manager.command_timeout, logger
         )
@@ -62,8 +63,8 @@ class ReleaseResources(AssignReleaseResources):
         """
         This method returns obsstate of subarray.
         """
-        self.logger.info("subarray_id: %s", self.subarray_id)
-        return self.component_manager.get_subarray_obsstate(self.subarray_id)
+        self.logger.info("subarray_devname: %s", self.subarray_devname)
+        return self.component_manager.get_subarray_obsstate(self.subarray_devname)
 
     @timeout_tracker
     @error_propagation_tracker(
@@ -104,7 +105,7 @@ class ReleaseResources(AssignReleaseResources):
                 status=TaskStatus.COMPLETED,
                 exception=exception,
             )
-            self.component_manager.subarray_devname = ""
+            self.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         if self.component_manager.command_mapping.get(self.command_id):
@@ -154,7 +155,7 @@ class ReleaseResources(AssignReleaseResources):
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.subarray_adapter = adapter
-                self.component_manager.subarray_devname = adapter.dev_name
+                self.subarray_devname = adapter.dev_name
 
         if self.subarray_adapter is None:
             return (
@@ -236,7 +237,7 @@ class ReleaseResources(AssignReleaseResources):
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.subarray_adapter = adapter
-                self.component_manager.subarray_devname = adapter.dev_name
+                self.subarray_devname = adapter.dev_name
 
         if self.subarray_adapter is None:
             return (

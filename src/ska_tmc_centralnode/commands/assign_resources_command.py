@@ -58,6 +58,7 @@ class AssignResources(AssignReleaseResources):
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
         self.subarray_id = ""
+        self.subarray_devname = ""
         self.timekeeper = TimeKeeper(
             self.component_manager.command_timeout, logger
         )
@@ -66,8 +67,8 @@ class AssignResources(AssignReleaseResources):
         """
         This method returns obsstate of subarray.
         """
-        self.logger.info("subarray_id: %s", self.subarray_id)
-        return self.component_manager.get_subarray_obsstate(self.subarray_id)
+        self.logger.info("subarray_devname: %s", self.subarray_devname)
+        return self.component_manager.get_subarray_obsstate(self.subarray_devname)
 
     def set_command_id(self, command_name: str):
         """Sets the command id for error propagation.
@@ -125,7 +126,7 @@ class AssignResources(AssignReleaseResources):
             self.task_callback(
                 result=result, status=TaskStatus.COMPLETED, exception=exception
             )
-            self.component_manager.subarray_devname = ""
+            self.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
             self.logger.info("AssignResources command completed and returned")
@@ -482,7 +483,7 @@ class AssignResources(AssignReleaseResources):
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.tm_subarray_adapter = adapter
-                self.component_manager.subarray_devname = adapter.dev_name
+                self.subarray_devname = adapter.dev_name
 
         if self.tm_subarray_adapter is None:
             return (

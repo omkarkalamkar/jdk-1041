@@ -182,7 +182,7 @@ class CNComponentManager(TmcComponentManager):
         self.skuid_service = skuid_service
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
-        self.subarray_devname: str = ""
+        # self.subarray_devname: str = ""
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()
@@ -522,15 +522,14 @@ class CNComponentManager(TmcComponentManager):
         return self.component.devices
 
     # pylint:disable =inconsistent-return-statements
-    def get_subarray_obsstate(self, subarray_id: int) -> ObsState:
+    def get_subarray_obsstate(self, subarray_devname) -> ObsState:
         """
         Get Current device obsState
 
         :return: current obsstate
         :rtype: ObsState
         """
-        subarray_devname = f"low-tmc/subarray/0{subarray_id}"
-        if self.subarray_devname:
+        if subarray_devname:
             return self.get_device(subarray_devname).obs_state
 
         # return self.get_device(self.subarray_devname).obs_state
