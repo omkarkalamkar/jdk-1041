@@ -222,6 +222,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_data_sources_prefix = gpm_data_sources_prefix
         self.gpm_file_path_prefix = gpm_file_path_prefix
         self.dish_vcc_event = threading.Event()
+        self.is_gpm_init = True
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -1004,12 +1005,12 @@ class CNComponentManagerMid(CNComponentManager):
                                 DishConfigStatus.COMPLETED
                             )
                         self.update_dish_vcc_flag(True)
-                        self.logger.info(
-                            "Invoking Initialize phase SETGPM ......"
-                        )
-                        while self.command_in_progress == "LoadDishCfg":
-                            self.dish_vcc_event.wait(0.1)
-                        self.invoke_set_gpm_command_callback()
+                        # self.logger.info(
+                        #     "Invoking Initialize phase SETGPM ......"
+                        # )
+                        # while self.command_in_progress == "LoadDishCfg":
+                        #     self.dish_vcc_event.wait(0.1)
+                        # self.invoke_set_gpm_command_callback()
                     else:
                         self.dish_vcc_command_status = DishConfigStatus.FAILED
                         self.update_dish_vcc_flag(False)
@@ -1225,6 +1226,13 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_command_status = DishConfigStatus.COMPLETED
+        self._check_init_and_invoke_gpm()
+
+    def _check_init_and_invoke_gpm(self):
+        """If TMC is in initalization phase then invoke gpm"""
+        if self.is_gpm_init:
+            self.invoke_set_gpm_command_callback()
+            self.is_gpm_init = False
 
     def handle_gpm_version_event(
         self, dev_name: str, gpmVersion: dict
@@ -1269,7 +1277,7 @@ class CNComponentManagerMid(CNComponentManager):
                     if (
                         self._dish_vcc_command_status
                         == DishConfigStatus.COMPLETED
-                    ):
+                    ) and not self.is_gpm_init:
                         self.logger.info(
                             "Restart phase: Invoking Set GPM command on:  %s",
                             self.gpm_unknown_dishes,

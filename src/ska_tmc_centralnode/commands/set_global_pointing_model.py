@@ -237,8 +237,8 @@ class SetGlobalPointingModel(SetDishGPM):
                 if not file_names:
                     self.logger.info("GPM file not found for dish %s", dish_id)
                     error_message = (
-                        "No GPM files were found for any"
-                        + "of the bands in the provided paths"
+                        "No GPM files were found for any of"
+                        + "the bands in the provided paths"
                     )
                     self.add_data_to_gpm_dictionary_in_case_of_error(
                         dish_id, error_message
