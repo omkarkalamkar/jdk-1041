@@ -46,9 +46,11 @@ def central_node():
     """Central node device"""
     database = Database()
     instance_list = database.get_device_exported_for_class("LowTmcCentralNode")
+    assert instance_list.value_string, "No LowTmcCentralNode device found"
     for instance in instance_list.value_string:
         return DeviceProxy(instance)
     instance_list = database.get_device_exported_for_class("MidTmcCentralNode")
+    assert instance_list.value_string, "No MidTmcCentralNode device found"
     for instance in instance_list.value_string:
         dev_factory = DevFactory()
         assert wait_and_validate_device_attribute_value(
