@@ -397,6 +397,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         """This callback is called when dishVccValidationResult is Unknown
         and Central Node needs to load dish cfg on csp
         """
+
         handler = self.get_command_object("SetGlobalPointingModel")
         handler(
             json.dumps(self.component_manager.get_default_gpm_version_params())
@@ -478,9 +479,14 @@ class MidTmcCentralNode(AbstractCentralNode):
             }
             Data formed for Dish Leaf node ApplyPointingModel command:
             {
-                "interface": "https://schema.skao.int/ska-mid-global-pointing-model/1.0",
-                "tm_data_sources": ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?v1.0#tmdata"],
-                "tm_data_filepath": "instrument/ska_mid1/global_pointing_model_data/gpm-ska001-Band_1.json"
+                "interface": "https://schema.skao.int/ska-mid-global
+                -pointing-model/1.0",
+                "tm_data_sources":
+                ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simu
+                lators?v1.0#tmdata"],
+                "tm_data_filepath":
+                "instrument/ska_mid1/global_pointing_model_data/gpm-
+                ska001-Band_1.json"
             }
         """
         handler = self.get_command_object("SetGlobalPointingModel")

@@ -194,7 +194,9 @@ class CNComponentManagerMid(CNComponentManager):
             self, self.logger
         )
         self.dev_names_for_load_dish_cfg = []
-        self.dishln_gpm_data_created_during_command_execution = {}
+        self.dishln_gpm_cmd_exe_data = (
+            {}
+        )  # dishln_gpm_data_created_during_command_execution
         self.load_dish_cfg_aggregated_result = None
         self.gpm_version_aggregated_result = ResultCode.UNKNOWN
         self.gpm_aggregated_result = True
@@ -219,6 +221,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_interface = gpm_interface
         self.gpm_data_sources_prefix = gpm_data_sources_prefix
         self.gpm_file_path_prefix = gpm_file_path_prefix
+        self.dish_vcc_event = threading.Event()
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -858,6 +861,7 @@ class CNComponentManagerMid(CNComponentManager):
         """
         self.logger.debug("Updating dish vcc config set flag to %s", value)
         self.is_dish_vcc_config_set = value
+        self.dish_vcc_event.set()
         self.update_dishvccconfig_callback(self.is_dish_vcc_config_set)
         self._aggregate_telescope_state()
 
@@ -1000,6 +1004,12 @@ class CNComponentManagerMid(CNComponentManager):
                                 DishConfigStatus.COMPLETED
                             )
                         self.update_dish_vcc_flag(True)
+                        self.logger.info(
+                            "Invoking Initialize phase SETGPM ......"
+                        )
+                        while self.command_in_progress == "LoadDishCfg":
+                            self.dish_vcc_event.wait(0.1)
+                        self.invoke_set_gpm_command_callback()
                     else:
                         self.dish_vcc_command_status = DishConfigStatus.FAILED
                         self.update_dish_vcc_flag(False)
@@ -1071,16 +1081,17 @@ class CNComponentManagerMid(CNComponentManager):
             a result code and message
 
         """
+
         set_gpm_version_command = SetGlobalPointingModel(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
         try:
             json.loads(argin)
-            self.logger.debug("JSON argin is in correct format.")
+            self.logger.debug("GPM JSON argin is in correct format.")
         except json.JSONDecodeError as e:
             return set_gpm_version_command.reject_command(
-                f"The JSON string is malformed. Error: {str(e)}",
+                f"The GPM JSON string is malformed. Error: {str(e)}",
             )
 
         task_status, response = self.submit_task(
@@ -1215,7 +1226,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_command_status = DishConfigStatus.COMPLETED
-        self.gpm_unknown_dishes = []
 
     def handle_gpm_version_event(
         self, dev_name: str, gpmVersion: dict
@@ -1247,22 +1257,37 @@ class CNComponentManagerMid(CNComponentManager):
             if self.check_if_csp_all_dish_ready():
                 gpm_aggregator = DishAttrValueAggregator(self, self.logger)
                 self.gpm_unknown_dishes = gpm_aggregator.aggregate_gpm()
+                self.logger.debug(
+                    "Command in progress %s and Dish-Vcc status %s",
+                    self.command_in_progress,
+                    self.is_dish_vcc_config_set,
+                )
                 if (
                     self.gpm_unknown_dishes
-                    and self.command_in_progress != "SetGlobalPointingModel"
+                    and self.command_in_progress
+                    not in ["SetGlobalPointingModel"]
                 ):
-                    self.logger.info(
-                        "Invoking SetGlobalPointingModel on Initialization/Restart phase on %s dishes",
-                        self.gpm_unknown_dishes,
-                    )
-                    self.invoke_set_gpm_command_callback()
+                    if (
+                        self._dish_vcc_command_status
+                        == DishConfigStatus.COMPLETED
+                    ):
+                        self.logger.info(
+                            "Restart phase: Invoking Set GPM command on:  %s",
+                            self.gpm_unknown_dishes,
+                        )
+                        self.invoke_set_gpm_command_callback()
 
     def reset_gpm_data(self) -> None:
         """Reset GPM data"""
+
         self.logger.info("Resetting SetGlobalPointingModel data")
         self.gpm_version_aggregated_result = ResultCode.UNKNOWN
         self.number_of_gpm_executed = 0
-        self.dishln_gpm_data_created_during_command_execution = {}
+        self.dishln_gpm_cmd_exe_data = {}
+        self.gpm_unknown_dishes = []
+        self.command_in_progress = ""
+        if self.command_mapping.get(self.command_id):
+            self.command_mapping.pop(self.command_id)
 
     def update_set_gpm_results(
         self, dev_name: str, value: tuple, is_async_result: bool = False
@@ -1282,7 +1307,8 @@ class CNComponentManagerMid(CNComponentManager):
         """
 
         self.logger.info(
-            "GPM longRunningCommandResult event for device: %s, with value: %s",
+            "GPM longRunningCommandResult event for device: "
+            "%s, with value: %s",
             dev_name,
             str(value),
         )
@@ -1293,25 +1319,16 @@ class CNComponentManagerMid(CNComponentManager):
             if unique_id.endswith("ApplyPointingModel"):
                 result_code_or_exception = json.loads(resultcode_message)
             if result_code_or_exception:
-                if (
-                    dishln_id
-                    in self.dishln_gpm_data_created_during_command_execution
-                ):
-                    dishln_gpm_data = (
-                        self.dishln_gpm_data_created_during_command_execution[
-                            dishln_id
-                        ]
-                    )
+                if dishln_id in self.dishln_gpm_cmd_exe_data:
+                    dishln_gpm_data = self.dishln_gpm_cmd_exe_data[dishln_id]
                     for band_name, band_value in dishln_gpm_data.items():
                         if band_value is None:
-                            self.dishln_gpm_data_created_during_command_execution[
-                                dishln_id
-                            ][
+                            self.dishln_gpm_cmd_exe_data[dishln_id][
                                 band_name
                             ] = result_code_or_exception
                 self.logger.info(
                     "Dev names for set gpm  %s & number of gpm executed %s",
-                    str(self.dishln_gpm_data_created_during_command_execution),
+                    str(self.dishln_gpm_cmd_exe_data),
                     self.number_of_gpm_executed,
                 )
 
@@ -1322,7 +1339,8 @@ class CNComponentManagerMid(CNComponentManager):
                 and self.command_in_progress == "SetGlobalPointingModel"
             ):
                 self.logger.info(
-                    "All Events received for set GPM version, Aggregating GPM results"
+                    "All Events received for set GPM version,"
+                    " Aggregating GPM results"
                 )
                 self.aggregate_set_gpm_results()
                 self.gpm_version_aggregated_result = ResultCode.OK
@@ -1337,7 +1355,7 @@ class CNComponentManagerMid(CNComponentManager):
         for (
             dishln_id,
             bands,
-        ) in self.dishln_gpm_data_created_during_command_execution.items():
+        ) in self.dishln_gpm_cmd_exe_data.items():
             if isinstance(bands, str):
                 self.gpm_aggregated_result = False
                 break_outer = True

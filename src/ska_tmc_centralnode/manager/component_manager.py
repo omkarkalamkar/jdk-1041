@@ -8,6 +8,7 @@ import json
 import re
 import threading
 import time
+import traceback
 from collections import defaultdict
 from logging import Logger
 from multiprocessing import Event
@@ -418,10 +419,10 @@ class CNComponentManager(TmcComponentManager):
                 # safely ignore it.
                 pass
             except Exception as exception:
-                import traceback
-
                 self.logger.error(
-                    ">>>>>>> %s %s", exception, traceback.print_exc()
+                    "Exception: %s Traceback: %s",
+                    exception,
+                    traceback.print_exc(),
                 )
 
     def check_event_error(self, event: tango.EventData, callback: str):
@@ -727,8 +728,8 @@ class CNComponentManager(TmcComponentManager):
         else:
             devInfo = DeviceInfo(device_name, False)
         self.component.update_device(devInfo)
-        # if self.liveliness_probe_object:
-        #     self.liveliness_probe_object.add_device(device_name)
+        if self.liveliness_probe_object:
+            self.liveliness_probe_object.add_device(device_name)
 
     def update_input_parameter(self) -> None:
         """updates the input parameter for component manager instance"""
@@ -1027,8 +1028,7 @@ class CNComponentManager(TmcComponentManager):
         :type subarray_dev_name: str
         """
         if self._liveliness_probe is not None:
-            print()
-            # self._liveliness_probe.add_device(subarray_dev_info.dev_name)
+            self._liveliness_probe.add_device(subarray_dev_info.dev_name)
         else:
             # If the monitoring loop is not active
             # I must assume that the subarray is reporting the correct value

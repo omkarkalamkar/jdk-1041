@@ -59,12 +59,12 @@ server:
       classes:
       - name: "HelperDishLNDevice"
         devices:
-        - name: "mid-tmc/leaf-node-dish/ska036"
+        - name: "mid-tmc/leaf-node-dish/ska002"
     - name: "09"
       classes:
       - name: "HelperDishLNDevice"
         devices:
-        - name: "mid-tmc/leaf-node-dish/ska063"
+        - name: "mid-tmc/leaf-node-dish/ska003"
     - name: "10"
       classes:
       - name: "HelperDishLNDevice"

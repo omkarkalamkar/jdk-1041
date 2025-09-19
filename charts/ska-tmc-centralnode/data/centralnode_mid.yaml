@@ -6,6 +6,7 @@ instances: ["01"]
 {{- $KValueValidRangeUpperLimit := .Values.deviceServers.centralnode.mid.KValueValidRange.max | int }}
 {{- $KValueValidRangeLowerLimit := .Values.deviceServers.centralnode.mid.KValueValidRange.min | int }}
 
+
 {{- if ge $KValueValidRangeUpperLimit $KValueValidRangeLowerLimit }}
 entrypoints:
   - name: "ska_tmc_centralnode.central_node_mid.MidTmcCentralNode"
@@ -106,6 +107,20 @@ server:
         - name: "EventSubscriptionCheckPeriod"
           values:
             - "{{.Values.deviceServers.centralnode.EventSubscriptionCheckPeriod}}"
+        - name: "GPMVersion"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.Global_pointing_model.version}}"
+        - name: "GPMInterface"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.Global_pointing_model.interface}}"
+        - name: "GPMFilePathPrefix"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.Global_pointing_model.file_path_prefix}}"
+        - name: "GPMDataSourcesPrefix"
+          values:
+          - "{{.Values.deviceServers.centralnode.mid.Global_pointing_model.data_sources_prefix}}"
+
+        
 {{- else }}
 {{- fail "KValueValidRangeUpperLimit should be greater than KValueValidRangeLowerLimit" }}
 {{- end }}
