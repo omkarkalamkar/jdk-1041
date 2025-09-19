@@ -1087,12 +1087,17 @@ class CNComponentManagerMid(CNComponentManager):
         )
 
         try:
-            json.loads(argin)
+            gpm_input = json.loads(argin)
             self.logger.debug("GPM JSON argin is in correct format.")
         except json.JSONDecodeError as e:
             return set_gpm_version_command.reject_command(
                 f"The GPM JSON string is malformed. Error: {str(e)}",
             )
+
+        is_error, message = self.validate_gpm_argin(gpm_input)
+
+        if is_error:
+            set_gpm_version_command.reject_command(message)
 
         task_status, response = self.submit_task(
             set_gpm_version_command.apply_gpm,
@@ -1100,6 +1105,66 @@ class CNComponentManagerMid(CNComponentManager):
             task_callback=task_callback,
         )
         return task_status, response
+
+    def validate_gpm_argin(self, argin: dict) -> Tuple[bool, str]:
+        """Validate the data in the GPM input
+        Args:
+            argin (str): Dish Id's with the specified bands and version.
+
+        """
+        invalid_input = False
+        error_message = ""
+        break_outer = False
+        source_prefix = "data_sources_prefix"
+        path_prefix = "file_path_prefix"
+        try:
+            allowed_keys = {
+                "version",
+                "interface",
+                "data_sources_prefix",
+                "file_path_prefix",
+                "receptors",
+            }
+            allowed_bands = {
+                "Band_1",
+                "Band_2",
+                "Band_3",
+                "Band_4",
+                "Band_5a",
+                "Band_5b",
+            }
+
+            if "receptors" not in argin.keys():
+                if source_prefix not in argin.keys():
+                    return True, f"{source_prefix} not found in gpm input"
+
+                if path_prefix not in argin.keys():
+                    return True, f"{path_prefix} not found in gpm input"
+
+            for key in argin.keys():
+                if key not in allowed_keys:
+                    invalid_input = True
+                    error_message = f"Invalid key {key} found"
+                    break
+
+            if not invalid_input:
+                if "receptors" in argin.keys():
+                    receptors = argin["receptors"]
+                    for _, bands in receptors.items():
+                        for band in bands:
+                            if band not in allowed_bands:
+                                invalid_input = True
+                                error_message = f"Invalid band {band} found"
+                                break_outer = True
+                                break
+                        if break_outer:
+                            break
+        except Exception as e:
+            print("Exception while processing GPM argin: %s", e)
+            invalid_input = True
+            error_message = e
+
+        return invalid_input, error_message
 
     def update_load_dish_cfg_results_async(
         self, dev_name: str, value: tuple
