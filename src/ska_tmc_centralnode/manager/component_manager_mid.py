@@ -1230,7 +1230,7 @@ class CNComponentManagerMid(CNComponentManager):
 
     def _check_init_and_invoke_gpm(self):
         """If TMC is in initalization phase then invoke gpm"""
-        if self.is_gpm_init:
+        if self.is_gpm_init and self.invoke_set_gpm_command_callback:
             self.invoke_set_gpm_command_callback()
             self.is_gpm_init = False
 
