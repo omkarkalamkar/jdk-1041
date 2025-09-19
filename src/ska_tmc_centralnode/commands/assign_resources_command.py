@@ -68,7 +68,9 @@ class AssignResources(AssignReleaseResources):
         This method returns obsstate of subarray.
         """
         self.logger.info("subarray_devname: %s", self.subarray_devname)
-        return self.component_manager.get_subarray_obsstate(self.subarray_devname)
+        return self.component_manager.get_subarray_obsstate(
+            self.subarray_devname
+        )
 
     def set_command_id(self, command_name: str):
         """Sets the command id for error propagation.

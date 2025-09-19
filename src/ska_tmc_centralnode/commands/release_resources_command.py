@@ -64,7 +64,9 @@ class ReleaseResources(AssignReleaseResources):
         This method returns obsstate of subarray.
         """
         self.logger.info("subarray_devname: %s", self.subarray_devname)
-        return self.component_manager.get_subarray_obsstate(self.subarray_devname)
+        return self.component_manager.get_subarray_obsstate(
+            self.subarray_devname
+        )
 
     @timeout_tracker
     @error_propagation_tracker(
