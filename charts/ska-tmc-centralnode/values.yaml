@@ -98,7 +98,7 @@ deviceServers:
       CommandTimeOutDefault: 30
       SubarrayPrefix: "mid-tmc/subarray/"
       Global_pointing_model:
-        version: "hm-745"
+        version: "1.0.0"
         interface: "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
         data_sources_prefix: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
         file_path_prefix: "instrument/ska_mid1/global_pointing_model_data"

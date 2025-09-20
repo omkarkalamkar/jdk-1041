@@ -210,6 +210,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "isDishVccConfigSet",
         "DishVccValidationStatus",
         "DishVccCommandStatus",
+        "GlobalPointingModelStatus",
         timeout=50.0,
     )
 

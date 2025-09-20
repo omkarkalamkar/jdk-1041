@@ -1097,7 +1097,7 @@ class CNComponentManagerMid(CNComponentManager):
         is_error, message = self.validate_gpm_argin(gpm_input)
 
         if is_error:
-            set_gpm_version_command.reject_command(message)
+            return set_gpm_version_command.reject_command(message)
 
         task_status, response = self.submit_task(
             set_gpm_version_command.apply_gpm,
@@ -1117,9 +1117,6 @@ class CNComponentManagerMid(CNComponentManager):
         break_outer = False
         allowed_keys = {
             "version",
-            "interface",
-            "data_sources_prefix",
-            "file_path_prefix",
             "receptors",
         }
         allowed_bands = {
@@ -1130,23 +1127,10 @@ class CNComponentManagerMid(CNComponentManager):
             "Band_5a",
             "Band_5b",
         }
-        must_have_keys = [
-            "interface",
-            "data_sources_prefix",
-            "file_path_prefix",
-            "version",
-        ]
         try:
-            if "receptors" not in argin.keys():
-                for key in must_have_keys:
-                    if key not in argin.keys():
-                        return True, f"{key} key is missing from the input"
-            else:
-                if must_have_keys[-1] not in argin.keys():
-                    return (
-                        True,
-                        f"{must_have_keys[-1]} key is missing from the input",
-                    )
+            for key in allowed_keys:
+                if key not in argin.keys():
+                    return True, f"{key} key is missing from the input"
 
             for key in argin.keys():
                 if key not in allowed_keys:
@@ -1161,7 +1145,7 @@ class CNComponentManagerMid(CNComponentManager):
                         for band in bands:
                             if band not in allowed_bands:
                                 invalid_input = True
-                                error_message = f"Invalid band {band} found"
+                                error_message = f"Invalid band {band} found."
                                 break_outer = True
                                 break
                         if break_outer:
@@ -1171,7 +1155,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "Exception while processing GPM argin: %s", e
             )
             invalid_input = True
-            error_message = e
+            error_message = "Input Error: " + str(e)
 
         return invalid_input, error_message
 
@@ -1323,7 +1307,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         self.logger.info(
-            "GPM versions received %s from %s", dev_name, gpmVersion
+            "GPM versions received %s from %s", gpmVersion, dev_name
         )
         with self.dishln_gpm_lock:
             dish_id = dev_name.split("/")[-1]
@@ -1332,15 +1316,11 @@ class CNComponentManagerMid(CNComponentManager):
                 gpm_aggregator = DishAttrValueAggregator(self, self.logger)
                 self.gpm_unknown_dishes = gpm_aggregator.aggregate_gpm()
                 self.logger.debug(
-                    "Command in progress %s and Dish-Vcc status %s",
+                    "Command in progress %s and Dish-Vcc command status %s",
                     self.command_in_progress,
-                    self.is_dish_vcc_config_set,
+                    self._dish_vcc_command_status,
                 )
-                if (
-                    self.gpm_unknown_dishes
-                    and self.command_in_progress
-                    not in ["SetGlobalPointingModel"]
-                ):
+                if self.gpm_unknown_dishes and not self.command_in_progress:
                     if (
                         self._dish_vcc_command_status
                         == DishConfigStatus.COMPLETED
@@ -1363,9 +1343,7 @@ class CNComponentManagerMid(CNComponentManager):
         if self.command_mapping.get(self.command_id):
             self.command_mapping.pop(self.command_id)
 
-    def update_set_gpm_results(
-        self, dev_name: str, value: tuple, is_async_result: bool = False
-    ) -> None:
+    def update_set_gpm_results(self, dev_name: str, value: tuple) -> None:
         """
         This method is used to update the result returned
         from Dish leaf nodes as part of SetGlobalPointingModel
@@ -1400,14 +1378,15 @@ class CNComponentManagerMid(CNComponentManager):
                             self.dishln_gpm_cmd_exe_data[dishln_id][
                                 band_name
                             ] = result_code_or_exception
+                if self.number_of_gpm_executed > 0:
+                    self.number_of_gpm_executed -= 1
                 self.logger.info(
-                    "Dev names for set gpm  %s & number of gpm executed %s",
+                    "Dev names for set gpm  %s &"
+                    " number of gpm executed remaining %s",
                     str(self.dishln_gpm_cmd_exe_data),
                     self.number_of_gpm_executed,
                 )
 
-            if self.number_of_gpm_executed > 0:
-                self.number_of_gpm_executed -= 1
             if (
                 not self.number_of_gpm_executed
                 and self.command_in_progress == "SetGlobalPointingModel"

@@ -35,8 +35,6 @@ class SetGlobalPointingModel(SetDishGPM):
         )
         self._timeout_subarrays = timeout_subarrays
         self._step_sleep = step_sleep
-        # self.gpm_files = None
-        self.gpm_cfg = self.component_manager.event_manager_object
         self.dish_gpm_params: str = ""
 
     def apply_gpm(
@@ -81,11 +79,12 @@ class SetGlobalPointingModel(SetDishGPM):
 
         ret_code, message = self.do(gpm_data)
         if ret_code[0] not in [ResultCode.OK, ResultCode.QUEUED]:
+            message = ", ".join(message)
             self.process_update_task_for_command_failure(
-                task_callback, message[0]
+                task_callback, message
             )
             self.component_manager.reset_gpm_data()
-            self.logger.debug("Error message: %s", message[0])
+            self.logger.debug("Error messages: %s", message)
         else:
             self.logger.debug(
                 "Command ID: %s | Message: %s ",
@@ -128,9 +127,7 @@ class SetGlobalPointingModel(SetDishGPM):
             self.logger.debug("Error message: %s", error_message)
         else:
             result = list(result)
-            result[1] = json.dumps(
-                self.component_manager.dishln_gpm_cmd_exe_data
-            )
+            result[1] = self.component_manager.dishln_gpm_cmd_exe_data
             result = tuple(result)
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.logger.info(
@@ -157,21 +154,23 @@ class SetGlobalPointingModel(SetDishGPM):
             error_message = error_message + str(
                 self.component_manager.dishln_gpm_cmd_exe_data
             )
-            for (
-                dish_id,
-                result,
-            ) in self.component_manager.dishln_gpm_cmd_exe_data.items():
-                if isinstance(result, str):
-                    self.component_manager.global_pointing_model_status[
-                        dish_id
-                    ] = result
+
+            if "Dish is assigned to subarray" not in error_message:
+                for (
+                    dish_id,
+                    result,
+                ) in self.component_manager.dishln_gpm_cmd_exe_data.items():
+                    if isinstance(result, str):
+                        self.component_manager.global_pointing_model_status[
+                            dish_id
+                        ] = result
         task_callback(
             status=TaskStatus.COMPLETED,
             result=(ResultCode.FAILED, error_message),
             exception=error_message,
         )
 
-    def form_gpm_path_from_receptors(self, argin: dict) -> None:
+    def form_gpm_path_from_receptors(self, argin: dict) -> dict:
         """This method forms the inputs for ApplyPointingModel command
 
         Args:
@@ -236,8 +235,10 @@ class SetGlobalPointingModel(SetDishGPM):
                 ]
                 if not file_names:
                     self.logger.info("GPM file not found for dish %s", dish_id)
-                    error_message = "No GPM files were found for any"
-                    "of the bands in the provided paths"
+                    error_message = (
+                        "No GPM files were found for any"
+                        + "of the bands in the provided paths"
+                    )
                     self.add_data_to_gpm_dictionary_in_case_of_error(
                         dish_id, error_message
                     )
@@ -256,7 +257,7 @@ class SetGlobalPointingModel(SetDishGPM):
                         }
                     )
         except Exception as e:
-            self.logger.exception("Exception %s occurred", e)
+            self.logger.exception("Exception %s occurred %s", e)
         return gpm_data
 
     def get_gpm_files(self, initial_params: dict) -> list:
@@ -356,25 +357,13 @@ class SetGlobalPointingModel(SetDishGPM):
             ResultCode and message
 
         """
+
         return_codes = [ResultCode.UNKNOWN]
-        message_or_unique_ids = [""]
+        message_or_unique_ids = []
         dishln_adapter = None
         self.logger.info("GPM data for command execution:%s", gpm_data)
         try:
             for dish_id, bands in gpm_data.items():
-                if self.component_manager.is_already_assigned(
-                    dish_id.upper()
-                ) or self.component_manager.is_already_assigned(
-                    dish_id.lower()
-                ):
-                    error_message = "Dish is assigned to subarray"
-                    self.add_data_to_gpm_dictionary_in_case_of_error(
-                        dish_id, error_message
-                    )
-                    return_codes[0] = ResultCode.FAILED
-                    message_or_unique_ids = ["Error: "]
-                    self.logger.error(error_message)
-                    continue
                 dishln_adapter = [
                     adapter
                     for adapter in self.dish_adapters
@@ -394,7 +383,20 @@ class SetGlobalPointingModel(SetDishGPM):
                     )
                     self.logger.error(error_message)
                     return_codes[0] = ResultCode.FAILED
-                    message_or_unique_ids = ["Error: "]
+                    message_or_unique_ids.append(f"Error: {error_message}")
+                    continue
+                if self.component_manager.is_already_assigned(
+                    dish_id.upper()
+                ) or self.component_manager.is_already_assigned(
+                    dish_id.lower()
+                ):
+                    error_message = "Dish is assigned to subarray"
+                    self.add_data_to_gpm_dictionary_in_case_of_error(
+                        dish_id, error_message
+                    )
+                    return_codes[0] = ResultCode.FAILED
+                    message_or_unique_ids.append(f"Error: {error_message}")
+                    self.logger.error(error_message)
                     continue
                 for band in bands:
                     return_codes, message_or_unique_ids = self.send_command(
@@ -425,6 +427,7 @@ class SetGlobalPointingModel(SetDishGPM):
                         dishln_band
                     ] = None
                 self.logger.info(
+                    "Finished executing APM on DLN."
                     "GPM data dictionary : %s",
                     self.component_manager.dishln_gpm_cmd_exe_data,
                 )
@@ -446,6 +449,10 @@ class SetGlobalPointingModel(SetDishGPM):
                 "Error in Calling ApplyPointingModel"
                 f" command on dish adapter {e}"
             ]
+
+        if self.component_manager.number_of_gpm_executed:
+            return [ResultCode.OK], [""]
+
         return return_codes, message_or_unique_ids
 
     def add_data_to_gpm_dictionary_in_case_of_error(
