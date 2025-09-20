@@ -6,7 +6,6 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
-
 import json
 import threading
 import time
@@ -35,6 +34,7 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
@@ -222,6 +222,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_data_sources_prefix = gpm_data_sources_prefix
         self.gpm_file_path_prefix = gpm_file_path_prefix
         self.dish_vcc_event = threading.Event()
+        self.is_gpm_init = True
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -1004,12 +1005,12 @@ class CNComponentManagerMid(CNComponentManager):
                                 DishConfigStatus.COMPLETED
                             )
                         self.update_dish_vcc_flag(True)
-                        self.logger.info(
-                            "Invoking Initialize phase SETGPM ......"
-                        )
-                        while self.command_in_progress == "LoadDishCfg":
-                            self.dish_vcc_event.wait(0.1)
-                        self.invoke_set_gpm_command_callback()
+                        # self.logger.info(
+                        #     "Invoking Initialize phase SETGPM ......"
+                        # )
+                        # while self.command_in_progress == "LoadDishCfg":
+                        #     self.dish_vcc_event.wait(0.1)
+                        # self.invoke_set_gpm_command_callback()
                     else:
                         self.dish_vcc_command_status = DishConfigStatus.FAILED
                         self.update_dish_vcc_flag(False)
@@ -1089,75 +1090,16 @@ class CNComponentManagerMid(CNComponentManager):
         try:
             gpm_input = json.loads(argin)
             self.logger.debug("GPM JSON argin is in correct format.")
-        except json.JSONDecodeError as e:
-            return set_gpm_version_command.reject_command(
-                f"The GPM JSON string is malformed. Error: {str(e)}",
+            GPMJsonModel(**gpm_input)
+            task_status, response = self.submit_task(
+                set_gpm_version_command.apply_gpm,
+                args=[argin, self.logger],
+                task_callback=task_callback,
             )
-
-        is_error, message = self.validate_gpm_argin(gpm_input)
-
-        if is_error:
-            return set_gpm_version_command.reject_command(message)
-
-        task_status, response = self.submit_task(
-            set_gpm_version_command.apply_gpm,
-            args=[argin, self.logger],
-            task_callback=task_callback,
-        )
-        return task_status, response
-
-    def validate_gpm_argin(self, argin: dict) -> Tuple[bool, str]:
-        """Validate the data in the GPM input
-        Args:
-            argin (str): Dish Id's with the specified bands and version.
-
-        """
-        invalid_input = False
-        error_message = ""
-        break_outer = False
-        allowed_keys = {
-            "version",
-            "receptors",
-        }
-        allowed_bands = {
-            "Band_1",
-            "Band_2",
-            "Band_3",
-            "Band_4",
-            "Band_5a",
-            "Band_5b",
-        }
-        try:
-            for key in allowed_keys:
-                if key not in argin.keys():
-                    return True, f"{key} key is missing from the input"
-
-            for key in argin.keys():
-                if key not in allowed_keys:
-                    invalid_input = True
-                    error_message = f"Invalid key {key} found"
-                    break
-
-            if not invalid_input:
-                if "receptors" in argin.keys():
-                    receptors = argin["receptors"]
-                    for _, bands in receptors.items():
-                        for band in bands:
-                            if band not in allowed_bands:
-                                invalid_input = True
-                                error_message = f"Invalid band {band} found."
-                                break_outer = True
-                                break
-                        if break_outer:
-                            break
-        except Exception as e:
-            self.logger.exception(
-                "Exception while processing GPM argin: %s", e
-            )
-            invalid_input = True
-            error_message = "Input Error: " + str(e)
-
-        return invalid_input, error_message
+            return task_status, response
+        except Exception as exception:
+            self.logger.error("Exception occured %s", exception)
+            return set_gpm_version_command.reject_command(exception)
 
     def update_load_dish_cfg_results_async(
         self, dev_name: str, value: tuple
@@ -1284,6 +1226,13 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_command_status = DishConfigStatus.COMPLETED
+        self._check_init_and_invoke_gpm()
+
+    def _check_init_and_invoke_gpm(self):
+        """If TMC is in initalization phase then invoke gpm"""
+        if self.is_gpm_init and self.invoke_set_gpm_command_callback:
+            self.invoke_set_gpm_command_callback()
+            self.is_gpm_init = False
 
     def handle_gpm_version_event(
         self, dev_name: str, gpmVersion: dict
@@ -1324,7 +1273,7 @@ class CNComponentManagerMid(CNComponentManager):
                     if (
                         self._dish_vcc_command_status
                         == DishConfigStatus.COMPLETED
-                    ):
+                    ) and not self.is_gpm_init:
                         self.logger.info(
                             "Restart phase: Invoking Set GPM command on:  %s",
                             self.gpm_unknown_dishes,
