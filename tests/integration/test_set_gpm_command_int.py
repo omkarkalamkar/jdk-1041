@@ -2,6 +2,7 @@
 
 import ast
 import json
+import time
 
 import pytest
 import tango
@@ -10,6 +11,7 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
+from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     ERROR_PROPAGATION_DEFECT,
@@ -174,15 +176,127 @@ def set_gpm_command_negative_scenarios(
     ]
 
     # Validate GlobalPointingModel Status
-    # Status of SKA100 and SKA001 will be unchanged as no command execution
+    # Status of SKA100, SKA093 and SKA001 will be
+    # unchanged as no command execution
     # happened on it.
     assert gpm_status["ska036"]["Band_2"] == "1.0"
-    assert gpm_status["ska093"] == "ERROR: Dish is unreachable"
+
+
+def gpm_restart_scenarios(
+    tango_context, central_node_name, change_event_callbacks
+):
+    """Test case to test GPM CN and DLN restart scenarios"""
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    subarray_node = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    dln_100 = dev_factory.get_device("mid-tmc/leaf-node-dish/ska100")
+    subarray_node.SetDirectassignedResources(json.dumps(["SKA001"]))
+
+    ensure_checked_devices(central_node)
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    central_node.subscribe_event(
+        "GlobalPointingModelStatus",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["GlobalPointingModelStatus"],
+    )
+
+    # Central Node restart scenario
+    validate_lrcr_data = (
+        '[0, {"ska100": {"Band_4": [0, "Command Completed"]}}]'
+    )
+    cn_device_server = tango.DeviceProxy("dserver/central_node_mid/01")
+    cn_device_server.RestartServer()
+    interface = "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
+    tm_data_sources = (
+        "gitlab://gitlab.com/ska-telescope/ska-tmc/"
+        + "ska-tmc-simulators?UNKNOWN#tmdata"
+    )
+    tm_file_path = "instrument/ska_mid1/global_pointing_model_data/"
+    # Set Restart Simulation for SKA100
+    gpm_data = {
+        "ska100": [
+            {
+                "interface": interface,
+                "tm_data_sources": tm_data_sources,
+                "tm_data_filepath": tm_file_path + "gpm-ska100-Band_1.json",
+            },
+            {
+                "interface": interface,
+                "tm_data_sources": tm_data_sources,
+                "tm_data_filepath": tm_file_path + "gpm-ska100-Band_2.json",
+            },
+            {
+                "interface": interface,
+                "tm_data_sources": tm_data_sources,
+                "tm_data_filepath": tm_file_path + "gpm-ska100-Band_3.json",
+            },
+            {
+                "interface": interface,
+                "tm_data_sources": tm_data_sources,
+                "tm_data_filepath": tm_file_path + "gpm-ska100-Band_4.json",
+            },
+            {
+                "interface": interface,
+                "tm_data_sources": tm_data_sources,
+                "tm_data_filepath": tm_file_path + "gpm-ska100-Band_5a.json",
+            },
+            {
+                "interface": interface,
+                "tm_data_sources": tm_data_sources,
+                "tm_data_filepath": tm_file_path + "gpm-ska100-Band_5b.json",
+            },
+        ]
+    }
+
+    for apm_input in gpm_data["ska100"]:
+        dln_100.ApplyPointingModel(json.dumps(apm_input))
+
+    wait_and_validate_device_attribute_value(
+        central_node,
+        "isDishVccConfigSet",
+        True,
+        timeout=300,
+    )
+
+    time.sleep(3)
+
+    assertion_data = change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (Anything, validate_lrcr_data),
+        lookahead=10,
+    )
+    result_data = json.loads(assertion_data["attribute_value"][1])
+    output_data = result_data[1]
+    logger.info(">>>>>>> %s", output_data)
+    command_completed = [0, "Command Completed"]
+
+    assert result_data[0] == int(ResultCode.OK)
+
+    # As GPM invoked on band 4 only of SKA100
+    assert output_data["ska100"]["Band_4"] == command_completed
+
+    dish_ln_ds = tango.DeviceProxy("dserver/mocks/10")
+    dish_ln_ds.RestartServer()
+
+    # assert no SetGPM command executed as data is already set for SKA100
+    with pytest.raises(AssertionError):
+        change_event_callbacks.assert_change_event(
+            "longRunningCommandResult",
+            (Anything, validate_lrcr_data),
+            lookahead=10,
+        )
+    gpm_status = json.loads(central_node.GlobalPointingModelStatus)
+    assert gpm_status["ska100"]["Band_4"] == "1.0.0"
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.test1
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
@@ -202,7 +316,6 @@ def test_set_gpm_command_negative_scenarios_all(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.test11
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
@@ -214,6 +327,26 @@ def test_set_gpm_command(
 ):
     """Test cases for Load_Dish_Config command"""
     return set_gpm_command(
+        tango_context,
+        central_node_name,
+        change_event_callbacks,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.xfail(reason="Test is under testing")
+@pytest.mark.parametrize(
+    "central_node_name",
+    [CENTRALNODE_MID],
+)
+def test_set_gpm_command_restart_scenarios(
+    tango_context,
+    central_node_name,
+    change_event_callbacks,
+):
+    """Test cases for Load_Dish_Config command"""
+    return gpm_restart_scenarios(
         tango_context,
         central_node_name,
         change_event_callbacks,

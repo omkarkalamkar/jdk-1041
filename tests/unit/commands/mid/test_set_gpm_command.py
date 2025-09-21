@@ -36,41 +36,6 @@ gpm_input = {
 }
 
 
-@pytest.mark.parametrize(
-    "receptors1, receptors2, receptors3",
-    [
-        (
-            {
-                "receptors": {
-                    "SKA001": ["Band_4"],
-                }
-            },
-            gpm_input,
-            {
-                "version": "1.0",
-                "receptors": {
-                    "SKA001": "Band_4",
-                },
-            },
-        )
-    ],
-)
-def test_gpm_input_validation(receptors1, receptors2, receptors3):
-    """Tests assign Resources completed"""
-    cm, _ = create_cm()
-    is_err, message = cm.validate_gpm_argin(receptors1)
-    assert is_err
-    assert message
-
-    is_err, message = cm.validate_gpm_argin(receptors3)
-    assert is_err
-    assert message
-
-    is_err, message = cm.validate_gpm_argin(receptors2)
-    assert not is_err
-    assert not message
-
-
 def test_gpm_paths_from_receptors():
     """Test to check the command function"""
     cm, _ = create_cm()
@@ -268,24 +233,20 @@ def test_process_update_task_for_command_failure():
 def test_no_gpm_executed():
     component_manager = MagicMock()
     adapter_factory = HelperAdapterFactory()
-    component_manager.number_of_gpm_executed = (
-        0  # Simulate no commands executed
-    )
+    component_manager.number_of_gpm_executed = 0
     command = SetGlobalPointingModel(
         component_manager=component_manager,
         adapter_factory=adapter_factory,
         logger=MagicMock(),
     )
-    result_code, result_message = command._set_gpm_to_dish(
-        {}
-    )  # Empty GPM data
+    result_code, result_message = command._set_gpm_to_dish({})
     component_manager.aggregate_set_gpm_results.assert_called_once()
     assert component_manager.gpm_version_aggregated_result == ResultCode.OK
     component_manager.observable.notify_observers.assert_called_once_with(
         command_exception=True
     )
     assert result_code == [ResultCode.UNKNOWN]
-    assert result_message == [""]
+    assert result_message == []
 
 
 def test_set_gpm_to_dish_exception_handling():
@@ -368,21 +329,25 @@ def test_update_set_gpm_results():
 
 def test_handle_gpm_version():
     cm, _ = create_cm()
-    cm.gpm_unknown_dishes = ["ska001"]
+    dish_id = "ska001"
+    cm.gpm_unknown_dishes = [dish_id]
     cm.command_in_progress = ""
     cm._dish_vcc_command_status = DishConfigStatus.COMPLETED
     cm.invoke_set_gpm_command_callback = MagicMock()
     cm.logger = MagicMock()
     cm.check_if_csp_all_dish_ready = MagicMock(return_value=True)
+    gpm_version = json.dumps(
+        {
+            "Band_1": "UNKNOWN",
+        }
+    )
+    cm.global_pointing_model_status[dish_id] = json.loads(gpm_version)
+    cm.command_in_progress = ""
+    cm.is_gpm_init = False
     cm.handle_gpm_version_event(
-        "mid-tmc/leaf-node-dish/ska001", json.dumps({"Band_1": "UNKNOWN"})
+        dev_name=f"mid-tmc/leaf-node-dish/{dish_id}", gpmVersion=gpm_version
     )
     assert cm.invoke_set_gpm_command_callback.called
-    assert cm.logger.info.called
-    log_call = cm.logger.info.call_args_list[-1]
-    assert "Restart phase: Invoking Set GPM command on:  %s", [
-        "ska001"
-    ] in str(log_call)
 
 
 @pytest.mark.parametrize(

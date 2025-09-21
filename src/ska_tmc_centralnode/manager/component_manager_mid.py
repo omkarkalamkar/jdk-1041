@@ -1083,14 +1083,28 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
 
+        keys_to_allow_skip = [
+            "version",
+            "tm_data_filepath",
+            "tm_data_sources",
+            "interface",
+        ]
         set_gpm_version_command = SetGlobalPointingModel(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
         try:
             gpm_input = json.loads(argin)
-            self.logger.debug("GPM JSON argin is in correct format.")
-            GPMJsonModel(**gpm_input)
+            self.logger.debug(
+                "GPM JSON argin is in correct format. %s", gpm_input
+            )
+            if not all(key in gpm_input for key in keys_to_allow_skip):
+                GPMJsonModel(**gpm_input)
+            else:
+                self.logger.debug(
+                    "Executing initialization/restart SetGPM on %s",
+                    self.gpm_unknown_dishes,
+                )
             task_status, response = self.submit_task(
                 set_gpm_version_command.apply_gpm,
                 args=[argin, self.logger],
@@ -1273,7 +1287,7 @@ class CNComponentManagerMid(CNComponentManager):
                     if (
                         self._dish_vcc_command_status
                         == DishConfigStatus.COMPLETED
-                    ) and not self.is_gpm_init:
+                    ):
                         self.logger.info(
                             "Restart phase: Invoking Set GPM command on:  %s",
                             self.gpm_unknown_dishes,

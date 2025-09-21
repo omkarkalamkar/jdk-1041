@@ -109,16 +109,16 @@ server:
             - "{{.Values.deviceServers.centralnode.EventSubscriptionCheckPeriod}}"
         - name: "GPMVersion"
           values:
-          - "{{.Values.deviceServers.centralnode.mid.Global_pointing_model.version}}"
+          - "{{.Values.deviceServers.centralnode.mid.global_pointing_model.version}}"
         - name: "GPMInterface"
           values:
-          - "{{.Values.deviceServers.centralnode.mid.Global_pointing_model.interface}}"
+          - "{{.Values.deviceServers.centralnode.mid.global_pointing_model.interface}}"
         - name: "GPMFilePathPrefix"
           values:
-          - "{{.Values.deviceServers.centralnode.mid.Global_pointing_model.file_path_prefix}}"
+          - "{{.Values.deviceServers.centralnode.mid.global_pointing_model.file_path_prefix}}"
         - name: "GPMDataSourcesPrefix"
           values:
-          - "{{.Values.deviceServers.centralnode.mid.Global_pointing_model.data_sources_prefix}}"
+          - "{{.Values.deviceServers.centralnode.mid.global_pointing_model.data_sources_prefix}}"
 
         
 {{- else }}

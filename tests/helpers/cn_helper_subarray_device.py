@@ -52,7 +52,7 @@ class CNHelperSubArrayDevice(HelperSubArrayDevice):
 
 def main(args=None, **kwargs):
     """
-    Runs the HelperDishDevice Tango device.
+    Runs the CNHelperSubArrayDevice Tango device.
     :param args: Arguments internal to TANGO
 
     :param kwargs: Arguments internal to TANGO
