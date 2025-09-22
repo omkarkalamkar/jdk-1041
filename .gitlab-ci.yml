@@ -98,9 +98,9 @@ k8s-test-mid-restart:
     - k8s-test
   variables:
     TELESCOPE: 'SKA-restart_device_server'
-    CONFIG: 'restart_device_server'
-    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
-    SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
+    MARK: 'restart_device_server'
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-restart'
+    SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-restart"
   before_script:
     - echo $TELESCOPE
     - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT
@@ -127,8 +127,8 @@ stop-k8s-test-mid-restart:
   extends:
     - stop-k8s-test
   variables:
-    CONFIG: 'restart_device_server'
-    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
+    MARK: 'restart_device_server'
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-restart'
   script:
     - make k8s-uninstall-chart
     - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
