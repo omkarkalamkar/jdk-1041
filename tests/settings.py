@@ -222,7 +222,7 @@ def create_cm(
                 "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
             ),
             gpm_data_sources_prefix=(
-                "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
+                "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
             ),
             gpm_file_path_prefix=(
                 "instrument/ska_mid1/global_pointing_model_data"
