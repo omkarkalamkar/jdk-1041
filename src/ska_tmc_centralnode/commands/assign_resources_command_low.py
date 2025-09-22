@@ -60,7 +60,7 @@ class AssignResourcesLow(AssignResources):
             self.logger.debug(
                 "Command ID: %s | Executing AssignResources "
                 + "command with arguments: %s",
-                self.component_manager.command_id,
+                self.command_id,
                 json_argument,
             )
         except Exception as exception:

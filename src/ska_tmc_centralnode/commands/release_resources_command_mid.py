@@ -81,7 +81,7 @@ class ReleaseResourcesMid(ReleaseResources):
                     # it will be resultcode failed for centralnode
                 if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                     self.component_manager.command_mapping[
-                        self.component_manager.command_id
+                        self.command_id
                     ] = message_or_unique_id
             return (ResultCode.OK, "")
         return (
