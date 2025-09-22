@@ -92,7 +92,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         doc="the valid k-value range",
     )
 
-    GPMVersion = device_property(dtype="str", default_value="0.0.8")
+    GPMVersion = device_property(dtype="str", default_value="")
 
     GPMInterface = device_property(
         dtype="str",
@@ -483,7 +483,7 @@ class MidTmcCentralNode(AbstractCentralNode):
                 -pointing-model/1.0",
                 "tm_data_sources":
                 ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simu
-                lators?v1.0#tmdata"],
+                lators?1.0#tmdata"],
                 "tm_data_filepath":
                 "instrument/ska_mid1/global_pointing_model_data/gpm-
                 ska001-Band_1.json"

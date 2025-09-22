@@ -45,6 +45,8 @@ class SetGlobalPointingModel(SetDishGPM):
         task_abort_event: Optional[threading.Event] = None,
     ) -> None:
         """
+        Method to apply the GPM to the respective bands of specified
+        dishes.
         :param logger: logger
         :param dish_gpm_params: GPM params
         :type logger: logging.Logger
@@ -403,7 +405,9 @@ class SetGlobalPointingModel(SetDishGPM):
                     )
                     self.logger.error(error_message)
                     return_codes[0] = ResultCode.FAILED
-                    message_or_unique_ids.append(f"Error: {error_message}")
+                    message_or_unique_ids.append(
+                        f"Error: {dish_id} :{error_message}"
+                    )
                     continue
                 if self.component_manager.is_already_assigned(
                     dish_id.upper()
@@ -415,7 +419,9 @@ class SetGlobalPointingModel(SetDishGPM):
                         dish_id, error_message
                     )
                     return_codes[0] = ResultCode.FAILED
-                    message_or_unique_ids.append(f"Error: {error_message}")
+                    message_or_unique_ids.append(
+                        f"Error: {dish_id}: {error_message}"
+                    )
                     self.logger.error(error_message)
                     continue
                 for band in bands:

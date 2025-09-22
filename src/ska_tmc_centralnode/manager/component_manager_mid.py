@@ -221,7 +221,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_interface = gpm_interface
         self.gpm_data_sources_prefix = gpm_data_sources_prefix
         self.gpm_file_path_prefix = gpm_file_path_prefix
-        self.dish_vcc_event = threading.Event()
         self.is_gpm_init = True
         self.event_queue.update(
             {
@@ -862,7 +861,6 @@ class CNComponentManagerMid(CNComponentManager):
         """
         self.logger.debug("Updating dish vcc config set flag to %s", value)
         self.is_dish_vcc_config_set = value
-        self.dish_vcc_event.set()
         self.update_dishvccconfig_callback(self.is_dish_vcc_config_set)
         self._aggregate_telescope_state()
 
