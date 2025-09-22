@@ -82,7 +82,7 @@ def test_telescope_off_command_unavailability(
     task_callback = MockCallable(unique_id)
     dev_factory = DevFactory()
     csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
-    sdp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
     mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
     csp_mln.SetSubsystemAvailable(False)
     sdp_mln.SetSubsystemAvailable(False)
