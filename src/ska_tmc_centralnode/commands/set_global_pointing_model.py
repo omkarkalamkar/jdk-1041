@@ -45,15 +45,19 @@ class SetGlobalPointingModel(SetDishGPM):
         task_abort_event: Optional[threading.Event] = None,
     ) -> None:
         """
-        Method to apply the GPM to the respective bands of specified
-        dishes.
-        :param logger: logger
-        :param dish_gpm_params: GPM params
-        :type logger: logging.Logger
-        :param task_callback: Update task state, defaults to None
-        :type task_callback: Callable, optional
-        :param task_abort_event: Check for abort, defaults to None
-        :type task_abort_event: Event, optional
+        Applies the Global Pointing Model (GPM) to dishes
+        using the provided parameters. Parses the input
+        JSON parameters, prepares GPM data per dish,
+        and invokes the command to set the GPM on dish leaf nodes.
+
+        Args:
+            dish_gpm_params (str): JSON string with GPM parameters.
+            logger (optional): Logger instance.
+            task_callback (Callable, optional): Callback to update task status.
+            task_abort_event (threading.Event, optional): task abort event.
+
+        Returns:
+            None
         """
         # Indicate that the task has started
         self.task_callback = task_callback
@@ -178,6 +182,12 @@ class SetGlobalPointingModel(SetDishGPM):
         )
 
     def filter_failed_dish_data(self, data: dict) -> dict:
+        """Filter Failed Dish Data
+        Args:
+            data(dict): Dish Data
+        Returns:
+            dish dict
+        """
         filtered = {}
         for dish, content in data.items():
             if isinstance(content, dict):
@@ -285,6 +295,7 @@ class SetGlobalPointingModel(SetDishGPM):
     def get_gpm_files(self, initial_params: dict) -> list:
         """
         Get GPM files from initial params
+
         Args:
             initial_param (dict): this param containg tm
                 data source uri and file path which is used
@@ -292,7 +303,6 @@ class SetGlobalPointingModel(SetDishGPM):
 
         Returns:
             list: containing GPM file names found on data repo.
-
         """
 
         gpm_files = []

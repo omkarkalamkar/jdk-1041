@@ -77,18 +77,28 @@ k8s-test-low:
     - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT
     - make k8s-install-chart
     - make k8s-wait 
+  script:
+    - make k8s-test || true
+    - make k8s-test MARK=auto_recovery
+    - |
+      if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
+        make k8s-uninstall-chart || true
+        make k8s-delete-namespace || true
+      fi;
+    - '[ -f build/status ] || (echo "Something went wrong with the test (no build/status file); exit 1")'
+    - exit $(cat build/status)
+
   environment:
     name: test/$CI_COMMIT_REF_SLUG
     on_stop: stop-k8s-test-low
-    auto_stop_in: 1 
+    auto_stop_in: 1 minute
 
 k8s-test-mid-restart:
   extends:
     - k8s-test
   variables:
-    TELESCOPE: 'SKA-mid'
-    CONFIG: 'restart'
-    MARK: 'restart'
+    TELESCOPE: 'SKA-restart_device_server'
+    CONFIG: 'restart_device_server'
     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG-restart'
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
   before_script:

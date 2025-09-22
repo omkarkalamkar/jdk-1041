@@ -19,7 +19,7 @@ from tests.settings import logger
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_dln_kvalue_validation_result(tango_context, change_event_callbacks):
+def test_dln_kvalue_validation_result(change_event_callbacks):
     """Test Dish leaf node kvalue validation result"""
     dev_factory = DevFactory()
     central_node = DeviceProxy(CENTRALNODE_MID)

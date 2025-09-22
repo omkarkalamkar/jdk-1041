@@ -332,7 +332,7 @@ def test_set_gpm_command(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.restart
+@pytest.mark.SKA_restart_device_server
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],

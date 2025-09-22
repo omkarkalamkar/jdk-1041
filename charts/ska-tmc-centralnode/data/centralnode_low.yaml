@@ -27,9 +27,6 @@ server:
         - name: "SdpMasterFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.low.SdpMasterFQDN}}"
-        - name: "SkuidService"
-          values:
-          - "{{.Values.deviceServers.centralnode.SkuidService}}"
         - name: "MCCSMasterLeafNodeFQDN"
           values:
           - "{{.Values.deviceServers.centralnode.low.MCCSMasterLeafNodeFQDN}}"
@@ -69,6 +66,9 @@ server:
         - name: "EventSubscriptionCheckPeriod"
           values:
             - "{{.Values.deviceServers.centralnode.EventSubscriptionCheckPeriod}}"
+        - name: "IsAutoRecoveryEnabled"
+          values:
+            - "{{.Values.deviceServers.centralnode.IsAutoRecoveryEnabled}}"
 depends_on:
   - device: sys/database/2
 image:
