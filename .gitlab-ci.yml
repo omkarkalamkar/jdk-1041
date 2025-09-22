@@ -80,6 +80,25 @@ k8s-test-low:
   environment:
     name: test/$CI_COMMIT_REF_SLUG
     on_stop: stop-k8s-test-low
+    auto_stop_in: 1 
+
+k8s-test-mid-restart:
+  extends:
+    - k8s-test
+  variables:
+    TELESCOPE: 'SKA-mid'
+    CONFIG: 'restart'
+    MARK: 'restart'
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG-restart'
+    SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
+  before_script:
+    - echo $TELESCOPE
+    - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT
+    - make k8s-install-chart
+    - make k8s-wait 
+  environment:
+    name: test/$CI_COMMIT_REF_SLUG
+    on_stop: stop-k8s-test-mid-restart
     auto_stop_in: 1 minute
 
 stop-k8s-test-low:
@@ -87,6 +106,18 @@ stop-k8s-test-low:
     - stop-k8s-test
   variables:
     CONFIG: 'low'
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
+  script:
+    - make k8s-uninstall-chart
+    - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
+    - make k8s-delete-namespace
+  
+
+stop-k8s-test-mid-restart:
+  extends:
+    - stop-k8s-test
+  variables:
+    CONFIG: 'restart'
     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
   script:
     - make k8s-uninstall-chart

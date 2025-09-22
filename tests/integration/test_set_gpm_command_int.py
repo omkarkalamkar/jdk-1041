@@ -163,13 +163,12 @@ def set_gpm_command_negative_scenarios(
     gpm_status = json.loads(central_node.GlobalPointingModelStatus)
     assert result_data[0] == int(ResultCode.FAILED)
     result_data = ast.literal_eval(
-        result_data[1].split("Command data: ", 1)[1]
+        result_data[1].split("SetGPM failed on: ", 1)[1]
     )
 
     # Validate LRCR
     assert result_data["ska001"] == "ERROR: Dish is assigned to subarray"
     assert result_data["ska093"] == "ERROR: Dish is unreachable"
-    assert result_data["ska036"]["Band_2"] == [0, "Command Completed"]
     assert result_data["ska100"]["Band_4"] == [
         3,
         "Exception occurred, command failed.",
@@ -179,6 +178,7 @@ def set_gpm_command_negative_scenarios(
     # Status of SKA100, SKA093 and SKA001 will be
     # unchanged as no command execution
     # happened on it.
+    subarray_node.SetDirectassignedResources("[]")
     assert gpm_status["ska036"]["Band_2"] == "1.0"
 
 
@@ -264,8 +264,7 @@ def gpm_restart_scenarios(
         timeout=300,
     )
 
-    time.sleep(3)
-
+    time.sleep(30)
     assertion_data = change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (Anything, validate_lrcr_data),
@@ -273,7 +272,6 @@ def gpm_restart_scenarios(
     )
     result_data = json.loads(assertion_data["attribute_value"][1])
     output_data = result_data[1]
-    logger.info(">>>>>>> %s", output_data)
     command_completed = [0, "Command Completed"]
 
     assert result_data[0] == int(ResultCode.OK)
@@ -334,8 +332,7 @@ def test_set_gpm_command(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-@pytest.mark.xfail(reason="Test is under testing")
+@pytest.mark.restart
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],

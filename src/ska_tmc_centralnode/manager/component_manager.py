@@ -952,7 +952,7 @@ class CNComponentManager(TmcComponentManager):
             #         dev_name = csp_subarray
             dev_info = self.component.get_device(dev_name)
             if dev_info is not None:
-                dev_info.resources = assign_resources
+                dev_info.resources = json.loads(assign_resources)
                 dev_info.last_event_arrived = time.time()
                 dev_info.update_unresponsive(False)
                 self.component._invoke_device_callback(dev_info)

@@ -120,7 +120,7 @@ class SetGlobalPointingModel(SetDishGPM):
 
         """
         if not self.component_manager.gpm_aggregated_result:
-            error_message = "Command Failed, Command data: "
+            error_message = "SetGPM failed on: "
             self.process_update_task_for_command_failure(
                 self.task_callback, error_message
             )
@@ -151,24 +151,44 @@ class SetGlobalPointingModel(SetDishGPM):
         """
 
         if self.component_manager.dishln_gpm_cmd_exe_data:
-            error_message = error_message + str(
-                self.component_manager.dishln_gpm_cmd_exe_data
-            )
-
-            if "Dish is assigned to subarray" not in error_message:
-                for (
-                    dish_id,
-                    result,
-                ) in self.component_manager.dishln_gpm_cmd_exe_data.items():
-                    if isinstance(result, str):
+            for (
+                dish_id,
+                result,
+            ) in self.component_manager.dishln_gpm_cmd_exe_data.items():
+                if isinstance(result, str):
+                    if (
+                        "Dish is assigned to subarray" not in result
+                        and "Dish is unreachable" not in result
+                    ):
                         self.component_manager.global_pointing_model_status[
                             dish_id
                         ] = result
+
+            error_message = error_message + str(
+                self.filter_failed_dish_data(
+                    self.component_manager.dishln_gpm_cmd_exe_data
+                )
+            )
         task_callback(
             status=TaskStatus.COMPLETED,
             result=(ResultCode.FAILED, error_message),
             exception=error_message,
         )
+
+    def filter_failed_dish_data(self, data: dict) -> dict:
+        filtered = {}
+        for dish, content in data.items():
+            if isinstance(content, dict):
+                bands = {
+                    band: values
+                    for band, values in content.items()
+                    if int(values[0]) != 0
+                }
+                if bands:
+                    filtered[dish] = bands
+            else:
+                filtered[dish] = content
+        return filtered
 
     def form_gpm_path_from_receptors(self, argin: dict) -> dict:
         """This method forms the inputs for ApplyPointingModel command

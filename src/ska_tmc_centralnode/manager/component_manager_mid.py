@@ -1005,12 +1005,6 @@ class CNComponentManagerMid(CNComponentManager):
                                 DishConfigStatus.COMPLETED
                             )
                         self.update_dish_vcc_flag(True)
-                        # self.logger.info(
-                        #     "Invoking Initialize phase SETGPM ......"
-                        # )
-                        # while self.command_in_progress == "LoadDishCfg":
-                        #     self.dish_vcc_event.wait(0.1)
-                        # self.invoke_set_gpm_command_callback()
                     else:
                         self.dish_vcc_command_status = DishConfigStatus.FAILED
                         self.update_dish_vcc_flag(False)
