@@ -57,6 +57,7 @@ class ReleaseResourcesMid(ReleaseResources):
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.subarray_adapter = adapter
+                self.subarray_devname = adapter.dev_name
                 self.component_manager.subarray_devname = adapter.dev_name
 
         if self.subarray_adapter is None:
