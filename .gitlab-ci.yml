@@ -99,7 +99,7 @@ k8s-test-mid-restart:
   variables:
     TELESCOPE: 'SKA-restart_device_server'
     CONFIG: 'restart_device_server'
-    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG-restart'
+    KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
   before_script:
     - echo $TELESCOPE
@@ -127,7 +127,7 @@ stop-k8s-test-mid-restart:
   extends:
     - stop-k8s-test
   variables:
-    CONFIG: 'restart'
+    CONFIG: 'restart_device_server'
     KUBE_NAMESPACE: 'ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG'
   script:
     - make k8s-uninstall-chart
