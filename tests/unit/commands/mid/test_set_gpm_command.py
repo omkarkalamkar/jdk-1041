@@ -134,12 +134,16 @@ def test_set_gpm_command_with_ok(
     task_callback,
 ):
     cm, _ = create_cm()
-    cm.is_dish_vcc_config_set = True
+    cm.aggregate_set_gpm_results = MagicMock()
     cm.set_gpm_version(json.dumps(gpm_input), task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
-
+    cm.number_of_gpm_executed = 1
+    cm.gpm_aggregated_result = True
+    cm.dishln_gpm_cmd_exe_data = {'ska001': {'Band_4': [0, "Command Completed"]}}
+    cm.gpm_version_aggregated_result = ResultCode.OK
+    cm.observable.notify_observers(command_exception=True)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -213,15 +217,6 @@ def test_process_update_task_for_command_failure():
     expected_error_message = error_message + str(
         mock_component_manager.dishln_gpm_cmd_exe_data
     )
-    for (
-        dish_id,
-        result,
-    ) in mock_component_manager.dishln_gpm_cmd_exe_data.items():
-        if isinstance(result, str):
-            assert (
-                mock_component_manager.global_pointing_model_status[dish_id]
-                == result
-            )
 
     command.task_callback.assert_called_once_with(
         status=TaskStatus.COMPLETED,

@@ -31,7 +31,7 @@ pytango = "9.5.0"
 ska-ser-logging = "^0.4.1"
 ska-tango-base = "1.2.0"
 ska-tmc-cdm = "12.10.0"
-ska-tmc-common = {git = "https://gitlab.com/ska-telescope/ska-tmc/ska-tmc-common.git", branch = "hm-740"}
+ska-tmc-common = "0.32.1"
 ska-tango-testing = "0.6.1"
 ska-ser-log-transactions = "*"
 mock = "^4.0.3"
@@ -68,16 +68,14 @@ pytest-repeat = "^0.9.1"
 
 
 [tool.poetry.group.docs.dependencies]
-recommonmark = "^0.7.1"
 docutils = "^0.18.1"
-Sphinx = "^7.2.6"
-ska-ser-sphinx-theme = "^0.1.2"
-sphinx-autodoc-typehints = "^2.0.0"
+Sphinx = "^5.1.1"
+ska-ser-sphinx-theme = "^0.1.1"
+sphinx-autodoc-typehints = "^1.19.3"
 sphinxcontrib-plantuml = "^0.22"
 typing_extensions  = "^4.3.0"
 sphinx-rtd-theme = "^1.2.2"
-MarkupSafe = "3.0.2"
-
+recommonmark = "^0.7.1"
 
 [tool.isort]
 multi_line_output = 3
