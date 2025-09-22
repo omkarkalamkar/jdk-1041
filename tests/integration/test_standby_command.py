@@ -24,12 +24,10 @@ from tests.settings import logger
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_standby_command_mid(
-    tango_context,
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test standby command for mid"""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
@@ -103,12 +101,10 @@ def test_standby_command_mid(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_standby_command_low(
-    tango_context,
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
 ):
     """Test standby command for low"""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
     ensure_checked_devices(central_node)

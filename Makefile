@@ -45,7 +45,6 @@ TARANTA ?= false
 MINIKUBE ?= false ## Minikube or not
 FAKE_DEVICES ?= true ## Install fake devices or not
 TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
-SKUID ?= ska-ser-skuid-$(HELM_RELEASE)-svc.$(KUBE_NAMESPACE).svc.$(CLUSTER_DOMAIN):9870
 CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode
 CI_ENVIRONMENT_SLUG ?= ska-tmc-centralnode
 $(shell echo 'global:\n  annotations:\n    app.gitlab.com/app: $(CI_PROJECT_PATH_SLUG)\n    app.gitlab.com/env: $(CI_ENVIRONMENT_SLUG)' > gilab_values.yaml)
@@ -125,9 +124,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set central_node.telescope=$(TELESCOPE) \
 	--set central_node.deviceServers.mocks.enabled=$(FAKE_DEVICES) \
 	--set ska-taranta.enabled=$(TARANTA) \
-	--set central_node.deviceServers.centralnode.SkuidService=$(SKUID) \
-	$(CUSTOM_VALUES) \
-	--values gilab_values.yaml
+	$(CUSTOM_VALUES) 
 
 test-requirements:
 	@poetry export --without-hashes --with dev --format requirements.txt --output tests/requirements.txt
