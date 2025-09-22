@@ -25,11 +25,11 @@ from ska_tmc_centralnode.commands.assign_resources_command_mid import (
     AssignResourcesMid,
 )
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
-from ska_tmc_centralnode.commands.set_global_pointing_model import (
-    SetGlobalPointingModel,
-)
 from ska_tmc_centralnode.commands.release_resources_command_mid import (
     ReleaseResourcesMid,
+)
+from ska_tmc_centralnode.commands.set_global_pointing_model import (
+    SetGlobalPointingModel,
 )
 from ska_tmc_centralnode.input_validator import (
     AssignResourceValidator,
