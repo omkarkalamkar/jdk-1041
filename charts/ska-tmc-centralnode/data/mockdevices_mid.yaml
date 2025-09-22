@@ -70,7 +70,18 @@ server:
       - name: "HelperDishLNDevice"
         devices:
         - name: "mid-tmc/leaf-node-dish/ska100"
-        
+    - name: "11"
+      classes:
+      - name: "CNHelperSubArrayDevice"
+        devices:
+        - name: "mid-tmc/subarray/02"
+    - name: "12"
+      classes:
+      - name: "HelperSubarrayLeafDevice"
+        devices:
+        - name: "mid-tmc/subarray-leaf-node-csp/02"
+        - name: "mid-tmc/subarray-leaf-node-sdp/02"
+
 depends_on:
   - device: sys/database/2
 image:
