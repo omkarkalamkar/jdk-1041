@@ -19,14 +19,13 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_SUBARRAY_LN,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import logger
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_tmc_state_mid(tango_context, change_event_callbacks):
+def test_tmc_state_mid(change_event_callbacks):
     """Tests tmc state for mid"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
 
@@ -56,9 +55,9 @@ def test_tmc_state_mid(tango_context, change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_tmc_state_low(tango_context, change_event_callbacks):
+def test_tmc_state_low(change_event_callbacks):
     """Test tmc state for low"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
 

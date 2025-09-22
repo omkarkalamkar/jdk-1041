@@ -21,7 +21,6 @@ from tests.settings import (
 
 
 def release_resources(
-    tango_context,
     central_node_fqdn,
     assign_input_str,
     release_input_string,
@@ -121,12 +120,9 @@ def release_resources(
 )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_release_res_command_mid(
-    tango_context, change_event_callbacks, json_factory
-):
+def test_release_res_command_mid(change_event_callbacks, json_factory):
     """Test release resources command mid"""
     return release_resources(
-        tango_context,
         CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources"),
@@ -136,12 +132,9 @@ def test_release_res_command_mid(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_release_res_command_low(
-    tango_context, change_event_callbacks, json_factory
-):
+def test_release_res_command_low(change_event_callbacks, json_factory):
     """Test release resources command for low"""
     return release_resources(
-        tango_context,
         CENTRALNODE_LOW,
         json_factory("assign_resource_low"),
         json_factory("release_resource_low"),

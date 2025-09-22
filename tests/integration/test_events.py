@@ -21,7 +21,6 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_internal_model_events_mid(
-    tango_context,
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
@@ -32,7 +31,6 @@ def test_internal_model_events_mid(
         assert not evt.err
         pytest.num_events_arrived += 1
 
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
 
@@ -72,7 +70,7 @@ def test_internal_model_events_mid(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_internal_model_events_low(
-    tango_context, set_low_devices_availability_for_aggregation
+    set_low_devices_availability_for_aggregation,
 ):
     """Test internal model events for low"""
     pytest.num_events_arrived = 0
@@ -81,7 +79,6 @@ def test_internal_model_events_low(
         assert not evt.err
         pytest.num_events_arrived += 1
 
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
 
@@ -119,11 +116,9 @@ def test_internal_model_events_low(
     central_node.unsubscribe_event(event_id)
 
 
-def commands_result_events(
-    tango_context, change_event_callbacks, central_node_name
-):
+def commands_result_events(change_event_callbacks, central_node_name):
     """Test case for command result events"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
 
@@ -148,13 +143,11 @@ def commands_result_events(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_command_result_events_mid(
-    tango_context,
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test command result events for mid."""
     commands_result_events(
-        tango_context,
         change_event_callbacks,
         CENTRALNODE_MID,
     )
@@ -164,13 +157,11 @@ def test_command_result_events_mid(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_command_result_events_low(
-    tango_context,
     change_event_callbacks,
     set_low_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test command results event low"""
     commands_result_events(
-        tango_context,
         change_event_callbacks,
         CENTRALNODE_LOW,
     )

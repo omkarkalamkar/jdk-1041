@@ -25,6 +25,8 @@ global:
     domain: "mid-tmc"
   low:
     domain: "low-tmc"
+  labels:
+    app: ska-tmc-centralnode
 
 dsconfig:
   configuration_file: data/configuration.json
@@ -46,7 +48,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.21.3
+    tag: 0.22.0
     pullPolicy: IfNotPresent
 
 resources:
@@ -70,7 +72,6 @@ deviceServers:
     instances: ["01"]
     command: "CentralNodeDS"
     subarray_count: 2
-    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
@@ -106,9 +107,8 @@ deviceServers:
       MCCSMasterLeafNodeFQDN: "low-tmc/leaf-node-mccs/0"
       MCCSMasterFQDN: "low-mccs/control/control"
       SubarrayPrefix: "low-tmc/subarray/"
-      CommandTimeOutDefault: 60
-
-
+      CommandTimeOutDefault: 30
+      IsAutoRecoveryEnabled: "false"
 nodeSelector: {}
 
 affinity: {}

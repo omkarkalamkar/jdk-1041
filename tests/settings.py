@@ -8,6 +8,7 @@ from typing import List
 
 import pytest
 import tango
+from ska_control_model import AdminMode
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_testing.mock.placeholders import Anything
@@ -15,6 +16,7 @@ from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
 from ska_tmc_common import FaultType, LivelinessProbeType
+from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -472,3 +474,51 @@ def check_lrcr_events(
     if flag:
         return True
     return False
+
+
+def set_low_devices_availability():
+    """Sets availability for low telescope."""
+    dev_factory = DevFactory()
+    proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    proxy_csp_mln.SetSubsystemAvailable(True)
+
+    proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    proxy_sdp_mln.SetSubsystemAvailable(True)
+
+    proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+    proxy_mccs_mln.SetSubsystemAvailable(True)
+
+
+def set_low_devices_admin_mode():
+    """Sets Admin mode for low telescope."""
+    dev_factory = DevFactory()
+    proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    proxy_csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
+
+    proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    proxy_sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
+
+    proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+    proxy_mccs_mln.SetMccsControllerAdminMode(AdminMode.ONLINE)
+
+
+def set_auto_recovery_for_low(central_node_name: str, enabled: bool = True):
+    """Sets the auto recovery property to True
+
+    :param central_node_name: central node fqdn
+    :type central_node_name: str
+    """
+    db = tango.Database()
+    dev_factory = DevFactory()
+    if (
+        db.get_device_property(central_node_name, "IsAutoRecoveryEnabled")
+        != enabled
+    ):
+        db.put_device_property(
+            central_node_name, {"IsAutoRecoveryEnabled": enabled}
+        )
+        central_node = dev_factory.get_device(central_node_name)
+        central_node.init()
+        time.sleep(5)
+        set_low_devices_admin_mode()
+        set_low_devices_availability()

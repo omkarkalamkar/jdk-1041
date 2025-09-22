@@ -24,9 +24,9 @@ from tests.settings import logger
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_telescope_health_state_mid(tango_context, change_event_callbacks):
+def test_telescope_health_state_mid(change_event_callbacks):
     """test telescope health state mid"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
@@ -71,9 +71,9 @@ def test_telescope_health_state_mid(tango_context, change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_telescope_health_state_low(tango_context, change_event_callbacks):
+def test_telescope_health_state_low(change_event_callbacks):
     """test telescope health state low"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
     sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
@@ -112,9 +112,9 @@ def test_telescope_health_state_low(tango_context, change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_telescope_command_timeout(tango_context, change_event_callbacks):
+def test_telescope_command_timeout(change_event_callbacks):
     """test telescope health state mid"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     central_node.commandTimeOut = 200

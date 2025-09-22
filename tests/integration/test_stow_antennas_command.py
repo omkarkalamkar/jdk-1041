@@ -17,9 +17,8 @@ from tests.settings import SLEEP_TIME, TIMEOUT, logger
 )
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_stow_antennas_command(tango_context):
+def test_stow_antennas_command():
     """Tests stow antennas command"""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)

@@ -14,11 +14,20 @@ from queue import Queue
 from typing import Callable
 
 from ska_control_model import AdminMode
+from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
+from ska_telmodel.schema import validate
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
+from ska_tmc_centralnode.commands.assign_resources_command_low import (
+    AssignResourcesLow,
+)
+from ska_tmc_centralnode.commands.release_resources_command_low import (
+    ReleaseResourcesLow,
+)
 from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
@@ -54,9 +63,9 @@ class CNComponentManagerLow(CNComponentManager):
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
-        skuid_service="",
         command_timeout=30,
         subarray_trl_prefix: str = "low-tmc/subarray/",
+        is_auto_recovery_enabled: bool = True,
         *args,
         **kwargs,
     ):
@@ -96,7 +105,6 @@ class CNComponentManagerLow(CNComponentManager):
             _liveliness_probe,
             _event_manager,
             proxy_timeout,
-            skuid_service=skuid_service,
             command_timeout=command_timeout,
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
@@ -104,7 +112,7 @@ class CNComponentManagerLow(CNComponentManager):
             *args,
             **kwargs,
         )
-
+        self.is_auto_recovery_enabled = is_auto_recovery_enabled
         self._telescope_availability_aggregator = None
         self.subarray_availability = {
             subarray: False
@@ -322,7 +330,10 @@ class CNComponentManagerLow(CNComponentManager):
             # If mccs is present in subsystems_to_config list, two LRCR events
             # need to be considered as the command gets invoked on both
             # SubarrayNode and MCCS subsystem.
-            if "mccs" in self.subsystems_to_config:
+            if (
+                "mccs" in self.subsystems_to_config
+                and not self.is_auto_recovery_enabled
+            ):
                 expected_event_dict_len = 2
             else:
                 expected_event_dict_len = 1
@@ -400,7 +411,7 @@ class CNComponentManagerLow(CNComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug("State event for %s: %s", device_name, state)
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN in case of
@@ -422,7 +433,6 @@ class CNComponentManagerLow(CNComponentManager):
                     "Updated State of %s: %s ", devInfo.dev_name, devInfo.state
                 )
                 devInfo.last_event_arrived = time.time()
-                devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
@@ -436,7 +446,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
@@ -548,3 +558,124 @@ class CNComponentManagerLow(CNComponentManager):
             return False
 
         return True
+
+    def validate_assign_json(self, argin: str):
+        """Validates the assign resources json.
+
+        :param argin: Assign resources json string.
+        :type argin: str
+        """
+        json_argument = json.loads(argin)
+        self.validate_subarray_id(json_argument)
+
+        interface = (
+            json_argument.get("interface", None)
+            or self._assign_resources_schema_version
+        )
+        validate(
+            version=interface,
+            config=json_argument,
+            strictness=2,
+        )
+
+    def assign_resources(self, argin: str, task_callback: TaskCallbackType):
+        """
+        Submits the AssignResources command in queue.
+
+        :param argin: input json string for assign resource command
+        :type argin: str
+        :param task_callback: Updates task status
+        :type task_callback: TaskCallbackType
+        :return: task_status
+        :rtype: tuple
+        """
+        try:
+            assign_resources_command = AssignResourcesLow(
+                self,
+                adapter_factory=self.adapter_factory,
+                logger=self.logger,
+                is_auto_recovery_enabled=self.is_auto_recovery_enabled,
+            )
+            self.validate_assign_json(argin)
+            assign_resources_command.subarray_id = self.get_subarray_id(argin)
+            task_status, response = self.submit_task(
+                assign_resources_command.assign_resources,
+                kwargs={"argin": argin},
+                task_callback=task_callback,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.EMPTY, ObsState.IDLE],
+                    "AssignResources",
+                ),
+            )
+            self.logger.info(
+                "AssignResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+        except Exception as exception:
+            self.logger.exception(
+                "Exception occurred while processing " + "assignresource: %s ",
+                exception,
+            )
+            return assign_resources_command.reject_command(str(exception))
+
+    def validate_release_json(self, argin: str):
+        """Validates the release resource json.
+
+        :param argin: release resource json string.
+        :type argin: str
+        """
+        json_argument = json.loads(argin)
+        self.validate_subarray_id(json_argument)
+        interface = (
+            json_argument.get("interface", None)
+            or self._release_resources_schema_version
+        )
+        validate(
+            version=interface,
+            config=json_argument,
+            strictness=2,
+        )
+
+    def release_resources(self, argin: str, task_callback: TaskCallbackType):
+        """
+        Submit the ReleaseResource command in queue.
+
+        :param argin: input json string for release resource command
+        :type argin: str
+        :param task_callback: Updates task status
+        :type task_callback: TaskCallbackType
+        :return: task_status
+        :rtype: tuple
+        """
+        try:
+            release_resources_command = ReleaseResourcesLow(
+                self,
+                adapter_factory=self.adapter_factory,
+                logger=self.logger,
+                is_auto_recovery_enabled=self.is_auto_recovery_enabled,
+            )
+            self.validate_release_json(argin)
+
+            self.check_availability_for_release(argin)
+
+            task_status, response = self.submit_task(
+                release_resources_command.release_resources,
+                kwargs={"argin": argin},
+                task_callback=task_callback,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.IDLE],
+                    "ReleaseResources",
+                ),
+            )
+            self.logger.info(
+                "ReleaseResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+        except Exception as exception:
+            return release_resources_command.reject_command(str(exception))
