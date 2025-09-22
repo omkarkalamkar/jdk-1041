@@ -11,8 +11,8 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_LOW
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
-    LOW_SUBARRAY_DEVICE,
     LOW_SUBARRAY2_DEVICE,
+    LOW_SUBARRAY_DEVICE,
     check_subarray_availability,
     logger,
 )
