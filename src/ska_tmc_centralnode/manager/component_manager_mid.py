@@ -440,6 +440,19 @@ class CNComponentManagerMid(CNComponentManager):
                 break
         return False
 
+    def get_unique_ids(self) -> list:
+        """Provides unique id for processing long
+        running command result events.
+
+        Returns:
+            list: Provides list of unique ids under progress
+        """
+        unique_ids = []
+        for data in self.command_mapping.values():
+            for uid in data:
+                unique_ids.append(uid)
+        return unique_ids
+
     def update_long_running_command_result(
         self, dev_name: str, value: tuple
     ) -> None:
@@ -463,20 +476,23 @@ class CNComponentManagerMid(CNComponentManager):
             value: longRunningCommandResult attribute event.
 
         """
-        self.logger.debug(
-            "Command ID: %s | longRunningCommandResult event for "
-            + "device %s. Event value: %s",
-            self.command_id,
-            dev_name,
-            str(value),
-        )
+        unique_ids = self.get_unique_ids()
+
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
             or not result_code_or_exception_or_task_status
-            or unique_id not in self.command_mapping.values()
+            or unique_id not in unique_ids
         ):
             return
+        command_id = self.get_command_id(unique_id)
+        self.logger.debug(
+            "Command ID: %s | longRunningCommandResult event for "
+            + "device %s. Event value: %s",
+            command_id,
+            dev_name,
+            str(value),
+        )
         try:
             result_code, message = json.loads(
                 result_code_or_exception_or_task_status
@@ -487,7 +503,7 @@ class CNComponentManagerMid(CNComponentManager):
                     self.logger.debug(
                         "Command ID: %s | Command with Unique ID %s on "
                         + "%s succeeded.",
-                        self.command_id,
+                        command_id,
                         str(unique_id),
                         dev_name,
                     )
@@ -501,7 +517,7 @@ class CNComponentManagerMid(CNComponentManager):
                         "Command ID: %s | Updating LRCRCallback with "
                         + "ResultCode: %s and Message: %s "
                         + "for command %s on  %s.",
-                        self.command_id,
+                        command_id,
                         ResultCode(result_code),
                         message,
                         str(unique_id),
@@ -512,7 +528,6 @@ class CNComponentManagerMid(CNComponentManager):
                         f"Exception occurred on device: {unique_id}: "
                         f"{dev_name}: {message}"
                     )
-                    command_id = self.get_command_id(unique_id)
                     self.long_running_result_callback(
                         command_id,
                         ResultCode.FAILED,
@@ -523,30 +538,25 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.exception(
                 "Command ID: %s | Exception occurred while processing "
                 + "long running command result on %s: %s",
-                self.command_id,
+                command_id,
                 dev_name,
                 exception,
             )
 
-    def get_command_id(self, unique_id: int) -> str:
+    def get_command_id(self, unique_id):
         """
-        This Method is used to get command
-        it from the command mapping dictionary
+        Returns the command id mapped to the given unique_id.
 
         Args:
-            unique_id (int): unique id of the command
+            unique_id: unique id of the command
 
         Returns:
-            str: returns the command id with reference to unique id.
-
+            str: command id corresponding to unique_id
         """
-        index_of_unique_id = list(self.command_mapping.values()).index(
-            unique_id
-        )  # get index location of unique_id received in event
-        command_id = list(self.command_mapping.keys())[
-            index_of_unique_id
-        ]  # command id mapped to unique id
-        return command_id
+        for cmd_id, uids in self.command_mapping.items():
+            if unique_id in uids:
+                return cmd_id
+        return None
 
     def update_device_state(self, device_name: str, state: DevState) -> None:
         """

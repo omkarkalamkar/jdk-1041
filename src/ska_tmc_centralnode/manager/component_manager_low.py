@@ -355,7 +355,7 @@ class CNComponentManagerLow(CNComponentManager):
     def get_command_id(self, unique_id: str):
         """
         This Method is used to get command
-        it from the command mapping dictionary
+        id from the command mapping dictionary
 
         Args:
             unique_id (int): unique id of the command
@@ -367,7 +367,7 @@ class CNComponentManagerLow(CNComponentManager):
         for k, v in self.command_mapping.items():
             if unique_id in v:
                 return k
-            return None
+        return None
 
     def update_long_running_command_result_callback(self, command_id) -> None:
         """
