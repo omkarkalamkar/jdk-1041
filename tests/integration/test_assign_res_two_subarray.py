@@ -12,6 +12,7 @@ from ska_tmc_centralnode.utils.constants import CENTRALNODE_LOW
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     LOW_SUBARRAY_DEVICE,
+    LOW_SUBARRAY2_DEVICE,
     check_subarray_availability,
     logger,
 )
@@ -24,12 +25,14 @@ def assign_resources(
     release_input_string,
     change_event_callbacks,
     subarray_device,
+    subarray2_device,
 ):
     """AssignResources Test method."""
     logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(subarray_device)
+    subarray2_proxy = dev_factory.get_device(subarray2_device)
 
     ensure_checked_devices(central_node)
 
@@ -62,6 +65,7 @@ def assign_resources(
     assign_input_str2 = json.dumps(assign_input)
 
     subarray_proxy.SetisSubarrayAvailable(True)
+    subarray2_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, subarray_device, True)
 
     result1, unique_id1 = central_node.AssignResources(assign_input_str1)
@@ -132,4 +136,5 @@ def test_assign_res_with_two_subarray_low(
         json_factory("release_resource_low"),
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
+        LOW_SUBARRAY2_DEVICE,
     )
