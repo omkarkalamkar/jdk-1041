@@ -91,7 +91,7 @@ k8s-test-low:
   environment:
     name: test/$CI_COMMIT_REF_SLUG
     on_stop: stop-k8s-test-low
-    auto_stop_in: 1 
+    auto_stop_in: 1 minute
 
 k8s-test-mid-restart:
   extends:
