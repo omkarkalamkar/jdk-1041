@@ -1326,12 +1326,13 @@ class CNComponentManagerMid(CNComponentManager):
                 result_code_or_exception = json.loads(resultcode_message)
             if result_code_or_exception:
                 if dishln_id in self.dishln_gpm_cmd_exe_data:
-                    dishln_gpm_data = self.dishln_gpm_cmd_exe_data[dishln_id]
-                    for band_name, band_value in dishln_gpm_data.items():
-                        if band_value is None:
-                            self.dishln_gpm_cmd_exe_data[dishln_id][
-                                band_name
-                            ] = result_code_or_exception
+                    band_value = self._get_band_dishln_gpm_cmd_data(unique_id)
+                    self.dishln_gpm_cmd_exe_data[dishln_id][
+                        band_value
+                    ] = result_code_or_exception
+                    self.logger.debug(
+                        "dishln gpm %s", self.dishln_gpm_cmd_exe_data
+                    )
                 if self.number_of_gpm_executed > 0:
                     self.number_of_gpm_executed -= 1
                 self.logger.info(
@@ -1352,6 +1353,19 @@ class CNComponentManagerMid(CNComponentManager):
                 self.aggregate_set_gpm_results()
                 self.gpm_version_aggregated_result = ResultCode.OK
                 self.observable.notify_observers(command_exception=True)
+
+    def _get_band_dishln_gpm_cmd_data(self, unique_id):
+        """Return Band for the specified dish in unique id
+        Args:
+            unique_id: command unique id
+        Returns:
+            band (str)
+        """
+        band = ""
+        for command_data in self.command_mapping[self.command_id]:
+            if unique_id in command_data:
+                band = command_data[unique_id]
+        return band
 
     def aggregate_set_gpm_results(self) -> None:
         """

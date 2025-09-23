@@ -452,6 +452,9 @@ class SetGlobalPointingModel(SetDishGPM):
                         .split("-")[-1]
                         .split(".")[0]
                     )
+                    self._set_band_command_mapping(
+                        message_or_unique_ids[0], dishln_band
+                    )
                     if (
                         dishln_id
                         not in self.component_manager.dishln_gpm_cmd_exe_data
@@ -510,3 +513,21 @@ class SetGlobalPointingModel(SetDishGPM):
         self.component_manager.dishln_gpm_cmd_exe_data[dish_id] = (
             "ERROR: " + error_message
         )
+
+    def _set_band_command_mapping(self, command_id, band) -> None:
+        """Set Band Command Mapping and Band
+        Args:
+            command_id: Command Id for the dish command
+        """
+        command_id_band_dict = {command_id: band}
+        if (
+            self.component_manager.command_id
+            not in self.component_manager.command_mapping
+        ):
+            self.component_manager.command_mapping[
+                self.component_manager.command_id
+            ] = [command_id_band_dict]
+        else:
+            self.component_manager.command_mapping[
+                self.component_manager.command_id
+            ].append(command_id_band_dict)
