@@ -88,15 +88,15 @@ def assign_resources(
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
+    subarray_id = json.loads(assign_input_str).get("subarray_id")
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.REJECTED),
-                    "Exception from 'is_cmd_allowed' method: "
-                    f"Subarray devices not available: ['{subarray_fqdn}']",
+                    int(ResultCode.FAILED),
+                    f"SubArray Id {subarray_id} is not existing!",
                 )
             ),
         ),
@@ -143,7 +143,10 @@ def test_assign_res_command_mid_unavailable_subarray(
     [CENTRALNODE_LOW],
 )
 def test_assign_res_command_low_unavailable_subarray(
-    central_node_name, change_event_callbacks, json_factory
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     """Test Assign Resources command for low unavailable subarray"""
     return assign_resources(
