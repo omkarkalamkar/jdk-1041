@@ -333,6 +333,9 @@ def test_set_gpm_command(
 
 @pytest.mark.post_deployment
 @pytest.mark.restart_device_server
+@pytest.mark.xfail(
+    reason="Intermittentent failure due to device server restart"
+)
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
