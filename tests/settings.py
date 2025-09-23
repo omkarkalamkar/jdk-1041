@@ -179,6 +179,11 @@ def mock_telescope_availability_callback(telescope_availability):
     logger.debug("telescope availability: %s", str(telescope_availability))
 
 
+def invoke_set_gpm_command_callback():
+    """Dummy method for invoke_set_gpm_command callback"""
+    logger.debug("Invoked SetGlobalPointingCommand")
+
+
 def create_cm(
     p_liveliness_probe=False,
     p_event_manager=True,
@@ -213,6 +218,17 @@ def create_cm(
             _event_manager=p_event_manager,
             _liveliness_probe=LivelinessProbeType.NONE,
             enable_dish_vcc_init=False,
+            invoke_set_gpm_command_callback=invoke_set_gpm_command_callback,
+            gpm_version="1.0.0",
+            gpm_interface=(
+                "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
+            ),
+            gpm_data_sources_prefix=(
+                "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
+            ),
+            gpm_file_path_prefix=(
+                "instrument/ska_mid1/global_pointing_model_data"
+            ),
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device

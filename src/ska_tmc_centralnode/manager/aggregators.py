@@ -409,7 +409,7 @@ class LoadDishCfgCommandResultAggregator:
         return result_code, message
 
 
-class DishkValueValidationResultAggregator:
+class DishAttrValueAggregator:
     """This Class Aggregate k-value validation results
     received from Dish Leaf Nodes.
     """
@@ -498,3 +498,47 @@ class DishkValueValidationResultAggregator:
             # Update the Central Node result attribute.
             if self.is_events_received_percentage_valid():
                 self.update_central_node_with_result()
+
+    def aggregate_gpm(self) -> list:
+        """
+        Aggregate the GPM version received from
+        Dish leaf nodes and provide the list of DLN on which
+        GPM is missing to Central Node.
+
+        Args:
+            dish_leaf_node_fqdn (str):
+                dish leaf node fqdn
+            gpm_version (dict):
+                GPM version on dish leaf node
+
+        """
+        initializing_gpm = True
+        gpm_unknown_dishes = []
+        self.logger.info(
+            "Current GPM Status %s",
+            self._component_manager.global_pointing_model_status,
+        )
+        total_events = len(
+            self._component_manager.global_pointing_model_status.keys()
+        )
+        if total_events == len(
+            self.input_parameter_obj.dish_leaf_node_dev_names
+        ):
+            for (
+                dish_id,
+                bands,
+            ) in self._component_manager.global_pointing_model_status.items():
+                if not isinstance(bands, str):
+                    for _, band_status in bands.items():
+                        if band_status != "UNKNOWN":
+                            initializing_gpm = False
+                            break
+                else:
+                    initializing_gpm = False
+                if initializing_gpm:
+                    gpm_unknown_dishes.append(dish_id)
+                initializing_gpm = True
+        self.logger.info(
+            "Dishes for which GPM version not set: %s", gpm_unknown_dishes
+        )
+        return gpm_unknown_dishes

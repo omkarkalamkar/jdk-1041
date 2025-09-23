@@ -8,6 +8,7 @@ import json
 import re
 import threading
 import time
+import traceback
 from collections import defaultdict
 from logging import Logger
 from multiprocessing import Event
@@ -276,6 +277,8 @@ class CNComponentManager(TmcComponentManager):
                     [
                         "dishMode",
                         "kValueValidationResult",
+                        "longrunningcommandresult",
+                        "gpmVersion",
                     ]
                 )
 
@@ -397,7 +400,11 @@ class CNComponentManager(TmcComponentManager):
                 # safely ignore it.
                 pass
             except Exception as exception:
-                self.logger.error(exception)
+                self.logger.error(
+                    "Exception: %s Traceback: %s",
+                    exception,
+                    traceback.print_exc(),
+                )
 
     def check_event_error(self, event: tango.EventData, callback: str):
         """Method for checking event error."""

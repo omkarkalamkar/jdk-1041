@@ -389,14 +389,11 @@ def test_load_dish_cfg_when_csp_is_defective(
     )
 
 
-# Test Cases with with requirment to restart server fail
-# randomly due to issues in restart
-@pytest.mark.skip(
-    reason="Skipped due to intermittent failures "
-    ", Raised SKB-404 to track same"
-)
+@pytest.mark.restart_device_server
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.xfail(
+    reason="Intermittentent failure due to device server restart"
+)
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
@@ -415,9 +412,11 @@ def test_load_dish_cfg_after_central_node_init(
     )
 
 
-@pytest.mark.skip(reason="Fails intermittently")
+@pytest.mark.xfail(
+    reason="Intermittentent failure due to device server restart"
+)
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.restart_device_server
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
