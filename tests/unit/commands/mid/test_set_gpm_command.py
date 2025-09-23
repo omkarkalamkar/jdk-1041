@@ -310,6 +310,7 @@ def test_update_set_gpm_results():
     cm.gpm_version_aggregated_result = ResultCode.UNKNOWN
     cm.observable = mock.Mock()
     cm.logger = mock.Mock()
+    cm._get_band_dishln_gpm_cmd_data = MagicMock(return_value="Band_1")
     dev_name = "mid-tmc/leaf-node-dish/ska001"
     value = (
         "cmd-12345-ApplyPointingModel",
