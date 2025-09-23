@@ -141,7 +141,9 @@ def test_set_gpm_command_with_ok(
     )
     cm.number_of_gpm_executed = 1
     cm.gpm_aggregated_result = True
-    cm.dishln_gpm_cmd_exe_data = {'ska001': {'Band_4': [0, "Command Completed"]}}
+    cm.dishln_gpm_cmd_exe_data = {
+        "ska001": {"Band_4": [0, "Command Completed"]}
+    }
     cm.gpm_version_aggregated_result = ResultCode.OK
     cm.observable.notify_observers(command_exception=True)
     task_callback.assert_against_call(
