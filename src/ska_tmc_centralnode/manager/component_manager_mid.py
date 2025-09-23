@@ -476,13 +476,13 @@ class CNComponentManagerMid(CNComponentManager):
             value: longRunningCommandResult attribute event.
 
         """
-        unique_ids = self.get_unique_ids()
+        # unique_ids = self.get_unique_ids()
 
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
             or not result_code_or_exception_or_task_status
-            or unique_id not in unique_ids
+            or unique_id not in self.command_mapping.values()
         ):
             return
         command_id = self.get_command_id(unique_id)
