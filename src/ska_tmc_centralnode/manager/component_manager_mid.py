@@ -1354,7 +1354,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self.gpm_version_aggregated_result = ResultCode.OK
                 self.observable.notify_observers(command_exception=True)
 
-    def _get_band_dishln_gpm_cmd_data(self, unique_id):
+    def _get_band_dishln_gpm_cmd_data(self, unique_id: str) -> str:
         """Return Band for the specified dish in unique id
         Args:
             unique_id: command unique id
