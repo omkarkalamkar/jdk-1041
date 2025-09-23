@@ -413,7 +413,7 @@ def test_load_dish_cfg_after_central_node_init(
 
 
 @pytest.mark.xfail(
-        reason="Intermittentent failure due to device server restart"
+    reason="Intermittentent failure due to device server restart"
 )
 @pytest.mark.post_deployment
 @pytest.mark.restart_device_server
