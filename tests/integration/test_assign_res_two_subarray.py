@@ -8,11 +8,16 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
 
-from ska_tmc_centralnode.utils.constants import CENTRALNODE_LOW
+from ska_tmc_centralnode.utils.constants import (
+    CENTRALNODE_LOW,
+    CENTRALNODE_MID,
+)
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     LOW_SUBARRAY2_DEVICE,
     LOW_SUBARRAY_DEVICE,
+    MID_SUBARRAY2_DEVICE,
+    MID_SUBARRAY_DEVICE,
     check_subarray_availability,
     logger,
 )
@@ -38,7 +43,7 @@ def assign_resources(
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
-        "Telscope On Command ID: %s Returned result: %s",
+        "Telescope On Command ID: %s Returned result: %s",
         unique_id,
         str(result),
     )
@@ -137,4 +142,34 @@ def test_assign_res_with_two_subarray_low(
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
         LOW_SUBARRAY2_DEVICE,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name, input_json",
+    [
+        (CENTRALNODE_MID, "command_AssignResources"),
+    ],
+)
+def test_assign_res_with_two_subarray_mid(
+    tango_context,
+    central_node_name,
+    input_json,
+    change_event_callbacks,
+    json_factory,
+    set_low_devices_availability_for_aggregation,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test assign Resources command for Mid"""
+
+    return assign_resources(
+        tango_context,
+        central_node_name,
+        json_factory(input_json),
+        json_factory("command_ReleaseResources"),
+        change_event_callbacks,
+        MID_SUBARRAY_DEVICE,
+        MID_SUBARRAY2_DEVICE,
     )
