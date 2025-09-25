@@ -220,7 +220,6 @@ class CNComponentManagerLow(CNComponentManager):
     def reset_event_count(self, command_id: str):
         """Reset count function to reset sdp and csp events count and
         error dictionary"""
-        self.logger.info("Command_id local: %s", command_id)
         del self.event_dict[command_id]
         self.error_count = 0
         del self.command_mapping[command_id]
@@ -267,7 +266,7 @@ class CNComponentManagerLow(CNComponentManager):
         self.logger.debug(
             "Command mapping dictionary: %s", str(self.command_mapping)
         )
-        self.logger.info("Event dictionary: %s", self.event_dict)
+        self.logger.debug("Event dictionary: %s", self.event_dict)
 
         unique_ids = self.get_unique_ids()
         unique_id, result_code_or_exception_or_task_status = value
@@ -338,9 +337,10 @@ class CNComponentManagerLow(CNComponentManager):
             else:
                 expected_event_dict_len = 1
 
-            self.logger.info("Event dict at end: %s", self.event_dict)
             if len(self.event_dict[command_id]) == expected_event_dict_len:
-                self.logger.info("Moving to updating LRCR callback")
+                self.logger.info(
+                    "Triggering update of long running command result callback"
+                )
                 self.update_long_running_command_result_callback(command_id)
         except Exception as exception:
             self.logger.exception(

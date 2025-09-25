@@ -164,7 +164,7 @@ class CNComponentManager(TmcComponentManager):
         self._op_state_aggregator = None
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
-        # self.subarray_devname: str = ""
+        self.subarray_devname: str = ""
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()

@@ -61,16 +61,16 @@ k8s-test:
     - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT
     - make k8s-install-chart
     - make k8s-wait
-  # script:
-  #   - make k8s-test || true
-  #   - make k8s-test MARK=restart_device_server
-  #   - |
-  #     if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
-  #       make k8s-uninstall-chart || true
-  #       make k8s-delete-namespace || true
-  #     fi;
-  #   - '[ -f build/status ] || (echo "Something went wrong with the test (no build/status file); exit 1")'
-  #   - exit $(cat build/status)
+  script:
+    - make k8s-test || true
+    - make k8s-test MARK=restart_device_server
+    - |
+      if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
+        make k8s-uninstall-chart || true
+        make k8s-delete-namespace || true
+      fi;
+    - '[ -f build/status ] || (echo "Something went wrong with the test (no build/status file); exit 1")'
+    - exit $(cat build/status)
 
 k8s-test-low:
   extends:

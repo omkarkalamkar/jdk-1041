@@ -502,19 +502,6 @@ class CNComponentManagerMid(CNComponentManager):
                 break
         return False
 
-    def get_unique_ids(self) -> list:
-        """Provides unique id for processing long
-        running command result events.
-
-        Returns:
-            list: Provides list of unique ids under progress
-        """
-        unique_ids = []
-        for data in self.command_mapping.values():
-            for uid in data:
-                unique_ids.append(uid)
-        return unique_ids
-
     def update_long_running_command_result(
         self, dev_name: str, value: tuple
     ) -> None:
@@ -535,8 +522,6 @@ class CNComponentManagerMid(CNComponentManager):
             captured in this method
             value: longRunningCommandResult attribute event.
         """
-        # unique_ids = self.get_unique_ids()
-
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
@@ -1224,16 +1209,11 @@ class CNComponentManagerMid(CNComponentManager):
             message,
         ) = load_dish_cfg_aggregator.aggregate()
         self.load_dish_cfg_aggregated_result = load_dish_cfg_aggregated_result
-        self.logger.debug(
-            "Aggregated Result of load dish config is: %s",
-            self.load_dish_cfg_aggregated_result,
-        )
         if (
             self.load_dish_cfg_aggregated_result == ResultCode.FAILED
             and self.load_dish_cfg_command_id
         ):
             exception_message = f"Exception occurred on device: {message}"
-            self.logger.debug("calling LRCR callback with exception")
             self.long_running_result_callback(
                 self.load_dish_cfg_command_id,
                 ResultCode.FAILED,
