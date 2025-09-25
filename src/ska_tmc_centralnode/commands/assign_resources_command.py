@@ -55,17 +55,17 @@ class AssignResources(AssignReleaseResources):
             self.component_manager.command_timeout, logger
         )
 
-    def get_subarray_obsstate(self):
+    def get_subarray_obsstate(self) -> ObsState:
         """
         This method returns obsstate of subarray.
         """
-        self.logger.info("subarray_devname: %s", self.subarray_devname)
         return self.component_manager.get_subarray_obsstate(
             self.subarray_devname
         )
 
-    def set_command_id(self, command_name: str):
-        """Sets the command id for error propagation.
+    def set_command_id(self, command_name: str) -> None:
+        """
+        Sets the command id for error propagation.
         :param command_name: name of the command.
         :type command_name: str
         """
@@ -123,7 +123,6 @@ class AssignResources(AssignReleaseResources):
             self.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
-            self.logger.info("AssignResources command completed and returned")
         self.component_manager.command_in_progress = ""
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)

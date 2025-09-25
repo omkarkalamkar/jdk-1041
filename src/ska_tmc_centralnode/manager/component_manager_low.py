@@ -224,12 +224,8 @@ class CNComponentManagerLow(CNComponentManager):
         self.error_count = 0
         del self.command_mapping[command_id]
         self.logger.debug(
-            "Updated command mapping dictionary is: %s",
-            str(self.command_mapping),
-        )
-        self.logger.debug(
-            "Updated event dictionary is: %s",
-            str(self.event_dict),
+            "Command mapping dictionary: %s and event dictionary: %s",
+            str(self.command_mapping), str(self.event_dict)
         )
 
     def get_unique_ids(self) -> list:
@@ -266,8 +262,6 @@ class CNComponentManagerLow(CNComponentManager):
         self.logger.debug(
             "Command mapping dictionary: %s", str(self.command_mapping)
         )
-        self.logger.debug("Event dictionary: %s", self.event_dict)
-
         unique_ids = self.get_unique_ids()
         unique_id, result_code_or_exception_or_task_status = value
         if (
@@ -364,9 +358,9 @@ class CNComponentManagerLow(CNComponentManager):
             str: returns the command id with reference to unique id.
 
         """
-        for k, v in self.command_mapping.items():
-            if unique_id in v:
-                return k
+        for cmd_id, uids in self.command_mapping.items():
+            if unique_id in uids:
+                return cmd_id
         return None
 
     def update_long_running_command_result_callback(self, command_id) -> None:

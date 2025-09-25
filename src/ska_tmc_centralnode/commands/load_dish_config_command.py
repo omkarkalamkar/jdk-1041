@@ -47,7 +47,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.dish_cfg_params: str = ""
         self.dish_vcc_config_json: dict = {}
 
-    def set_command_id(self, command_name: str):
+    def set_command_id(self, command_name: str) -> None:
         """Sets the command id for error propagation.
         :param command_name: name of the command.
         :type command_name: str

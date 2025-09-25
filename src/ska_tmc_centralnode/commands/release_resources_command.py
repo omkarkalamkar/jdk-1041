@@ -57,7 +57,7 @@ class ReleaseResources(AssignReleaseResources):
             self.component_manager.command_timeout, logger
         )
 
-    def set_command_id(self, command_name: str):
+    def set_command_id(self, command_name: str) -> None:
         """Sets the command id for error propagation.
         :param command_name: name of the command.
         :type command_name: str
@@ -69,7 +69,7 @@ class ReleaseResources(AssignReleaseResources):
             command_name,
         )
 
-    def get_subarray_obsstate(self):
+    def get_subarray_obsstate(self) -> ObsState:
         """
         This method returns obsstate of subarray.
         """
