@@ -148,12 +148,6 @@ def test_release_resources_mid_timeout(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
@@ -187,7 +181,7 @@ def test_release_resources_mid_timeout(
                 )
             ),
         ),
-        lookahead=8,
+        lookahead=4,
     )
     subarray_proxy.SetDefective(RESET_DEFECT)
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
@@ -392,12 +386,6 @@ def test_release_resources_error_propagation(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
@@ -586,12 +574,6 @@ def test_release_resources_error_aggregation(
 
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
-
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
