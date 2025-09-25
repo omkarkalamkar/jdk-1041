@@ -2,6 +2,7 @@
 
 import json
 import threading
+import time
 from typing import Callable, Optional, Tuple
 
 from retry import retry
@@ -45,6 +46,18 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.dish_cfg = self.component_manager.event_manager_object
         self.dish_cfg_params: str = ""
         self.dish_vcc_config_json: dict = {}
+
+    def set_command_id(self, command_name: str):
+        """Sets the command id for error propagation.
+        :param command_name: name of the command.
+        :type command_name: str
+        """
+        self.command_id = f"{time.time()}-{command_name}"
+        self.logger.info(
+            "Setting command id as %s for command: %s",
+            self.command_id,
+            command_name,
+        )
 
     def load_dish_cfg(
         self,

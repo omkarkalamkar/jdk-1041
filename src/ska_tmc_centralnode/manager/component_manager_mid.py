@@ -1233,6 +1233,7 @@ class CNComponentManagerMid(CNComponentManager):
             and self.load_dish_cfg_command_id
         ):
             exception_message = f"Exception occurred on device: {message}"
+            self.logger.debug("calling LRCR callback with exception")
             self.long_running_result_callback(
                 self.load_dish_cfg_command_id,
                 ResultCode.FAILED,
