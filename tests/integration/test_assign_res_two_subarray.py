@@ -159,8 +159,8 @@ def test_assign_res_with_two_subarray_mid(
     input_json,
     change_event_callbacks,
     json_factory,
-    set_low_devices_availability_for_aggregation,
-    set_low_sdp_csp_mccs_admin_modes,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+    set_mid_sdp_csp_admin_modes,
 ):
     """Test assign Resources command for Mid"""
 
