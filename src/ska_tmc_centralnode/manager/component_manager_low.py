@@ -225,7 +225,8 @@ class CNComponentManagerLow(CNComponentManager):
         del self.command_mapping[command_id]
         self.logger.debug(
             "Command mapping dictionary: %s and event dictionary: %s",
-            str(self.command_mapping), str(self.event_dict)
+            str(self.command_mapping),
+            str(self.event_dict),
         )
 
     def get_unique_ids(self) -> list:
