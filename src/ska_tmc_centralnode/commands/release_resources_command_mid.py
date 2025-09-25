@@ -58,7 +58,7 @@ class ReleaseResourcesMid(ReleaseResources):
             if str(subarray_id) in adapter.dev_name:
                 self.subarray_adapter = adapter
                 self.subarray_devname = adapter.dev_name
-                self.component_manager.subarray_devname = adapter.dev_name
+                # self.component_manager.subarray_devname = adapter.dev_name
 
         if self.subarray_adapter is None:
             return (
@@ -83,6 +83,11 @@ class ReleaseResourcesMid(ReleaseResources):
                     self.component_manager.command_mapping[
                         self.command_id
                     ] = message_or_unique_id
+            self.logger.info(
+                "Command ID: %s |  Release Resources invoked successfully on: %s",
+                self.command_id,
+                self.subarray_adapter,
+            )
             return (ResultCode.OK, "")
         return (
             ResultCode.FAILED,

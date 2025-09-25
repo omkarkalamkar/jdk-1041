@@ -123,7 +123,7 @@ class ReleaseResources(AssignReleaseResources):
             adapter: Adapter
 
         Returns:
-            Tuple(list, list): Tuple of list of ResulCodes
+            Tuple(list, list): Tuple of list of ResultCodes
             and lists of messages.
 
         """
