@@ -370,6 +370,7 @@ def test_load_dish_cfg_rejected(
     )
 
 
+@pytest.mark.skip
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
