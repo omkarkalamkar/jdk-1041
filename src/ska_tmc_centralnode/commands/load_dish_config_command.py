@@ -58,6 +58,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.command_id,
             command_name,
         )
+        self.component_manager.command_id = self.command_id
 
     def load_dish_cfg(
         self,
