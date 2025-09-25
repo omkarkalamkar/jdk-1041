@@ -84,7 +84,8 @@ class ReleaseResourcesMid(ReleaseResources):
                         self.command_id
                     ] = message_or_unique_id
             self.logger.info(
-                "Command ID: %s |  Release Resources invoked successfully on: %s",
+                "Command ID: %s |  Release Resources "
+                "invoked successfully on: %s",
                 self.command_id,
                 self.subarray_adapter,
             )
