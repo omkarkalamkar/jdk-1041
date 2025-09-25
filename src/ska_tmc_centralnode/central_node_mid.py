@@ -92,6 +92,26 @@ class MidTmcCentralNode(AbstractCentralNode):
         doc="the valid k-value range",
     )
 
+    GPMVersion = device_property(dtype="str", default_value="")
+
+    GPMInterface = device_property(
+        dtype="str",
+        doc="Default GPM interface",
+        default_value="",
+    )
+
+    GPMDataSourcesPrefix = device_property(
+        dtype="str",
+        doc="Default GPM data source prefix",
+        default_value="",
+    )
+
+    GPMFilePathPrefix = device_property(
+        dtype="str",
+        doc="Default GPM data file path prefix",
+        default_value="",
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -127,6 +147,11 @@ class MidTmcCentralNode(AbstractCentralNode):
     )
 
     DishVccValidationStatus = attribute(
+        dtype=str,
+        access=AttrWriteType.READ,
+    )
+
+    GlobalPointingModelStatus = attribute(
         dtype=str,
         access=AttrWriteType.READ,
     )
@@ -214,6 +239,7 @@ class MidTmcCentralNode(AbstractCentralNode):
                 "isDishVccConfigSet",
                 "DishVccValidationStatus",
                 "DishVccCommandStatus",
+                "GlobalPointingModelStatus",
             ]:
                 self._device.set_change_event(attribute_name, True, False)
                 self._device.set_archive_event(attribute_name, True)
@@ -250,6 +276,10 @@ class MidTmcCentralNode(AbstractCentralNode):
     def read_DishVccCommandStatus(self):
         """Return the DishVccCommandStatus attribute."""
         return self.component_manager.dish_vcc_command_status
+
+    def read_GlobalPointingModelStatus(self):
+        """Return the DishVccCommandStatus attribute."""
+        return json.dumps(self.component_manager.global_pointing_model_status)
 
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(
@@ -291,8 +321,15 @@ class MidTmcCentralNode(AbstractCentralNode):
             invoke_load_dish_cfg_command_callback=(
                 self.invoke_load_dish_cfg_command_callback
             ),
+            invoke_set_gpm_command_callback=(
+                self.invoke_set_gpm_command_callback
+            ),
             enable_dish_vcc_init=self.EnableDishVccInit,
             subarray_trl_prefix=self.SubarrayPrefix,
+            gpm_version=self.GPMVersion,
+            gpm_interface=self.GPMInterface,
+            gpm_data_sources_prefix=self.GPMDataSourcesPrefix,
+            gpm_file_path_prefix=self.GPMFilePathPrefix,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
@@ -330,16 +367,20 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         super().init_command_objects()
         # LoadDishCfg command is specific to Mid so register it in Mid only
-        self.register_command_object(
-            "LoadDishCfg",
-            SubmittedSlowCommand(
-                "LoadDishCfg",
-                self._command_tracker,
-                self.component_manager,
-                "load_dish_cfg",
-                logger=None,
-            ),
-        )
+        for command_name, method_name in [
+            ("LoadDishCfg", "load_dish_cfg"),
+            ("SetGlobalPointingModel", "set_gpm_version"),
+        ]:
+            self.register_command_object(
+                command_name,
+                SubmittedSlowCommand(
+                    command_name,
+                    self._command_tracker,
+                    self.component_manager,
+                    method_name,
+                    logger=None,
+                ),
+            )
 
     def invoke_load_dish_cfg_command_callback(self):
         """This callback is called when dishVccValidationResult is Unknown
@@ -350,6 +391,16 @@ class MidTmcCentralNode(AbstractCentralNode):
             self.component_manager.get_default_dish_vcc_config_params()
         )
         handler(dish_cfg_json)
+
+    def invoke_set_gpm_command_callback(self):
+        """This callback is called when dishVccValidationResult is Unknown
+        and Central Node needs to load dish cfg on csp
+        """
+
+        handler = self.get_command_object("SetGlobalPointingModel")
+        handler(
+            json.dumps(self.component_manager.get_default_gpm_version_params())
+        )
 
     def is_LoadDishCfg_allowed(self):
         """
@@ -387,6 +438,57 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         """
         handler = self.get_command_object("LoadDishCfg")
+        result_code, unique_id = handler(argin)
+        return [[result_code], [str(unique_id)]]
+
+    def is_setGlobalPointingModel_allowed(self):
+        """
+        Checks whether setGlobalPointingModel command is allowed to be run
+        in current device state.
+
+        :rtype: boolean
+        """
+        return True
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def SetGlobalPointingModel(self, argin):
+        """
+        SetGlobalPointingModel command to send the GPM URI to dish leaf
+        nodes. This command gets a dictionary in following form:
+
+        .. code-block::
+            :caption: Example
+
+            {
+                # Versioned tag of git where all the GPM files are available
+                # for applying to the respective dishes for their respective
+                # bands.
+                "version": "1.0",
+                "receptors":
+                    {
+                        "SKA001":['Band_1','Band_2'],
+                        "SKA002":['Band_2']
+                    }
+            }
+            Data formed for Dish Leaf node ApplyPointingModel command:
+            {
+                "interface": "https://schema.skao.int/ska-mid-global
+                -pointing-model/1.0",
+                "tm_data_sources":
+                ["car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simu
+                lators?1.0#tmdata"],
+                "tm_data_filepath":
+                "instrument/ska_mid1/global_pointing_model_data/gpm-
+                ska001-Band_1.json"
+            }
+        """
+        handler = self.get_command_object("SetGlobalPointingModel")
         result_code, unique_id = handler(argin)
         return [[result_code], [str(unique_id)]]
 

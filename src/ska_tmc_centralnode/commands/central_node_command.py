@@ -694,3 +694,62 @@ class LoadDishCfgCommand(CentralNodeCommand):
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}",
             )
         return (ResultCode.OK, "")
+
+
+class SetDishGPM(CentralNodeCommand):
+    """This command class for SetGlobalPointingModel command which
+    forms GPM json CAR URI and pass it to TMC Dish Leaf Node.
+    """
+
+    def __init__(
+        self,
+        component_manager,
+        adapter_factory: Optional[AdapterFactory] = None,
+        *args,
+        logger=None,
+        **kwargs,
+    ):
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
+        self._adapter_factory = adapter_factory or AdapterFactory()
+        self.csp_mln_adapter = None
+        self.sdp_mln_adapter = None
+        self.subarray_adapters = []
+        self.dish_adapters = []
+
+    def init_adapters_mid(self) -> Tuple[ResultCode, str]:
+        """Initialises Adapters for mid"""
+        self.csp_mln_adapter: Optional[AdapterFactory] = None
+        self.sdp_mln_adapter: Optional[AdapterFactory] = None
+        self.subarray_adapters: Optional[AdapterFactory] = []
+        self.dish_adapters = []
+        error_dev_names = []
+        num_working = 0
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
+            if not devInfo.unresponsive:
+                try:
+                    self.dish_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.DISH
+                        )
+                    )
+                    num_working += 1
+                    self.logger.debug(
+                        "Adapter is created for DishLeafNode: %s", dev_name
+                    )
+                except Exception as e:
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
+                        dev_name,
+                        str(e),
+                    )
+                    error_dev_names.append(dev_name)
+
+        if num_working == 0:
+            return (
+                ResultCode.FAILED,
+                f"Error in creating dish adapters {'.'.join(error_dev_names)}",
+            )
+        return (ResultCode.OK, "")

@@ -181,8 +181,8 @@ def check_internal_model(device_list):
 
 @then(
     parsers.parse(
-        "the {command_name} command is executed successfully\
-              on lower level devices"
+        "the {command_name} command is executed \
+            successfully on lower level devices"
     )
 )
 def check_command(central_node, command_name, change_event_callbacks):
@@ -220,12 +220,13 @@ def check_command(central_node, command_name, change_event_callbacks):
             lookahead=4,
         )
         command_id, result = next_result["attribute_value"]
+        result = json.loads(result)[0]
     assert command_id == unique_id
     assert int(result) == ResultCode.OK or int(result) == ResultCode.FAILED
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandsInQueue",
-        None,
+        (),
         lookahead=4,
     )
 

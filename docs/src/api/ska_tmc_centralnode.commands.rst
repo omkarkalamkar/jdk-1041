@@ -68,6 +68,14 @@ ska\_tmc\_centralnode.commands.load\_dish\_config\_command module
    :undoc-members:
    :show-inheritance:
 
+ska\_tmc\_centralnode.commands.set\_global\_pointing\_model module
+------------------------------------------------------------------
+
+.. automodule:: ska_tmc_centralnode.commands.set_global_pointing_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

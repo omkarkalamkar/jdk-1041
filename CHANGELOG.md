@@ -5,6 +5,14 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.23.0]
+********
+Added
+-----
+* Added SetGlobalPointingModel command to apply GPM to specified bands for given dish.
+* Added GlobalPointingModelStatus to view the GPM status on dishes.
+* Handled GPM initialization and Restart scenarios.
+
 [0.22.0]
 ********
 Added
