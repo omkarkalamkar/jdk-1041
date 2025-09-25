@@ -403,8 +403,7 @@ def test_release_resources_mid_timeout(
         lookahead=6,
     )
 
-    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(TIMEOUT_DEFECT)
+    subarray_proxy.SetDefective(TIMEOUT_DEFECT)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
 
     result, unique_id = central_node.ReleaseResources(
@@ -433,11 +432,11 @@ def test_release_resources_mid_timeout(
         ),
         lookahead=8,
     )
-    tmc_subarray.SetDefective(RESET_DEFECT)
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    subarray_proxy.SetDefective(RESET_DEFECT)
+    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    tmc_subarray.ClearCommandCallInfo()
+    subarray_proxy.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
