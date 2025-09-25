@@ -1224,6 +1224,10 @@ class CNComponentManagerMid(CNComponentManager):
             message,
         ) = load_dish_cfg_aggregator.aggregate()
         self.load_dish_cfg_aggregated_result = load_dish_cfg_aggregated_result
+        self.logger.debug(
+            "Aggregated Result of load dish config is: %s",
+            self.load_dish_cfg_aggregated_result,
+        )
         if (
             self.load_dish_cfg_aggregated_result == ResultCode.FAILED
             and self.load_dish_cfg_command_id
