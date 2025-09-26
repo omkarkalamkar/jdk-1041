@@ -78,7 +78,7 @@ def invoke_assignresources_on_subarrays(
     )
 
 
-@when("release the resources from both the subarrays")
+@when("resources are released from both the subarrays")
 def invoke_release_resources_subarray(
     central_node, json_factory, change_event_callbacks
 ):
