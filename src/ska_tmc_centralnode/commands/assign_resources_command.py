@@ -123,7 +123,6 @@ class AssignResources(AssignReleaseResources):
             self.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
-        self.component_manager.command_in_progress = ""
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)
 

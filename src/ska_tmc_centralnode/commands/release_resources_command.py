@@ -73,7 +73,6 @@ class ReleaseResources(AssignReleaseResources):
         """
         This method returns obsstate of subarray.
         """
-        self.logger.info("subarray_devname: %s", self.subarray_devname)
         return self.component_manager.get_subarray_obsstate(
             self.subarray_devname
         )
@@ -122,7 +121,6 @@ class ReleaseResources(AssignReleaseResources):
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)
-        self.component_manager.command_in_progress = ""
         self.component_manager.subsystem_assigned_per_subarray.pop(
             self.subarray_id
         )
