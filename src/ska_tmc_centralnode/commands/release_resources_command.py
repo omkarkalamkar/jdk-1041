@@ -123,9 +123,6 @@ class ReleaseResources(AssignReleaseResources):
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)
         self.component_manager.command_in_progress = ""
-        self.component_manager.subsystem_assigned_per_subarray.pop(
-            self.subarray_id
-        )
 
     def release_all_resources(
         self, adapter

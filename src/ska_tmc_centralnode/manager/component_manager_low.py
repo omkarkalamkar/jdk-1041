@@ -9,9 +9,10 @@ package.
 
 import json
 import time
+from collections import defaultdict
 from logging import Logger
 from queue import Queue
-from typing import Callable
+from typing import Callable, Dict
 
 from ska_control_model import AdminMode
 from ska_tango_base.base import TaskCallbackType
@@ -164,6 +165,12 @@ class CNComponentManagerLow(CNComponentManager):
             telescope="low",
         )
         self.aggregation_process.start_aggregation_process()
+        self.subsystem_assigned_per_subarray: Dict[int, list] = defaultdict(
+            list
+        )
+        self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
+            list
+        )
 
     @property
     def assign_resources_schema_version(self) -> str:

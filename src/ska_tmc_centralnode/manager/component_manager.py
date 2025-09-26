@@ -168,12 +168,6 @@ class CNComponentManager(TmcComponentManager):
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()
-        self.subsystem_assigned_per_subarray: Dict[int, list] = defaultdict(
-            list
-        )
-        self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
-            list
-        )
         self.no_of_events_for_command = 0
 
         self.supported_commands = (
