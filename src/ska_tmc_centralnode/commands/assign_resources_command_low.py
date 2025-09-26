@@ -55,7 +55,6 @@ class AssignResourcesLow(AssignResources):
 
         """
         try:
-            self.component_manager.subsystems_to_config = []
             json_argument = json.loads(argin)
             self.logger.debug(
                 "Command ID: %s | Executing AssignResources "
@@ -68,25 +67,25 @@ class AssignResourcesLow(AssignResources):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", exception),
             )
-
-        self.component_manager.subsystems_to_config = SUB_SYSTEMS.intersection(
-            json_argument.keys()
+        assigned_subsystem: list = list(
+            SUB_SYSTEMS.intersection(json_argument.keys())
         )
 
+        self.component_manager.subsystem_assigned_per_subarray[
+            self.subarray_id
+        ] = assigned_subsystem
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        subarrayID = int(json_argument["subarray_id"])
-
-        result_code, message = self.get_subarray_adapter(subarrayID)
+        result_code, message = self.get_subarray_adapter(self.subarray_id)
         if result_code == ResultCode.FAILED:
             return result_code, message
 
         if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarrayID),
+                ("SubArray Id %s is not existing!", self.subarray_id),
             )
 
         return_codes, message_or_unique_ids = self.send_command(
@@ -109,7 +108,10 @@ class AssignResourcesLow(AssignResources):
             )
 
         if (
-            "mccs" in self.component_manager.subsystems_to_config
+            "mccs"
+            in self.component_manager.subsystem_assigned_per_subarray[
+                self.subarray_id
+            ]
             and not self.is_auto_recovery_enabled
         ):
             try:
@@ -142,7 +144,9 @@ class AssignResourcesLow(AssignResources):
                     ResultCode.FAILED,
                     message_or_unique_id,
                 )
-
+            self.component_manager.subsystem_assigned_per_command_id[
+                self.command_id
+            ] = assigned_subsystem
         return (ResultCode.OK, "")
 
     def create_mccs_cmd_data(self, json_argument: dict) -> dict:

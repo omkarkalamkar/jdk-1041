@@ -325,7 +325,7 @@ class CNComponentManagerLow(CNComponentManager):
             # need to be considered as the command gets invoked on both
             # SubarrayNode and MCCS subsystem.
             if (
-                "mccs" in self.subsystems_to_config
+                "mccs" in self.subsystem_assigned_per_command_id[command_id]
                 and not self.is_auto_recovery_enabled
             ):
                 expected_event_dict_len = 2
@@ -655,7 +655,7 @@ class CNComponentManagerLow(CNComponentManager):
             self.validate_release_json(argin)
 
             self.check_availability_for_release(argin)
-
+            release_resources_command.subarray_id = self.get_subarray_id(argin)
             task_status, response = self.submit_task(
                 release_resources_command.release_resources,
                 kwargs={"argin": argin},
