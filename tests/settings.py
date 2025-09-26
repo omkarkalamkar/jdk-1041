@@ -463,6 +463,7 @@ def check_lrcr_events(
     command_name: str,
     result_to_check: ResultCode = ResultCode.OK,
     retries: int = 20,
+    callback_name: str = "longRunningCommandResult",
 ):
     """Used to assert command name and result code in
        longRunningCommandResult event callbacks.
@@ -477,8 +478,9 @@ def check_lrcr_events(
     COUNT = 0
     flag = False
     while not flag and COUNT <= retries:
-        assertion_data = change_event_callback.assert_change_event(
-            "longRunningCommandResult",
+        assertion_data = change_event_callback[
+            callback_name
+        ].assert_change_event(
             Anything,
             lookahead=15,
         )

@@ -224,7 +224,6 @@ def test_off_command_dish_fail(
     tmc_dish.ClearCommandCallInfo()
 
 
-@pytest.mark.new
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_off_command_low(

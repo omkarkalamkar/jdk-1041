@@ -29,6 +29,25 @@ class AssignResourcesLow(AssignResources):
         )
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
 
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ) -> None:
+        """
+        Updates the task status for command ReleaseResources
+
+        Args:
+            result: A tuple containing the result code and a message.
+                The result code indicates whether the command
+                succeeded or failed.
+            exception (str): A string representing any exception message.
+                This is used when the result indicates a failure.
+                Default is an empty string.
+        """
+        super().update_task_status(result, exception)
+        self.component_manager.subsystem_assigned_per_command_id.pop(
+            self.command_id, None
+        )
+
     # pylint:disable=signature-differs
     def do(self, argin: str) -> Tuple[ResultCode, str]:
         """
