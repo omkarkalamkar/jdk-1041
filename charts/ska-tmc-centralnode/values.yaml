@@ -9,7 +9,6 @@ telescope: SKA-mid
 
 legacy_compatibility: true
 
-subarray_count: 1
 dishes: ["01"]
 
 labels:
@@ -48,12 +47,11 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.23.0
+    tag: 0.24.0
     pullPolicy: IfNotPresent
 
 resources:
   limits:
-
     memory: 500Mi
   requests:
     cpu: 150m
@@ -70,12 +68,12 @@ deviceServers:
   centralnode:
     enabled: true
     instances: ["01"]
+    subarray_count: 2
     command: "CentralNodeDS"
-    subarray_count: 1
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
-    member : "0"
+    member: "0"
 
     mid:
       file: "data/centralnode_mid.yaml"

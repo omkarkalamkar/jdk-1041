@@ -50,7 +50,9 @@ LOW_CSP_SLN_DEVICE = "low-tmc/subarray-leaf-node-csp/01"
 MID_SDP_SLN_DEVICE = "mid-tmc/subarray-leaf-node-sdp/01"
 LOW_SDP_SLN_DEVICE = "low-tmc/subarray-leaf-node-sdp/01"
 MID_SUBARRAY_DEVICE = "mid-tmc/subarray/01"
+MID_SUBARRAY2_DEVICE = "mid-tmc/subarray/02"
 LOW_SUBARRAY_DEVICE = "low-tmc/subarray/01"
+LOW_SUBARRAY2_DEVICE = "low-tmc/subarray/02"
 DISH_LEAF_NODE_DEVICE = "mid-tmc/leaf-node-dish/ska001"
 DISH_MASTER_DEVICE = "ska001/elt/master"
 MID_SDP_MASTER_DEVICE = "mid-sdp/control/0"
@@ -461,6 +463,7 @@ def check_lrcr_events(
     command_name: str,
     result_to_check: ResultCode = ResultCode.OK,
     retries: int = 20,
+    callback_name: str = "longRunningCommandResult",
 ):
     """Used to assert command name and result code in
        longRunningCommandResult event callbacks.
@@ -475,8 +478,9 @@ def check_lrcr_events(
     COUNT = 0
     flag = False
     while not flag and COUNT <= retries:
-        assertion_data = change_event_callback.assert_change_event(
-            "longRunningCommandResult",
+        assertion_data = change_event_callback[
+            callback_name
+        ].assert_change_event(
             Anything,
             lookahead=15,
         )

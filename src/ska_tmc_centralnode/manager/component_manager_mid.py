@@ -522,13 +522,6 @@ class CNComponentManagerMid(CNComponentManager):
             captured in this method
             value: longRunningCommandResult attribute event.
         """
-        self.logger.debug(
-            "Command ID: %s | longRunningCommandResult event for "
-            + "device %s. Event value: %s",
-            self.command_id,
-            dev_name,
-            str(value),
-        )
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
@@ -536,6 +529,14 @@ class CNComponentManagerMid(CNComponentManager):
             or unique_id not in self.command_mapping.values()
         ):
             return
+        command_id = self.get_command_id(unique_id)
+        self.logger.debug(
+            "Command ID: %s | longRunningCommandResult event for "
+            + "device %s. Event value: %s",
+            command_id,
+            dev_name,
+            str(value),
+        )
         try:
             result_code, message = json.loads(
                 result_code_or_exception_or_task_status
@@ -546,7 +547,7 @@ class CNComponentManagerMid(CNComponentManager):
                     self.logger.debug(
                         "Command ID: %s | Command with Unique ID %s on "
                         + "%s succeeded.",
-                        self.command_id,
+                        command_id,
                         str(unique_id),
                         dev_name,
                     )
@@ -560,7 +561,7 @@ class CNComponentManagerMid(CNComponentManager):
                         "Command ID: %s | Updating LRCRCallback with "
                         + "ResultCode: %s and Message: %s "
                         + "for command %s on  %s.",
-                        self.command_id,
+                        command_id,
                         ResultCode(result_code),
                         message,
                         str(unique_id),
@@ -571,7 +572,6 @@ class CNComponentManagerMid(CNComponentManager):
                         f"Exception occurred on device: {unique_id}: "
                         f"{dev_name}: {message}"
                     )
-                    command_id = self.get_command_id(unique_id)
                     self.long_running_result_callback(
                         command_id,
                         ResultCode.FAILED,
@@ -582,28 +582,10 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.exception(
                 "Command ID: %s | Exception occurred while processing "
                 + "long running command result on %s: %s",
-                self.command_id,
+                command_id,
                 dev_name,
                 exception,
             )
-
-    def get_command_id(self, unique_id: int) -> str:
-        """
-        This Method is used to get command
-        it from the command mapping dictionary
-        Args:
-            unique_id (int): unique id of the command
-
-        Returns:
-            str: returns the command id with reference to unique id.
-        """
-        index_of_unique_id = list(self.command_mapping.values()).index(
-            unique_id
-        )  # get index location of unique_id received in event
-        command_id = list(self.command_mapping.keys())[
-            index_of_unique_id
-        ]  # command id mapped to unique id
-        return command_id
 
     def update_device_state(self, device_name: str, state: DevState) -> None:
         """
@@ -1444,6 +1426,7 @@ class CNComponentManagerMid(CNComponentManager):
                 logger=self.logger,
             )
             self.validate_assign_json(argin)
+            assign_resources_command.subarray_id = self.get_subarray_id(argin)
             task_status, response = self.submit_task(
                 assign_resources_command.assign_resources,
                 kwargs={"argin": argin},

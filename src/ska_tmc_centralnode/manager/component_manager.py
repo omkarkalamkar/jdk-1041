@@ -164,12 +164,9 @@ class CNComponentManager(TmcComponentManager):
         self._op_state_aggregator = None
         self.long_running_result_callback = LRCRCallback(self.logger)
         self.command_in_progress: str = ""
-        self.subarray_devname: str = ""
         self.command_mapping = {}
         self.result_codes_mapping = {}
         self.rlock = threading.RLock()
-        self.subsystems_to_config = []
-
         self.no_of_events_for_command = 0
 
         self.supported_commands = (
@@ -519,17 +516,18 @@ class CNComponentManager(TmcComponentManager):
         return self.component.devices
 
     # pylint:disable =inconsistent-return-statements
-    def get_subarray_obsstate(self) -> ObsState:
+    def get_subarray_obsstate(self, subarray_devname: str) -> ObsState:
         """
         Get Current device obsState
 
-        :return: current obsstate
-        :rtype: ObsState
-        """
-        if self.subarray_devname:
-            return self.get_device(self.subarray_devname).obs_state
+        Args:
+            subarray_devname (str): subarray device name
 
-        # return self.get_device(self.subarray_devname).obs_state
+        Returns:
+            ObsState: current obsstate
+        """
+        if subarray_devname:
+            return self.get_device(subarray_devname).obs_state
 
     def get_device(self, device_name):
         """
@@ -1160,6 +1158,21 @@ class CNComponentManager(TmcComponentManager):
         :rtype: _type_
         """
         return json.loads(argin).get("subarray_id")
+
+    def get_command_id(self, unique_id):
+        """
+        Returns the command id mapped to the given unique_id.
+
+        Args:
+            unique_id: unique id of the command
+
+        Returns:
+            str: command id corresponding to unique_id
+        """
+        for cmd_id, uids in self.command_mapping.items():
+            if unique_id in uids:
+                return cmd_id
+        return None
 
     def command_not_allowed_callable(
         self,

@@ -387,11 +387,9 @@ def test_assign_resources_exception_propagation(
         lookahead=4,
     )
 
-    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(ERROR_PROPAGATION_DEFECT)
-
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    subarray_proxy.SetDefective(ERROR_PROPAGATION_DEFECT)
 
     result, unique_id = central_node.AssignResources(
         json_factory("command_AssignResources")
@@ -416,10 +414,10 @@ def test_assign_resources_exception_propagation(
     )
     assert exception_message in event_data["attribute_value"][1]
 
-    tmc_subarray.SetDefective(RESET_DEFECT)
+    subarray_proxy.SetDefective(RESET_DEFECT)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    tmc_subarray.ClearCommandCallInfo()
+    subarray_proxy.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
