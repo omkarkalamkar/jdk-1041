@@ -5,6 +5,20 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.24.0]
+********
+Added
+-----
+* Added test case for skb-908.
+* Added test case for skb-1051.
+
+Updated
+-----
+* Updated AssignResources and ReleaseResources commands to use command class id.
+* Updated deployment to support 2 subarrays.
+* Updated logic to track subsystems assigned per subbarray.
+* Updated ska-tmc-common version to 0.34.0
+
 [0.23.0]
 ********
 Added
@@ -36,19 +50,19 @@ Fixed
 Fixed
 -----
 * Resolve bug SKB-813
-* TelescopeAvailability attribute for mid deployment does not reflect mccs master leafnode availability 
+* TelescopeAvailability attribute for mid deployment does not reflect mccs master leafnode availability
 
 [0.21.1]
 ********
 Updated
 --------
-* Used latest changes from common for CommandTimeout 
+* Used latest changes from common for CommandTimeout
 
 [0.21.0]
 ********
 Updated
 --------
-* Updated AssignResources and ReleaseResources commands to work with specified subsystem configurations 
+* Updated AssignResources and ReleaseResources commands to work with specified subsystem configurations
 
 
 [0.20.3]
@@ -56,7 +70,7 @@ Updated
 Added
 --------
 * CommandTimeout attribute is introduced which can help to update timeout without redeployment.
-* CommandTimeOutDefault property is introduced which 
+* CommandTimeOutDefault property is introduced which
   can be used to set default value at the time of deployment.
 * Update docker with latest base images
 
@@ -76,7 +90,7 @@ Updated
 --------
 * Telmodel version 1.23.0.
 * CDM version 12.10.0.
-* Test assign resource jsons to MID v2.2 and LOW v4.1 compatible with SDP v1.0 assign json. 
+* Test assign resource jsons to MID v2.2 and LOW v4.1 compatible with SDP v1.0 assign json.
 
 [0.20.0]
 ********
@@ -90,7 +104,7 @@ Added
 
 [0.19.7]
 ********
-Added 
+Added
 -------
 * Added retry mechanism to device responsiveness check in component manager to fix SKB-860 .
 
@@ -124,7 +138,7 @@ Updated
 
 [0.19.1]
 ********
-* Added changes in the logs as per Logging Guidelines 
+* Added changes in the logs as per Logging Guidelines
 * Added Command ID in logs and fixed logging levels .
 
 [0.19.0]
@@ -156,7 +170,7 @@ Removed
 
 [0.17.7]
 ********
-* Updated event receiver to include state and healthState subscription 
+* Updated event receiver to include state and healthState subscription
 * This is branch release and does not include ADR-9 changes
 
 
@@ -182,12 +196,12 @@ Removed
 ********
 * Updated state, health state and load dish config result event receiver with queue mechanism.
 * Removed unused attributes from mid and low.
-  
+
 [0.17.1]
 ********
 * Fix telescope ON issue.
 * Change event receiver with queue mechanism.
-  
+
 [0.17.0]
 ********
 * Resolved SKB-665 and SKB-525 with updated ska-tmc-common with command callback tracker updates
@@ -199,11 +213,11 @@ Removed
 [0.16.8]
 ********
 * Added retry mechanism while downloading tel-model resources to resolve SKB-495.
-  
+
 [0.16.7]
 ********
 * Utilised ska-tmc-common v0.20.2 with liveliness probe updated to track device with full trl.
-  
+
 [0.16.6]
 ********
 * Utilised ska-tmc-common v0.20.0 with liveliness probe changes.
@@ -215,21 +229,21 @@ Removed
 [0.16.4]
 ********
 * set and push archive events for all the attributes
-  
+
 [0.16.3]
 ********
 * Fixed long running command result handling in component manager for result code ABORTED
-  
+
 [0.16.2]
 ********
 * Fix long running command result handling in component manager
-  
+
 [0.16.1]
 ********
 * Utilised ska-telmodel v1.17.0
 * Updated Assignresources json(interface v.4.0)
 * Removed custom validations and added telmodel validation for Assignresources and Releaseresources commands.
-* Included base classes v.1.0.0 updates 
+* Included base classes v.1.0.0 updates
 
 [0.15.2]
 ********
