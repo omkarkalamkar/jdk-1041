@@ -112,7 +112,7 @@ def invoke_release_resources_subarray(
     )
 
 
-@then("the command is executed successfully on both the subarray_node")
+@then("the command is executed successfully on both the subarrays")
 def verify_subarraynode():
     """Method verifies if release was invoked on subarray node"""
     subarray_proxy = DeviceProxy(LOW_SUBARRAY_DEVICE)
