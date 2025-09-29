@@ -129,7 +129,7 @@ class CNComponentManagerLow(CNComponentManager):
             LOW_RELEASE_RESOURCES_SCHEMA_VERSION
         )
         telescope_availability["tmc_subarrays"] = self.subarray_availability
-        self.set_telescope_availability = telescope_availability
+        self.set_telescope_availability(telescope_availability)
 
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorLow(self, self.logger)

@@ -274,7 +274,7 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
                         "sdp_master_leaf_node"
                     ] = self._component_manager.sdp_mln_availability
 
-            self._component_manager.set_telescope_availability = (
+            self._component_manager.set_telescope_availability(
                 telescope_availability
             )
 
@@ -335,7 +335,7 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                         "mccs_master_leaf_node"
                     ] = self._component_manager.mccs_mln_availability
 
-            self._component_manager.set_telescope_availability = (
+            self._component_manager.set_telescope_availability(
                 telescope_availability
             )
 
