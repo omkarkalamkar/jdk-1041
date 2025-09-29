@@ -1367,15 +1367,10 @@ class CNComponentManager(TmcComponentManager):
         """
         subarray_id = self.get_subarray_id(argin)
         self.logger.info("subarray_id: %s", subarray_id)
-        subarray_suffics = "/" + str(subarray_id).zfill(2)
-        self.logger.info("subarray_suffics: %s", subarray_suffics)
+        subarray = self.subarray_trl_prefix + str(subarray_id).zfill(2)
+        self.logger.info("subarray device name: %s", subarray)
         telescope_availability = self.get_telescope_availability()
         self.logger.info("telescope_availability: %s", telescope_availability)
-        subarrays_list = telescope_availability["tmc_subarrays"].keys()
-        self.logger.info("subarrays_list: %s", subarrays_list)
-        for subarray in subarrays_list:
-            if (
-                subarray.endswith(subarray_suffics)
-                and telescope_availability["tmc_subarrays"][subarray] is False
-            ):
-                raise Exception(f"Subarray {subarray} is not available.")
+        subarray_availability = telescope_availability.get(subarray)
+        if subarray_availability is False:
+            raise Exception(f"Subarray {subarray} is not available.")
