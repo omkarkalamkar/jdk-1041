@@ -9,7 +9,6 @@ telescope: SKA-mid
 
 legacy_compatibility: true
 
-subarray_count: 2
 dishes: ["01"]
 
 labels:
