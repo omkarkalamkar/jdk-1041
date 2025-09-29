@@ -587,21 +587,6 @@ class CNComponentManagerMid(CNComponentManager):
                 exception,
             )
 
-    def get_command_id(self, unique_id):
-        """
-        Returns the command id mapped to the given unique_id.
-
-        Args:
-            unique_id: unique id of the command
-
-        Returns:
-            str: command id corresponding to unique_id
-        """
-        for cmd_id, uids in self.command_mapping.items():
-            if unique_id in uids:
-                return cmd_id
-        return None
-
     def update_device_state(self, device_name: str, state: DevState) -> None:
         """
         Update a monitored device state,

@@ -1159,6 +1159,21 @@ class CNComponentManager(TmcComponentManager):
         """
         return json.loads(argin).get("subarray_id")
 
+    def get_command_id(self, unique_id):
+        """
+        Returns the command id mapped to the given unique_id.
+
+        Args:
+            unique_id: unique id of the command
+
+        Returns:
+            str: command id corresponding to unique_id
+        """
+        for cmd_id, uids in self.command_mapping.items():
+            if unique_id in uids:
+                return cmd_id
+        return None
+
     def command_not_allowed_callable(
         self,
         subarray_id: int = 0,

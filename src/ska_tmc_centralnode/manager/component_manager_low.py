@@ -354,23 +354,6 @@ class CNComponentManagerLow(CNComponentManager):
                 exception,
             )
 
-    def get_command_id(self, unique_id: str):
-        """
-        This Method is used to get command
-        id from the command mapping dictionary
-
-        Args:
-            unique_id (str): unique id of the command
-
-        Returns:
-            str: returns the command id with reference to unique id.
-
-        """
-        for cmd_id, uids in self.command_mapping.items():
-            if unique_id in uids:
-                return cmd_id
-        return None
-
     def update_long_running_command_result_callback(self, command_id) -> None:
         """
         Checks for errors after receiving events from all the desired devices.
