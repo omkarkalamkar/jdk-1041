@@ -53,7 +53,6 @@ centralnode:
 
 resources:
   limits:
-
     memory: 500Mi
   requests:
     cpu: 150m
@@ -71,11 +70,10 @@ deviceServers:
     enabled: true
     instances: ["01"]
     command: "CentralNodeDS"
-    subarray_count: 2
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
-    member : "0"
+    member: "0"
 
     mid:
       file: "data/centralnode_mid.yaml"

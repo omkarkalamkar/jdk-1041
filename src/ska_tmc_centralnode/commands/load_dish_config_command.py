@@ -49,6 +49,7 @@ class LoadDishCfg(LoadDishCfgCommand):
 
     def set_command_id(self, command_name: str) -> None:
         """Sets the command id for error propagation.
+
         :param command_name: name of the command.
         :type command_name: str
         """
