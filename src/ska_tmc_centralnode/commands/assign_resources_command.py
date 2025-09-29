@@ -63,19 +63,6 @@ class AssignResources(AssignReleaseResources):
             self.subarray_devname
         )
 
-    def set_command_id(self, command_name: str) -> None:
-        """
-        Sets the command id for error propagation.
-        :param command_name: name of the command.
-        :type command_name: str
-        """
-        self.command_id = f"{time.time()}-{command_name}"
-        self.logger.info(
-            "Setting command id as %s for command: %s",
-            self.command_id,
-            command_name,
-        )
-
     @timeout_tracker
     @error_propagation_tracker(
         "get_subarray_obsstate",

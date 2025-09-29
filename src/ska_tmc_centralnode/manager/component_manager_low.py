@@ -360,7 +360,7 @@ class CNComponentManagerLow(CNComponentManager):
         id from the command mapping dictionary
 
         Args:
-            unique_id (int): unique id of the command
+            unique_id (str): unique id of the command
 
         Returns:
             str: returns the command id with reference to unique id.
@@ -373,13 +373,17 @@ class CNComponentManagerLow(CNComponentManager):
 
     def update_long_running_command_result_callback(self, command_id) -> None:
         """
-        This method checks for errors after receiving events from
-        all the desired devices. If there are errors it will
-        aggregate them and update the lrcr callback.
-        If there are no errors it will just reset the event dicitonary.
+        Checks for errors after receiving events from all the desired devices.
+        If there are errors, aggregates them and updates the long running
+        command result (LRCR) callback. If there are no errors,
+        resets the event dictionary.
+
+        Args:
+            command_id (str): The command ID for which to update the LRCR
+                callback.
         """
         if self.error_count:
-            # modify below message to include value from error_dict
+            # Aggregate error messages from event_dict
             exception_message = "Exception occurred on the following devices: "
             for devname, data in self.event_dict[command_id].items():
                 if isinstance(data, dict):

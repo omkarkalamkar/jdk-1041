@@ -516,14 +516,15 @@ class CNComponentManager(TmcComponentManager):
         return self.component.devices
 
     # pylint:disable =inconsistent-return-statements
-    def get_subarray_obsstate(self, subarray_devname) -> ObsState:
+    def get_subarray_obsstate(self, subarray_devname: str) -> ObsState:
         """
         Get Current device obsState
-        :param subarray_devname: subarray device name
-        :type subarray_devname: str
 
-        :return: current obsstate
-        :rtype: ObsState
+        Args:
+            subarray_devname (str): subarray device name
+
+        Returns:
+            ObsState: current obsstate
         """
         if subarray_devname:
             return self.get_device(subarray_devname).obs_state
