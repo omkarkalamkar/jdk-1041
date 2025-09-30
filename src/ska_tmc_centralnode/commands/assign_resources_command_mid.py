@@ -32,7 +32,7 @@ class AssignResourcesMid(AssignResources):
         try:
             self.logger.debug(
                 "Command ID: %s | Loading the  AssignResource JSON string",
-                self.component_manager.command_id,
+                self.command_id,
             )
             json_argument = json.loads(argin)
         except Exception as e:
@@ -57,7 +57,7 @@ class AssignResourcesMid(AssignResources):
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(
             "Command ID: %s | Receptor IDs are: %s",
-            self.component_manager.command_id,
+            self.command_id,
             receptor_ids,
         )
         for receptor_id in receptor_ids:
@@ -68,7 +68,7 @@ class AssignResourcesMid(AssignResources):
                 )
             self.logger.debug(
                 "Command ID: %s | Dish %s is available for assignment.",
-                self.component_manager.command_id,
+                self.command_id,
                 receptor_ids,
             )
         self.component_manager.log_state(
@@ -77,7 +77,7 @@ class AssignResourcesMid(AssignResources):
 
         self.logger.info(
             "Command ID: %s | Invoking AssignResources command on: %s",
-            self.component_manager.command_id,
+            self.command_id,
             self.tm_subarray_adapter,
         )
 
@@ -95,12 +95,12 @@ class AssignResourcesMid(AssignResources):
 
             if return_code in [ResultCode.QUEUED, ResultCode.OK]:
                 self.component_manager.command_mapping[
-                    self.component_manager.command_id
+                    self.command_id
                 ] = message_or_unique_id
 
         self.logger.info(
             "Command ID: %s | Resources assigned successfully on: %s",
-            self.component_manager.command_id,
+            self.command_id,
             self.tm_subarray_adapter,
         )
 

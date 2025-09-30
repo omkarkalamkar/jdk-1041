@@ -29,6 +29,25 @@ class AssignResourcesLow(AssignResources):
         )
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
 
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ) -> None:
+        """
+        Updates the task status for command ReleaseResources
+
+        Args:
+            result: A tuple containing the result code and a message.
+                The result code indicates whether the command
+                succeeded or failed.
+            exception (str): A string representing any exception message.
+                This is used when the result indicates a failure.
+                Default is an empty string.
+        """
+        super().update_task_status(result, exception)
+        self.component_manager.subsystem_assigned_per_command_id.pop(
+            self.command_id, None
+        )
+
     # pylint:disable=signature-differs
     def do(self, argin: str) -> Tuple[ResultCode, str]:
         """
@@ -55,12 +74,11 @@ class AssignResourcesLow(AssignResources):
 
         """
         try:
-            self.component_manager.subsystems_to_config = []
             json_argument = json.loads(argin)
             self.logger.debug(
                 "Command ID: %s | Executing AssignResources "
                 + "command with arguments: %s",
-                self.component_manager.command_id,
+                self.command_id,
                 json_argument,
             )
         except Exception as exception:
@@ -68,25 +86,25 @@ class AssignResourcesLow(AssignResources):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", exception),
             )
-
-        self.component_manager.subsystems_to_config = SUB_SYSTEMS.intersection(
-            json_argument.keys()
+        assigned_subsystem: list = list(
+            SUB_SYSTEMS.intersection(json_argument.keys())
         )
 
+        self.component_manager.subsystem_assigned_per_subarray[
+            self.subarray_id
+        ] = assigned_subsystem
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        subarrayID = int(json_argument["subarray_id"])
-
-        result_code, message = self.get_subarray_adapter(subarrayID)
+        result_code, message = self.get_subarray_adapter(self.subarray_id)
         if result_code == ResultCode.FAILED:
             return result_code, message
 
         if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", subarrayID),
+                ("SubArray Id %s is not existing!", self.subarray_id),
             )
 
         return_codes, message_or_unique_ids = self.send_command(
@@ -109,7 +127,10 @@ class AssignResourcesLow(AssignResources):
             )
 
         if (
-            "mccs" in self.component_manager.subsystems_to_config
+            "mccs"
+            in self.component_manager.subsystem_assigned_per_subarray[
+                self.subarray_id
+            ]
             and not self.is_auto_recovery_enabled
         ):
             try:
@@ -142,7 +163,9 @@ class AssignResourcesLow(AssignResources):
                     ResultCode.FAILED,
                     message_or_unique_id,
                 )
-
+            self.component_manager.subsystem_assigned_per_command_id[
+                self.command_id
+            ] = assigned_subsystem
         return (ResultCode.OK, "")
 
     def create_mccs_cmd_data(self, json_argument: dict) -> dict:

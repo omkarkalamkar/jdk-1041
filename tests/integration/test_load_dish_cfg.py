@@ -155,7 +155,7 @@ def load_dish_cfg_rejected(
     change_event_callbacks.assert_change_event(
         "DishVccCommandStatus",
         DishConfigStatus.COMPLETED,
-        lookahead=4,
+        lookahead=8,
     )
     csp_master_ln_device.SetDelay(2)
 

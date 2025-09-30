@@ -30,6 +30,28 @@ class ReleaseResourcesLow(ReleaseResources):
         )
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
 
+    def update_task_status(
+        self, result: Tuple[ResultCode, str], exception: str = ""
+    ) -> None:
+        """
+        Updates the task status for command ReleaseResources
+
+        Args:
+            result: A tuple containing the result code and a message.
+                The result code indicates whether the command
+                succeeded or failed.
+            exception (str): A string representing any exception message.
+                This is used when the result indicates a failure.
+                Default is an empty string.
+        """
+        super().update_task_status(result, exception)
+        self.component_manager.subsystem_assigned_per_subarray.pop(
+            self.subarray_id, None
+        )
+        self.component_manager.subsystem_assigned_per_command_id.pop(
+            self.command_id, None
+        )
+
     # pylint:disable=signature-differs
     def do(self, argin):
         """
@@ -70,23 +92,15 @@ class ReleaseResourcesLow(ReleaseResources):
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
-        if "subarray_id" not in json_argument:
-            return (
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
-        subarray_id = json_argument["subarray_id"]
-
         for adapter in self.subarray_adapters:
-            if str(subarray_id) in adapter.dev_name:
+            if str(self.subarray_id) in adapter.dev_name:
                 self.subarray_adapter = adapter
-                self.component_manager.subarray_devname = adapter.dev_name
+                self.subarray_devname = adapter.dev_name
 
         if self.subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                f"Subarray Id {subarray_id} doesn't exit!",
+                f"Subarray Id {self.subarray_id} doesn't exit!",
             )
 
         if json_argument["release_all"] is True:
@@ -105,9 +119,16 @@ class ReleaseResourcesLow(ReleaseResources):
                     ResultCode.FAILED,
                     message_or_unique_id,
                 )
-
+            assigned_subsystem = (
+                self.component_manager.subsystem_assigned_per_subarray[
+                    self.subarray_id
+                ]
+            )
             if (
-                "mccs" in self.component_manager.subsystems_to_config
+                "mccs"
+                in self.component_manager.subsystem_assigned_per_subarray[
+                    self.subarray_id
+                ]
                 and not self.is_auto_recovery_enabled
             ):
                 try:
@@ -137,6 +158,9 @@ class ReleaseResourcesLow(ReleaseResources):
                         ResultCode.FAILED,
                         message_or_unique_id,
                     )
+                self.component_manager.subsystem_assigned_per_command_id[
+                    self.command_id
+                ] = assigned_subsystem
         return (ResultCode.OK, "")
 
     def release_all_resources_mccs(

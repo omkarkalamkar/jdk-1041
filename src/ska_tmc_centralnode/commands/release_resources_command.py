@@ -8,7 +8,7 @@ from typing import Optional, Tuple
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import TimeoutCallback
+from ska_tmc_common import TimeKeeper, TimeoutCallback
 from ska_tmc_common.adapters import AdapterFactory
 from ska_tmc_common.v1.error_propagation_tracker import (
     error_propagation_tracker,
@@ -51,10 +51,27 @@ class ReleaseResources(AssignReleaseResources):
         self.subarray_adapter = None
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
+        self.subarray_id = ""
+        self.subarray_devname = ""
+        self.timekeeper = TimeKeeper(
+            self.component_manager.command_timeout, logger
+        )
+
+    def get_subarray_obsstate(self) -> ObsState:
+        """
+        This method returns obsstate of subarray.
+
+        Returns: ObsState
+        """
+        return self.component_manager.get_subarray_obsstate(
+            self.subarray_devname
+        )
 
     @timeout_tracker
     @error_propagation_tracker(
-        "get_subarray_obsstate", [ObsState.RESOURCING, ObsState.EMPTY]
+        "get_subarray_obsstate",
+        [ObsState.RESOURCING, ObsState.EMPTY],
+        use_command_class_id=True,
     )
     def release_resources(
         self,
@@ -89,17 +106,14 @@ class ReleaseResources(AssignReleaseResources):
                 status=TaskStatus.COMPLETED,
                 exception=exception,
             )
-            self.component_manager.subarray_devname = ""
+            self.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
-        if self.component_manager.command_mapping.get(
-            self.component_manager.command_id
-        ):
-            self.component_manager.command_mapping.pop(
-                self.component_manager.command_id
-            )
-        self.component_manager.command_in_progress = ""
-        self.component_manager.subsystems_to_config = []
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
+        self.component_manager.subsystem_assigned_per_subarray.pop(
+            self.subarray_id
+        )
 
     def release_all_resources(
         self, adapter
@@ -111,7 +125,7 @@ class ReleaseResources(AssignReleaseResources):
             adapter: Adapter
 
         Returns:
-            Tuple(list, list): Tuple of list of ResulCodes
+            Tuple(list, list): Tuple of list of ResultCodes
             and lists of messages.
 
         """

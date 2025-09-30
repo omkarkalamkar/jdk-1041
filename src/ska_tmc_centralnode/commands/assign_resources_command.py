@@ -8,7 +8,7 @@ from typing import Optional, Tuple
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_base.executor import TaskStatus
-from ska_tmc_common import AdapterFactory, TimeoutCallback
+from ska_tmc_common import AdapterFactory, TimeKeeper, TimeoutCallback
 from ska_tmc_common.v1.error_propagation_tracker import (
     error_propagation_tracker,
 )
@@ -49,10 +49,25 @@ class AssignResources(AssignReleaseResources):
         self.tm_subarray_adapter: Optional[AdapterFactory] = None
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
+        self.subarray_id = ""
+        self.subarray_devname = ""
+        self.timekeeper = TimeKeeper(
+            self.component_manager.command_timeout, logger
+        )
+
+    def get_subarray_obsstate(self) -> ObsState:
+        """
+        This method returns obsstate of subarray.
+        """
+        return self.component_manager.get_subarray_obsstate(
+            self.subarray_devname
+        )
 
     @timeout_tracker
     @error_propagation_tracker(
-        "get_subarray_obsstate", [ObsState.RESOURCING, ObsState.IDLE]
+        "get_subarray_obsstate",
+        [ObsState.RESOURCING, ObsState.IDLE],
+        use_command_class_id=True,
     )
     def assign_resources(
         self,
@@ -92,16 +107,11 @@ class AssignResources(AssignReleaseResources):
             self.task_callback(
                 result=result, status=TaskStatus.COMPLETED, exception=exception
             )
-            self.component_manager.subarray_devname = ""
+            self.subarray_devname = ""
         else:
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
-        self.component_manager.command_in_progress = ""
-        if self.component_manager.command_mapping.get(
-            self.component_manager.command_id
-        ):
-            self.component_manager.command_mapping.pop(
-                self.component_manager.command_id
-            )
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
 
     def get_subarray_adapter(self, subarray_id: int) -> Tuple[ResultCode, str]:
         """
@@ -119,7 +129,7 @@ class AssignResources(AssignReleaseResources):
         for adapter in self.subarray_adapters:
             if str(subarray_id) in adapter.dev_name:
                 self.tm_subarray_adapter = adapter
-                self.component_manager.subarray_devname = adapter.dev_name
+                self.subarray_devname = adapter.dev_name
 
         if self.tm_subarray_adapter is None:
             return (

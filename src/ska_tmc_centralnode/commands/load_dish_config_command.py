@@ -2,6 +2,7 @@
 
 import json
 import threading
+import time
 from typing import Callable, Optional, Tuple
 
 from retry import retry
@@ -46,6 +47,20 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.dish_cfg_params: str = ""
         self.dish_vcc_config_json: dict = {}
 
+    def set_command_id(self, command_name: str) -> None:
+        """Sets the command id for error propagation.
+
+        :param command_name: name of the command.
+        :type command_name: str
+        """
+        self.command_id = f"{time.time()}-{command_name}"
+        self.logger.info(
+            "Setting command id as %s for command: %s",
+            self.command_id,
+            command_name,
+        )
+        self.component_manager.command_id = self.command_id
+
     def load_dish_cfg(
         self,
         dish_cfg_params: str,
@@ -86,7 +101,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             }
             self.logger.debug(
                 "Command ID: %s",
-                self.component_manager.command_id,
+                self.command_id,
             )
             self.component_manager.reset_load_dish_cfg_data()
             task_callback(
@@ -100,7 +115,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.dish_cfg_params = dish_cfg_params
         self.logger.debug(
             "Command ID: %s | Message: %s ",
-            self.component_manager.command_id,
+            self.command_id,
             message,
         )
         if ret_code == ResultCode.FAILED:
@@ -117,14 +132,12 @@ class LoadDishCfg(LoadDishCfgCommand):
                 task_abort_event,
                 timeout_id=self.timeout_id,
                 timeout_callback=self.timeout_callback,
-                command_id=self.component_manager.command_id,
+                command_id=self.command_id,
                 lrcr_callback=(
                     self.component_manager.long_running_result_callback
                 ),
             )
-        self.component_manager.load_dish_cfg_command_id = (
-            self.component_manager.command_id
-        )
+        self.component_manager.load_dish_cfg_command_id = self.command_id
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -141,7 +154,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             "Command ID: %s | Calling task callback for "
             + "LoadDishCfg with Result: "
             + "%s and Message: %s",
-            self.component_manager.command_id,
+            self.command_id,
             str(result[0]),
             exception,
         )
@@ -160,12 +173,8 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.update_dish_vcc_flag(True)
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.component_manager.command_in_progress = ""
-        if self.component_manager.command_mapping.get(
-            self.component_manager.command_id
-        ):
-            self.component_manager.command_mapping.pop(
-                self.component_manager.command_id
-            )
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
         self.component_manager.reset_load_dish_cfg_data()
 
     def update_memorized_attribute(self) -> None:
@@ -196,7 +205,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         tm_data_filepath = initial_params.get("tm_data_filepath", None)
         self.logger.debug(
             "Command ID: %s | The initial params are : %s",
-            self.component_manager.command_id,
+            self.command_id,
             json.dumps(initial_params, indent=2),
         )
         if data_sources and tm_data_filepath:
@@ -207,7 +216,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 self.logger.exception(
                     "Command ID: %s |  Error in Loading Dish VCC map "
                     + "json file %s, retrying",
-                    self.component_manager.command_id,
+                    self.command_id,
                     exception,
                 )
                 return (
@@ -238,7 +247,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         if result_code == ResultCode.FAILED:
             self.logger.error(
                 "Command ID: %s | Failed to initialize adapters: %s",
-                self.component_manager.command_id,
+                self.command_id,
                 message,
             )
             return result_code, message
@@ -246,7 +255,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         dishid_vcc_map_params = json.loads(argin)
         self.logger.info(
             "Command ID: %s | DishId-VCC map parameters: %s",
-            self.component_manager.command_id,
+            self.command_id,
             json.dumps(dishid_vcc_map_params, indent=4),
         )
 
@@ -263,7 +272,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     self.logger.error(
                         "Command ID: %s | LoadDishCfg command "
                         + "failed with error: %s",
-                        self.component_manager.command_id,
+                        self.command_id,
                         message_or_unique_id,
                     )
                     return ResultCode.FAILED, message_or_unique_id
@@ -271,7 +280,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.logger.info(
             "Command ID: %s | Successfully invoked LoadDishCfg command on "
             " %s",
-            self.component_manager.command_id,
+            self.command_id,
             self.csp_mln_adapter.dev_name,
         )
         return ResultCode.OK, ""
@@ -294,7 +303,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         self.logger.info(
             "Command ID: %s | Invoking LoadDishCfg command on: %s",
-            self.component_manager.command_id,
+            self.command_id,
             self.csp_mln_adapter.dev_name,
         )
         self.component_manager.dev_names_for_load_dish_cfg.append(
@@ -339,7 +348,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     k_value = vcc_k_map.get("k")
                     self.logger.info(
                         "Command ID: %s | Invoking SetKValue command on: %s",
-                        self.component_manager.command_id,
+                        self.command_id,
                         dish_adapter.dev_name,
                     )
                     dish_adapter.proxy.command_inout_asynch(
