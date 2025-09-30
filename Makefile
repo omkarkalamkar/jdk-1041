@@ -43,7 +43,6 @@ DISPLAY ?= $(THIS_HOST):0
 JIVE ?= false# Enable jive
 TARANTA ?= false
 MINIKUBE ?= false ## Minikube or not
-FAKE_DEVICES ?= true ## Install fake devices or not
 TANGO_HOST ?= tango-databaseds:10000## TANGO_HOST connection to the Tango DS
 SKUID ?= ska-ser-skuid-$(HELM_RELEASE)-svc.$(KUBE_NAMESPACE).svc.$(CLUSTER_DOMAIN):9870
 CI_PROJECT_PATH_SLUG ?= ska-tmc-centralnode
@@ -123,7 +122,6 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set ska-tango-base.xauthority=$(XAUTHORITY) \
 	--set ska-tango-base.jive.enabled=$(JIVE) \
 	--set central_node.telescope=$(TELESCOPE) \
-	--set central_node.deviceServers.mocks.enabled=$(FAKE_DEVICES) \
 	--set ska-taranta.enabled=$(TARANTA) \
 	--set central_node.deviceServers.centralnode.SkuidService=$(SKUID) \
 	$(CUSTOM_VALUES) \
