@@ -58,13 +58,6 @@ resources:
     memory: 400Mi
 
 deviceServers:
-  mocks:
-    enabled: false
-    mid:
-      file: "data/mockdevices_mid.yaml"
-    low:
-      file: "data/mockdevices_low.yaml"
-
   centralnode:
     enabled: true
     instances: ["01"]

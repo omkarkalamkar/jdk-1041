@@ -13,9 +13,7 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.device_info import SubArrayDeviceInfo
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.test_helpers.helper_adapter_factory import (
-    HelperAdapterFactory,
-)
+from ska_tmc_simulators.helper_adapter_factory import HelperAdapterFactory
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command import (

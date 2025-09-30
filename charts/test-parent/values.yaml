@@ -39,12 +39,16 @@ central_node:
   labels:
     app: ska-tmc-centralnode
   deviceServers:
-    mocks:
-      enabled: true
-
     centralnode:
       enabled: true
       DishMasterIdentifier: "elt/master"
+
+ska-tmc-simulators:
+  enabled: true
+  telescope: SKA-low
+  deviceServers:
+    mocks:
+    enabled: true
 
 ska-taranta:
   enabled: false

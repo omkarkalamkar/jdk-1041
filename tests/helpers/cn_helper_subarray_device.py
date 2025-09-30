@@ -2,9 +2,7 @@
 
 
 from ska_tango_base.commands import ResultCode
-from ska_tmc_common.test_helpers.helper_subarray_device import (
-    HelperSubArrayDevice,
-)
+from ska_tmc_simulators.helper_subarray_device import HelperSubArrayDevice
 from tango import AttrWriteType
 from tango.server import attribute, command
 
