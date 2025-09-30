@@ -45,10 +45,22 @@ central_node:
 
 ska-tmc-simulators:
   enabled: true
-  telescope: SKA-low
+  telescope: SKA-mid
   deviceServers:
     mocks:
-    enabled: true
+      enabled: true
+      mid:
+        enabled: true  
+        is_simulated:
+          csp: true
+          sdp: true
+          dish: true
+      low:
+        enabled: true   
+        is_simulated:
+          csp: true
+          sdp: true
+          mccs: true
 
 ska-taranta:
   enabled: false
