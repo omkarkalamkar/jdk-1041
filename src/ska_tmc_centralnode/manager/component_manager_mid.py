@@ -1038,7 +1038,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         task_status, response = self.submit_task(
             loadishcfg_command.load_dish_cfg,
-            args=[argin, self.logger],
+            kwargs={"argin": argin},
             task_callback=task_callback,
         )
         return task_status, response
@@ -1205,6 +1205,11 @@ class CNComponentManagerMid(CNComponentManager):
                 exception_msg=exception_message,
             )
             self.observable.notify_observers(command_exception=True)
+        elif (
+            self.load_dish_cfg_aggregated_result == ResultCode.OK
+            and self.load_dish_cfg_command_id
+        ):
+            self.observable.notify_observers(attribute_value_change=True)
 
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""

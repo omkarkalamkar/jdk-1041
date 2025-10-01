@@ -9,6 +9,10 @@ from retry import retry
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_telmodel.data import TMData
+from ska_tmc_common.v1.error_propagation_tracker import (
+    error_propagation_tracker,
+)
+from ska_tmc_common.v1.timeout_tracker import timeout_tracker
 
 from ska_tmc_centralnode.commands.central_node_command import (
     LoadDishCfgCommand,
@@ -61,83 +65,49 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
         self.component_manager.command_id = self.command_id
 
+    @timeout_tracker
+    @error_propagation_tracker(
+        "get_load_disg_cfg_resultcode",
+        [ResultCode.OK],
+    )
     def load_dish_cfg(
         self,
-        dish_cfg_params: str,
+        argin: str,
         logger=None,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
-    ) -> None:
+    ) -> Tuple[ResultCode, str]:
         """
-        :param logger: logger
-        :param dish_cfg_params: dishid vcc map params
-        :type logger: logging.Logger
-        :param task_callback: Update task state, defaults to None
-        :type task_callback: Callable, optional
-        :param task_abort_event: Check for abort, defaults to None
-        :type task_abort_event: Event, optional
+        Load Dish Configuration command.
+        Validates dish-vcc data, executes lower-level command.
         """
-        # Indicate that the task has started
-        self.task_callback = task_callback
-        self.set_command_id(__class__.__name__)
-        self.task_callback(status=TaskStatus.IN_PROGRESS)
-        self.component_manager.command_in_progress = "LoadDishCfg"
-        self.component_manager.command_result = ResultCode.STARTED
+        # Set Dish-specific command status (decorators don’t do this part)
         self.component_manager.dish_vcc_command_status = (
             DishConfigStatus.IN_PROGRESS
         )
-        self.component_manager.start_timer(
-            self.timeout_id,
-            self.component_manager.command_timeout,
-            self.timeout_callback,
-        )
+
+        # Validate
         (
             dish_vcc_map_json,
             error_message,
-        ) = self.check_and_validate_dish_vcc_data(dish_cfg_params)
+        ) = self.check_and_validate_dish_vcc_data(argin)
         if error_message:
             self.component_manager.dish_vcc_validation_status = {
                 CENTRALNODE_MID: error_message
             }
-            self.logger.debug(
-                "Command ID: %s",
-                self.command_id,
-            )
-            self.component_manager.reset_load_dish_cfg_data()
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, error_message),
-                exception=error_message,
-            )
-            return
+            return ResultCode.FAILED, error_message
+
+        # Save validated config
         self.dish_vcc_config_json = dish_vcc_map_json
-        ret_code, message = self.do(dish_cfg_params)
-        self.dish_cfg_params = dish_cfg_params
-        self.logger.debug(
-            "Command ID: %s | Message: %s ",
-            self.command_id,
-            message,
-        )
-        if ret_code == ResultCode.FAILED:
-            self.component_manager.reset_load_dish_cfg_data()
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, message),
-                exception=message,
-            )
-        else:
-            self.start_tracker_thread(
-                "get_load_disg_cfg_resultcode",
-                [ResultCode.OK],
-                task_abort_event,
-                timeout_id=self.timeout_id,
-                timeout_callback=self.timeout_callback,
-                command_id=self.command_id,
-                lrcr_callback=(
-                    self.component_manager.long_running_result_callback
-                ),
-            )
+        self.dish_cfg_params = argin
+
+        # Execute device-level command
+        ret_code, message = self.do(argin)
+
+        # Record command ID
         self.component_manager.load_dish_cfg_command_id = self.command_id
+
+        return ret_code, message
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
