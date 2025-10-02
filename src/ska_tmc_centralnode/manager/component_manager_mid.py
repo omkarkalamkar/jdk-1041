@@ -1212,7 +1212,7 @@ class CNComponentManagerMid(CNComponentManager):
             self.long_running_result_callback(
                 self.load_dish_cfg_command_id,
                 ResultCode.OK,
-                exception_msg=""  # keep signature consistent
+                exception_msg="",  # keep signature consistent
             )
             self.observable.notify_observers(attribute_value_change=True)
 
