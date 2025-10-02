@@ -1209,12 +1209,41 @@ class CNComponentManagerMid(CNComponentManager):
             self.load_dish_cfg_aggregated_result == ResultCode.OK
             and self.load_dish_cfg_command_id
         ):
-            self.long_running_result_callback(
-                self.load_dish_cfg_command_id,
-                ResultCode.OK,
-                exception_msg="",  # keep signature consistent
-            )
-            self.observable.notify_observers(attribute_value_change=True)
+            # Mark dish config set so CentralNode allows TelescopeOn
+            # Use same lock used elsewhere to avoid races
+            # try:
+            with self.rlock:
+                # self.rlock.acquire()
+                # mark that dish vcc config is set
+                # (flag used by is_TelescopeOn_allowed)
+                self._is_dish_vcc_config_set = True
+
+                # update command status so state machine knows
+                # command completed
+                self.dish_vcc_command_status = DishConfigStatus.COMPLETED
+                # optional: store validation status
+                self.dish_vcc_validation_status = {CENTRALNODE_MID: "SUCCESS"}
+
+                # Notify observers (existing behavior)
+                self.observable.notify_observers(attribute_value_change=True)
+
+                # Call long running result callback so upstream logic sees
+                # completion
+                # This mirrors the FAILED branch where callback was called.
+                self.long_running_result_callback(
+                    self.load_dish_cfg_command_id,
+                    ResultCode.OK,
+                    exception_msg="",  # keep signature consistent
+                )
+            # finally:
+            #     self.rlock.release()
+
+            # self.long_running_result_callback(
+            #     self.load_dish_cfg_command_id,
+            #     ResultCode.OK,
+            #     exception_msg="",  # keep signature consistent
+            # )
+            # self.observable.notify_observers(attribute_value_change=True)
 
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""
