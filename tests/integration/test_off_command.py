@@ -112,12 +112,24 @@ def test_off_command_mid(
 def test_off_command_dish_fail(
     device_name,
     change_event_callbacks,
+    json_factory,
 ):
     """Test TelescopeOff command failure on dish device"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
 
     ensure_checked_devices(central_node)
+
+    config_str = json_factory("command_load_dish_cfg")
+    _, unique_id = central_node.LoadDishCfg(config_str)
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
+        lookahead=4,
+    )
 
     result_on, unique_id_on = central_node.TelescopeOn()
     assert result_on[0] == ResultCode.QUEUED
