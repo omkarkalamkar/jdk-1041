@@ -114,7 +114,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.component_manager.load_dish_cfg_command_id = self.command_id
 
         #  trigger aggregation flow
-        self.component_manager.aggregate_load_dish_cfg_results()
+        # self.component_manager.aggregate_load_dish_cfg_results()
 
         # # update component_manager state
         # if ret_code == ResultCode.OK:

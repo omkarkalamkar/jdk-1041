@@ -1215,7 +1215,7 @@ class CNComponentManagerMid(CNComponentManager):
                 exception_msg="",
             )
             # mark config set only when devices aggregated OK
-            self._is_dish_vcc_config_set = True
+            # self._is_dish_vcc_config_set = True
             self.observable.notify_observers(attribute_value_change=True)
 
     def reset_load_dish_cfg_data(self) -> None:
