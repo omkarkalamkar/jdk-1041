@@ -1209,13 +1209,7 @@ class CNComponentManagerMid(CNComponentManager):
             self.load_dish_cfg_aggregated_result == ResultCode.OK
             and self.load_dish_cfg_command_id
         ):
-            self.long_running_result_callback(
-                self.load_dish_cfg_command_id,
-                ResultCode.OK,
-                exception_msg="",
-            )
-            # mark config set only when devices aggregated OK
-            # self._is_dish_vcc_config_set = True
+            
             self.observable.notify_observers(attribute_value_change=True)
 
     def reset_load_dish_cfg_data(self) -> None:

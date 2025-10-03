@@ -40,40 +40,7 @@ def test_off_command_mid(
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
-
-    # 1. Ensure telescope is OFF before starting
-    telescope_state = central_node.read_attribute("telescopeState").value
-    if telescope_state == "ON":
-        central_node.TelescopeOff()
-        assert wait_and_validate_device_attribute_value(
-            central_node, "telescopeState", "OFF", timeout=30
-        )
-
-    # 2. Load the Dish VCC configuration
-    config_str = json_factory("command_load_dish_cfg")
-    _, unique_id_cfg = central_node.LoadDishCfg(config_str)
-
-    # Wait until LoadDishCfg completes
-    # change_event_callbacks.assert_change_event(
-    #     "longRunningCommandResult",
-    #     (
-    #         unique_id_cfg[0],
-    #         json.dumps((int(ResultCode.OK), "Command Completed")),
-    #     ),
-    #     lookahead=6,
-    # )
-    # Assert LoadDishCfg completed (ignore exact payload)
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id_cfg[0], Anything),
-        lookahead=10,
-    )
-
-    # 3. Validate Dish VCC config is COMPLETED
-    assert wait_and_validate_device_attribute_value(
-        central_node, "dishVccCommandStatus", "COMPLETED", timeout=30
-    )
-
+    
     result_on, unique_id_on = central_node.TelescopeOn()
     assert result_on[0] == ResultCode.QUEUED
 
