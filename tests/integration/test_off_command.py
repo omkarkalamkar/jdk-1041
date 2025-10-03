@@ -22,6 +22,7 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MASTER_DEVICE,
     MID_SDP_MASTER_DEVICE,
 )
+from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import DISH_DEFECT, RESET_DEFECT, logger
 
@@ -120,15 +121,19 @@ def test_off_command_dish_fail(
 
     ensure_checked_devices(central_node)
 
-    config_str = json_factory("command_load_dish_cfg")
-    _, unique_id = central_node.LoadDishCfg(config_str)
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (
-            unique_id[0],
-            json.dumps((int(ResultCode.OK), "Command Completed")),
-        ),
-        lookahead=4,
+    # config_str=json_factory("command_load_dish_cfg")
+    # _, unique_id = central_node.LoadDishCfg(config_str)
+    # change_event_callbacks.assert_change_event(
+    #     "longRunningCommandResult",
+    #     (
+    #         unique_id[0],
+    #         json.dumps((int(ResultCode.OK), "Command Completed")),
+    #     ),
+    #     lookahead=4,
+    # )
+    # Wait until Dish VCC config is set
+    assert wait_and_validate_device_attribute_value(
+        central_node, "dishVccCommandStatus", "COMPLETED", timeout=300
     )
 
     result_on, unique_id_on = central_node.TelescopeOn()
