@@ -5,6 +5,12 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.24.1]
+********
+Fixed
+-----
+* Resolved bug SKB-860
+
 [0.24.0]
 ********
 Added
