@@ -95,13 +95,13 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.dish_vcc_validation_status = {
                 CENTRALNODE_MID: error_message
             }
-            # return ResultCode.FAILED, error_message
-            # Explicitly reset state on validation failure
-            self.component_manager._is_dish_vcc_config_set = False
-            self.component_manager.dish_vcc_command_status = (
-                DishConfigStatus.FAILED
-            )
             return ResultCode.FAILED, error_message
+            # Explicitly reset state on validation failure
+            # self.component_manager._is_dish_vcc_config_set = False
+            # self.component_manager.dish_vcc_command_status = (
+            #     DishConfigStatus.FAILED
+            # )
+            # return ResultCode.FAILED, error_message
 
         # Save validated config
         self.dish_vcc_config_json = dish_vcc_map_json
@@ -113,17 +113,20 @@ class LoadDishCfg(LoadDishCfgCommand):
         # Record command ID
         self.component_manager.load_dish_cfg_command_id = self.command_id
 
-        # update component_manager state
-        if ret_code == ResultCode.OK:
-            self.component_manager._is_dish_vcc_config_set = True
-            self.component_manager.dish_vcc_command_status = (
-                DishConfigStatus.COMPLETED
-            )
-        else:
-            self.component_manager._is_dish_vcc_config_set = False
-            self.component_manager.dish_vcc_command_status = (
-                DishConfigStatus.FAILED
-            )
+        #  trigger aggregation flow
+        self.component_manager.aggregate_load_dish_cfg_results()
+
+        # # update component_manager state
+        # if ret_code == ResultCode.OK:
+        #     self.component_manager._is_dish_vcc_config_set = True
+        #     self.component_manager.dish_vcc_command_status = (
+        #         DishConfigStatus.COMPLETED
+        #     )
+        # else:
+        #     self.component_manager._is_dish_vcc_config_set = False
+        #     self.component_manager.dish_vcc_command_status = (
+        #         DishConfigStatus.FAILED
+        #     )
 
         return ret_code, message
 
