@@ -34,11 +34,39 @@ def test_off_command_mid(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
     set_mid_sdp_csp_admin_modes,
+    json_factory,
 ):
     """Test cases for Off command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
+
+    # 1. Ensure telescope is OFF before starting
+    telescope_state = central_node.read_attribute("telescopeState").value
+    if telescope_state == "ON":
+        central_node.TelescopeOff()
+        assert wait_and_validate_device_attribute_value(
+            central_node, "telescopeState", "OFF", timeout=30
+        )
+
+    # 2. Load the Dish VCC configuration
+    config_str = json_factory("command_load_dish_cfg")
+    _, unique_id_cfg = central_node.LoadDishCfg(config_str)
+
+    # Wait until LoadDishCfg completes
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id_cfg[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
+        lookahead=6,
+    )
+
+    # 3. Validate Dish VCC config is COMPLETED
+    assert wait_and_validate_device_attribute_value(
+        central_node, "dishVccCommandStatus", "COMPLETED", timeout=30
+    )
 
     result_on, unique_id_on = central_node.TelescopeOn()
     assert result_on[0] == ResultCode.QUEUED
@@ -113,7 +141,6 @@ def test_off_command_mid(
 def test_off_command_dish_fail(
     device_name,
     change_event_callbacks,
-    json_factory,
 ):
     """Test TelescopeOff command failure on dish device"""
     dev_factory = DevFactory()
@@ -121,32 +148,20 @@ def test_off_command_dish_fail(
 
     ensure_checked_devices(central_node)
 
-    # 1. Ensure telescope is OFF before starting
-    telescope_state = central_node.read_attribute("telescopeState").value
-    if telescope_state == "ON":
-        central_node.TelescopeOff()
-        assert wait_and_validate_device_attribute_value(
-            central_node, "telescopeState", "OFF", timeout=30
-        )
-
-    # 2. Load the Dish VCC configuration
-    config_str = json_factory("command_load_dish_cfg")
-    _, unique_id_cfg = central_node.LoadDishCfg(config_str)
-
-    # Wait until LoadDishCfg completes
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (
-            unique_id_cfg[0],
-            json.dumps((int(ResultCode.OK), "Command Completed")),
-        ),
-        lookahead=6,
-    )
-
-    # 3. Validate Dish VCC config is COMPLETED
-    assert wait_and_validate_device_attribute_value(
-        central_node, "dishVccCommandStatus", "COMPLETED", timeout=30
-    )
+    # config_str=json_factory("command_load_dish_cfg")
+    # _, unique_id = central_node.LoadDishCfg(config_str)
+    # change_event_callbacks.assert_change_event(
+    #     "longRunningCommandResult",
+    #     (
+    #         unique_id[0],
+    #         json.dumps((int(ResultCode.OK), "Command Completed")),
+    #     ),
+    #     lookahead=4,
+    # )
+    # Wait until Dish VCC config is set
+    # assert wait_and_validate_device_attribute_value(
+    #     central_node, "dishVccCommandStatus", "COMPLETED", timeout=300
+    # )
 
     result_on, unique_id_on = central_node.TelescopeOn()
     assert result_on[0] == ResultCode.QUEUED
