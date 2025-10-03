@@ -969,7 +969,7 @@ class CNComponentManager(TmcComponentManager):
         """Getter method for telescope health state"""
         return self.component.telescope_health_state
 
-    def get_telescope_availability(self) -> bool:
+    def get_telescope_availability(self) -> dict:
         """Getter method for Telescope Availability"""
         return self.component.telescope_availability
 
@@ -1379,14 +1379,8 @@ class CNComponentManager(TmcComponentManager):
         :raises Exception: Raises Exception if subarray is not available.
         """
         subarray_id = self.get_subarray_id(argin)
-        subarray_suffics = "/" + str(subarray_id).zfill(2)
-        subarrays_list = list(
-            self._component.telescope_availability["tmc_subarrays"].keys()
-        )
-        for subarray in subarrays_list:
-            telescope_availability = self.get_telescope_availability()
-            if (
-                subarray.endswith(subarray_suffics)
-                and telescope_availability["tmc_subarrays"][subarray] is False
-            ):
-                raise Exception(f"Subarray {subarray} is not available.")
+        subarray = self.subarray_trl_prefix + str(subarray_id).zfill(2)
+        telescope_availability = self.get_telescope_availability()
+        subarray_availability = telescope_availability.get(subarray)
+        if subarray_availability is False:
+            raise Exception(f"Subarray {subarray} is not available.")
