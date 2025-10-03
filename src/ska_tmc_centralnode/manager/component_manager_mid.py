@@ -1209,7 +1209,6 @@ class CNComponentManagerMid(CNComponentManager):
             self.load_dish_cfg_aggregated_result == ResultCode.OK
             and self.load_dish_cfg_command_id
         ):
-            
             self.observable.notify_observers(attribute_value_change=True)
 
     def reset_load_dish_cfg_data(self) -> None:
