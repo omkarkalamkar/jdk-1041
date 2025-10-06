@@ -8,7 +8,7 @@ import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import DevFactory
-from ska_tmc_simulators.helper_adapter_factory import HelperAdapterFactory
+from ska_tmc_common.test_helpershelper_adapter_factory import HelperAdapterFactory
 from tango import ApiUtil
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg

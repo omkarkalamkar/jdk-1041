@@ -5,7 +5,7 @@ import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.adapters import DishAdapter
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_simulators.helper_adapter_factory import HelperAdapterFactory
+from ska_tmc_common.test_helpershelper_adapter_factory import HelperAdapterFactory
 
 from ska_tmc_centralnode.commands.stow_antennas_command import StowAntennas
 from ska_tmc_centralnode.utils.constants import DISH_LEAF_NODE_1
