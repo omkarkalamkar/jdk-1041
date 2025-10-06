@@ -104,6 +104,93 @@ def load_dish_cfg(central_node_name, config_str, change_event_callbacks):
     )
 
 
+def invoke_load_dish_config(
+    central_node_name,
+    config_str,
+    change_event_callbacks,
+):
+    """Invoke LoadDishCfg with correct Dish VCC map path to recover from failed state."""
+    logger.info("Invoking LoadDishCfg with correct VCC map path...")
+
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+
+    ensure_checked_devices(central_node)
+
+    # Correct path for tm_data_sources
+    dish_cfg_input = json.loads(config_str)
+    dish_cfg_input.update(
+        {
+            "tm_data_sources": [
+                # correct SKA CAR
+                "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
+            ]
+        }
+    )
+
+    # Subscribe to events
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    central_node.subscribe_event(
+        "DishVccCommandStatus",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["DishVccCommandStatus"],
+    )
+
+    # Run the command
+    result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
+    logger.info(
+        "Reattempted LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+
+    # Command should queue
+    assert unique_id[0].endswith("LoadDishCfg")
+    assert result[0] == ResultCode.QUEUED
+
+    # Validate sequence of events
+    change_event_callbacks.assert_change_event(
+        "DishVccCommandStatus",
+        DishConfigStatus.IN_PROGRESS,
+        lookahead=4,
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+
+    change_event_callbacks.assert_change_event(
+        "DishVccCommandStatus",
+        DishConfigStatus.COMPLETED,
+        lookahead=4,
+    )
+
+    # Ensure CSP and Dish configs are applied correctly
+    assert json.loads(csp_master_ln_device.sourceDishVccConfig) == json.loads(
+        json.dumps(dish_cfg_input)
+    )
+    assert dish_ln_device.kValue == CURRENT_TEST_DISH_VCC_KVALUE
+    assert json.loads(csp_master_ln_device.memorizedDishVccMap) == json.loads(
+        json.dumps(dish_cfg_input)
+    )
+
+    # Persist config across restarts
+    validate_attribute_after_restart(
+        csp_master_ln_device,
+        json.dumps(dish_cfg_input),
+    )
+
+    logger.info("Successfully reloaded Dish VCC configuration.")
+
+
 def load_dish_cfg_rejected(
     central_node_name, config_str, change_event_callbacks
 ):
@@ -439,6 +526,7 @@ def load_dish_cfg_with_wrong_path(
     central_node_name,
     config_str,
     change_event_callbacks,
+    json_factory,
 ):
     """Test cases for Load_Dish_Config command with csp defective"""
     logger.info("%s", config_str)
@@ -488,6 +576,13 @@ def load_dish_cfg_with_wrong_path(
     )
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
+
+    # Recover by loading the correct Dish VCC config
+    invoke_load_dish_config(
+        central_node_name,
+        json_factory("command_load_dish_cfg"),
+        change_event_callbacks,
+    )
 
 
 @pytest.mark.post_deployment
