@@ -526,7 +526,7 @@ def load_dish_cfg_with_wrong_path(
     central_node_name,
     config_str,
     change_event_callbacks,
-    json_factory,
+    json_factory=None,
 ):
     """Test cases for Load_Dish_Config command with csp defective"""
     logger.info("%s", config_str)
@@ -601,4 +601,5 @@ def test_load_dish_cfg_with_wrong_path(
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
+        json_factory,
     )
