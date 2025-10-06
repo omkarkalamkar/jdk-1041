@@ -39,20 +39,7 @@ ska-tmc-simulators:
   telescope: SKA-mid
   deviceServers:
     mocks:
-      enabled: false
-      mid:
-        enabled: true  
-        is_simulated:
-          csp: true
-          sdp: true
-          dish: true
-      low:
-        enabled: true   
-        is_simulated:
-          csp: true
-          sdp: true
-          mccs: true
-
+      enabled: true
       
 ska-taranta:
   enabled: false
