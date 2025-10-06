@@ -33,7 +33,6 @@ def test_off_command_mid(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
     set_mid_sdp_csp_admin_modes,
-    json_factory,
 ):
     """Test cases for Off command"""
     dev_factory = DevFactory()

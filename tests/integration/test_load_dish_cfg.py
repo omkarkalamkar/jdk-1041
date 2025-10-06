@@ -109,7 +109,9 @@ def invoke_load_dish_config(
     config_str,
     change_event_callbacks,
 ):
-    """Invoke LoadDishCfg with correct Dish VCC map path to recover from failed state."""
+    """Invoke LoadDishCfg with correct Dish VCC
+    map path to recover from failed state."""
+
     logger.info("Invoking LoadDishCfg with correct VCC map path...")
 
     dev_factory = DevFactory()
@@ -125,7 +127,8 @@ def invoke_load_dish_config(
         {
             "tm_data_sources": [
                 # correct SKA CAR
-                "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
+                "car://gitlab.com/ska-telescope/ska-tmc/"
+                "ska-tmc-simulators?main#tmdata"
             ]
         }
     )

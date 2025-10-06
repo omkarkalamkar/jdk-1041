@@ -1,9 +1,8 @@
 """Commad class for Load_dish_config_command"""
 
 import json
-import threading
 import time
-from typing import Callable, Optional, Tuple
+from typing import Tuple
 
 from retry import retry
 from ska_tango_base.commands import ResultCode
@@ -73,15 +72,19 @@ class LoadDishCfg(LoadDishCfgCommand):
     def load_dish_cfg(
         self,
         argin: str,
-        logger=None,
-        task_callback: Callable = None,
-        task_abort_event: Optional[threading.Event] = None,
     ) -> Tuple[ResultCode, str]:
         """
         Load Dish Configuration command.
         Validates dish-vcc data, executes lower-level command.
+
+        Args:
+            argin (str): Input argument for the command.
+
+        Returns:
+            Tuple(ResultCode, str): Result code and message.
+
         """
-        # Set Dish-specific command status (decorators don’t do this part)
+        # Set Dish-specific command status
         self.component_manager.dish_vcc_command_status = (
             DishConfigStatus.IN_PROGRESS
         )
