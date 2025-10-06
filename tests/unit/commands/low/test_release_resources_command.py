@@ -9,7 +9,9 @@ from ska_tango_base.executor import TaskStatus
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.test_helpers.helper_adapter_factory import HelperAdapterFactory
+from ska_tmc_common.test_helpers.helper_adapter_factory import (
+    HelperAdapterFactory,
+)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.release_resources_command_low import (
