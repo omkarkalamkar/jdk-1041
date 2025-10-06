@@ -6,7 +6,6 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
-
 import json
 import threading
 import time
@@ -15,23 +14,38 @@ from queue import Queue
 from typing import Callable, Tuple
 
 from ska_control_model import AdminMode, ObsState
+from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
+from ska_tmc_centralnode.commands.assign_resources_command_mid import (
+    AssignResourcesMid,
+)
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
+from ska_tmc_centralnode.commands.release_resources_command_mid import (
+    ReleaseResourcesMid,
+)
+from ska_tmc_centralnode.commands.set_global_pointing_model import (
+    SetGlobalPointingModel,
+)
+from ska_tmc_centralnode.input_validator import (
+    AssignResourceValidator,
+    ReleaseResourceValidator,
+)
 from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
 from ska_tmc_centralnode.manager.aggregators import (
-    DishkValueValidationResultAggregator,
+    DishAttrValueAggregator,
     LoadDishCfgCommandResultAggregator,
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
@@ -66,17 +80,21 @@ class CNComponentManagerMid(CNComponentManager):
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
-        skuid_service="",
         command_timeout=30,
         dish_vcc_uri=None,
         dish_vcc_file_path=None,
         dish_vcc_init_timeout=120,
         dishKvalueAggregationAllowedPercent=100.0,
         invoke_load_dish_cfg_command_callback=None,
+        invoke_set_gpm_command_callback=None,
         enable_dish_vcc_init=True,
         k_value_valid_range_upper_limit=1177,
         k_value_valid_range_lower_limit=1,
         subarray_trl_prefix: str = "mid-tmc/subarray/",
+        gpm_version=None,
+        gpm_interface=None,
+        gpm_data_sources_prefix=None,
+        gpm_file_path_prefix=None,
         *args,
         **kwargs,
     ) -> None:
@@ -106,8 +124,6 @@ class CNComponentManagerMid(CNComponentManager):
                 liveliness probe to monitor each device in a loop
             timeout : Optional. Time period to wait for
                 intialization of adapter.
-            skuid_service:
-                SKUId service
             command_timeout:
                 Command timeout
             dish_vcc_uri:
@@ -120,12 +136,18 @@ class CNComponentManagerMid(CNComponentManager):
                 dish Kvalue aggregation default
             invoke_load_dish_cfg_command_callback:
                 callback for invoke load dish
+            invoke_set_gpm_command_callback:
+                callback for set GPM command
             enable_dish_vcc_init:
                 enable dish vcc
             k_value_valid_range_upper_limit:
                 k value upper limit
             k_value_valid_range_lower_limit:
                 k value lower limit.
+            gpm_version: GPM version
+            gpm_interface: GPM interface,
+            gpm_data_sources_prefix: GPM data sources prefix path,
+            gpm_file_path_prefix: GPM file path prefix,
 
         """
         super().__init__(
@@ -144,7 +166,6 @@ class CNComponentManagerMid(CNComponentManager):
             proxy_timeout,
             event_subscription_check_period,
             liveliness_check_period,
-            skuid_service,
             command_timeout,
             subarray_trl_prefix=subarray_trl_prefix,
             *args,
@@ -159,7 +180,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.sdp_mln_availability = False
         telescope_availability = self.get_telescope_availability()
         telescope_availability["tmc_subarrays"] = self.subarray_availability
-        self.set_telescope_availability = telescope_availability
+        self.set_telescope_availability(telescope_availability)
 
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorMid(self, self.logger)
@@ -172,17 +193,25 @@ class CNComponentManagerMid(CNComponentManager):
         self.invoke_load_dish_cfg_command_callback = (
             invoke_load_dish_cfg_command_callback
         )
+        self.invoke_set_gpm_command_callback = invoke_set_gpm_command_callback
         self.dishKvalueAggregationAllowedPercent = (
             dishKvalueAggregationAllowedPercent
         )
-        self.dish_kvalue_validation_aggregator = (
-            DishkValueValidationResultAggregator(self, self.logger)
+        self.dish_kvalue_validation_aggregator = DishAttrValueAggregator(
+            self, self.logger
         )
         self.dev_names_for_load_dish_cfg = []
+        self.dishln_gpm_cmd_exe_data = (
+            {}
+        )  # dishln_gpm_data_created_during_command_execution
         self.load_dish_cfg_aggregated_result = None
+        self.gpm_version_aggregated_result = ResultCode.UNKNOWN
+        self.gpm_aggregated_result = True
         self.load_dish_cfg_command_id = None
         self._dish_vcc_validation_status = "{}"
+        self._global_pointing_model_status = {}
         self.dish_vcc_validation_attr_lock = threading.Lock()
+        self.dishln_gpm_lock = threading.RLock()
         self.enable_dish_vcc_init = enable_dish_vcc_init
         self.command_result = None
         self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
@@ -193,6 +222,13 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_command_status_callback = (
             _dish_vcc_command_status_callback
         )
+        self.number_of_gpm_executed = 0
+        self.gpm_unknown_dishes = []
+        self.gpm_version = gpm_version
+        self.gpm_interface = gpm_interface
+        self.gpm_data_sources_prefix = gpm_data_sources_prefix
+        self.gpm_file_path_prefix = gpm_file_path_prefix
+        self.is_gpm_init = True
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -204,6 +240,8 @@ class CNComponentManagerMid(CNComponentManager):
                 "state": Queue(),
                 "loadDishConfigResult": Queue(),
                 "loadDishConfigResultAsync": Queue(),
+                "setGPMResult": Queue(),
+                "gpmVersion": Queue(),
             }
         )
         handle_dish_vcc = self.handle_dish_vcc_validation_result
@@ -222,6 +260,8 @@ class CNComponentManagerMid(CNComponentManager):
                 "loadDishConfigResultAsync": (
                     self.update_load_dish_cfg_results_async
                 ),
+                "setGPMResult": self.update_set_gpm_results,
+                "gpmVersion": self.handle_gpm_version_event,
             }
         )
         self._start_event_processing_threads()
@@ -257,6 +297,16 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         return self.load_dish_cfg_aggregated_result
+
+    def get_set_gpm_version_resultcode(self) -> ResultCode:
+        """
+        Return Aggregated command result for Load Dish Cfg command
+
+        Returns:
+            Aggregated command result for Load Dish Cfg command
+
+        """
+        return self.gpm_version_aggregated_result
 
     @property
     def dish_vcc_command_status(self):
@@ -400,6 +450,25 @@ class CNComponentManagerMid(CNComponentManager):
         current_dish_vcc_validation_status = {}
         updated_validation_status = {}
 
+    @property
+    def global_pointing_model_status(self) -> dict:
+        """
+        Getter method for dish GPM version status
+
+        Returns:
+            dish: dish GPM version status
+
+        """
+        return self._global_pointing_model_status
+
+    @global_pointing_model_status.setter
+    def global_pointing_model_status(self, gpm_version: dict):
+        """
+        This method does the aggregation from Dish
+        and sets the updated GPM version.
+        """
+        self._global_pointing_model_status = gpm_version
+
     def is_csp_dish_ready(self) -> bool:
         """
         his method wait for csp master leaf node and
@@ -438,7 +507,6 @@ class CNComponentManagerMid(CNComponentManager):
     ) -> None:
         """
         Updates the LRCR callback with received event.
-
         Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
         or (unique_id,TaskStatus)
         Whenever there is exception occured , (unique_id,exception_msg)
@@ -449,20 +517,11 @@ class CNComponentManagerMid(CNComponentManager):
         all events are verified with respect to this mapping.
         If there is no command_mapping present the event
         might be of old command.
-
         Args:
             dev_name (str): name of the device who's event has been
-                captured in this method
+            captured in this method
             value: longRunningCommandResult attribute event.
-
         """
-        self.logger.debug(
-            "Command ID: %s | longRunningCommandResult event for "
-            + "device %s. Event value: %s",
-            self.command_id,
-            dev_name,
-            str(value),
-        )
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
@@ -470,6 +529,14 @@ class CNComponentManagerMid(CNComponentManager):
             or unique_id not in self.command_mapping.values()
         ):
             return
+        command_id = self.get_command_id(unique_id)
+        self.logger.debug(
+            "Command ID: %s | longRunningCommandResult event for "
+            + "device %s. Event value: %s",
+            command_id,
+            dev_name,
+            str(value),
+        )
         try:
             result_code, message = json.loads(
                 result_code_or_exception_or_task_status
@@ -480,7 +547,7 @@ class CNComponentManagerMid(CNComponentManager):
                     self.logger.debug(
                         "Command ID: %s | Command with Unique ID %s on "
                         + "%s succeeded.",
-                        self.command_id,
+                        command_id,
                         str(unique_id),
                         dev_name,
                     )
@@ -494,7 +561,7 @@ class CNComponentManagerMid(CNComponentManager):
                         "Command ID: %s | Updating LRCRCallback with "
                         + "ResultCode: %s and Message: %s "
                         + "for command %s on  %s.",
-                        self.command_id,
+                        command_id,
                         ResultCode(result_code),
                         message,
                         str(unique_id),
@@ -505,7 +572,6 @@ class CNComponentManagerMid(CNComponentManager):
                         f"Exception occurred on device: {unique_id}: "
                         f"{dev_name}: {message}"
                     )
-                    command_id = self.get_command_id(unique_id)
                     self.long_running_result_callback(
                         command_id,
                         ResultCode.FAILED,
@@ -516,30 +582,10 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.exception(
                 "Command ID: %s | Exception occurred while processing "
                 + "long running command result on %s: %s",
-                self.command_id,
+                command_id,
                 dev_name,
                 exception,
             )
-
-    def get_command_id(self, unique_id: int) -> str:
-        """
-        This Method is used to get command
-        it from the command mapping dictionary
-
-        Args:
-            unique_id (int): unique id of the command
-
-        Returns:
-            str: returns the command id with reference to unique id.
-
-        """
-        index_of_unique_id = list(self.command_mapping.values()).index(
-            unique_id
-        )  # get index location of unique_id received in event
-        command_id = list(self.command_mapping.keys())[
-            index_of_unique_id
-        ]  # command id mapped to unique id
-        return command_id
 
     def update_device_state(self, device_name: str, state: DevState) -> None:
         """
@@ -581,7 +627,6 @@ class CNComponentManagerMid(CNComponentManager):
                     f"{devInfo.state}"
                 )
                 devInfo.last_event_arrived = time.time()
-                devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
@@ -628,7 +673,6 @@ class CNComponentManagerMid(CNComponentManager):
                 DishMode(dev_info.dish_mode).name,
             )
             dev_info.last_event_arrived = time.time()
-            dev_info.update_unresponsive(False)
 
         self._aggregate_state()
         self._update_imaging()
@@ -816,6 +860,21 @@ class CNComponentManagerMid(CNComponentManager):
             "tm_data_filepath": self.dish_vcc_file_path,
         }
 
+    def get_default_gpm_version_params(self) -> dict:
+        """
+        Return default GPM version parameters
+
+        Returns:
+            Default GPM version parameters
+
+        """
+        return {
+            "version": self.gpm_version,
+            "interface": self.gpm_interface,
+            "tm_data_sources": [self.gpm_data_sources_prefix],
+            "tm_data_filepath": self.gpm_file_path_prefix,
+        }
+
     def check_if_csp_all_dish_ready(self) -> bool:
         """
         Check and validate all dish and csp master is ready
@@ -984,6 +1043,52 @@ class CNComponentManagerMid(CNComponentManager):
         )
         return task_status, response
 
+    def set_gpm_version(
+        self, argin: str, task_callback: Callable = None
+    ) -> Tuple[ResultCode, str]:
+        """
+        Set GPM version for Dish.
+
+        Args:
+            argin (str): Dish Id's with the specified bands and version.
+
+        Returns:
+            a result code and message
+
+        """
+
+        keys_to_allow_skip = [
+            "version",
+            "tm_data_filepath",
+            "tm_data_sources",
+            "interface",
+        ]
+        set_gpm_version_command = SetGlobalPointingModel(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        try:
+            gpm_input = json.loads(argin)
+            self.logger.debug(
+                "GPM JSON argin is in correct format. %s", gpm_input
+            )
+            if not all(key in gpm_input for key in keys_to_allow_skip):
+                GPMJsonModel(**gpm_input)
+            else:
+                self.logger.debug(
+                    "Executing initialization/restart SetGPM on %s",
+                    self.gpm_unknown_dishes,
+                )
+            task_status, response = self.submit_task(
+                set_gpm_version_command.apply_gpm,
+                args=[argin, self.logger],
+                task_callback=task_callback,
+            )
+            return task_status, response
+        except Exception as exception:
+            self.logger.error("Exception occured %s", exception)
+            return set_gpm_version_command.reject_command(exception)
+
     def update_load_dish_cfg_results_async(
         self, dev_name: str, value: tuple
     ) -> None:
@@ -1109,3 +1214,284 @@ class CNComponentManagerMid(CNComponentManager):
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.dish_vcc_command_status = DishConfigStatus.COMPLETED
+        self._check_init_and_invoke_gpm()
+
+    def _check_init_and_invoke_gpm(self):
+        """If TMC is in initalization phase then invoke gpm"""
+        if self.is_gpm_init and self.invoke_set_gpm_command_callback:
+            self.invoke_set_gpm_command_callback()
+            self.is_gpm_init = False
+
+    def handle_gpm_version_event(
+        self, dev_name: str, gpmVersion: dict
+    ) -> None:
+        """
+        Handle the GPM version
+        Based on following table Result codes handled and attributes updated\n
+
+        String       | Meaning\n
+        UNKNOWN      | GPM version not set on Dish\n
+        Version      | GPM is already invoked \n
+
+        String      | Action\n
+        UNKNOWN     | Apply GPM using SetGlobalPointingModel command\n
+        Version     | Version is set, no need to invoke SetGlobalPointingModel
+                      command
+
+        Args:
+            dev_name (str): Device name
+            result (ResultCode): ResultCode
+
+        """
+        self.logger.info(
+            "GPM versions received %s from %s", gpmVersion, dev_name
+        )
+        with self.dishln_gpm_lock:
+            dish_id = dev_name.split("/")[-1]
+            self.global_pointing_model_status[dish_id] = json.loads(gpmVersion)
+            if self.check_if_csp_all_dish_ready():
+                gpm_aggregator = DishAttrValueAggregator(self, self.logger)
+                self.gpm_unknown_dishes = gpm_aggregator.aggregate_gpm()
+                self.logger.debug(
+                    "Command in progress %s and Dish-Vcc command status %s",
+                    self.command_in_progress,
+                    self._dish_vcc_command_status,
+                )
+                if self.gpm_unknown_dishes and not self.command_in_progress:
+                    if (
+                        self._dish_vcc_command_status
+                        == DishConfigStatus.COMPLETED
+                    ):
+                        self.logger.info(
+                            "Restart phase: Invoking Set GPM command on:  %s",
+                            self.gpm_unknown_dishes,
+                        )
+                        self.invoke_set_gpm_command_callback()
+
+    def reset_gpm_data(self) -> None:
+        """Reset GPM data"""
+
+        self.logger.info("Resetting SetGlobalPointingModel data")
+        self.gpm_version_aggregated_result = ResultCode.UNKNOWN
+        self.number_of_gpm_executed = 0
+        self.dishln_gpm_cmd_exe_data = {}
+        self.gpm_unknown_dishes = []
+        self.command_in_progress = ""
+        if self.command_mapping.get(self.command_id):
+            self.command_mapping.pop(self.command_id)
+
+    def update_set_gpm_results(self, dev_name: str, value: tuple) -> None:
+        """
+        This method is used to update the result returned
+        from Dish leaf nodes as part of SetGlobalPointingModel
+        command.
+        If all events are received from all device then aggregate
+        the result
+        Value contains (unique_id, ResultCode)
+        Args:
+            dev_name (str): Name of the device who's event has been
+            captured in this method
+            value (tuple): longRunningCommandResult attribute event.
+        """
+
+        self.logger.info(
+            "GPM longRunningCommandResult event for device: "
+            "%s, with value: %s",
+            dev_name,
+            str(value),
+        )
+        with self.dishln_gpm_lock:
+            dishln_id = dev_name.split("/")[-1]
+            result_code_or_exception = []
+            unique_id, resultcode_message = value
+            if unique_id.endswith("ApplyPointingModel"):
+                result_code_or_exception = json.loads(resultcode_message)
+            if result_code_or_exception:
+                if dishln_id in self.dishln_gpm_cmd_exe_data:
+                    band_value = self._get_band_dishln_gpm_cmd_data(unique_id)
+                    self.dishln_gpm_cmd_exe_data[dishln_id][
+                        band_value
+                    ] = result_code_or_exception
+                    self.logger.debug(
+                        "dishln gpm %s", self.dishln_gpm_cmd_exe_data
+                    )
+                if self.number_of_gpm_executed > 0:
+                    self.number_of_gpm_executed -= 1
+                self.logger.info(
+                    "Dev names for set gpm  %s &"
+                    " number of gpm executed remaining %s",
+                    str(self.dishln_gpm_cmd_exe_data),
+                    self.number_of_gpm_executed,
+                )
+
+            if (
+                not self.number_of_gpm_executed
+                and self.command_in_progress == "SetGlobalPointingModel"
+            ):
+                self.logger.info(
+                    "All Events received for set GPM version,"
+                    " Aggregating GPM results"
+                )
+                self.aggregate_set_gpm_results()
+                self.gpm_version_aggregated_result = ResultCode.OK
+                self.observable.notify_observers(command_exception=True)
+
+    def _get_band_dishln_gpm_cmd_data(self, unique_id: str) -> str:
+        """Return Band for the specified dish in unique id
+        Args:
+            unique_id: command unique id
+        Returns:
+            band (str)
+        """
+        band = ""
+        for command_data in self.command_mapping[self.command_id]:
+            if unique_id in command_data:
+                band = command_data[unique_id]
+        return band
+
+    def aggregate_set_gpm_results(self) -> None:
+        """
+        This method aggregate GPM command results.
+        """
+        break_outer = False
+        self.gpm_aggregated_result = True
+        for (
+            dishln_id,
+            bands,
+        ) in self.dishln_gpm_cmd_exe_data.items():
+            if isinstance(bands, str):
+                self.gpm_aggregated_result = False
+                break_outer = True
+                break
+            for band_name, result in bands.items():
+                first_value = result[0]
+                if not isinstance(first_value, int):
+                    try:
+                        first_value = int(first_value)
+                    except (ValueError, TypeError):
+                        self.logger.exception(
+                            "Invalid Value found %s -> %s result",
+                            dishln_id,
+                            band_name,
+                        )
+                if first_value != int(ResultCode.OK):
+                    self.gpm_aggregated_result = False
+                    break_outer = True
+                    break
+            if break_outer:
+                break
+
+    def validate_assign_json(self, argin: str):
+        """Validates assign resources json
+
+        :param argin: json input
+        :type argin: str
+        """
+        json_argument = json.loads(argin)
+        self.validate_subarray_id(json_argument)
+        # Utilize CDM to validate json.
+        available_subarrays_list = self.input_parameter.subarray_dev_names
+        dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
+        available_dish_leaf_node_devices = (
+            self.input_parameter.dish_leaf_node_dev_names
+        )
+        assign_validator = AssignResourceValidator(
+            available_subarrays_list,
+            available_dish_leaf_node_devices,
+            dish_leaf_node_prefix,
+            self.logger,
+        )
+
+        assign_validator.loads(argin)
+
+    def assign_resources(self, argin, task_callback: TaskCallbackType):
+        """
+        Submits the AssignResources command in queue.
+
+        :param argin: input json string for assign resource command
+        :type argin: str
+        :param task_callback: Update task state, defaults to None
+        :type task_callback: TaskCallbackType
+        :return: task_status
+        :rtype: tuple
+        """
+        try:
+            # Execute the command if the input JSON is valid
+            self.logger.debug(
+                "Calling component manager assign_resources method"
+            )
+            assign_resources_command = AssignResourcesMid(
+                self,
+                adapter_factory=self.adapter_factory,
+                logger=self.logger,
+            )
+            self.validate_assign_json(argin)
+            assign_resources_command.subarray_id = self.get_subarray_id(argin)
+            task_status, response = self.submit_task(
+                assign_resources_command.assign_resources,
+                kwargs={"argin": argin},
+                task_callback=task_callback,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.EMPTY, ObsState.IDLE],
+                    "AssignResources",
+                ),
+            )
+            self.logger.info(
+                "AssignResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+        except Exception as exception:
+            return assign_resources_command.reject_command(str(exception))
+
+    def validate_release_json(self, argin: str):
+        """Validates the release resource json.
+
+        :param argin: release resource json string.
+        :type argin: str
+        """
+        json_argument = json.loads(argin)
+        self.validate_subarray_id(json_argument)
+        release_validator = ReleaseResourceValidator(self.logger)
+        release_validator.loads(argin)
+
+    def release_resources(self, argin: str, task_callback: TaskCallbackType):
+        """
+        Submit the ReleaseResource command in queue.
+
+        :param argin: input json string for release resource command
+        :type argin: str
+        :param task_callback: Updates task status
+        :type task_callback: TaskCallbackType
+        :return: task_status
+        :rtype: tuple
+        """
+        try:
+            release_resources_command = ReleaseResourcesMid(
+                self, adapter_factory=self.adapter_factory, logger=self.logger
+            )
+            self.validate_release_json(argin)
+
+            self.check_availability_for_release(argin)
+
+            task_status, response = self.submit_task(
+                release_resources_command.release_resources,
+                kwargs={"argin": argin},
+                task_callback=task_callback,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.IDLE],
+                    "ReleaseResources",
+                ),
+            )
+            self.logger.info(
+                "ReleaseResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+
+        except Exception as exception:
+            return release_resources_command.reject_command(str(exception))

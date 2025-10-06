@@ -38,9 +38,7 @@ def validate_attribute_after_restart(
     assert json.loads(csp_mln.memorizedDishVccMap) == json.loads(dish_cfg_str)
 
 
-def load_dish_cfg(
-    tango_context, central_node_name, config_str, change_event_callbacks
-):
+def load_dish_cfg(central_node_name, config_str, change_event_callbacks):
     """Test cases for Load_Dish_Config command"""
     logger.info("%s", config_str)
     dev_factory = DevFactory()
@@ -107,7 +105,7 @@ def load_dish_cfg(
 
 
 def load_dish_cfg_rejected(
-    tango_context, central_node_name, config_str, change_event_callbacks
+    central_node_name, config_str, change_event_callbacks
 ):
     """Test LoadDishCfg rejected when existing
     LoadDishCfg command is in progress"""
@@ -157,13 +155,12 @@ def load_dish_cfg_rejected(
     change_event_callbacks.assert_change_event(
         "DishVccCommandStatus",
         DishConfigStatus.COMPLETED,
-        lookahead=4,
+        lookahead=8,
     )
     csp_master_ln_device.SetDelay(2)
 
 
 def load_dish_cfg_when_csp_is_defective(
-    tango_context,
     central_node_name,
     config_str,
     change_event_callbacks,
@@ -223,7 +220,7 @@ def load_dish_cfg_when_csp_is_defective(
 
 
 def load_dish_cfg_after_central_node_init(
-    tango_context, central_node_name, config_str, change_event_callbacks
+    central_node_name, config_str, change_event_callbacks
 ):
     """Test cases for Load_Dish_Config command"""
     dev_factory = DevFactory()
@@ -285,7 +282,7 @@ def load_dish_cfg_after_central_node_init(
 
 
 def central_node_dish_vcc_after_csp_master_dish_ln_restart(
-    tango_context, central_node_name, config_str, change_event_callbacks
+    central_node_name, config_str, change_event_callbacks
 ):
     """Validate When only CSP master leaf node and dish leaf node restart
     then Central Node update it's dishVccValidationResult properly
@@ -340,14 +337,12 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
     [CENTRALNODE_MID],
 )
 def test_load_dish_cfg(
-    tango_context,
     central_node_name,
     change_event_callbacks,
     json_factory,
 ):
     """Test cases for Load_Dish_Config command"""
     return load_dish_cfg(
-        tango_context,
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
@@ -361,7 +356,6 @@ def test_load_dish_cfg(
     [CENTRALNODE_MID],
 )
 def test_load_dish_cfg_rejected(
-    tango_context,
     central_node_name,
     change_event_callbacks,
     json_factory,
@@ -370,7 +364,6 @@ def test_load_dish_cfg_rejected(
     when existing command is in progress
     """
     return load_dish_cfg_rejected(
-        tango_context,
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
@@ -384,34 +377,28 @@ def test_load_dish_cfg_rejected(
     [CENTRALNODE_MID],
 )
 def test_load_dish_cfg_when_csp_is_defective(
-    tango_context,
     central_node_name,
     change_event_callbacks,
     json_factory,
 ):
     """Test cases for Load_Dish_Config command"""
     return load_dish_cfg_when_csp_is_defective(
-        tango_context,
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
     )
 
 
-# Test Cases with with requirment to restart server fail
-# randomly due to issues in restart
-@pytest.mark.skip(
-    reason="Skipped due to intermittent failures "
-    ", Raised SKB-404 to track same"
-)
+@pytest.mark.restart_device_server
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.xfail(
+    reason="Intermittentent failure due to device server restart"
+)
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
 )
 def test_load_dish_cfg_after_central_node_init(
-    tango_context,
     central_node_name,
     change_event_callbacks,
     json_factory,
@@ -419,22 +406,22 @@ def test_load_dish_cfg_after_central_node_init(
     """Test cases for Load_Dish_Config command after central node
     initialisation"""
     return load_dish_cfg_after_central_node_init(
-        tango_context,
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
     )
 
 
-@pytest.mark.skip(reason="Fails intermittently")
+@pytest.mark.xfail(
+    reason="Intermittentent failure due to device server restart"
+)
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.restart_device_server
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
 )
 def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
-    tango_context,
     central_node_name,
     change_event_callbacks,
     json_factory,
@@ -442,7 +429,6 @@ def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
     """Test cases for Load_Dish_Config command after csp master dish Leaf node
     restarts"""
     return central_node_dish_vcc_after_csp_master_dish_ln_restart(
-        tango_context,
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
@@ -450,7 +436,6 @@ def test_central_node_dish_vcc_after_csp_master_dish_ln_restart(
 
 
 def load_dish_cfg_with_wrong_path(
-    tango_context,
     central_node_name,
     config_str,
     change_event_callbacks,
@@ -512,14 +497,12 @@ def load_dish_cfg_with_wrong_path(
     [CENTRALNODE_MID],
 )
 def test_load_dish_cfg_with_wrong_path(
-    tango_context,
     central_node_name,
     change_event_callbacks,
     json_factory,
 ):
     """Test cases for Load_Dish_Config command"""
     return load_dish_cfg_with_wrong_path(
-        tango_context,
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,

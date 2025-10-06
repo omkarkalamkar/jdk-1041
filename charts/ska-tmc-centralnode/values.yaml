@@ -9,7 +9,6 @@ telescope: SKA-mid
 
 legacy_compatibility: true
 
-subarray_count: 1
 dishes: ["01"]
 
 labels:
@@ -25,6 +24,8 @@ global:
     domain: "mid-tmc"
   low:
     domain: "low-tmc"
+  labels:
+    app: ska-tmc-centralnode
 
 dsconfig:
   configuration_file: data/configuration.json
@@ -46,12 +47,11 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.21.3
+    tag: 0.24.1
     pullPolicy: IfNotPresent
 
 resources:
   limits:
-
     memory: 500Mi
   requests:
     cpu: 150m
@@ -61,13 +61,12 @@ deviceServers:
   centralnode:
     enabled: true
     instances: ["01"]
+    subarray_count: 2
     command: "CentralNodeDS"
-    subarray_count: 1
-    SkuidService: "ska-ser-skuid-test-svc.ska-tmc-centralnode.svc.techops.internal.skao.int:9870"
     LivelinessCheckPeriod: 1.0
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
-    member : "0"
+    member: "0"
 
     mid:
       file: "data/centralnode_mid.yaml"
@@ -90,6 +89,11 @@ deviceServers:
       DishVccInitTimeout: 120
       CommandTimeOutDefault: 30
       SubarrayPrefix: "mid-tmc/subarray/"
+      global_pointing_model:
+        version: "1.0.0"
+        interface: "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
+        data_sources_prefix: "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
+        file_path_prefix: "instrument/ska_mid1/global_pointing_model_data"
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "low-tmc/leaf-node-csp/0"
@@ -100,8 +104,7 @@ deviceServers:
       MCCSMasterFQDN: "low-mccs/control/control"
       SubarrayPrefix: "low-tmc/subarray/"
       CommandTimeOutDefault: 30
-
-
+      IsAutoRecoveryEnabled: "false"
 nodeSelector: {}
 
 affinity: {}

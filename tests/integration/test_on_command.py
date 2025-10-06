@@ -24,7 +24,7 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import DISH_DEFECT, RESET_DEFECT, logger
+from tests.settings import DISH_DEFECT, RESET_DEFECT
 
 
 # pylint:disable=c-extension-no-member
@@ -33,7 +33,6 @@ from tests.settings import DISH_DEFECT, RESET_DEFECT, logger
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_on_command_mid(
-    tango_context,
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
@@ -103,12 +102,10 @@ def test_on_command_mid(
     [DISH_LEAF_NODE_1],
 )
 def test_on_command_dish_fail(
-    tango_context,
     device_name,
     change_event_callbacks,
 ):
     """Test TelescopeOn command failure on dish device"""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
 
@@ -198,7 +195,6 @@ def test_on_command_dish_fail(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_on_command_low(
-    tango_context,
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
 ):

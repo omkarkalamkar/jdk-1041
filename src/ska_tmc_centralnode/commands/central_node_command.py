@@ -60,7 +60,7 @@ class CentralNodeCommand(TMCCommand):
         logger: logging.Logger = LOGGER,
         **kwargs,
     ):
-        super().__init__(component_manager, *args, logger=logger, **kwargs)
+        super().__init__(component_manager, logger, *args, **kwargs)
         self.timeout_id: str = f"{time.time()}_{self.__class__.__name__}"
         self.timeout_callback: TimeoutCallback = TimeoutCallback(
             self.timeout_id, self.logger
@@ -445,6 +445,20 @@ class AssignReleaseResources(CentralNodeCommand):
         self.dish_adapters = []
         self.subarray_adapters = []
 
+    def set_command_id(self, command_name: str) -> None:
+        """
+        Sets the command id for error propagation.
+
+        :param command_name: name of the command.
+        :type command_name: str
+        """
+        self.command_id = f"{time.time()}-{command_name}"
+        self.logger.info(
+            "Setting command id as %s for command: %s",
+            self.command_id,
+            command_name,
+        )
+
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
         """
         Initialises adapters for mid
@@ -596,32 +610,30 @@ class AssignReleaseResources(CentralNodeCommand):
             # even if command is rejected by subarraynode ,
             # it will be resultcode failed for centralnode
             if return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                if self.component_manager.command_mapping.get(
-                    self.component_manager.command_id
-                ):
+                if self.component_manager.command_mapping.get(self.command_id):
                     self.logger.debug(
-                        "Command ID : %s |"
-                        + "Adding the ID %s to the command mapping"
-                        + "dictionary under command_id: %s",
-                        self.component_manager.command_id,
+                        "Command ID: %s |"
+                        + " Adding the ID %s to the command mapping"
+                        + " dictionary under command_id: %s",
+                        self.command_id,
                         message_or_unique_id,
-                        self.component_manager.command_id,
+                        self.command_id,
                     )
                     self.component_manager.command_mapping[
-                        self.component_manager.command_id
+                        self.command_id
                     ].append(message_or_unique_id)
                 else:
                     self.logger.debug(
                         "Command ID: %s |"
-                        + "Creating a command mapping dictionary for id:"
+                        + " Creating a command mapping dictionary for id: "
                         + "%s, with unique_id: %s",
-                        self.component_manager.command_id,
-                        self.component_manager.command_id,
+                        self.command_id,
+                        self.command_id,
                         message_or_unique_id,
                     )
-                    self.component_manager.command_mapping[
-                        self.component_manager.command_id
-                    ] = [message_or_unique_id]
+                    self.component_manager.command_mapping[self.command_id] = [
+                        message_or_unique_id
+                    ]
         return (ResultCode.OK, "")
 
 
@@ -665,6 +677,65 @@ class LoadDishCfgCommand(CentralNodeCommand):
                 self.component_manager.input_parameter.csp_mln_dev_name,
                 e,
             )
+        error_dev_names = []
+        num_working = 0
+        for (
+            dev_name
+        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
+            devInfo = self.component_manager.get_device(dev_name)
+            if not devInfo.unresponsive:
+                try:
+                    self.dish_adapters.append(
+                        self._adapter_factory.get_or_create_adapter(
+                            dev_name, AdapterType.DISH
+                        )
+                    )
+                    num_working += 1
+                    self.logger.debug(
+                        "Adapter is created for DishLeafNode: %s", dev_name
+                    )
+                except Exception as e:
+                    self.logger.exception(
+                        "Exception in creating adapter for %s, Exception: %s",
+                        dev_name,
+                        str(e),
+                    )
+                    error_dev_names.append(dev_name)
+
+        if num_working == 0:
+            return (
+                ResultCode.FAILED,
+                f"Error in creating dish adapters {'.'.join(error_dev_names)}",
+            )
+        return (ResultCode.OK, "")
+
+
+class SetDishGPM(CentralNodeCommand):
+    """This command class for SetGlobalPointingModel command which
+    forms GPM json CAR URI and pass it to TMC Dish Leaf Node.
+    """
+
+    def __init__(
+        self,
+        component_manager,
+        adapter_factory: Optional[AdapterFactory] = None,
+        *args,
+        logger=None,
+        **kwargs,
+    ):
+        super().__init__(component_manager, *args, logger=logger, **kwargs)
+        self._adapter_factory = adapter_factory or AdapterFactory()
+        self.csp_mln_adapter = None
+        self.sdp_mln_adapter = None
+        self.subarray_adapters = []
+        self.dish_adapters = []
+
+    def init_adapters_mid(self) -> Tuple[ResultCode, str]:
+        """Initialises Adapters for mid"""
+        self.csp_mln_adapter: Optional[AdapterFactory] = None
+        self.sdp_mln_adapter: Optional[AdapterFactory] = None
+        self.subarray_adapters: Optional[AdapterFactory] = []
+        self.dish_adapters = []
         error_dev_names = []
         num_working = 0
         for (

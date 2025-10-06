@@ -8,6 +8,7 @@ from typing import List
 
 import pytest
 import tango
+from ska_control_model import AdminMode
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tango_testing.mock.placeholders import Anything
@@ -15,6 +16,7 @@ from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
 from ska_tmc_common import FaultType, LivelinessProbeType
+from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
 from ska_tmc_centralnode.manager.component_manager_low import (
@@ -48,7 +50,9 @@ LOW_CSP_SLN_DEVICE = "low-tmc/subarray-leaf-node-csp/01"
 MID_SDP_SLN_DEVICE = "mid-tmc/subarray-leaf-node-sdp/01"
 LOW_SDP_SLN_DEVICE = "low-tmc/subarray-leaf-node-sdp/01"
 MID_SUBARRAY_DEVICE = "mid-tmc/subarray/01"
+MID_SUBARRAY2_DEVICE = "mid-tmc/subarray/02"
 LOW_SUBARRAY_DEVICE = "low-tmc/subarray/01"
+LOW_SUBARRAY2_DEVICE = "low-tmc/subarray/02"
 DISH_LEAF_NODE_DEVICE = "mid-tmc/leaf-node-dish/ska001"
 DISH_MASTER_DEVICE = "ska001/elt/master"
 MID_SDP_MASTER_DEVICE = "mid-sdp/control/0"
@@ -177,6 +181,11 @@ def mock_telescope_availability_callback(telescope_availability):
     logger.debug("telescope availability: %s", str(telescope_availability))
 
 
+def invoke_set_gpm_command_callback():
+    """Dummy method for invoke_set_gpm_command callback"""
+    logger.debug("Invoked SetGlobalPointingCommand")
+
+
 def create_cm(
     p_liveliness_probe=False,
     p_event_manager=True,
@@ -211,6 +220,17 @@ def create_cm(
             _event_manager=p_event_manager,
             _liveliness_probe=LivelinessProbeType.NONE,
             enable_dish_vcc_init=False,
+            invoke_set_gpm_command_callback=invoke_set_gpm_command_callback,
+            gpm_version="1.0.0",
+            gpm_interface=(
+                "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
+            ),
+            gpm_data_sources_prefix=(
+                "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
+            ),
+            gpm_file_path_prefix=(
+                "instrument/ska_mid1/global_pointing_model_data"
+            ),
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
@@ -443,6 +463,7 @@ def check_lrcr_events(
     command_name: str,
     result_to_check: ResultCode = ResultCode.OK,
     retries: int = 20,
+    callback_name: str = "longRunningCommandResult",
 ):
     """Used to assert command name and result code in
        longRunningCommandResult event callbacks.
@@ -457,8 +478,9 @@ def check_lrcr_events(
     COUNT = 0
     flag = False
     while not flag and COUNT <= retries:
-        assertion_data = change_event_callback.assert_change_event(
-            "longRunningCommandResult",
+        assertion_data = change_event_callback[
+            callback_name
+        ].assert_change_event(
             Anything,
             lookahead=15,
         )
@@ -472,3 +494,51 @@ def check_lrcr_events(
     if flag:
         return True
     return False
+
+
+def set_low_devices_availability():
+    """Sets availability for low telescope."""
+    dev_factory = DevFactory()
+    proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    proxy_csp_mln.SetSubsystemAvailable(True)
+
+    proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    proxy_sdp_mln.SetSubsystemAvailable(True)
+
+    proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+    proxy_mccs_mln.SetSubsystemAvailable(True)
+
+
+def set_low_devices_admin_mode():
+    """Sets Admin mode for low telescope."""
+    dev_factory = DevFactory()
+    proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
+    proxy_csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
+
+    proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
+    proxy_sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
+
+    proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
+    proxy_mccs_mln.SetMccsControllerAdminMode(AdminMode.ONLINE)
+
+
+def set_auto_recovery_for_low(central_node_name: str, enabled: bool = True):
+    """Sets the auto recovery property to True
+
+    :param central_node_name: central node fqdn
+    :type central_node_name: str
+    """
+    db = tango.Database()
+    dev_factory = DevFactory()
+    if (
+        db.get_device_property(central_node_name, "IsAutoRecoveryEnabled")
+        != enabled
+    ):
+        db.put_device_property(
+            central_node_name, {"IsAutoRecoveryEnabled": enabled}
+        )
+        central_node = dev_factory.get_device(central_node_name)
+        central_node.init()
+        time.sleep(5)
+        set_low_devices_admin_mode()
+        set_low_devices_availability()

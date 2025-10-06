@@ -12,8 +12,8 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_simulators.helper_adapter_factory import HelperAdapterFactory
 from tango import DevState
 
-from ska_tmc_centralnode.commands.release_resources_command import (
-    ReleaseResources,
+from ska_tmc_centralnode.commands.release_resources_command_low import (
+    ReleaseResourcesLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
@@ -74,7 +74,9 @@ def test_low_release_resources_command_fail_subarray(
         LOW_SUBARRAY_DEVICE, proxy=subarrayMock
     )
     release_input_str = json_factory("release_resource_low")
-    assign_res_command = ReleaseResources(cm, adapter_factory, logger=logger)
+    assign_res_command = ReleaseResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
     (res_code, _) = assign_res_command.do(release_input_str)
     assert res_code == ResultCode.FAILED
 
@@ -84,8 +86,7 @@ def test_low_release_resources_empty_input_json(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    cm.release_resources("", task_callback=task_callback)
-    (res_code, _) = cm.release_resources(" ")
+    (res_code, _) = cm.release_resources("", task_callback=task_callback)
     assert res_code == TaskStatus.REJECTED
 
 
@@ -118,10 +119,10 @@ def test_low_release_resources_missing_subarray_id(
     release_input_str = json_factory("release_resource_low")
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
-    cm.release_resources(
+
+    (res_code, message) = cm.release_resources(
         json.dumps(json_argument), task_callback=task_callback
     )
-    (res_code, message) = cm.release_resources(json.dumps(json_argument))
     assert res_code == TaskStatus.REJECTED
     assert (
         "subarray_id key is not present in the input json argument" in message

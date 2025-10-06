@@ -53,18 +53,12 @@ class AbstractCentralNode(TMCBaseDevice):
         default_value=tuple(),
     )
 
-    SkuidService = device_property(
-        dtype="DevString",
-        default_value="ska-ser-skuid-test-svc.ska-tmc-centralnode"
-        + ".svc.techops.internal.skao.int:9870",
-    )
     ProxyTimeout = device_property(dtype="DevUShort", default_value=500)
 
     SubarrayPrefix = device_property(
         dtype="DevString",
         default_value="",
     )
-
     # ----------
     # Attributes
     # ----------

@@ -12,8 +12,8 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_simulators.helper_adapter_factory import HelperAdapterFactory
 from tango import DevState
 
-from ska_tmc_centralnode.commands.assign_resources_command import (
-    AssignResources,
+from ska_tmc_centralnode.commands.assign_resources_command_low import (
+    AssignResourcesLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
@@ -62,7 +62,9 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     json_argument = json.loads(assign_input_str)
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
     del json_argument["sdp"]["processing_blocks"]
-    (res_code, _) = cm.assign_resources(json.dumps(json_argument))
+    (res_code, _) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == TaskStatus.REJECTED
     with pytest.raises(Exception) as e:
         assert "processing_blocks" in e
@@ -79,7 +81,9 @@ def test_assign_resources_missing_sdp_key(
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
-    (res_code, message) = cm.assign_resources(json.dumps(json_argument))
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == TaskStatus.REJECTED
     assert "sdp" in message
 
@@ -95,7 +99,9 @@ def test_assign_resources_missing_csp_key(
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["csp"]
-    (res_code, message) = cm.assign_resources(json.dumps(json_argument))
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == TaskStatus.REJECTED
     assert "csp" in message
 
@@ -115,9 +121,6 @@ def test_low_assign_resources_command_fail_subarray(
 
     adapter_factory = HelperAdapterFactory()
 
-    attrs = {"fetch_skuid.return_value": 123}
-    skuid = mock.Mock(**attrs)
-
     # include exception in AssignResources command
     attrs = {"AssignResources.side_effect": Exception}
     subarrayMock = mock.Mock(**attrs)
@@ -125,8 +128,8 @@ def test_low_assign_resources_command_fail_subarray(
         LOW_SUBARRAY_DEVICE, proxy=subarrayMock
     )
     assign_input_str = json_factory("assign_resource_low")
-    assign_res_command = AssignResources(
-        cm, adapter_factory, skuid, logger=logger
+    assign_res_command = AssignResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
     )
     (res_code, _) = assign_res_command.do(assign_input_str)
     assert res_code == ResultCode.FAILED
@@ -144,7 +147,9 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["subarray_beams"][0]["subarray_beam_id"]
-    (res_code, message) = cm.assign_resources(json.dumps(json_argument))
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == TaskStatus.REJECTED
     assert "subarray_beam_id" in message
 
@@ -156,7 +161,7 @@ def test_low_assign_resources_command_empty_input_json(
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    (res_code, _) = cm.assign_resources(" ")
+    (res_code, _) = cm.assign_resources(" ", task_callback=task_callback)
     assert res_code == TaskStatus.REJECTED
 
 
@@ -192,7 +197,9 @@ def test_low_assign_resources_missing_subarray_id(
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
-    (res_code, message) = cm.assign_resources(json.dumps(json_argument))
+    (res_code, message) = cm.assign_resources(
+        json.dumps(json_argument), task_callback=task_callback
+    )
     assert res_code == TaskStatus.REJECTED
     assert "subarray_id" in message
 

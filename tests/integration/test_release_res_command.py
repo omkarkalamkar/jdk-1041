@@ -23,11 +23,11 @@ from tests.settings import (
     TIMEOUT_DEFECT,
     check_subarray_availability,
     logger,
+    set_auto_recovery_for_low,
 )
 
 
 def release_resources(
-    tango_context,
     central_node_name,
     assign_input_str,
     release_input_string,
@@ -95,22 +95,110 @@ def release_resources(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=6,
     )
-
     # Teardown
     result, unique_id = central_node.TelescopeOff()
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+def test_release_resources_mid_timeout(
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
+    """Test cases for release resources command for mid timeout."""
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
+    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_proxy.SetisSubarrayAvailable(True)
+    ensure_checked_devices(central_node)
+
+    result, unique_id = central_node.TelescopeOn()
+    logger.info(
+        "TelescopeOn Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=5,
+    )
+
+    result, unique_id = central_node.AssignResources(
+        json_factory("command_AssignResources")
+    )
+
+    logger.info(
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+
+    assert unique_id[0].endswith("AssignResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=6,
+    )
+
+    subarray_proxy.SetDefective(TIMEOUT_DEFECT)
+    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+
+    result, unique_id = central_node.ReleaseResources(
+        json_factory("command_ReleaseResources")
+    )
+
+    logger.info(
+        "ReleaseResources Command ID: %s Returned result: %s ",
+        unique_id,
+        str(result),
+    )
+
+    assert unique_id[0].endswith("ReleaseResources")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            json.dumps(
+                (
+                    int(ResultCode.FAILED),
+                    "Timeout has occurred, command failed",
+                )
+            ),
+        ),
+        lookahead=4,
+    )
+    subarray_proxy.SetDefective(RESET_DEFECT)
+    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
+    # Teardown
+    result, unique_id = central_node.TelescopeOff()
+    subarray_proxy.ClearCommandCallInfo()
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
 def test_release_res_command_mid(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test cases for rlease resources command for low"""
     return release_resources(
-        tango_context,
         CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources"),
@@ -121,14 +209,27 @@ def test_release_res_command_mid(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
     """Test cases for release resources command"""
     return release_resources(
-        tango_context,
+        CENTRALNODE_LOW,
+        json_factory("assign_resource_low"),
+        json_factory("release_resource_low"),
+        change_event_callbacks,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.auto_recovery
+def test_release_res_command_low_with_auto_recovery(
+    change_event_callbacks, json_factory
+):
+    """Test cases for release resources command"""
+    set_auto_recovery_for_low(CENTRALNODE_LOW)
+    return release_resources(
         CENTRALNODE_LOW,
         json_factory("assign_resource_low"),
         json_factory("release_resource_low"),
@@ -137,7 +238,6 @@ def test_release_res_command_low(
 
 
 def release_resources_without_subarray_id(
-    tango_context,
     central_node_name,
     assign_input_str,
     invalid_release_input_string,
@@ -223,14 +323,12 @@ def release_resources_without_subarray_id(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_res_command_mid_without_subarray_id(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test cases for release resources command without subarray id"""
     return release_resources_without_subarray_id(
-        tango_context,
         CENTRALNODE_MID,
         json_factory("command_AssignResources"),
         json_factory("command_ReleaseResources_without_subarray_id"),
@@ -242,13 +340,11 @@ def test_release_res_command_mid_without_subarray_id(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_release_resources_error_propagation(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test cases for release resources error propagation command."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -290,19 +386,12 @@ def test_release_resources_error_propagation(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=6,
     )
-    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(ERROR_PROPAGATION_DEFECT)
+    subarray_proxy.SetDefective(ERROR_PROPAGATION_DEFECT)
 
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
@@ -329,124 +418,22 @@ def test_release_resources_error_propagation(
     )
 
     assert exception_message in event_data["attribute_value"][1]
-    tmc_subarray.SetDefective(RESET_DEFECT)
+    subarray_proxy.SetDefective(RESET_DEFECT)
     # Tear Down
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    tmc_subarray.ClearCommandCallInfo()
-
-
-@pytest.mark.post_deployment
-@pytest.mark.SKA_mid
-def test_release_resources_mid_timeout(
-    tango_context,
-    change_event_callbacks,
-    json_factory,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-):
-    """Test cases for release resources command for mid timeout."""
-    logger.info("%s", tango_context)
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(CENTRALNODE_MID)
-    subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-    subarray_proxy.SetisSubarrayAvailable(True)
-    ensure_checked_devices(central_node)
-
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "TelescopeOn Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=5,
-    )
-
-    result, unique_id = central_node.AssignResources(
-        json_factory("command_AssignResources")
-    )
-
-    logger.info(
-        "AssignResources Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("AssignResources")
-    assert result[0] == ResultCode.QUEUED
-
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=6,
-    )
-
-    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(TIMEOUT_DEFECT)
-    check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
-
-    result, unique_id = central_node.ReleaseResources(
-        json_factory("command_ReleaseResources")
-    )
-
-    logger.info(
-        "ReleaseResources Command ID: %s Returned result: %s ",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("ReleaseResources")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (
-            unique_id[0],
-            json.dumps(
-                (
-                    int(ResultCode.FAILED),
-                    "Timeout has occurred, command failed",
-                )
-            ),
-        ),
-        lookahead=8,
-    )
-    tmc_subarray.SetDefective(RESET_DEFECT)
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
-    # Teardown
-    result, unique_id = central_node.TelescopeOff()
-    tmc_subarray.ClearCommandCallInfo()
+    subarray_proxy.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_resources_low_timeout(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
     """Test cases for release resources command for low timeout."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
@@ -540,13 +527,11 @@ def test_release_resources_low_timeout(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_resources_error_aggregation(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
     """Test Release Resources error propagation."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
@@ -589,12 +574,6 @@ def test_release_resources_error_aggregation(
 
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
-
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",

@@ -26,11 +26,11 @@ from tests.settings import (
     TIMEOUT_DEFECT,
     check_subarray_availability,
     logger,
+    set_auto_recovery_for_low,
 )
 
 
 def assign_resources(
-    tango_context,
     central_node_name,
     assign_input_str,
     release_input_string,
@@ -38,7 +38,7 @@ def assign_resources(
     subarray_device,
 ):
     """AssignResources Test method."""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(subarray_device)
@@ -89,28 +89,6 @@ def assign_resources(
                 return device
         return None
 
-    # TODO Uncomment below code during integration of MCCS
-    # def get_mccs_device_resources(json_model):
-    #     for device in json_model["devices"]:
-    #         if device["dev_name"] == "low-tmc/leaf-node-mccs/0":
-    #             return device
-    #     len_subarray_beam_ids = 0
-    #     if "subarray_beam_ids" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["subarray_beam_ids"]
-    #         )
-    #     len_station_ids = 0
-    #     if "station_ids" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["station_ids"]
-    #         )
-    #     len_channel_blocks = 0
-    #     if "channel_blocks" in mccs_device["resources"]:
-    #         len_subarray_beam_ids = len(
-    #             mccs_device["resources"]["channel_blocks"]
-    #         )
-    #     return len_subarray_beam_ids + len_station_ids + len_channel_blocks
-
     device = get_subarray_device(json.loads(central_node.internalModel))
     logger.debug("InternalModel attribute value is:%s", device)
     start_time = time.time()
@@ -135,32 +113,6 @@ def assign_resources(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-
-    # TODO Uncomment below code during integration of MCCS
-    # if "ska_low" in central_node_name:
-    #     device = get_mccs_device_resources(
-    #         json.loads(central_node.internalModel)
-    #     )
-    #     start_time = time.time()
-    #     while len(device["resources"]) == 0:
-    #         time.sleep(SLEEP_TIME)
-    #         device = get_mccs_device_resources(
-    #             json.loads(central_node.internalModel)
-    #         )
-    #         elapsed_time = time.time() - start_time
-    #         if elapsed_time > TIMEOUT:
-    #             pytest.fail("Timeout occurred while executing the test")
-    # while resources_len == 0:
-    #     time.sleep(SLEEP_TIME)
-    #     resources_len = get_mccs_device_resources(
-    #         json.loads(central_node.internalModel)
-    #     )
-    #     elapsed_time = time.time() - start_time
-    #     if elapsed_time > TIMEOUT:
-    #         pytest.fail("Timeout occurred while executing the test")
-    # assert len(device["resources"]) > 0
-
-    # teardown subarray, setting ObsState = Empty
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
@@ -177,7 +129,6 @@ def assign_resources(
     ],
 )
 def test_assign_res_command_mid(
-    tango_context,
     central_node_name,
     input_json,
     change_event_callbacks,
@@ -186,7 +137,6 @@ def test_assign_res_command_mid(
 ):
     """Test assign Resources command for mid"""
     return assign_resources(
-        tango_context,
         central_node_name,
         json_factory(input_json),
         json_factory("command_ReleaseResources"),
@@ -208,7 +158,6 @@ def test_assign_res_command_mid(
     ],
 )
 def test_assign_res_command_low(
-    tango_context,
     central_node_name,
     input_json,
     change_event_callbacks,
@@ -217,7 +166,6 @@ def test_assign_res_command_low(
 ):
     """Test assign Resources command for low"""
     return assign_resources(
-        tango_context,
         central_node_name,
         json_factory(input_json),
         json_factory("release_resource_low"),
@@ -226,8 +174,24 @@ def test_assign_res_command_low(
     )
 
 
+@pytest.mark.post_deployment
+@pytest.mark.auto_recovery
+def test_assign_res_command_low_with_auto_recovery(
+    change_event_callbacks,
+    json_factory,
+):
+    """Test assign Resources command for low"""
+    set_auto_recovery_for_low(CENTRALNODE_LOW)
+    return assign_resources(
+        CENTRALNODE_LOW,
+        json_factory("assign_resource_low"),
+        json_factory("release_resource_low"),
+        change_event_callbacks,
+        LOW_SUBARRAY_DEVICE,
+    )
+
+
 def assign_resources_with_invalid_json(
-    tango_context,
     central_node_name,
     assign_input_str,
     change_event_callbacks,
@@ -284,7 +248,6 @@ def assign_resources_with_invalid_json(
     [CENTRALNODE_LOW],
 )
 def test_assign_res_command_low_invalid_json(
-    tango_context,
     central_node_name,
     change_event_callbacks,
     json_factory,
@@ -292,7 +255,6 @@ def test_assign_res_command_low_invalid_json(
 ):
     """Test assign resources for low invalid json"""
     return assign_resources_with_invalid_json(
-        tango_context,
         central_node_name,
         json_factory("invalid_key_AssignResources"),
         change_event_callbacks,
@@ -301,7 +263,6 @@ def test_assign_res_command_low_invalid_json(
 
 
 def assign_resources_without_subarray_id(
-    tango_context,
     central_node_name,
     assign_input_str,
     change_event_callbacks,
@@ -376,7 +337,6 @@ def assign_resources_without_subarray_id(
     [CENTRALNODE_MID],
 )
 def test_assign_res_command_mid_without_subarray_id(
-    tango_context,
     central_node_name,
     change_event_callbacks,
     json_factory,
@@ -384,7 +344,6 @@ def test_assign_res_command_mid_without_subarray_id(
 ):
     """Test assign Resources command mid without subarray id"""
     return assign_resources_without_subarray_id(
-        tango_context,
         central_node_name,
         json_factory("invalid_key_AssignResources"),
         change_event_callbacks,
@@ -394,13 +353,12 @@ def test_assign_res_command_mid_without_subarray_id(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_assign_resources_exception_propagation(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test Assign Resources exception propagation"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -429,11 +387,9 @@ def test_assign_resources_exception_propagation(
         lookahead=4,
     )
 
-    tmc_subarray = DevFactory().get_device(MID_SUBARRAY_DEVICE)
-    tmc_subarray.SetDefective(ERROR_PROPAGATION_DEFECT)
-
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, MID_SUBARRAY_DEVICE, True)
+    subarray_proxy.SetDefective(ERROR_PROPAGATION_DEFECT)
 
     result, unique_id = central_node.AssignResources(
         json_factory("command_AssignResources")
@@ -458,22 +414,21 @@ def test_assign_resources_exception_propagation(
     )
     assert exception_message in event_data["attribute_value"][1]
 
-    tmc_subarray.SetDefective(RESET_DEFECT)
+    subarray_proxy.SetDefective(RESET_DEFECT)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    tmc_subarray.ClearCommandCallInfo()
+    subarray_proxy.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_assign_resources_mid_timeout(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test Assign Resources mid timeout"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -545,13 +500,12 @@ def test_assign_resources_mid_timeout(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_assign_resources_low_timeout(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
     """Test Assign Resources low timeout"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
@@ -626,13 +580,12 @@ def test_assign_resources_low_timeout(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_assign_resources_low_error_aggregation(
-    tango_context,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
 ):
     """Test Assign Resources low error aggregation"""
-    logger.info("%s", tango_context)
+
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)

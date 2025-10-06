@@ -25,14 +25,12 @@ from tests.settings import (
 
 
 def assign_resources(
-    tango_context,
     central_node_fqdn,
     assign_input_str,
     change_event_callbacks,
     subarray_fqdn,
 ):
     """Assign Resources command method."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node_proxy = dev_factory.get_device(central_node_fqdn)
     subarray_proxy = dev_factory.get_device(subarray_fqdn)
@@ -90,15 +88,15 @@ def assign_resources(
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
+    subarray_id = json.loads(assign_input_str).get("subarray_id")
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.REJECTED),
-                    "Exception from 'is_cmd_allowed' method: "
-                    f"Subarray devices not available: ['{subarray_fqdn}']",
+                    int(ResultCode.FAILED),
+                    f"SubArray Id {subarray_id} is not existing!",
                 )
             ),
         ),
@@ -126,11 +124,10 @@ def assign_resources(
     [CENTRALNODE_MID],
 )
 def test_assign_res_command_mid_unavailable_subarray(
-    tango_context, central_node_name, change_event_callbacks, json_factory
+    central_node_name, change_event_callbacks, json_factory
 ):
     """Test Assign Resources command for low unavailable subarray for mid"""
     return assign_resources(
-        tango_context,
         central_node_name,
         json_factory("command_AssignResources"),
         change_event_callbacks,
@@ -145,11 +142,13 @@ def test_assign_res_command_mid_unavailable_subarray(
     [CENTRALNODE_LOW],
 )
 def test_assign_res_command_low_unavailable_subarray(
-    tango_context, central_node_name, change_event_callbacks, json_factory
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
     """Test Assign Resources command for low unavailable subarray"""
     return assign_resources(
-        tango_context,
         central_node_name,
         json_factory("assign_resource_low"),
         change_event_callbacks,

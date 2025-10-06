@@ -9,16 +9,26 @@ package.
 
 import json
 import time
+from collections import defaultdict
 from logging import Logger
 from queue import Queue
-from typing import Callable
+from typing import Callable, Dict
 
 from ska_control_model import AdminMode
+from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.control_model import ObsState
+from ska_telmodel.schema import validate
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
+from ska_tmc_centralnode.commands.assign_resources_command_low import (
+    AssignResourcesLow,
+)
+from ska_tmc_centralnode.commands.release_resources_command_low import (
+    ReleaseResourcesLow,
+)
 from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
@@ -54,9 +64,9 @@ class CNComponentManagerLow(CNComponentManager):
         proxy_timeout=500,
         event_subscription_check_period=1,
         liveliness_check_period=1,
-        skuid_service="",
         command_timeout=30,
         subarray_trl_prefix: str = "low-tmc/subarray/",
+        is_auto_recovery_enabled: bool = True,
         *args,
         **kwargs,
     ):
@@ -96,7 +106,6 @@ class CNComponentManagerLow(CNComponentManager):
             _liveliness_probe,
             _event_manager,
             proxy_timeout,
-            skuid_service=skuid_service,
             command_timeout=command_timeout,
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
@@ -104,7 +113,7 @@ class CNComponentManagerLow(CNComponentManager):
             *args,
             **kwargs,
         )
-
+        self.is_auto_recovery_enabled = is_auto_recovery_enabled
         self._telescope_availability_aggregator = None
         self.subarray_availability = {
             subarray: False
@@ -121,7 +130,7 @@ class CNComponentManagerLow(CNComponentManager):
             LOW_RELEASE_RESOURCES_SCHEMA_VERSION
         )
         telescope_availability["tmc_subarrays"] = self.subarray_availability
-        self.set_telescope_availability = telescope_availability
+        self.set_telescope_availability(telescope_availability)
 
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorLow(self, self.logger)
@@ -156,6 +165,12 @@ class CNComponentManagerLow(CNComponentManager):
             telescope="low",
         )
         self.aggregation_process.start_aggregation_process()
+        self.subsystem_assigned_per_subarray: Dict[int, list] = defaultdict(
+            list
+        )
+        self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
+            list
+        )
 
     @property
     def assign_resources_schema_version(self) -> str:
@@ -212,12 +227,13 @@ class CNComponentManagerLow(CNComponentManager):
     def reset_event_count(self, command_id: str):
         """Reset count function to reset sdp and csp events count and
         error dictionary"""
-        self.event_dict.clear()
+        del self.event_dict[command_id]
         self.error_count = 0
         del self.command_mapping[command_id]
         self.logger.debug(
-            "Updated command mapping dictionary is: %s",
+            "Command mapping dictionary: %s and event dictionary: %s",
             str(self.command_mapping),
+            str(self.event_dict),
         )
 
     def get_unique_ids(self) -> list:
@@ -252,14 +268,9 @@ class CNComponentManagerLow(CNComponentManager):
         :type value: tuple
         """
         self.logger.debug(
-            "Command ID: %s | Received longRunningCommandResult event "
-            + "for device: %s, with value: %s",
-            self.command_id,
-            dev_name,
-            str(value),
+            "Command mapping dictionary: %s", str(self.command_mapping)
         )
         unique_ids = self.get_unique_ids()
-
         unique_id, result_code_or_exception_or_task_status = value
         if (
             not unique_id.endswith(self.supported_commands)
@@ -267,18 +278,28 @@ class CNComponentManagerLow(CNComponentManager):
             or (unique_id not in unique_ids)
         ):  # ignoring other command events
             return
+
+        command_id = self.get_command_id(unique_id)
+        self.logger.debug(
+            "Command ID: %s | Received longRunningCommandResult event "
+            + "for device: %s, with value: %s",
+            command_id,
+            dev_name,
+            str(value),
+        )
+
         try:
             result_code, message = json.loads(
                 result_code_or_exception_or_task_status
             )
-            if not self.event_dict.get(self.command_id):
-                self.event_dict[self.command_id] = {}
+            if not self.event_dict.get(command_id):
+                self.event_dict[command_id] = {}
             match int(result_code):
                 case ResultCode.OK:
-                    self.event_dict[self.command_id].update(
+                    self.event_dict[command_id].update(
                         {dev_name: ResultCode.OK}
                     )
-                    self.command_mapping[self.command_id].remove(unique_id)
+                    self.command_mapping[command_id].remove(unique_id)
                     self.logger.debug(
                         "Updated command mapping dictionary is: %s",
                         str(self.command_mapping),
@@ -290,11 +311,11 @@ class CNComponentManagerLow(CNComponentManager):
                     | ResultCode.NOT_ALLOWED
                     | ResultCode.ABORTED
                 ):
-                    self.event_dict[self.command_id].update(
+                    self.event_dict[command_id].update(
                         {dev_name: {"error": message}}
                     )
                     self.error_count += 1
-                    self.command_mapping[self.command_id].remove(unique_id)
+                    self.command_mapping[command_id].remove(unique_id)
                     self.logger.debug(
                         "Updated command mapping dictionary is: %s",
                         str(self.command_mapping),
@@ -302,64 +323,71 @@ class CNComponentManagerLow(CNComponentManager):
                     self.logger.exception(
                         "Command ID: %s | Exception occurred with value: %s "
                         + "for %s command_id for device: %s",
-                        self.command_id,
+                        command_id,
                         str(value),
-                        self.command_id,
+                        command_id,
                         dev_name,
                     )
             # If mccs is present in subsystems_to_config list, two LRCR events
             # need to be considered as the command gets invoked on both
             # SubarrayNode and MCCS subsystem.
-            if "mccs" in self.subsystems_to_config:
+            if (
+                "mccs" in self.subsystem_assigned_per_command_id[command_id]
+                and not self.is_auto_recovery_enabled
+            ):
                 expected_event_dict_len = 2
             else:
                 expected_event_dict_len = 1
 
-            if (
-                len(self.event_dict[self.command_id])
-                == expected_event_dict_len
-            ):
-                self.update_long_running_command_result_callback()
+            if len(self.event_dict[command_id]) == expected_event_dict_len:
+                self.logger.info(
+                    "Triggering update of long running command result callback"
+                )
+                self.update_long_running_command_result_callback(command_id)
         except Exception as exception:
             self.logger.exception(
                 "Command ID: %s | "
                 + "Exception occurred while processing"
                 + "long running command result"
                 + "attribute event: %s",
-                self.command_id,
+                command_id,
                 exception,
             )
 
-    def update_long_running_command_result_callback(self) -> None:
+    def update_long_running_command_result_callback(self, command_id) -> None:
         """
-        This method checks for errors after receiving events from
-        all the desired devices. If there are errors it will
-        aggregate them and update the lrcr callback.
-        If there are no errors it will just reset the event dicitonary.
+        Checks for errors after receiving events from all the desired devices.
+        If there are errors, aggregates them and updates the long running
+        command result (LRCR) callback. If there are no errors,
+        resets the event dictionary.
+
+        Args:
+            command_id (str): The command ID for which to update the LRCR
+                callback.
         """
         if self.error_count:
-            # modify below message to include value from error_dict
+            # Aggregate error messages from event_dict
             exception_message = "Exception occurred on the following devices: "
-            for devname, data in self.event_dict[self.command_id].items():
+            for devname, data in self.event_dict[command_id].items():
                 if isinstance(data, dict):
                     error_message = data["error"]
                     exception_message += (
-                        f"{self.command_id}: {devname}: {error_message}"
+                        f"{command_id}: {devname}: {error_message}"
                     )
             self.logger.debug(
                 "Command ID: %s | Updating LRCRCallback with following"
                 + " values: ResultCode: %s, Message: %s",
-                self.command_id,
+                command_id,
                 str(ResultCode.FAILED),
                 exception_message,
             )
             self.long_running_result_callback(
-                self.command_id,
+                command_id,
                 ResultCode.FAILED,
                 exception_msg=exception_message,
             )
             self.observable.notify_observers(command_exception=True)
-        self.reset_event_count(self.command_id)
+        self.reset_event_count(command_id)
 
     def update_device_state(self, device_name, state):
         """
@@ -372,7 +400,7 @@ class CNComponentManagerLow(CNComponentManager):
         :param state: state of the device
         :type state: DevState
         """
-        with self.lock:
+        with self.rlock:
             self.logger.debug("State event for %s: %s", device_name, state)
             if "sdp" in device_name:
                 # Update SDP Master device name with full FQDN in case of
@@ -394,7 +422,6 @@ class CNComponentManagerLow(CNComponentManager):
                     "Updated State of %s: %s ", devInfo.dev_name, devInfo.state
                 )
                 devInfo.last_event_arrived = time.time()
-                devInfo.update_unresponsive(False)
                 self.component._invoke_device_callback(devInfo)
 
         self._aggregate_state()
@@ -408,7 +435,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self, self.logger
             )
 
-        with self.lock:
+        with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
@@ -520,3 +547,124 @@ class CNComponentManagerLow(CNComponentManager):
             return False
 
         return True
+
+    def validate_assign_json(self, argin: str):
+        """Validates the assign resources json.
+
+        :param argin: Assign resources json string.
+        :type argin: str
+        """
+        json_argument = json.loads(argin)
+        self.validate_subarray_id(json_argument)
+
+        interface = (
+            json_argument.get("interface", None)
+            or self._assign_resources_schema_version
+        )
+        validate(
+            version=interface,
+            config=json_argument,
+            strictness=2,
+        )
+
+    def assign_resources(self, argin: str, task_callback: TaskCallbackType):
+        """
+        Submits the AssignResources command in queue.
+
+        :param argin: input json string for assign resource command
+        :type argin: str
+        :param task_callback: Updates task status
+        :type task_callback: TaskCallbackType
+        :return: task_status
+        :rtype: tuple
+        """
+        try:
+            assign_resources_command = AssignResourcesLow(
+                self,
+                adapter_factory=self.adapter_factory,
+                logger=self.logger,
+                is_auto_recovery_enabled=self.is_auto_recovery_enabled,
+            )
+            self.validate_assign_json(argin)
+            assign_resources_command.subarray_id = self.get_subarray_id(argin)
+            task_status, response = self.submit_task(
+                assign_resources_command.assign_resources,
+                kwargs={"argin": argin},
+                task_callback=task_callback,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.EMPTY, ObsState.IDLE],
+                    "AssignResources",
+                ),
+            )
+            self.logger.info(
+                "AssignResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+        except Exception as exception:
+            self.logger.exception(
+                "Exception occurred while processing " + "assignresource: %s ",
+                exception,
+            )
+            return assign_resources_command.reject_command(str(exception))
+
+    def validate_release_json(self, argin: str):
+        """Validates the release resource json.
+
+        :param argin: release resource json string.
+        :type argin: str
+        """
+        json_argument = json.loads(argin)
+        self.validate_subarray_id(json_argument)
+        interface = (
+            json_argument.get("interface", None)
+            or self._release_resources_schema_version
+        )
+        validate(
+            version=interface,
+            config=json_argument,
+            strictness=2,
+        )
+
+    def release_resources(self, argin: str, task_callback: TaskCallbackType):
+        """
+        Submit the ReleaseResource command in queue.
+
+        :param argin: input json string for release resource command
+        :type argin: str
+        :param task_callback: Updates task status
+        :type task_callback: TaskCallbackType
+        :return: task_status
+        :rtype: tuple
+        """
+        try:
+            release_resources_command = ReleaseResourcesLow(
+                self,
+                adapter_factory=self.adapter_factory,
+                logger=self.logger,
+                is_auto_recovery_enabled=self.is_auto_recovery_enabled,
+            )
+            self.validate_release_json(argin)
+
+            self.check_availability_for_release(argin)
+            release_resources_command.subarray_id = self.get_subarray_id(argin)
+            task_status, response = self.submit_task(
+                release_resources_command.release_resources,
+                kwargs={"argin": argin},
+                task_callback=task_callback,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.IDLE],
+                    "ReleaseResources",
+                ),
+            )
+            self.logger.info(
+                "ReleaseResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+        except Exception as exception:
+            return release_resources_command.reject_command(str(exception))

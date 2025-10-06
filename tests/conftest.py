@@ -57,6 +57,8 @@ from tests.settings import (
     MID_SDP_MLN_DEVICE,
     MID_SDP_SLN_DEVICE,
     MID_SUBARRAY_DEVICE,
+    set_low_devices_admin_mode,
+    set_low_devices_availability,
 )
 
 
@@ -197,6 +199,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "longRunningCommandStatus",
         "longRunningCommandsInQueue",
         "longRunningCommandResult",
+        "MCCSMLNlongRunningCommandResult",
         "State",
         "telescopeState",
         "telescopeHealthState",
@@ -210,7 +213,8 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "isDishVccConfigSet",
         "DishVccValidationStatus",
         "DishVccCommandStatus",
-        timeout=50.0,
+        "GlobalPointingModelStatus",
+        timeout=80.0,
     )
 
 
@@ -265,28 +269,7 @@ def set_low_devices_availability_for_aggregation():
     Setting low Csp subarray leaf node and Sdp subarray leaf node availabilty
     attribute isSubsystemAvailable as True for aggregation
     """
-    dev_factory = DevFactory()
-    proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
-    proxy_csp_mln.SetSubsystemAvailable(True)
-
-    proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
-    proxy_sdp_mln.SetSubsystemAvailable(True)
-
-    proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
-    proxy_mccs_mln.SetSubsystemAvailable(True)
-
-    logging.debug(
-        "CspSubarrayLeafNode availability is: %s",
-        proxy_csp_mln.isSubsystemAvailable,
-    )
-    logging.debug(
-        "SdpSubarrayLeafNode availability is: %s",
-        proxy_sdp_mln.isSubsystemAvailable,
-    )
-    logging.debug(
-        "MccsSubarrayLeafNode availability is: %s",
-        proxy_mccs_mln.isSubsystemAvailable,
-    )
+    set_low_devices_availability()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -366,25 +349,4 @@ def set_low_sdp_csp_mccs_admin_modes():
     Setting low Csp controller and Sdp controller and Mccs controller
     adminModes attribute as Online.
     """
-    dev_factory = DevFactory()
-    proxy_csp_mln = dev_factory.get_device(LOW_CSP_MLN_DEVICE)
-    proxy_csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
-
-    proxy_sdp_mln = dev_factory.get_device(LOW_SDP_MLN_DEVICE)
-    proxy_sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
-
-    proxy_mccs_mln = dev_factory.get_device(MCCS_MLN_DEVICE)
-    proxy_mccs_mln.SetMccsControllerAdminMode(AdminMode.ONLINE)
-    logging.debug(
-        "cspControllerAdminMode attrubte is: %s",
-        proxy_csp_mln.cspControllerAdminMode,
-    )
-    logging.debug(
-        "sdpControllerAdminMode attrubte is: %s",
-        proxy_sdp_mln.sdpControllerAdminMode,
-    )
-
-    logging.debug(
-        "mccsControllerAdminMode attrubte is: %s",
-        proxy_mccs_mln.mccsControllerAdminMode,
-    )
+    set_low_devices_admin_mode()
