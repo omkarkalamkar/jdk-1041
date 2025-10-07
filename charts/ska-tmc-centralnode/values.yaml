@@ -60,10 +60,15 @@ ska_tmc_simulators:
 deviceServers:
   mocks:
     enabled: false
+    image:
+      registry: "{{.Values.ska_tmc_simulators.image.registry}}"
+      image: "{{.Values.ska_tmc_simulators.image.image}}"
+      tag: "{{.Values.ska_tmc_simulators.image.tag}}"
+      pullPolicy: "{{.Values.ska_tmc_simulators.image.pullPolicy}}"
     mid:
       file: "data/mockdevices_mid.yaml"
     low:
-      file: "data/mockdevices_low.yaml"
+      file: "data/mockdevices_low.yaml""
 
 resources:
   limits:
