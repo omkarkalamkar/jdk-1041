@@ -38,7 +38,6 @@ central_node:
   deviceServers:
     mocks:
       enabled: true
-
       
 ska-taranta:
   enabled: false
