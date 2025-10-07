@@ -37,7 +37,7 @@ central_node:
 ska_tmc_simulators:
   deviceServers:
     mocks:
-      enabled: true
+      enabled: false
       
 ska-taranta:
   enabled: false
