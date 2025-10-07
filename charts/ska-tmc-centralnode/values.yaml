@@ -59,7 +59,7 @@ ska_tmc_simulators:
 
 deviceServers:
   mocks:
-    enabled: true
+    enabled: false
     mid:
       file: "data/mockdevices_mid.yaml"
     low:
