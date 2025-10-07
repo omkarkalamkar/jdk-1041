@@ -42,7 +42,7 @@ server:
       classes:
       - name: "HelperDishDevice"
         devices:
-        {{- range (.Values.deviceServers.centralnode.mid.DishIDs) }}
+        {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
         - name: "{{ . | lower }}/{{ $DishMasterIdentifier }}"
         {{- end }}
     - name: "06"
