@@ -105,12 +105,12 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.dish_cfg_params = argin
 
         # Execute device-level command
-        ret_code, message = self.do(argin)
+        result_code, message = self.do(argin)
 
         # Record command ID
         self.component_manager.load_dish_cfg_command_id = self.command_id
 
-        return ret_code, message
+        return result_code, message
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
