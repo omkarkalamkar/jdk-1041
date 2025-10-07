@@ -50,6 +50,21 @@ centralnode:
     tag: 0.24.1
     pullPolicy: IfNotPresent
 
+ska_tmc_simulators:
+  image:
+      registry: artefact.skao.int
+      image: ska-tmc-simulators
+      tag: 1.1.3
+      pullPolicy: IfNotPresent
+
+deviceServers:
+  mocks:
+    enabled: true
+    mid:
+      file: "data/mockdevices_mid.yaml"
+    low:
+      file: "data/mockdevices_low.yaml"
+
 resources:
   limits:
     memory: 500Mi
