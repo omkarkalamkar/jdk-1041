@@ -86,7 +86,7 @@ depends_on:
   - device: sys/database/2
 
 image:
-  registry: "{{.Values.ska_tmc_simulators.image.registry}}"
-  image: "{{.Values.ska_tmc_simulators.image.image}}"
-  tag: "{{.Values.ska_tmc_simulators.image.tag}}"
-  pullPolicy: "{{.Values.ska_tmc_simulators.image.pullPolicy}}"
+  registry: "{{.Values.centralnode.image.registry}}"
+  image: "{{.Values.centralnode.image.image}}"
+  tag: "{{.Values.centralnode.image.tag}}"
+  pullPolicy: "{{.Values.centralnode.image.pullPolicy}}"
