@@ -34,7 +34,7 @@ central_node:
       enabled: true
       DishMasterIdentifier: "elt/master"
 
-central_node:
+ska_tmc_simulators:
   deviceServers:
     mocks:
       enabled: true
