@@ -84,7 +84,6 @@ server:
 
 depends_on:
   - device: sys/database/2
-
 image:
   registry: "{{.Values.centralnode.image.registry}}"
   image: "{{.Values.centralnode.image.image}}"

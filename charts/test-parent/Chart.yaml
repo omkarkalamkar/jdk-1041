@@ -23,5 +23,3 @@ dependencies:
     version: 1.0.29
     repository: https://artefact.skao.int/repository/helm-internal
     condition: ska-taranta.enabled
-
-
