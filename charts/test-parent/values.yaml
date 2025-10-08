@@ -34,10 +34,6 @@ central_node:
       enabled: true
       DishMasterIdentifier: "elt/master"
 
-ska_tmc_simulators:
-  deviceServers:
-    mocks:
-      enabled: true
       
 ska-taranta:
   enabled: false
