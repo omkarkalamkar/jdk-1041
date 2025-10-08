@@ -16,18 +16,18 @@ from ska_tango_testing.mock.tango.event_callback import (
 )
 from ska_tmc_common import HelperMCCSController, HelperMCCSMasterLeafNode
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.test_helpers.helper_base_device import HelperBaseDevice
-from ska_tmc_common.test_helpers.helper_csp_master_leaf_node import (
+from ska_tmc_simulators.helper_base_device import HelperBaseDevice
+from ska_tmc_simulators.helper_csp_master_leaf_node import (
     HelperCspMasterLeafDevice,
 )
-from ska_tmc_common.test_helpers.helper_dish_device import (
+from ska_tmc_simulators.helper_dish_device import (
     HelperDishDevice,
     HelperDishLNDevice,
 )
-from ska_tmc_common.test_helpers.helper_sdp_master_leaf_node import (
+from ska_tmc_simulators.helper_sdp_master_leaf_node import (
     HelperSDPMasterLeafNode,
 )
-from ska_tmc_common.test_helpers.helper_subarray_leaf_device import (
+from ska_tmc_simulators.helper_subarray_leaf_device import (
     HelperSubarrayLeafDevice,
 )
 from tango.test_context import MultiDeviceTestContext
