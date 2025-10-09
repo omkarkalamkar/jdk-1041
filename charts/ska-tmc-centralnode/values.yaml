@@ -66,11 +66,11 @@ resources:
 
 deviceServers:
   mocks:
-    enabled: false
+    enabled: true
     mid:
-      file: "data/mockdevices_mid.yaml"
+      file: "data/mocks_mid.yaml"
     low:
-      file: "data/mockdevices_low.yaml"
+      file: "data/mocks_low.yaml"
 
   centralnode:
     enabled: true

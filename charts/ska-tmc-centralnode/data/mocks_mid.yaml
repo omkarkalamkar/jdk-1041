@@ -1,0 +1,73 @@
+name: "mocks-{{.Release.Name}}"
+function: testing
+domain: mocks
+instances: ["001","002","003","004","005","006","007","008","009","010"]
+entrypoints:
+  - name: "ska_tmc_simulators.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
+  - name: "ska_tmc_simulators.helper_dish_ln_device.HelperDishLNDevice"
+  - name: "ska_tmc_simulators.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
+  - name: "ska_tmc_simulators.helper_sdp_master_leaf_node.HelperSDPMasterLeafNode"
+{{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
+server:
+  name: "mocks"
+  instances:    
+    - name: "002"
+      classes:
+      - name: "CNHelperSubArrayDevice"
+        devices:
+        - name: "mid-tmc/subarray/01"
+    - name: "003"
+      classes:
+      - name: "HelperSubarrayLeafDevice"
+        devices:
+        - name: "mid-tmc/subarray-leaf-node-csp/01"
+        - name: "mid-tmc/subarray-leaf-node-sdp/01"
+    - name: "004"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska001"
+    - name: "005"
+      classes:
+      - name: "HelperSDPMasterLeafNode"
+        devices:
+        - name: "mid-tmc/leaf-node-sdp/0"
+    - name: "006"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska036"
+    - name: "007"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska063"
+    - name: "008"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska100"
+    - name: "009"
+      classes:
+      - name: "CNHelperSubArrayDevice"
+        devices:
+        - name: "mid-tmc/subarray/02"
+    - name: "010"
+      classes:
+      - name: "HelperSubarrayLeafDevice"
+        devices:
+        - name: "mid-tmc/subarray-leaf-node-csp/02"
+        - name: "mid-tmc/subarray-leaf-node-sdp/02"
+    - name: "011"
+      classes:
+      - name: "HelperCspMasterLeafDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-csp/0"
+
+depends_on:
+  - device: sys/database/2
+image:
+  registry: "{{.Values.centralnode.image.registry}}"
+  image: "{{.Values.centralnode.image.image}}"
+  tag: "{{.Values.centralnode.image.tag}}"
+  pullPolicy: "{{.Values.centralnode.image.pullPolicy}}"
