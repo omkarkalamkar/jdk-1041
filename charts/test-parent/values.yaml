@@ -28,6 +28,22 @@ ska-tango-base:
   jive:
     enabled: false
 
+ska_tmc_simulators:
+  enabled: true
+  deviceServers:
+    mocks:
+      enabled: true
+      mid:
+        is_simulated:
+          csp: true
+          sdp: true
+          dish: true
+      low:
+        is_simulated:
+          csp: true
+          sdp: true
+          mccs: true
+
 central_node:
   deviceServers:
     centralnode:
