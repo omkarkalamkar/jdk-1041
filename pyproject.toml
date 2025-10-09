@@ -50,8 +50,6 @@ tenacity = "^8.5.0"
 astropy = "6.1.7"
 astroid = "3.2.4"
 
-
-
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 isort = "^5.10.1"

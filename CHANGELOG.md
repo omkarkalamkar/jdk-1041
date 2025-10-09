@@ -9,8 +9,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ********
 Updated
 -------
-Updated imports for the helper device to deploy from ska-tmc-simulators package v1.1.1.
-Updated ska-tmc-common to v0.31.0.
+Updated imports for the helper device to deploy from ska-tmc-simulators package v1.1.3.
 
 [0.24.2]
 ********

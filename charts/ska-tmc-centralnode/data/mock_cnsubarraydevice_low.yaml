@@ -1,0 +1,22 @@
+name: "cnsubarray-{{.Release.Name}}"
+function: testing
+domain: mocks
+instances: ["01"]
+entrypoints:
+  - name: "cn_helper_subarray_device.CNHelperSubArrayDevice"
+    path: "/app/tests/helpers/cn_helper_subarray_device.py"
+server:
+  name: "cnsubarray"
+  instances:    
+    - name: "01"
+      classes:
+      - name: "CNHelperSubArrayDevice"
+        devices:
+        - name: "low-tmc/subarray/02"
+depends_on:
+  - device: sys/database/2
+image:
+  registry: "{{.Values.centralnode.image.registry}}"
+  image: "{{.Values.centralnode.image.image}}"
+  tag: "{{.Values.centralnode.image.tag}}"
+  pullPolicy: "{{.Values.centralnode.image.pullPolicy}}"

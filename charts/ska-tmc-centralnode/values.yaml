@@ -120,6 +120,13 @@ deviceServers:
       CommandTimeOutDefault: 30
       IsAutoRecoveryEnabled: "false"
 
+  cnsubarray:
+      enabled: true
+      mid:
+        file: "data/mock_cnsubarraydevice_mid.yaml"
+      low:
+        file: "data/mock_cnsubarraydevice_low.yaml"
+
 
 
 nodeSelector: {}
