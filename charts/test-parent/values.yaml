@@ -30,11 +30,6 @@ ska-tango-base:
 
 central_node:
   deviceServers:
-    mocks:
-      enabled: true
-
-central_node:
-  deviceServers:
     centralnode:
       enabled: true
       DishMasterIdentifier: "elt/master"
