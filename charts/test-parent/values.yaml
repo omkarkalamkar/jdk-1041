@@ -28,13 +28,11 @@ ska-tango-base:
   jive:
     enabled: false
 
-ska_tmc_simulators:
+ska_simulators:
   enabled: true
   deviceServers:
     mocks:
       enabled: true
-
-
 
 central_node:
   deviceServers:
