@@ -27,23 +27,13 @@ ska-tango-base:
     enabled: true
   jive:
     enabled: false
+
 ska_tmc_simulators:
   enabled: true
   deviceServers:
     mocks:
       enabled: true
-      mid:
-        is_simulated:
-          csp: true
-          sdp: true
-          dish: true
-        file: "data/mocks_mid.yaml"
-      low:
-        is_simulated:
-          csp: true
-          sdp: true
-          mccs: true
-        file: "data/mocks_low.yaml"
+
 
 
 central_node:
