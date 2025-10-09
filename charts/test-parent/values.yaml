@@ -37,7 +37,7 @@ central_node:
       enabled: true
       DishMasterIdentifier: "elt/master"
 
-cn_helper:
+subarrayhelper:
   enabled: true
 
 ska_tmc_simulators:

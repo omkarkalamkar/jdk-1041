@@ -1,4 +1,4 @@
-name: "cn-helper-{{.Release.Name | lower}}"
+name: "subarrayhelper-{{.Release.Name | lower}}"
 function: testing
 domain: mocks
 instances: ["01","02"]
@@ -7,7 +7,7 @@ entrypoints:
     path: "/app/tests/helpers/cn_helper_subarray_device.py"
 
 server:
-  name: "cn_helper"
+  name: "subarrayhelper"
   instances:
     - name: "01"
       classes:
