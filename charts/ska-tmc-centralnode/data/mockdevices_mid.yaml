@@ -1,7 +1,7 @@
 name: "mocks-{{.Release.Name}}"
 function: testing
 domain: mocks
-instances: ["01","02","03","04","05","06","07", "08","09","10","11","12"]
+instances: ["01","02","03","04","05","06","07", "08","09","10"]
 entrypoints:
   - name: "ska_tmc_simulators.helper_base_device.HelperBaseDevice"
   - name: "ska_tmc_simulators.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
@@ -10,8 +10,6 @@ entrypoints:
   - name: "ska_tmc_simulators.helper_csp_master_device.HelperCspMasterDevice"
   - name: "ska_tmc_simulators.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
   - name: "ska_tmc_simulators.helper_sdp_master_leaf_node.HelperSDPMasterLeafNode"
-  - name: "cn_helper_subarray_device.CNHelperSubArrayDevice"
-    path: "/app/tests/helpers/cn_helper_subarray_device.py"
 {{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
 server:
   name: "mocks"
@@ -26,56 +24,46 @@ server:
       - name: "HelperCspMasterDevice"
         devices:
         - name: "mid-csp/control/0"
-        - name: "mid-sdp/control/0"
+        - name: "mid-sdp/control/0"    
     - name: "03"
-      classes:
-      - name: "CNHelperSubArrayDevice"
-        devices:
-        - name: "mid-tmc/subarray/01"
-    - name: "04"
       classes:
       - name: "HelperSubarrayLeafDevice"
         devices:
         - name: "mid-tmc/subarray-leaf-node-csp/01"
         - name: "mid-tmc/subarray-leaf-node-sdp/01"
-    - name: "05"
+    - name: "04"
       classes:
       - name: "HelperDishDevice"
         devices:
         {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
         - name: "{{ . | lower }}/{{ $DishMasterIdentifier }}"
         {{- end }}
-    - name: "06"
+    - name: "05"
       classes:
       - name: "HelperDishLNDevice"
         devices:
         - name: "mid-tmc/leaf-node-dish/ska001"
-    - name: "07"
+    - name: "06"
       classes:
       - name: "HelperSDPMasterLeafNode"
         devices:
         - name: "mid-tmc/leaf-node-sdp/0"
-    - name: "08"
+    - name: "07"
       classes:
       - name: "HelperDishLNDevice"
         devices:
         - name: "mid-tmc/leaf-node-dish/ska036"
-    - name: "09"
+    - name: "08"
       classes:
       - name: "HelperDishLNDevice"
         devices:
         - name: "mid-tmc/leaf-node-dish/ska063"
-    - name: "10"
+    - name: "09"
       classes:
       - name: "HelperDishLNDevice"
         devices:
-        - name: "mid-tmc/leaf-node-dish/ska100"
-    - name: "11"
-      classes:
-      - name: "CNHelperSubArrayDevice"
-        devices:
-        - name: "mid-tmc/subarray/02"
-    - name: "12"
+        - name: "mid-tmc/leaf-node-dish/ska100"    
+    - name: "10"
       classes:
       - name: "HelperSubarrayLeafDevice"
         devices:

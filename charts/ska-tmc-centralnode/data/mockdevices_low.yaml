@@ -10,8 +10,6 @@ entrypoints:
   - name: "ska_tmc_simulators.helper_csp_master_device.HelperCspMasterDevice"
   - name: "ska_tmc_simulators.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
   - name: "ska_tmc_simulators.helper_sdp_master_leaf_node.HelperSDPMasterLeafNode"
-  - name: "cn_helper_subarray_device.CNHelperSubArrayDevice"
-    path: "/app/tests/helpers/cn_helper_subarray_device.py"
 server:
   name: "mocks"
   instances:
@@ -27,41 +25,31 @@ server:
         - name: "low-sdp/control/0"
     - name: "03"
       classes:
-      - name: "CNHelperSubArrayDevice"
-        devices:
-        - name: "low-tmc/subarray/01"
-    - name: "04"
-      classes:
       - name: "HelperMCCSMasterLeafNode"
         devices:
         - name: "low-tmc/leaf-node-mccs/0"
-    - name: "05"
+    - name: "04"
       classes:
       - name: "HelperMCCSController"
         devices:
         - name: "low-mccs/control/control"
-    - name: "06"
+    - name: "05"
       classes:
       - name: "HelperSubarrayLeafDevice"
         devices:
         - name: "low-tmc/subarray-leaf-node-csp/01"
         - name: "low-tmc/subarray-leaf-node-sdp/01"
-    - name: "07"
+    - name: "06"
       classes:
       - name: "HelperSDPMasterLeafNode"
         devices:
         - name: "low-tmc/leaf-node-sdp/0"
-    - name: "08"
+    - name: "07"
       classes:
       - name: "HelperCspMasterLeafDevice"
         devices:
         - name: "low-tmc/leaf-node-csp/0"
-    - name: "09"
-      classes:
-      - name: "CNHelperSubArrayDevice"
-        devices:
-        - name: "low-tmc/subarray/02"
-    - name: "10"
+    - name: "08"
       classes:
       - name: "HelperSubarrayLeafDevice"
         devices:
