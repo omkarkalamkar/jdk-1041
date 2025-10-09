@@ -1,7 +1,7 @@
 name: "mocks-{{.Release.Name}}"
 function: testing
 domain: mocks
-instances: ["001","002","003","004","005","006","007"]
+instances: ["008","002","003","004","005","006","007"]
 entrypoints:
   - name: "ska_tmc_simulators.helper_mccs_master_leaf_node_device.HelperMCCSMasterLeafNode"
   - name: "ska_tmc_simulators.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
@@ -13,7 +13,7 @@ entrypoints:
 server:
   name: "mocks"
   instances:    
-    - name: "001"
+    - name: "008"
       classes:
       - name: "CNHelperSubArrayDevice"
         devices:
