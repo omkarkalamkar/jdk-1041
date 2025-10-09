@@ -1,4 +1,4 @@
-name: "cn-helper-{{.Release.Name}}"
+name: "cn-helper-{{.Release.Name | lower}}"
 function: testing
 domain: mocks
 instances: ["01","02"]
