@@ -73,7 +73,7 @@ deviceServers:
       file: "data/mockdevices_low.yaml"
   
   cn_helper:
-    enabled: false
+    enabled: true
     mid:
       file: "data/cn_helper_mid.yaml"
     low:
