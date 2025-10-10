@@ -15,7 +15,7 @@ Updated imports for the helper device to deploy from ska-tmc-simulators package 
 ********
 Updated
 -----
-* Updated LoadDishCfg method to integrate with the latest command tracker
+* Updated LoadDishCfg method to integrate with the latest command tracker.
 
 [0.24.1]
 ********
