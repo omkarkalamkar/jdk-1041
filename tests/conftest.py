@@ -16,6 +16,7 @@ from ska_tango_testing.mock.tango.event_callback import (
 )
 from ska_tmc_common import HelperMCCSController, HelperMCCSMasterLeafNode
 from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 from ska_tmc_simulators.helper_base_device import HelperBaseDevice
 from ska_tmc_simulators.helper_csp_master_leaf_node import (
     HelperCspMasterLeafDevice,
@@ -36,7 +37,6 @@ from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
 from tests.common_utils import wait_and_validate_device_attribute_value
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,

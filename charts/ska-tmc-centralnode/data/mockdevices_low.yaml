@@ -1,7 +1,7 @@
 name: "mocks-{{.Release.Name}}"
 function: testing
 domain: mocks
-instances: ["01","02","03","04","05","06","07","08"]
+instances: ["01","02","03","04","05","06","07","08","09","10"]
 entrypoints:
   - name: "ska_tmc_simulators.helper_base_device.HelperBaseDevice"
   - name: "ska_tmc_simulators.helper_mccs_controller_device.HelperMCCSController"
@@ -10,6 +10,7 @@ entrypoints:
   - name: "ska_tmc_simulators.helper_csp_master_device.HelperCspMasterDevice"
   - name: "ska_tmc_simulators.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
   - name: "ska_tmc_simulators.helper_sdp_master_leaf_node.HelperSDPMasterLeafNode"
+  - name: "ska_tmc_simulators.cn_helper_subarray_device.CNHelperSubArrayDevice"
 server:
   name: "mocks"
   instances:
@@ -25,31 +26,41 @@ server:
         - name: "low-sdp/control/0"
     - name: "03"
       classes:
+      - name: "CNHelperSubArrayDevice"
+        devices:
+        - name: "low-tmc/subarray/01"
+    - name: "04"
+      classes:
       - name: "HelperMCCSMasterLeafNode"
         devices:
         - name: "low-tmc/leaf-node-mccs/0"
-    - name: "04"
+    - name: "05"
       classes:
       - name: "HelperMCCSController"
         devices:
         - name: "low-mccs/control/control"
-    - name: "05"
+    - name: "06"
       classes:
       - name: "HelperSubarrayLeafDevice"
         devices:
         - name: "low-tmc/subarray-leaf-node-csp/01"
         - name: "low-tmc/subarray-leaf-node-sdp/01"
-    - name: "06"
+    - name: "07"
       classes:
       - name: "HelperSDPMasterLeafNode"
         devices:
         - name: "low-tmc/leaf-node-sdp/0"
-    - name: "07"
+    - name: "08"
       classes:
       - name: "HelperCspMasterLeafDevice"
         devices:
         - name: "low-tmc/leaf-node-csp/0"
-    - name: "08"
+    - name: "09"
+      classes:
+      - name: "CNHelperSubArrayDevice"
+        devices:
+        - name: "low-tmc/subarray/02"
+    - name: "10"
       classes:
       - name: "HelperSubarrayLeafDevice"
         devices:

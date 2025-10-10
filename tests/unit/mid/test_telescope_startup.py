@@ -4,8 +4,8 @@ import pytest
 import tango
 from ska_tango_base.control_model import HealthState
 from ska_tmc_common import HelperBaseDevice
+from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,

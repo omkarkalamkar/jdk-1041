@@ -8,9 +8,9 @@ from ska_tmc_common import (
     HelperMCCSMasterLeafNode,
 )
 from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 
 from ska_tmc_centralnode.model.input import InputParameterLow
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     LOW_CSP_MASTER_DEVICE,
     LOW_CSP_MLN_DEVICE,

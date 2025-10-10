@@ -16,6 +16,7 @@ from ska_tmc_common import (
     HelperSDPMasterLeafNode,
 )
 from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tango.test_context import MultiDeviceTestContext
 
 from ska_tmc_centralnode.central_node_low import LowTmcCentralNode
@@ -44,7 +45,6 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_SUBARRAY_LN,
     MID_TMC_SUBARRAY,
 )
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 pytest.event_arrived = False
