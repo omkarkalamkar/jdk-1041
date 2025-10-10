@@ -66,18 +66,18 @@ resources:
 
 deviceServers:
   mocks:
-    enabled: true
+    enabled: false
     mid:
       file: "data/mockdevices_mid.yaml"
     low:
       file: "data/mockdevices_low.yaml"
   
   subarrayhelper:
-    enabled: true
+    enabled: false
     mid:
-      file: "data/cn_helper_mid.yaml"
+      file: "data/subarrayhelper_mid.yaml"
     low:
-      file: "data/cn_helper_low.yaml"
+      file: "data/subarrayhelper_low.yaml"
 
   centralnode:
     enabled: true
