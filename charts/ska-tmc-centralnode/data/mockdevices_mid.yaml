@@ -3,15 +3,14 @@ function: testing
 domain: mocks
 instances: ["01","02","03","04","05","06","07", "08","09","10","11","12"]
 entrypoints:
-  - name: "ska_tmc_common.test_helpers.helper_base_device.HelperBaseDevice"
-  - name: "ska_tmc_common.test_helpers.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
-  - name: "ska_tmc_common.test_helpers.helper_dish_device.HelperDishDevice"
-  - name: "ska_tmc_common.test_helpers.helper_dish_ln_device.HelperDishLNDevice"
-  - name: "ska_tmc_common.test_helpers.helper_csp_master_device.HelperCspMasterDevice"
-  - name: "ska_tmc_common.test_helpers.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
-  - name: "ska_tmc_common.test_helpers.helper_sdp_master_leaf_node.HelperSDPMasterLeafNode"
-  - name: "cn_helper_subarray_device.CNHelperSubArrayDevice"
-    path: "/app/tests/helpers/cn_helper_subarray_device.py"
+  - name: "ska_tmc_simulators.helper_base_device.HelperBaseDevice"
+  - name: "ska_tmc_simulators.helper_subarray_leaf_device.HelperSubarrayLeafDevice"
+  - name: "ska_tmc_simulators.helper_dish_device.HelperDishDevice"
+  - name: "ska_tmc_simulators.helper_dish_ln_device.HelperDishLNDevice"
+  - name: "ska_tmc_simulators.helper_csp_master_device.HelperCspMasterDevice"
+  - name: "ska_tmc_simulators.helper_csp_master_leaf_node.HelperCspMasterLeafDevice"
+  - name: "ska_tmc_simulators.helper_sdp_master_leaf_node.HelperSDPMasterLeafNode"
+  - name: "ska_tmc_simulators.cn_helper_subarray_device.CNHelperSubArrayDevice"
 {{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
 server:
   name: "mocks"
@@ -85,7 +84,7 @@ server:
 depends_on:
   - device: sys/database/2
 image:
-  registry: "{{.Values.centralnode.image.registry}}"
-  image: "{{.Values.centralnode.image.image}}"
-  tag: "{{.Values.centralnode.image.tag}}"
-  pullPolicy: "{{.Values.centralnode.image.pullPolicy}}"
+  registry: "{{.Values.ska_tmc_simulators.image.registry}}"
+  image: "{{.Values.ska_tmc_simulators.image.image}}"
+  tag: "{{.Values.ska_tmc_simulators.image.tag}}"
+  pullPolicy: "{{.Values.ska_tmc_simulators.image.pullPolicy}}"

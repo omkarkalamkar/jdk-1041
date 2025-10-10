@@ -5,11 +5,17 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.24.3]
+********
+Updated
+-------
+Updated imports for the helper device to deploy from ska-tmc-simulators package v1.1.4.
+
 [0.24.2]
 ********
 Updated
 -----
-* Updated LoadDishCfg method to integrate with the latest command tracker
+* Updated LoadDishCfg method to integrate with the latest command tracker.
 
 [0.24.1]
 ********

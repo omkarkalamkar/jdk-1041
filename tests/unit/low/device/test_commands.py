@@ -7,9 +7,9 @@ from ska_tmc_common import (
     HelperMCCSMasterLeafNode,
     HelperSDPMasterLeafNode,
 )
+from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 
 from ska_tmc_centralnode.central_node_low import LowTmcCentralNode
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,

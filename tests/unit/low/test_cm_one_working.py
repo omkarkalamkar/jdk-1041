@@ -3,6 +3,7 @@
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
+from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 
 from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
@@ -19,7 +20,6 @@ from ska_tmc_centralnode.utils.constants import (
     MCCS_MASTER_DEVICE,
     MCCS_MLN_DEVICE,
 )
-from tests.helpers.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tests.settings import (
     DEVICE_LIST_LOW,
     LOW_SUBARRAY_DEVICE,
