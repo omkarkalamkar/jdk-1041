@@ -38,10 +38,10 @@ central_node:
       DishMasterIdentifier: "elt/master"
 
 subarrayhelper:
-  enabled: false
+  enabled: true
 
 ska_tmc_simulators:
-  enabled: false
+  enabled: true
 
 ska-taranta:
   enabled: false
