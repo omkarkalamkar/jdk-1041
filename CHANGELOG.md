@@ -21,7 +21,7 @@ Updated imports for the helper device to deploy from ska-tmc-simulators package 
 [0.24.2]
 ********
 Updated
------
+-------
 * Updated LoadDishCfg method to integrate with the latest command tracker.
 
 [0.24.1]
@@ -38,7 +38,7 @@ Added
 * Added test case for skb-1051.
 
 Updated
------
+-------
 * Updated AssignResources and ReleaseResources commands to use command class id.
 * Updated deployment to support 2 subarrays.
 * Updated logic to track subsystems assigned per subbarray.
