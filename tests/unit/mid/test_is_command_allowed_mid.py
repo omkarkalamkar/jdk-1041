@@ -2,10 +2,18 @@ import pytest
 from ska_control_model import AdminMode
 from ska_tmc_common import HelperCspMasterLeafDevice, HelperSDPMasterLeafNode
 from ska_tmc_common.dev_factory import DevFactory
-from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.exceptions import (
+    CommandNotAllowed,
+    SubarrayNotPresentError,
+)
 
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.settings import MID_CSP_MLN_DEVICE, MID_SDP_MLN_DEVICE, create_cm
+from tests.settings import (
+    MID_CSP_MLN_DEVICE,
+    MID_SDP_MLN_DEVICE,
+    create_cm,
+    logger,
+)
 
 
 @pytest.fixture()
@@ -57,3 +65,15 @@ def test_low_admin_mode_validation_without_mccs(
             cm.is_command_allowed()
     else:
         cm.is_command_allowed()
+
+
+def test_check_device_responsiveness_command(tango_context):
+    cm, _ = create_cm(_input_parameter=InputParameterMid(None))
+    device_name = "mid-tmc/subarray/01"
+    for dev_info in cm._component.devices:
+        if device_name in dev_info.dev_name:
+            dev_info.update_unresponsive(True)
+            logger.info("Device unresponsive flag: %s", dev_info.unresponsive)
+
+    with pytest.raises(SubarrayNotPresentError):
+        cm.check_device_responsiveness_command("AssignResources", 1)
