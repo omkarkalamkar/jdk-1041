@@ -641,6 +641,21 @@ class CNComponentManager(TmcComponentManager):
             self.input_parameter.subarray_dev_names
         )
 
+    def check_if_subarray_is_responsive(self, subarray_id: int) -> bool:
+        """
+        Checks if subarray are responsive
+
+        :return: True if at least one subarray device is responsive,
+                 False otherwise.
+        :rtype: bool
+        """
+        self.logger.debug("Checking if subarray %s is responsive", subarray_id)
+        subarray_devices = self.input_parameter.subarray_dev_names
+        for device in subarray_devices:
+            subarray_device_id = re.findall(r"\d+", device)
+            if subarray_id == int(subarray_device_id[0]):
+                return self._check_if_device_is_responsive([device])
+
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_fixed(3.0),
@@ -1203,7 +1218,7 @@ class CNComponentManager(TmcComponentManager):
             :return: return boolean value if command in valid obstate else
                 return exception.
             """
-            self.check_device_responsiveness_command(command_name)
+            self.check_device_responsiveness_command(command_name, subarray_id)
             if subarray_id and desired_obsstate:
                 subarray_devices = self.input_parameter.subarray_dev_names
                 for device in subarray_devices:
@@ -1219,7 +1234,9 @@ class CNComponentManager(TmcComponentManager):
 
         return is_subarray_in_right_obs_state
 
-    def check_device_responsiveness_command(self, command_name: str) -> None:
+    def check_device_responsiveness_command(
+        self, command_name: str, subarray_id: int
+    ) -> None:
         """
         Override this method to add responsive checks for the devices
 
