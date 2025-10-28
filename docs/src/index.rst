@@ -10,40 +10,18 @@ Link to the TMC User documentation is `here <https://confluence.skatelescope.org
 
 .. toctree::
    :maxdepth: 1
-   :caption: Getting started
+   :caption: Table of Contents
 
    getting_started/getting_started
-   
-.. toctree::
-   :maxdepth: 1
-   :caption: Developer guide
-
-   developer_guide/code_quality
-
-
-.. toctree::
-   :maxdepth: 1
-   :caption: API
-
-   api/index
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Knowledge base
-
+   developer_guide/developer_guide
    knowledge_base/knowledge_base
+   
 
 .. toctree::
    :maxdepth: 1
    :caption: Releases
 
    CHANGELOG.rst
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Introduction
-
-   README
 
 
 Indices and tables
