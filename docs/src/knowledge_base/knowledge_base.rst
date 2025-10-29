@@ -8,3 +8,4 @@ Knowledge Base
    :maxdepth: 1
 
    commands/commands
+   glossary

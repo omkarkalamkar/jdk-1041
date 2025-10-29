@@ -27,7 +27,7 @@ The AssignResources command allocates telescope resources to a specific subarray
     7. The following **state requirements** are applied for the **command execution** :-
 
         a. TMC Subarray is in `'observation state'` **EMPTY** or **IDLE** .
-        b. TMC Subarray node is `'available'` - which requires CSP, SDP, MCCS systems to be `'available'`.
+        b. :term:`telescopeAvailability` is checked to ensure the subsystems (SubarryNode, CSP, SDP and MCCS) are :term:`available`
     
     8. The command execution involves below key operations :-
         a. `'transaction ID'` is removed from the input JSON
