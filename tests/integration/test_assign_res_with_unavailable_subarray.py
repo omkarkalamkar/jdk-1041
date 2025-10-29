@@ -97,7 +97,7 @@ def assign_resources(
                 (
                     int(ResultCode.REJECTED),
                     "Exception from 'is_cmd_allowed' method: Subarray devices "
-                    + f"not available: [{subarray_fqdn}]",
+                    + "not available: ['low-tmc/subarray/01']",
                 )
             ),
         ),
