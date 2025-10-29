@@ -46,8 +46,9 @@ autodoc_mock_imports = [
     "pandas",
     "ska_ser_logging",
     "retry",
-    "rule_engine" , 
-    "tenacity"
+    "rule_engine", 
+    "tenacity",
+    "pydantic"
 ]
 
 import os
