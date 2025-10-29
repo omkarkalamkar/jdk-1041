@@ -4,7 +4,7 @@
 TMC Commands Workflow
 =====================
 
-This section specifies the TMC commands and changes done in interfaces for LOW telescope.
+This section specifies the TMC commands and changes done in interfaces for LOW and MID telescope.
 
 .. toctree::
    :maxdepth: 1
@@ -12,5 +12,4 @@ This section specifies the TMC commands and changes done in interfaces for LOW t
    telescope_off_command
    telescope_on_command
    telescope_standby_command
-   assign_resources_command
-   release_resources_command
+   low/commands
