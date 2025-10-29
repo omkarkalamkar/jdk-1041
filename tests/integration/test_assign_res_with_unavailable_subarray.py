@@ -88,20 +88,22 @@ def assign_resources(
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    subarray_id = json.loads(assign_input_str).get("subarray_id")
+    # subarray_id = json.loads(assign_input_str).get("subarray_id")
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.FAILED),
-                    f"SubArray Id {subarray_id} is not existing!",
+                    int(ResultCode.REJECTED),
+                    "Exception from 'is_cmd_allowed' method: Subarray devices "
+                    + "not available: ['low-tmc/subarray/01']",
                 )
             ),
         ),
         lookahead=4,
     )
+
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
     export_device(db, db_device_info)
