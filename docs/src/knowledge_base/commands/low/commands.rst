@@ -1,7 +1,7 @@
 .. _commandslow:
 
 =====================
-TMC Low Workflow
+TMC Low Commands
 =====================
 
 This section specifies the TMC commands and changes done in interfaces for LOW telescope.
