@@ -794,6 +794,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         Args:
             command_name (str): Command name for the check
+            subarray_id (int): Subarray id
 
         """
         if command_name in self.supported_commands_for_responsive_check:

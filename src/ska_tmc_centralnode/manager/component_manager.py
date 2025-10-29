@@ -643,9 +643,11 @@ class CNComponentManager(TmcComponentManager):
 
     def check_if_subarray_is_responsive(self, subarray_id: int) -> bool:
         """
-        Checks if subarray are responsive
+        Checks if subarray is responsive
 
-        :return: True if at least one subarray device is responsive,
+        :param subarray_id: Subarray id
+        :type subarray_id: int
+        :return: True if the subarray device is responsive,
                  False otherwise.
         :rtype: bool
         """
@@ -1242,6 +1244,7 @@ class CNComponentManager(TmcComponentManager):
 
         Args:
             command_name (str): Command name for the check
+            subarray_id (int): Subarray id
 
         """
         return True
