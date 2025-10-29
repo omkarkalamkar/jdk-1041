@@ -1,11 +1,13 @@
 """Test cases for release resources command"""
 
 import json
+import time
 
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
+from tango.db import Database
 
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
@@ -16,6 +18,7 @@ from tests.settings import (
     LOW_SUBARRAY_DEVICE,
     MID_SUBARRAY_DEVICE,
     check_subarray_availability,
+    export_device,
     logger,
 )
 
@@ -78,9 +81,35 @@ def release_resources(
     subarray_proxy.SetisSubarrayAvailable(False)
     check_subarray_availability(central_node, subarray_fqdn, False)
 
+    db = Database()
+    db_device_info = db.get_device_info(subarray_fqdn)
+    db.unexport_device(subarray_fqdn)
+
+    # Waiting for event from central node
+    time.sleep(3)
+
     result, unique_id = central_node.ReleaseResources(release_input_string)
 
-    assert result[0] == ResultCode.REJECTED
+    assert result[0] == ResultCode.QUEUED
+
+    # subarray_id = json.loads(assign_input_str).get("subarray_id")
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (
+            unique_id[0],
+            json.dumps(
+                (
+                    int(ResultCode.REJECTED),
+                    "Exception from 'is_cmd_allowed' method: Subarray devices "
+                    + "not available: ['low-tmc/subarray/01']",
+                )
+            ),
+        ),
+        lookahead=4,
+    )
+
+    export_device(db, db_device_info)
+    time.sleep(3)
 
     subarray_proxy.SetisSubarrayAvailable(True)
     check_subarray_availability(central_node, subarray_fqdn, True)
