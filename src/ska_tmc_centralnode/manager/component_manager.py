@@ -1247,7 +1247,13 @@ class CNComponentManager(TmcComponentManager):
             subarray_id (int): Subarray id
 
         """
-        return True
+        if command_name in self.supported_commands_for_responsive_check:
+            self.logger.debug("Checking the devices for: %s", command_name)
+            if subarray_id:
+                # check for the availability of specific subarray
+                self.check_if_subarray_is_responsive(subarray_id)
+            else:
+                self.check_if_subarrays_are_responsive()
 
     def validate_subarray_id(self, json_argument: dict):
         """Validates the subarray id in the assign resources json.

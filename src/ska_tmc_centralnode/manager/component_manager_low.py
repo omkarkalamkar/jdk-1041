@@ -502,14 +502,9 @@ class CNComponentManagerLow(CNComponentManager):
             subarray_id (int): Subarray id
 
         """
+        super().check_device_responsiveness_command(command_name, subarray_id)
         if command_name in self.supported_commands_for_responsive_check:
-            self.logger.debug("Checking low devices for: %s", command_name)
             self.check_if_mccs_mln_is_responsive()
-            if subarray_id:
-                # check for the availability of specific subarray
-                self.check_if_subarray_is_responsive(subarray_id)
-            else:
-                self.check_if_subarrays_are_responsive()
 
     def update_telescope_availability(self, device_name, event_value):
         """Updates telescope availability"""
