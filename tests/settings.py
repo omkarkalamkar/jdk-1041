@@ -35,7 +35,7 @@ from tests.mock_callable import MockCallable
 logger = logging.getLogger(__name__)
 TANGO_HOST = os.getenv("TANGO_HOST")
 SLEEP_TIME = 0.5
-TIMEOUT = 80
+TIMEOUT = 50
 KVALUE = 9
 DISH_LEAF_NODE_PREFIX = "mid-tmc/leaf-node-dish/ska"
 NUM_DISHES = 10

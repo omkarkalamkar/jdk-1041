@@ -88,7 +88,6 @@ def assign_resources(
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    # subarray_id = json.loads(assign_input_str).get("subarray_id")
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (
