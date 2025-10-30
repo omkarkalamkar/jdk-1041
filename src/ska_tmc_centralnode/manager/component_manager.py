@@ -657,6 +657,7 @@ class CNComponentManager(TmcComponentManager):
             subarray_device_id = re.findall(r"\d+", device)
             if subarray_id == int(subarray_device_id[0]):
                 return self._check_if_device_is_responsive([device])
+        return False
 
     @retry(
         stop=stop_after_attempt(5),
