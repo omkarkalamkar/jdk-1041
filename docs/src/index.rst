@@ -6,24 +6,16 @@ This project is developing the Central Node (Mid and Low) component of the Teles
 
 .. _Square Kilometre Array: https://skatelescope.org/
 
+Link to the TMC User documentation is `here <https://confluence.skatelescope.org/display/UD/TMC+User+Documentation>`_.
+
 .. toctree::
    :maxdepth: 1
-   :caption: Getting started
+   :caption: Table of Contents
 
    getting_started/getting_started
+   developer_guide/developer_guide
+   knowledge_base/knowledge_base
    
-.. toctree::
-   :maxdepth: 1
-   :caption: Developer guide
-
-   developer_guide/code_quality
-
-
-.. toctree::
-   :maxdepth: 1
-   :caption: API
-
-   api/index
 
 .. toctree::
    :maxdepth: 1
@@ -31,17 +23,9 @@ This project is developing the Central Node (Mid and Low) component of the Teles
 
    CHANGELOG.rst
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Introduction
-
-   README
-
 
 Indices and tables
 ------------------
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-Link to the TMC User documentation is `here <https://confluence.skatelescope.org/display/UD/TMC+User+Documentation>`_.

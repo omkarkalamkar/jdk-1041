@@ -1,6 +1,8 @@
 ska\_tmc\_centralnode.commands package
 ======================================
 
+See the :ref:`commands` section for details about TMC command workflows.
+
 Submodules
 ----------
 

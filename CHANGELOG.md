@@ -11,6 +11,13 @@ Fixed
 -----
 * Fixed the command allowed logic to check the responsiveness flag for specific 
   subarray in case of commands AssignResources and ReleaseResources
+* Fixed RTD structure.
+* Fixed all the existing docs-build warnings from master.
+
+Added
+-----
+* Added knowledge base and glossary in RTD.
+* Added Command workflow in knowledge base for Subarray Node to resolve comments on SKB-808.
 
 [0.24.3]
 ********
@@ -21,7 +28,7 @@ Updated imports for the helper device to deploy from ska-tmc-simulators package 
 [0.24.2]
 ********
 Updated
------
+-------
 * Updated LoadDishCfg method to integrate with the latest command tracker.
 
 [0.24.1]
@@ -38,7 +45,7 @@ Added
 * Added test case for skb-1051.
 
 Updated
------
+-------
 * Updated AssignResources and ReleaseResources commands to use command class id.
 * Updated deployment to support 2 subarrays.
 * Updated logic to track subsystems assigned per subbarray.
