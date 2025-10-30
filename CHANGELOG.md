@@ -5,6 +5,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[Unreleased]
+************
+Fixed
+-----
+* Fixed the command allowed logic to check the responsiveness flag for specific 
+  subarray in case of commands AssignResources and ReleaseResources
+
 [0.24.3]
 ********
 Updated
