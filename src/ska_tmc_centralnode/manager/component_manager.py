@@ -641,6 +641,24 @@ class CNComponentManager(TmcComponentManager):
             self.input_parameter.subarray_dev_names
         )
 
+    def check_if_subarray_is_responsive(self, subarray_id: int) -> bool:
+        """
+        Checks if subarray is responsive
+
+        :param subarray_id: Subarray id
+        :type subarray_id: int
+        :return: True if the subarray device is responsive,
+                 False otherwise.
+        :rtype: bool
+        """
+        self.logger.debug("Checking if subarray %s is responsive", subarray_id)
+        subarray_devices = self.input_parameter.subarray_dev_names
+        for device in subarray_devices:
+            subarray_device_id = re.findall(r"\d+", device)
+            if subarray_id == int(subarray_device_id[0]):
+                return self._check_if_device_is_responsive([device])
+        return False
+
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_fixed(3.0),
@@ -1203,7 +1221,7 @@ class CNComponentManager(TmcComponentManager):
             :return: return boolean value if command in valid obstate else
                 return exception.
             """
-            self.check_device_responsiveness_command(command_name)
+            self.check_device_responsiveness_command(command_name, subarray_id)
             if subarray_id and desired_obsstate:
                 subarray_devices = self.input_parameter.subarray_dev_names
                 for device in subarray_devices:
@@ -1219,15 +1237,24 @@ class CNComponentManager(TmcComponentManager):
 
         return is_subarray_in_right_obs_state
 
-    def check_device_responsiveness_command(self, command_name: str) -> None:
+    def check_device_responsiveness_command(
+        self, command_name: str, subarray_id: int
+    ) -> None:
         """
         Override this method to add responsive checks for the devices
 
         Args:
             command_name (str): Command name for the check
+            subarray_id (int): Subarray id
 
         """
-        return True
+        if command_name in self.supported_commands_for_responsive_check:
+            self.logger.debug("Checking the devices for: %s", command_name)
+            if subarray_id:
+                # check for the availability of specific subarray
+                self.check_if_subarray_is_responsive(subarray_id)
+            else:
+                self.check_if_subarrays_are_responsive()
 
     def validate_subarray_id(self, json_argument: dict):
         """Validates the subarray id in the assign resources json.

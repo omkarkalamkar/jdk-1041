@@ -785,18 +785,20 @@ class CNComponentManagerMid(CNComponentManager):
             )
         return True
 
-    def check_device_responsiveness_command(self, command_name: str) -> None:
+    def check_device_responsiveness_command(
+        self, command_name: str, subarray_id: int
+    ) -> None:
         """
         This method overrides the method from super class
         to add responsive checks for the devices
 
         Args:
             command_name (str): Command name for the check
+            subarray_id (int): Subarray id
 
         """
+        super().check_device_responsiveness_command(command_name, subarray_id)
         if command_name in self.supported_commands_for_responsive_check:
-            self.logger.debug(f"Checking mid devices for {command_name}")
-            self.check_if_subarrays_are_responsive()
             self.check_if_dishes_are_responsive()
 
     def update_k_value_validation(
