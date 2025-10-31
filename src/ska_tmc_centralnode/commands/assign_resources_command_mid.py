@@ -1,4 +1,5 @@
-"""AssignResourcesLow Command class for CentralNode.
+"""
+AssignResourcesLow Command class for CentralNode.
 """
 import json
 from typing import Tuple
@@ -17,21 +18,10 @@ class AssignResourcesMid(AssignResources):
     def do(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke the AssignResources command on a Subarray.
-
-        Args:
-            argin (str): Input argument for the command
-
-        .. literalinclude:: ../../../tests/data/command_AssignResources.json
-            :language: json
-            :caption: Example JSON for Assign Resources mid
-
-        Returns:
-            Tuple(ResultCode, str): Result code and message
-
         """
         try:
             self.logger.debug(
-                "Command ID: %s | Loading the  AssignResource JSON string",
+                "Command ID: %s | Loading the AssignResource JSON string",
                 self.command_id,
             )
             json_argument = json.loads(argin)
@@ -45,31 +35,27 @@ class AssignResourcesMid(AssignResources):
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
-        # ------------------------------------------------------------------
-        # NEW: array layout URL handling
-        # 1. If argin has "array_layout_url", take it, store in component
-        #    manager, and remove it from the payload sent to subarray
-        #    (so we don't break existing subarray contracts).
-        # 2. If not present, take the default from component manager (if any)
-        #    and inject it into the JSON we send to the subarray.
-        # ------------------------------------------------------------------
+        # --------------------------------------------------------------
+        # array_layout_url handling:
+        # 1. if user passed it -> KEEP in json, update manager
+        # 2. else -> take manager's default (if set) and inject it
+        # --------------------------------------------------------------
         if "array_layout_url" in json_argument:
-            array_url = json_argument.pop("array_layout_url")
-            # update manager's current URL
+            array_url = json_argument["array_layout_url"]
             self.component_manager.array_layout_url = array_url
             self.logger.debug(
-                "Command ID: %s | array_layout_url provided in argin: %s",
+                "Command ID: %s | array_layout_url in argin: %s",
                 self.command_id,
                 array_url,
             )
         else:
             default_url = getattr(
-                self.component_manager, "default_array_layout_url", ""
+                self.component_manager,
+                "default_array_layout_url",
+                "",
             )
             if default_url:
-                # inject into command going to subarray
                 json_argument["array_layout_url"] = default_url
-                # also reflect this as the active one
                 self.component_manager.array_layout_url = default_url
                 self.logger.debug(
                     "Command ID: %s | array_layout_url not provided, "
@@ -84,16 +70,16 @@ class AssignResourcesMid(AssignResources):
                     self.command_id,
                 )
 
-        # ------------------------------------------------------------------
+        # --------------------------------------------------------------
         # existing logic below
-        # ------------------------------------------------------------------
+        # --------------------------------------------------------------
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        subarrayID = int(json_argument["subarray_id"])
+        subarray_id = int(json_argument["subarray_id"])
 
-        result_code, message = self.get_subarray_adapter(subarrayID)
+        result_code, message = self.get_subarray_adapter(subarray_id)
         if result_code == ResultCode.FAILED:
             return result_code, message
 

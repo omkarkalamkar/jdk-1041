@@ -34,10 +34,6 @@ class AssignResourcesLow(AssignResources):
     ) -> None:
         """
         Updates the task status for command ReleaseResources
-
-        Args:
-            result: A tuple containing the result code and a message.
-            exception (str): A string representing any exception message.
         """
         super().update_task_status(result, exception)
         self.component_manager.subsystem_assigned_per_command_id.pop(
@@ -64,12 +60,12 @@ class AssignResourcesLow(AssignResources):
             )
 
         # --------------------------------------------------------------
-        # array_layout_url handling (minimal change):
-        # 1. if user passed it -> store in manager, remove from payload
+        # array_layout_url handling:
+        # 1. if user passed it -> KEEP in json, update manager
         # 2. else -> take manager's default (if set) and inject it
         # --------------------------------------------------------------
         if "array_layout_url" in json_argument:
-            array_url = json_argument.pop("array_layout_url")
+            array_url = json_argument["array_layout_url"]
             self.component_manager.array_layout_url = array_url
             self.logger.debug(
                 "Command ID: %s | array_layout_url in argin: %s",
