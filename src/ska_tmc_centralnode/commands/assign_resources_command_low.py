@@ -37,11 +37,7 @@ class AssignResourcesLow(AssignResources):
 
         Args:
             result: A tuple containing the result code and a message.
-                The result code indicates whether the command
-                succeeded or failed.
             exception (str): A string representing any exception message.
-                This is used when the result indicates a failure.
-                Default is an empty string.
         """
         super().update_task_status(result, exception)
         self.component_manager.subsystem_assigned_per_command_id.pop(
@@ -52,32 +48,12 @@ class AssignResourcesLow(AssignResources):
     def do(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke AssignResources command on Subarray.
-
-        Args:
-            argin (str): Input argument for the command
-
-        .. literalinclude:: ../../../tests/data/assign_resource_low.json
-            :language: json
-            :caption: Example JSON for Assign Resources low
-
-        Returns:
-            Tuple(ResultCode, str): tuple containing a
-            return code and a string msg.
-            For Example: (ResultCode.OK, "")
-
-        :raises:
-            KeyError if input argument json string contains invalid key
-
-            ValueError if input argument json string contains invalid value
-
-            AssertionError if  Mccs On command is not completed.
-
         """
         try:
             json_argument = json.loads(argin)
             self.logger.debug(
-                "Command ID: %s | Executing AssignResources "
-                + "command with arguments: %s",
+                "Command ID: %s | Executing AssignResources command with "
+                "arguments: %s",
                 self.command_id,
                 json_argument,
             )
@@ -86,6 +62,31 @@ class AssignResourcesLow(AssignResources):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", exception),
             )
+
+        # --------------------------------------------------------------
+        # array_layout_url handling (minimal change):
+        # 1. if user passed it -> store in manager, remove from payload
+        # 2. else -> take manager's default (if set) and inject it
+        # --------------------------------------------------------------
+        if "array_layout_url" in json_argument:
+            array_url = json_argument.pop("array_layout_url")
+            self.component_manager.array_layout_url = array_url
+            self.logger.debug(
+                "Command ID: %s | array_layout_url in argin: %s",
+                self.command_id,
+                array_url,
+            )
+        else:
+            default_url = self.component_manager.default_array_layout_url
+            if default_url:
+                json_argument["array_layout_url"] = default_url
+                self.component_manager.array_layout_url = default_url
+                self.logger.debug(
+                    "Command ID: %s | using default array_layout_url: %s",
+                    self.command_id,
+                    default_url,
+                )
+
         assigned_subsystem: list = list(
             SUB_SYSTEMS.intersection(json_argument.keys())
         )
@@ -147,8 +148,8 @@ class AssignResourcesLow(AssignResources):
 
             return_codes, message_or_unique_ids = self.send_command(
                 [self.mccs_mln_adapter],
-                "Error in calling AssignResources command"
-                + " on MCCS Master Leaf Node ",
+                "Error in calling AssignResources command on MCCS "
+                "Master Leaf Node ",
                 "AssignResources",
                 json.dumps(input_mccs_master),
             )
@@ -172,13 +173,6 @@ class AssignResourcesLow(AssignResources):
         """
         Method to prepare the input json_argument required while invoking
         AssignResources() command on MCCS Master Leaf Node.
-
-        Args:
-            json_argument (dict): The string in JSON format.
-
-        Returns:
-            dict: The string in JSON format.
-
         """
         try:
             subarray_id = json_argument["subarray_id"]

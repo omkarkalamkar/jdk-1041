@@ -273,6 +273,10 @@ class CNComponentManagerMid(CNComponentManager):
             telescope="mid",
         )
         self.aggregation_process.start_aggregation_process()
+        self._array_layout_url: str = ""
+        self._default_array_layout_url: str = (
+            "instrument/ska1_mid/layout/mid-layout.json"
+        )
 
     def check_if_dishes_are_responsive(self) -> bool:
         """

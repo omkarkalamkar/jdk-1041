@@ -171,6 +171,10 @@ class CNComponentManagerLow(CNComponentManager):
         self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
             list
         )
+        self._array_layout_url: str = ""
+        self._default_array_layout_url: str = (
+            "instrument/ska1_mid/layout/low-layout.json"
+        )
 
     @property
     def assign_resources_schema_version(self) -> str:

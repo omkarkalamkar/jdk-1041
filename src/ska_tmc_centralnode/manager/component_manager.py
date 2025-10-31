@@ -214,6 +214,8 @@ class CNComponentManager(TmcComponentManager):
         self.event_manager_object = CentralNodeEventManager(
             self, logger=logger
         )
+        self._array_layout_url: str = ""
+        self._default_array_layout_url: str = ""
 
     def setup_event_subscription(self) -> None:
         """
@@ -324,6 +326,42 @@ class CNComponentManager(TmcComponentManager):
             "Device attribute map dictionary : %s", device_attribute_map
         )
         return device_attribute_map
+
+    # ------------------------------------------------------------------
+    # Array layout URL (current)
+    # ------------------------------------------------------------------
+    @property
+    def array_layout_url(self) -> str:
+        """Get the current array layout URL."""
+        return self._array_layout_url
+
+    @array_layout_url.setter
+    def array_layout_url(self, url: str) -> None:
+        """Set the current array layout URL.
+        url: str
+        """
+        if not isinstance(url, str):
+            raise ValueError("array_layout_url must be a string.")
+        self._array_layout_url = url
+        self.logger.info(f"Array layout URL set to: {url}")
+
+    # ------------------------------------------------------------------
+    # Array layout URL (default)
+    # ------------------------------------------------------------------
+    @property
+    def default_array_layout_url(self) -> str:
+        """Get the default array layout URL."""
+        return self._default_array_layout_url
+
+    @default_array_layout_url.setter
+    def default_array_layout_url(self, url: str) -> None:
+        """Set the default array layout URL.
+        url: str
+        """
+        if not isinstance(url, str):
+            raise ValueError("default_array_layout_url must be a string.")
+        self._default_array_layout_url = url
+        self.logger.info(f"Default array layout URL set to: {url}")
 
     @property
     def event_queue(self):

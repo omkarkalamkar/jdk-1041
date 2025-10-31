@@ -41,9 +41,52 @@ class AssignResourcesMid(AssignResources):
                 f"Problem in loading the JSON string: {e}",
             )
 
+        # Remove transaction id if present (existing behaviour)
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
+        # ------------------------------------------------------------------
+        # NEW: array layout URL handling
+        # 1. If argin has "array_layout_url", take it, store in component
+        #    manager, and remove it from the payload sent to subarray
+        #    (so we don't break existing subarray contracts).
+        # 2. If not present, take the default from component manager (if any)
+        #    and inject it into the JSON we send to the subarray.
+        # ------------------------------------------------------------------
+        if "array_layout_url" in json_argument:
+            array_url = json_argument.pop("array_layout_url")
+            # update manager's current URL
+            self.component_manager.array_layout_url = array_url
+            self.logger.debug(
+                "Command ID: %s | array_layout_url provided in argin: %s",
+                self.command_id,
+                array_url,
+            )
+        else:
+            default_url = getattr(
+                self.component_manager, "default_array_layout_url", ""
+            )
+            if default_url:
+                # inject into command going to subarray
+                json_argument["array_layout_url"] = default_url
+                # also reflect this as the active one
+                self.component_manager.array_layout_url = default_url
+                self.logger.debug(
+                    "Command ID: %s | array_layout_url not provided, "
+                    "using default: %s",
+                    self.command_id,
+                    default_url,
+                )
+            else:
+                self.logger.debug(
+                    "Command ID: %s | No array_layout_url in argin and no "
+                    "default_array_layout_url set in component manager.",
+                    self.command_id,
+                )
+
+        # ------------------------------------------------------------------
+        # existing logic below
+        # ------------------------------------------------------------------
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
