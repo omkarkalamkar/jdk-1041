@@ -133,6 +133,7 @@ def test_array_layout_assign_resources(
         },
         lookahead=5,
     )
+    assert cm.array_layout_url == mid_array_layout
 
 
 def check_if_subarray_is_available(cm):
