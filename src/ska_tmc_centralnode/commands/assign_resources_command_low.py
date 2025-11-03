@@ -92,7 +92,7 @@ class AssignResourcesLow(AssignResources):
         # 1. if user passed it -> KEEP in json, update manager
         # 2. else -> take manager's default (if set) and inject it
         # --------------------------------------------------------------
-        if "array_layout_url" in json_argument:
+        if "telmodel" in json_argument:
             array_url = json_argument["array_layout_url"]
             self.component_manager.array_layout_url = array_url
             self.logger.debug(
@@ -103,7 +103,7 @@ class AssignResourcesLow(AssignResources):
         else:
             default_url = self.component_manager.default_array_layout_url
             if default_url:
-                json_argument["array_layout_url"] = default_url
+                json_argument["telmodel"] = default_url
                 self.component_manager.array_layout_url = default_url
                 self.logger.debug(
                     "Command ID: %s | using default array_layout_url: %s",

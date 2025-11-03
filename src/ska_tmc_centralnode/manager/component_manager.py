@@ -64,6 +64,7 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 from ska_tmc_centralnode.utils.constants import (
+    ARRAY_LAYOUT_DEFAULT_MID,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     MCCS_MLN_DEVICE,
@@ -215,7 +216,7 @@ class CNComponentManager(TmcComponentManager):
             self, logger=logger
         )
         self._array_layout_url: str = ""
-        self._default_array_layout_url: str = ""
+        self._default_array_layout_url: dict = ARRAY_LAYOUT_DEFAULT_MID
 
     def setup_event_subscription(self) -> None:
         """
@@ -349,7 +350,7 @@ class CNComponentManager(TmcComponentManager):
     # Array layout URL (default)
     # ------------------------------------------------------------------
     @property
-    def default_array_layout_url(self) -> str:
+    def default_array_layout_url(self) -> dict:
         """Get the default array layout URL."""
         return self._default_array_layout_url
 
@@ -358,8 +359,8 @@ class CNComponentManager(TmcComponentManager):
         """Set the default array layout URL.
         url: str
         """
-        if not isinstance(url, str):
-            raise ValueError("default_array_layout_url must be a string.")
+        if not isinstance(url, dict):
+            raise ValueError("default_array_layout_url must be a dictionary.")
         self._default_array_layout_url = url
         self.logger.info(f"Default array layout URL set to: {url}")
 

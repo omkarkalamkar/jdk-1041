@@ -38,6 +38,7 @@ from ska_tmc_centralnode.manager.aggregators import (
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.utils.constants import (
+    ARRAY_LAYOUT_DEFAULT_LOW,
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
 )
@@ -172,9 +173,7 @@ class CNComponentManagerLow(CNComponentManager):
             list
         )
         self._array_layout_url: str = ""
-        self._default_array_layout_url: str = (
-            "instrument/ska1_mid/layout/low-layout.json"
-        )
+        self._default_array_layout_url: dict = ARRAY_LAYOUT_DEFAULT_LOW
 
     @property
     def assign_resources_schema_version(self) -> str:

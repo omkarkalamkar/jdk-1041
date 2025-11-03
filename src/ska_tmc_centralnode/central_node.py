@@ -93,7 +93,7 @@ class AbstractCentralNode(TMCBaseDevice):
     @arrayLayoutURL.write
     def arrayLayoutURL(self, url: str) -> None:
         """Sets the array layout URL."""
-        self.component_manager.array_layout_url = url
+        self.component_manager.array_layout_url = json.loads(url)
 
     @attribute(
         dtype="DevString",
@@ -101,14 +101,14 @@ class AbstractCentralNode(TMCBaseDevice):
         memorized=True,
         hw_memorized=True,
     )
-    def defaultArrayLayoutURL(self) -> str:
+    def DefaultArrayLayoutURL(self) -> str:
         """Returns the default array layout URL attribute value."""
-        return self.component_manager.default_array_layout_url
+        return json.dumps(self.component_manager.default_array_layout_url)
 
-    @defaultArrayLayoutURL.write
-    def defaultArrayLayoutURL(self, url: str) -> None:
+    @DefaultArrayLayoutURL.write
+    def DefaultArrayLayoutURL(self, url: str) -> None:
         """Sets the default array layout URL."""
-        self.component_manager.default_array_layout_url = url
+        self.component_manager.default_array_layout_url = json.loads(url)
 
     tmOpState = attribute(
         dtype="DevState",
