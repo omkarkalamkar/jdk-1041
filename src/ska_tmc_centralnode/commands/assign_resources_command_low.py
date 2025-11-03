@@ -173,7 +173,8 @@ class AssignResourcesLow(AssignResources):
             return_codes, message_or_unique_ids = self.send_command(
                 [self.mccs_mln_adapter],
                 "Error in calling AssignResources command on MCCS "
-                "Master Leaf Node AssignResources : json",
+                "Master Leaf Node ",
+                "AssignResources",
                 json.dumps(input_mccs_master),
             )
             (
