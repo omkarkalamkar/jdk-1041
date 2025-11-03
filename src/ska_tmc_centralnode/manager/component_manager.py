@@ -341,8 +341,8 @@ class CNComponentManager(TmcComponentManager):
         """Set the current array layout URL.
         url: str
         """
-        if not isinstance(url, str):
-            raise ValueError("array_layout_url must be a string.")
+        if not isinstance(url, dict):
+            raise ValueError("array_layout_url must be a dictionary.")
         self._array_layout_url = url
         self.logger.info(f"Array layout URL set to: {url}")
 

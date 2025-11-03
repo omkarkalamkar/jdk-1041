@@ -55,7 +55,7 @@ class AssignResourcesMid(AssignResources):
                 "",
             )
             if default_url:
-                json_argument["array_layout_url"] = default_url
+                json_argument["telmodel"] = default_url
                 self.component_manager.array_layout_url = default_url
                 self.logger.debug(
                     "Command ID: %s | array_layout_url not provided, "

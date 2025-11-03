@@ -93,7 +93,7 @@ class AssignResourcesLow(AssignResources):
         # 2. else -> take manager's default (if set) and inject it
         # --------------------------------------------------------------
         if "telmodel" in json_argument:
-            array_url = json_argument["array_layout_url"]
+            array_url = json_argument["telmodel"]
             self.component_manager.array_layout_url = array_url
             self.logger.debug(
                 "Command ID: %s | array_layout_url in argin: %s",
