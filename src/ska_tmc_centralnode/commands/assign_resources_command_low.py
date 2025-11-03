@@ -96,7 +96,7 @@ class AssignResourcesLow(AssignResources):
             array_url = json_argument["telmodel"]
             self.component_manager.array_layout_url = array_url
             self.logger.debug(
-                "Command ID: %s | array_layout_url in argin: %s",
+                "Command ID: %s | Array layout url in input JSON: %s",
                 self.command_id,
                 array_url,
             )
@@ -106,7 +106,7 @@ class AssignResourcesLow(AssignResources):
                 json_argument["telmodel"] = default_url
                 self.component_manager.array_layout_url = default_url
                 self.logger.debug(
-                    "Command ID: %s | using default array_layout_url: %s",
+                    "Command ID: %s | Default array layout url will be used: %s",
                     self.command_id,
                     default_url,
                 )
