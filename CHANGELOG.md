@@ -5,8 +5,9 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-[Unreleased]
+[0.25.0]
 ************
+
 Fixed
 -----
 * Fixed the command allowed logic to check the responsiveness flag for specific 
@@ -18,7 +19,9 @@ Added
 -----
 * Added knowledge base and glossary in RTD.
 * Added Command workflow in knowledge base for Subarray Node to resolve comments on SKB-808.
-
+* Added Attribute for Support change ArrayLayout after deployment
+* Refactored AssignResources to support arrayLayout 
+ 
 [0.24.3]
 ********
 Updated
