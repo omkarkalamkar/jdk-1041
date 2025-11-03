@@ -104,3 +104,21 @@ Usage
 * **CommandTimeOutDefault property**
   - Configurable in the deployment configuration (e.g., ``values.yaml``).
   - Sets the initial timeout value at startup.
+
+Array Layout URL
+=================
+
+The ``DefaultArrayLayoutURL`` attribute is introduced to define the default array
+layout configuration used by the Central Node. This attribute specifies the default
+array layout source and path that the system will use at startup or when no specific
+layout is provided.
+
+The ``ArrayLayoutURL`` attribute is introduced to indicate the current array layout
+configuration actively in use by the Central Node. This allows dynamic updates to
+the array layout at runtime without requiring a redeployment, providing flexibility
+for testing or operational adjustments.
+
+
+
+
+
