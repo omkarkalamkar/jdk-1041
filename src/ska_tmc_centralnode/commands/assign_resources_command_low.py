@@ -106,7 +106,7 @@ class AssignResourcesLow(AssignResources):
                 json_argument["telmodel"] = default_url
                 self.component_manager.array_layout_url = default_url
                 self.logger.debug(
-                    "Command ID: %s | Default array layout url will be used: %s",
+                    "Command ID:%s | Default array layout url will be used:%s",
                     self.command_id,
                     default_url,
                 )
@@ -173,8 +173,7 @@ class AssignResourcesLow(AssignResources):
             return_codes, message_or_unique_ids = self.send_command(
                 [self.mccs_mln_adapter],
                 "Error in calling AssignResources command on MCCS "
-                "Master Leaf Node ",
-                "AssignResources",
+                "Master Leaf Node AssignResources : json",
                 json.dumps(input_mccs_master),
             )
             (
