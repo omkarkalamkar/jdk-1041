@@ -18,6 +18,17 @@ class AssignResourcesMid(AssignResources):
     def do(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke the AssignResources command on a Subarray.
+
+         Args:
+            argin (str): Input argument for the command
+
+        .. literalinclude:: ../../../tests/data/command_AssignResources.json
+            :language: json
+            :caption: Example JSON for Assign Resources mid
+
+        Returns:
+            Tuple(ResultCode, str): Result code and message
+
         """
         try:
             self.logger.debug(
