@@ -12,6 +12,7 @@ from ska_tmc_common import DevFactory
 from tango.test_utils import DeviceTestContext
 
 from ska_tmc_centralnode.central_node_mid import MidTmcCentralNode
+from ska_tmc_centralnode.model.input import InputParameterMid
 from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 # ---------- Fixtures ----------
@@ -148,3 +149,14 @@ def check_if_subarray_is_available(cm):
             pytest.fail(
                 "Timeout occurred while checking the SubarrayNode availability."
             )
+
+
+def test_cm_default_array_layout_url_invalid_type_raises_value_error_mid():
+    """Ensure CM command path raises ValueError for non-dict layout URL."""
+    cm, _ = create_cm(_input_parameter=InputParameterMid(None))
+
+    invalid_value = "this_is_not_a_dict"
+    with pytest.raises(
+        ValueError, match="default_array_layout_url must be a dictionary."
+    ):
+        cm.default_array_layout_url = invalid_value

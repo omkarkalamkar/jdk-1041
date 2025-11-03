@@ -126,3 +126,14 @@ def check_if_subarray_is_available(cm):
             pytest.fail(
                 "Timeout occurred while checking the SubarrayNode availability."
             )
+
+
+def test_cm_default_array_layout_url_invalid_type_raises_value_error():
+    """Ensure CM command path raises ValueError for non-dict layout URL."""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+
+    invalid_value = "this_is_not_a_dict"
+    with pytest.raises(
+        ValueError, match="default_array_layout_url must be a dictionary."
+    ):
+        cm.default_array_layout_url = invalid_value
