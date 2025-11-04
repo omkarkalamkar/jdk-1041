@@ -42,6 +42,7 @@ class AssignResourcesLow(AssignResources):
             exception (str): A string representing any exception message.
                 This is used when the result indicates a failure.
                 Default is an empty string.
+
         """
         super().update_task_status(result, exception)
         self.component_manager.subsystem_assigned_per_command_id.pop(
@@ -71,13 +72,12 @@ class AssignResourcesLow(AssignResources):
             ValueError if input argument json string contains invalid value
 
             AssertionError if  Mccs On command is not completed.
-
         """
         try:
             json_argument = json.loads(argin)
             self.logger.debug(
-                "Command ID: %s | Executing AssignResources "
-                + "command with arguments: %s",
+                "Command ID: %s | Executing AssignResources command with "
+                "arguments: %s",
                 self.command_id,
                 json_argument,
             )
@@ -86,6 +86,37 @@ class AssignResourcesLow(AssignResources):
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", exception),
             )
+
+        if "telmodel" in json_argument:
+            array_url = json_argument["telmodel"]
+            self.component_manager.array_layout_url = array_url
+            self.logger.debug(
+                "Command ID: %s | Array layout url in input JSON: %s",
+                self.command_id,
+                array_url,
+            )
+        else:
+            default_url = self.component_manager.default_array_layout_url
+            if default_url:
+                if not isinstance(default_url, dict):
+                    self.logger.error(
+                        "Command ID:%s | Default telmodel must"
+                        " be a dict got %s",
+                        self.command_id,
+                        type(default_url).__name__,
+                    )
+                    return (
+                        ResultCode.FAILED,
+                        "Invalid default ArrayLayout : expected a dictionary.",
+                    )
+                json_argument["telmodel"] = default_url
+                self.component_manager.array_layout_url = default_url
+                self.logger.debug(
+                    "Command ID:%s | Default array layout url will be used:%s",
+                    self.command_id,
+                    default_url,
+                )
+
         assigned_subsystem: list = list(
             SUB_SYSTEMS.intersection(json_argument.keys())
         )
@@ -147,8 +178,8 @@ class AssignResourcesLow(AssignResources):
 
             return_codes, message_or_unique_ids = self.send_command(
                 [self.mccs_mln_adapter],
-                "Error in calling AssignResources command"
-                + " on MCCS Master Leaf Node ",
+                "Error in calling AssignResources command on MCCS "
+                "Master Leaf Node ",
                 "AssignResources",
                 json.dumps(input_mccs_master),
             )
@@ -178,6 +209,7 @@ class AssignResourcesLow(AssignResources):
 
         Returns:
             dict: The string in JSON format.
+
 
         """
         try:

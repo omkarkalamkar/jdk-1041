@@ -80,6 +80,36 @@ class AbstractCentralNode(TMCBaseDevice):
         doc="desiredTelescopeState attribute of Central Node.",
     )
 
+    @attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+        memorized=True,
+        hw_memorized=True,
+    )
+    def arrayLayoutURL(self) -> str:
+        """Returns the array layout URL attribute value."""
+        return self.component_manager.array_layout_url
+
+    @arrayLayoutURL.write
+    def arrayLayoutURL(self, url: str) -> None:
+        """Sets the array layout URL."""
+        self.component_manager.array_layout_url = json.loads(url)
+
+    @attribute(
+        dtype="DevString",
+        access=AttrWriteType.READ_WRITE,
+        memorized=True,
+        hw_memorized=True,
+    )
+    def DefaultArrayLayoutURL(self) -> str:
+        """Returns the default array layout URL attribute value."""
+        return json.dumps(self.component_manager.default_array_layout_url)
+
+    @DefaultArrayLayoutURL.write
+    def DefaultArrayLayoutURL(self, url: str) -> None:
+        """Sets the default array layout URL."""
+        self.component_manager.default_array_layout_url = json.loads(url)
+
     tmOpState = attribute(
         dtype="DevState",
     )

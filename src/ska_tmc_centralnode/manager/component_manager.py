@@ -64,6 +64,7 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 from ska_tmc_centralnode.utils.constants import (
+    ARRAY_LAYOUT_DEFAULT_MID,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     MCCS_MLN_DEVICE,
@@ -214,6 +215,8 @@ class CNComponentManager(TmcComponentManager):
         self.event_manager_object = CentralNodeEventManager(
             self, logger=logger
         )
+        self._array_layout_url: str = ""
+        self._default_array_layout_url: dict = ARRAY_LAYOUT_DEFAULT_MID
 
     def setup_event_subscription(self) -> None:
         """
@@ -324,6 +327,42 @@ class CNComponentManager(TmcComponentManager):
             "Device attribute map dictionary : %s", device_attribute_map
         )
         return device_attribute_map
+
+    # ------------------------------------------------------------------
+    # Array layout URL (current)
+    # ------------------------------------------------------------------
+    @property
+    def array_layout_url(self) -> str:
+        """Get the current array layout URL."""
+        return self._array_layout_url
+
+    @array_layout_url.setter
+    def array_layout_url(self, url: str) -> None:
+        """Set the current array layout URL.
+        url: str
+        """
+        if not isinstance(url, dict):
+            raise ValueError("array_layout_url must be a dictionary.")
+        self._array_layout_url = url
+        self.logger.info(f"Array layout URL set to: {url}")
+
+    # ------------------------------------------------------------------
+    # Array layout URL (default)
+    # ------------------------------------------------------------------
+    @property
+    def default_array_layout_url(self) -> dict:
+        """Get the default array layout URL."""
+        return self._default_array_layout_url
+
+    @default_array_layout_url.setter
+    def default_array_layout_url(self, url: str) -> None:
+        """Set the default array layout URL.
+        url: str
+        """
+        if not isinstance(url, dict):
+            raise ValueError("default_array_layout_url must be a dictionary.")
+        self._default_array_layout_url = url
+        self.logger.info(f"Default array layout URL set to: {url}")
 
     @property
     def event_queue(self):

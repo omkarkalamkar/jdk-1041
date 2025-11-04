@@ -1,4 +1,5 @@
-"""AssignResourcesLow Command class for CentralNode.
+"""
+AssignResourcesLow Command class for CentralNode.
 """
 import json
 from typing import Tuple
@@ -18,7 +19,7 @@ class AssignResourcesMid(AssignResources):
         """
         Method to invoke the AssignResources command on a Subarray.
 
-        Args:
+         Args:
             argin (str): Input argument for the command
 
         .. literalinclude:: ../../../tests/data/command_AssignResources.json
@@ -31,7 +32,7 @@ class AssignResourcesMid(AssignResources):
         """
         try:
             self.logger.debug(
-                "Command ID: %s | Loading the  AssignResource JSON string",
+                "Command ID: %s | Loading the AssignResource JSON string",
                 self.command_id,
             )
             json_argument = json.loads(argin)
@@ -44,13 +45,57 @@ class AssignResourcesMid(AssignResources):
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
+        if "telmodel" in json_argument:
+            array_url = json_argument["telmodel"]
+            self.component_manager.array_layout_url = array_url
+            self.logger.debug(
+                "Command ID: %s | array_layout_url in argin: %s",
+                self.command_id,
+                array_url,
+            )
+        else:
+            default_url = getattr(
+                self.component_manager,
+                "default_array_layout_url",
+                "",
+            )
+            if default_url:
+                if not isinstance(default_url, dict):
+                    self.logger.error(
+                        "Command ID: %s | Default 'telmodel'"
+                        " must be a dict; got %s",
+                        self.command_id,
+                        type(default_url).__name__,
+                    )
+                    return (
+                        ResultCode.FAILED,
+                        "Invalid default 'telmodel': expected a dictionary.",
+                    )
+                json_argument["telmodel"] = default_url
+                self.component_manager.array_layout_url = default_url
+                self.logger.debug(
+                    "Command ID: %s | array_layout_url not provided, "
+                    "using default: %s",
+                    self.command_id,
+                    default_url,
+                )
+            else:
+                self.logger.debug(
+                    "Command ID: %s | No array_layout_url in argin and no "
+                    "default_array_layout_url set in component manager.",
+                    self.command_id,
+                )
+
+        # --------------------------------------------------------------
+        # existing logic below
+        # --------------------------------------------------------------
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        subarrayID = int(json_argument["subarray_id"])
+        subarray_id = int(json_argument["subarray_id"])
 
-        result_code, message = self.get_subarray_adapter(subarrayID)
+        result_code, message = self.get_subarray_adapter(subarray_id)
         if result_code == ResultCode.FAILED:
             return result_code, message
 

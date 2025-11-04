@@ -136,6 +136,33 @@ Install the umbrella chart::
   REVISION: 1
   TEST SUITE: None
 
+Update Array Layout Configuration
+---------------------------------
+
+To modify the default array layout URL used by the Central Node, update the value of
+``centralnode_proxy.DefaultArraylayout`` to the desired configuration. The configuration
+must follow the JSON structure shown below::
+
+    {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": "instrument/ska1_low/layout/low-layout.json"
+    }
+
+When assigning resources with a different array layout, include the ``telmodel`` section
+in the input JSON for the ``assignResources`` command as shown below::
+
+    "telmodel": {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": "instrument/ska1_low/layout/low-layout.json"
+    }
+
+This configuration ensures that the Central Node uses the specified telescope model
+and layout definition when managing and deploying resources.
+
 
 Test the deployment with (the result of the tests are stored into the folder ``charts/build``)::
 
@@ -184,3 +211,4 @@ Makefile targets
 
 This project contains a Makefile which acts as a UI for building container images, testing images, and for launching interactive developer environments.
 For the documentation of the Makefile run ``make help``.
+
