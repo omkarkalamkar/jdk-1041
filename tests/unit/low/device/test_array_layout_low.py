@@ -137,3 +137,56 @@ def test_cm_default_array_layout_url_invalid_type_raises_value_error():
         ValueError, match="default_array_layout_url must be a dictionary."
     ):
         cm.default_array_layout_url = invalid_value
+
+
+@pytest.mark.SKA_low
+def test_low_assign_resources_fails_with_invalid_default_array_layout_json(
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
+    monkeypatch,
+):
+    """
+    If no telmodel is provided and the default array layout URL is not a dict,
+    the AssignResources command should fail with our new validation error.
+    """
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+
+    # Make subarray available (same as other tests)
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
+    assign_input = json.loads(json_factory("assign_resource_low"))
+    assign_input.pop("telmodel", None)
+
+    monkeypatch.setattr(
+        cm.__class__,
+        "default_array_layout_url",
+        property(lambda self: "this_is_not_a_dict"),
+    )
+
+    # Invoke AssignResources via the CM path
+    cm.assign_resources(json.dumps(assign_input), task_callback=task_callback)
+
+    # Usual task lifecycle checks
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (
+                ResultCode.FAILED,
+                "Invalid default ArrayLayout : expected a dictionary.",
+            ),
+            "exception": "Invalid default ArrayLayout : expected a dictionary.",
+        }
+    )
+
+    assert cm.array_layout_url != "this_is_not_a_dict"

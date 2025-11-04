@@ -91,6 +91,7 @@ class AssignResourcesLow(AssignResources):
         # array_layout_url handling:
         # 1. if user passed it -> KEEP in json, update manager
         # 2. else -> take manager's default (if set) and inject it
+        #    (ADDED: verify default is a dict; otherwise fail)
         # --------------------------------------------------------------
         if "telmodel" in json_argument:
             array_url = json_argument["telmodel"]
@@ -103,6 +104,17 @@ class AssignResourcesLow(AssignResources):
         else:
             default_url = self.component_manager.default_array_layout_url
             if default_url:
+                if not isinstance(default_url, dict):
+                    self.logger.error(
+                        "Command ID:%s | Default telmodel must"
+                        " be a dict got %s",
+                        self.command_id,
+                        type(default_url).__name__,
+                    )
+                    return (
+                        ResultCode.FAILED,
+                        "Invalid default ArrayLayout : expected a dictionary.",
+                    )
                 json_argument["telmodel"] = default_url
                 self.component_manager.array_layout_url = default_url
                 self.logger.debug(

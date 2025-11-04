@@ -160,3 +160,62 @@ def test_cm_default_array_layout_url_invalid_type_raises_value_error_mid():
         ValueError, match="default_array_layout_url must be a dictionary."
     ):
         cm.default_array_layout_url = invalid_value
+
+
+def test_mid_assign_resources_fails_with_invalid_default_array_layout_json(
+    tango_context,
+    task_callback,
+    set_mid_sdp_csp_admin_modes,
+    monkeypatch,
+):
+    """
+    If no telmodel is provided and the default array layout URL is not a dict,
+    the AssignResources command should fail with the validation error.
+    """
+    cm, _ = create_cm(_input_parameter=InputParameterMid(None))
+
+    # Ensure the command does NOT carry a 'telmodel' so the default is used
+    assign_input_str = (
+        get_assign_input_str()
+    )  # reads command_AssignResources.json
+    assign_input = json.loads(assign_input_str)
+    assign_input.pop("telmodel", None)
+    assign_input_str = json.dumps(assign_input)
+
+    # Make subarray available (consistent with existing tests)
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
+    # Patch the CM's getter so default_array_layout_url returns a non-dict.
+    # This avoids the setter ValueError test and directly exercises the command path.
+    monkeypatch.setattr(
+        cm.__class__,
+        "default_array_layout_url",
+        property(lambda self: "this_is_not_a_dict"),
+    )
+
+    # Invoke AssignResources via the CM path
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
+
+    # Task lifecycle expectations with failure result
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (
+                ResultCode.FAILED,
+                "Invalid default 'telmodel': expected a dictionary.",
+            ),
+            "exception": "Invalid default 'telmodel': expected a dictionary.",
+        }
+    )
+
+    # Sanity: the invalid value should not have been adopted
+    assert cm.array_layout_url != "this_is_not_a_dict"
