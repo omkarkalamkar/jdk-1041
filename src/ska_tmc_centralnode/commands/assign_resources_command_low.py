@@ -87,12 +87,6 @@ class AssignResourcesLow(AssignResources):
                 ("Problem in loading the JSON string: %s", exception),
             )
 
-        # --------------------------------------------------------------
-        # array_layout_url handling:
-        # 1. if user passed it -> KEEP in json, update manager
-        # 2. else -> take manager's default (if set) and inject it
-        #    (ADDED: verify default is a dict; otherwise fail)
-        # --------------------------------------------------------------
         if "telmodel" in json_argument:
             array_url = json_argument["telmodel"]
             self.component_manager.array_layout_url = array_url

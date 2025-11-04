@@ -42,16 +42,9 @@ class AssignResourcesMid(AssignResources):
                 f"Problem in loading the JSON string: {e}",
             )
 
-        # Remove transaction id if present (existing behaviour)
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
-        # --------------------------------------------------------------
-        # array_layout_url handling:
-        # 1. if user passed it -> KEEP in json, update manager
-        # 2. else -> take manager's default (if set) and inject it
-        #    (ADDED: verify default is a dict; otherwise fail)
-        # --------------------------------------------------------------
         if "telmodel" in json_argument:
             array_url = json_argument["telmodel"]
             self.component_manager.array_layout_url = array_url
@@ -67,7 +60,6 @@ class AssignResourcesMid(AssignResources):
                 "",
             )
             if default_url:
-                # === Minimal addition: enforce dict type for default ===
                 if not isinstance(default_url, dict):
                     self.logger.error(
                         "Command ID: %s | Default 'telmodel'"
@@ -79,7 +71,6 @@ class AssignResourcesMid(AssignResources):
                         ResultCode.FAILED,
                         "Invalid default 'telmodel': expected a dictionary.",
                     )
-                # === End minimal addition ===
                 json_argument["telmodel"] = default_url
                 self.component_manager.array_layout_url = default_url
                 self.logger.debug(
