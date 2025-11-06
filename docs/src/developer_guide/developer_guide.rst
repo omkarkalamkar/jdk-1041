@@ -8,6 +8,7 @@ Developer Guide
    :maxdepth: 1
 
    code_quality
+   trl
    api/index
 
 TMC development follows logging guidelines in addition to SKA logging guidelines. These TMC specific 
