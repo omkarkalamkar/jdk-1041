@@ -15,14 +15,14 @@ The AssignResources command allocates telescope resources to a specific subarray
 
     5. The Central Node **rejects the command** if :-
 
-        A. Admin mode reported by each of the system - CSP,SDP are in **OFFLINE** or **NOT FITTED**.
+        A. **Admin mode** reported by each of the system - CSP,SDP are in **OFFLINE** or **NOT FITTED**.
         B. **is_dish_vcc_config_set** should be  set to **False**
-        C. Operational state of central node is **FAULT/UNKNOWN/DISABLE** .
+        C. Operational **state** of central node is **FAULT/UNKNOWN/DISABLE** .
 
     6. The **Input JSON** is validated as below, and Command is `'Rejected'` with **exception message if they are not met** :-
 
-        A. **JSON** should not be empty or malformed
-        B. **JSON validation** is done with **ska-tmc-cdm**
+        A. JSON should not be empty or malformed
+        B. JSON **validation** is done with **ska-tmc-cdm**
 
     7. The following **state requirements** are applied for the **command execution** :-
 
@@ -44,4 +44,4 @@ The AssignResources command allocates telescope resources to a specific subarray
         B. Command **failure** is reported in any of the below cases as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node.
 
             - The TMC subarray node reports **'RESULT_CODE - FAILED'** on its Long Running Command Result attribute
-            - The command times out if TMC SubarrayNode **does not transition to IDLE within the timeout period** specified by `CommandTimeOutDefault` property specified in helm chart of TMC central node .
+            - The **command times out** if TMC SubarrayNode **does not transition** to **IDLE** within the **timeout period** specified by `CommandTimeOutDefault` property specified in helm chart of TMC central node .

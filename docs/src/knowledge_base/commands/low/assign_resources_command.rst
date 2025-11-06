@@ -33,8 +33,8 @@ The AssignResources command allocates telescope resources to a specific subarray
         a. `'transaction ID'` is removed from the input JSON
         b. The command is then invoked on the relevant TMC Subarray Node.
 
-            - If TMC Subarry node **rejects** assign resources command , command failure is reported as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node.
-            - If TMC Subarry node **accepts** command , central node will wait for command completion.  
+            - If TMC Subarray node **rejects** assign resources command , command failure is reported as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node.
+            - If TMC Subarray node **accepts** command , central node will wait for command completion.  
 
     9. The Central Node monitors the progress of command via the subarray ObsState transitions and the long running command results :-
 
@@ -42,4 +42,4 @@ The AssignResources command allocates telescope resources to a specific subarray
         - Command failure is reported in any of the below cases as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node:
 
             a. The TMC subarray node reports **'RESULT_CODE - FAILED'** on its Long Running Command Result attribute
-            b. The command times out if TMC SubarryNode does not transition to **IDLE** within the timeout period specified by `CommandTimeOutDefault` property specified in helm chart of TMC central node .
+            b. The **command times out** if TMC SubarrayNode **does not transition** to **IDLE** within the **timeout period** specified by `CommandTimeOutDefault` property specified in helm chart of TMC central node .
