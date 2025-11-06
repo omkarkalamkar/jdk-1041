@@ -13,8 +13,8 @@ Link to the TMC User documentation is `here <https://confluence.skatelescope.org
    :caption: Table of Contents
 
    getting_started/getting_started
-   developer_guide/developer_guide
    knowledge_base/knowledge_base
+   developer_guide/developer_guide
    
 
 .. toctree::

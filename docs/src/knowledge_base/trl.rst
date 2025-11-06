@@ -6,8 +6,6 @@ TRL for TMC CentralNode
 TRL for Low devices
 ===================
 
-
-
 +-----------------------------------------+---------------------------------------+
 | Previous FQDN                           | Updated FQDN                          |
 +-----------------------------------------+---------------------------------------+
@@ -22,6 +20,10 @@ TRL for Low devices
 | `ska_low/tm_leaf_node/csp_subarray01`   | `low-tmc/subarray-leaf-node-csp/01`   |
 +-----------------------------------------+---------------------------------------+
 | `ska_low/tm_leaf_node/sdp_subarray01`   | `low-tmc/subarray-leaf-node-sdp/01`   |
++-----------------------------------------+---------------------------------------+
+| `ska_low/tm_leaf_node/mccs_master`      | `low-tmc/leaf-node-mccs/0`            |
++-----------------------------------------+---------------------------------------+
+| `ska_low/tm_leaf_node/mccs_subarray01`  | `low-tmc/subarray-leaf-node-mccs/01`  |
 +-----------------------------------------+---------------------------------------+
 
 TRL for Mid devices
@@ -41,10 +43,6 @@ TRL for Mid devices
 | `ska_mid/tm_leaf_node/csp_subarray01`   | `mid-tmc/subarray-leaf-node-csp/01`   |
 +-----------------------------------------+---------------------------------------+
 | `ska_mid/tm_leaf_node/sdp_subarray01`   | `mid-tmc/subarray-leaf-node-sdp/01`   |
-+-----------------------------------------+---------------------------------------+
-| `ska_mid/tm_leaf_node/mccs_master`      | `mid-tmc/leaf-node-mccs/0`            |
-+-----------------------------------------+---------------------------------------+
-| `ska_mid/tm_leaf_node/mccs_subarray01`  | `mid-tmc/subarray-leaf-node-mccs/01`  |
 +-----------------------------------------+---------------------------------------+
 | `ska_mid/tm_leaf_node/d0001`            | `mid-tmc/leaf-node-dish/ska001`       |
 +-----------------------------------------+---------------------------------------+
