@@ -13,3 +13,4 @@ This section specifies the TMC commands and changes done in interfaces for LOW a
    telescope_on_command
    telescope_standby_command
    low/commands
+   mid/commands
