@@ -8,4 +8,5 @@ Knowledge Base
    :maxdepth: 1
 
    commands/commands
+   trl
    glossary

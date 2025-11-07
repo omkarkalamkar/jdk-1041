@@ -22,14 +22,14 @@ ReleaseResourcesLow
     6. The following **state requirements** are applied for the **command execution** :-
 
         a. TMC Subarray is in `'observation state'` **IDLE** .
-        b. :term:`telescopeAvailability` is checked to ensure the subsystems (SubarryNode, CSP, SDP and MCCS) are :term:`available`
+        b. :term:`telescopeAvailability` is checked to ensure the subsystems (SubarrayNode, CSP, SDP and MCCS) are :term:`available`
 
     7. The command execution involves below key operations :-
         1. `'transaction ID'` is removed from the input JSON
         2. The command is then invoked on the relevant TMC Subarray Node.
 
-            a. If TMC Subarry node **rejects** assign resources command , command failure is reported as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node.
-            b. If TMC Subarry node **accepts** command , central node will wait for command completion.  
+            a. If TMC Subarray node **rejects** assign resources command , command failure is reported as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node.
+            b. If TMC Subarray node **accepts** command , central node will wait for command completion.  
 
     8. The Central Node monitors the progress of command via the subarray ObsState transitions and the long running command results :-
 
@@ -37,4 +37,4 @@ ReleaseResourcesLow
         b. Command failure is reported in any of the below cases as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node :-
 
             * The TMC subarray node reports **'RESULT_CODE - FAILED'** on its Long Running Command Result attribute
-            * The command times out if TMC SubarryNode does not transition to **EMPTY** within the timeout period specified by `CommandTimeOutDefault` property specified in helm chart of TMC central node .
+            * The **command times out** if TMC SubarrayNode **does not transition** to **EMPTY** within the **timeout period** specified by `CommandTimeOutDefault` property specified in helm chart of TMC central node .

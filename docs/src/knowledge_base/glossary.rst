@@ -14,4 +14,8 @@ Glossary
             #. sub-array Availability (as reported by the respective sub-array nodes)
             #. CSP Master availability (as reported by the CSP master leaf node)
             #. SDP Master availability (as reported by the SDP master leaf node)
-            #. MCCS Master availability ( as reported by the MCCS master leaf node)
+
+            In case of Low it also consists: MCCS Master availability ( as reported by the MCCS master leaf node)
+
+    TRL
+        It stands for Tango Resource Locator. Check `ADR-9 <https://confluence.skatelescope.org/display/SWSI/ADR-9+Update+naming+conventions+for+TANGO+Devices+and+Servers>`_ for more details.

@@ -9,12 +9,12 @@ This project is developing the Central Node (Mid and Low) component of the Teles
 Link to the TMC User documentation is `here <https://confluence.skatelescope.org/display/UD/TMC+User+Documentation>`_.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Table of Contents
 
    getting_started/getting_started
-   developer_guide/developer_guide
    knowledge_base/knowledge_base
+   developer_guide/developer_guide
    
 
 .. toctree::
