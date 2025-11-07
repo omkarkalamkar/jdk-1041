@@ -1,13 +1,14 @@
-#########################
-TRL for TMC CentralNode
-#########################
+###############################
+:term:`TRL` for TMC CentralNode
+###############################
 
+TRL stands for Tango Resource Locator. For more details check :term:`TRL`
 
-TRL for Low devices
-===================
+:term:`TRL` for Low devices
+===========================
 
 +-----------------------------------------+---------------------------------------+
-| Previous FQDN                           | Updated FQDN                          |
+| Previous :term:`TRL`                    |  Updated :term:`TRL`                  |
 +-----------------------------------------+---------------------------------------+
 | `ska_low/tm_central/central_node`       | `low-tmc/central-node/0`              |
 +-----------------------------------------+---------------------------------------+
@@ -26,11 +27,11 @@ TRL for Low devices
 | `ska_low/tm_leaf_node/mccs_subarray01`  | `low-tmc/subarray-leaf-node-mccs/01`  |
 +-----------------------------------------+---------------------------------------+
 
-TRL for Mid devices
-===================
+:term:`TRL` for Mid devices
+===========================
 
 +-----------------------------------------+---------------------------------------+
-| Previous FQDN                           | Updated FQDN                          |
+| Previous :term:`TRL`                    | Updated :term:`TRL`                   |
 +-----------------------------------------+---------------------------------------+
 | `ska_mid/tm_central/central_node`       | `mid-tmc/central-node/0`              |
 +-----------------------------------------+---------------------------------------+

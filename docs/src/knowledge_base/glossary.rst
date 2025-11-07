@@ -16,3 +16,6 @@ Glossary
             #. SDP Master availability (as reported by the SDP master leaf node)
 
             In case of Low it also consists: MCCS Master availability ( as reported by the MCCS master leaf node)
+
+    TRL
+        It stands for Tango Resource Locator. Check `ADR-9 <https://confluence.skatelescope.org/display/SWSI/ADR-9+Update+naming+conventions+for+TANGO+Devices+and+Servers>`_ for more details.
