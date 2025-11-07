@@ -5,6 +5,17 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[Unreleased]
+************
+
+Updated
+-------
+* Updated the TMC mid documentation to bring it on par with the Low updates made towards resolution of skb-808
+
+Added
+-----
+* Added Tango Resource Locator(TRL) page in knowledge base
+
 [0.25.0]
 ************
 
