@@ -88,7 +88,7 @@ class AbstractCentralNode(TMCBaseDevice):
     )
     def arrayLayoutURL(self) -> str:
         """Returns the array layout URL attribute value."""
-        return self.component_manager.array_layout_url
+        return json.dumps(self.component_manager.array_layout_url)
 
     @arrayLayoutURL.write
     def arrayLayoutURL(self, url: str) -> None:
