@@ -231,6 +231,13 @@ def create_cm(
             gpm_file_path_prefix=(
                 "instrument/ska_mid1/global_pointing_model_data"
             ),
+            default_array_layout_source_uris=[
+                "gitlab://gitlab.com/ska-telescope/"
+                + "ska-telmodel-data?main#tmdata"
+            ],
+            default_array_layout_path=(
+                "instrument/ska1_low/layout/low-layout.json"
+            ),
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
@@ -265,6 +272,10 @@ def create_cm(
             _telescope_availability_callback=(
                 mock_telescope_availability_callback
             ),
+            default_array_layout_source_uris=[
+                "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+            ],
+            default_array_layout_path="instrument/ska1_low/layout/low-layout.json",
             _event_manager=p_event_manager,
             _liveliness_probe=LivelinessProbeType.NONE,
         )

@@ -112,6 +112,8 @@ class CNComponentManagerLow(CNComponentManager):
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
             subarray_trl_prefix=subarray_trl_prefix,
+            default_array_layout_source_uris=default_array_layout_source_uris,
+            default_array_layout_path=default_array_layout_path,
             *args,
             **kwargs,
         )

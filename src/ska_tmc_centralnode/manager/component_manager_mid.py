@@ -170,6 +170,8 @@ class CNComponentManagerMid(CNComponentManager):
             liveliness_check_period,
             command_timeout,
             subarray_trl_prefix=subarray_trl_prefix,
+            default_array_layout_source_uris=default_array_layout_source_uris,
+            default_array_layout_path=default_array_layout_path,
             *args,
             **kwargs,
         )
