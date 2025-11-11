@@ -73,6 +73,13 @@ def test_low_some_working_other_faulty(tango_context):
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
+        default_array_layout_source_uris=[
+            "gitlab://gitlab.com/ska-telescope/"
+            + "ska-telmodel-data?main#tmdata"
+        ],
+        default_array_layout_path=(
+            "instrument/ska1_low/layout/low-layout.json"
+        ),
     )
 
     for dev in DEVICE_LIST_LOW:

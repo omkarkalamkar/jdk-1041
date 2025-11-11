@@ -30,6 +30,13 @@ def test_telescope_on():
         _telescope_availability_callback=mock_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
+        default_array_layout_source_uris=[
+            "gitlab://gitlab.com/ska-telescope/"
+            + "ska-telmodel-data?main#tmdata"
+        ],
+        default_array_layout_path=(
+            "instrument/ska1_mid/layout/mid-layout.json"
+        ),
     )
 
     res_code, message = cm.telescope_on()
@@ -56,6 +63,13 @@ def test_telescope_off():
         # component_state_callback=mock_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
+        default_array_layout_source_uris=[
+            "gitlab://gitlab.com/ska-telescope/"
+            + "ska-telmodel-data?main#tmdata"
+        ],
+        default_array_layout_path=(
+            "instrument/ska1_mid/layout/mid-layout.json"
+        ),
     )
 
     res_code, message = cm.telescope_off()

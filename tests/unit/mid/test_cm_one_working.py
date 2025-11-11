@@ -79,6 +79,13 @@ def test_one_working_other_faulty(tango_context):
         _telescope_availability_callback=mock_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
+        default_array_layout_source_uris=[
+            "gitlab://gitlab.com/ska-telescope/"
+            + "ska-telmodel-data?main#tmdata"
+        ],
+        default_array_layout_path=(
+            "instrument/ska1_mid/layout/mid-layout.json"
+        ),
     )
 
     dishes = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
