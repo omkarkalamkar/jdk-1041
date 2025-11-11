@@ -67,7 +67,7 @@ class CNComponentManagerLow(CNComponentManager):
         command_timeout=30,
         subarray_trl_prefix: str = "low-tmc/subarray/",
         is_auto_recovery_enabled: bool = True,
-        default_array_layout_source_uris: str | None = None,
+        default_array_layout_source_uris: list[str] | None = None,
         default_array_layout_path: str | None = None,
         *args,
         **kwargs,
@@ -175,7 +175,7 @@ class CNComponentManagerLow(CNComponentManager):
         )
         self._array_layout_url: str = ""
         self._default_array_layout_url: dict = {
-            "source_uris": default_array_layout_source_uris or "",
+            "source_uris": list(default_array_layout_source_uris or []),
             "array_layout_path": default_array_layout_path or "",
         }
 

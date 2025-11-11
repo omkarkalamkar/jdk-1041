@@ -61,7 +61,7 @@ class AbstractCentralNode(TMCBaseDevice):
     )
 
     DefaultArrayLayoutSourceURIs = device_property(
-        dtype="str",
+        dtype=("str",),
         doc=(
             "Default source URIs for the Array Layout. "
             "Defines the TelModel repository source(s). Example: "
