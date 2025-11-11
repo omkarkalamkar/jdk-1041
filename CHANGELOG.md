@@ -5,7 +5,7 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-[Unreleased]
+[0.25.1]
 ************
 
 Updated
@@ -15,9 +15,10 @@ Updated
 Added
 -----
 * Added Tango Resource Locator(TRL) page in knowledge base
+* Removed hardcoding of the array layout 
 
 [0.25.0]
-************
+********
 
 Fixed
 -----
