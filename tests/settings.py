@@ -273,9 +273,12 @@ def create_cm(
                 mock_telescope_availability_callback
             ),
             default_array_layout_source_uris=[
-                "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+                "gitlab://gitlab.com/ska-telescope/"
+                + "ska-telmodel-data?main#tmdata"
             ],
-            default_array_layout_path="instrument/ska1_low/layout/low-layout.json",
+            default_array_layout_path=(
+                "instrument/ska1_low/layout/low-layout.json"
+            ),
             _event_manager=p_event_manager,
             _liveliness_probe=LivelinessProbeType.NONE,
         )
