@@ -68,6 +68,7 @@ class AbstractCentralNode(TMCBaseDevice):
             '["gitlab://gitlab.com/ska-telescope/'
             'ska-telmodel-data?main#tmdata"]'
         ),
+        # default_value="",
         default_value=[
             "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
         ],
@@ -79,6 +80,7 @@ class AbstractCentralNode(TMCBaseDevice):
             "Default array layout path within the TelModel data. "
             "Example: 'instrument/ska1_mid/layout/mid-layout.json'"
         ),
+        # default_value="",
         default_value="instrument/ska1_mid/layout/mid-layout.json",
     )
     # ----------

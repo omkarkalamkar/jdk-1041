@@ -45,6 +45,18 @@ DISH_KVALUE_VALIDATION_RESULT_STATUS = {
     ResultCode.UNKNOWN: "k-value not set",
     ResultCode.STARTED: "Dish leaf node initializing",
 }
+ARRAY_LAYOUT_DEFAULT_MID = {
+    "source_uris": [
+        "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+    ],
+    "array_layout_path": "instrument/ska1_mid/layout/mid-layout.json",
+}
+ARRAY_LAYOUT_DEFAULT_LOW = {
+    "source_uris": [
+        "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+    ],
+    "array_layout_path": "instrument/ska1_low/layout/low-layout.json",
+}
 
 DISH_VCC_CONFIG_INTERFACE_VERSION = (
     "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0"

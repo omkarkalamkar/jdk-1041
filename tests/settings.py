@@ -239,6 +239,15 @@ def create_cm(
         DEVICE_LIST = DEVICE_LIST_MID
         cm.is_dish_vcc_config_set = True
         cm.dish_vcc_command_status = DishConfigStatus.COMPLETED
+        cm.default_array_layout_url = {
+            "source_uris": list(
+                [
+                    "gitlab://gitlab.com/ska-telescope/"
+                    "ska-telmodel-data?main#tmdata"
+                ],
+            ),
+            "array_layout_path": "instrument/ska1_mid/layout/mid-layout.json",
+        }
     else:
         cm = CNComponentManagerLow(
             op_state_model,
@@ -260,6 +269,15 @@ def create_cm(
             _liveliness_probe=LivelinessProbeType.NONE,
         )
         DEVICE_LIST = DEVICE_LIST_LOW
+        cm.default_array_layout_url = {
+            "source_uris": list(
+                [
+                    "gitlab://gitlab.com/ska-telescope/"
+                    "ska-telmodel-data?main#tmdata"
+                ],
+            ),
+            "array_layout_path": "instrument/ska1_low/layout/low-layout.json",
+        }
 
     for dev in DEVICE_LIST:
         cm.add_device(dev)

@@ -233,8 +233,8 @@ class CNComponentManagerMid(CNComponentManager):
         self.is_gpm_init = True
         self._array_layout_url: str = ""
         self._default_array_layout_url: dict = {
-            "source_uris": list(default_array_layout_source_uris or []),
-            "array_layout_path": default_array_layout_path or "",
+            "source_uris": list(default_array_layout_source_uris),
+            "array_layout_path": default_array_layout_path,
         }
         self.event_queue.update(
             {

@@ -218,8 +218,8 @@ class CNComponentManager(TmcComponentManager):
         )
         self._array_layout_url: str = ""
         self._default_array_layout_url: dict = {
-            "source_uris": list(default_array_layout_source_uris or []),
-            "array_layout_path": default_array_layout_path or "",
+            "source_uris": list(default_array_layout_source_uris),
+            "array_layout_path": default_array_layout_path,
         }
 
     def setup_event_subscription(self) -> None:
