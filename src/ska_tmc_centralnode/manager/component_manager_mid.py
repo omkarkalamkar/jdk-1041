@@ -97,6 +97,9 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_file_path_prefix=None,
         default_array_layout_source_uris: list[str] | None = None,
         default_array_layout_path: str | None = None,
+        array_layout_url_callback: Callable[[dict], None] | None = None,
+        default_array_layout_url_callback: Callable[[dict], None]
+        | None = None,
         *args,
         **kwargs,
     ) -> None:
@@ -172,6 +175,10 @@ class CNComponentManagerMid(CNComponentManager):
             subarray_trl_prefix=subarray_trl_prefix,
             default_array_layout_source_uris=default_array_layout_source_uris,
             default_array_layout_path=default_array_layout_path,
+            array_layout_url_callback=array_layout_url_callback,
+            default_array_layout_url_callback=(
+                default_array_layout_url_callback
+            ),
             *args,
             **kwargs,
         )

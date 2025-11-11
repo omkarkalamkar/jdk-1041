@@ -109,6 +109,9 @@ class CNComponentManager(TmcComponentManager):
         subarray_trl_prefix: str = "",
         default_array_layout_source_uris: list[str] | None = None,
         default_array_layout_path: str | None = None,
+        array_layout_url_callback: Callable[[dict], None] | None = None,
+        default_array_layout_url_callback: Callable[[dict], None]
+        | None = None,
         *args,
         **kwargs,
     ):
@@ -217,6 +220,10 @@ class CNComponentManager(TmcComponentManager):
             self, logger=logger
         )
         self._array_layout_url: str = ""
+        self._array_layout_url_callback = array_layout_url_callback
+        self._default_array_layout_url_callback = (
+            default_array_layout_url_callback
+        )
         self._default_array_layout_url: dict = {
             "source_uris": list(default_array_layout_source_uris),
             "array_layout_path": default_array_layout_path,
@@ -336,19 +343,24 @@ class CNComponentManager(TmcComponentManager):
     # Array layout URL (current)
     # ------------------------------------------------------------------
     @property
-    def array_layout_url(self) -> str:
-        """Get the current array layout URL."""
+    def array_layout_url(self) -> dict:
+        """Get the current array layout URL (as a dict)."""
         return self._array_layout_url
 
     @array_layout_url.setter
-    def array_layout_url(self, url: str) -> None:
-        """Set the current array layout URL.
-        url: str
-        """
+    def array_layout_url(self, url: dict) -> None:
+        """Set the current array layout URL."""
         if not isinstance(url, dict):
             raise ValueError("array_layout_url must be a dictionary.")
+        if url == self._array_layout_url:
+            # avoid redundant events/logs
+            return
         self._array_layout_url = url
-        self.logger.info(f"Array layout URL set to: {url}")
+        self.logger.info("Array layout URL set to: %s", url)
+
+        # >>> notify Tango device if callback is provided <<<
+        if self._array_layout_url_callback is not None:
+            self._array_layout_url_callback(url)
 
     # ------------------------------------------------------------------
     # Array layout URL (default)
@@ -359,14 +371,17 @@ class CNComponentManager(TmcComponentManager):
         return self._default_array_layout_url
 
     @default_array_layout_url.setter
-    def default_array_layout_url(self, url: str) -> None:
-        """Set the default array layout URL.
-        url: str
-        """
+    def default_array_layout_url(self, url: dict) -> None:
+        """Set the default array layout URL."""
         if not isinstance(url, dict):
             raise ValueError("default_array_layout_url must be a dictionary.")
+        if url == self._default_array_layout_url:
+            return
         self._default_array_layout_url = url
-        self.logger.info(f"Default array layout URL set to: {url}")
+        self.logger.info("Default array layout URL set to: %s", url)
+
+        if self._default_array_layout_url_callback is not None:
+            self._default_array_layout_url_callback(url)
 
     @property
     def event_queue(self):

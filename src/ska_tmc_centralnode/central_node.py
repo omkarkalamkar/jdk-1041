@@ -28,6 +28,22 @@ class AbstractCentralNode(TMCBaseDevice):
     # -----------------
     # Device Properties
     # -----------------
+    def update_array_layout_url_callback(self, url_dict: dict) -> None:
+        """
+        Called by the component manager whenever array_layout_url changes.
+        Pushes change/archive events for the arrayLayoutURL attribute.
+        """
+        json_value = json.dumps(url_dict)
+        self.push_change_archive_events("arrayLayoutURL", json_value)
+
+    def update_default_array_layout_url_callback(self, url_dict: dict) -> None:
+        """
+        Called by the component manager default_array_layout_url.
+        Pushes change/archive events for the DefaultArrayLayoutURL attribute.
+        """
+        json_value = json.dumps(url_dict)
+        self.push_change_archive_events("DefaultArrayLayoutURL", json_value)
+
     TMCSubarrayNodes = device_property(
         dtype=("str",),
         doc="List of TMC Mid Subarray Node devices",
