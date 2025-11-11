@@ -38,7 +38,6 @@ from ska_tmc_centralnode.manager.aggregators import (
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.utils.constants import (
-    ARRAY_LAYOUT_DEFAULT_LOW,
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
 )
@@ -68,6 +67,8 @@ class CNComponentManagerLow(CNComponentManager):
         command_timeout=30,
         subarray_trl_prefix: str = "low-tmc/subarray/",
         is_auto_recovery_enabled: bool = True,
+        default_array_layout_source_uris: str | None = None,
+        default_array_layout_path: str | None = None,
         *args,
         **kwargs,
     ):
@@ -173,7 +174,10 @@ class CNComponentManagerLow(CNComponentManager):
             list
         )
         self._array_layout_url: str = ""
-        self._default_array_layout_url: dict = ARRAY_LAYOUT_DEFAULT_LOW
+        self._default_array_layout_url: dict = {
+            "source_uris": default_array_layout_source_uris or "",
+            "array_layout_path": default_array_layout_path or "",
+        }
 
     @property
     def assign_resources_schema_version(self) -> str:

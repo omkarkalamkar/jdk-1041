@@ -64,7 +64,6 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 from ska_tmc_centralnode.utils.constants import (
-    ARRAY_LAYOUT_DEFAULT_MID,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     MCCS_MLN_DEVICE,
@@ -108,6 +107,8 @@ class CNComponentManager(TmcComponentManager):
         retry_attempts: int = 5,
         retry_delay: float = 3.0,
         subarray_trl_prefix: str = "",
+        default_array_layout_source_uris: str | None = None,
+        default_array_layout_path: str | None = None,
         *args,
         **kwargs,
     ):
@@ -216,7 +217,10 @@ class CNComponentManager(TmcComponentManager):
             self, logger=logger
         )
         self._array_layout_url: str = ""
-        self._default_array_layout_url: dict = ARRAY_LAYOUT_DEFAULT_MID
+        self._default_array_layout_url: dict = {
+            "source_uris": default_array_layout_source_uris or "",
+            "array_layout_path": default_array_layout_path or "",
+        }
 
     def setup_event_subscription(self) -> None:
         """

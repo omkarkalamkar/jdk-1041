@@ -95,6 +95,8 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_interface=None,
         gpm_data_sources_prefix=None,
         gpm_file_path_prefix=None,
+        default_array_layout_source_uris: str | None = None,
+        default_array_layout_path: str | None = None,
         *args,
         **kwargs,
     ) -> None:
@@ -229,6 +231,11 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_data_sources_prefix = gpm_data_sources_prefix
         self.gpm_file_path_prefix = gpm_file_path_prefix
         self.is_gpm_init = True
+        self._array_layout_url: str = ""
+        self._default_array_layout_url: dict = {
+            "source_uris": default_array_layout_source_uris or "",
+            "array_layout_path": default_array_layout_path or "",
+        }
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),

@@ -59,6 +59,28 @@ class AbstractCentralNode(TMCBaseDevice):
         dtype="DevString",
         default_value="",
     )
+
+    DefaultArrayLayoutSourceURIs = device_property(
+        dtype="str",
+        doc=(
+            "Default source URIs for the Array Layout. "
+            "Defines the TelModel repository source(s). Example: "
+            '["gitlab://gitlab.com/ska-telescope/'
+            'ska-telmodel-data?main#tmdata"]'
+        ),
+        default_value=[
+            "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+        ],
+    )
+
+    DefaultArrayLayoutPath = device_property(
+        dtype="str",
+        doc=(
+            "Default array layout path within the TelModel data. "
+            "Example: 'instrument/ska1_mid/layout/mid-layout.json'"
+        ),
+        default_value="instrument/ska1_mid/layout/mid-layout.json",
+    )
     # ----------
     # Attributes
     # ----------

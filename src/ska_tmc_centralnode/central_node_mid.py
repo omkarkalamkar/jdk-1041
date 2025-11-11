@@ -330,6 +330,8 @@ class MidTmcCentralNode(AbstractCentralNode):
             gpm_interface=self.GPMInterface,
             gpm_data_sources_prefix=self.GPMDataSourcesPrefix,
             gpm_file_path_prefix=self.GPMFilePathPrefix,
+            default_array_layout_source_uris=self.DefaultArrayLayoutSourceURIs,
+            default_array_layout_path=self.DefaultArrayLayoutPath,
         )
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []

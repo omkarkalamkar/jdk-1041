@@ -140,6 +140,8 @@ class LowTmcCentralNode(AbstractCentralNode):
             liveliness_check_period=self.LivelinessCheckPeriod,
             subarray_trl_prefix=self.SubarrayPrefix,
             is_auto_recovery_enabled=self.IsAutoRecoveryEnabled,
+            default_array_layout_source_uris=self.DefaultArrayLayoutSourceURIs,
+            default_array_layout_path=self.DefaultArrayLayoutPath,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.mccs_mln_dev_name = (
