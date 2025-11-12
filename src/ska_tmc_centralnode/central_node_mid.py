@@ -355,7 +355,12 @@ class MidTmcCentralNode(AbstractCentralNode):
             gpm_file_path_prefix=self.GPMFilePathPrefix,
             default_array_layout_source_uris=self.DefaultArrayLayoutSourceURIs,
             default_array_layout_path=self.DefaultArrayLayoutPath,
+            array_layout_url_callback=self.update_array_layout_url_callback,
+            default_array_layout_url_callback=(
+                self.update_default_array_layout_url_callback
+            ),
         )
+
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
         for dish in self.DishIDs:
