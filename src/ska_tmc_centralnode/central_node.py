@@ -28,29 +28,44 @@ class AbstractCentralNode(TMCBaseDevice):
     # -----------------
     # Device Properties
     # -----------------
+    def _memorize_attr(self, attr_name: str, json_string_value: str) -> None:
+        """
+        Persist an attribute value into Tango DB in the right format.
+        attr_name must match the Tango attribute name exactly.
+        json_string_value must be a JSON-encoded string (ex:json.dumps(dict)).
+        """
+        try:
+            db = Database()
+            props = {attr_name: {"__value": [json_string_value]}}
+            # Use the server's own FQDN
+            device_fqdn = self.get_name()
+            db.put_device_attribute_property(device_fqdn, props)
+        except Exception:
+            # Don't crash your server if DB is unavailable
+            self.logger.exception("Failed to memorize %s in DB", attr_name)
+
     def update_array_layout_url_callback(self, url_dict: dict) -> None:
         """
         Called by the component manager whenever array_layout_url changes.
-        Pushes change/archive events for the arrayLayoutURL attribute.
+        Also persists the value in the Tango DB and pushes events.
         """
         json_value = json.dumps(url_dict)
-        db = Database()
-        db.put_device_attribute_property(
-            self.self._device.get_name(), json_value
-        )
-        self.push_change_archive_events("arrayLayoutURL", json_value)
+        self._memorize_attr("arrayLayoutURL", json_value)
+        with tango.EnsureOmniThread():
+            self.push_change_archive_events("arrayLayoutURL", json_value)
 
     def update_default_array_layout_url_callback(self, url_dict: dict) -> None:
         """
-        Called by the component manager default_array_layout_url.
-        Pushes change/archive events for the DefaultArrayLayoutURL attribute.
+        Called by the component manager whenever default_array_layout_url
+        changes.
+        Also persists the value in the Tango DB and pushes events.
         """
         json_value = json.dumps(url_dict)
-        db = Database()
-        db.put_device_attribute_property(
-            self.self._device.get_name(), json_value
-        )
-        self.push_change_archive_events("DefaultArrayLayoutURL", json_value)
+        self._memorize_attr("DefaultArrayLayoutURL", json_value)
+        with tango.EnsureOmniThread():
+            self.push_change_archive_events(
+                "DefaultArrayLayoutURL", json_value
+            )
 
     TMCSubarrayNodes = device_property(
         dtype=("str",),
