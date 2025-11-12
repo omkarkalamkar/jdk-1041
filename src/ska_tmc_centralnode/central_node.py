@@ -108,7 +108,7 @@ class AbstractCentralNode(TMCBaseDevice):
             'ska-telmodel-data?main#tmdata"]'
         ),
         default_value=(
-            "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata",
+            "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
         ),
     )
 

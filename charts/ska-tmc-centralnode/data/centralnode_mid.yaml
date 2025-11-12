@@ -118,10 +118,10 @@ server:
           - "{{.Values.deviceServers.centralnode.mid.global_pointing_model.data_sources_prefix}}"
         - name: "DefaultArrayLayoutSourceURIs"
           values:
-            - "{{.Values.deviceServers.centralnode.DefaultArrayLayoutSourceURIs}}"
+            - "{{.Values.deviceServers.centralnode.mid.DefaultArrayLayoutSourceURIs}}"
         - name: "DefaultArrayLayoutPath"
           values:
-            - "{{.Values.deviceServers.centralnode.DefaultArrayLayoutPath}}"
+            - "{{.Values.deviceServers.centralnode.mid.DefaultArrayLayoutPath}}"
         
 
         

@@ -95,7 +95,7 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_interface=None,
         gpm_data_sources_prefix=None,
         gpm_file_path_prefix=None,
-        default_array_layout_source_uris: list[str] | None = None,
+        default_array_layout_source_uris: str | None = None,
         default_array_layout_path: str | None = None,
         array_layout_url_callback: Callable[[dict], None] | None = None,
         default_array_layout_url_callback: Callable[[dict], None]
