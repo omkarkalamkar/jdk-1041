@@ -547,14 +547,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "certifi"
-version = "2025.10.5"
+version = "2025.11.12"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.7"
 groups = ["main", "dev", "docs"]
 files = [
-    {file = "certifi-2025.10.5-py3-none-any.whl", hash = "sha256:0f212c2744a9bb6de0c56639a6f68afe01ecd92d91f14ae897c4fe7bbeeef0de"},
-    {file = "certifi-2025.10.5.tar.gz", hash = "sha256:47c09d31ccf2acf0be3f701ea53595ee7e0b8fa08801c6624be771df09ae7b43"},
+    {file = "certifi-2025.11.12-py3-none-any.whl", hash = "sha256:97de8790030bbd5c2d96b7ec782fc2f7820ef8dba6db909ccf95449f2d062d4b"},
+    {file = "certifi-2025.11.12.tar.gz", hash = "sha256:d8ab5478f2ecd78af242878415affce761ca6bc54a22a27e026d7c25357c3316"},
 ]
 
 [package.source]
@@ -4398,14 +4398,14 @@ reference = "ska-nexus"
 
 [[package]]
 name = "ska-tmc-common"
-version = "0.34.0"
+version = "1.0.0"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["main"]
 files = [
-    {file = "ska_tmc_common-0.34.0-py3-none-any.whl", hash = "sha256:5519513e3886d7b74f20720369c12f0c34eafab947868bd0a891e873986ddbfd"},
-    {file = "ska_tmc_common-0.34.0.tar.gz", hash = "sha256:f7ad53cd8a835ec42429c13db06156277f65a401c6c66476e8eac4bb34092be8"},
+    {file = "ska_tmc_common-1.0.0-py3-none-any.whl", hash = "sha256:01e725975de3cd4bc0678c9e54fb762c88634c8bbd2233d7b6c1b0c8122b8657"},
+    {file = "ska_tmc_common-1.0.0.tar.gz", hash = "sha256:f874b09bea1c542b91567369f272538f7b141f26066082cf7cccc23b9c588bf6"},
 ]
 
 [package.dependencies]
@@ -5239,4 +5239,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "f6ee14c0392312b1387bdb26ea9e4b0be8fb0683bd3b40add1f3e60a6ce0a06c"
+content-hash = "31b5ce8420f52b18bb94f44afe1c0f5de9976eefa28660e3550255a7c44933f1"

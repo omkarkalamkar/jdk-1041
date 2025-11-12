@@ -2,7 +2,7 @@
 
 import pytest
 import tango
-from ska_tmc_common import HelperBaseDevice
+from ska_tmc_simulators import HelperBaseDevice
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 

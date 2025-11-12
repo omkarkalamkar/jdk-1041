@@ -3,7 +3,7 @@
 import time
 
 import pytest
-from ska_tmc_common import HelperBaseDevice
+from ska_tmc_simulators import HelperBaseDevice
 from ska_tmc_common.device_info import SubArrayDeviceInfo
 from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 

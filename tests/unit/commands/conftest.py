@@ -1,5 +1,5 @@
 import pytest
-from ska_tmc_common import HelperMCCSController, HelperMCCSMasterLeafNode
+from ska_tmc_simulators import HelperMCCSController, HelperMCCSMasterLeafNode
 from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 from ska_tmc_simulators.helper_base_device import HelperBaseDevice
 from ska_tmc_simulators.helper_csp_master_leaf_node import (

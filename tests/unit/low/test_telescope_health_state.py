@@ -4,7 +4,7 @@ import time
 
 import pytest
 from ska_tango_base.control_model import AdminMode, HealthState
-from ska_tmc_common import (
+from ska_tmc_simulators import (
     HelperBaseDevice,
     HelperMCCSController,
     HelperMCCSMasterLeafNode,

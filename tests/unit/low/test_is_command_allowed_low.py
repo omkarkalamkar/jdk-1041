@@ -1,6 +1,6 @@
 import pytest
 from ska_control_model import AdminMode
-from ska_tmc_common import (
+from ska_tmc_simulators import (
     HelperCspMasterLeafDevice,
     HelperMCCSMasterLeafNode,
     HelperSDPMasterLeafNode,
