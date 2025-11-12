@@ -189,13 +189,11 @@ def invoke_set_gpm_command_callback():
 def array_layout_url_callback(url_dict):
     """Dummy method for array layout url callback"""
     logger.debug(url_dict)
-    pass
 
 
 def default_array_layout_url_callback(url_dict):
     """Dummy method for default array layout url callback"""
     logger.debug(url_dict)
-    pass
 
 
 def create_cm(
