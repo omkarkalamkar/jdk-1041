@@ -58,6 +58,8 @@ class CNComponentManagerLow(CNComponentManager):
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
+        array_layout_url_callback: Callable,
+        default_array_layout_url_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager=True,
@@ -69,9 +71,6 @@ class CNComponentManagerLow(CNComponentManager):
         is_auto_recovery_enabled: bool = True,
         default_array_layout_source_uris: str | None = None,
         default_array_layout_path: str | None = None,
-        array_layout_url_callback: Callable[[dict], None] | None = None,
-        default_array_layout_url_callback: Callable[[dict], None]
-        | None = None,
         *args,
         **kwargs,
     ):
@@ -107,6 +106,8 @@ class CNComponentManagerLow(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             _telescope_availability_callback,
+            array_layout_url_callback,
+            default_array_layout_url_callback,
             _component,
             _liveliness_probe,
             _event_manager,
@@ -117,10 +118,6 @@ class CNComponentManagerLow(CNComponentManager):
             subarray_trl_prefix=subarray_trl_prefix,
             default_array_layout_source_uris=default_array_layout_source_uris,
             default_array_layout_path=default_array_layout_path,
-            array_layout_url_callback=array_layout_url_callback,
-            default_array_layout_url_callback=(
-                default_array_layout_url_callback
-            ),
             *args,
             **kwargs,
         )

@@ -65,13 +65,15 @@ class CNComponentManagerMid(CNComponentManager):
         op_state_model,
         _input_parameter,
         logger: Logger,
-        _dish_vcc_command_status_callback: callable,
+        _dish_vcc_command_status_callback: Callable,
         _update_device_callback: Callable,
         _update_telescope_state_callback: Callable,
         _update_telescope_health_state_callback: Callable,
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
+        array_layout_url_callback: Callable,
+        default_array_layout_url_callback: Callable,
         _update_dishvccconfig_callback: Callable,
         _dishvccvalidation_callback: Callable,
         _component=None,
@@ -97,9 +99,6 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_file_path_prefix=None,
         default_array_layout_source_uris: str | None = None,
         default_array_layout_path: str | None = None,
-        array_layout_url_callback: Callable[[dict], None] | None = None,
-        default_array_layout_url_callback: Callable[[dict], None]
-        | None = None,
         *args,
         **kwargs,
     ) -> None:
@@ -165,6 +164,8 @@ class CNComponentManagerMid(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             _telescope_availability_callback,
+            array_layout_url_callback,
+            default_array_layout_url_callback,
             _component,
             _liveliness_probe,
             _event_manager,
@@ -175,10 +176,6 @@ class CNComponentManagerMid(CNComponentManager):
             subarray_trl_prefix=subarray_trl_prefix,
             default_array_layout_source_uris=default_array_layout_source_uris,
             default_array_layout_path=default_array_layout_path,
-            array_layout_url_callback=array_layout_url_callback,
-            default_array_layout_url_callback=(
-                default_array_layout_url_callback
-            ),
             *args,
             **kwargs,
         )

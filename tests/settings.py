@@ -186,6 +186,16 @@ def invoke_set_gpm_command_callback():
     logger.debug("Invoked SetGlobalPointingCommand")
 
 
+def array_layout_url_callback():
+    """Dummy method for array layout url callback"""
+    logger.debug("Array layout URL callback invoked")
+
+
+def default_array_layout_url_callback():
+    """Dummy method for default array layout url callback"""
+    logger.debug("Default array layout URL callback invoked")
+
+
 def create_cm(
     p_liveliness_probe=False,
     p_event_manager=True,
@@ -214,6 +224,10 @@ def create_cm(
             _update_imaging_callback=mock_update_imaging_callback,
             _telescope_availability_callback=(
                 mock_telescope_availability_callback
+            ),
+            array_layout_url_callback=array_layout_url_callback,
+            default_array_layout_url_callback=(
+                default_array_layout_url_callback
             ),
             _update_dishvccconfig_callback=task_callback,
             _dishvccvalidation_callback=task_callback,
@@ -271,6 +285,10 @@ def create_cm(
             _update_imaging_callback=mock_update_imaging_callback,
             _telescope_availability_callback=(
                 mock_telescope_availability_callback
+            ),
+            array_layout_url_callback=array_layout_url_callback,
+            default_array_layout_url_callback=(
+                default_array_layout_url_callback
             ),
             default_array_layout_source_uris=[
                 "gitlab://gitlab.com/ska-telescope/"

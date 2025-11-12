@@ -97,6 +97,8 @@ class CNComponentManager(TmcComponentManager):
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
+        array_layout_url_callback: Callable,
+        default_array_layout_url_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager: bool = True,
@@ -109,9 +111,6 @@ class CNComponentManager(TmcComponentManager):
         subarray_trl_prefix: str = "",
         default_array_layout_source_uris: str | None = None,
         default_array_layout_path: str | None = None,
-        array_layout_url_callback: Callable[[dict], None] | None = None,
-        default_array_layout_url_callback: Callable[[dict], None]
-        | None = None,
         *args,
         **kwargs,
     ):
