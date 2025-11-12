@@ -11,7 +11,7 @@ import tango
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
-from tango import ApiUtil, AttrWriteType, DebugIt
+from tango import ApiUtil, AttrWriteType, Database, DebugIt
 from tango.server import attribute, command, device_property
 
 from ska_tmc_centralnode import release
@@ -34,6 +34,10 @@ class AbstractCentralNode(TMCBaseDevice):
         Pushes change/archive events for the arrayLayoutURL attribute.
         """
         json_value = json.dumps(url_dict)
+        db = Database()
+        db.put_device_attribute_property(
+            self.self._device.get_name(), json_value
+        )
         self.push_change_archive_events("arrayLayoutURL", json_value)
 
     def update_default_array_layout_url_callback(self, url_dict: dict) -> None:
@@ -42,6 +46,10 @@ class AbstractCentralNode(TMCBaseDevice):
         Pushes change/archive events for the DefaultArrayLayoutURL attribute.
         """
         json_value = json.dumps(url_dict)
+        db = Database()
+        db.put_device_attribute_property(
+            self.self._device.get_name(), json_value
+        )
         self.push_change_archive_events("DefaultArrayLayoutURL", json_value)
 
     TMCSubarrayNodes = device_property(
@@ -84,7 +92,6 @@ class AbstractCentralNode(TMCBaseDevice):
             '["gitlab://gitlab.com/ska-telescope/'
             'ska-telmodel-data?main#tmdata"]'
         ),
-        # default_value="",
         default_value=[
             "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
         ],
@@ -96,7 +103,6 @@ class AbstractCentralNode(TMCBaseDevice):
             "Default array layout path within the TelModel data. "
             "Example: 'instrument/ska1_mid/layout/mid-layout.json'"
         ),
-        # default_value="",
         default_value="instrument/ska1_mid/layout/mid-layout.json",
     )
     # ----------
