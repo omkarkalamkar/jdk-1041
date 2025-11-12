@@ -186,14 +186,16 @@ def invoke_set_gpm_command_callback():
     logger.debug("Invoked SetGlobalPointingCommand")
 
 
-def array_layout_url_callback():
+def array_layout_url_callback(url_dict):
     """Dummy method for array layout url callback"""
-    logger.debug("Array layout URL callback invoked")
+    logger.debug(url_dict)
+    pass
 
 
-def default_array_layout_url_callback():
+def default_array_layout_url_callback(url_dict):
     """Dummy method for default array layout url callback"""
-    logger.debug("Default array layout URL callback invoked")
+    logger.debug(url_dict)
+    pass
 
 
 def create_cm(

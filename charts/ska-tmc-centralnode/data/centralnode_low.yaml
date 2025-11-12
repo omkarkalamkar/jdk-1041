@@ -71,10 +71,10 @@ server:
             - "{{.Values.deviceServers.centralnode.IsAutoRecoveryEnabled}}"
         - name: "DefaultArrayLayoutSourceURIs"
           values:
-            - "{{.Values.deviceServers.centralnode.DefaultArrayLayoutSourceURIs}}"
+            - "{{.Values.deviceServers.centralnode.low.DefaultArrayLayoutSourceURIs}}"
         - name: "DefaultArrayLayoutPath"
           values:
-            - "{{.Values.deviceServers.centralnode.DefaultArrayLayoutPath}}"
+            - "{{.Values.deviceServers.centralnode.low.DefaultArrayLayoutPath}}"
 depends_on:
   - device: sys/database/2
 image:
