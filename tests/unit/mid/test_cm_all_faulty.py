@@ -1,8 +1,8 @@
 """Test cases file for component manager faulty"""
 
 import pytest
-from ska_tmc_simulators import HelperBaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
+from ska_tmc_simulators import HelperBaseDevice
 
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
