@@ -6,7 +6,9 @@ This project is developing the Central Node (Mid and Low) component of the Teles
 
 .. _Square Kilometre Array: https://skatelescope.org/
 
-Link to the TMC User documentation is `here <https://confluence.skatelescope.org/display/UD/TMC+User+Documentation>`_.
+
+The TMC architecture and design is documented in detail in the Solution Intent space of
+SKA Confluence. Please refer to the `Solution Intent space <https://confluence.skatelescope.org/x/og2ACQ>`_.
 
 .. toctree::
    :maxdepth: 2
