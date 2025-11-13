@@ -48,7 +48,7 @@ def low_array_layout_json(low_array_layout):
     return json.dumps(low_array_layout)
 
 
-@pytest.mark.layout_low
+@pytest.mark.SKA_low
 def test_array_layout_default_read_low(central_node_device):
     """Test to check DefaultarrayLayoutURL attribute value"""
     assert central_node_device.DefaultarrayLayoutURL == json.dumps(

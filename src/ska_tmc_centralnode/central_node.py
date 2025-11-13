@@ -40,14 +40,23 @@ class AbstractCentralNode(TMCBaseDevice):
             # Use the server's own FQDN
             device_fqdn = self.get_name()
             db.put_device_attribute_property(device_fqdn, props)
+            self.logger.debug(
+                "Memorized %s in DB with value: %s",
+                attr_name,
+                json_string_value,
+            )
         except Exception:
             # Don't crash your server if DB is unavailable
             self.logger.exception("Failed to memorize %s in DB", attr_name)
 
     def update_array_layout_url_callback(self, url_dict: dict) -> None:
         """
-        Called by the component manager whenever array_layout_url changes.
-        Also persists the value in the Tango DB and pushes events.
+        Called by the component manager whenever the array_layout_url changes.
+        Persists the value in the Tango DB and pushes change/archive events.
+
+        Args:
+            url_dict (dict): Dictionary containing the array layout URL
+            information to be serialized and stored.
         """
         json_value = json.dumps(url_dict)
         self._memorize_attr("arrayLayoutURL", json_value)
@@ -56,9 +65,13 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_default_array_layout_url_callback(self, url_dict: dict) -> None:
         """
-        Called by the component manager whenever default_array_layout_url
-        changes.
-        Also persists the value in the Tango DB and pushes events.
+        Called by the component manager whenever the default_array_layout_url
+        changes. Persists the value in the Tango DB and pushes change/archive
+        events.
+
+        Args:
+            url_dict (dict): Dictionary containing the default array layout URL
+                information to be serialized and stored.
         """
         json_value = json.dumps(url_dict)
         self._memorize_attr("DefaultArrayLayoutURL", json_value)
@@ -107,9 +120,6 @@ class AbstractCentralNode(TMCBaseDevice):
             '["gitlab://gitlab.com/ska-telescope/'
             'ska-telmodel-data?main#tmdata"]'
         ),
-        default_value=(
-            "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
-        ),
     )
 
     DefaultArrayLayoutPath = device_property(
@@ -118,7 +128,6 @@ class AbstractCentralNode(TMCBaseDevice):
             "Default array layout path within the TelModel data. "
             "Example: 'instrument/ska1_mid/layout/mid-layout.json'"
         ),
-        default_value="instrument/ska1_mid/layout/mid-layout.json",
     )
     # ----------
     # Attributes
