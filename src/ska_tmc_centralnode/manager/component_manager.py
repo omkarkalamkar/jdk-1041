@@ -109,8 +109,7 @@ class CNComponentManager(TmcComponentManager):
         retry_attempts: int = 5,
         retry_delay: float = 3.0,
         subarray_trl_prefix: str = "",
-        default_array_layout_source_uris: str | None = None,
-        default_array_layout_path: str | None = None,
+        default_array_layout_url: dict | None = None,
         *args,
         **kwargs,
     ):
@@ -223,10 +222,7 @@ class CNComponentManager(TmcComponentManager):
         self._default_array_layout_url_callback = (
             default_array_layout_url_callback
         )
-        self._default_array_layout_url: dict = {
-            "source_uris": list(default_array_layout_source_uris),
-            "array_layout_path": default_array_layout_path,
-        }
+        self._default_array_layout_url: dict = default_array_layout_url
 
     def setup_event_subscription(self) -> None:
         """

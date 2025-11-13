@@ -56,6 +56,7 @@ from ska_tmc_centralnode.utils.constants import (
 
 
 # pylint:disable=too-many-instance-attributes
+# pylint:disable=too-many-instance-attributes
 class CNComponentManagerMid(CNComponentManager):
     """Component manager class for central node mid"""
 
@@ -97,8 +98,7 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_interface=None,
         gpm_data_sources_prefix=None,
         gpm_file_path_prefix=None,
-        default_array_layout_source_uris: str | None = None,
-        default_array_layout_path: str | None = None,
+        default_array_layout_url: dict | None = None,
         *args,
         **kwargs,
     ) -> None:
@@ -174,8 +174,7 @@ class CNComponentManagerMid(CNComponentManager):
             liveliness_check_period,
             command_timeout,
             subarray_trl_prefix=subarray_trl_prefix,
-            default_array_layout_source_uris=default_array_layout_source_uris,
-            default_array_layout_path=default_array_layout_path,
+            default_array_layout_url=default_array_layout_url,
             *args,
             **kwargs,
         )
@@ -237,11 +236,11 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_data_sources_prefix = gpm_data_sources_prefix
         self.gpm_file_path_prefix = gpm_file_path_prefix
         self.is_gpm_init = True
-        self._array_layout_url: str = ""
-        self._default_array_layout_url: dict = {
-            "source_uris": list(default_array_layout_source_uris),
-            "array_layout_path": default_array_layout_path,
-        }
+
+        # array layout:
+        # _default_array_layout_url is already set in CNComponentManager
+        # from default_array_layout_url; nothing extra needed here.
+
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),

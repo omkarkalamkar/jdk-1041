@@ -69,8 +69,7 @@ class CNComponentManagerLow(CNComponentManager):
         command_timeout=30,
         subarray_trl_prefix: str = "low-tmc/subarray/",
         is_auto_recovery_enabled: bool = True,
-        default_array_layout_source_uris: str | None = None,
-        default_array_layout_path: str | None = None,
+        default_array_layout_url: dict | None = None,
         *args,
         **kwargs,
     ):
@@ -116,8 +115,7 @@ class CNComponentManagerLow(CNComponentManager):
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
             subarray_trl_prefix=subarray_trl_prefix,
-            default_array_layout_source_uris=default_array_layout_source_uris,
-            default_array_layout_path=default_array_layout_path,
+            default_array_layout_url=default_array_layout_url,
             *args,
             **kwargs,
         )
@@ -179,11 +177,6 @@ class CNComponentManagerLow(CNComponentManager):
         self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
             list
         )
-        self._array_layout_url: str = ""
-        self._default_array_layout_url: dict = {
-            "source_uris": list(default_array_layout_source_uris),
-            "array_layout_path": default_array_layout_path,
-        }
 
     @property
     def assign_resources_schema_version(self) -> str:

@@ -282,9 +282,20 @@ class MidTmcCentralNode(AbstractCentralNode):
         return json.dumps(self.component_manager.global_pointing_model_status)
 
     def create_component_manager(self):
+        """
+        Creates and configures the Component Manager for this device.
+        :return: The configured Component Manager instance.
+        :rtype: CNComponentManagerMid
+        """
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )
+
+        default_array_layout_url = {
+            "source_uris": list(self.DefaultArrayLayoutSourceURIs),
+            "array_layout_path": self.DefaultArrayLayoutPath,
+        }
+
         cm = CNComponentManagerMid(
             self.op_state_model,
             _input_parameter=InputParameterMid(None),
@@ -334,8 +345,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             gpm_interface=self.GPMInterface,
             gpm_data_sources_prefix=self.GPMDataSourcesPrefix,
             gpm_file_path_prefix=self.GPMFilePathPrefix,
-            default_array_layout_source_uris=self.DefaultArrayLayoutSourceURIs,
-            default_array_layout_path=self.DefaultArrayLayoutPath,
+            default_array_layout_url=default_array_layout_url,
         )
 
         cm.input_parameter.dish_leaf_node_dev_names = []
