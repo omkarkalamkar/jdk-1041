@@ -1,5 +1,7 @@
 """Test cases file"""
 
+from unittest.mock import Mock
+
 from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
@@ -17,6 +19,17 @@ def mock_callback(*args, **kwargs):
 def test_telescope_on():
     """Test Telescope on"""
     op_state_model = TMCOpStateModel(logger)
+
+    default_array_layout_url = {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/"
+            "ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": "instrument/ska1_mid/layout/mid-layout.json",
+    }
+
+    mock_array_layout_callback = Mock()
+
     cm = CNComponentManagerMid(
         op_state_model,
         _input_parameter=InputParameterMid(None),
@@ -28,15 +41,11 @@ def test_telescope_on():
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
+        array_layout_url_callback=mock_array_layout_callback,
+        default_array_layout_url_callback=mock_array_layout_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
-        default_array_layout_source_uris=[
-            "gitlab://gitlab.com/ska-telescope/"
-            + "ska-telmodel-data?main#tmdata"
-        ],
-        default_array_layout_path=(
-            "instrument/ska1_mid/layout/mid-layout.json"
-        ),
+        default_array_layout_url=default_array_layout_url,
     )
 
     res_code, message = cm.telescope_on()
@@ -48,6 +57,16 @@ def test_telescope_off():
     """Test Telescope off"""
     op_state_model = TMCOpStateModel(logger)
 
+    default_array_layout_url = {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/"
+            "ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": "instrument/ska1_mid/layout/mid-layout.json",
+    }
+
+    mock_array_layout_callback = Mock()
+
     cm = CNComponentManagerMid(
         op_state_model,
         _input_parameter=InputParameterMid(None),
@@ -59,17 +78,11 @@ def test_telescope_off():
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
-        # communication_state_callback=mock_callback,
-        # component_state_callback=mock_callback,
+        array_layout_url_callback=mock_array_layout_callback,
+        default_array_layout_url_callback=mock_array_layout_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
-        default_array_layout_source_uris=[
-            "gitlab://gitlab.com/ska-telescope/"
-            + "ska-telmodel-data?main#tmdata"
-        ],
-        default_array_layout_path=(
-            "instrument/ska1_mid/layout/mid-layout.json"
-        ),
+        default_array_layout_url=default_array_layout_url,
     )
 
     res_code, message = cm.telescope_off()
