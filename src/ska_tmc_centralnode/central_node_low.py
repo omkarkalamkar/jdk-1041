@@ -140,6 +140,12 @@ class LowTmcCentralNode(AbstractCentralNode):
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )
+
+        default_array_layout_url = {
+            "source_uris": [self.DefaultArrayLayoutSourceURIs],
+            "array_layout_path": self.DefaultArrayLayoutPath,
+        }
+
         cm = CNComponentManagerLow(
             self.op_state_model,
             logger=self.logger,
@@ -166,8 +172,7 @@ class LowTmcCentralNode(AbstractCentralNode):
             liveliness_check_period=self.LivelinessCheckPeriod,
             subarray_trl_prefix=self.SubarrayPrefix,
             is_auto_recovery_enabled=self.IsAutoRecoveryEnabled,
-            default_array_layout_source_uris=self.DefaultArrayLayoutSourceURIs,
-            default_array_layout_path=self.DefaultArrayLayoutPath,
+            default_array_layout_url=default_array_layout_url,
         )
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.mccs_mln_dev_name = (

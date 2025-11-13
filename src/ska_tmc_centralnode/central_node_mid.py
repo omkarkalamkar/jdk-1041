@@ -292,7 +292,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         )
 
         default_array_layout_url = {
-            "source_uris": list(self.DefaultArrayLayoutSourceURIs),
+            "source_uris": [self.DefaultArrayLayoutSourceURIs],
             "array_layout_path": self.DefaultArrayLayoutPath,
         }
 
