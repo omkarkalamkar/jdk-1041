@@ -47,7 +47,7 @@ class AssignResourcesMid(AssignResources):
 
         if "telmodel" in json_argument:
             array_url = json_argument["telmodel"]
-            self.component_manager.array_layout_url = array_url
+            self.component_manager.array_layout_url = json.dumps(array_url)
             self.logger.debug(
                 "Command ID: %s | array_layout_url in argin: %s",
                 self.command_id,
@@ -72,7 +72,9 @@ class AssignResourcesMid(AssignResources):
                         "Invalid default 'telmodel': expected a dictionary.",
                     )
                 json_argument["telmodel"] = default_url
-                self.component_manager.array_layout_url = default_url
+                self.component_manager.array_layout_url = json.dumps(
+                    default_url
+                )
                 self.logger.debug(
                     "Command ID: %s | array_layout_url not provided, "
                     "using default: %s",

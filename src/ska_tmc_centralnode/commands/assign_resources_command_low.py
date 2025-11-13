@@ -89,7 +89,7 @@ class AssignResourcesLow(AssignResources):
 
         if "telmodel" in json_argument:
             array_url = json_argument["telmodel"]
-            self.component_manager.array_layout_url = array_url
+            self.component_manager.array_layout_url = json.dumps(array_url)
             self.logger.debug(
                 "Command ID: %s | Array layout url in input JSON: %s",
                 self.command_id,
@@ -110,7 +110,9 @@ class AssignResourcesLow(AssignResources):
                         "Invalid default ArrayLayout : expected a dictionary.",
                     )
                 json_argument["telmodel"] = default_url
-                self.component_manager.array_layout_url = default_url
+                self.component_manager.array_layout_url = json.dumps(
+                    default_url
+                )
                 self.logger.debug(
                     "Command ID:%s | Default array layout url will be used:%s",
                     self.command_id,

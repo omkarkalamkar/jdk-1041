@@ -291,7 +291,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             logger=self.logger, callback=super()._update_state
         )
 
-        default_array_layout_url = {
+        default_array_layout_url_dict = {
             "source_uris": [self.DefaultArrayLayoutSourceURIs],
             "array_layout_path": self.DefaultArrayLayoutPath,
         }
@@ -345,7 +345,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             gpm_interface=self.GPMInterface,
             gpm_data_sources_prefix=self.GPMDataSourcesPrefix,
             gpm_file_path_prefix=self.GPMFilePathPrefix,
-            default_array_layout_url=default_array_layout_url,
+            default_array_layout_url=default_array_layout_url_dict,
         )
 
         cm.input_parameter.dish_leaf_node_dev_names = []
