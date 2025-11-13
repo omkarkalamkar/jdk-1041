@@ -138,12 +138,11 @@ for the Array Layout. It specifies the TelModel repository source(s).
 
 **Example:**
 
+::
 
-["gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"]
-
+   ["gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"]
 
 ka-telescope/ska-telmodel-data?main#tmdata
-
 
 
 ## DefaultArrayLayoutPath
@@ -153,15 +152,12 @@ within the TelModel data.
 
 **Example:**
 
-instrument/ska1_mid/layout/mid-layout.json
+::
 
+   instrument/ska1_mid/layout/mid-layout.json
 
 **Default value:**
 
+::
 
-instrument/ska1_mid/layout/mid-layout.json
-
-
-
-
-
+   instrument/ska1_mid/layout/mid-layout.json
