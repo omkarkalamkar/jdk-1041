@@ -237,10 +237,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_file_path_prefix = gpm_file_path_prefix
         self.is_gpm_init = True
 
-        # array layout:
-        # _default_array_layout_url is already set in CNComponentManager
-        # from default_array_layout_url; nothing extra needed here.
-
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
