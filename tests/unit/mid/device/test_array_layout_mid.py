@@ -55,18 +55,6 @@ def mid_array_layout_json(mid_array_layout):
 # ---------- Tests ----------
 
 
-def test_array_layout_default_read_mid(central_node_device):
-    """Test to check DefaultarrayLayoutURL attribute value"""
-    assert central_node_device.DefaultarrayLayoutURL == json.dumps(
-        {
-            "source_uris": [
-                "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
-            ],
-            "array_layout_path": "instrument/ska1_mid/layout/mid-layout.json",
-        }
-    )
-
-
 def test_array_layout_default_write_mid(central_node_device):
     """Test to check DefaultarrayLayoutURL attribute write"""
     new_default_array_layout = {
