@@ -47,14 +47,14 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.25.0
+    tag: 0.25.1
     pullPolicy: IfNotPresent
 
 ska_tmc_simulators:
   image:
     registry: artefact.skao.int
     image: ska-tmc-simulators
-    tag: 1.1.4
+    tag: 1.2.1
     pullPolicy: IfNotPresent
 
 resources:
@@ -108,6 +108,9 @@ deviceServers:
         interface: "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
         data_sources_prefix: "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
         file_path_prefix: "instrument/ska_mid1/global_pointing_model_data"
+      DefaultArrayLayoutSourceURIs: "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+      DefaultArrayLayoutPath: "instrument/ska1_mid/layout/mid-layout.json"
+
     low:
       file: "data/centralnode_low.yaml"
       CspMasterLeafNodeFQDN: "low-tmc/leaf-node-csp/0"
@@ -119,6 +122,8 @@ deviceServers:
       SubarrayPrefix: "low-tmc/subarray/"
       CommandTimeOutDefault: 30
       IsAutoRecoveryEnabled: "false"
+      DefaultArrayLayoutSourceURIs: "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+      DefaultArrayLayoutPath: "instrument/ska1_low/layout/low-layout.json"
 nodeSelector: {}
 
 affinity: {}

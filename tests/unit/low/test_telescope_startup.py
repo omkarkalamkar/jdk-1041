@@ -3,7 +3,7 @@
 import pytest
 import tango
 from ska_control_model import HealthState
-from ska_tmc_common import (
+from ska_tmc_simulators import (
     HelperBaseDevice,
     HelperMCCSController,
     HelperMCCSMasterLeafNode,

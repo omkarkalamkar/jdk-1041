@@ -64,7 +64,6 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 from ska_tmc_centralnode.utils.constants import (
-    ARRAY_LAYOUT_DEFAULT_MID,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
     MCCS_MLN_DEVICE,
@@ -98,6 +97,8 @@ class CNComponentManager(TmcComponentManager):
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
+        array_layout_url_callback: Callable,
+        default_array_layout_url_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager: bool = True,
@@ -108,6 +109,7 @@ class CNComponentManager(TmcComponentManager):
         retry_attempts: int = 5,
         retry_delay: float = 3.0,
         subarray_trl_prefix: str = "",
+        default_array_layout_url: dict | None = None,
         *args,
         **kwargs,
     ):
@@ -216,7 +218,11 @@ class CNComponentManager(TmcComponentManager):
             self, logger=logger
         )
         self._array_layout_url: str = ""
-        self._default_array_layout_url: dict = ARRAY_LAYOUT_DEFAULT_MID
+        self._array_layout_url_callback = array_layout_url_callback
+        self._default_array_layout_url_callback = (
+            default_array_layout_url_callback
+        )
+        self._default_array_layout_url: dict = default_array_layout_url
 
     def setup_event_subscription(self) -> None:
         """
@@ -332,19 +338,24 @@ class CNComponentManager(TmcComponentManager):
     # Array layout URL (current)
     # ------------------------------------------------------------------
     @property
-    def array_layout_url(self) -> str:
-        """Get the current array layout URL."""
+    def array_layout_url(self) -> dict:
+        """Get the current array layout URL (as a dict)."""
         return self._array_layout_url
 
     @array_layout_url.setter
-    def array_layout_url(self, url: str) -> None:
-        """Set the current array layout URL.
-        url: str
-        """
+    def array_layout_url(self, url: dict) -> None:
+        """Set the current array layout URL."""
         if not isinstance(url, dict):
             raise ValueError("array_layout_url must be a dictionary.")
+        if url == self._array_layout_url:
+            # avoid redundant events/logs
+            return
         self._array_layout_url = url
-        self.logger.info(f"Array layout URL set to: {url}")
+        self.logger.info("Array layout URL set to: %s", url)
+
+        # >>> notify Tango device if callback is provided <<<
+        if self._array_layout_url_callback is not None:
+            self._array_layout_url_callback(url)
 
     # ------------------------------------------------------------------
     # Array layout URL (default)
@@ -355,14 +366,17 @@ class CNComponentManager(TmcComponentManager):
         return self._default_array_layout_url
 
     @default_array_layout_url.setter
-    def default_array_layout_url(self, url: str) -> None:
-        """Set the default array layout URL.
-        url: str
-        """
+    def default_array_layout_url(self, url: dict) -> None:
+        """Set the default array layout URL."""
         if not isinstance(url, dict):
             raise ValueError("default_array_layout_url must be a dictionary.")
+        if url == self._default_array_layout_url:
+            return
         self._default_array_layout_url = url
-        self.logger.info(f"Default array layout URL set to: {url}")
+        self.logger.info("Default array layout URL set to: %s", url)
+
+        if self._default_array_layout_url_callback is not None:
+            self._default_array_layout_url_callback(url)
 
     @property
     def event_queue(self):

@@ -6,7 +6,8 @@ import logging
 import time
 
 import pytest
-from ska_tmc_common import (
+from ska_tmc_common.dev_factory import DevFactory
+from ska_tmc_simulators import (
     HelperBaseDevice,
     HelperCspMasterLeafDevice,
     HelperDishDevice,
@@ -15,7 +16,6 @@ from ska_tmc_common import (
     HelperMCCSMasterLeafNode,
     HelperSDPMasterLeafNode,
 )
-from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 from tango.test_context import MultiDeviceTestContext
 

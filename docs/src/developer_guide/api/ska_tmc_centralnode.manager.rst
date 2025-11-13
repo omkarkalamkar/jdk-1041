@@ -119,6 +119,45 @@ the array layout at runtime without requiring a redeployment, providing flexibil
 for testing or operational adjustments.
 
 
+# Array Layout URL
+
+The `DefaultArrayLayoutURL` attribute is introduced to define the default array
+layout configuration used by the Central Node. This attribute specifies the default
+array layout source and path that the system will use at startup or when no specific
+layout is provided.
+
+The `ArrayLayoutURL` attribute is introduced to indicate the current array layout
+configuration actively in use by the Central Node. This allows dynamic updates to
+the array layout at runtime without requiring a redeployment, providing flexibility
+for testing or operational adjustments.
+
+## DefaultArrayLayoutSourceURIs
+
+The `DefaultArrayLayoutSourceURIs` device property defines the default source URIs
+for the Array Layout. It specifies the TelModel repository source(s).
+
+**Example:**
+
+::
+
+   ["gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"]
+
+ka-telescope/ska-telmodel-data?main#tmdata
 
 
+## DefaultArrayLayoutPath
 
+The ``DefaultArrayLayoutPath`` device property defines the default array layout path
+within the TelModel data.
+
+**Example:**
+
+::
+
+   instrument/ska1_mid/layout/mid-layout.json
+
+**Default value:**
+
+::
+
+   instrument/ska1_mid/layout/mid-layout.json

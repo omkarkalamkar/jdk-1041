@@ -11,7 +11,7 @@ import tango
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
 from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
-from tango import ApiUtil, AttrWriteType, DebugIt
+from tango import ApiUtil, AttrWriteType, Database, DebugIt
 from tango.server import attribute, command, device_property
 
 from ska_tmc_centralnode import release
@@ -28,6 +28,58 @@ class AbstractCentralNode(TMCBaseDevice):
     # -----------------
     # Device Properties
     # -----------------
+    def _memorize_attr(self, attr_name: str, json_string_value: str) -> None:
+        """
+        Persist an attribute value into Tango DB in the right format.
+        attr_name must match the Tango attribute name exactly.
+        json_string_value must be a JSON-encoded string (ex:json.dumps(dict)).
+        """
+        try:
+            db = Database()
+            props = {attr_name: {"__value": [json_string_value]}}
+            # Use the server's own FQDN
+            device_fqdn = self.get_name()
+            db.put_device_attribute_property(device_fqdn, props)
+            self.logger.debug(
+                "Memorized %s in DB with value: %s",
+                attr_name,
+                json_string_value,
+            )
+        except Exception:
+            # Don't crash your server if DB is unavailable
+            self.logger.exception("Failed to memorize %s in DB", attr_name)
+
+    def update_array_layout_url_callback(self, url_dict: dict) -> None:
+        """
+        Called by the component manager whenever the array_layout_url changes.
+        Persists the value in the Tango DB and pushes change/archive events.
+
+        Args:
+            url_dict (dict): Dictionary containing the array layout URL
+            information to be serialized and stored.
+        """
+        json_value = json.dumps(url_dict)
+        self._memorize_attr("arrayLayoutURL", json_value)
+        with tango.EnsureOmniThread():
+            self.push_change_archive_events("arrayLayoutURL", json_value)
+
+    def update_default_array_layout_url_callback(self, url_dict: dict) -> None:
+        """
+        Called by the component manager whenever the default_array_layout_url
+        changes. Persists the value in the Tango DB and pushes change/archive
+        events.
+
+        Args:
+            url_dict (dict): Dictionary containing the default array layout URL
+                information to be serialized and stored.
+        """
+        json_value = json.dumps(url_dict)
+        self._memorize_attr("DefaultArrayLayoutURL", json_value)
+        with tango.EnsureOmniThread():
+            self.push_change_archive_events(
+                "DefaultArrayLayoutURL", json_value
+            )
+
     TMCSubarrayNodes = device_property(
         dtype=("str",),
         doc="List of TMC Mid Subarray Node devices",
@@ -59,6 +111,24 @@ class AbstractCentralNode(TMCBaseDevice):
         dtype="DevString",
         default_value="",
     )
+
+    DefaultArrayLayoutSourceURIs = device_property(
+        dtype="DevString",
+        doc=(
+            "Default source URIs for the Array Layout. "
+            "Defines the TelModel repository source(s). Example: "
+            '["gitlab://gitlab.com/ska-telescope/'
+            'ska-telmodel-data?main#tmdata"]'
+        ),
+    )
+
+    DefaultArrayLayoutPath = device_property(
+        dtype="str",
+        doc=(
+            "Default array layout path within the TelModel data. "
+            "Example: 'instrument/ska1_mid/layout/mid-layout.json'"
+        ),
+    )
     # ----------
     # Attributes
     # ----------
@@ -88,7 +158,7 @@ class AbstractCentralNode(TMCBaseDevice):
     )
     def arrayLayoutURL(self) -> str:
         """Returns the array layout URL attribute value."""
-        return self.component_manager.array_layout_url
+        return json.dumps(self.component_manager.array_layout_url)
 
     @arrayLayoutURL.write
     def arrayLayoutURL(self, url: str) -> None:

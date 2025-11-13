@@ -48,18 +48,6 @@ def low_array_layout_json(low_array_layout):
     return json.dumps(low_array_layout)
 
 
-def test_array_layout_default_read_low(central_node_device):
-    """Test to check DefaultarrayLayoutURL attribute value"""
-    assert central_node_device.DefaultarrayLayoutURL == json.dumps(
-        {
-            "source_uris": [
-                "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
-            ],
-            "array_layout_path": "instrument/ska1_low/layout/low-layout.json",
-        }
-    )
-
-
 def test_array_layout_default_write_low(central_node_device):
     """Test to check DefaultarrayLayoutURL attribute write"""
     new_default_array_layout = {

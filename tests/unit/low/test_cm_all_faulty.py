@@ -1,8 +1,10 @@
 """Test case for cm all faulty"""
 
+from unittest.mock import Mock
+
 import pytest
-from ska_tmc_common import HelperBaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
+from ska_tmc_simulators import HelperBaseDevice
 
 from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
@@ -28,11 +30,21 @@ def mock_callback(*args, **kwargs):
     """Devices to mock_callback"""
 
 
-@pytest.mark.test_all_low_devices_faulty
 @pytest.mark.SKA_low
 def test_all_low_devices_faulty(tango_context):
     """Test all low devices faulty"""
     op_state_model = TMCOpStateModel(logger)
+
+    # Single dict for default array layout
+    default_array_layout_url = {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/"
+            "ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": "instrument/ska1_low/layout/low-layout.json",
+    }
+
+    mock_array_layout_callback = Mock()
 
     cm = CNComponentManagerLow(
         op_state_model,
@@ -44,6 +56,9 @@ def test_all_low_devices_faulty(tango_context):
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
+        array_layout_url_callback=mock_array_layout_callback,
+        default_array_layout_url_callback=mock_array_layout_callback,
+        default_array_layout_url=default_array_layout_url,
     )
 
     cm.add_multiple_devices(DEVICE_LIST_LOW)

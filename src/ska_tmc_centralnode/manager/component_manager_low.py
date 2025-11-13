@@ -38,7 +38,6 @@ from ska_tmc_centralnode.manager.aggregators import (
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.utils.constants import (
-    ARRAY_LAYOUT_DEFAULT_LOW,
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
 )
@@ -59,6 +58,8 @@ class CNComponentManagerLow(CNComponentManager):
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
+        array_layout_url_callback: Callable,
+        default_array_layout_url_callback: Callable,
         _component=None,
         _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
         _event_manager=True,
@@ -68,6 +69,7 @@ class CNComponentManagerLow(CNComponentManager):
         command_timeout=30,
         subarray_trl_prefix: str = "low-tmc/subarray/",
         is_auto_recovery_enabled: bool = True,
+        default_array_layout_url: dict | None = None,
         *args,
         **kwargs,
     ):
@@ -103,6 +105,8 @@ class CNComponentManagerLow(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             _telescope_availability_callback,
+            array_layout_url_callback,
+            default_array_layout_url_callback,
             _component,
             _liveliness_probe,
             _event_manager,
@@ -111,6 +115,7 @@ class CNComponentManagerLow(CNComponentManager):
             event_subscription_check_period=event_subscription_check_period,
             liveliness_check_period=liveliness_check_period,
             subarray_trl_prefix=subarray_trl_prefix,
+            default_array_layout_url=default_array_layout_url,
             *args,
             **kwargs,
         )
@@ -172,8 +177,6 @@ class CNComponentManagerLow(CNComponentManager):
         self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
             list
         )
-        self._array_layout_url: str = ""
-        self._default_array_layout_url: dict = ARRAY_LAYOUT_DEFAULT_LOW
 
     @property
     def assign_resources_schema_version(self) -> str:

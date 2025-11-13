@@ -96,7 +96,12 @@ class AssignResourcesLow(AssignResources):
                 array_url,
             )
         else:
-            default_url = self.component_manager.default_array_layout_url
+            default_url = getattr(
+                self.component_manager,
+                "default_array_layout_url",
+                "",
+            )
+
             if default_url:
                 if not isinstance(default_url, dict):
                     self.logger.error(

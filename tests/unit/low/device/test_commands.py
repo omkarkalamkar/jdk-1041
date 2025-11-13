@@ -2,7 +2,7 @@
 
 import pytest
 import tango
-from ska_tmc_common import (
+from ska_tmc_simulators import (
     HelperCspMasterLeafDevice,
     HelperMCCSMasterLeafNode,
     HelperSDPMasterLeafNode,

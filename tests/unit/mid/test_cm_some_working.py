@@ -1,5 +1,7 @@
 """Test cases file"""
 
+from unittest.mock import Mock
+
 import pytest
 from ska_tango_base.base.base_device import SKABaseDevice
 from ska_tmc_common.op_state_model import TMCOpStateModel
@@ -71,6 +73,16 @@ def test_some_working_other_faulty(tango_context):
 
     op_state_model = TMCOpStateModel(logger)
 
+    default_array_layout_url = {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/"
+            "ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": "instrument/ska1_mid/layout/mid-layout.json",
+    }
+
+    mock_array_layout_callback = Mock()
+
     cm = CNComponentManagerMid(
         op_state_model,
         _dish_vcc_command_status_callback=dish_vcc_process_callback,
@@ -82,13 +94,17 @@ def test_some_working_other_faulty(tango_context):
         _update_tmc_op_state_callback=mock_callback,
         _update_imaging_callback=mock_callback,
         _telescope_availability_callback=mock_callback,
+        array_layout_url_callback=mock_array_layout_callback,
+        default_array_layout_url_callback=mock_array_layout_callback,
         _update_dishvccconfig_callback=mock_callback,
         _dishvccvalidation_callback=mock_callback,
+        default_array_layout_url=default_array_layout_url,
     )
 
     dishes = cm.add_dishes(DISH_LEAF_NODE_PREFIX, NUM_DISHES)
     for dev in DEVICE_LIST_MID:
         cm.add_device(dev)
+
     set_devices_unresponsive(cm, FAULTY_LIST)
     set_devices_unresponsive(cm, dishes)
 

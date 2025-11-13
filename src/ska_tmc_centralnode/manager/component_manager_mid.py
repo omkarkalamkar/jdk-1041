@@ -56,6 +56,7 @@ from ska_tmc_centralnode.utils.constants import (
 
 
 # pylint:disable=too-many-instance-attributes
+# pylint:disable=too-many-instance-attributes
 class CNComponentManagerMid(CNComponentManager):
     """Component manager class for central node mid"""
 
@@ -65,13 +66,15 @@ class CNComponentManagerMid(CNComponentManager):
         op_state_model,
         _input_parameter,
         logger: Logger,
-        _dish_vcc_command_status_callback: callable,
+        _dish_vcc_command_status_callback: Callable,
         _update_device_callback: Callable,
         _update_telescope_state_callback: Callable,
         _update_telescope_health_state_callback: Callable,
         _update_tmc_op_state_callback: Callable,
         _update_imaging_callback: Callable,
         _telescope_availability_callback: Callable,
+        array_layout_url_callback: Callable,
+        default_array_layout_url_callback: Callable,
         _update_dishvccconfig_callback: Callable,
         _dishvccvalidation_callback: Callable,
         _component=None,
@@ -95,6 +98,7 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_interface=None,
         gpm_data_sources_prefix=None,
         gpm_file_path_prefix=None,
+        default_array_layout_url: dict | None = None,
         *args,
         **kwargs,
     ) -> None:
@@ -160,6 +164,8 @@ class CNComponentManagerMid(CNComponentManager):
             _update_tmc_op_state_callback,
             _update_imaging_callback,
             _telescope_availability_callback,
+            array_layout_url_callback,
+            default_array_layout_url_callback,
             _component,
             _liveliness_probe,
             _event_manager,
@@ -168,6 +174,7 @@ class CNComponentManagerMid(CNComponentManager):
             liveliness_check_period,
             command_timeout,
             subarray_trl_prefix=subarray_trl_prefix,
+            default_array_layout_url=default_array_layout_url,
             *args,
             **kwargs,
         )
@@ -229,6 +236,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_data_sources_prefix = gpm_data_sources_prefix
         self.gpm_file_path_prefix = gpm_file_path_prefix
         self.is_gpm_init = True
+
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),

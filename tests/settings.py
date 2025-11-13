@@ -186,6 +186,16 @@ def invoke_set_gpm_command_callback():
     logger.debug("Invoked SetGlobalPointingCommand")
 
 
+def array_layout_url_callback(url_dict):
+    """Dummy method for array layout url callback"""
+    logger.debug(url_dict)
+
+
+def default_array_layout_url_callback(url_dict):
+    """Dummy method for default array layout url callback"""
+    logger.debug(url_dict)
+
+
 def create_cm(
     p_liveliness_probe=False,
     p_event_manager=True,
@@ -198,6 +208,17 @@ def create_cm(
     if isinstance(_input_parameter, InputParameterMid):
         unique_id = f"{time.time()}"
         task_callback = MockCallable(unique_id)
+
+        default_array_layout_url_mid = {
+            "source_uris": [
+                "gitlab://gitlab.com/ska-telescope/"
+                "ska-telmodel-data?main#tmdata"
+            ],
+            "array_layout_path": (
+                "instrument/ska1_low/layout/low-layout.json"
+            ),
+        }
+
         cm = CNComponentManagerMid(
             op_state_model,
             _input_parameter=InputParameterMid(None),
@@ -215,6 +236,10 @@ def create_cm(
             _telescope_availability_callback=(
                 mock_telescope_availability_callback
             ),
+            array_layout_url_callback=array_layout_url_callback,
+            default_array_layout_url_callback=(
+                default_array_layout_url_callback
+            ),
             _update_dishvccconfig_callback=task_callback,
             _dishvccvalidation_callback=task_callback,
             _event_manager=p_event_manager,
@@ -231,6 +256,7 @@ def create_cm(
             gpm_file_path_prefix=(
                 "instrument/ska_mid1/global_pointing_model_data"
             ),
+            default_array_layout_url=default_array_layout_url_mid,
         )
         # In this unit test dish_vcc initialisation should not be run during
         # device
@@ -239,7 +265,26 @@ def create_cm(
         DEVICE_LIST = DEVICE_LIST_MID
         cm.is_dish_vcc_config_set = True
         cm.dish_vcc_command_status = DishConfigStatus.COMPLETED
+        cm.default_array_layout_url = {
+            "source_uris": list(
+                [
+                    "gitlab://gitlab.com/ska-telescope/"
+                    "ska-telmodel-data?main#tmdata"
+                ],
+            ),
+            "array_layout_path": "instrument/ska1_mid/layout/mid-layout.json",
+        }
     else:
+        default_array_layout_url_low = {
+            "source_uris": [
+                "gitlab://gitlab.com/ska-telescope/"
+                "ska-telmodel-data?main#tmdata"
+            ],
+            "array_layout_path": (
+                "instrument/ska1_low/layout/low-layout.json"
+            ),
+        }
+
         cm = CNComponentManagerLow(
             op_state_model,
             _input_parameter=InputParameterLow(None),
@@ -256,10 +301,24 @@ def create_cm(
             _telescope_availability_callback=(
                 mock_telescope_availability_callback
             ),
+            array_layout_url_callback=array_layout_url_callback,
+            default_array_layout_url_callback=(
+                default_array_layout_url_callback
+            ),
+            default_array_layout_url=default_array_layout_url_low,
             _event_manager=p_event_manager,
             _liveliness_probe=LivelinessProbeType.NONE,
         )
         DEVICE_LIST = DEVICE_LIST_LOW
+        cm.default_array_layout_url = {
+            "source_uris": list(
+                [
+                    "gitlab://gitlab.com/ska-telescope/"
+                    "ska-telmodel-data?main#tmdata"
+                ],
+            ),
+            "array_layout_path": "instrument/ska1_low/layout/low-layout.json",
+        }
 
     for dev in DEVICE_LIST:
         cm.add_device(dev)
