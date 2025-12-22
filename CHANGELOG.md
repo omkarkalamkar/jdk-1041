@@ -11,7 +11,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 Updated
 -------
 * Updates to allow assigning the PST resources (AssignResources schema v2.4)
-* Updates to use telecope model v1.28.0  
+* Updates to use telescope model v1.28.0
 
 [0.25.1]
 ************
