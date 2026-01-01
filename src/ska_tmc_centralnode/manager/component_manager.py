@@ -282,7 +282,7 @@ class CNComponentManager(TmcComponentManager):
                 device_attribute_map[dev_name].extend(
                     [
                         "dishMode",
-                        "kValueValidationResult",
+                        "healthState",
                         "longrunningcommandresult",
                         "gpmVersion",
                     ]
