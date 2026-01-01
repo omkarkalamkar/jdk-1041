@@ -1,9 +1,16 @@
 {
-  "interface": "https://schema.skao.int/ska-tmc-assignresources/2.2",
+  "interface": "https://schema.skao.int/ska-tmc-assignresources/2.4",
   "transaction_id": "txn-....-00001",
   "subarray_id": 1,
   "dish": {
       "receptor_ids": ["SKA001"]
+  },
+"csp": {
+    "pst": {
+      "pst_beam_ids": [
+        1
+      ]
+    }
   },
   "sdp": {
       "interface": "https://schema.skao.int/ska-sdp-assignres/1.0",
