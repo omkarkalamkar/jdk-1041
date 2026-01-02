@@ -120,3 +120,50 @@ def test_telescope_command_timeout(change_event_callbacks):
     central_node.commandTimeOut = 200
     logger.info("Command Timeout after %s", central_node.commandTimeOut)
     assert central_node.commandTimeOut == 200
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_telescope_health_state_from_dish_leaf_node(change_event_callbacks):
+    """Test CN aggregates healthState reported by Dish Leaf Node"""
+
+    dev_factory = DevFactory()
+
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
+    dish_ln = dev_factory.get_device("DISH_LEAF_NODE_1")
+
+    ensure_checked_devices(central_node)
+
+    central_node.subscribe_event(
+        "telescopeHealthState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeHealthState"],
+    )
+
+    dish_ln.subscribe_event(
+        "healthState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["healthState"],
+    )
+
+    # Dish reports DEGRADED
+    dish_ln.SetDirectHealthState(HealthState.DEGRADED)
+
+    change_event_callbacks["healthState"].assert_change_event(
+        HealthState.DEGRADED, lookahead=4
+    )
+
+    change_event_callbacks["telescopeHealthState"].assert_change_event(
+        HealthState.DEGRADED, lookahead=4
+    )
+
+    assert central_node.telescopeHealthState == HealthState.DEGRADED
+
+    # Tear down: Dish reports OK
+    dish_ln.SetDirectHealthState(HealthState.OK)
+
+    change_event_callbacks["telescopeHealthState"].assert_change_event(
+        HealthState.OK, lookahead=4
+    )
+
+    assert central_node.telescopeHealthState == HealthState.OK
