@@ -125,6 +125,7 @@ def test_telescope_command_timeout(change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.mid_dln
 def test_telescope_health_state_from_dln_mid(change_event_callbacks):
     """Test CN aggregates healthState reported by Dish Leaf Node"""
 
@@ -171,4 +172,7 @@ def test_telescope_health_state_from_dln_mid(change_event_callbacks):
         HealthState.OK, lookahead=4
     )
 
+    logger.info("telescopeHealthState D %s", central_node.telescopeHealthState)
+    time.sleep(0.3)
+    logger.info("telescopeHealthState D %s", central_node.telescopeHealthState)
     assert central_node.telescopeHealthState == HealthState.OK
