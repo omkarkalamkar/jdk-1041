@@ -10,6 +10,7 @@ from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
     CENTRALNODE_MID,
+    DISH_LEAF_NODE_1,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MASTER_DEVICE,
     LOW_SDP_MLN_DEVICE,
@@ -130,7 +131,7 @@ def test_telescope_health_state_from_dish_leaf_node(change_event_callbacks):
     dev_factory = DevFactory()
 
     central_node = dev_factory.get_device(CENTRALNODE_MID)
-    dish_ln = dev_factory.get_device("DISH_LEAF_NODE_1")
+    dish_ln = dev_factory.get_device(DISH_LEAF_NODE_1)
 
     ensure_checked_devices(central_node)
 
