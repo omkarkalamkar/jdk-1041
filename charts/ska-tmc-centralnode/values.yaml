@@ -47,7 +47,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 0.25.1
+    tag: 0.26.0
     pullPolicy: IfNotPresent
 
 ska_tmc_simulators:
