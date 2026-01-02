@@ -190,6 +190,7 @@ def test_telescope_health_state_from_dln_low(change_event_callbacks):
     mccs_mln.SetMccsControllerAdminMode(AdminMode.ONLINE)
     sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
     csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
+
     ensure_checked_devices(central_node)
 
     central_node.subscribe_event(
