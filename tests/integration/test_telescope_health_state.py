@@ -172,7 +172,6 @@ def test_telescope_health_state_from_dln_mid(change_event_callbacks):
         HealthState.OK, lookahead=4
     )
 
-    logger.info("telescopeHealthState D %s", central_node.telescopeHealthState)
-    time.sleep(0.3)
-    logger.info("telescopeHealthState D %s", central_node.telescopeHealthState)
+    logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
+    time.sleep(0.1)
     assert central_node.telescopeHealthState == HealthState.OK
