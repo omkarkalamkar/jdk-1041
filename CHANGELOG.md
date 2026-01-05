@@ -5,6 +5,14 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[0.25.2]
+************
+
+Updated
+-------
+* Central Node now subscribes to the Dish Leaf Node healthState attribute and derives the telescope aggregate health state from it.
+
+
 [0.25.1]
 ************
 
