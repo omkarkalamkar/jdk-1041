@@ -171,7 +171,7 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     )
     assert (
         "JSON validation error: Validation"
-        " 'Mid TMC assign resources 2.2'" in message
+        " 'Mid TMC assign resources 2.4'" in message
     )
     assert res_code == TaskStatus.REJECTED
 
