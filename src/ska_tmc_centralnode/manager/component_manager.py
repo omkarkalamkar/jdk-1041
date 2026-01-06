@@ -283,6 +283,7 @@ class CNComponentManager(TmcComponentManager):
                     [
                         "dishMode",
                         "kValueValidationResult",
+                        "healthState",
                         "longrunningcommandresult",
                         "gpmVersion",
                     ]
