@@ -280,7 +280,8 @@ class AssignResourcesLow(AssignResources):
                     conflicting_beams,
                 )
                 raise Exception(
-                    f"PSS beams: {conflicting_beams} already assigned to another subarray"
+                    f"PSS beams: {conflicting_beams} already assigned"
+                    f"to another subarray"
                 )
 
             self.component_manager.pss_beams_assigned_per_subarray[

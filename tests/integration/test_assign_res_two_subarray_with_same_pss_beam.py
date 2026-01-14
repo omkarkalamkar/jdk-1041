@@ -89,7 +89,8 @@ def assign_resources_low(
             json.dumps(
                 (
                     int(ResultCode.FAILED),
-                    "PSS beams: [1, 2, 3] already assigned to another subarray",
+                    "PSS beams: [1, 2, 3] already"
+                    " assigned to another subarray",
                 )
             ),
         ),
