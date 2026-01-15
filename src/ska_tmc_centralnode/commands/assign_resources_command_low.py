@@ -173,7 +173,7 @@ class AssignResourcesLow(AssignResources):
             except Exception as exception:
                 return (
                     ResultCode.FAILED,
-                    exception,
+                    str(exception),
                 )
 
         if (
