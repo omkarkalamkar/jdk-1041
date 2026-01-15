@@ -115,12 +115,21 @@ def assign_resources_low(
         )
 
     release_input_string1 = release_input_string
+    release_input = json.loads(release_input_string)
+    release_input["subarray_id"] = 2
+    release_input_string2 = json.dumps(release_input)
 
     result1, unique_id1 = central_node.ReleaseResources(release_input_string1)
+    result2, unique_id2 = central_node.ReleaseResources(release_input_string2)
 
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id1[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id2[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
     tmc_subarray = dev_factory.get_device(subarray_device)
