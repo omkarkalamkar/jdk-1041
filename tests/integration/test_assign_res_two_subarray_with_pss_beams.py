@@ -64,6 +64,7 @@ def assign_resources_low(
     assign_input = json.loads(assign_input_str)
     assign_input["subarray_id"] = 2
     assign_input["sdp"]["execution_block"]["eb_id"] = "eb-test-20220917-00000"
+    assigned_pss_beams = assign_input["csp"]["pss"]["pss_beam_ids"]
     assign_input["csp"]["pss"]["pss_beam_ids"] = pss_beams
     assign_input_str2 = json.dumps(assign_input)
 
@@ -86,6 +87,9 @@ def assign_resources_low(
         lookahead=4,
     )
     if second_assign_failed:
+        conflicting_pss_beams = list(
+            set(pss_beams).intersection(assigned_pss_beams)
+        )
         change_event_callbacks.assert_change_event(
             "longRunningCommandResult",
             (
@@ -93,8 +97,8 @@ def assign_resources_low(
                 json.dumps(
                     (
                         int(ResultCode.FAILED),
-                        f"PSS beams: {pss_beams} already"
-                        " assigned to another subarray",
+                        f"PSS beams: {conflicting_pss_beams}"
+                        " already assigned to another subarray",
                     )
                 ),
             ),
