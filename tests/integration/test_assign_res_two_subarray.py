@@ -67,8 +67,9 @@ def assign_resources(
     assign_input = json.loads(assign_input_str)
     assign_input["subarray_id"] = 2
     assign_input["sdp"]["execution_block"]["eb_id"] = "eb-test-20220917-00000"
-    # pss_beam_ids can not be shared between subarrays
-    assign_input["csp"]["pss"]["pss_beam_ids"] = [4, 5, 6]
+    if "low" in central_node_name:
+        # pss_beam_ids can not be shared between subarrays for TMC low
+        assign_input["csp"]["pss"]["pss_beam_ids"] = [4, 5, 6]
     assign_input_str2 = json.dumps(assign_input)
 
     subarray_proxy.SetisSubarrayAvailable(True)
