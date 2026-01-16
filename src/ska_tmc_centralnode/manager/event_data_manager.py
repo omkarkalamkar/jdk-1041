@@ -13,6 +13,8 @@ from typing import Callable, Dict, Union
 from ska_ser_logging import configure_logging
 from ska_tango_base.control_model import AdminMode, HealthState
 
+from ska_tmc_centralnode.model.input import InputParameterMid
+
 configure_logging("DEBUG")
 LOGGER = logging.getLogger(__name__)
 
@@ -25,6 +27,7 @@ class HealthStateData:
 
     health_state: HealthState
     event_timestamp: datetime
+    is_dish_leaf_node: bool = False
 
 
 @dataclass
@@ -234,9 +237,21 @@ class EventDataManager:
             target_dict = getattr(self.event_info, dict_name)
 
             if data_type == "HealthState":
+                is_dish_leaf_node = False
                 data = self.get_enum_name_from_value(HealthState, int(data))
+                # pylint: disable=line-too-long
+                if isinstance(
+                    self.component_manager.input_parameter,
+                    InputParameterMid,
+                ):
+                    is_dish_leaf_node = (
+                        self.component_manager.input_parameter.dish_ln_prefix
+                        in device_name
+                    )
                 target_dict[device_name] = HealthStateData(
-                    health_state=data, event_timestamp=received_timestamp
+                    health_state=data,
+                    is_dish_leaf_node=is_dish_leaf_node,
+                    event_timestamp=received_timestamp,
                 )
                 LOGGER.info("HealthState - %s", target_dict[device_name])
 

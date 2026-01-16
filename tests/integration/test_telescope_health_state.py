@@ -125,6 +125,7 @@ def test_telescope_command_timeout(change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.test_health
 def test_telescope_health_state_from_dln_mid(change_event_callbacks):
     """Test CN aggregates healthState reported by Dish Leaf Node"""
 
@@ -158,6 +159,9 @@ def test_telescope_health_state_from_dln_mid(change_event_callbacks):
         HealthState.DEGRADED, lookahead=4
     )
 
+    logger.info("telescopeHealthState 0 %s", central_node.telescopeHealthState)
+    time.sleep(0.1)
+
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.DEGRADED, lookahead=4
     )
@@ -171,6 +175,30 @@ def test_telescope_health_state_from_dln_mid(change_event_callbacks):
         HealthState.OK, lookahead=4
     )
 
-    logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
+    logger.info("telescopeHealthState 1 %s", central_node.telescopeHealthState)
+    time.sleep(0.1)
+    assert central_node.telescopeHealthState == HealthState.OK
+
+    # Dish reports FAILED (single dish failure → telescope DEGRADED)
+    dish_ln.SetDirectHealthState(HealthState.FAILED)
+
+    change_event_callbacks["healthState"].assert_change_event(
+        HealthState.FAILED, lookahead=4
+    )
+
+    change_event_callbacks["telescopeHealthState"].assert_change_event(
+        HealthState.DEGRADED, lookahead=4
+    )
+
+    assert central_node.telescopeHealthState == HealthState.DEGRADED
+
+    # Tear down: Dish reports OK
+    dish_ln.SetDirectHealthState(HealthState.OK)
+
+    change_event_callbacks["telescopeHealthState"].assert_change_event(
+        HealthState.OK, lookahead=4
+    )
+
+    logger.info("telescopeHealthState 2 %s", central_node.telescopeHealthState)
     time.sleep(0.1)
     assert central_node.telescopeHealthState == HealthState.OK

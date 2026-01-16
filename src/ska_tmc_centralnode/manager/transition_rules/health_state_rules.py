@@ -28,5 +28,51 @@ HEALTH_STATE_RULES_MID = HEALTH_STATE_RULES | {
             'event_data.health_state_data[key]["health_state"] == "FAILED" '
             "for key in event_data.health_state_data.keys])"
         ),
-    ]
+        Rule('"FAILED" in all_unique_dish_leaf_node_health_states'),
+    ],
+    "DEGRADED": [
+        Rule(
+            '"DEGRADED" in all_unique_health_states'
+            " or "
+            '"OFFLINE" in all_unique_admin_modes'
+        ),
+        Rule(
+            '"DEGRADED" in all_unique_dish_leaf_node_health_states'
+            " or "
+            '"FAILED" in all_unique_dish_leaf_node_health_states'
+        ),
+    ],
 }
+
+# HEALTH_STATE_RULES_MID = HEALTH_STATE_RULES | {
+#     "DEGRADED": [
+#         # Any dish FAILED → DEGRADED
+#         Rule(
+#             "$any(["
+#             'event_data.health_state_data[key]["health_state"] == "FAILED" '
+#             "for key in event_data.health_state_data.keys"
+#             "])"
+#         ),
+#         # Any dish DEGRADED → DEGRADED
+#         Rule('"DEGRADED" in all_unique_health_states'),
+#     ],
+#     "FAILED": [
+#         Rule(
+#             "$all(["
+#             'event_data.health_state_data[key]["health_state"] == "FAILED" '
+#             "for key in event_data.health_state_data.keys"
+#             "])"
+#         ),
+#     ],
+# }
+
+# HEALTH_STATE_RULES_MID = HEALTH_STATE_RULES | {
+#     "FAILED": [
+#         Rule('"FAILED" in all_unique_health_states'),
+#         Rule(
+#             '$any(["elt/master" in key and '
+#             'event_data.health_state_data[key]["health_state"] == "FAILED" '
+#             "for key in event_data.health_state_data.keys])"
+#         ),
+#     ]
+# }
