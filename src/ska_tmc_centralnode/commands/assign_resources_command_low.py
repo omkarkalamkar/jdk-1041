@@ -262,12 +262,12 @@ class AssignResourcesLow(AssignResources):
             pss_beam_ids = pss_key["pss_beam_ids"]
             assigned_pss_beams = set()
             for (
-                sa_id,
+                assigned_subarray_id,
                 beams,
             ) in (
                 self.component_manager.pss_beams_assigned_per_subarray.items()
             ):
-                if sa_id != subarray_id:
+                if assigned_subarray_id != subarray_id:
                     assigned_pss_beams.update(beams)
 
             # Check if pss_beam_id is already assigned to another subarray
