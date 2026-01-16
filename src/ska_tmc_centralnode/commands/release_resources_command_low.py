@@ -51,6 +51,9 @@ class ReleaseResourcesLow(ReleaseResources):
         self.component_manager.subsystem_assigned_per_command_id.pop(
             self.command_id, None
         )
+        self.component_manager.pss_beams_assigned_per_subarray.pop(
+            self.subarray_id, None
+        )
 
     # pylint:disable=signature-differs
     def do(self, argin):
