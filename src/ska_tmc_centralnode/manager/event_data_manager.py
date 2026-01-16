@@ -245,7 +245,7 @@ class EventDataManager:
                     InputParameterMid,
                 ):
                     is_dish_leaf_node = (
-                        self.component_manager.input_parameter.dish_ln_prefix
+                        self.component_manager.input_parameter.dish_leaf_node_prefix
                         in device_name
                     )
                 target_dict[device_name] = HealthStateData(
