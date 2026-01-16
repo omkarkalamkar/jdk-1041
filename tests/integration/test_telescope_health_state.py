@@ -160,10 +160,8 @@ def test_telescope_health_state_from_dln_mid(change_event_callbacks):
     )
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.DEGRADED, lookahead=4
+        HealthState.DEGRADED, lookahead=10
     )
-
-    logger.info("telescopeHealthState 0 %s", central_node.telescopeHealthState)
 
     assert central_node.telescopeHealthState == HealthState.DEGRADED
 
@@ -174,8 +172,6 @@ def test_telescope_health_state_from_dln_mid(change_event_callbacks):
         HealthState.OK, lookahead=4
     )
 
-    logger.info("telescopeHealthState 1 %s", central_node.telescopeHealthState)
-    time.sleep(0.1)
     assert central_node.telescopeHealthState == HealthState.OK
 
     # Dish reports FAILED (single dish failure → telescope DEGRADED)

@@ -143,6 +143,7 @@ def test_convert_event_data_to_dict(
     expected_event_data_dict = {
         "all_unique_admin_modes": ["ONLINE"],
         "all_unique_health_states": ["OK"],
+        "all_unique_dish_leaf_node_health_states": [],
     }
 
     logging.info(
