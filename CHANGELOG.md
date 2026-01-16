@@ -10,7 +10,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 Updated
 -------
-* Updated AssignResources to validate pss beams are not shared between subarrays.
+* Updated AssignResources to validate pss beams are not shared between subarrays
 
 [0.27.0]
 ************
