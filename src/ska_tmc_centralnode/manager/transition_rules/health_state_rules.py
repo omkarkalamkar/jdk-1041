@@ -36,17 +36,20 @@ HEALTH_STATE_RULES_MID = HEALTH_STATE_RULES | {
             " or "
             '"OFFLINE" in all_unique_admin_modes'
         ),
+        Rule('"DEGRADED" in all_unique_dish_leaf_node_health_states'),
         Rule(
-            '"DEGRADED" in all_unique_dish_leaf_node_health_states'
-            " or "
-            '"FAILED" in all_unique_dish_leaf_node_health_states'
+            '"FAILED" in all_unique_dish_leaf_node_health_states '
+            'and all_unique_dish_leaf_node_health_states != ["FAILED"]'
         ),
     ],
     "OK": [
         Rule(
             '["OK"] == all_unique_health_states '
             'and ["ONLINE"] == all_unique_admin_modes '
-            'and all_unique_dish_leaf_node_health_states == ["OK"]'
+            "and ("
+            "all_unique_dish_leaf_node_health_states == [] "
+            'or all_unique_dish_leaf_node_health_states == ["OK"]'
+            ")"
         )
     ],
 }
