@@ -31,6 +31,7 @@ from ska_tmc_centralnode.commands.release_resources_command_mid import (
 from ska_tmc_centralnode.commands.set_global_pointing_model import (
     SetGlobalPointingModel,
 )
+from ska_tmc_centralnode.commands.stow_antennas_command import SetStowMode
 from ska_tmc_centralnode.input_validator import (
     AssignResourceValidator,
     ReleaseResourceValidator,
@@ -236,7 +237,13 @@ class CNComponentManagerMid(CNComponentManager):
         self.gpm_data_sources_prefix = gpm_data_sources_prefix
         self.gpm_file_path_prefix = gpm_file_path_prefix
         self.is_gpm_init = True
-
+        self.dishln_stow_mode_lock = threading.RLock()
+        self.number_of_stow_mode_executed: int = 0
+        self.stow_mode_command_aggregated_result: ResultCode = (
+            ResultCode.UNKNOWN
+        )
+        self.stow_mode_aggregated_result: bool = True
+        self.dishln_stow_mode_cmd_exe_data: dict = {}
         self.event_queue.update(
             {
                 "longRunningCommandResult": Queue(),
@@ -250,6 +257,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "loadDishConfigResultAsync": Queue(),
                 "setGPMResult": Queue(),
                 "gpmVersion": Queue(),
+                "setStowModeResult": Queue(),
             }
         )
         handle_dish_vcc = self.handle_dish_vcc_validation_result
@@ -270,6 +278,7 @@ class CNComponentManagerMid(CNComponentManager):
                 ),
                 "setGPMResult": self.update_set_gpm_results,
                 "gpmVersion": self.handle_gpm_version_event,
+                "setStowModeResult": self.update_set_stow_mode_results,
             }
         )
         self._start_event_processing_threads()
@@ -308,13 +317,23 @@ class CNComponentManagerMid(CNComponentManager):
 
     def get_set_gpm_version_resultcode(self) -> ResultCode:
         """
-        Return Aggregated command result for Load Dish Cfg command
+        Return Aggregated command result for Set GPM Version command
 
         Returns:
-            Aggregated command result for Load Dish Cfg command
+            Aggregated command result for Set GPM Version command
 
         """
         return self.gpm_version_aggregated_result
+
+    def get_set_stow_mode_resultcode(self) -> ResultCode:
+        """
+        Return Aggregated command result for Set Stow Mode command
+
+        Returns:
+            Aggregated command result for Set Stow Mode command
+
+        """
+        return self.stow_mode_command_aggregated_result
 
     @property
     def dish_vcc_command_status(self):
@@ -672,7 +691,7 @@ class CNComponentManagerMid(CNComponentManager):
             for dish in dish_leaf_node_dev_names:
                 if dev_name in dish:
                     dev_name = dish
-
+                    break
             dev_info = self.component.get_device(dev_name)
             dev_info.dish_mode = dish_mode
             self.logger.debug(
@@ -1096,8 +1115,51 @@ class CNComponentManagerMid(CNComponentManager):
             )
             return task_status, response
         except Exception as exception:
-            self.logger.error("Exception occured %s", exception)
+            self.logger.exception("Exception occured %s", exception)
             return set_gpm_version_command.reject_command(exception)
+
+    def set_stow_mode(
+        self, argin: str, task_callback: Callable = None
+    ) -> Tuple[ResultCode, str]:
+        """
+        Set stow mode for given dishes.
+
+        Args:
+            argin (str): Dish Id's.
+
+        Returns:
+            a result code and message
+
+        """
+
+        set_stow_mode_command = SetStowMode(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
+
+        try:
+            messgae = "Invalid input: Expected a list of dish IDs"
+            example = 'e.g., ["ska001", "ska002", ...] or ["ALL"]'
+            stow_input = json.loads(argin)
+            if not isinstance(stow_input, list):
+                raise ValueError(messgae + " " + example)
+            if "ALL" in stow_input:
+                if len(stow_input) == 1:
+                    stow_input = []
+                    for dish_id in self.get_dish_leaf_node_device_names():
+                        stow_input.append(dish_id.rsplit("/", 1)[-1])
+                else:
+                    raise ValueError(messgae + " " + example)
+            GPMJsonModel.validate_dish_ids(stow_input)
+            self.logger.info("Stow command dish list: %s", stow_input)
+            task_status, response = self.submit_task(
+                set_stow_mode_command.apply_stow_mode,
+                kwargs={"argin": stow_input},
+                task_callback=task_callback,
+            )
+            return task_status, response
+        except Exception as exception:
+            self.logger.exception("Exception occured %s", exception)
+            return set_stow_mode_command.reject_command(exception)
 
     def update_load_dish_cfg_results_async(
         self, dev_name: str, value: tuple
@@ -1395,6 +1457,170 @@ class CNComponentManagerMid(CNComponentManager):
                     break
             if break_outer:
                 break
+
+    def reset_stow_mode_data(self) -> None:
+        """Reset StowMode data"""
+        self.logger.debug("Resetting SetStowMode data")
+        self.stow_mode_command_aggregated_result = ResultCode.UNKNOWN
+        self.number_of_stow_mode_executed = 0
+        self.dishln_stow_mode_cmd_exe_data = {}
+        self.command_in_progress = ""
+        if self.command_mapping.get(self.command_id):
+            self.command_mapping.pop(self.command_id)
+
+    def update_set_stow_mode_results(
+        self, dev_name: str, value: tuple
+    ) -> None:
+        """
+        This method is used to update the result returned
+        from Dish leaf nodes as part of SetStowMode
+        command.
+        If all events are received from all device then aggregate
+        the result
+        Value contains (unique_id, ResultCode)
+        Args:
+            dev_name (str): Name of the device who's event has been
+            captured in this method
+            value (tuple): longRunningCommandResult attribute event.
+        """
+
+        self.logger.info(
+            "SetStowMode longRunningCommandResult event for device: "
+            "%s, with value: %s",
+            dev_name,
+            str(value),
+        )
+        with self.dishln_stow_mode_lock:
+            dishln_id = dev_name.split("/")[-1]
+            result_code_or_exception = []
+            unique_id, resultcode_message = value
+            if unique_id.endswith("SetStowMode"):
+                result_code_or_exception = json.loads(resultcode_message)
+            if result_code_or_exception:
+                if dishln_id in self.dishln_stow_mode_cmd_exe_data:
+                    self.dishln_stow_mode_cmd_exe_data[dishln_id][
+                        "result_code"
+                    ] = result_code_or_exception
+                    self.logger.debug(
+                        "Current dishln stow mode command data %s",
+                        self.dishln_stow_mode_cmd_exe_data,
+                    )
+                if self.number_of_stow_mode_executed > 0:
+                    self.number_of_stow_mode_executed -= 1
+                self.logger.debug(
+                    "Dev names for set stow mode  %s &"
+                    " number of stow mode execution remaining %s",
+                    str(self.dishln_stow_mode_cmd_exe_data),
+                    self.number_of_stow_mode_executed,
+                )
+
+            if (
+                not self.number_of_stow_mode_executed
+                and self.command_in_progress == "SetStowMode"
+            ):
+                self.logger.info(
+                    "All Events received for set stow mode,"
+                    " Aggregating stow mode results"
+                )
+                self.aggregate_set_stow_mode_results()
+                self.stow_mode_command_aggregated_result = ResultCode.OK
+                self.observable.notify_observers(attribute_value_change=True)
+
+    def aggregate_set_stow_mode_results(self) -> None:
+        """
+        This method aggregate StowMode command results.
+        """
+
+        self.stow_mode_aggregated_result = True
+        self.stow_mode_aggregated_result = (
+            self.aggregate_dish_stow_mode_events()
+        )
+        if self.stow_mode_aggregated_result:
+            for (
+                _,
+                result_code_or_exception,
+            ) in self.dishln_stow_mode_cmd_exe_data.items():
+                if isinstance(result_code_or_exception, str):
+                    self.stow_mode_aggregated_result = False
+                    break
+                if result_code_or_exception["result_code"][0] != int(
+                    ResultCode.OK
+                ):
+                    self.stow_mode_aggregated_result = False
+                    break
+
+    def aggregate_dish_stow_mode_events(self) -> bool:
+        """
+        Wait for all dish stow mode events to be received within timeout.
+
+        Polls the dishln_stow_mode_cmd_exe_data dictionary to check if
+        all dishes have reported their mode values for the stow mode command.
+
+        Returns:
+            bool: True if all dishes reported their mode within the timeout
+                   period,False if timeout is reached before all dishes
+                   respond.
+        """
+        wait_event = threading.Event()
+
+        timeout = self.command_timeout - 3  # total timeout in seconds
+        interval = 0.5  # wait interval in seconds
+        start_time = time.time()
+
+        while True:
+            if self.all_dish_stow_mode_available():
+                self.logger.info(
+                    "All dish_mode values are available. Exiting loop."
+                )
+                return True
+
+            if time.time() - start_time >= timeout:
+                self.logger.info("Timeout reached. Exiting loop.")
+                return False
+
+            wait_event.wait(interval)
+
+    def all_dish_stow_mode_available(self) -> bool:
+        """
+        Returns True only if all valid dish entries (dicts)
+        have  dish mode STOW.
+        Ignores non-dict entries.
+        """
+
+        flag = True
+        for dish_id, data in self.dishln_stow_mode_cmd_exe_data.items():
+            if isinstance(data, dict):
+                data["dish_mode"] = DishMode(
+                    self.get_current_dish_mode_of_dln(dish_id)
+                ).name
+        for dish in self.dishln_stow_mode_cmd_exe_data.values():
+            if (
+                isinstance(dish, dict)
+                and dish.get("dish_mode") != DishMode.STOW.name
+            ):
+                flag = False
+                break  # Early exit like any()
+        return flag
+
+    def get_current_dish_mode_of_dln(self, dish_id: str) -> DishMode:
+        """
+        Get the current dish mode of the specified dish leaf node.
+
+        Args:
+            dish_id (str): Dish identifier to retrieve mode for
+
+        Returns:
+            DishMode: Current mode of the specified dish
+
+        """
+        dish_leaf_node_dev_names = self.get_dish_leaf_node_device_names()
+        dish_dev_name = ""
+        for dish in dish_leaf_node_dev_names:
+            if dish_id in dish:
+                dish_dev_name = dish
+                break
+        dev_info = self.component.get_device(dish_dev_name)
+        return dev_info.dish_mode
 
     def validate_assign_json(self, argin: str):
         """Validates assign resources json

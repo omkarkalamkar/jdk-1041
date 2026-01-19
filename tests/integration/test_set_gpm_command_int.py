@@ -304,7 +304,7 @@ def test_set_gpm_command_negative_scenarios_all(
     central_node_name,
     change_event_callbacks,
 ):
-    """Test cases for Load_Dish_Config command"""
+    """Test cases for set gpm command"""
     return set_gpm_command_negative_scenarios(
         tango_context,
         central_node_name,
@@ -323,7 +323,7 @@ def test_set_gpm_command(
     central_node_name,
     change_event_callbacks,
 ):
-    """Test cases for Load_Dish_Config command"""
+    """Test cases for set gpm command"""
     return set_gpm_command(
         tango_context,
         central_node_name,
@@ -345,7 +345,7 @@ def test_set_gpm_command_restart_scenarios(
     central_node_name,
     change_event_callbacks,
 ):
-    """Test cases for Load_Dish_Config command"""
+    """Test cases set gpm command"""
     return gpm_restart_scenarios(
         tango_context,
         central_node_name,

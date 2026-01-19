@@ -353,7 +353,9 @@ class SetGlobalPointingModel(SetDishGPM):
 
         """
         if not argin:
-            return [ResultCode.FAILED], ["Error in processesing GPM data."]
+            err_message = "Set GPM Command failed, argin is empty"
+            self.logger.error(err_message)
+            return [ResultCode.FAILED], [err_message]
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:

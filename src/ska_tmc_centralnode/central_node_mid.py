@@ -278,7 +278,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         return self.component_manager.dish_vcc_command_status
 
     def read_GlobalPointingModelStatus(self):
-        """Return the DishVccCommandStatus attribute."""
+        """Return the GlobalPointingModelStatus attribute."""
         return json.dumps(self.component_manager.global_pointing_model_status)
 
     def create_component_manager(self):
@@ -387,6 +387,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         for command_name, method_name in [
             ("LoadDishCfg", "load_dish_cfg"),
             ("SetGlobalPointingModel", "set_gpm_version"),
+            ("SetStowMode", "set_stow_mode"),
         ]:
             self.register_command_object(
                 command_name,
@@ -458,7 +459,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         result_code, unique_id = handler(argin)
         return [[result_code], [str(unique_id)]]
 
-    def is_setGlobalPointingModel_allowed(self):
+    def is_setGlobalPointingModel_allowed(self) -> bool:
         """
         Checks whether setGlobalPointingModel command is allowed to be run
         in current device state.
@@ -506,6 +507,37 @@ class MidTmcCentralNode(AbstractCentralNode):
             }
         """
         handler = self.get_command_object("SetGlobalPointingModel")
+        result_code, unique_id = handler(argin)
+        return [[result_code], [str(unique_id)]]
+
+    def is_setStowMode_allowed(self) -> bool:
+        """
+        Checks whether setStowMode command is allowed to be run
+        in current device state.
+
+        :rtype: boolean
+        """
+        return True
+
+    @command(
+        dtype_in="str",
+        doc_in="The string in JSON format.",
+        dtype_out="DevVarLongStringArray",
+        doc_out="information-only string",
+    )
+    @DebugIt()
+    def SetStowMode(self, argin):
+        """
+        SetStowMode command to send the stow mode command to dish leaf
+        nodes. This command gets a list in following form:
+
+        .. code-block::
+            :caption: Example
+
+            To Specific Dishes = ["SKA001","SKA002", ...]
+            To all Dishes = ["ALL"]
+        """
+        handler = self.get_command_object("SetStowMode")
         result_code, unique_id = handler(argin)
         return [[result_code], [str(unique_id)]]
 
