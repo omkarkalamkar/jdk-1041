@@ -114,6 +114,9 @@ class ReleaseResources(AssignReleaseResources):
         self.component_manager.subsystem_assigned_per_subarray.pop(
             self.subarray_id
         )
+        self.component_manager.pss_beams_assigned_per_subarray.pop(
+            self.subarray_id
+        )
 
     def release_all_resources(
         self, adapter

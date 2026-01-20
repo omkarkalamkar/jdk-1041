@@ -11,6 +11,9 @@ from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
     CENTRALNODE_MID,
     DISH_LEAF_NODE_1,
+    DISH_LEAF_NODE_36,
+    DISH_LEAF_NODE_63,
+    DISH_LEAF_NODE_100,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MASTER_DEVICE,
     LOW_SDP_MLN_DEVICE,
@@ -125,7 +128,9 @@ def test_telescope_command_timeout(change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_telescope_health_state_from_dln_mid(change_event_callbacks):
+def test_telescope_health_state_single_dish_degraded_state(
+    change_event_callbacks,
+):
     """Test CN aggregates healthState reported by Dish Leaf Node"""
 
     dev_factory = DevFactory()
@@ -155,11 +160,11 @@ def test_telescope_health_state_from_dln_mid(change_event_callbacks):
     dish_ln.SetDirectHealthState(HealthState.DEGRADED)
 
     change_event_callbacks["healthState"].assert_change_event(
-        HealthState.DEGRADED, lookahead=4
+        HealthState.DEGRADED, lookahead=8
     )
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.DEGRADED, lookahead=4
+        HealthState.DEGRADED, lookahead=8
     )
 
     assert central_node.telescopeHealthState == HealthState.DEGRADED
@@ -167,10 +172,93 @@ def test_telescope_health_state_from_dln_mid(change_event_callbacks):
     # Tear down: Dish reports OK
     dish_ln.SetDirectHealthState(HealthState.OK)
 
+    logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
+    time.sleep(0.3)
+    assert central_node.telescopeHealthState == HealthState.OK
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_telescope_health_state_handles_multi_dish_failure(
+    change_event_callbacks,
+):
+    """Test CN aggregates healthState reported by Dish Leaf Node"""
+
+    dev_factory = DevFactory()
+
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
+    dish_ln = dev_factory.get_device(DISH_LEAF_NODE_1)
+    sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
+    csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
+    sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
+    csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
+
+    dish_ln_36 = dev_factory.get_device(DISH_LEAF_NODE_36)
+    dish_ln_63 = dev_factory.get_device(DISH_LEAF_NODE_63)
+    dish_ln_100 = dev_factory.get_device(DISH_LEAF_NODE_100)
+
+    ensure_checked_devices(central_node)
+
+    central_node.subscribe_event(
+        "telescopeHealthState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeHealthState"],
+    )
+
+    dish_ln.subscribe_event(
+        "healthState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["healthState"],
+    )
+
+    dish_ln_36.subscribe_event(
+        "healthState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["healthState"],
+    )
+
+    dish_ln_63.subscribe_event(
+        "healthState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["healthState"],
+    )
+
+    dish_ln_100.subscribe_event(
+        "healthState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["healthState"],
+    )
+
+    # Dish reports FAILED
+    dish_ln.SetDirectHealthState(HealthState.FAILED)
+    dish_ln_36.SetDirectHealthState(HealthState.FAILED)
+    dish_ln_63.SetDirectHealthState(HealthState.FAILED)
+    dish_ln_100.SetDirectHealthState(HealthState.FAILED)
+
+    time.sleep(0.3)
+
+    assert central_node.telescopeHealthState == HealthState.FAILED
+
+    #  Dish reports OK
+    dish_ln.SetDirectHealthState(HealthState.OK)
+
+    time.sleep(0.1)
+
+    assert central_node.telescopeHealthState == HealthState.DEGRADED
+
+    # Tear down: Dish reports OK
+    dish_ln_36.SetDirectHealthState(HealthState.OK)
+    dish_ln_63.SetDirectHealthState(HealthState.OK)
+    dish_ln_100.SetDirectHealthState(HealthState.OK)
+
+    change_event_callbacks["healthState"].assert_change_event(
+        HealthState.OK, lookahead=4
+    )
+
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.OK, lookahead=4
     )
 
-    logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     time.sleep(0.1)
+
     assert central_node.telescopeHealthState == HealthState.OK

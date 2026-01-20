@@ -28,5 +28,29 @@ HEALTH_STATE_RULES_MID = HEALTH_STATE_RULES | {
             'event_data.health_state_data[key]["health_state"] == "FAILED" '
             "for key in event_data.health_state_data.keys])"
         ),
-    ]
+        Rule('"FAILED" in all_unique_dish_leaf_node_health_states'),
+    ],
+    "DEGRADED": [
+        Rule(
+            '("DEGRADED" in all_unique_health_states'
+            " or "
+            '"OFFLINE" in all_unique_admin_modes) '
+            'and "FAILED" not in all_unique_health_states'
+        ),
+        Rule('"DEGRADED" in all_unique_dish_leaf_node_health_states'),
+        Rule(
+            '"FAILED" in all_unique_dish_leaf_node_health_states '
+            'and all_unique_dish_leaf_node_health_states != ["FAILED"]'
+        ),
+    ],
+    "OK": [
+        Rule(
+            '["OK"] == all_unique_health_states '
+            'and ["ONLINE"] == all_unique_admin_modes '
+            "and ("
+            "all_unique_dish_leaf_node_health_states == [] "
+            'or all_unique_dish_leaf_node_health_states == ["OK"]'
+            ")"
+        )
+    ],
 }

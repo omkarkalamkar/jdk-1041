@@ -177,6 +177,9 @@ class CNComponentManagerLow(CNComponentManager):
         self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
             list
         )
+        self.pss_beams_assigned_per_subarray: Dict[int, list] = defaultdict(
+            list
+        )
 
     @property
     def assign_resources_schema_version(self) -> str:
