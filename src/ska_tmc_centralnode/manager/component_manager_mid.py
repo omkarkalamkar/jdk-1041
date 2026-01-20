@@ -330,7 +330,7 @@ class CNComponentManagerMid(CNComponentManager):
         Return Aggregated command result for Set Stow Mode command
 
         Returns:
-            Aggregated command result for Set Stow Mode command
+            Aggregated command result(ResultCode) for Set Stow Mode command
 
         """
         return self.stow_mode_command_aggregated_result

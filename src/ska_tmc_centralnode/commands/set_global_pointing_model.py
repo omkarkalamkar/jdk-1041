@@ -381,7 +381,7 @@ class SetGlobalPointingModel(SetDishGPM):
     def _set_gpm_to_dish(self, gpm_data: dict) -> Tuple[ResultCode, str]:
         """
         Set GPM to Dish by invoking ApplyPointingModel
-        command on dish dish leaf node.
+        command on dish leaf node.
 
         Args:
             gpm_data (dict): GPM data per dish

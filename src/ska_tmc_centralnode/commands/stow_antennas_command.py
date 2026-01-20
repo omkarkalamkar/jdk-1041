@@ -18,8 +18,8 @@ from ska_tmc_centralnode.commands.central_node_command import SetDishGPM
 # pylint:disable =abstract-method
 class SetStowMode(SetDishGPM):
     """
-    A class for CentralNode's SetGlobalPointingModel command.
-    This command forms GPM CAR URI and provide it to Dish Leaf Node
+    A class for CentralNode's SetStowMode command.
+    This command invokes SetStowMode command on specified dish id's
     """
 
     # pylint:disable=keyword-arg-before-vararg
@@ -207,7 +207,7 @@ class SetStowMode(SetDishGPM):
     ) -> Tuple[ResultCode, str]:
         """
         Set Dish to Stow Mode by invoking SetStowMode
-        command on dish dish leaf node.
+        command on dish leaf node.
 
         Args:
             stow_dish_list (list): List of dish IDs to set to stow mode
@@ -222,7 +222,7 @@ class SetStowMode(SetDishGPM):
         message_or_unique_ids = []
         dishln_adapter = None
         self.logger.info(
-            "Stow mode dishes for command execution:%s", stow_dish_list
+            "Stow mode dishes for command execution: %s", stow_dish_list
         )
         try:
             for dish_id in stow_dish_list:
@@ -292,7 +292,7 @@ class SetStowMode(SetDishGPM):
                 )
         except Exception as e:
             self.logger.exception(
-                "Exception occured in Calling SetStowMode, " + "Exception: %s",
+                "Exception occured in Calling SetStowMode, Exception: %s",
                 str(e),
             )
             return [ResultCode.FAILED], [
@@ -305,7 +305,13 @@ class SetStowMode(SetDishGPM):
         return return_codes, message_or_unique_ids
 
     def set_stow_mode_cm_variables(self, dish_id: str, flag: bool) -> None:
-        """Sets component manager variables for stow mode command execution"""
+        """
+        Set component manager variables for stow mode command.
+
+        Args:
+            dish_id(str): Dish leaf node identifier
+            flag(bool): True to increment execution counter
+        """
         if flag:
             self.component_manager.number_of_stow_mode_executed += 1
         if dish_id not in self.component_manager.dishln_stow_mode_cmd_exe_data:
@@ -316,7 +322,7 @@ class SetStowMode(SetDishGPM):
 
     def add_data_to_stow_mode_dictionary_in_case_of_error(
         self, dish_id: str, error_message: str
-    ):
+    ) -> None:
         """
         Update the SetStowMode data with aggregated error for given
         dish_id

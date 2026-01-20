@@ -17,7 +17,7 @@ from tests.settings import ERROR_PROPAGATION_DEFECT, RESET_DEFECT, logger
 def set_stow_mode_command(
     tango_context, central_node_name, change_event_callbacks
 ):
-    """Test cases for SetGlobalPointing command"""
+    """Test cases for SetStowMode command"""
 
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -136,7 +136,6 @@ def set_stow_mode_command(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.test
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],

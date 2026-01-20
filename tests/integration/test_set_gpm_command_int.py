@@ -110,7 +110,7 @@ def set_gpm_command_negative_scenarios(
     subarray_node = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     dln_100 = dev_factory.get_device("mid-tmc/leaf-node-dish/ska100")
     dln_100.SetDefective(ERROR_PROPAGATION_DEFECT)
-    subarray_node.SetDirectassignedResources(json.dumps(["SKA001"]))
+    subarray_node.SetDirectassignedResources(("SKA001",))
 
     ensure_checked_devices(central_node)
 
