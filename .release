@@ -1,7 +1,7 @@
 """Release information for Python Package"""
 
 name="""ska-tmc-centralnode"""
-version="0.27.0"
+version="0.27.1"
 
 version_info=version.split(".")
 description="""Central Node"""
@@ -9,6 +9,6 @@ author="Team SAHYADRI & HIMALAYA"
 author_email="telmgt-internal@googlegroups.com"
 url="""https://www.skaobservatory.org/"""
 
-release=0.27.0
-tag=0.27.0
+release=0.27.1
+tag=0.27.1
 
