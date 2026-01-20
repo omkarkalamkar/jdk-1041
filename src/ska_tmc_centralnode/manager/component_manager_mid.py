@@ -1593,6 +1593,9 @@ class CNComponentManagerMid(CNComponentManager):
                 data["dish_mode"] = DishMode(
                     self.get_current_dish_mode_of_dln(dish_id)
                 ).name
+                self.logger.info(
+                    "Current dish mode for %s is %s", dish_id, data
+                )
         for dish in self.dishln_stow_mode_cmd_exe_data.values():
             if (
                 isinstance(dish, dict)
