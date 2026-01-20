@@ -128,7 +128,6 @@ def test_telescope_command_timeout(change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.test_degraded
 def test_telescope_health_state_single_dish_degraded_state(
     change_event_callbacks,
 ):
@@ -180,7 +179,6 @@ def test_telescope_health_state_single_dish_degraded_state(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.test_health_2
 def test_telescope_health_state_handles_multi_dish_failure(
     change_event_callbacks,
 ):

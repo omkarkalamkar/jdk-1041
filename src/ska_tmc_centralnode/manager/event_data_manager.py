@@ -239,15 +239,14 @@ class EventDataManager:
             if data_type == "HealthState":
                 is_dish_leaf_node = False
                 data = self.get_enum_name_from_value(HealthState, int(data))
-                # pylint: disable=line-too-long
                 if isinstance(
                     self.component_manager.input_parameter,
                     InputParameterMid,
                 ):
-                    is_dish_leaf_node = (
-                        self.component_manager.input_parameter.dish_leaf_node_prefix
-                        in device_name
-                    )
+                    input_params = self.component_manager.input_parameter
+                    dln_prefix = input_params.dish_leaf_node_prefix
+                    is_dish_leaf_node = dln_prefix in device_name
+
                 target_dict[device_name] = HealthStateData(
                     health_state=data,
                     is_dish_leaf_node=is_dish_leaf_node,
