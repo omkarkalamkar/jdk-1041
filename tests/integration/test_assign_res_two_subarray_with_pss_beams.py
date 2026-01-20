@@ -1,4 +1,4 @@
-"""Test module for AssignResources command."""
+"""Test module for AssignResourcesLow command."""
 
 import json
 
@@ -8,29 +8,26 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common.dev_factory import DevFactory
 
-from ska_tmc_centralnode.utils.constants import (
-    CENTRALNODE_LOW,
-    CENTRALNODE_MID,
-)
+from ska_tmc_centralnode.utils.constants import CENTRALNODE_LOW
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import (
     LOW_SUBARRAY2_DEVICE,
     LOW_SUBARRAY_DEVICE,
-    MID_SUBARRAY2_DEVICE,
-    MID_SUBARRAY_DEVICE,
     check_subarray_availability,
     logger,
 )
 
 
-def assign_resources(
+def assign_resources_low(
     tango_context,
     central_node_name,
     assign_input_str,
     release_input_string,
+    pss_beams,
     change_event_callbacks,
     subarray_device,
     subarray2_device,
+    second_assign_failed=True,
 ):
     """AssignResources Test method."""
     logger.info("%s", tango_context)
@@ -67,9 +64,8 @@ def assign_resources(
     assign_input = json.loads(assign_input_str)
     assign_input["subarray_id"] = 2
     assign_input["sdp"]["execution_block"]["eb_id"] = "eb-test-20220917-00000"
-    if "low" in central_node_name:
-        # pss_beam_ids can not be shared between subarrays for TMC low
-        assign_input["csp"]["pss"]["pss_beam_ids"] = [4, 5, 6]
+    assigned_pss_beams = assign_input["csp"]["pss"]["pss_beam_ids"]
+    assign_input["csp"]["pss"]["pss_beam_ids"] = pss_beams
     assign_input_str2 = json.dumps(assign_input)
 
     subarray_proxy.SetisSubarrayAvailable(True)
@@ -90,11 +86,33 @@ def assign_resources(
         (unique_id1[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
-        (unique_id2[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
+    if second_assign_failed:
+        conflicting_pss_beams = list(
+            set(pss_beams).intersection(assigned_pss_beams)
+        )
+        change_event_callbacks.assert_change_event(
+            "longRunningCommandResult",
+            (
+                unique_id2[0],
+                json.dumps(
+                    (
+                        int(ResultCode.FAILED),
+                        f"PSS beams: {conflicting_pss_beams}"
+                        " already assigned to another subarray",
+                    )
+                ),
+            ),
+            lookahead=4,
+        )
+    else:
+        change_event_callbacks.assert_change_event(
+            "longRunningCommandResult",
+            (
+                unique_id2[0],
+                json.dumps((int(ResultCode.OK), "Command Completed")),
+            ),
+            lookahead=4,
+        )
 
     release_input_string1 = release_input_string
     release_input = json.loads(release_input_string)
@@ -103,6 +121,7 @@ def assign_resources(
 
     result1, unique_id1 = central_node.ReleaseResources(release_input_string1)
     result2, unique_id2 = central_node.ReleaseResources(release_input_string2)
+
     change_event_callbacks.assert_change_event(
         "longRunningCommandResult",
         (unique_id1[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
@@ -122,57 +141,65 @@ def assign_resources(
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 @pytest.mark.parametrize(
-    "central_node_name, input_json",
+    "central_node_name, input_json, pss_beams",
     [
-        (CENTRALNODE_LOW, "assign_resource_low"),
+        (CENTRALNODE_LOW, "assign_resource_low", [1, 2, 3]),
+        (CENTRALNODE_LOW, "assign_resource_low", [1, 2, 4]),
+        (CENTRALNODE_LOW, "assign_resource_low", [1]),
     ],
 )
-def test_assign_res_with_two_subarray_low(
+def test_assign_res_with_two_subarray_low_same_pss_beam(
     tango_context,
     central_node_name,
     input_json,
+    pss_beams,
     change_event_callbacks,
     json_factory,
     set_low_devices_availability_for_aggregation,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    """Test assign Resources command for low"""
-    return assign_resources(
+    """Test assign Resources command for low with same pss beams"""
+    assign_resources_low(
         tango_context,
         central_node_name,
         json_factory(input_json),
         json_factory("release_resource_low"),
+        pss_beams,
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
         LOW_SUBARRAY2_DEVICE,
+        second_assign_failed=True,
     )
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.SKA_low
 @pytest.mark.parametrize(
-    "central_node_name, input_json",
+    "central_node_name, input_json, pss_beams",
     [
-        (CENTRALNODE_MID, "command_AssignResources"),
+        (CENTRALNODE_LOW, "assign_resource_low", [4, 5, 6]),
+        (CENTRALNODE_LOW, "assign_resource_low", [4]),
     ],
 )
-def test_assign_res_with_two_subarray_mid(
+def test_assign_res_with_two_subarray_low_different_pss_beam(
     tango_context,
     central_node_name,
     input_json,
+    pss_beams,
     change_event_callbacks,
     json_factory,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-    set_mid_sdp_csp_admin_modes,
+    set_low_devices_availability_for_aggregation,
+    set_low_sdp_csp_mccs_admin_modes,
 ):
-    """Test assign Resources command for Mid"""
-
-    return assign_resources(
+    """Test assign Resources command for low with different pss beams"""
+    assign_resources_low(
         tango_context,
         central_node_name,
         json_factory(input_json),
-        json_factory("command_ReleaseResources"),
+        json_factory("release_resource_low"),
+        pss_beams,
         change_event_callbacks,
-        MID_SUBARRAY_DEVICE,
-        MID_SUBARRAY2_DEVICE,
+        LOW_SUBARRAY_DEVICE,
+        LOW_SUBARRAY2_DEVICE,
+        second_assign_failed=False,
     )
