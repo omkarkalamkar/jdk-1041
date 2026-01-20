@@ -74,6 +74,14 @@ class HealthStateAggregationProcessor(AggregationProcess):
                 set(
                     health_data.health_state
                     for health_data in event_data.health_state_data.values()
+                    if not health_data.is_dish_leaf_node
+                )
+            ),
+            "all_unique_dish_leaf_node_health_states": list(
+                set(
+                    healthdata.health_state
+                    for healthdata in event_data.health_state_data.values()
+                    if healthdata.is_dish_leaf_node
                 )
             ),
             "all_unique_admin_modes": list(
