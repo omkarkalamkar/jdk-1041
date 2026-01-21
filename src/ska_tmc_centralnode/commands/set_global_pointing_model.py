@@ -353,7 +353,9 @@ class SetGlobalPointingModel(SetDishGPM):
 
         """
         if not argin:
-            return [ResultCode.FAILED], ["Error in processesing GPM data."]
+            err_message = "Set GPM Command failed, argin is empty"
+            self.logger.error(err_message)
+            return [ResultCode.FAILED], [err_message]
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
@@ -379,7 +381,7 @@ class SetGlobalPointingModel(SetDishGPM):
     def _set_gpm_to_dish(self, gpm_data: dict) -> Tuple[ResultCode, str]:
         """
         Set GPM to Dish by invoking ApplyPointingModel
-        command on dish dish leaf node.
+        command on dish leaf node.
 
         Args:
             gpm_data (dict): GPM data per dish

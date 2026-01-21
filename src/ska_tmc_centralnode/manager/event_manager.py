@@ -234,6 +234,11 @@ class CentralNodeEventManager(EventManager):
             == "SetGlobalPointingModel"
         ):
             self._handle_set_gpm_result_callback(event)
+        elif (
+            re.search(r"/(ska\d{3}|mkt\d{3})", event.attr_name, re.IGNORECASE)
+            and self._component_manager.command_in_progress == "SetStowMode"
+        ):
+            self._handle_set_stow_mode_result_callback(event)
         else:
             self._component_manager.event_queue[
                 "longRunningCommandResult"
@@ -258,6 +263,19 @@ class CentralNodeEventManager(EventManager):
             self._component_manager.event_queue[
                 "loadDishConfigResultAsync"
             ].put(event)
+
+    def _handle_set_stow_mode_result_callback(
+        self, event: tango.EventData
+    ) -> None:
+        """
+        Special handler for SetStowMode result events.
+
+        Args:
+            event_data (tango.EventType.CHANGE_EVENT): to flag the
+                change in event.
+
+        """
+        self._component_manager.event_queue["setStowModeResult"].put(event)
 
     def _handle_set_gpm_result_callback(self, event: tango.EventData) -> None:
         """

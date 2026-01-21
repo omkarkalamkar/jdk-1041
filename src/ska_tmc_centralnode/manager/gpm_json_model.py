@@ -47,9 +47,23 @@ class GPMJsonModel:
         """
         if not receptors:
             raise ValueError("Please add receptors")
+        cls.validate_dish_ids(list(receptors.keys()))
+        return receptors
+
+    @field_validator("receptors")
+    @classmethod
+    def validate_dish_ids(cls, dish_ids: list) -> list:
+        """Validates the dish IDs
+
+        :param dish_ids: Dish IDs in the json.
+        :type dish_ids: list
+        :raises ValueError: Raises value error if the value is incorrect.
+        :return: Returns dish IDs after validation
+        :rtype: list
+        """
         pattern = r"^ska(00[1-9]|0[1-9][0-9]|1[0-3]{2})$"  # allow 001-133
         pattern2 = r"^mkt(00[0-9]|0[1-5][0-9]|06[0-3])$"  # allow 000-063
-        for dish in receptors.keys():
+        for dish in dish_ids:
             dish = dish.lower()
             match = re.fullmatch(pattern, dish)
             match2 = re.fullmatch(pattern2, dish)
@@ -57,4 +71,4 @@ class GPMJsonModel:
                 raise ValueError(
                     f"Invalid dish '{dish}': does not match pattern '{pattern}' or '{pattern2}'"
                 )
-        return receptors
+        return dish_ids
