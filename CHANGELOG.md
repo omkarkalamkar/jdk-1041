@@ -11,7 +11,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ************
 Added
 -------
-* Added SetStowMode command to apply Stow mode on specified dish id's
+* Added SetStowMode command to apply Stow mode on specified dish id's.
 
 [0.28.1]
 ************
