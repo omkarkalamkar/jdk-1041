@@ -10,7 +10,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 [0.29.0]
 ************
 Added
--------
+------
 * Added SetStowMode command to apply Stow mode on specified dish id's.
 
 [0.28.1]
