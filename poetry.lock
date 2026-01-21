@@ -5180,4 +5180,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "0a22519fcd1390869ec50565b89cc432a089a8c47afcf2825e78b877a69fc51b"
+content-hash = "89e72024022f342443b10632c474b1719cafabb04e417619d9f10c709b15f532"
