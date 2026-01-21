@@ -22,6 +22,7 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_MASTER_DEVICE,
     MID_SDP_MLN_DEVICE,
 )
+from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
@@ -259,6 +260,8 @@ def test_telescope_health_state_handles_multi_dish_failure(
         HealthState.OK, lookahead=4
     )
 
-    time.sleep(0.1)
-
-    assert central_node.telescopeHealthState == HealthState.OK
+    assert wait_and_validate_device_attribute_value(
+        central_node,
+        "telescopeHealthState",
+        HealthState.OK,
+    )
