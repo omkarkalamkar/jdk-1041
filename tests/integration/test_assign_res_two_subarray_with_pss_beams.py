@@ -96,7 +96,7 @@ def assign_resources_low(
                 unique_id2[0],
                 json.dumps(
                     (
-                        int(ResultCode.FAILED),
+                        int(ResultCode.REJECTED),
                         f"PSS beams: {conflicting_pss_beams}"
                         " already assigned to another subarray",
                     )
