@@ -567,7 +567,7 @@ class CNComponentManagerLow(CNComponentManager):
         """
         json_argument = json.loads(argin)
         self.validate_subarray_id(json_argument)
-        subarray_id = json_argument.get("subarray_id")
+        # subarray_id = json_argument.get("subarray_id")
 
         interface = (
             json_argument.get("interface", None)
@@ -578,8 +578,8 @@ class CNComponentManagerLow(CNComponentManager):
             config=json_argument,
             strictness=2,
         )
-        if "csp" in self.subsystem_assigned_per_subarray[subarray_id]:
-            self.update_subarray_pss_beams_mapping(json_argument)
+        # if "csp" in self.subsystem_assigned_per_subarray[subarray_id]:
+        self.update_subarray_pss_beams_mapping(json_argument)
 
     def assign_resources(self, argin: str, task_callback: TaskCallbackType):
         """
@@ -696,7 +696,10 @@ class CNComponentManagerLow(CNComponentManager):
         """
         try:
             subarray_id = json_argument["subarray_id"]
-            csp_input = json_argument["csp"]
+            csp_input = json_argument.get("csp", None)
+            if csp_input is None:
+                self.logger.debug("csp key missing")
+                return
             pss_key = csp_input.get("pss", None)
             if pss_key is None:
                 return
@@ -722,7 +725,9 @@ class CNComponentManagerLow(CNComponentManager):
                     f"PSS beams: {conflicting_beams} already assigned"
                     f" to another subarray"
                 )
-
+            self.logger.info(
+                "PSS beams assigned for %s: %s", subarray_id, pss_beam_ids
+            )
             self.pss_beams_assigned_per_subarray[subarray_id] = pss_beam_ids
 
         except Exception as exception:
