@@ -143,6 +143,20 @@ class AssignResourcesLow(AssignResources):
                 ("SubArray Id %s is not existing!", self.subarray_id),
             )
 
+        if (
+            "csp"
+            in self.component_manager.subsystem_assigned_per_subarray[
+                self.subarray_id
+            ]
+        ):
+            try:
+                self.update_subarray_pss_beams_mapping(json_argument)
+            except Exception as exception:
+                return (
+                    ResultCode.FAILED,
+                    str(exception),
+                )
+
         return_codes, message_or_unique_ids = self.send_command(
             [self.tm_subarray_adapter],
             "Error in calling AssignResources on subarray:"
@@ -161,20 +175,6 @@ class AssignResourcesLow(AssignResources):
                 ResultCode.FAILED,
                 message_or_unique_id,
             )
-
-        if (
-            "csp"
-            in self.component_manager.subsystem_assigned_per_subarray[
-                self.subarray_id
-            ]
-        ):
-            try:
-                self.update_subarray_pss_beams_mapping(json_argument)
-            except Exception as exception:
-                return (
-                    ResultCode.FAILED,
-                    str(exception),
-                )
 
         if (
             "mccs"
