@@ -5,9 +5,9 @@ import threading
 import time
 from typing import Any, Callable, List, Optional, Tuple
 
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
 from tango import DevState
 
 from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff

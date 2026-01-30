@@ -5,8 +5,8 @@ import time
 from typing import Tuple
 
 from retry import retry
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
 from ska_telmodel.data import TMData
 from ska_tmc_common.v1.error_propagation_tracker import (
     error_propagation_tracker,

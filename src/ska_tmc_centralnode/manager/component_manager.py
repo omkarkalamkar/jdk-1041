@@ -19,10 +19,9 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
 import tango
-from ska_control_model import AdminMode, HealthState
+from ska_control_model import AdminMode, HealthState, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
 from ska_tango_base.faults import StateModelError
 from ska_tmc_common import (
     AdapterFactory,

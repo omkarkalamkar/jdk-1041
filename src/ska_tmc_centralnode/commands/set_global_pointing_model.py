@@ -4,8 +4,8 @@ import json
 import threading
 from typing import Callable, Optional, Tuple
 
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
 from ska_telmodel.data import TMData
 
 from ska_tmc_centralnode.commands.central_node_command import SetDishGPM
