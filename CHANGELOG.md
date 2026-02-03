@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 
+[0.29.1]
+*********
+Updated
+-------
+* Updated the PSS validation to reject AssignResourcesLow before queueing in case PSS beams are attempted to be shared between subarrays.
 
 [0.29.0]
 ************
