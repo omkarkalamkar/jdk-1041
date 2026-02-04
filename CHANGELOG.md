@@ -39,7 +39,7 @@ Updated
 * Central Node now subscribes to the Dish Leaf Node healthState attribute and derives the telescope aggregate health state from it.
 
 [0.26.0]
-*************
+*********
 
 Updated
 -------
@@ -47,7 +47,7 @@ Updated
 * Updates to use telescope model v1.28.0
 
 [0.25.1]
-************
+*********
 
 Updated
 -------
