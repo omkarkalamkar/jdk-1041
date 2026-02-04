@@ -13,13 +13,13 @@ Updated
 * Updated the PSS validation to reject AssignResourcesLow before queueing in case PSS beams are attempted to be shared between subarrays.
 
 [0.29.0]
-************
+*********
 Added
 ------
 * Added SetStowMode command to apply Stow mode on specified dish id's.
 
 [0.28.1]
-************
+*********
 Updated
 -------
 * Updated rules for aggregation of telescope health state.
@@ -32,7 +32,7 @@ Updated
 * Updated AssignResources to validate pss beams are not shared between subarrays.
 
 [0.27.0]
-************
+*********
 
 Updated
 -------
