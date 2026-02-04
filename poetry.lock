@@ -373,14 +373,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "astropy-iers-data"
-version = "0.2026.1.26.0.43.56"
+version = "0.2026.2.2.0.48.1"
 description = "IERS Earth Rotation and Leap Second tables for the astropy core package"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "astropy_iers_data-0.2026.1.26.0.43.56-py3-none-any.whl", hash = "sha256:355e0e669dd883bd0aaae909cd5e767897ccdc6c96a71b93f2580b86252e8054"},
-    {file = "astropy_iers_data-0.2026.1.26.0.43.56.tar.gz", hash = "sha256:0e50352ecbd2376978db559180bdfc937e240a57c313061e26359197ea69fa15"},
+    {file = "astropy_iers_data-0.2026.2.2.0.48.1-py3-none-any.whl", hash = "sha256:62aecb2faea740e0d714808b85512ebe4f29adbfe1e8d5e5481cfd66494d164f"},
+    {file = "astropy_iers_data-0.2026.2.2.0.48.1.tar.gz", hash = "sha256:d495e25566eb1fd08c16eecc190f60b06f56b8d7f3516d279765afef736b3f73"},
 ]
 
 [package.extras]
@@ -457,14 +457,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "babel"
-version = "2.17.0"
+version = "2.18.0"
 description = "Internationalization utilities"
 optional = false
 python-versions = ">=3.8"
 groups = ["docs"]
 files = [
-    {file = "babel-2.17.0-py3-none-any.whl", hash = "sha256:4d0b53093fdfb4b21c92b5213dba5a1b23885afa8383709427046b21c366e5f2"},
-    {file = "babel-2.17.0.tar.gz", hash = "sha256:0c54cffb19f690cdcc52a3b50bcbf71e07a808d1c80d549f2459b9d2cf0afb9d"},
+    {file = "babel-2.18.0-py3-none-any.whl", hash = "sha256:e2b422b277c2b9a9630c1d7903c2a00d0830c409c59ac8cae9081c92f1aeba35"},
+    {file = "babel-2.18.0.tar.gz", hash = "sha256:b80b99a14bd085fcacfa15c9165f651fbb3406e66cc603abf11c5750937c992d"},
 ]
 
 [package.extras]
@@ -4451,10 +4451,8 @@ description = "SKA TMC Simulators contains helper classes required for Telescope
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["main"]
-files = [
-    {file = "ska_tmc_simulators-1.9.4-py3-none-any.whl", hash = "sha256:656e75297647184fe615a36cec7c36042a3b8637d4b542f38594e9ca5c251067"},
-    {file = "ska_tmc_simulators-1.9.4.tar.gz", hash = "sha256:ad2b017ca825b165998d2f99140aab988642378ed61c16b74da9ec7737d4cb65"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 attrs = "*"
@@ -5065,14 +5063,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "wcwidth"
-version = "0.5.2"
+version = "0.2.14"
 description = "Measures the displayed width of unicode strings in a terminal"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "wcwidth-0.5.2-py3-none-any.whl", hash = "sha256:46912178a64217749bf3426b21e36e849fbc46e05c949407b3e364d9f7ffcadf"},
-    {file = "wcwidth-0.5.2.tar.gz", hash = "sha256:c022c39a02a0134d1e10810da36d1f984c79648181efcc70a389f4569695f5ae"},
+    {file = "wcwidth-0.2.14-py2.py3-none-any.whl", hash = "sha256:a7bb560c8aee30f9957e5f9895805edd20602f2d7f720186dfd906e82b4982e1"},
+    {file = "wcwidth-0.2.14.tar.gz", hash = "sha256:4d478375d31bc5395a3c55c40ccdf3354688364cd61c4f6adacaa9215d0b3605"},
 ]
 
 [package.source]

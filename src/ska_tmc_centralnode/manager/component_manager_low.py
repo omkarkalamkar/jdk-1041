@@ -577,6 +577,7 @@ class CNComponentManagerLow(CNComponentManager):
             config=json_argument,
             strictness=2,
         )
+        self.update_subarray_pss_beams_mapping(json_argument)
 
     def assign_resources(self, argin: str, task_callback: TaskCallbackType):
         """
@@ -679,3 +680,55 @@ class CNComponentManagerLow(CNComponentManager):
             return task_status, response
         except Exception as exception:
             return release_resources_command.reject_command(str(exception))
+
+    def update_subarray_pss_beams_mapping(self, json_argument: dict) -> dict:
+        """
+        Method to update the mapping of subarray_id to the assigned pss beams
+
+        Args:
+            json_argument (dict): The string in JSON format.
+
+        Returns:
+            dict: The string in JSON format.
+
+        """
+        try:
+            subarray_id = json_argument["subarray_id"]
+            csp_input = json_argument.get("csp", None)
+            if csp_input is None:
+                self.logger.debug("csp key missing")
+                return
+            pss_key = csp_input.get("pss", None)
+            if pss_key is None:
+                return
+            pss_beam_ids = pss_key["pss_beam_ids"]
+            assigned_pss_beams = set()
+            for (
+                assigned_subarray_id,
+                beams,
+            ) in self.pss_beams_assigned_per_subarray.items():
+                if assigned_subarray_id != subarray_id:
+                    assigned_pss_beams.update(beams)
+
+            # Check if pss_beam_id is already assigned to another subarray
+            conflicting_beams = [
+                beam for beam in pss_beam_ids if beam in assigned_pss_beams
+            ]
+            if conflicting_beams:
+                self.logger.error(
+                    "PSS beams: %s already assigned to another subarray",
+                    conflicting_beams,
+                )
+                raise Exception(
+                    f"PSS beams: {conflicting_beams} already assigned"
+                    f" to another subarray"
+                )
+            self.logger.info(
+                "PSS beams assigned for subarray %s: %s",
+                subarray_id,
+                pss_beam_ids,
+            )
+            self.pss_beams_assigned_per_subarray[subarray_id] = pss_beam_ids
+
+        except Exception as exception:
+            raise exception
