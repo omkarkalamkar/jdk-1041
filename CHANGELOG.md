@@ -6,15 +6,20 @@ All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 
+[0.29.1]
+*********
+Updated
+-------
+* Updated the PSS validation to reject AssignResourcesLow before queueing in case PSS beams are attempted to be shared between subarrays.
 
 [0.29.0]
-************
+*********
 Added
-------
+-----
 * Added SetStowMode command to apply Stow mode on specified dish id's.
 
 [0.28.1]
-************
+*********
 Updated
 -------
 * Updated rules for aggregation of telescope health state.
@@ -27,14 +32,14 @@ Updated
 * Updated AssignResources to validate pss beams are not shared between subarrays.
 
 [0.27.0]
-************
+*********
 
 Updated
 -------
 * Central Node now subscribes to the Dish Leaf Node healthState attribute and derives the telescope aggregate health state from it.
 
 [0.26.0]
-*************
+*********
 
 Updated
 -------
@@ -42,7 +47,7 @@ Updated
 * Updates to use telescope model v1.28.0
 
 [0.25.1]
-************
+*********
 
 Updated
 -------

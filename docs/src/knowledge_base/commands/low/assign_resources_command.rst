@@ -24,19 +24,23 @@ The AssignResources command allocates telescope resources to a specific subarray
         a. JSON should not be empty or malformed
         b. JSON validation against the schema specified in the Telescope Model (https://developer.skao.int/projects/ska-telmodel/en/latest/schemas/tmc/ska-low-tmc-assignres.html)
 
-    7. The following **state requirements** are applied for the **command execution** :-
+    7. CentralNode validates the pss beam_ids in assign json:
+            - If already assigned to different SubarrayNode: Command failure is reported as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node, with a message mentioning the pss beam ids that are already assigned to different subarray.
+            - If not already assigned to different SubarrayNode: Command execution continues
+
+    8. The following **state requirements** are applied for the **command execution** :-
 
         a. TMC Subarray is in `'observation state'` **EMPTY** or **IDLE** .
         b. :term:`telescopeAvailability` is checked to ensure the subsystems (SubarryNode, CSP, SDP and MCCS) are :term:`available`
     
-    8. The command execution involves below key operations :-
+    9. The command execution involves below key operations :-
         a. `'transaction ID'` is removed from the input JSON
         b. The command is then invoked on the relevant TMC Subarray Node.
 
             - If TMC Subarray node **rejects** assign resources command , command failure is reported as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node.
             - If TMC Subarray node **accepts** command , central node will wait for command completion.  
 
-    9. The Central Node monitors the progress of command via the subarray ObsState transitions and the long running command results :-
+    10. The Central Node monitors the progress of command via the subarray ObsState transitions and the long running command results :-
 
         - Command is successful when the TMC Subarray Node transitions to **IDLE** ObsState. This is reported as **'RESULT_CODE - OK'** on Long Running Command Result attribute of the central node.
         - Command failure is reported in any of the below cases as **'RESULT_CODE - FAILED'** on Long Running Command Result attribute of the central node:
