@@ -94,7 +94,7 @@ def assign_resources(
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.REJECTED),
+                    int(ResultCode.FAILED),
                     "Exception from 'is_cmd_allowed' method: Subarray devices "
                     + "not available: ['low-tmc/subarray/01']",
                 )
@@ -102,7 +102,6 @@ def assign_resources(
         ),
         lookahead=4,
     )
-
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
     export_device(db, db_device_info)

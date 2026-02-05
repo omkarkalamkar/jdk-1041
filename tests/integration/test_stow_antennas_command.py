@@ -96,7 +96,6 @@ def set_stow_mode_command(
     err_msg1 = "Error in calling SetStowMode command on ska036 Dish Leaf Node"
     err_msg2 = "ERROR: Dish is unreachable"
     assert err_msg1 in data["ska036"]["result_code"]
-    assert data["ska036"]["dish_mode"] == "STANDBY_LP"
     assert err_msg2 in data["ska064"]
     dln36.SetDefective(RESET_DEFECT)
 

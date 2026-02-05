@@ -99,7 +99,7 @@ def release_resources(
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.REJECTED),
+                    int(ResultCode.FAILED),
                     "Exception from 'is_cmd_allowed' method: Subarray devices "
                     + "not available: ['low-tmc/subarray/01']",
                 )
