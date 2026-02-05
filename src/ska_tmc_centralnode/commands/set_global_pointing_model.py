@@ -449,7 +449,6 @@ class SetGlobalPointingModel(SetDishGPM):
                     self.component_manager.dishln_gpm_cmd_exe_data,
                 )
             if not self.component_manager.number_of_gpm_executed:
-                self.component_manager.aggregate_set_gpm_results()
                 self.component_manager.gpm_version_aggregated_result = (
                     ResultCode.OK
                 )

@@ -16,7 +16,6 @@ from typing import Callable, Dict
 
 from ska_control_model import AdminMode
 from ska_tango_base.base import TaskCallbackType
-from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_telmodel.schema import validate
 from ska_tmc_common.enum import LivelinessProbeType
@@ -154,9 +153,6 @@ class CNComponentManagerLow(CNComponentManager):
 
         self.event_processing_methods.update(
             {
-                "longRunningCommandResult": (
-                    self.update_long_running_command_result
-                ),
                 "isSubsystemAvailable": self.update_telescope_availability,
                 "isSubarrayAvailable": self.update_telescope_availability,
                 "state": self.update_device_state,
@@ -257,146 +253,6 @@ class CNComponentManagerLow(CNComponentManager):
             for uid in data:
                 unique_ids.append(uid)
         return unique_ids
-
-    def update_long_running_command_result(self, dev_name: str, value: tuple):
-        """Updates the LRCR callback with received event.
-
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg) or
-        (unique_id,TaskStatus)Whenever there is exception occured on any
-        device,(unique_id,exception_msg) event is first raised and catched in
-        ValueError.The events on longRunningCommandResult from both the
-        devices are aggregated and then exception_msg and command_id along
-        with the device name is then passed to long_running_result_callback.
-        Command_mapping contains {centralnode_command_id:unique_id} , all
-        events are verified with respect to this mapping.If there is no
-        command_mapping present the event might be of old command.
-
-        :param dev_name: name of the device who's event has been captured
-        :type dev_name: str
-        :param value: longRunningCommandResult attribute event.
-        :type value: tuple
-        """
-        self.logger.debug(
-            "Command mapping dictionary: %s", str(self.command_mapping)
-        )
-        unique_ids = self.get_unique_ids()
-        unique_id, result_code_or_exception_or_task_status = value
-        if (
-            not unique_id.endswith(self.supported_commands)
-            or (not result_code_or_exception_or_task_status)
-            or (unique_id not in unique_ids)
-        ):  # ignoring other command events
-            return
-
-        command_id = self.get_command_id(unique_id)
-        self.logger.debug(
-            "Command ID: %s | Received longRunningCommandResult event "
-            + "for device: %s, with value: %s",
-            command_id,
-            dev_name,
-            str(value),
-        )
-
-        try:
-            result_code, message = json.loads(
-                result_code_or_exception_or_task_status
-            )
-            if not self.event_dict.get(command_id):
-                self.event_dict[command_id] = {}
-            match int(result_code):
-                case ResultCode.OK:
-                    self.event_dict[command_id].update(
-                        {dev_name: ResultCode.OK}
-                    )
-                    self.command_mapping[command_id].remove(unique_id)
-                    self.logger.debug(
-                        "Updated command mapping dictionary is: %s",
-                        str(self.command_mapping),
-                    )
-
-                case (
-                    ResultCode.REJECTED
-                    | ResultCode.FAILED
-                    | ResultCode.NOT_ALLOWED
-                    | ResultCode.ABORTED
-                ):
-                    self.event_dict[command_id].update(
-                        {dev_name: {"error": message}}
-                    )
-                    self.error_count += 1
-                    self.command_mapping[command_id].remove(unique_id)
-                    self.logger.debug(
-                        "Updated command mapping dictionary is: %s",
-                        str(self.command_mapping),
-                    )
-                    self.logger.exception(
-                        "Command ID: %s | Exception occurred with value: %s "
-                        + "for %s command_id for device: %s",
-                        command_id,
-                        str(value),
-                        command_id,
-                        dev_name,
-                    )
-            # If mccs is present in subsystems_to_config list, two LRCR events
-            # need to be considered as the command gets invoked on both
-            # SubarrayNode and MCCS subsystem.
-            if (
-                "mccs" in self.subsystem_assigned_per_command_id[command_id]
-                and not self.is_auto_recovery_enabled
-            ):
-                expected_event_dict_len = 2
-            else:
-                expected_event_dict_len = 1
-
-            if len(self.event_dict[command_id]) == expected_event_dict_len:
-                self.logger.info(
-                    "Triggering update of long running command result callback"
-                )
-                self.update_long_running_command_result_callback(command_id)
-        except Exception as exception:
-            self.logger.exception(
-                "Command ID: %s | "
-                + "Exception occurred while processing"
-                + "long running command result"
-                + "attribute event: %s",
-                command_id,
-                exception,
-            )
-
-    def update_long_running_command_result_callback(self, command_id) -> None:
-        """
-        Checks for errors after receiving events from all the desired devices.
-        If there are errors, aggregates them and updates the long running
-        command result (LRCR) callback. If there are no errors,
-        resets the event dictionary.
-
-        Args:
-            command_id (str): The command ID for which to update the LRCR
-                callback.
-        """
-        if self.error_count:
-            # Aggregate error messages from event_dict
-            exception_message = "Exception occurred on the following devices: "
-            for devname, data in self.event_dict[command_id].items():
-                if isinstance(data, dict):
-                    error_message = data["error"]
-                    exception_message += (
-                        f"{command_id}: {devname}: {error_message}"
-                    )
-            self.logger.debug(
-                "Command ID: %s | Updating LRCRCallback with following"
-                + " values: ResultCode: %s, Message: %s",
-                command_id,
-                str(ResultCode.FAILED),
-                exception_message,
-            )
-            self.long_running_result_callback(
-                command_id,
-                ResultCode.FAILED,
-                exception_msg=exception_message,
-            )
-            self.observable.notify_observers(command_exception=True)
-        self.reset_event_count(command_id)
 
     def update_device_state(self, device_name, state):
         """

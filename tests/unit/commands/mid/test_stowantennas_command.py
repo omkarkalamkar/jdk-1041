@@ -84,37 +84,8 @@ def test_reset_stow_mode_data():
     cm.logger.debug.assert_called_once()
 
 
-def test_update_set_stow_mode_results():
-    cm, _ = create_cm()
-    cm.logger = MagicMock()
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {
-            "result_code": None,
-            "dish_mode": None,
-        }
-    }
-    cm.number_of_stow_mode_executed = 1
-    cm.command_in_progress = "SetStowMode"
-    cm.aggregate_set_stow_mode_results = MagicMock()
-    cm.observable = MagicMock()
-
-    cm.update_set_stow_mode_results(
-        "abc/def/ska001", ("123_SetStowMode", '[0, "Command Completed"]')
-    )
-    assert cm.logger.info.call_count == 2
-    assert cm.logger.debug.call_count == 2
-    cm.aggregate_set_stow_mode_results.assert_called_once()
-    assert cm.stow_mode_command_aggregated_result == ResultCode.OK
-    assert not cm.number_of_stow_mode_executed
-    result_code = cm.dishln_stow_mode_cmd_exe_data.get("ska001").get(
-        "result_code"
-    )
-    assert result_code == [0, "Command Completed"]
-
-
 def test_aggregate_set_stow_mode_results():
     cm, _ = create_cm()
-    cm.aggregate_dish_stow_mode_events = MagicMock(return_value=True)
     cm.dishln_stow_mode_cmd_exe_data = {
         "ska001": {
             "result_code": [3, "Command Failed"],
@@ -126,20 +97,6 @@ def test_aggregate_set_stow_mode_results():
     cm.dishln_stow_mode_cmd_exe_data = {"ska001": "Dish is unreachable"}
     cm.aggregate_set_stow_mode_results()
     assert not cm.stow_mode_aggregated_result
-
-
-def test_all_dish_stow_mode_available():
-    cm, _ = create_cm()
-    cm.get_current_dish_mode_of_dln = MagicMock(return_value=2)
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {
-            "result_code": [3, "Command Failed"],
-            "dish_mode": None,
-        }
-    }
-    assert not cm.all_dish_stow_mode_available()
-    cm.get_current_dish_mode_of_dln = MagicMock(return_value=5)
-    assert cm.all_dish_stow_mode_available()
 
 
 def test_get_current_dish_mode_of_dln():
@@ -160,20 +117,6 @@ def test_get_current_dish_mode_of_dln():
     cm.get_dish_leaf_node_device_names.assert_called_once()
     cm._component.get_device.call_count >= 1
     assert result == expected_mode
-
-
-def test_aggregate_set_stow_mode_results_success():
-    cm, _ = create_cm()
-    cm.aggregate_dish_stow_mode_events = MagicMock(return_value=True)
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {"result_code": [int(ResultCode.OK), "OK"]},
-    }
-    cm.aggregate_set_stow_mode_results()
-    cm.aggregate_dish_stow_mode_events.assert_called_once()
-    assert cm.stow_mode_aggregated_result is True
-    cm.aggregate_dish_stow_mode_events = MagicMock(return_value=False)
-    cm.aggregate_set_stow_mode_results()
-    assert not cm.stow_mode_aggregated_result
 
 
 def test_apply_set_stow_command(task_callback):

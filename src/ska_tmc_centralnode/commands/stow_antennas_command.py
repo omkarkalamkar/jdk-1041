@@ -278,13 +278,6 @@ class SetStowMode(SetDishGPM):
                 self.component_manager.dishln_stow_mode_cmd_exe_data,
             )
             if not self.component_manager.number_of_stow_mode_executed:
-                self.component_manager.aggregate_set_stow_mode_results()
-                self.component_manager.stow_mode_command_aggregated_result = (
-                    ResultCode.OK
-                )
-                self.component_manager.observable.notify_observers(
-                    attribute_value_change=True
-                )
                 return_codes[0] = ResultCode.OK
                 message_or_unique_ids.append("SetStowMode Command Completed")
                 self.logger.debug(

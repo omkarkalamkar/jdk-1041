@@ -364,6 +364,11 @@ def test_assign_resources_exception_propagation(
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
@@ -375,14 +380,7 @@ def test_assign_resources_exception_propagation(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )

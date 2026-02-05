@@ -425,12 +425,7 @@ class CNComponentManager(TmcComponentManager):
                 if not self.check_event_error(
                     event_data, f"{attribute_name}_Callback"
                 ):
-                    if attribute_name == "loadDishConfigResultAsync":
-                        self.event_processing_methods[attribute_name](
-                            event_data.device.dev_name(),
-                            event_data.argout,
-                        )
-                    elif attribute_name in ("healthState", "adminMode"):
+                    if attribute_name in ("healthState", "adminMode"):
                         self.event_processing_methods[attribute_name](
                             event_data.device.dev_name(),
                             event_data.attr_value.value,
@@ -978,7 +973,6 @@ class CNComponentManager(TmcComponentManager):
                 )
                 devInfo.last_event_arrived = time.time()
                 self.component._invoke_device_callback(devInfo)
-            self.observable.notify_observers(attribute_value_change=True)
 
     def update_device_assigned_resource(
         self, dev_name: str, assign_resources: str

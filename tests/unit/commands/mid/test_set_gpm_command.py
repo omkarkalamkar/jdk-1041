@@ -134,7 +134,6 @@ def test_set_gpm_command_with_ok(
     task_callback,
 ):
     cm, _ = create_cm()
-    cm.aggregate_set_gpm_results = MagicMock()
     cm.set_gpm_version(json.dumps(gpm_input), task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
@@ -145,7 +144,6 @@ def test_set_gpm_command_with_ok(
         "ska001": {"Band_4": [0, "Command Completed"]}
     }
     cm.gpm_version_aggregated_result = ResultCode.OK
-    cm.observable.notify_observers(command_exception=True)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -237,7 +235,6 @@ def test_no_gpm_executed():
         logger=MagicMock(),
     )
     result_code, result_message = command._set_gpm_to_dish({})
-    component_manager.aggregate_set_gpm_results.assert_called_once()
     assert component_manager.gpm_version_aggregated_result == ResultCode.OK
 
     assert result_code == [ResultCode.UNKNOWN]
@@ -280,25 +277,6 @@ def test_set_gpm_to_dish_exception_handling():
     ]
 
 
-def test_aggregate_set_gpm_results_all_ok():
-    data = {"ska001": {"Band_4": [ResultCode.OK]}}
-    cm, _ = create_cm()
-    cm.logger = MagicMock()
-    cm.dishln_gpm_cmd_exe_data = data
-    cm.aggregate_set_gpm_results()
-    assert cm.gpm_aggregated_result is True
-    cm.logger.exception.assert_not_called()
-
-    data = {"ska001": "Failed"}
-    cm.dishln_gpm_cmd_exe_data = data
-    cm.aggregate_set_gpm_results()
-    assert cm.gpm_aggregated_result is False
-    data = {"ska001": {"Band_4": [ResultCode.FAILED]}}
-    cm.dishln_gpm_cmd_exe_data = data
-    cm.aggregate_set_gpm_results()
-    assert cm.gpm_aggregated_result is False
-
-
 @pytest.mark.skip("removed")
 def test_update_set_gpm_results():
     cm, _ = create_cm()
@@ -307,7 +285,6 @@ def test_update_set_gpm_results():
     cm.number_of_gpm_executed = 1
     cm.command_in_progress = "SetGlobalPointingModel"
     cm.gpm_version_aggregated_result = ResultCode.UNKNOWN
-    cm.observable = mock.Mock()
     cm.logger = mock.Mock()
     cm._get_band_dishln_gpm_cmd_data = MagicMock(return_value="Band_1")
     dev_name = "mid-tmc/leaf-node-dish/ska001"
