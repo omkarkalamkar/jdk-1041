@@ -184,7 +184,7 @@ class SetStowMode(SetDishGPM):
 
         result_code, message = self._set_stow_mode_to_dish(argin)
         if result_code[0] not in [ResultCode.OK, ResultCode.STARTED]:
-            return [result_code], [message]
+            return result_code, message
         receptors = (
             list(self.component_manager.dishln_stow_mode_cmd_exe_data.keys())
             + self.receptors_with_stow_mode_set

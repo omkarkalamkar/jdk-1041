@@ -300,7 +300,6 @@ def gpm_restart_scenarios(
     "central_node_name",
     [CENTRALNODE_MID],
 )
-@pytest.mark.new
 def test_set_gpm_command_negative_scenarios_all(
     tango_context,
     central_node_name,

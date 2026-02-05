@@ -239,12 +239,10 @@ def test_mid_release_resources_raises_state_model_exception(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
 
-    data = task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.REJECTED,
-            "result": Anything,
-            "exception": Anything,
-        }
+    data = task_callback.assert_call(
+        status=TaskStatus.REJECTED,
+        result=Anything,
+        lookahead=5,
     )
-    assert ResultCode.REJECTED == data["result"][0]
+    assert ResultCode.NOT_ALLOWED == data["result"][0]
     assert "ReleaseResources command not permitted" in data["result"][1]

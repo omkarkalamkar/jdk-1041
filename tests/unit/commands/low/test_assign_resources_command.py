@@ -6,7 +6,6 @@ import pytest
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -321,12 +320,10 @@ def test_low_assign_resources_raises_state_model_exception(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
 
-    data = task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.REJECTED,
-            "result": Anything,
-            "exception": Anything,
-        }
+    task_callback.assert_against_call(
+        status=TaskStatus.REJECTED,
+        result=(
+            ResultCode.NOT_ALLOWED,
+            "AssignResources command not permitted in observation state 4",
+        ),
     )
-    assert ResultCode.REJECTED == data["result"][0]
-    assert "AssignResources command not permitted" in data["result"][1]
