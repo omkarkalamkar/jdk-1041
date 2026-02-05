@@ -4,6 +4,7 @@ AssignResourcesLow Command class for CentralNode.
 import json
 from typing import Tuple
 
+from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
@@ -126,7 +127,7 @@ class AssignResourcesMid(AssignResources):
             self.tm_subarray_adapter,
         )
 
-        return_codes, message_or_unique_ids = self.send_command(
+        return_codes, message_or_unique_ids = self.invoke_command(
             [self.tm_subarray_adapter],
             "Error in calling AssignResources on subarray",
             "AssignResources",
@@ -149,4 +150,9 @@ class AssignResourcesMid(AssignResources):
             self.tm_subarray_adapter,
         )
 
-        return (ResultCode.OK, "")
+        return self.wait_for_command_completion(
+            len(self.command_subs_list),
+            ObsState.IDLE,
+            "get_subarray_obsstate",
+            use_command_class_id=True,
+        )

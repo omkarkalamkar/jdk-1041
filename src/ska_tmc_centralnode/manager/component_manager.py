@@ -19,10 +19,9 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import pandas as pd
 import tango
-from ska_control_model import AdminMode, HealthState
+from ska_control_model import AdminMode, HealthState, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
 from ska_tango_base.faults import StateModelError
 from ska_tmc_common import (
     AdapterFactory,
@@ -223,6 +222,7 @@ class CNComponentManager(TmcComponentManager):
             default_array_layout_url_callback
         )
         self._default_array_layout_url: dict = default_array_layout_url
+        self.command_completion_cond = threading.Condition()
 
     def setup_event_subscription(self) -> None:
         """
@@ -284,7 +284,6 @@ class CNComponentManager(TmcComponentManager):
                         "dishMode",
                         "kValueValidationResult",
                         "healthState",
-                        "longrunningcommandresult",
                         "gpmVersion",
                     ]
                 )
@@ -293,7 +292,6 @@ class CNComponentManager(TmcComponentManager):
             if dev_name in self.input_parameter.subarray_dev_names:
                 device_attribute_map[dev_name].extend(
                     [
-                        "longRunningCommandResult",
                         "isSubarrayAvailable",
                     ]
                 )
@@ -306,7 +304,6 @@ class CNComponentManager(TmcComponentManager):
         if MID_CSP_MLN_DEVICE in device_attribute_map:
             device_attribute_map[MID_CSP_MLN_DEVICE].extend(
                 [
-                    "longRunningCommandResult",
                     "DishVccMapValidationResult",
                     "cspControllerAdminMode",
                 ]
@@ -326,7 +323,6 @@ class CNComponentManager(TmcComponentManager):
         if MCCS_MLN_DEVICE in device_attribute_map:
             device_attribute_map[MCCS_MLN_DEVICE].extend(
                 [
-                    "longRunningCommandResult",
                     "mccsControllerAdminMode",
                 ]
             )

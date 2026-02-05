@@ -63,14 +63,14 @@ def set_gpm_command(tango_context, central_node_name, change_event_callbacks):
 
     assert unique_id[0].endswith("SetGlobalPointingModel")
     assert result[0] == ResultCode.QUEUED
-    change_event_callbacks.assert_change_event(
-        "GlobalPointingModelStatus",
+    change_event_callbacks["GlobalPointingModelStatus"].assert_change_event(
         Anything,
         lookahead=4,
     )
 
-    assertion_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    assertion_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=4,
     )
@@ -153,8 +153,9 @@ def set_gpm_command_negative_scenarios(
         lookahead=4,
     )
 
-    assertion_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    assertion_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=4,
     )
@@ -178,7 +179,7 @@ def set_gpm_command_negative_scenarios(
     # Status of SKA100, SKA093 and SKA001 will be
     # unchanged as no command execution
     # happened on it.
-    subarray_node.SetDirectassignedResources("[]")
+    subarray_node.SetDirectassignedResources([""])
     assert gpm_status["ska036"]["Band_2"] == "1.0"
 
 
@@ -299,6 +300,7 @@ def gpm_restart_scenarios(
     "central_node_name",
     [CENTRALNODE_MID],
 )
+@pytest.mark.new
 def test_set_gpm_command_negative_scenarios_all(
     tango_context,
     central_node_name,

@@ -276,7 +276,6 @@ class CNComponentManagerMid(CNComponentManager):
                 "loadDishConfigResultAsync": (
                     self.update_load_dish_cfg_results_async
                 ),
-                "setGPMResult": self.update_set_gpm_results,
                 "gpmVersion": self.handle_gpm_version_event,
                 "setStowModeResult": self.update_set_stow_mode_results,
             }
@@ -1356,62 +1355,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.command_in_progress = ""
         if self.command_mapping.get(self.command_id):
             self.command_mapping.pop(self.command_id)
-
-    def update_set_gpm_results(self, dev_name: str, value: tuple) -> None:
-        """
-        This method is used to update the result returned
-        from Dish leaf nodes as part of SetGlobalPointingModel
-        command.
-        If all events are received from all device then aggregate
-        the result
-        Value contains (unique_id, ResultCode)
-        Args:
-            dev_name (str): Name of the device who's event has been
-            captured in this method
-            value (tuple): longRunningCommandResult attribute event.
-        """
-
-        self.logger.info(
-            "GPM longRunningCommandResult event for device: "
-            "%s, with value: %s",
-            dev_name,
-            str(value),
-        )
-        with self.dishln_gpm_lock:
-            dishln_id = dev_name.split("/")[-1]
-            result_code_or_exception = []
-            unique_id, resultcode_message = value
-            if unique_id.endswith("ApplyPointingModel"):
-                result_code_or_exception = json.loads(resultcode_message)
-            if result_code_or_exception:
-                if dishln_id in self.dishln_gpm_cmd_exe_data:
-                    band_value = self._get_band_dishln_gpm_cmd_data(unique_id)
-                    self.dishln_gpm_cmd_exe_data[dishln_id][
-                        band_value
-                    ] = result_code_or_exception
-                    self.logger.debug(
-                        "dishln gpm %s", self.dishln_gpm_cmd_exe_data
-                    )
-                if self.number_of_gpm_executed > 0:
-                    self.number_of_gpm_executed -= 1
-                self.logger.info(
-                    "Dev names for set gpm  %s &"
-                    " number of gpm executed remaining %s",
-                    str(self.dishln_gpm_cmd_exe_data),
-                    self.number_of_gpm_executed,
-                )
-
-            if (
-                not self.number_of_gpm_executed
-                and self.command_in_progress == "SetGlobalPointingModel"
-            ):
-                self.logger.info(
-                    "All Events received for set GPM version,"
-                    " Aggregating GPM results"
-                )
-                self.aggregate_set_gpm_results()
-                self.gpm_version_aggregated_result = ResultCode.OK
-                self.observable.notify_observers(command_exception=True)
 
     def _get_band_dishln_gpm_cmd_data(self, unique_id: str) -> str:
         """Return Band for the specified dish in unique id

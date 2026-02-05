@@ -236,17 +236,16 @@ def test_telescope_health_state_handles_multi_dish_failure(
     dish_ln_63.SetDirectHealthState(HealthState.FAILED)
     dish_ln_100.SetDirectHealthState(HealthState.FAILED)
 
-    time.sleep(0.3)
-
-    assert central_node.telescopeHealthState == HealthState.FAILED
+    change_event_callbacks["telescopeHealthState"].assert_change_event(
+        HealthState.FAILED, lookahead=4
+    )
 
     #  Dish reports OK
     dish_ln.SetDirectHealthState(HealthState.OK)
 
-    time.sleep(0.1)
-
-    assert central_node.telescopeHealthState == HealthState.DEGRADED
-
+    change_event_callbacks["telescopeHealthState"].assert_change_event(
+        HealthState.DEGRADED, lookahead=4
+    )
     # Tear down: Dish reports OK
     dish_ln_36.SetDirectHealthState(HealthState.OK)
     dish_ln_63.SetDirectHealthState(HealthState.OK)

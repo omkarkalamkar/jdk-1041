@@ -11,7 +11,7 @@ from ska_tmc_common.dev_factory import DevFactory
 
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import ERROR_PROPAGATION_DEFECT, RESET_DEFECT, logger
+from tests.settings import DISH_DEFECT, RESET_DEFECT, logger
 
 
 def set_stow_mode_command(
@@ -65,7 +65,7 @@ def set_stow_mode_command(
     dln36.SetDirectDishMode(2)
     time.sleep(1)
 
-    dln36.SetDefective(ERROR_PROPAGATION_DEFECT)
+    dln36.SetDefective(DISH_DEFECT)
     time.sleep(0.5)
 
     result, unique_id = central_node.SetStowMode(

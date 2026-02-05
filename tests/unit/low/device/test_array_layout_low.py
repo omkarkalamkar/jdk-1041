@@ -3,8 +3,8 @@ import time
 
 import pytest
 import tango
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import DevFactory
 from tango.test_utils import DeviceTestContext
 

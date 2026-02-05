@@ -3,13 +3,16 @@
 # pylint:disable =abstract-method
 import logging
 import operator
+import threading
 import time
 from typing import Any, List, Optional, Tuple, Union
 
+from ska_control_model import TaskStatus
 from ska_ser_logging import configure_logging
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
+from ska_tango_base.faults import CommandError, ResultCodeError
+from ska_tango_base.long_running_commands.api import invoke_lrc
 from ska_tmc_common import TimeoutCallback
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.tmc_command import TMCCommand
@@ -67,6 +70,11 @@ class CentralNodeCommand(TMCCommand):
         )
         self.task_callback: TaskCallbackType = task_callback_default
         self.mccs_mln_adapter = None
+        self.command_subs_list = []
+        self.abort_flag = False
+        self.command_results = {}
+        self.command_device_id_map = {}
+        self.task_abort_event = threading.Event()
 
     def init_adapters(self) -> Tuple[ResultCode, str]:
         """Initialises adapters for central node command class"""
@@ -90,7 +98,82 @@ class CentralNodeCommand(TMCCommand):
 
         return result
 
+    def call_update_task_status(self, result, message) -> None:
+        """Call update task status and provide result, message
+        attribute
+        Args:
+            result(ResultCode): Result code
+            message(str): command success/error message
+        Returns:
+            None
+        """
+        if result != ResultCode.ABORTED:
+            self.update_task_status(
+                result=(result, message), exception=message
+            )
+        else:
+            self.update_task_status(status=TaskStatus.ABORTED)
+
     def invoke_command(
+        self,
+        adapters: List,
+        err_msg: str,
+        command_name: str,
+        argin: Optional[str] = None,
+        callback=None,
+    ) -> Tuple[List[ResultCode | Any], List[str | Any]]:
+        """
+        Invokes command on adapters
+
+        Args:
+            adapters: list of the adapters.
+            command_caller: command caller.
+            err_msg (str): error message.
+            command_name (str): Command name.
+
+        Returns:
+            Tuple(List, List): tuple containing a
+            list of return codes and a listof string msg.
+            For Example: (ResultCode.OK, "").
+
+        """
+        return_codes = []  # ["ResultCode.OK","ResultCode.REJECTED"]
+        message_or_unique_ids = []  # ["1234_AssignResources","InvalidJson"]
+
+        for adapter in adapters:
+            try:
+                (
+                    return_code,
+                    message,
+                ) = self.invoke_command_and_add_tracking_data(
+                    adapter=adapter,
+                    command_name=command_name,
+                    command_input=argin,
+                    callback=callback,
+                )
+                return_codes.append(return_code)
+                message_or_unique_ids.append(message)
+                self.logger.info(
+                    "%s invoked on %s ", command_name, adapter.dev_name
+                )
+
+            except Exception as e:
+                return_codes.append(ResultCode.FAILED)
+                message_or_unique_ids.append(
+                    f"{err_msg} {adapter.dev_name}: {e}"
+                )
+                self.logger.error(
+                    "Error in invoking %s on %s, Exception: %s",
+                    command_name,
+                    adapter.dev_name,
+                    str(e),
+                )
+        self.logger.info(
+            "Current message_or_uniques_ids: %s", str(message_or_unique_ids)
+        )
+        return return_codes, message_or_unique_ids
+
+    def invoke_commands_without_lrc(
         self,
         adapters: List,
         command_caller,
@@ -162,10 +245,10 @@ class CentralNodeCommand(TMCCommand):
 
         """
         if argin is None:
-            return self.invoke_command(
+            return self.invoke_commands_without_lrc(
                 adapters, operator.methodcaller(command), description, command
             )
-        return self.invoke_command(
+        return self.invoke_commands_without_lrc(
             adapters,
             operator.methodcaller(command, argin),
             description,
@@ -207,6 +290,143 @@ class CentralNodeCommand(TMCCommand):
         message = f"Adapter creation failed for {dev_name}: {str(error)}"
         self.logger.error(message)
         return ResultCode.FAILED, message
+
+    def invoke_command_and_add_tracking_data(
+        self, adapter, command_name, command_input=None, callback=None
+    ):
+        """Update command tracking data"""
+        try:
+            if not callback:
+                callback = self.invoke_command_lrc_cb
+            lrc_data = invoke_lrc(
+                callback(adapter.dev_name),
+                adapter._proxy,
+                command_name,
+                command_args=(command_input,) if command_input else None,
+                logger=self.logger,
+            )
+            self.command_subs_list.append(lrc_data)
+        except CommandError as err:
+            self.logger.error("command error %s", str(err))
+            error_message = (
+                f"Command Error for device {adapter.dev_name}: {str(err)}"
+            )
+            return ResultCode.REJECTED, error_message
+        except ResultCodeError as err:
+            self.logger.error("ResultCode error %s", str(err))
+            error_message = (
+                f"error occurred for device {adapter.dev_name}: {str(err)}"
+            )
+            return ResultCode.FAILED, error_message
+        return ResultCode.OK, ""
+
+    def set_abort_flag(self):
+        """This set abort flag to stop command completion
+        tracker
+        """
+        self.abort_flag = True
+        with self.component_manager.command_completion_cond:
+            self.component_manager.command_completion_cond.notify_all()
+
+    def wait_for_command_completion(
+        self,
+        device_length: int,
+        desired_state=None,
+        function_name=None,
+        use_command_class_id=False,
+    ):
+        """This Method wait for desired obs state"""
+        all_results_ok = False
+        end_time = time.monotonic() + self.component_manager.command_timeout
+        self.logger.info("subs list %s", self.command_subs_list)
+        with self.component_manager.command_completion_cond:
+            while True:
+                if self.abort_flag:
+                    self.logger.info(
+                        "Command is Aborting %s",
+                        self.component_manager.command_in_progress,
+                    )
+                    return ResultCode.ABORTED, "Command Aborted"
+                self.logger.info(
+                    "%s %s",
+                    len(self.command_results.keys()),
+                    self.command_results,
+                )
+                self.logger.info(device_length)
+                if len(self.command_results.keys()) == device_length:
+                    # All command results received check if any Failure
+                    failed_results_info = {}
+                    for device, result in self.command_results.items():
+                        self.logger.info(result)
+                        if result[0] != ResultCode.OK:
+                            failed_results_info[device] = result
+
+                    if failed_results_info:
+                        exception_message = (
+                            "Exception occurred on the following devices: "
+                        )
+                        for devname, error_value in sorted(
+                            failed_results_info.items()
+                        ):
+                            _, error_message = error_value
+                            exception_message += f"{devname}: {error_message}"
+
+                        return ResultCode.FAILED, exception_message
+                    all_results_ok = True
+                self.logger.info(
+                    "function_name %s %s", function_name, all_results_ok
+                )
+                if (not function_name) and all_results_ok:
+                    return ResultCode.OK, "Command Completed"
+                if function_name:
+                    if use_command_class_id:
+                        state = getattr(self, function_name)()
+                    else:
+                        state = getattr(
+                            self.component_manager, function_name
+                        )()
+                    if state == desired_state and all_results_ok:
+                        return ResultCode.OK, "Command Completed"
+
+                remaining = end_time - time.monotonic()
+                if remaining <= 0:
+                    if function_name and use_command_class_id:
+                        data = getattr(self, function_name)()
+                    elif function_name and not use_command_class_id:
+                        data = getattr(self.component_manager, function_name)()
+                    else:
+                        data = None
+                    self.logger.info(
+                        "No event command results %s state %s",
+                        self.command_results,
+                        data,
+                    )
+                    return (
+                        ResultCode.FAILED,
+                        "Timeout has occurred, command failed",
+                    )
+
+                self.component_manager.command_completion_cond.wait(remaining)
+
+    def invoke_command_lrc_cb(self, device_name: str):
+        """Invoke LRC callback.
+        Provide this callback whenever command is invoked using invoke_lrc api
+        Args:
+            device_name: Name Of Device
+        Returns:
+            callback: function object to provided to invoke_lrc
+        """
+
+        def callback(result=None, **kwargs):
+            logging.info("Got Command Result for %s %s", device_name, result)
+            if result:
+                with self.component_manager.command_completion_cond:
+                    self.command_results[device_name] = result
+                    cond = self.component_manager.command_completion_cond
+                    with cond:
+                        cond.notify_all()
+
+        return callback
 
 
 class TelescopeOnOff(CentralNodeCommand):
