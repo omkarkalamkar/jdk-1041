@@ -2439,14 +2439,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "parse"
-version = "1.20.2"
+version = "1.21.0"
 description = "parse() is the opposite of format()"
 optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
-    {file = "parse-1.20.2-py2.py3-none-any.whl", hash = "sha256:967095588cb802add9177d0c0b6133b5ba33b1ea9007ca800e526f42a85af558"},
-    {file = "parse-1.20.2.tar.gz", hash = "sha256:b41d604d16503c79d81af5165155c0b20f6c8d6c559efa66b4b695c3e5a0a0ce"},
+    {file = "parse-1.21.0-py2.py3-none-any.whl", hash = "sha256:6d81f7bae0ab25fd72818375c4a9c71c8705256bfc42e8725be609cf8b904aed"},
+    {file = "parse-1.21.0.tar.gz", hash = "sha256:937725d51330ffec9c7a26fdb5623baa135d8ba8ed78817ea9523538844e3ce4"},
 ]
 
 [package.source]
@@ -4451,8 +4451,10 @@ description = "SKA TMC Simulators contains helper classes required for Telescope
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "ska_tmc_simulators-1.9.4-py3-none-any.whl", hash = "sha256:656e75297647184fe615a36cec7c36042a3b8637d4b542f38594e9ca5c251067"},
+    {file = "ska_tmc_simulators-1.9.4.tar.gz", hash = "sha256:ad2b017ca825b165998d2f99140aab988642378ed61c16b74da9ec7737d4cb65"},
+]
 
 [package.dependencies]
 attrs = "*"
@@ -5063,14 +5065,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "wcwidth"
-version = "0.2.14"
+version = "0.5.3"
 description = "Measures the displayed width of unicode strings in a terminal"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "wcwidth-0.2.14-py2.py3-none-any.whl", hash = "sha256:a7bb560c8aee30f9957e5f9895805edd20602f2d7f720186dfd906e82b4982e1"},
-    {file = "wcwidth-0.2.14.tar.gz", hash = "sha256:4d478375d31bc5395a3c55c40ccdf3354688364cd61c4f6adacaa9215d0b3605"},
+    {file = "wcwidth-0.5.3-py3-none-any.whl", hash = "sha256:d584eff31cd4753e1e5ff6c12e1edfdb324c995713f75d26c29807bb84bf649e"},
+    {file = "wcwidth-0.5.3.tar.gz", hash = "sha256:53123b7af053c74e9fe2e92ac810301f6139e64379031f7124574212fb3b4091"},
 ]
 
 [package.source]

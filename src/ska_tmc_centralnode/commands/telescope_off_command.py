@@ -41,7 +41,7 @@ class TelescopeOff(TelescopeOnOff):
         logger: logging.Logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
-    ) -> None:
+    ) -> Tuple[ResultCode, str]:
         """
         This is a long running method
 
@@ -67,6 +67,7 @@ class TelescopeOff(TelescopeOnOff):
             task_callback(
                 status=TaskStatus.COMPLETED, result=(ResultCode.OK, message)
             )
+        return return_code, message
 
     def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
         """

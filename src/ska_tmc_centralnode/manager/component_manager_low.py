@@ -12,12 +12,11 @@ import time
 from collections import defaultdict
 from logging import Logger
 from queue import Queue
-from typing import Callable, Dict
+from typing import Callable, Dict, Tuple
 
-from ska_control_model import AdminMode
+from ska_control_model import AdminMode, ObsState, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.control_model import ObsState
 from ska_telmodel.schema import validate
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -497,6 +496,7 @@ class CNComponentManagerLow(CNComponentManager):
                 "Command is not allowed in current state :",
                 f"{str(self.op_state_model.op_state)}",
             )
+        self.command_not_allowed_callable(self.get_subarray_id)
         return True
 
     def check_device_responsiveness_command(
@@ -579,7 +579,10 @@ class CNComponentManagerLow(CNComponentManager):
         )
         self.update_subarray_pss_beams_mapping(json_argument)
 
-    def assign_resources(self, argin: str, task_callback: TaskCallbackType):
+    # pylint: disable=unexpected-keyword-arg
+    def assign_resources(
+        self, argin: str, task_callback: TaskCallbackType, task_abort_event
+    ) -> Tuple[TaskStatus, str]:
         """
         Submits the AssignResources command in queue.
 
@@ -587,40 +590,60 @@ class CNComponentManagerLow(CNComponentManager):
         :type argin: str
         :param task_callback: Updates task status
         :type task_callback: TaskCallbackType
+        :param task_abort_event: Event to abort the task
+        :type task_abort_event: Event
         :return: task_status
         :rtype: tuple
         """
         try:
-            assign_resources_command = AssignResourcesLow(
+            assign_resources_command_object = AssignResourcesLow(
                 self,
                 adapter_factory=self.adapter_factory,
                 logger=self.logger,
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )
             self.validate_assign_json(argin)
-            assign_resources_command.subarray_id = self.get_subarray_id(argin)
-            task_status, response = self.submit_task(
-                assign_resources_command.assign_resources,
-                kwargs={"argin": argin},
-                task_callback=task_callback,
-                is_cmd_allowed=self.command_not_allowed_callable(
-                    self.get_subarray_id(argin),
-                    [ObsState.EMPTY, ObsState.IDLE],
-                    "AssignResources",
-                ),
+            assign_resources_command_object.subarray_id = self.get_subarray_id(
+                argin
             )
-            self.logger.info(
-                "AssignResources command's status: "
-                + f"{task_status.name}, and response: {response}"
+            # Validate command is allowed
+            self.is_command_allowed_callable(
+                subarray_id=assign_resources_command_object.subarray_id,
+                desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
+                command_name="AssignResources",
+            )
+            return assign_resources_command_object.assign_resources(
+                argin=argin,
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
             )
 
-            return task_status, response
+            # task_status, response = self.submit_task(
+            #     assign_resources_command_object.assign_resources,
+            #     kwargs={"argin": argin},
+            #     task_callback=task_callback,
+            #     is_cmd_allowed=self.command_not_allowed_callable(
+            #         self.get_subarray_id(argin),
+            #         [ObsState.EMPTY, ObsState.IDLE],
+            #         "AssignResources",
+            #     ),
+            # )
+            # self.logger.info(
+            #     "AssignResources command's status: "
+            #     + f"{task_status.name}, and response: {response}"
+            # )
+
+            # return task_status, response
         except Exception as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
                 exception,
             )
-            return assign_resources_command.reject_command(str(exception))
+            return assign_resources_command_object.reject_command(
+                str(exception)
+            )
+
+    # pylint: enable=unexpected-keyword-arg
 
     def validate_release_json(self, argin: str):
         """Validates the release resource json.
@@ -640,7 +663,10 @@ class CNComponentManagerLow(CNComponentManager):
             strictness=2,
         )
 
-    def release_resources(self, argin: str, task_callback: TaskCallbackType):
+    # pylint: disable=unexpected-keyword-arg
+    def release_resources(
+        self, argin: str, task_callback: TaskCallbackType, task_abort_event
+    ) -> Tuple[TaskStatus, str]:
         """
         Submit the ReleaseResource command in queue.
 
@@ -648,11 +674,13 @@ class CNComponentManagerLow(CNComponentManager):
         :type argin: str
         :param task_callback: Updates task status
         :type task_callback: TaskCallbackType
+        :param task_abort_event: Event to abort the task
+        :type task_abort_event: Event
         :return: task_status
         :rtype: tuple
         """
         try:
-            release_resources_command = ReleaseResourcesLow(
+            release_resources_command_object = ReleaseResourcesLow(
                 self,
                 adapter_factory=self.adapter_factory,
                 logger=self.logger,
@@ -661,25 +689,43 @@ class CNComponentManagerLow(CNComponentManager):
             self.validate_release_json(argin)
 
             self.check_availability_for_release(argin)
-            release_resources_command.subarray_id = self.get_subarray_id(argin)
-            task_status, response = self.submit_task(
-                release_resources_command.release_resources,
-                kwargs={"argin": argin},
-                task_callback=task_callback,
-                is_cmd_allowed=self.command_not_allowed_callable(
-                    self.get_subarray_id(argin),
-                    [ObsState.IDLE],
-                    "ReleaseResources",
-                ),
+            release_resources_command_object.subarray_id = (
+                self.get_subarray_id(argin)
             )
-            self.logger.info(
-                "ReleaseResources command's status: "
-                + f"{task_status.name}, and response: {response}"
+            # Validate command is allowed
+            self.is_command_allowed_callable(
+                subarray_id=release_resources_command_object.subarray_id,
+                desired_obsstate=[ObsState.IDLE],
+                command_name="ReleaseResources",
+            )
+            return release_resources_command_object.release_resources(
+                argin=argin,
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
             )
 
-            return task_status, response
+            # task_status, response = self.submit_task(
+            #     release_resources_command.release_resources,
+            #     kwargs={"argin": argin},
+            #     task_callback=task_callback,
+            #     is_cmd_allowed=self.command_not_allowed_callable(
+            #         self.get_subarray_id(argin),
+            #         [ObsState.IDLE],
+            #         "ReleaseResources",
+            #     ),
+            # )
+            # self.logger.info(
+            #     "ReleaseResources command's status: "
+            #     + f"{task_status.name}, and response: {response}"
+            # )
+
+            # return task_status, response
         except Exception as exception:
-            return release_resources_command.reject_command(str(exception))
+            return release_resources_command_object.reject_command(
+                str(exception)
+            )
+
+    # pylint: enable=unexpected-keyword-arg
 
     def update_subarray_pss_beams_mapping(self, json_argument: dict) -> dict:
         """

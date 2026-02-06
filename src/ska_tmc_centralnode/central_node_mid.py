@@ -6,11 +6,14 @@ of state and mode attributes defined by the SKA Control Model.
 
 # pylint:disable = attribute-defined-outside-init
 import json
+from threading import Event
 
-from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
+import ska_tango_base as stb
+from ska_tango_base.base import TaskCallbackType
+from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
-from tango.server import attribute, command, device_property, run
+from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_mid import (
@@ -27,6 +30,8 @@ class MidTmcCentralNode(AbstractCentralNode):
     Central Node is a coordinator of the complete Telescope system
 
     """
+
+    InitCommand = None
 
     # -----------------
     # Device Properties
@@ -116,10 +121,20 @@ class MidTmcCentralNode(AbstractCentralNode):
     # Attributes
     # ----------
 
-    imaging = attribute(
+    _imaging: Signal[ModesAvailability] = Signal[ModesAvailability](
+        stored=True, initial_value=ModesAvailability.not_available
+    )
+
+    def read_imaging(self):
+        """Read Attribute for imaging"""
+        return self.component_manager.component.imaging
+
+    imaging = attribute_from_signal(
+        _imaging,
+        fget=read_imaging,
         dtype=ModesAvailability,
+        description="Imaging Attribute",
         access=AttrWriteType.READ,
-        doc="Imaging Attribute",
     )
 
     pss = attribute(
@@ -136,22 +151,62 @@ class MidTmcCentralNode(AbstractCentralNode):
         doc="VLBI Attribute",
     )
 
-    isDishVccConfigSet = attribute(
+    _is_dish_vcc_config_set: Signal[bool] = Signal[bool](
+        stored=True, initial_value=False
+    )
+
+    def read_isDishVccConfigSet(self):
+        """Return the isDishVccConfigSet attribute."""
+        return self.component_manager.is_dish_vcc_config_set
+
+    isDishVccConfigSet = attribute_from_signal(
+        _is_dish_vcc_config_set,
+        fget=read_isDishVccConfigSet,
         dtype=bool,
         access=AttrWriteType.READ,
     )
 
-    DishVccCommandStatus = attribute(
+    _dish_vcc_command_status: Signal[DishConfigStatus] = Signal[
+        DishConfigStatus
+    ](stored=True, initial_value=DishConfigStatus.STAGING)
+
+    def read_DishVccCommandStatus(self):
+        """Return the DishVccCommandStatus attribute."""
+        return self.component_manager.dish_vcc_command_status
+
+    DishVccCommandStatus = attribute_from_signal(
+        _dish_vcc_command_status,
+        fget=read_DishVccCommandStatus,
         dtype=DishConfigStatus,
         access=AttrWriteType.READ,
     )
 
-    DishVccValidationStatus = attribute(
+    _dish_vcc_validation_status: Signal[str] = Signal[str](
+        stored=True, initial_value=""
+    )
+
+    def read_DishVccValidationStatus(self):
+        """Return the DishVccValidationStatus"""
+        return self.component_manager.dish_vcc_validation_status
+
+    DishVccValidationStatus = attribute_from_signal(
+        _dish_vcc_validation_status,
+        fget=read_DishVccValidationStatus,
         dtype=str,
         access=AttrWriteType.READ,
     )
 
-    GlobalPointingModelStatus = attribute(
+    _global_pointing_model_status: Signal[str] = Signal[str](
+        stored=True, initial_value=""
+    )
+
+    def read_GlobalPointingModelStatus(self):
+        """Return the GlobalPointingModelStatus attribute."""
+        return json.dumps(self.component_manager.global_pointing_model_status)
+
+    GlobalPointingModelStatus = attribute_from_signal(
+        _dish_vcc_validation_status,
+        fget=read_GlobalPointingModelStatus,
         dtype=str,
         access=AttrWriteType.READ,
     )
@@ -159,18 +214,16 @@ class MidTmcCentralNode(AbstractCentralNode):
     def update_imaging_callback(self, imaging):
         """Callback for Update imaging"""
         self.logger.debug("Imaging %s", imaging)
-        self.push_change_archive_events("imaging", imaging)
+        self._imaging = imaging
 
     def update_dishvccconfig_callback(self, isdishvccconfigset):
         """Update isDishVccConfigSet callbacks"""
         try:
-            self.push_change_archive_events(
-                "isDishVccConfigSet", isdishvccconfigset
-            )
+            self._is_dish_vcc_config_set = isdishvccconfigset
 
         except Exception as exception:
             self.logger.exception(
-                "Exception while pushing event for isDishVccConfigSet: %s",
+                "Exception while updating isDishVccConfigSet: %s",
                 exception,
             )
 
@@ -186,9 +239,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         """
         try:
-            self.push_change_archive_events(
-                "DishVccCommandStatus", dish_vcc_command_status
-            )
+            self._dish_vcc_command_status = dish_vcc_command_status
 
         except Exception as exception:
             self.logger.exception(
@@ -206,9 +257,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         """
         try:
-            self.push_change_archive_events(
-                "DishVccValidationStatus", dishvccvalidationstatus
-            )
+            self._dish_vcc_validation_status = dishvccvalidationstatus
         except Exception as exception:
             self.logger.exception(
                 "Exception while pushing event for "
@@ -219,39 +268,10 @@ class MidTmcCentralNode(AbstractCentralNode):
     # ---------------
     # General methods
     # ---------------
-    class InitCommand(AbstractCentralNode.InitCommand):
-        """
-        A class for the TMC CentralNode's init_device() method.
-        """
-
-        def do(self):
-            """
-            Initializes the attributes and properties of the Central Node.
-
-            :return: A tuple containing a return code and a string message
-                indicating status.The message is for information purpose only.
-
-            :rtype: (ReturnCode, str)
-            """
-            super().do()
-            for attribute_name in [
-                "imaging",
-                "isDishVccConfigSet",
-                "DishVccValidationStatus",
-                "DishVccCommandStatus",
-                "GlobalPointingModelStatus",
-            ]:
-                self._device.set_change_event(attribute_name, True, False)
-                self._device.set_archive_event(attribute_name, True)
-            return (ResultCode.OK, "")
 
     # ------------------
     # Attributes methods
     # ------------------
-
-    def read_imaging(self):
-        """Read Attribute for imaging"""
-        return self.component_manager.component.imaging
 
     def read_pss(self):
         """Read attribute for pss"""
@@ -264,22 +284,6 @@ class MidTmcCentralNode(AbstractCentralNode):
     def read_vlbi(self):
         """Read attribute value of vlbi"""
         return self.component_manager.component.vlbi
-
-    def read_isDishVccConfigSet(self):
-        """Return the isDishVccConfigSet attribute."""
-        return self.component_manager.is_dish_vcc_config_set
-
-    def read_DishVccValidationStatus(self):
-        """Return the DishVccValidationStatus"""
-        return self.component_manager.dish_vcc_validation_status
-
-    def read_DishVccCommandStatus(self):
-        """Return the DishVccCommandStatus attribute."""
-        return self.component_manager.dish_vcc_command_status
-
-    def read_GlobalPointingModelStatus(self):
-        """Return the GlobalPointingModelStatus attribute."""
-        return json.dumps(self.component_manager.global_pointing_model_status)
 
     def create_component_manager(self):
         """
@@ -378,45 +382,23 @@ class MidTmcCentralNode(AbstractCentralNode):
         cm.setup_event_subscription()
         return cm
 
-    def init_command_objects(self):
-        """
-        Initialises the command handlers for commands supported by this device.
-        """
-        super().init_command_objects()
-        # LoadDishCfg command is specific to Mid so register it in Mid only
-        for command_name, method_name in [
-            ("LoadDishCfg", "load_dish_cfg"),
-            ("SetGlobalPointingModel", "set_gpm_version"),
-            ("SetStowMode", "set_stow_mode"),
-        ]:
-            self.register_command_object(
-                command_name,
-                SubmittedSlowCommand(
-                    command_name,
-                    self._command_tracker,
-                    self.component_manager,
-                    method_name,
-                    logger=None,
-                ),
-            )
-
     def invoke_load_dish_cfg_command_callback(self):
         """This callback is called when dishVccValidationResult is Unknown
         and Central Node needs to load dish cfg on csp
         """
-        handler = self.get_command_object("LoadDishCfg")
+        # handler = self.get_command_object("LoadDishCfg")
         dish_cfg_json = json.dumps(
             self.component_manager.get_default_dish_vcc_config_params()
         )
-        handler(dish_cfg_json)
+        self.execute_LoadDishCfg(dish_cfg_json)
+        # handler(dish_cfg_json)
 
     def invoke_set_gpm_command_callback(self):
         """This callback is called when dishVccValidationResult is Unknown
         and Central Node needs to load dish cfg on csp
         """
 
-        handler = self.get_command_object("SetGlobalPointingModel")
-        handler(
+        self.execute_SetGlobalPointingModel(
             json.dumps(self.component_manager.get_default_gpm_version_params())
         )
 
@@ -429,14 +411,9 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @command(
-        dtype_in="str",
-        doc_in="The string in JSON format.",
-        dtype_out="DevVarLongStringArray",
-        doc_out="information-only string",
-    )
+    @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def LoadDishCfg(self, argin):
+    def execute_LoadDishCfg(self, argin):
         """
         LoadDishCfg command to load dishID-vcc map config.
         This command get dishid-vcc map json string from Telmodel
@@ -455,9 +432,19 @@ class MidTmcCentralNode(AbstractCentralNode):
             }
 
         """
-        handler = self.get_command_object("LoadDishCfg")
-        result_code, unique_id = handler(argin)
-        return [[result_code], [str(unique_id)]]
+
+        def task(
+            task_callback: TaskCallbackType, task_abort_event: Event
+        ) -> None:
+            self.component_manager.load_dish_cfg(
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
+            )
+
+        return task
+        # handler = self.get_command_object("LoadDishCfg")
+        # result_code, unique_id = handler(argin)
+        # return [[result_code], [str(unique_id)]]
 
     def is_setGlobalPointingModel_allowed(self) -> bool:
         """
@@ -468,14 +455,9 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @command(
-        dtype_in="str",
-        doc_in="The string in JSON format.",
-        dtype_out="DevVarLongStringArray",
-        doc_out="information-only string",
-    )
+    @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def SetGlobalPointingModel(self, argin):
+    def execute_SetGlobalPointingModel(self, argin):
         """
         SetGlobalPointingModel command to send the GPM URI to dish leaf
         nodes. This command gets a dictionary in following form:
@@ -506,9 +488,20 @@ class MidTmcCentralNode(AbstractCentralNode):
                 ska001-Band_1.json"
             }
         """
-        handler = self.get_command_object("SetGlobalPointingModel")
-        result_code, unique_id = handler(argin)
-        return [[result_code], [str(unique_id)]]
+
+        def task(
+            task_callback: TaskCallbackType, task_abort_event: Event
+        ) -> None:
+            self.component_manager.set_gpm_version(
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
+            )
+
+        return task
+
+        # handler = self.get_command_object("SetGlobalPointingModel")
+        # result_code, unique_id = handler(argin)
+        # return [[result_code], [str(unique_id)]]
 
     def is_setStowMode_allowed(self) -> bool:
         """
@@ -519,14 +512,9 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @command(
-        dtype_in="str",
-        doc_in="The string in JSON format.",
-        dtype_out="DevVarLongStringArray",
-        doc_out="information-only string",
-    )
+    @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def SetStowMode(self, argin):
+    def execute_SetStowMode(self, argin):
         """
         SetStowMode command to send the stow mode command to dish leaf
         nodes. This command gets a list in following form:
@@ -537,9 +525,19 @@ class MidTmcCentralNode(AbstractCentralNode):
             To Specific Dishes = ["SKA001","SKA002", ...]
             To all Dishes = ["ALL"]
         """
-        handler = self.get_command_object("SetStowMode")
-        result_code, unique_id = handler(argin)
-        return [[result_code], [str(unique_id)]]
+
+        def task(
+            task_callback: TaskCallbackType, task_abort_event: Event
+        ) -> None:
+            self.component_manager.set_stow_mode(
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
+            )
+
+        return task
+        # handler = self.get_command_object("SetStowMode")
+        # result_code, unique_id = handler(argin)
+        # return [[result_code], [str(unique_id)]]
 
 
 # ----------

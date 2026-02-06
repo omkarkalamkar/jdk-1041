@@ -332,6 +332,7 @@ def create_cm(
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
+    # cm.cleanup()
     cm.setup_event_subscription()
     return cm, start_time
 

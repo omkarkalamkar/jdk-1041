@@ -11,9 +11,7 @@ import time
 import traceback
 from collections import defaultdict
 from logging import Logger
-from multiprocessing import Event
-from multiprocessing import Lock as ProcessLock
-from multiprocessing import Manager
+from multiprocessing import Event, Manager
 from queue import Empty, Queue
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -150,7 +148,7 @@ class CNComponentManager(TmcComponentManager):
         self.event_data_manager = EventDataManager(self)
         self.event_manager = _event_manager
         self.command_timeout = command_timeout
-        self.process_lock = ProcessLock()
+        self.process_lock = threading.RLock()
         self._component.set_op_callbacks(
             _update_device_callback,
             _update_telescope_state_callback,
@@ -179,7 +177,8 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_availability_aggregator = Aggregator(
             self, logger=logger
         )
-        self._stop_thread: bool = False
+        self._stop = False
+        self._stop_thread: threading.Event = threading.Event()
         self._liveliness_probe = None
         self.supported_commands_for_responsive_check = [
             "TelescopeOn",
@@ -210,7 +209,7 @@ class CNComponentManager(TmcComponentManager):
         )
         self.aggregate_value_update_event = Event()
         self.aggregate_process_monitor_thread = threading.Thread(
-            target=self.aggregate_process_monitor
+            target=self.aggregate_process_monitor, daemon=True
         )
         self.aggregate_process_monitor_thread.start()
         self.event_manager_object = CentralNodeEventManager(
@@ -396,18 +395,21 @@ class CNComponentManager(TmcComponentManager):
         """This method keep tracking aggregate health state changed
         from aggregation process
         """
-        while not self._stop_thread:
-            if self.aggregate_value_update_event.is_set():
-                self.aggregate_value_update_event.clear()
-                current_health_state = self.aggregated_health_state[0]
-                self.component.telescope_health_state = current_health_state
-                self.logger.debug(
-                    "Aggregate telescope health state called %s",
-                    str(current_health_state),
-                )
+        with tango.EnsureOmniThread:
+            while not self._stop_thread.is_set():
+                if self.aggregate_value_update_event.wait(0.1):
+                    self.aggregate_value_update_event.clear()
+                    current_health_state = self.aggregated_health_state[0]
+                    self.component.telescope_health_state = (
+                        current_health_state
+                    )
+                    self.logger.debug(
+                        "Aggregate telescope health state called %s",
+                        str(current_health_state),
+                    )
 
-            time.sleep(0.1)
-        self.logger.debug("aggregation process monitor thread stopped")
+                time.sleep(0.1)
+            self.logger.debug("aggregation process monitor thread stopped")
 
     def process_event(self, attribute_name: str) -> None:
         """
@@ -422,39 +424,40 @@ class CNComponentManager(TmcComponentManager):
         :returns: None
 
         """
-        while True:
-            try:
-                event_data = self.event_queue[attribute_name].get()
-                if not self.check_event_error(
-                    event_data, f"{attribute_name}_Callback"
-                ):
-                    if attribute_name == "loadDishConfigResultAsync":
-                        self.event_processing_methods[attribute_name](
-                            event_data.device.dev_name(),
-                            event_data.argout,
-                        )
-                    elif attribute_name in ("healthState", "adminMode"):
-                        self.event_processing_methods[attribute_name](
-                            event_data.device.dev_name(),
-                            event_data.attr_value.value,
-                            event_data.attr_value.time.todatetime(),
-                        )
-                    else:
-                        self.event_processing_methods[attribute_name](
-                            event_data.device.dev_name(),
-                            event_data.attr_value.value,
-                        )
-                self.event_queue[attribute_name].task_done()
-            except Empty:
-                # If an empty exception is raised by the Queue, we can
-                # safely ignore it.
-                pass
-            except Exception as exception:
-                self.logger.error(
-                    "Exception: %s Traceback: %s",
-                    exception,
-                    traceback.print_exc(),
-                )
+        with tango.EnsureOmniThread():
+            while not self._stop_thread.is_set():
+                try:
+                    event_data = self.event_queue[attribute_name].get()
+                    if not self.check_event_error(
+                        event_data, f"{attribute_name}_Callback"
+                    ):
+                        if attribute_name == "loadDishConfigResultAsync":
+                            self.event_processing_methods[attribute_name](
+                                event_data.device.dev_name(),
+                                event_data.argout,
+                            )
+                        elif attribute_name in ("healthState", "adminMode"):
+                            self.event_processing_methods[attribute_name](
+                                event_data.device.dev_name(),
+                                event_data.attr_value.value,
+                                event_data.attr_value.time.todatetime(),
+                            )
+                        else:
+                            self.event_processing_methods[attribute_name](
+                                event_data.device.dev_name(),
+                                event_data.attr_value.value,
+                            )
+                    self.event_queue[attribute_name].task_done()
+                except Empty:
+                    # If an empty exception is raised by the Queue, we can
+                    # safely ignore it.
+                    pass
+                except Exception as exception:
+                    self.logger.error(
+                        "Exception: %s Traceback: %s",
+                        exception,
+                        traceback.print_exc(),
+                    )
 
     def check_event_error(self, event: tango.EventData, callback: str):
         """Method for checking event error."""
@@ -488,21 +491,52 @@ class CNComponentManager(TmcComponentManager):
         """shutdown aggregation process"""
         self.logger.debug("component destructor called")
         self.stop_all_process()
+        self.stop()
+
+    def cleanup(self):
+        self.stop_all_process()
+        self.stop()
 
     def stop_event_manager(self) -> None:
         """Stops the Event Receiver"""
-        if self.event_manager:
-            self.event_manager_object.cancel_subscription_thread(
-                self.event_thread_id
-            )
-            for device in self.build_device_attribute_map():
-                self.event_manager_object.unsubscribe_event_async(device)
+        if not self.event_manager:
+            return
+
+        with tango.EnsureOmniThread():
+            if self.event_manager:
+                self.event_manager_object.cancel_subscription_thread(
+                    self.event_thread_id
+                )
+                # for device in self.build_device_attribute_map():
+                #     self.event_manager_object.unsubscribe_event_async(device)
+            try:
+                subscriptions = (
+                    self.event_manager_object.device_subscriptions.copy()
+                )
+                for device in subscriptions:
+                    if subscriptions.get(device).get(
+                        "is_subscription_completed"
+                    ):
+                        self.event_manager_object.unsubscribe_event_async(
+                            device
+                        )
+            except Exception:
+                self.logger.exception(
+                    "Failed to unsubscribe event for %s", device
+                )
 
     def stop(self) -> None:
         """stops liveliness probe"""
-        self.stop_liveliness_probe()
+        self._stop_thread.set()
+        self.aggregate_value_update_event.set()
+        try:
+            self.event_data_queue.put_nowait(None)
+        except Exception:
+            pass
+
+        self._stop = True
         self.stop_event_manager()
-        self._stop_thread = True
+        self.stop_liveliness_probe()
 
     def reset(
         self: CNComponentManager, task_callback: Optional[Callable] = None
@@ -1128,65 +1162,70 @@ class CNComponentManager(TmcComponentManager):
             else:
                 self.component.imaging = ModesAvailability.not_available
 
-    def telescope_on(self, task_callback: TaskCallbackType | None = None):
+    def telescope_on(
+        self,
+        task_callback: TaskCallbackType | None = None,
+        task_abort_event=None,
+    ):
         """
         Turn the Telescope On.
 
         :return: a result code and message
         """
-        telescope_on_command = TelescopeOn(
+        telescope_on_command_object = TelescopeOn(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, response = self.submit_task(
-            telescope_on_command.telescope_on,
-            args=[self.logger],
-            task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeOn"
-            ),
+        self.is_command_allowed_callable(
+            command_name="TelescopeOn",
         )
-        return task_status, response
 
-    def telescope_off(self, task_callback: Callable = None):
+        return telescope_on_command_object.telescope_on(
+            logger=self.logger,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
+
+    def telescope_off(
+        self, task_callback: Callable = None, task_abort_event=None
+    ):
         """
         Turn the Telescope Off.
 
         :return: a result code and message
         """
-        telescope_off_command = TelescopeOff(
+        telescope_off_command_object = TelescopeOff(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, response = self.submit_task(
-            telescope_off_command.telescope_off,
-            args=[self.logger],
+        # self.is_command_allowed_callable(
+        #     command_name="TelescopeOff",
+        # )
+        return telescope_off_command_object.telescope_off(
+            logger=self.logger,
             task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeOff"
-            ),
+            task_abort_event=task_abort_event,
         )
-        return task_status, response
 
-    def telescope_standby(self, task_callback: Callable = None):
+    def telescope_standby(
+        self, task_callback: Callable = None, task_abort_event=None
+    ):
         """
         Standby the Telescope.
 
         :return: a result code and message
         """
-        telescopestandby_command = TelescopeStandby(
+        telescopestandby_command_object = TelescopeStandby(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-
-        task_status, response = self.submit_task(
-            telescopestandby_command.telescope_standby,
-            args=[self.logger],
-            task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeStandby"
-            ),
+        self.is_command_allowed_callable(
+            command_name="TelescopeStandby",
         )
-        return task_status, response
+        return telescopestandby_command_object.telescope_standby(
+            logger=self.logger,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     def is_input_json_valid(self, argin: str) -> Tuple[bool, str]:
         """
@@ -1294,6 +1333,39 @@ class CNComponentManager(TmcComponentManager):
             return True
 
         return is_subarray_in_right_obs_state
+
+    def is_command_allowed_callable(
+        self,
+        subarray_id: int = 0,
+        desired_obsstate: List | None = None,
+        command_name: str = "",
+    ):
+        """This method provides callable for command not allowed
+
+        Args:
+            subarray_id (int): subarray_id
+            desired_obsstate (List): desired observation state
+            command_name (str): command name
+
+        Returns:
+            boolean value if command in valid obstate else
+            return exception.
+        """
+
+        self.check_device_responsiveness_command(command_name, subarray_id)
+        if subarray_id and desired_obsstate:
+            subarray_devices = self.input_parameter.subarray_dev_names
+            for device in subarray_devices:
+                subarray_device_id = re.findall(r"\d+", device)
+                if subarray_id == int(subarray_device_id[0]):
+                    subarray_obstate = self.get_device(device).obs_state
+                    if subarray_obstate not in desired_obsstate:
+                        raise StateModelError(
+                            f"{command_name} command not permitted "
+                            + f"in observation state {subarray_obstate}"
+                        )
+                        # return False
+        return True
 
     def check_device_responsiveness_command(
         self, command_name: str, subarray_id: int

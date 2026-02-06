@@ -41,9 +41,6 @@ def test_low_release_resources_command(
     release_input_str = json_factory("release_resource_low")
     cm.release_resources(release_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
-    task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(

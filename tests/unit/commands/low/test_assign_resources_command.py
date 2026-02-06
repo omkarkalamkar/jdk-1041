@@ -1,12 +1,12 @@
 import json
+import threading
 import time
 
 import mock
 import pytest
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
-from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -36,9 +36,10 @@ def test_low_assign_resources_command(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     assign_input_str = json_factory("assign_resource_low")
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -65,7 +66,9 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
     json_argument["sdp"]["execution_block"]["eb_id"] = ""
     del json_argument["sdp"]["processing_blocks"]
     (res_code, _) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     with pytest.raises(Exception) as e:
@@ -84,7 +87,9 @@ def test_assign_resources_missing_sdp_key(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert "sdp" in message
@@ -102,7 +107,9 @@ def test_assign_resources_missing_csp_key(
     json_argument = json.loads(assign_input_str)
     del json_argument["csp"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert "csp" in message
@@ -150,7 +157,9 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["subarray_beams"][0]["subarray_beam_id"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert "subarray_beam_id" in message
@@ -163,7 +172,9 @@ def test_low_assign_resources_command_empty_input_json(
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    (res_code, _) = cm.assign_resources(" ", task_callback=task_callback)
+    (res_code, _) = cm.assign_resources(
+        " ", task_callback=task_callback, task_abort_event=threading.Event()
+    )
     assert res_code == TaskStatus.REJECTED
 
 
@@ -178,7 +189,9 @@ def test_low_assign_resources_command_with_invalide_key(
     assign_input_str = json_factory("invalid_key_AssignResources")
     # json_argument = json.loads(assign_input_str)
     (res_code, message) = cm.assign_resources(
-        assign_input_str, task_callback=task_callback
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert (
@@ -200,7 +213,9 @@ def test_low_assign_resources_missing_subarray_id(
     json_argument = json.loads(assign_input_str)
     del json_argument["subarray_id"]
     (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert "subarray_id" in message
@@ -220,7 +235,9 @@ def test_low_assign_resources_command_missing_mccs(
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]
     res_code, message = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert "mccs" in message
@@ -242,7 +259,9 @@ def test_low_assign_resources_command_missing_aperture_id(
         "aperture_id"
     ]
     res_code, message = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert "aperture_id" in message
@@ -265,7 +284,9 @@ def test_low_assign_resources_command_missing_station_ids(
         "station_id"
     ]
     res_code, message = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert "station_id" in message
@@ -316,17 +337,23 @@ def test_low_assign_resources_raises_state_model_exception(
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("assign_resource_low")
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+
+    res_code, message = cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
-    data = task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.REJECTED,
-            "result": Anything,
-            "exception": Anything,
-        }
+    assert res_code == TaskStatus.REJECTED
+    assert (
+        message
+        == "AssignResources command not permitted in observation state 4"
     )
-    assert ResultCode.REJECTED == data["result"][0]
-    assert "AssignResources command not permitted" in data["result"][1]
+    # task_callback.assert_against_call(
+    #     status=TaskStatus.REJECTED,
+    #     result=(
+    #         ResultCode.REJECTED,
+    #         "AssignResources command not permitted in observation state 4",
+    #     ),
+    #     lookahead=3
+    # )
