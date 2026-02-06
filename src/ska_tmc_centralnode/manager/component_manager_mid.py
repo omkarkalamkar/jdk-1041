@@ -1574,24 +1574,17 @@ class CNComponentManagerMid(CNComponentManager):
         timeout = self.command_timeout - 3  # total timeout in seconds
         self.logger.debug("Stow Timeout is %s seconds", timeout)
         interval = 0.5  # wait interval in seconds
-        flag = True
         # start_time = time.time()
 
-        while flag:
+        while timeout > 0:
             if self.all_dish_stow_mode_available():
-                self.logger.info(
+                self.logger.debug(
                     "All dish_mode values are available. Exiting loop."
                 )
-                flag = False
                 return True
-
-            if timeout > 0:
-                self.logger.info("Timeout reached. Exiting loop.")
-                flag = False
-                return flag
             timeout -= interval
             wait_event.wait(interval)
-        return flag
+        return False
 
     def all_dish_stow_mode_available(self) -> bool:
         """
