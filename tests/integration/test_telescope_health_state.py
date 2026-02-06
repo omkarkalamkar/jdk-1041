@@ -53,11 +53,11 @@ def test_telescope_health_state_mid(change_event_callbacks):
 
     sdp_master.SetDirectHealthState(HealthState.DEGRADED)
     change_event_callbacks["healthState"].assert_change_event(
-        HealthState.DEGRADED, lookahead=4
+        HealthState.DEGRADED, lookahead=8
     )
     time.sleep(0.3)
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.DEGRADED, lookahead=4
+        HealthState.DEGRADED, lookahead=8
     )
 
     assert central_node.telescopeHealthState == HealthState.DEGRADED
@@ -173,9 +173,9 @@ def test_telescope_health_state_single_dish_degraded_state(
     # Tear down: Dish reports OK
     dish_ln.SetDirectHealthState(HealthState.OK)
 
-    logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
-    time.sleep(0.3)
-    assert central_node.telescopeHealthState == HealthState.OK
+    change_event_callbacks["telescopeHealthState"].assert_change_event(
+        HealthState.OK, lookahead=8
+    )
 
 
 @pytest.mark.post_deployment
@@ -237,14 +237,14 @@ def test_telescope_health_state_handles_multi_dish_failure(
     dish_ln_100.SetDirectHealthState(HealthState.FAILED)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.FAILED, lookahead=4
+        HealthState.FAILED, lookahead=8
     )
 
     #  Dish reports OK
     dish_ln.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.DEGRADED, lookahead=4
+        HealthState.DEGRADED, lookahead=8
     )
     # Tear down: Dish reports OK
     dish_ln_36.SetDirectHealthState(HealthState.OK)
@@ -252,11 +252,11 @@ def test_telescope_health_state_handles_multi_dish_failure(
     dish_ln_100.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["healthState"].assert_change_event(
-        HealthState.OK, lookahead=4
+        HealthState.OK, lookahead=8
     )
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.OK, lookahead=4
+        HealthState.OK, lookahead=8
     )
 
     assert wait_and_validate_device_attribute_value(

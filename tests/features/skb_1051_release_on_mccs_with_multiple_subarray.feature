@@ -1,4 +1,4 @@
-@post_deployment @acceptance @SKA_low
+@post_deployment @acceptance @SKA_low @new
 Scenario: Ability to assgin and release mutltiple subarray
     Given a CentralNode Low device
     And assigned two subarrays to the central node

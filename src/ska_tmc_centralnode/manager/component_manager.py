@@ -399,7 +399,7 @@ class CNComponentManager(TmcComponentManager):
         from aggregation process
         """
         while not self._stop_thread:
-            if self.aggregate_value_update_event.is_set():
+            if self.aggregate_value_update_event.wait(0.1):
                 self.aggregate_value_update_event.clear()
                 current_health_state = self.aggregated_health_state[0]
                 self.component.telescope_health_state = current_health_state
@@ -407,8 +407,6 @@ class CNComponentManager(TmcComponentManager):
                     "Aggregate telescope health state called %s",
                     str(current_health_state),
                 )
-
-            time.sleep(0.1)
         self.logger.debug("aggregation process monitor thread stopped")
 
     def process_event(self, attribute_name: str) -> None:
@@ -424,7 +422,7 @@ class CNComponentManager(TmcComponentManager):
         :returns: None
 
         """
-        while True:
+        while not self._stop_thread:
             try:
                 event_data = self.event_queue[attribute_name].get()
                 if not self.check_event_error(

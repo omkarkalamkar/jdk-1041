@@ -70,7 +70,7 @@ ADD_ARGS ?= ## Additional args to pass to pytest
 
 CI_REGISTRY ?= gitlab.com
 CUSTOM_VALUES = --set central_node.centralnode.image.tag=$(VERSION)
-K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/ska-build-python:0.3.1
+K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/ska-build-python:0.3.2
 ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnode.image.image=$(PROJECT) \
 	--set central_node.centralnode.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
