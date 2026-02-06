@@ -72,9 +72,7 @@ class SetGlobalPointingModel(SetDishGPM):
             gpm_files = self.get_gpm_files(self.dish_gpm_params)
             if not gpm_files:
                 error_message = "No GPM files found on set GPM parameters."
-                self.process_update_task_for_command_failure(
-                    self.task_callback, error_message
-                )
+                self.process_update_task_for_command_failure(error_message)
                 self.component_manager.reset_gpm_data()
                 self.logger.debug("Error message: %s", error_message)
                 return ResultCode.REJECTED, error_message
@@ -101,9 +99,7 @@ class SetGlobalPointingModel(SetDishGPM):
         """
         if result[0] == ResultCode.FAILED:
             error_message = "SetGPM failed on: "
-            self.process_update_task_for_command_failure(
-                self.task_callback, error_message
-            )
+            self.process_update_task_for_command_failure(error_message)
             self.logger.debug("Error message: %s", error_message)
         else:
             result = list(result)
@@ -121,7 +117,7 @@ class SetGlobalPointingModel(SetDishGPM):
         self.component_manager.reset_gpm_data()
 
     def process_update_task_for_command_failure(
-        self, task_callback, error_message: str
+        self, error_message: str
     ) -> None:
         """Method to update the task callback and GPM status
         with the failure data
@@ -149,7 +145,7 @@ class SetGlobalPointingModel(SetDishGPM):
                     self.component_manager.dishln_gpm_cmd_exe_data
                 )
             )
-        task_callback(
+        self.task_callback(
             status=TaskStatus.COMPLETED,
             result=(ResultCode.FAILED, error_message),
             exception=error_message,

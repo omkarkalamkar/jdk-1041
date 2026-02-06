@@ -146,7 +146,7 @@ def test_update_task_status(task_callback):
     cm.reset_stow_mode_data = MagicMock()
     cm.stow_mode_aggregated_result = True
     cm.dishln_stow_mode_cmd_exe_data = {
-        "ska002": {"result_code": [0, "success"], "dish_mode": "STOW"}
+        "ska002": {"result_code": [0, "success"]}
     }
     set_stow_command.task_callback = MagicMock()
     set_stow_command.update_task_status(
@@ -177,11 +177,10 @@ def test_process_update_task_for_command_failure():
     )
     error_message = "SetStowMode failed"
     cm.dishln_stow_mode_cmd_exe_data = {
-        "ska002": {"result_code": [3, "FAILED"], "dish_mode": "STANDBY_LP"}
+        "ska002": {"result_code": [3, "FAILED"]}
     }
     set_stow_command.process_update_task_for_command_failure(
         error_message=error_message,
-        task_callback=task_callback,
     )
     task_callback.assert_called()
     kwargs = task_callback.call_args.kwargs

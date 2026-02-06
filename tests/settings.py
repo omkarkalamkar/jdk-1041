@@ -536,27 +536,23 @@ def check_lrcr_events(
     """
     COUNT = 0
     flag = False
-    try:
-        while not flag and COUNT <= retries:
-            assertion_data = change_event_callback[
-                callback_name
-            ].assert_change_event(
-                Anything,
-                lookahead=15,
-            )
-            unique_id, result = assertion_data["attribute_value"]
-            if unique_id.endswith(command_name):
-                if result == str(result_to_check):
-                    logger.debug("%s_UID: %s", command_name, unique_id)
-                    flag = True
-            COUNT = COUNT + 1
-            time.sleep(1)
-        if flag:
-            return True
-        return False
-    except Exception as exception:
-        logger.error(exception)
-        return False
+    while not flag and COUNT <= retries:
+        assertion_data = change_event_callback[
+            callback_name
+        ].assert_change_event(
+            Anything,
+            lookahead=15,
+        )
+        unique_id, result = assertion_data["attribute_value"]
+        if unique_id.endswith(command_name):
+            if result == str(result_to_check):
+                logger.debug("%s_UID: %s", command_name, unique_id)
+                flag = True
+        COUNT = COUNT + 1
+        time.sleep(1)
+    if flag:
+        return True
+    return False
 
 
 def set_low_devices_availability():

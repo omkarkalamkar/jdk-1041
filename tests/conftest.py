@@ -202,7 +202,7 @@ def change_event_callbacks() -> MockTangoEventCallbackGroup:
         "longRunningCommandStatus",
         "longRunningCommandsInQueue",
         "longRunningCommandResult",
-        "MCCSMLNlongRunningCommandResult",
+        "lrcfinished",
         "State",
         "telescopeState",
         "telescopeHealthState",

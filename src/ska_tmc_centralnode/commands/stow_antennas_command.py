@@ -83,7 +83,7 @@ class SetStowMode(SetDishGPM):
                 " or dish not in STOW mode: "
             )
             result = self.process_update_task_for_command_failure(
-                self.task_callback, error_message
+                error_message
             )
         else:
             self.logger.debug(
@@ -118,7 +118,7 @@ class SetStowMode(SetDishGPM):
         self.component_manager.reset_stow_mode_data()
 
     def process_update_task_for_command_failure(
-        self, task_callback, error_message: str
+        self, error_message: str
     ) -> str:
         """Method to update the task callback and GPM status
         with the failure data
@@ -133,17 +133,14 @@ class SetStowMode(SetDishGPM):
             result,
         ) in self.component_manager.dishln_stow_mode_cmd_exe_data.items():
             if not isinstance(result, str):
-                if (
-                    result["result_code"][0] == int(ResultCode.OK)
-                    and result["dish_mode"] == DishMode.STOW.name
-                ):
+                if result["result_code"][0] == int(ResultCode.OK):
                     keys_to_delete.append(dish_id)
         for key in keys_to_delete:
             del self.component_manager.dishln_stow_mode_cmd_exe_data[key]
         error_message += json.dumps(
             self.component_manager.dishln_stow_mode_cmd_exe_data
         )
-        task_callback(
+        self.task_callback(
             status=TaskStatus.COMPLETED,
             result=(ResultCode.FAILED, error_message),
             exception=error_message,
@@ -266,7 +263,7 @@ class SetStowMode(SetDishGPM):
                     self.set_stow_mode_cm_variables(dish_id, False)
                     self.component_manager.dishln_stow_mode_cmd_exe_data[
                         dish_id
-                    ] = {"result_code": err_message, "dish_mode": None}
+                    ] = {"result_code": err_message}
                     self.command_subs_list.append(dishln_adapter.dev_name)
                     self.command_results[dishln_adapter.dev_name] = [
                         return_codes[0],
@@ -311,8 +308,7 @@ class SetStowMode(SetDishGPM):
             self.component_manager.number_of_stow_mode_executed += 1
         if dish_id not in self.component_manager.dishln_stow_mode_cmd_exe_data:
             self.component_manager.dishln_stow_mode_cmd_exe_data[dish_id] = {
-                "result_code": None,
-                "dish_mode": None,
+                "result_code": None
             }
 
     def add_data_to_stow_mode_dictionary_in_case_of_error(

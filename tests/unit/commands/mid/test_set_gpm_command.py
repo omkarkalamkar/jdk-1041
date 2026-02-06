@@ -210,9 +210,7 @@ def test_process_update_task_for_command_failure():
     command.task_callback = MagicMock()
 
     error_message = "Command failed"
-    command.process_update_task_for_command_failure(
-        command.task_callback, error_message
-    )
+    command.process_update_task_for_command_failure(error_message)
 
     expected_error_message = error_message + str(
         mock_component_manager.dishln_gpm_cmd_exe_data
