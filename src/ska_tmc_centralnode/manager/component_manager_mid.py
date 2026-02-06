@@ -1523,7 +1523,7 @@ class CNComponentManagerMid(CNComponentManager):
                     " Aggregating stow mode results"
                 )
                 self.aggregate_set_stow_mode_results()
-                self.logger.info(
+                self.logger.debug(
                     "stow_mode_aggregated_result: %s,"
                     " dishln_stow_mode_cmd_exe_data: %s",
                     self.stow_mode_aggregated_result,
@@ -1541,35 +1541,17 @@ class CNComponentManagerMid(CNComponentManager):
         self.stow_mode_aggregated_result = (
             self.aggregate_dish_stow_mode_events()
         )
-        self.logger.info(
-            "stow_mode_aggregated_result: %s,"
-            " dishln_stow_mode_cmd_exe_data: %s",
-            self.stow_mode_aggregated_result,
-            self.dishln_stow_mode_cmd_exe_data,
-        )
         if self.stow_mode_aggregated_result:
             for (
                 _,
                 result_code_or_exception,
             ) in self.dishln_stow_mode_cmd_exe_data.items():
                 if isinstance(result_code_or_exception, str):
-                    self.logger.info(
-                        "stow_mode_aggregated_result: %s,"
-                        " dishln_stow_mode_cmd_exe_data: %s",
-                        self.stow_mode_aggregated_result,
-                        self.dishln_stow_mode_cmd_exe_data,
-                    )
                     self.stow_mode_aggregated_result = False
                     break
                 if result_code_or_exception["result_code"][0] != int(
                     ResultCode.OK
                 ):
-                    self.logger.info(
-                        "stow_mode_aggregated_result: %s,"
-                        " dishln_stow_mode_cmd_exe_data: %s",
-                        self.stow_mode_aggregated_result,
-                        self.dishln_stow_mode_cmd_exe_data,
-                    )
                     self.stow_mode_aggregated_result = False
                     break
 
@@ -1586,9 +1568,11 @@ class CNComponentManagerMid(CNComponentManager):
                    respond.
         """
         wait_event = threading.Event()
-        self.logger.info("Command Timeout is %s seconds", self.command_timeout)
+        self.logger.debug(
+            "Command Timeout is %s seconds", self.command_timeout
+        )
         timeout = self.command_timeout - 3  # total timeout in seconds
-        self.logger.info("Stow Timeout is %s seconds", timeout)
+        self.logger.debug("Stow Timeout is %s seconds", timeout)
         interval = 0.5  # wait interval in seconds
         flag = True
         # start_time = time.time()
