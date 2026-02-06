@@ -148,7 +148,7 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
         self.event_data_manager = EventDataManager(self)
-        self.event_manager = _event_manager
+        self.event_manager: CentralNodeEventManager = _event_manager
         self.command_timeout = command_timeout
         self.process_lock = ProcessLock()
         self._component.set_op_callbacks(
@@ -232,6 +232,7 @@ class CNComponentManager(TmcComponentManager):
         self.start_event_manager(
             self.build_device_attribute_map(), timeout=1000
         )
+        self.event_manager.init_timeout(self.event_thread_id)
         self.logger.debug("Successfully subscribed the events")
 
     def build_device_attribute_map(self) -> Dict[str, List[str]]:
@@ -385,7 +386,10 @@ class CNComponentManager(TmcComponentManager):
         """Start all the event processing threads."""
         for attribute in self.event_queue:
             thread = threading.Thread(
-                target=self.process_event, args=[attribute], name=attribute
+                target=self.process_event,
+                args=[attribute],
+                name=attribute,
+                daemon=True,
             )
             thread.start()
 
@@ -480,6 +484,11 @@ class CNComponentManager(TmcComponentManager):
         """shutdown aggregation process"""
         self.logger.debug("component destructor called")
         self.stop_all_process()
+        self.stop()
+
+    def cleanup(self):
+        self.stop_all_process()
+        self.stop()
 
     def stop_event_manager(self) -> None:
         """Stops the Event Receiver"""
@@ -487,8 +496,21 @@ class CNComponentManager(TmcComponentManager):
             self.event_manager_object.cancel_subscription_thread(
                 self.event_thread_id
             )
-            for device in self.build_device_attribute_map():
-                self.event_manager_object.unsubscribe_event_async(device)
+            try:
+                subscriptions = (
+                    self.event_manager_object.device_subscriptions.copy()
+                )
+                for device in subscriptions:
+                    if subscriptions.get(device).get(
+                        "is_subscription_completed"
+                    ):
+                        self.event_manager_object.unsubscribe_event_async(
+                            device
+                        )
+            except Exception:
+                self.logger.exception(
+                    "Failed to unsubscribe event for %s", device
+                )
 
     def stop(self) -> None:
         """stops liveliness probe"""

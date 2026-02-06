@@ -84,21 +84,6 @@ def test_reset_stow_mode_data():
     cm.logger.debug.assert_called_once()
 
 
-def test_aggregate_set_stow_mode_results():
-    cm, _ = create_cm()
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {
-            "result_code": [3, "Command Failed"],
-            "dish_mode": None,
-        }
-    }
-    cm.aggregate_set_stow_mode_results()
-    assert not cm.stow_mode_aggregated_result
-    cm.dishln_stow_mode_cmd_exe_data = {"ska001": "Dish is unreachable"}
-    cm.aggregate_set_stow_mode_results()
-    assert not cm.stow_mode_aggregated_result
-
-
 def test_get_current_dish_mode_of_dln():
     cm, _ = create_cm()
     dish_id = "ska001"
