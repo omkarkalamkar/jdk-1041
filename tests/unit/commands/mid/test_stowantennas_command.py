@@ -167,7 +167,6 @@ def test_update_task_status(task_callback):
 def test_process_update_task_for_command_failure():
     cm, _ = create_cm()
     adapter_factory = MagicMock()
-    task_callback = MagicMock()
     set_stow_command = SetStowMode(
         cm,
         adapter_factory,
@@ -179,11 +178,12 @@ def test_process_update_task_for_command_failure():
     cm.dishln_stow_mode_cmd_exe_data = {
         "ska002": {"result_code": [3, "FAILED"]}
     }
+    set_stow_command.task_callback = MagicMock()
     set_stow_command.process_update_task_for_command_failure(
         error_message=error_message,
     )
-    task_callback.assert_called()
-    kwargs = task_callback.call_args.kwargs
+    set_stow_command.task_callback.assert_called()
+    kwargs = set_stow_command.task_callback.call_args.kwargs
 
     assert kwargs["status"] == TaskStatus.COMPLETED
     assert kwargs["result"][0] == ResultCode.FAILED

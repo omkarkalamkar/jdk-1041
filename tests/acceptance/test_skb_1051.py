@@ -20,8 +20,6 @@ from tests.settings import (
     check_subarray_availability,
 )
 
-mccs_master_proxy = DeviceProxy(MCCS_MLN_DEVICE)
-
 
 @pytest.fixture()
 def subscribe_mccs_lrc_event():
@@ -41,9 +39,11 @@ def subscribe_mccs_lrc_event():
                     pytest.unique_id2 = unique_id
                     pytest.mccs_release2 = True
 
+    mccs_master_proxy = DeviceProxy(MCCS_MLN_DEVICE)
     pytest.sub_id = mccs_master_proxy.subscribe_event(
         "longrunningcommandresult", tango.EventType.CHANGE_EVENT, cb
     )
+    pytest.mccs_master_proxy = mccs_master_proxy
 
 
 @given(
@@ -139,7 +139,7 @@ def verify_subarraynode():
 )
 def verify_mccs_master_leaf_node():
     """Method verifies if release was invoked on mccs master leaf node"""
-    mccs_master_proxy.unsubscribe_event(pytest.sub_id)
+    pytest.mccs_master_proxy.unsubscribe_event(pytest.sub_id)
     assert pytest.mccs_release1
     assert pytest.mccs_release2
 
