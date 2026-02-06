@@ -148,7 +148,7 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
         self.event_data_manager = EventDataManager(self)
-        self.event_manager: CentralNodeEventManager = _event_manager
+        self.event_manager: bool = _event_manager
         self.command_timeout = command_timeout
         self.process_lock = ProcessLock()
         self._component.set_op_callbacks(
@@ -213,8 +213,8 @@ class CNComponentManager(TmcComponentManager):
             target=self.aggregate_process_monitor
         )
         self.aggregate_process_monitor_thread.start()
-        self.event_manager_object = CentralNodeEventManager(
-            self, logger=logger
+        self.event_manager_object: CentralNodeEventManager = (
+            CentralNodeEventManager(self, logger=logger)
         )
         self._array_layout_url: str = ""
         self._array_layout_url_callback = array_layout_url_callback
@@ -232,7 +232,8 @@ class CNComponentManager(TmcComponentManager):
         self.start_event_manager(
             self.build_device_attribute_map(), timeout=1000
         )
-        self.event_manager.init_timeout(self.event_thread_id)
+        if self.event_manager:
+            self.event_manager_object.init_timeout(self.event_thread_id)
         self.logger.debug("Successfully subscribed the events")
 
     def build_device_attribute_map(self) -> Dict[str, List[str]]:
