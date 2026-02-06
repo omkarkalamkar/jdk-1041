@@ -3,6 +3,7 @@
 # pylint: disable=unused-argument
 # pylint: disable=redefined-outer-name
 import logging
+import threading
 from multiprocessing import Manager
 from os.path import dirname, join
 
@@ -163,16 +164,43 @@ def pytest_addoption(parser):
     )
 
 
+def wait_for_threads_to_complete(tc):
+    """Wait all threads to complete"""
+    alive = [
+        t for t in threading.enumerate() if t is not threading.main_thread()
+    ]
+    for t in alive:
+        # Skip already-dead threads
+        if not t.is_alive():
+            logging.info("Already killed %s", t.name)
+            continue
+
+        logging.info("Joining thread %s", t)
+        t.join(timeout=10)
+    alive = [
+        t._target
+        for t in threading.enumerate()
+        if t is not threading.main_thread()
+    ]
+    logging.info("alive threads %s", alive)
+
+
 @pytest.fixture
 def tango_context(devices_to_load, request):
     """Tango context fixture"""
     true_context = request.config.getoption("--true-context")
     logging.info("true context: %s", true_context)
     if not true_context:
-        with MultiDeviceTestContext(devices_to_load, timeout=100) as context:
-            DevFactory._test_context = context
-            logging.info("test context set")
-            yield context
+        try:
+            with MultiDeviceTestContext(
+                devices_to_load, process=True, timeout=100
+            ) as context:
+                DevFactory._test_context = context
+                logging.info("test context set")
+                yield context
+        except Exception as exception:
+            logging.error(exception)
+            wait_for_threads_to_complete(context)
     else:
         yield None
 
