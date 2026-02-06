@@ -1586,8 +1586,9 @@ class CNComponentManagerMid(CNComponentManager):
                    respond.
         """
         wait_event = threading.Event()
-
-        timeout = self.command_timeout - 3  # total timeout in seconds
+        self.logger.info("Command Timeout is %s seconds", self.command_timeout)
+        timeout = self.command_timeout - 10  # total timeout in seconds
+        self.logger.info("Stow Timeout is %s seconds", self.command_timeout)
         interval = 0.5  # wait interval in seconds
         start_time = time.time()
 
