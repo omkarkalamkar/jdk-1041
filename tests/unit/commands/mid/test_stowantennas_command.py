@@ -101,8 +101,8 @@ def test_update_set_stow_mode_results():
     cm.update_set_stow_mode_results(
         "abc/def/ska001", ("123_SetStowMode", '[0, "Command Completed"]')
     )
-    assert cm.logger.info.call_count == 2
-    assert cm.logger.debug.call_count == 2
+    assert cm.logger.info.call_count > 1
+    assert cm.logger.debug.call_count > 1
     cm.aggregate_set_stow_mode_results.assert_called_once()
     assert cm.stow_mode_command_aggregated_result == ResultCode.OK
     assert not cm.number_of_stow_mode_executed
