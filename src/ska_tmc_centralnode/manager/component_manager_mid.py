@@ -1571,19 +1571,16 @@ class CNComponentManagerMid(CNComponentManager):
         self.logger.debug(
             "Command Timeout is %s seconds", self.command_timeout
         )
-        timeout = self.command_timeout - 3  # total timeout in seconds
-        self.logger.debug("Stow Timeout is %s seconds", timeout)
         interval = 0.5  # wait interval in seconds
-        # start_time = time.time()
-
-        while timeout > 0:
+        end_time = time.monotonic() + (self.command_timeout - 3)
+        while time.monotonic() < end_time:
             if self.all_dish_stow_mode_available():
                 self.logger.debug(
                     "All dish_mode values are available. Exiting loop."
                 )
                 return True
-            timeout -= interval
             wait_event.wait(interval)
+        wait_event.clear()
         return False
 
     def all_dish_stow_mode_available(self) -> bool:
@@ -1599,7 +1596,7 @@ class CNComponentManagerMid(CNComponentManager):
                 data["dish_mode"] = DishMode(
                     self.get_current_dish_mode_of_dln(dish_id)
                 ).name
-                self.logger.info(
+                self.logger.debug(
                     "Current dish mode for %s is %s", dish_id, data
                 )
         for dish in self.dishln_stow_mode_cmd_exe_data.values():
@@ -1607,6 +1604,7 @@ class CNComponentManagerMid(CNComponentManager):
                 isinstance(dish, dict)
                 and dish.get("dish_mode") != DishMode.STOW.name
             ):
+                self.logger.debug("Dish data: %s", dish)
                 flag = False
                 break  # Early exit like any()
         return flag
