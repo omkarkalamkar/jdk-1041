@@ -1523,6 +1523,12 @@ class CNComponentManagerMid(CNComponentManager):
                     " Aggregating stow mode results"
                 )
                 self.aggregate_set_stow_mode_results()
+                self.logger.info(
+                    "stow_mode_aggregated_result: %s,"
+                    " dishln_stow_mode_cmd_exe_data: %s",
+                    self.stow_mode_aggregated_result,
+                    self.dishln_stow_mode_cmd_exe_data,
+                )
                 self.stow_mode_command_aggregated_result = ResultCode.OK
                 self.observable.notify_observers(attribute_value_change=True)
 
@@ -1535,17 +1541,35 @@ class CNComponentManagerMid(CNComponentManager):
         self.stow_mode_aggregated_result = (
             self.aggregate_dish_stow_mode_events()
         )
+        self.logger.info(
+            "stow_mode_aggregated_result: %s,"
+            " dishln_stow_mode_cmd_exe_data: %s",
+            self.stow_mode_aggregated_result,
+            self.dishln_stow_mode_cmd_exe_data,
+        )
         if self.stow_mode_aggregated_result:
             for (
                 _,
                 result_code_or_exception,
             ) in self.dishln_stow_mode_cmd_exe_data.items():
                 if isinstance(result_code_or_exception, str):
+                    self.logger.info(
+                        "stow_mode_aggregated_result: %s,"
+                        " dishln_stow_mode_cmd_exe_data: %s",
+                        self.stow_mode_aggregated_result,
+                        self.dishln_stow_mode_cmd_exe_data,
+                    )
                     self.stow_mode_aggregated_result = False
                     break
                 if result_code_or_exception["result_code"][0] != int(
                     ResultCode.OK
                 ):
+                    self.logger.info(
+                        "stow_mode_aggregated_result: %s,"
+                        " dishln_stow_mode_cmd_exe_data: %s",
+                        self.stow_mode_aggregated_result,
+                        self.dishln_stow_mode_cmd_exe_data,
+                    )
                     self.stow_mode_aggregated_result = False
                     break
 
