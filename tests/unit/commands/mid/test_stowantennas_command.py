@@ -142,6 +142,24 @@ def test_all_dish_stow_mode_available():
     assert cm.all_dish_stow_mode_available()
 
 
+def test_check_timeout_for_stow_mode_lrcr_events():
+    cm, _ = create_cm()
+    cm.dishln_stow_mode_cmd_exe_data = {
+        "ska001": {
+            "result_code": [3, "Timeout Occurred"],
+            "dish_mode": None,
+        }
+    }
+    assert cm.check_timeout_for_stow_mode_lrcr_events()
+    cm.dishln_stow_mode_cmd_exe_data = {
+        "ska001": {
+            "result_code": [3, "Command failed"],
+            "dish_mode": None,
+        }
+    }
+    assert not cm.check_timeout_for_stow_mode_lrcr_events()
+
+
 def test_get_current_dish_mode_of_dln():
     cm, _ = create_cm()
     dish_id = "ska001"
