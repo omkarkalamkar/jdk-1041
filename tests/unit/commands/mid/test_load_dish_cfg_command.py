@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import mock
 import tango
-from ska_tango_base.commands import ResultCode
 from ska_control_model import TaskStatus
+from ska_tango_base.commands import ResultCode
 from ska_tmc_common import DevFactory
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,

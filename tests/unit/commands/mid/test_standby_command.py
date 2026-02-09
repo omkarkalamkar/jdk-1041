@@ -2,8 +2,8 @@ import time
 
 import mock
 import pytest
-from ska_tango_base.commands import ResultCode
 from ska_control_model import TaskStatus
+from ska_tango_base.commands import ResultCode
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed

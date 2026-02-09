@@ -2,7 +2,6 @@
 
 # pylint: disable=redefined-outer-name
 import json
-import logging
 import time
 
 import pytest
@@ -10,6 +9,7 @@ import pytest
 from tests.settings import SLEEP_TIME, TIMEOUT, logger
 
 pytest.event_arrived = False
+
 
 def checked_devices(json_model: dict) -> int:
     """Checked devices for availability"""

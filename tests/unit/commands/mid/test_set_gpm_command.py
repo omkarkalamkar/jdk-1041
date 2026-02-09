@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, call, patch
 
 import mock
 import pytest
-from ska_tango_base.commands import ResultCode
 from ska_control_model import TaskStatus
+from ska_tango_base.commands import ResultCode
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
