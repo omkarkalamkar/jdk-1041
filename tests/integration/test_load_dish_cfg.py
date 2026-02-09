@@ -78,7 +78,6 @@ def load_dish_cfg(central_node_name, config_str, change_event_callbacks):
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-
     change_event_callbacks["DishVccCommandStatus"].assert_change_event(
         DishConfigStatus.COMPLETED,
         lookahead=4,
@@ -272,8 +271,8 @@ def load_dish_cfg_when_csp_is_defective(
     assert result[0] == ResultCode.QUEUED
 
     expected_failed_message = (
-        f'[{ResultCode.FAILED}, "Exception occurred on device: '
-        f'Command failed on device {MID_CSP_MLN_DEVICE}: Exception occurred, command failed."]'
+        f'[{ResultCode.FAILED}, "Exception occurred on the following devices: '
+        f'{MID_CSP_MLN_DEVICE}: Exception occurred, command failed."]'
     )
     logger.info(f"{expected_failed_message} is this")
 

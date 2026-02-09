@@ -192,12 +192,11 @@ def test_telescope_off_command_rejected(
     # assert res_code == TaskStatus.REJECTED
     # assert message == "'low-tmc/leaf-node-mccs/0' not available in "
 
-    data = task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.COMPLETED,
-            "result": Anything,
-        },
+    data = task_callback.assert_call(
+        status=TaskStatus.REJECTED,
+        result=Anything,
+        exception=Anything,
         lookahead=5,
     )
-    assert ResultCode.OK == data["result"][0]
-    assert f"Unavailable devices: ['{MCCS_MLN_DEVICE}']" in data["result"][1]
+    assert ResultCode.FAILED == data["result"][0]
+    assert f"['{MCCS_MLN_DEVICE}'] not available" in data["result"][1]

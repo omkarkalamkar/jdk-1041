@@ -65,12 +65,12 @@ PYTHON_VARS_BEFORE_PYTEST ?= PYTHONPATH=.:./src \
 MARK ?= ## What -m opt to pass to pytest
 # run one test with FILE=acceptance/test_central_node.py::test_check_internal_model_according_to_the_tango_ecosystem_deployed
 FILE ?= tests## A specific test file to pass to pytest
-ADD_ARGS ?= -x ## Additional args to pass to pytest
+ADD_ARGS ?= ## Additional args to pass to pytest
 
 
 CI_REGISTRY ?= gitlab.com
 CUSTOM_VALUES = --set central_node.centralnode.image.tag=$(VERSION)
-K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/ska-build-python:0.3.1
+K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/ska-build-python:0.3.2
 ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnode.image.image=$(PROJECT) \
 	--set central_node.centralnode.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
@@ -79,7 +79,7 @@ endif
 
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
-ADD_ARGS += --forked
+ADD_ARGS += -n8 --forked
 MARK = not post_deployment and not acceptance
 endif
 ifeq ($(MAKECMDGOALS),k8s-test)

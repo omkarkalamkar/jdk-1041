@@ -49,7 +49,6 @@ def assign_resources(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-
     result, unique_id = central_node.TelescopeOn()
     logger.info(
         "Telscope On Command ID: %s Returned result: %s",
@@ -271,7 +270,6 @@ def assign_resources_without_subarray_id(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-
     result, unique_id = central_node.TelescopeOn()
     logger.info(
         "TelescopeOn Command ID: %s Returned result: %s",
@@ -354,7 +352,6 @@ def test_assign_resources_exception_propagation(
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
@@ -429,7 +426,6 @@ def test_assign_resources_mid_timeout(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-
     result, unique_id = central_node.TelescopeOn()
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
@@ -503,7 +499,6 @@ def test_assign_resources_low_timeout(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-
     result, unique_id = central_node.TelescopeOn()
     logger.info(
         "Telescope On Command ID: %s Returned result: %s",

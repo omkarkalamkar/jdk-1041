@@ -146,7 +146,7 @@ class CNComponentManager(TmcComponentManager):
         self.op_state_model = op_state_model
         self.adapter_factory = AdapterFactory()
         self.event_data_manager = EventDataManager(self)
-        self.event_manager = _event_manager
+        self.event_manager: bool = _event_manager
         self.command_timeout = command_timeout
         self.process_lock = threading.RLock()
         self._component.set_op_callbacks(
@@ -212,8 +212,8 @@ class CNComponentManager(TmcComponentManager):
             target=self.aggregate_process_monitor, daemon=True
         )
         self.aggregate_process_monitor_thread.start()
-        self.event_manager_object = CentralNodeEventManager(
-            self, logger=logger
+        self.event_manager_object: CentralNodeEventManager = (
+            CentralNodeEventManager(self, logger=logger)
         )
         self._array_layout_url: str = ""
         self._array_layout_url_callback = array_layout_url_callback
@@ -221,6 +221,7 @@ class CNComponentManager(TmcComponentManager):
             default_array_layout_url_callback
         )
         self._default_array_layout_url: dict = default_array_layout_url
+        self.command_completion_cond = threading.Condition()
 
     def setup_event_subscription(self) -> None:
         """
@@ -230,6 +231,8 @@ class CNComponentManager(TmcComponentManager):
         self.start_event_manager(
             self.build_device_attribute_map(), timeout=1000
         )
+        if self.event_manager:
+            self.event_manager_object.init_timeout(self.event_thread_id)
         self.logger.debug("Successfully subscribed the events")
 
     def build_device_attribute_map(self) -> Dict[str, List[str]]:
@@ -282,7 +285,6 @@ class CNComponentManager(TmcComponentManager):
                         "dishMode",
                         "kValueValidationResult",
                         "healthState",
-                        "longrunningcommandresult",
                         "gpmVersion",
                     ]
                 )
@@ -291,7 +293,6 @@ class CNComponentManager(TmcComponentManager):
             if dev_name in self.input_parameter.subarray_dev_names:
                 device_attribute_map[dev_name].extend(
                     [
-                        "longRunningCommandResult",
                         "isSubarrayAvailable",
                     ]
                 )
@@ -304,7 +305,6 @@ class CNComponentManager(TmcComponentManager):
         if MID_CSP_MLN_DEVICE in device_attribute_map:
             device_attribute_map[MID_CSP_MLN_DEVICE].extend(
                 [
-                    "longRunningCommandResult",
                     "DishVccMapValidationResult",
                     "cspControllerAdminMode",
                 ]
@@ -324,7 +324,6 @@ class CNComponentManager(TmcComponentManager):
         if MCCS_MLN_DEVICE in device_attribute_map:
             device_attribute_map[MCCS_MLN_DEVICE].extend(
                 [
-                    "longRunningCommandResult",
                     "mccsControllerAdminMode",
                 ]
             )
@@ -387,7 +386,10 @@ class CNComponentManager(TmcComponentManager):
         """Start all the event processing threads."""
         for attribute in self.event_queue:
             thread = threading.Thread(
-                target=self.process_event, args=[attribute], name=attribute
+                target=self.process_event,
+                args=[attribute],
+                name=attribute,
+                daemon=True,
             )
             thread.start()
 
@@ -396,20 +398,16 @@ class CNComponentManager(TmcComponentManager):
         from aggregation process
         """
         with tango.EnsureOmniThread:
-            while not self._stop_thread.is_set():
+            while not self._stop_thread:
                 if self.aggregate_value_update_event.wait(0.1):
                     self.aggregate_value_update_event.clear()
                     current_health_state = self.aggregated_health_state[0]
-                    self.component.telescope_health_state = (
-                        current_health_state
-                    )
+                    self.component.telescope_health_state = current_health_state
                     self.logger.debug(
                         "Aggregate telescope health state called %s",
                         str(current_health_state),
-                    )
-
-                time.sleep(0.1)
-            self.logger.debug("aggregation process monitor thread stopped")
+                )
+        self.logger.debug("aggregation process monitor thread stopped")
 
     def process_event(self, attribute_name: str) -> None:
         """
@@ -424,40 +422,34 @@ class CNComponentManager(TmcComponentManager):
         :returns: None
 
         """
-        with tango.EnsureOmniThread():
-            while not self._stop_thread.is_set():
-                try:
-                    event_data = self.event_queue[attribute_name].get()
-                    if not self.check_event_error(
-                        event_data, f"{attribute_name}_Callback"
-                    ):
-                        if attribute_name == "loadDishConfigResultAsync":
-                            self.event_processing_methods[attribute_name](
-                                event_data.device.dev_name(),
-                                event_data.argout,
-                            )
-                        elif attribute_name in ("healthState", "adminMode"):
-                            self.event_processing_methods[attribute_name](
-                                event_data.device.dev_name(),
-                                event_data.attr_value.value,
-                                event_data.attr_value.time.todatetime(),
-                            )
-                        else:
-                            self.event_processing_methods[attribute_name](
-                                event_data.device.dev_name(),
-                                event_data.attr_value.value,
-                            )
-                    self.event_queue[attribute_name].task_done()
-                except Empty:
-                    # If an empty exception is raised by the Queue, we can
-                    # safely ignore it.
-                    pass
-                except Exception as exception:
-                    self.logger.error(
-                        "Exception: %s Traceback: %s",
-                        exception,
-                        traceback.print_exc(),
-                    )
+        while not self._stop_thread:
+            try:
+                event_data = self.event_queue[attribute_name].get()
+                if not self.check_event_error(
+                    event_data, f"{attribute_name}_Callback"
+                ):
+                    if attribute_name in ("healthState", "adminMode"):
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.attr_value.value,
+                            event_data.attr_value.time.todatetime(),
+                        )
+                    else:
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.attr_value.value,
+                        )
+                self.event_queue[attribute_name].task_done()
+            except Empty:
+                # If an empty exception is raised by the Queue, we can
+                # safely ignore it.
+                pass
+            except Exception as exception:
+                self.logger.error(
+                    "Exception: %s Traceback: %s",
+                    exception,
+                    traceback.print_exc(),
+                )
 
     def check_event_error(self, event: tango.EventData, callback: str):
         """Method for checking event error."""
@@ -499,16 +491,10 @@ class CNComponentManager(TmcComponentManager):
 
     def stop_event_manager(self) -> None:
         """Stops the Event Receiver"""
-        if not self.event_manager:
-            return
-
-        with tango.EnsureOmniThread():
-            if self.event_manager:
-                self.event_manager_object.cancel_subscription_thread(
-                    self.event_thread_id
-                )
-                # for device in self.build_device_attribute_map():
-                #     self.event_manager_object.unsubscribe_event_async(device)
+        if self.event_manager:
+            self.event_manager_object.cancel_subscription_thread(
+                self.event_thread_id
+            )
             try:
                 subscriptions = (
                     self.event_manager_object.device_subscriptions.copy()
@@ -1015,7 +1001,6 @@ class CNComponentManager(TmcComponentManager):
                 )
                 devInfo.last_event_arrived = time.time()
                 self.component._invoke_device_callback(devInfo)
-            self.observable.notify_observers(attribute_value_change=True)
 
     def update_device_assigned_resource(
         self, dev_name: str, assign_resources: str

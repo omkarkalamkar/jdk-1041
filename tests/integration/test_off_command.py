@@ -38,7 +38,6 @@ def test_off_command_mid(
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
@@ -110,13 +109,11 @@ def test_off_command_dish_fail(
     central_node = dev_factory.get_device(CENTRALNODE_MID)
 
     ensure_checked_devices(central_node)
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-
     result_on, unique_id_on = central_node.TelescopeOn()
     assert result_on[0] == ResultCode.QUEUED
 

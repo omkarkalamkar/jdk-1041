@@ -74,7 +74,6 @@ def invoke_assignresources_on_subarrays(
     subarray_proxy.SetisSubarrayAvailable(True)
     subarray_proxy2 = DeviceProxy(LOW_SUBARRAY2_DEVICE)
     subarray_proxy2.SetisSubarrayAvailable(True)
-
     check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
     check_subarray_availability(central_node, LOW_SUBARRAY2_DEVICE, True)
     central_node.subscribe_event(
@@ -82,6 +81,7 @@ def invoke_assignresources_on_subarrays(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
+
     assign_res_string = json_factory("assign_resource_low")
     assign_data = json.loads(assign_res_string)
     _, unique_id = central_node.AssignResources(assign_res_string)
@@ -109,11 +109,13 @@ def invoke_release_resources_subarray(
 
     release_resource_string = json_factory("release_resource_low")
     release_resource_data = json.loads(release_resource_string)
+
     _, unique_id = central_node.ReleaseResources(release_resource_string)
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
         lookahead=10,
     )
+
     release_resource_data["subarray_id"] = 2
     release_resource_string = json.dumps(release_resource_data)
     _, unique_id = central_node.ReleaseResources(release_resource_string)
@@ -138,7 +140,7 @@ def verify_subarraynode():
 )
 def verify_mccs_master_leaf_node():
     """Method verifies if release was invoked on mccs master leaf node"""
-
+    pytest.mccs_master_proxy.unsubscribe_event(pytest.sub_id)
     assert pytest.mccs_release1
     assert pytest.mccs_release2
 

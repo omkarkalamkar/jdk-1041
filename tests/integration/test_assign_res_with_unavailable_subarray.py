@@ -41,6 +41,7 @@ def assign_resources(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
+
     result, unique_id = central_node_proxy.TelescopeOn()
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
@@ -98,7 +99,6 @@ def assign_resources(
         ),
         lookahead=4,
     )
-
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
     export_device(db, db_device_info)

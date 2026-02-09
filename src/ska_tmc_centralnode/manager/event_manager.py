@@ -1,14 +1,11 @@
 """Event manager class for CentralNode"""
 
 import logging
-import re
 from typing import Callable, Optional
 
 import tango
 from ska_ser_logging import configure_logging
 from ska_tmc_common.v2.event_manager import EventManager
-
-from ska_tmc_centralnode.utils.constants import MID_CSP_MLN_DEVICE
 
 configure_logging("DEBUG")
 
@@ -212,81 +209,6 @@ class CentralNodeEventManager(EventManager):
 
         """
         self._component_manager.event_queue["isSubarrayAvailable"].put(event)
-
-    def longrunningcommandresult_event_callback(
-        self, event: tango.EventData
-    ) -> None:
-        """
-        Callback for longRunningCommandResult attribute.
-
-        Delegates to specific handlers based on device type.
-
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-                change in event.
-
-        """
-        if MID_CSP_MLN_DEVICE in event.attr_name:
-            self._handle_load_dish_cfg_result_callback(event)
-        elif (
-            re.search(r"/(ska\d{3}|mkt\d{3})", event.attr_name, re.IGNORECASE)
-            and self._component_manager.command_in_progress
-            == "SetGlobalPointingModel"
-        ):
-            self._handle_set_gpm_result_callback(event)
-        elif (
-            re.search(r"/(ska\d{3}|mkt\d{3})", event.attr_name, re.IGNORECASE)
-            and self._component_manager.command_in_progress == "SetStowMode"
-        ):
-            self._handle_set_stow_mode_result_callback(event)
-        else:
-            self._component_manager.event_queue[
-                "longRunningCommandResult"
-            ].put(event)
-
-    def _handle_load_dish_cfg_result_callback(
-        self, event: tango.EventData
-    ) -> None:
-        """
-        Special handler for LoadDishCfg and SetKValue result events.
-
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-                change in event.
-
-        """
-        if getattr(event, "attr_value", False):
-            self._component_manager.event_queue["loadDishConfigResult"].put(
-                event
-            )
-        elif getattr(event, "argout", False):
-            self._component_manager.event_queue[
-                "loadDishConfigResultAsync"
-            ].put(event)
-
-    def _handle_set_stow_mode_result_callback(
-        self, event: tango.EventData
-    ) -> None:
-        """
-        Special handler for SetStowMode result events.
-
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-                change in event.
-
-        """
-        self._component_manager.event_queue["setStowModeResult"].put(event)
-
-    def _handle_set_gpm_result_callback(self, event: tango.EventData) -> None:
-        """
-        Special handler for SetGPM result events.
-
-        Args:
-            event_data (tango.EventType.CHANGE_EVENT): to flag the
-                change in event.
-
-        """
-        self._component_manager.event_queue["setGPMResult"].put(event)
 
     def gpmversion_event_callback(self, event: tango.EventData) -> None:
         """

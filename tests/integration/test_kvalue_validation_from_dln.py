@@ -92,7 +92,6 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
     )
 
     logger.info("Check if DishVccValidationStatus to True")
-
     change_event_callbacks["DishVccValidationStatus"].assert_change_event(
         json.dumps(result_string_to_match),
         lookahead=4,

@@ -240,12 +240,12 @@ def release_resources_without_subarray_id(
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     ensure_checked_devices(central_node)
+
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-
     result, unique_id_on = central_node.TelescopeOn()
     assert unique_id_on[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
@@ -407,6 +407,11 @@ def test_release_resources_error_propagation(
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], '[0, "Command Completed"]'),
+        lookahead=8,
+    )
     subarray_proxy.ClearCommandCallInfo()
 
 

@@ -337,31 +337,24 @@ def test_low_assign_resources_raises_state_model_exception(
     check_if_subarray_is_available(cm)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
-    # assign_input_str = json_factory("assign_resource_low")
-    with pytest.raises(Exception) as exception:
-        cm.is_command_allowed_callable(
-            subarray_id=1, command_name="AssignResources"
-        )
-        assert (
-            "AssignResources command not permitted in observation state 4"
-            in str(exception)
-        )
-    # res_code, message = cm.assign_resources(
-    #     assign_input_str,
-    #     task_callback=task_callback,
-    #     task_abort_event=threading.Event(),
-    # )
+    assign_input_str = json_factory("assign_resource_low")
+    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    # with pytest.raises(Exception) as exception:
+    #     cm.is_command_allowed_callable(
+    #         subarray_id=1, command_name="AssignResources"
+    #     )
+    #     assert (
+    #         "AssignResources command not permitted in observation state 4"
+    #         in str(exception)
+    #     )
 
-    # assert res_code == TaskStatus.REJECTED
-    # assert (
-    #     message
-    #     == "AssignResources command not permitted in observation state 4"
-    # )
-    # task_callback.assert_against_call(
-    #     status=TaskStatus.REJECTED,
-    #     result=(
-    #         ResultCode.REJECTED,
-    #         "AssignResources command not permitted in observation state 4",
-    #     ),
-    #     lookahead=3
-    # )
+    task_callback.assert_against_call(
+        status=TaskStatus.REJECTED,
+        result=(
+            ResultCode.NOT_ALLOWED,
+            "AssignResources command not permitted in observation state 4",
+        ),
+    )

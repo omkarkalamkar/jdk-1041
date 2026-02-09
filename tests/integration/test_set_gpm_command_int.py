@@ -178,7 +178,7 @@ def set_gpm_command_negative_scenarios(
     # Status of SKA100, SKA093 and SKA001 will be
     # unchanged as no command execution
     # happened on it.
-    subarray_node.SetDirectassignedResources("[]")
+    subarray_node.SetDirectassignedResources([""])
     assert gpm_status["ska036"]["Band_2"] == "1.0"
 
 

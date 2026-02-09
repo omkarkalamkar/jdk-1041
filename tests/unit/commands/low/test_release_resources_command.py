@@ -181,23 +181,18 @@ def test_low_release_resources_raises_state_model_exception(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    # release_input_str = json_factory("release_resource_low")
-    with pytest.raises(Exception) as exception:
-        cm.is_command_allowed_callable(
-            subarray_id=1, command_name="ReleaseResources"
-        )
-        assert (
-            "ReleaseResources command not permitted in observation state 0"
-            in str(exception)
-        )
-    # cm.release_resources(release_input_str, task_callback=task_callback)
+    release_input_str = json_factory("release_resource_low")
+    cm.release_resources(release_input_str, task_callback=task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
 
-    # data = task_callback.assert_against_call(
-    #     call_kwargs={
-    #         "status": TaskStatus.REJECTED,
-    #         "result": Anything,
-    #         "exception": Anything,
-    #     }
-    # )
-    # assert ResultCode.REJECTED == data["result"][0]
-    # assert "ReleaseResources command not permitted" in data["result"][1]
+    task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.REJECTED,
+            "result": (
+                ResultCode.NOT_ALLOWED,
+                "ReleaseResources command not permitted in observation state 0",
+            ),
+        }
+    )

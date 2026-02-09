@@ -8,10 +8,6 @@ from retry import retry
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_telmodel.data import TMData
-from ska_tmc_common.v1.error_propagation_tracker import (
-    error_propagation_tracker,
-)
-from ska_tmc_common.v1.timeout_tracker import timeout_tracker
 
 from ska_tmc_centralnode.commands.central_node_command import (
     LoadDishCfgCommand,
@@ -64,14 +60,11 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
         self.component_manager.command_id = self.command_id
 
-    @timeout_tracker
-    @error_propagation_tracker(
-        "get_load_disg_cfg_resultcode",
-        [ResultCode.OK],
-    )
     def load_dish_cfg(
         self,
         argin: str,
+        task_callback,
+        task_abort_event,
     ) -> Tuple[ResultCode, str]:
         """
         Load Dish Configuration command.
@@ -84,6 +77,13 @@ class LoadDishCfg(LoadDishCfgCommand):
             Tuple(ResultCode, str): Result code and message.
 
         """
+        self.component_manager.command_in_progress = "LoadDishCfg"
+        self.set_command_id("LoadDishCfg")
+        self.task_callback = task_callback
+        self.task_abort_event = task_abort_event
+        self.component_manager.abort_event = self.task_abort_event
+        self.task_callback(status=TaskStatus.IN_PROGRESS)
+
         # Set Dish-specific command status
         self.component_manager.dish_vcc_command_status = (
             DishConfigStatus.IN_PROGRESS
@@ -98,6 +98,10 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.dish_vcc_validation_status = {
                 CENTRALNODE_MID: error_message
             }
+            self.update_task_status(
+                result=(ResultCode.FAILED, error_message),
+                exception=error_message,
+            )
             return ResultCode.FAILED, error_message
 
         # Save validated config
@@ -105,12 +109,10 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.dish_cfg_params = argin
 
         # Execute device-level command
-        result_code, message = self.do(argin)
-
-        # Record command ID
         self.component_manager.load_dish_cfg_command_id = self.command_id
-
-        return result_code, message
+        result, message = self.do(argin)
+        self.update_task_status(result=(result, message), exception=message)
+        return result, message
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -256,7 +258,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.command_id,
             self.csp_mln_adapter.dev_name,
         )
-        return ResultCode.OK, ""
+        return self.wait_for_command_completion(len(self.command_subs_list))
 
     def _invoke_load_dish_cfg_on_csp_master_ln(
         self, dishid_vcc_map_params: str
@@ -282,7 +284,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.component_manager.dev_names_for_load_dish_cfg.append(
             self.csp_mln_adapter.dev_name
         )
-        return_codes, message_or_unique_ids = self.send_command(
+        return_codes, message_or_unique_ids = self.invoke_command(
             [self.csp_mln_adapter],
             "Error in calling LoadDishCfg command on Csp Master Leaf Node",
             "LoadDishCfg",
@@ -327,8 +329,10 @@ class LoadDishCfg(LoadDishCfgCommand):
                     dish_adapter.proxy.command_inout_asynch(
                         "SetKValue",
                         k_value,
-                        self.dish_cfg._handle_load_dish_cfg_result_callback,
+                        self.async_cb(dish_adapter.dev_name),
                     )
+                    name = dish_adapter.dev_name + "async"
+                    self.command_subs_list.append(name)
                     # Append dish dev names to track on which dish
                     # SetKValue is invoked
                     self.component_manager.dev_names_for_load_dish_cfg.append(
@@ -427,3 +431,24 @@ class LoadDishCfg(LoadDishCfgCommand):
         if not is_valid_dish_cfg:
             return "", message
         return dishid_vcc_map_json, ""
+
+    def async_cb(self, device_name: str):
+        """Invoke LRC callback.
+        Provide this callback whenever command is invoked using invoke_lrc api
+        Args:
+            device_name: Name Of Device
+        Returns:
+            callback: function object to provided to invoke_lrc
+        """
+
+        def callback(event_data):
+            if event_data:
+                value = event_data.argout
+                result = [value[0][0], value[1][0]]
+                with self.component_manager.command_completion_cond:
+                    self.command_results[device_name] = result
+                    cond = self.component_manager.command_completion_cond
+                    with cond:
+                        cond.notify_all()
+
+        return callback

@@ -7,10 +7,6 @@ from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common import TimeKeeper
 from ska_tmc_common.enum import DishMode
-from ska_tmc_common.v1.error_propagation_tracker import (
-    error_propagation_tracker,
-)
-from ska_tmc_common.v1.timeout_tracker import timeout_tracker
 
 from ska_tmc_centralnode.commands.central_node_command import SetDishGPM
 
@@ -45,14 +41,8 @@ class SetStowMode(SetDishGPM):
             self.component_manager.command_timeout, logger
         )
 
-    @timeout_tracker
-    @error_propagation_tracker(
-        "get_set_stow_mode_resultcode",
-        [ResultCode.OK],
-    )
     def apply_stow_mode(
-        self,
-        argin: list,
+        self, argin: list, task_callback, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """
         Applies the STOW command to specified dish id's in the list.
@@ -66,9 +56,15 @@ class SetStowMode(SetDishGPM):
         Returns:
             None
         """
-
+        self.component_manager.command_in_progress = "SetStowMode"
+        self.task_callback = task_callback
+        self.task_abort_event = task_abort_event
+        self.component_manager.abort_event = self.task_abort_event
+        self.task_callback(status=TaskStatus.IN_PROGRESS)
         self.receptors = argin
-        return self.do(argin)
+        result, message = self.do(argin)
+        self.update_task_status(result=(result, message), exception=message)
+        return result, message
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = None
@@ -81,13 +77,13 @@ class SetStowMode(SetDishGPM):
             exception (str): any message returned as a part of command
 
         """
-        if not self.component_manager.stow_mode_aggregated_result:
+        if result[0] == ResultCode.FAILED:
             error_message = (
                 "SetStowMode failed: Command failure"
                 " or dish not in STOW mode: "
             )
             result = self.process_update_task_for_command_failure(
-                self.task_callback, error_message
+                error_message
             )
         else:
             self.logger.debug(
@@ -122,7 +118,7 @@ class SetStowMode(SetDishGPM):
         self.component_manager.reset_stow_mode_data()
 
     def process_update_task_for_command_failure(
-        self, task_callback, error_message: str
+        self, error_message: str
     ) -> str:
         """Method to update the task callback and GPM status
         with the failure data
@@ -137,17 +133,14 @@ class SetStowMode(SetDishGPM):
             result,
         ) in self.component_manager.dishln_stow_mode_cmd_exe_data.items():
             if not isinstance(result, str):
-                if (
-                    result["result_code"][0] == int(ResultCode.OK)
-                    and result["dish_mode"] == DishMode.STOW.name
-                ):
+                if result["result_code"][0] == int(ResultCode.OK):
                     keys_to_delete.append(dish_id)
         for key in keys_to_delete:
             del self.component_manager.dishln_stow_mode_cmd_exe_data[key]
         error_message += json.dumps(
             self.component_manager.dishln_stow_mode_cmd_exe_data
         )
-        task_callback(
+        self.task_callback(
             status=TaskStatus.COMPLETED,
             result=(ResultCode.FAILED, error_message),
             exception=error_message,
@@ -188,7 +181,7 @@ class SetStowMode(SetDishGPM):
 
         result_code, message = self._set_stow_mode_to_dish(argin)
         if result_code[0] not in [ResultCode.OK, ResultCode.STARTED]:
-            return [result_code], [message]
+            return result_code, message
         receptors = (
             list(self.component_manager.dishln_stow_mode_cmd_exe_data.keys())
             + self.receptors_with_stow_mode_set
@@ -200,7 +193,7 @@ class SetStowMode(SetDishGPM):
             self.component_manager.command_id,
             receptors,
         )
-        return [result_code], [message]
+        return self.wait_for_command_completion(len(self.command_subs_list))
 
     def _set_stow_mode_to_dish(
         self, stow_dish_list: list
@@ -257,10 +250,11 @@ class SetStowMode(SetDishGPM):
                     self.component_manager.command_id,
                     dishln_adapter.dev_name,
                 )
-                return_codes, message_or_unique_ids = self.send_command(
+                return_codes, message_or_unique_ids = self.invoke_command(
                     [dishln_adapter],
                     err_message,
                     "SetStowMode",
+                    callback=self.update_stow_results,
                 )
                 if return_codes[0] in [ResultCode.STARTED, ResultCode.OK]:
                     with self.component_manager.dishln_stow_mode_lock:
@@ -269,20 +263,18 @@ class SetStowMode(SetDishGPM):
                     self.set_stow_mode_cm_variables(dish_id, False)
                     self.component_manager.dishln_stow_mode_cmd_exe_data[
                         dish_id
-                    ] = {"result_code": err_message, "dish_mode": None}
+                    ] = {"result_code": err_message}
+                    self.command_subs_list.append(dishln_adapter.dev_name)
+                    self.command_results[dishln_adapter.dev_name] = [
+                        return_codes[0],
+                        message_or_unique_ids[0],
+                    ]
             self.logger.info(
                 "Finished executing SetStowMode on DLN."
                 "Set Stow Mode data dictionary : %s",
                 self.component_manager.dishln_stow_mode_cmd_exe_data,
             )
             if not self.component_manager.number_of_stow_mode_executed:
-                self.component_manager.aggregate_set_stow_mode_results()
-                self.component_manager.stow_mode_command_aggregated_result = (
-                    ResultCode.OK
-                )
-                self.component_manager.observable.notify_observers(
-                    attribute_value_change=True
-                )
                 return_codes[0] = ResultCode.OK
                 message_or_unique_ids.append("SetStowMode Command Completed")
                 self.logger.debug(
@@ -316,8 +308,7 @@ class SetStowMode(SetDishGPM):
             self.component_manager.number_of_stow_mode_executed += 1
         if dish_id not in self.component_manager.dishln_stow_mode_cmd_exe_data:
             self.component_manager.dishln_stow_mode_cmd_exe_data[dish_id] = {
-                "result_code": None,
-                "dish_mode": None,
+                "result_code": None
             }
 
     def add_data_to_stow_mode_dictionary_in_case_of_error(
@@ -339,3 +330,48 @@ class SetStowMode(SetDishGPM):
         self.component_manager.dishln_stow_mode_cmd_exe_data[dish_id] = (
             "ERROR: " + error_message
         )
+
+    def update_stow_results(self, dev_name: str) -> None:
+        """
+        This method is used to update the result returned
+        from Dish leaf nodes as part of SetGlobalPointingModel
+        command.
+        If all events are received from all device then aggregate
+        the result
+        Value contains (unique_id, ResultCode)
+        Args:
+            dev_name (str): Name of the device who's event has been
+            captured in this method
+            value (tuple): longRunningCommandResult attribute event.
+        """
+
+        def callback(result=None, **kwargs):
+            stow_mode_cmd_exe_data = (
+                self.component_manager.dishln_stow_mode_cmd_exe_data
+            )
+            self.logger.info(
+                "SetStowMode longRunningCommandResult event for device: "
+                "%s, with value: %s",
+                dev_name,
+                str(result),
+            )
+            with self.component_manager.dishln_stow_mode_lock:
+                dishln_id = dev_name.split("/")[-1]
+                if result:
+                    if dishln_id in stow_mode_cmd_exe_data:
+                        stow_mode_cmd_exe_data[dishln_id][
+                            "result_code"
+                        ] = result
+                        self.logger.debug(
+                            "Current dishln stow mode command data %s",
+                            stow_mode_cmd_exe_data,
+                        )
+
+            if result:
+                with self.component_manager.command_completion_cond:
+                    self.command_results[dev_name] = result
+                    cond = self.component_manager.command_completion_cond
+                    with cond:
+                        cond.notify_all()
+
+        return callback

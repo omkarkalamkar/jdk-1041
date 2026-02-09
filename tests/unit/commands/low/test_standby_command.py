@@ -186,23 +186,14 @@ def test_telescope_standby_command_rejected(
     cm.is_command_allowed("TelescopeStandby")
     cm.telescope_standby(task_callback=task_callback)
 
-    data = task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.COMPLETED,
-            "result": Anything,
-        },
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.QUEUED}
+    )
+    data = task_callback.assert_call(
+        status=TaskStatus.REJECTED,
+        result=Anything,
+        exception=Anything,
         lookahead=5,
     )
-    assert ResultCode.OK == data["result"][0]
-    assert f"Unavailable devices: ['{MCCS_MLN_DEVICE}']" in data["result"][1]
-
-    # data = task_callback.assert_against_call(
-    #     call_kwargs={
-    #         "status": TaskStatus.REJECTED,
-    #         "result": Anything,
-    #         "exception": Anything,
-    #     },
-    #     lookahead=5,
-    # )
-    # assert ResultCode.REJECTED == data["result"][0]
-    # assert f"['{MCCS_MLN_DEVICE}'] not available" in data["result"][1]
+    assert ResultCode.FAILED == data["result"][0]
+    assert f"['{MCCS_MLN_DEVICE}'] not available" in data["result"][1]
