@@ -14,7 +14,7 @@ from logging import Logger
 from queue import Queue
 from typing import Callable, Dict, Tuple
 
-from ska_control_model import AdminMode, TaskStatus
+from ska_control_model import AdminMode, ObsState, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_telmodel.schema import validate
 from ska_tmc_common.enum import LivelinessProbeType
@@ -466,28 +466,32 @@ class CNComponentManagerLow(CNComponentManager):
             #     subarray_id=assign_resources_command_object.subarray_id,
             #     command_name="AssignResources",
             # )
-            return assign_resources_command_object.assign_resources(
-                argin=argin,
+            # return assign_resources_command_object.assign_resources(
+            #     argin=argin,
+            #     task_callback=task_callback,
+            #     task_abort_event=task_abort_event,
+            # )
+
+            task_status, response = self.submit_task(
+                assign_resources_command_object.assign_resources,
+                kwargs={
+                    "argin": argin,
+                    "task_callback": task_callback,
+                    "task_abort_event": task_abort_event,
+                },
                 task_callback=task_callback,
-                task_abort_event=task_abort_event,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.EMPTY, ObsState.IDLE],
+                    "AssignResources",
+                ),
+            )
+            self.logger.info(
+                "AssignResources command's status: "
+                + f"{task_status.name}, and response: {response}"
             )
 
-            # task_status, response = self.submit_task(
-            #     assign_resources_command_object.assign_resources,
-            #     kwargs={"argin": argin},
-            #     task_callback=task_callback,
-            #     is_cmd_allowed=self.command_not_allowed_callable(
-            #         self.get_subarray_id(argin),
-            #         [ObsState.EMPTY, ObsState.IDLE],
-            #         "AssignResources",
-            #     ),
-            # )
-            # self.logger.info(
-            #     "AssignResources command's status: "
-            #     + f"{task_status.name}, and response: {response}"
-            # )
-
-            # return task_status, response
+            return task_status, response
         except Exception as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
@@ -551,28 +555,32 @@ class CNComponentManagerLow(CNComponentManager):
             #     subarray_id=release_resources_command_object.subarray_id,
             #     command_name="ReleaseResources",
             # )
-            return release_resources_command_object.release_resources(
-                argin=argin,
+            # return release_resources_command_object.release_resources(
+            #     argin=argin,
+            #     task_callback=task_callback,
+            #     task_abort_event=task_abort_event,
+            # )
+
+            task_status, response = self.submit_task(
+                release_resources_command_object.release_resources,
+                kwargs={
+                    "argin": argin,
+                    "task_callback": task_callback,
+                    "task_abort_event": task_abort_event,
+                },
                 task_callback=task_callback,
-                task_abort_event=task_abort_event,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.IDLE],
+                    "ReleaseResources",
+                ),
+            )
+            self.logger.info(
+                "ReleaseResources command's status: "
+                + f"{task_status.name}, and response: {response}"
             )
 
-            # task_status, response = self.submit_task(
-            #     release_resources_command.release_resources,
-            #     kwargs={"argin": argin},
-            #     task_callback=task_callback,
-            #     is_cmd_allowed=self.command_not_allowed_callable(
-            #         self.get_subarray_id(argin),
-            #         [ObsState.IDLE],
-            #         "ReleaseResources",
-            #     ),
-            # )
-            # self.logger.info(
-            #     "ReleaseResources command's status: "
-            #     + f"{task_status.name}, and response: {response}"
-            # )
-
-            # return task_status, response
+            return task_status, response
         except Exception as exception:
             return release_resources_command_object.reject_command(
                 str(exception)

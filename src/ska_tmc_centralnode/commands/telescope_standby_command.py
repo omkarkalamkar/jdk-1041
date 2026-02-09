@@ -68,7 +68,7 @@ class TelescopeStandby(TelescopeOnOff):
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.OK, message),
             )
-        return ret_code, message
+        # return ret_code, message
 
     def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
         """

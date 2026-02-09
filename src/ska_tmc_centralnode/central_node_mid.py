@@ -152,7 +152,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     )
 
     _is_dish_vcc_config_set: Signal[bool] = Signal[bool](
-        stored=True, initial_value=False
+        stored=True, initial_value=True
     )
 
     def read_isDishVccConfigSet(self):

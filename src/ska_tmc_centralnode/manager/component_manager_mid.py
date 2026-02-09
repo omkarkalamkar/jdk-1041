@@ -1069,7 +1069,7 @@ class CNComponentManagerMid(CNComponentManager):
             stow_input = [dish_id.lower() for dish_id in stow_input]
             self.logger.info("Stow command dish list: %s", stow_input)
             return set_stow_mode_command_object.apply_stow_mode(
-                argin=argin,
+                argin=stow_input,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
@@ -1284,16 +1284,31 @@ class CNComponentManagerMid(CNComponentManager):
             assign_resources_command_object.subarray_id = self.get_subarray_id(
                 argin
             )
-            # Validate command is allowed
-            # self.is_command_allowed_callable(
-            #     subarray_id=assign_resources_command_object.subarray_id,
-            #     command_name="AssignResources",
-            # )
-            return assign_resources_command_object.assign_resources(
-                argin=argin,
+            task_status, response = self.submit_task(
+                assign_resources_command_object.assign_resources,
+                kwargs={
+                    "argin": argin,
+                    "task_callback": task_callback,
+                    "task_abort_event": task_abort_event,
+                },
                 task_callback=task_callback,
-                task_abort_event=task_abort_event,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.EMPTY, ObsState.IDLE],
+                    "AssignResources",
+                ),
             )
+            self.logger.info(
+                "AssignResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+            # return assign_resources_command_object.assign_resources(
+            #     argin=argin,
+            #     task_callback=task_callback,
+            #     task_abort_event=task_abort_event,
+            # )
 
         except Exception as exception:
             return assign_resources_command_object.reject_command(
@@ -1339,16 +1354,31 @@ class CNComponentManagerMid(CNComponentManager):
             release_resources_command_object.subarray_id = (
                 self.get_subarray_id(argin)
             )
-            # Validate command is allowed
-            # self.is_command_allowed_callable(
-            #     subarray_id=release_resources_command_object.subarray_id,
-            #     command_name="ReleaseResources",
-            # )
-            return release_resources_command_object.release_resources(
-                argin=argin,
+            task_status, response = self.submit_task(
+                release_resources_command_object.release_resources,
+                kwargs={
+                    "argin": argin,
+                    "task_callback": task_callback,
+                    "task_abort_event": task_abort_event,
+                },
                 task_callback=task_callback,
-                task_abort_event=task_abort_event,
+                is_cmd_allowed=self.command_not_allowed_callable(
+                    self.get_subarray_id(argin),
+                    [ObsState.IDLE],
+                    "ReleaseResources",
+                ),
             )
+            self.logger.info(
+                "ReleaseResources command's status: "
+                + f"{task_status.name}, and response: {response}"
+            )
+
+            return task_status, response
+            # return release_resources_command_object.release_resources(
+            #     argin=argin,
+            #     task_callback=task_callback,
+            #     task_abort_event=task_abort_event,
+            # )
 
         except Exception as exception:
             return release_resources_command_object.reject_command(

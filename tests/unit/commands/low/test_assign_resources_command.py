@@ -338,7 +338,11 @@ def test_low_assign_resources_raises_state_model_exception(
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("assign_resource_low")
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )

@@ -182,7 +182,11 @@ def test_low_release_resources_raises_state_model_exception(
     check_if_subarray_is_available(cm)
 
     release_input_str = json_factory("release_resource_low")
-    cm.release_resources(release_input_str, task_callback=task_callback)
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
