@@ -63,7 +63,6 @@ def check_command_allowed(
                         if hasattr(self, "component_manager"):
                             self.component_manager.is_command_allowed_callable(
                                 subarray_id=subarray_id,
-                                desired_obsstate=desired_obsstate,
                                 command_name=cmd_name,
                             )
                 except json.JSONDecodeError as e:

@@ -608,7 +608,6 @@ class CNComponentManagerLow(CNComponentManager):
             # # Validate command is allowed
             self.is_command_allowed_callable(
                 subarray_id=assign_resources_command_object.subarray_id,
-                desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
                 command_name="AssignResources",
             )
             return assign_resources_command_object.assign_resources(
@@ -694,7 +693,6 @@ class CNComponentManagerLow(CNComponentManager):
             # Validate command is allowed
             self.is_command_allowed_callable(
                 subarray_id=release_resources_command_object.subarray_id,
-                desired_obsstate=[ObsState.IDLE],
                 command_name="ReleaseResources",
             )
             return release_resources_command_object.release_resources(
