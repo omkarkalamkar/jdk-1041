@@ -64,8 +64,7 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
     )
 
     logger.info("Check if isDishVccConfigSet to True")
-    change_event_callbacks.assert_change_event(
-        "isDishVccConfigSet",
+    change_event_callbacks["isDishVccConfigSet"].assert_change_event(
         True,
         lookahead=4,
     )
@@ -93,8 +92,8 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
     )
 
     logger.info("Check if DishVccValidationStatus to True")
-    change_event_callbacks.assert_change_event(
-        "DishVccValidationStatus",
+
+    change_event_callbacks["DishVccValidationStatus"].assert_change_event(
         json.dumps(result_string_to_match),
         lookahead=4,
     )

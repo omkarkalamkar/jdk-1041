@@ -45,8 +45,9 @@ def set_stow_mode_command(
     assert unique_id[0].endswith("SetStowMode")
     assert result[0] == ResultCode.QUEUED
 
-    assertion_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    assertion_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=4,
     )
@@ -78,8 +79,9 @@ def set_stow_mode_command(
     )
     assert unique_id[0].endswith("SetStowMode")
     assert result[0] == ResultCode.QUEUED
-    assertion_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    assertion_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=10,
     )
@@ -113,8 +115,9 @@ def set_stow_mode_command(
     )
     assert unique_id[0].endswith("SetStowMode")
     assert result[0] == ResultCode.QUEUED
-    assertion_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    assertion_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=4,
     )

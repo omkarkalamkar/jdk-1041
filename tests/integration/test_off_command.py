@@ -39,16 +39,15 @@ def test_off_command_mid(
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
 
-    result_on, unique_id_on = central_node.TelescopeOn()
-    assert result_on[0] == ResultCode.QUEUED
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    result_on, unique_id_on = central_node.TelescopeOn()
+    assert result_on[0] == ResultCode.QUEUED
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id_on[0],
             json.dumps((int(ResultCode.OK), "Command Completed")),
@@ -58,12 +57,6 @@ def test_off_command_mid(
 
     result_off, unique_id_off = central_node.TelescopeOff()
     assert result_off[0] == ResultCode.QUEUED
-
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
 
     csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(tango.DevState.OFF)
@@ -83,8 +76,7 @@ def test_off_command_mid(
         lookahead=2,
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id_off[0],
             json.dumps((int(ResultCode.OK), "Command Completed")),
@@ -98,8 +90,8 @@ def test_off_command_mid(
         change_event_callbacks["telescopeState"],
     )
 
-    change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=12
+    change_event_callbacks["telescopeState"].assert_change_event(
+        tango._tango.DevState.OFF, lookahead=12
     )
 
 
@@ -119,17 +111,16 @@ def test_off_command_dish_fail(
 
     ensure_checked_devices(central_node)
 
-    result_on, unique_id_on = central_node.TelescopeOn()
-    assert result_on[0] == ResultCode.QUEUED
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    result_on, unique_id_on = central_node.TelescopeOn()
+    assert result_on[0] == ResultCode.QUEUED
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id_on[0],
             json.dumps((int(ResultCode.OK), "Command Completed")),
@@ -154,20 +145,15 @@ def test_off_command_dish_fail(
     assert unique_id[0].endswith("TelescopeOff")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
     csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(tango.DevState.OFF)
 
     sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
     sdp_master.SetDirectState(tango.DevState.OFF)
 
-    event_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    event_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=4,
     )
@@ -216,8 +202,7 @@ def test_off_command_dish_fail(
 
     # Teardown
     result, unique_id = central_node.TelescopeOff()
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
@@ -234,27 +219,25 @@ def test_off_command_low(
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
     ensure_checked_devices(central_node)
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
     result_on, unique_id_on = central_node.TelescopeOn()
     result_off, unique_id_off = central_node.TelescopeOff()
 
     assert result_on[0] == ResultCode.QUEUED
     assert result_off[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id_on[0],
             json.dumps((int(ResultCode.OK), "Command Completed")),
         ),
         lookahead=3,
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id_off[0],
             json.dumps((int(ResultCode.OK), "Command Completed")),
@@ -277,8 +260,7 @@ def test_off_command_low(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["telescopeState"],
     )
-    change_event_callbacks.assert_change_event(
-        "State",
+    change_event_callbacks["State"].assert_change_event(
         tango._tango.DevState.OFF,
         lookahead=5,
     )
@@ -291,12 +273,11 @@ def test_off_command_low(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["State"],
     )
-    change_event_callbacks.assert_change_event(
-        "State",
+    change_event_callbacks["State"].assert_change_event(
         tango._tango.DevState.OFF,
         lookahead=3,
     )
 
-    change_event_callbacks.assert_change_event(
-        "telescopeState", tango._tango.DevState.OFF, lookahead=4
+    change_event_callbacks["telescopeState"].assert_change_event(
+        tango._tango.DevState.OFF, lookahead=4
     )

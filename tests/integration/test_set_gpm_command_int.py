@@ -63,14 +63,14 @@ def set_gpm_command(tango_context, central_node_name, change_event_callbacks):
 
     assert unique_id[0].endswith("SetGlobalPointingModel")
     assert result[0] == ResultCode.QUEUED
-    change_event_callbacks.assert_change_event(
-        "GlobalPointingModelStatus",
+    change_event_callbacks["GlobalPointingModelStatus"].assert_change_event(
         Anything,
         lookahead=4,
     )
 
-    assertion_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    assertion_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=4,
     )
@@ -147,14 +147,14 @@ def set_gpm_command_negative_scenarios(
 
     assert unique_id[0].endswith("SetGlobalPointingModel")
     assert result[0] == ResultCode.QUEUED
-    change_event_callbacks.assert_change_event(
-        "GlobalPointingModelStatus",
+    change_event_callbacks["GlobalPointingModelStatus"].assert_change_event(
         Anything,
         lookahead=4,
     )
 
-    assertion_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    assertion_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=4,
     )
@@ -265,8 +265,9 @@ def gpm_restart_scenarios(
     )
 
     time.sleep(30)
-    assertion_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    assertion_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (Anything, validate_lrcr_data),
         lookahead=10,
     )
@@ -284,8 +285,7 @@ def gpm_restart_scenarios(
 
     # assert no SetGPM command executed as data is already set for SKA100
     with pytest.raises(AssertionError):
-        change_event_callbacks.assert_change_event(
-            "longRunningCommandResult",
+        change_event_callbacks["longRunningCommandResult"].assert_change_event(
             (Anything, validate_lrcr_data),
             lookahead=10,
         )

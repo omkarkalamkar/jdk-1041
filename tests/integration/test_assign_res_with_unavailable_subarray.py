@@ -36,7 +36,11 @@ def assign_resources(
     subarray_proxy = dev_factory.get_device(subarray_fqdn)
 
     ensure_checked_devices(central_node_proxy)
-
+    central_node_proxy.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
     result, unique_id = central_node_proxy.TelescopeOn()
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
@@ -47,14 +51,7 @@ def assign_resources(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node_proxy.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -88,13 +85,12 @@ def assign_resources(
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.REJECTED),
+                    int(ResultCode.FAILED),
                     "Exception from 'is_cmd_allowed' method: Subarray devices "
                     + "not available: ['low-tmc/subarray/01']",
                 )
