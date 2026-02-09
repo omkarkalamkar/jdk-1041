@@ -476,7 +476,6 @@ class CNComponentManagerLow(CNComponentManager):
                 assign_resources_command_object.assign_resources,
                 kwargs={
                     "argin": argin,
-                    "task_callback": task_callback,
                     "task_abort_event": task_abort_event,
                 },
                 task_callback=task_callback,
@@ -565,7 +564,6 @@ class CNComponentManagerLow(CNComponentManager):
                 release_resources_command_object.release_resources,
                 kwargs={
                     "argin": argin,
-                    "task_callback": task_callback,
                     "task_abort_event": task_abort_event,
                 },
                 task_callback=task_callback,

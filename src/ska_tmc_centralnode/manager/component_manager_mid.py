@@ -968,18 +968,18 @@ class CNComponentManagerMid(CNComponentManager):
                 f"The JSON string is malformed. Error: {str(e)}",
             )
 
-        return loadishcfg_command_object.load_dish_cfg(
-            argin=argin,
-            task_callback=task_callback,
-            task_abort_event=task_abort_event,
-        )
-
-        # task_status, response = self.submit_task(
-        #     loadishcfg_command.load_dish_cfg,
-        #     kwargs={"argin": argin},
+        # return loadishcfg_command_object.load_dish_cfg(
+        #     argin=argin,
         #     task_callback=task_callback,
+        #     task_abort_event=task_abort_event,
         # )
-        # return task_status, response
+
+        task_status, response = self.submit_task(
+            loadishcfg_command_object.load_dish_cfg,
+            kwargs={"argin": argin, "task_abort_event": task_abort_event},
+            task_callback=task_callback,
+        )
+        return task_status, response
 
     def set_gpm_version(
         self, argin: str, task_callback: Callable = None, task_abort_event=None
@@ -1018,18 +1018,22 @@ class CNComponentManagerMid(CNComponentManager):
                     self.gpm_unknown_dishes,
                 )
 
-            return set_gpm_version_command_object.apply_gpm(
-                dish_gpm_params=argin,
-                logger=self.logger,
-                task_callback=task_callback,
-                task_abort_event=task_abort_event,
-            )
-            # task_status, response = self.submit_task(
-            #     set_gpm_version_command.apply_gpm,
-            #     args=[argin, self.logger],
+            # return set_gpm_version_command_object.apply_gpm(
+            #     dish_gpm_params=argin,
+            #     logger=self.logger,
             #     task_callback=task_callback,
+            #     task_abort_event=task_abort_event,
             # )
-            # return task_status, response
+            task_status, response = self.submit_task(
+                set_gpm_version_command_object.apply_gpm,
+                args=[argin, self.logger],
+                kwargs={
+                    "task_callback": task_callback,
+                    "task_abort_event": task_abort_event,
+                },
+                task_callback=task_callback,
+            )
+            return task_status, response
         except Exception as exception:
             self.logger.exception("Exception occured %s", exception)
             return set_gpm_version_command_object.reject_command(exception)
@@ -1068,17 +1072,20 @@ class CNComponentManagerMid(CNComponentManager):
             GPMJsonModel.validate_dish_ids(stow_input)
             stow_input = [dish_id.lower() for dish_id in stow_input]
             self.logger.info("Stow command dish list: %s", stow_input)
-            return set_stow_mode_command_object.apply_stow_mode(
-                argin=stow_input,
-                task_callback=task_callback,
-                task_abort_event=task_abort_event,
-            )
-            # task_status, response = self.submit_task(
-            #     set_stow_mode_command.apply_stow_mode,
-            #     kwargs={"argin": stow_input},
+            # return set_stow_mode_command_object.apply_stow_mode(
+            #     argin=stow_input,
             #     task_callback=task_callback,
+            #     task_abort_event=task_abort_event,
             # )
-            # return task_status, response
+            task_status, response = self.submit_task(
+                set_stow_mode_command_object.apply_stow_mode,
+                kwargs={
+                    "argin": stow_input,
+                    "task_abort_event": task_abort_event,
+                },
+                task_callback=task_callback,
+            )
+            return task_status, response
         except Exception as exception:
             self.logger.exception("Exception occured %s", exception)
             return set_stow_mode_command_object.reject_command(exception)

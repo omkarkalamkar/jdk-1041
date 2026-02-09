@@ -152,7 +152,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     )
 
     _is_dish_vcc_config_set: Signal[bool] = Signal[bool](
-        stored=True, initial_value=True
+        stored=True, initial_value=False
     )
 
     def read_isDishVccConfigSet(self):
@@ -390,7 +390,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         dish_cfg_json = json.dumps(
             self.component_manager.get_default_dish_vcc_config_params()
         )
-        self.execute_LoadDishCfg(dish_cfg_json)
+        self.LoadDishCfg(dish_cfg_json)
         # handler(dish_cfg_json)
 
     def invoke_set_gpm_command_callback(self):
@@ -398,7 +398,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         and Central Node needs to load dish cfg on csp
         """
 
-        self.execute_SetGlobalPointingModel(
+        self.SetGlobalPointingModel(
             json.dumps(self.component_manager.get_default_gpm_version_params())
         )
 
@@ -413,7 +413,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def execute_LoadDishCfg(self, argin):
+    def LoadDishCfg(self, argin):
         """
         LoadDishCfg command to load dishID-vcc map config.
         This command get dishid-vcc map json string from Telmodel
@@ -437,6 +437,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             task_callback: TaskCallbackType, task_abort_event: Event
         ) -> None:
             self.component_manager.load_dish_cfg(
+                argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
@@ -457,7 +458,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def execute_SetGlobalPointingModel(self, argin):
+    def SetGlobalPointingModel(self, argin):
         """
         SetGlobalPointingModel command to send the GPM URI to dish leaf
         nodes. This command gets a dictionary in following form:
@@ -493,6 +494,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             task_callback: TaskCallbackType, task_abort_event: Event
         ) -> None:
             self.component_manager.set_gpm_version(
+                argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
@@ -514,7 +516,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def execute_SetStowMode(self, argin):
+    def SetStowMode(self, argin):
         """
         SetStowMode command to send the stow mode command to dish leaf
         nodes. This command gets a list in following form:
@@ -530,6 +532,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             task_callback: TaskCallbackType, task_abort_event: Event
         ) -> None:
             self.component_manager.set_stow_mode(
+                argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
