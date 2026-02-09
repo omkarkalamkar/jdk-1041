@@ -2,10 +2,11 @@
 
 import json
 import threading
+from functools import partial
 from typing import Callable, Optional, Tuple
 
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
 from ska_telmodel.data import TMData
 
 from ska_tmc_centralnode.commands.central_node_command import SetDishGPM
@@ -71,48 +72,19 @@ class SetGlobalPointingModel(SetDishGPM):
             gpm_files = self.get_gpm_files(self.dish_gpm_params)
             if not gpm_files:
                 error_message = "No GPM files found on set GPM parameters."
-                self.process_update_task_for_command_failure(
-                    task_callback, error_message
-                )
+                self.process_update_task_for_command_failure(error_message)
                 self.component_manager.reset_gpm_data()
                 self.logger.debug("Error message: %s", error_message)
-                return
+                return ResultCode.REJECTED, error_message
             gpm_data = self.form_gpm_file_for_each_dish(
                 gpm_files, self.dish_gpm_params
             )
         else:
             gpm_data = self.form_gpm_path_from_receptors(self.dish_gpm_params)
 
-        ret_code, message = self.do(gpm_data)
-        if ret_code[0] not in [ResultCode.OK, ResultCode.QUEUED]:
-            message = ", ".join(message)
-            self.process_update_task_for_command_failure(
-                task_callback, message
-            )
-            self.component_manager.reset_gpm_data()
-            self.logger.debug("Error messages: %s", message)
-        else:
-            self.logger.debug(
-                "Command ID: %s | Message: %s ",
-                self.component_manager.command_id,
-                message,
-            )
-            self.component_manager.start_timer(
-                self.timeout_id,
-                self.component_manager.command_timeout,
-                self.timeout_callback,
-            )
-            self.start_tracker_thread(
-                "get_set_gpm_version_resultcode",
-                [ResultCode.OK],
-                task_abort_event,
-                timeout_id=self.timeout_id,
-                timeout_callback=self.timeout_callback,
-                command_id=self.component_manager.command_id,
-                lrcr_callback=(
-                    self.component_manager.long_running_result_callback
-                ),
-            )
+        result, message = self.do(gpm_data)
+        self.update_task_status(result=(result, message), exception=message)
+        return result, message
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -125,11 +97,9 @@ class SetGlobalPointingModel(SetDishGPM):
             exception (str): any message returned as a part of command
 
         """
-        if not self.component_manager.gpm_aggregated_result:
+        if result[0] == ResultCode.FAILED:
             error_message = "SetGPM failed on: "
-            self.process_update_task_for_command_failure(
-                self.task_callback, error_message
-            )
+            self.process_update_task_for_command_failure(error_message)
             self.logger.debug("Error message: %s", error_message)
         else:
             result = list(result)
@@ -147,7 +117,7 @@ class SetGlobalPointingModel(SetDishGPM):
         self.component_manager.reset_gpm_data()
 
     def process_update_task_for_command_failure(
-        self, task_callback, error_message: str
+        self, error_message: str
     ) -> None:
         """Method to update the task callback and GPM status
         with the failure data
@@ -175,7 +145,7 @@ class SetGlobalPointingModel(SetDishGPM):
                     self.component_manager.dishln_gpm_cmd_exe_data
                 )
             )
-        task_callback(
+        self.task_callback(
             status=TaskStatus.COMPLETED,
             result=(ResultCode.FAILED, error_message),
             exception=error_message,
@@ -194,7 +164,7 @@ class SetGlobalPointingModel(SetDishGPM):
                 bands = {
                     band: values
                     for band, values in content.items()
-                    if int(values[0]) != 0
+                    if values and values != 0
                 }
                 if bands:
                     filtered[dish] = bands
@@ -376,7 +346,7 @@ class SetGlobalPointingModel(SetDishGPM):
             self.component_manager.command_id,
             self.component_manager.dishln_gpm_cmd_exe_data.keys(),
         )
-        return [ResultCode.OK], [""]
+        return self.wait_for_command_completion(len(self.command_subs_list))
 
     def _set_gpm_to_dish(self, gpm_data: dict) -> Tuple[ResultCode, str]:
         """
@@ -437,16 +407,6 @@ class SetGlobalPointingModel(SetDishGPM):
                     self.logger.error(error_message)
                     continue
                 for band in bands:
-                    return_codes, message_or_unique_ids = self.send_command(
-                        [dishln_adapter],
-                        "Error in calling SetGlobalPointingModel"
-                        "command on Dish Leaf Node",
-                        "ApplyPointingModel",
-                        json.dumps(band),
-                    )
-                    if return_codes[0] == int(ResultCode.QUEUED):
-                        with self.component_manager.dishln_gpm_lock:
-                            self.component_manager.number_of_gpm_executed += 1
                     tm_data_filepath = band["tm_data_filepath"]
                     dishln_id = tm_data_filepath.split("/")[-1].split("-")[-2]
                     dishln_band = (
@@ -454,9 +414,21 @@ class SetGlobalPointingModel(SetDishGPM):
                         .split("-")[-1]
                         .split(".")[0]
                     )
-                    self._set_band_command_mapping(
-                        message_or_unique_ids[0], dishln_band
+                    callback = partial(
+                        self.update_set_gpm_results, band_value=dishln_band
                     )
+                    return_codes, message_or_unique_ids = self.invoke_command(
+                        [dishln_adapter],
+                        "Error in calling SetGlobalPointingModel"
+                        "command on Dish Leaf Node",
+                        "ApplyPointingModel",
+                        json.dumps(band),
+                        callback=callback,
+                    )
+                    if return_codes[0] == int(ResultCode.OK):
+                        with self.component_manager.dishln_gpm_lock:
+                            self.component_manager.number_of_gpm_executed += 1
+
                     if (
                         dishln_id
                         not in self.component_manager.dishln_gpm_cmd_exe_data
@@ -473,12 +445,8 @@ class SetGlobalPointingModel(SetDishGPM):
                     self.component_manager.dishln_gpm_cmd_exe_data,
                 )
             if not self.component_manager.number_of_gpm_executed:
-                self.component_manager.aggregate_set_gpm_results()
                 self.component_manager.gpm_version_aggregated_result = (
                     ResultCode.OK
-                )
-                self.component_manager.observable.notify_observers(
-                    command_exception=True
                 )
         except Exception as e:
             self.logger.exception(
@@ -533,3 +501,48 @@ class SetGlobalPointingModel(SetDishGPM):
             self.component_manager.command_mapping[
                 self.component_manager.command_id
             ].append(command_id_band_dict)
+
+    def update_set_gpm_results(self, dev_name: str, band_value: str) -> None:
+        """
+        This method is used to update the result returned
+        from Dish leaf nodes as part of SetGlobalPointingModel
+        command.
+        If all events are received from all device then aggregate
+        the result
+        Value contains (unique_id, ResultCode)
+        Args:
+            dev_name (str): Name of the device who's event has been
+            captured in this method
+            value (tuple): longRunningCommandResult attribute event.
+        """
+
+        def callback(result=None, **kwargs):
+            self.logger.info(
+                "GPM longRunningCommandResult event for device: "
+                "%s, with value: %s",
+                dev_name,
+                str(result),
+            )
+            with self.component_manager.dishln_gpm_lock:
+                dishln_id = dev_name.split("/")[-1]
+                if result:
+                    if (
+                        dishln_id
+                        in self.component_manager.dishln_gpm_cmd_exe_data
+                    ):
+                        self.component_manager.dishln_gpm_cmd_exe_data[
+                            dishln_id
+                        ][band_value] = result
+                        self.logger.debug(
+                            "dishln gpm %s",
+                            self.component_manager.dishln_gpm_cmd_exe_data,
+                        )
+            if result:
+                name = f"{dishln_id}_{band_value}"
+                with self.component_manager.command_completion_cond:
+                    self.command_results[name] = result
+                    cond = self.component_manager.command_completion_cond
+                    with cond:
+                        cond.notify_all()
+
+        return callback

@@ -5,15 +5,11 @@ ReleaseResources class for CentralNode.
 import time
 from typing import Optional, Tuple
 
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import TimeKeeper, TimeoutCallback
 from ska_tmc_common.adapters import AdapterFactory
-from ska_tmc_common.v1.error_propagation_tracker import (
-    error_propagation_tracker,
-)
-from ska_tmc_common.v1.timeout_tracker import timeout_tracker
 
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
@@ -67,15 +63,8 @@ class ReleaseResources(AssignReleaseResources):
             self.subarray_devname
         )
 
-    @timeout_tracker
-    @error_propagation_tracker(
-        "get_subarray_obsstate",
-        [ObsState.RESOURCING, ObsState.EMPTY],
-        use_command_class_id=True,
-    )
     def release_resources(
-        self,
-        argin: str,
+        self, argin: str, task_callback, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """This is a long running command method for ReleaseResources command
 
@@ -84,7 +73,14 @@ class ReleaseResources(AssignReleaseResources):
         :returns: Result code and message
         :rtype: `Tuple[ResultCode, str]`
         """
-        return self.do(argin)
+        self.component_manager.command_in_progress = "ReleaseResources"
+        self.task_callback = task_callback
+        self.task_abort_event = task_abort_event
+        self.component_manager.abort_event = self.task_abort_event
+        self.task_callback(status=TaskStatus.IN_PROGRESS)
+        result, message = self.do(argin)
+        self.update_task_status(result=(result, message), exception=message)
+        return result, message
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -111,12 +107,14 @@ class ReleaseResources(AssignReleaseResources):
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)
-        self.component_manager.subsystem_assigned_per_subarray.pop(
-            self.subarray_id
-        )
-        self.component_manager.pss_beams_assigned_per_subarray.pop(
-            self.subarray_id
-        )
+        if hasattr(self.component_manager, "subsystem_assigned_per_subarray"):
+            self.component_manager.subsystem_assigned_per_subarray.pop(
+                self.subarray_id
+            )
+        if hasattr(self.component_manager, "pss_beams_assigned_per_subarray"):
+            self.component_manager.pss_beams_assigned_per_subarray.pop(
+                self.subarray_id
+            )
 
     def release_all_resources(
         self, adapter
@@ -132,7 +130,7 @@ class ReleaseResources(AssignReleaseResources):
             and lists of messages.
 
         """
-        return self.send_command(
+        return self.invoke_command(
             [adapter],
             f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
             + " device",

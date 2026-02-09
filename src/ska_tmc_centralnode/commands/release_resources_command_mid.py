@@ -5,6 +5,7 @@ ReleaseResources class for CentralNode.
 import json
 from typing import Tuple
 
+from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
 
 from ska_tmc_centralnode.commands.release_resources_command import (
@@ -88,7 +89,12 @@ class ReleaseResourcesMid(ReleaseResources):
                 self.command_id,
                 self.subarray_adapter,
             )
-            return (ResultCode.OK, "")
+            return self.wait_for_command_completion(
+                len(self.command_subs_list),
+                ObsState.EMPTY,
+                "get_subarray_obsstate",
+                use_command_class_id=True,
+            )
         return (
             ResultCode.FAILED,
             "Partial release resources not supported!",

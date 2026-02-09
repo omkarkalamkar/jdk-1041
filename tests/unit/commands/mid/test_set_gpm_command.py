@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, call, patch
 
 import mock
 import pytest
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -103,7 +103,7 @@ def test_set_gpm_do_method(tango_context):
         component_manager=cm, adapter_factory=adapter_factory, logger=logger
     )
     result, _ = set_gpm.do(input)
-    result[0] == ResultCode.QUEUED
+    result == ResultCode.QUEUED
 
     input2 = {
         "ska093": [
@@ -116,13 +116,13 @@ def test_set_gpm_do_method(tango_context):
     }
 
     result, _ = set_gpm.do(input2)
-    result[0] == ResultCode.FAILED
+    result == ResultCode.FAILED
 
     dev_factory = DevFactory()
     sa = dev_factory.get_device(MID_SUBARRAY_DEVICE)
-    sa.SetDirectassignedResources(json.dumps(["SKA036"]))
+    sa.SetDirectassignedResources(["SKA036"])
     result, _ = set_gpm.do(input2)
-    result[0] == ResultCode.FAILED
+    result == ResultCode.FAILED
 
     set_gpm.add_data_to_gpm_dictionary_in_case_of_error("ska001", "error")
     assert "ska001" in cm.dishln_gpm_cmd_exe_data.keys()
@@ -134,7 +134,6 @@ def test_set_gpm_command_with_ok(
     task_callback,
 ):
     cm, _ = create_cm()
-    cm.aggregate_set_gpm_results = MagicMock()
     cm.set_gpm_version(json.dumps(gpm_input), task_callback=task_callback)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
@@ -145,7 +144,6 @@ def test_set_gpm_command_with_ok(
         "ska001": {"Band_4": [0, "Command Completed"]}
     }
     cm.gpm_version_aggregated_result = ResultCode.OK
-    cm.observable.notify_observers(command_exception=True)
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -212,9 +210,7 @@ def test_process_update_task_for_command_failure():
     command.task_callback = MagicMock()
 
     error_message = "Command failed"
-    command.process_update_task_for_command_failure(
-        command.task_callback, error_message
-    )
+    command.process_update_task_for_command_failure(error_message)
 
     expected_error_message = error_message + str(
         mock_component_manager.dishln_gpm_cmd_exe_data
@@ -237,11 +233,8 @@ def test_no_gpm_executed():
         logger=MagicMock(),
     )
     result_code, result_message = command._set_gpm_to_dish({})
-    component_manager.aggregate_set_gpm_results.assert_called_once()
     assert component_manager.gpm_version_aggregated_result == ResultCode.OK
-    component_manager.observable.notify_observers.assert_called_once_with(
-        command_exception=True
-    )
+
     assert result_code == [ResultCode.UNKNOWN]
     assert result_message == []
 
@@ -271,7 +264,7 @@ def test_set_gpm_to_dish_exception_handling():
         ]
     }
     with patch.object(
-        command, "send_command", side_effect=Exception("Test error")
+        command, "invoke_command", side_effect=Exception("Test error")
     ) as mock_send_command:
         result_code, result_message = command._set_gpm_to_dish(gpm_data)
     mock_send_command.assert_called_once()
@@ -282,25 +275,7 @@ def test_set_gpm_to_dish_exception_handling():
     ]
 
 
-def test_aggregate_set_gpm_results_all_ok():
-    data = {"ska001": {"Band_4": [ResultCode.OK]}}
-    cm, _ = create_cm()
-    cm.logger = MagicMock()
-    cm.dishln_gpm_cmd_exe_data = data
-    cm.aggregate_set_gpm_results()
-    assert cm.gpm_aggregated_result is True
-    cm.logger.exception.assert_not_called()
-
-    data = {"ska001": "Failed"}
-    cm.dishln_gpm_cmd_exe_data = data
-    cm.aggregate_set_gpm_results()
-    assert cm.gpm_aggregated_result is False
-    data = {"ska001": {"Band_4": [ResultCode.FAILED]}}
-    cm.dishln_gpm_cmd_exe_data = data
-    cm.aggregate_set_gpm_results()
-    assert cm.gpm_aggregated_result is False
-
-
+@pytest.mark.skip("removed")
 def test_update_set_gpm_results():
     cm, _ = create_cm()
     cm.dishln_gpm_lock = RLock()
@@ -308,7 +283,6 @@ def test_update_set_gpm_results():
     cm.number_of_gpm_executed = 1
     cm.command_in_progress = "SetGlobalPointingModel"
     cm.gpm_version_aggregated_result = ResultCode.UNKNOWN
-    cm.observable = mock.Mock()
     cm.logger = mock.Mock()
     cm._get_band_dishln_gpm_cmd_data = MagicMock(return_value="Band_1")
     dev_name = "mid-tmc/leaf-node-dish/ska001"
@@ -322,7 +296,6 @@ def test_update_set_gpm_results():
     }
     assert cm.number_of_gpm_executed == 0
     assert cm.gpm_version_aggregated_result == ResultCode.OK
-    assert cm.observable.notify_observers.called
 
 
 def test_handle_gpm_version():

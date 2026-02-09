@@ -2,7 +2,7 @@
 
 from typing import Callable
 
-from ska_tango_base.executor import TaskStatus
+from ska_control_model import TaskStatus
 
 
 class MockCallable(Callable):

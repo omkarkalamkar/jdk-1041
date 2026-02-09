@@ -5,14 +5,10 @@ AssignResources Command class for CentralNode.
 import time
 from typing import Optional, Tuple
 
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
 from ska_tmc_common import AdapterFactory, TimeKeeper, TimeoutCallback
-from ska_tmc_common.v1.error_propagation_tracker import (
-    error_propagation_tracker,
-)
-from ska_tmc_common.v1.timeout_tracker import timeout_tracker
 
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
@@ -63,15 +59,8 @@ class AssignResources(AssignReleaseResources):
             self.subarray_devname
         )
 
-    @timeout_tracker
-    @error_propagation_tracker(
-        "get_subarray_obsstate",
-        [ObsState.RESOURCING, ObsState.IDLE],
-        use_command_class_id=True,
-    )
     def assign_resources(
-        self,
-        argin: str,
+        self, argin: str, task_callback, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """
         This is a long running command method for AssignResources command.
@@ -86,7 +75,14 @@ class AssignResources(AssignReleaseResources):
             Tuple(ResultCode, str): Result code and message.
 
         """
-        return self.do(argin)
+        self.component_manager.command_in_progress = "AssignResources"
+        self.task_callback = task_callback
+        self.task_abort_event = task_abort_event
+        self.component_manager.abort_event = self.task_abort_event
+        self.task_callback(status=TaskStatus.IN_PROGRESS)
+        result, message = self.do(argin)
+        self.update_task_status(result=(result, message), exception=message)
+        return result, message
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""

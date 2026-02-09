@@ -40,15 +40,14 @@ def release_resources(
         subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
     ensure_checked_devices(central_node)
 
-    result, unique_id_on = central_node.TelescopeOn()
-    assert unique_id_on[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
+    result, unique_id_on = central_node.TelescopeOn()
+    assert unique_id_on[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
@@ -69,8 +68,7 @@ def release_resources(
         result, unique_id_assign = central_node.AssignResources(
             assign_input_str
         )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id_assign[0],
             json.dumps((int(ResultCode.OK), "Command Completed")),
@@ -93,13 +91,12 @@ def release_resources(
     assert result[0] == ResultCode.QUEUED
 
     # subarray_id = json.loads(assign_input_str).get("subarray_id")
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.REJECTED),
+                    int(ResultCode.FAILED),
                     "Exception from 'is_cmd_allowed' method: Subarray devices "
                     + "not available: ['low-tmc/subarray/01']",
                 )
@@ -120,8 +117,7 @@ def release_resources(
     assert unique_id[0].endswith("ReleaseResources")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -134,8 +130,7 @@ def release_resources(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id_off[0],
             json.dumps((int(ResultCode.OK), "Command Completed")),

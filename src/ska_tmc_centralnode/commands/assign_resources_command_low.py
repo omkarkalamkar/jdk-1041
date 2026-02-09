@@ -4,6 +4,7 @@ AssignResourcesLow Command class for CentralNode.
 import json
 from typing import Tuple
 
+from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
 
 from ska_tmc_centralnode.commands.assign_resources_command import (
@@ -143,7 +144,7 @@ class AssignResourcesLow(AssignResources):
                 ("SubArray Id %s is not existing!", self.subarray_id),
             )
 
-        return_codes, message_or_unique_ids = self.send_command(
+        return_codes, message_or_unique_ids = self.invoke_command(
             [self.tm_subarray_adapter],
             "Error in calling AssignResources on subarray:"
             + self.tm_subarray_adapter.dev_name,
@@ -181,7 +182,7 @@ class AssignResourcesLow(AssignResources):
                 "Device states before executing AssignResources command"
             )
 
-            return_codes, message_or_unique_ids = self.send_command(
+            return_codes, message_or_unique_ids = self.invoke_command(
                 [self.mccs_mln_adapter],
                 "Error in calling AssignResources command on MCCS "
                 "Master Leaf Node ",
@@ -202,7 +203,12 @@ class AssignResourcesLow(AssignResources):
             self.component_manager.subsystem_assigned_per_command_id[
                 self.command_id
             ] = assigned_subsystem
-        return (ResultCode.OK, "")
+        return self.wait_for_command_completion(
+            len(self.command_subs_list),
+            ObsState.IDLE,
+            "get_subarray_obsstate",
+            use_command_class_id=True,
+        )
 
     def create_mccs_cmd_data(self, json_argument: dict) -> dict:
         """

@@ -1,8 +1,8 @@
 import json
 from unittest.mock import MagicMock
 
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
 
 from ska_tmc_centralnode.commands.stow_antennas_command import SetStowMode
 from tests.settings import create_cm
@@ -84,82 +84,6 @@ def test_reset_stow_mode_data():
     cm.logger.debug.assert_called_once()
 
 
-def test_update_set_stow_mode_results():
-    cm, _ = create_cm()
-    cm.logger = MagicMock()
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {
-            "result_code": None,
-            "dish_mode": None,
-        }
-    }
-    cm.number_of_stow_mode_executed = 1
-    cm.command_in_progress = "SetStowMode"
-    cm.aggregate_set_stow_mode_results = MagicMock()
-    cm.observable = MagicMock()
-
-    cm.update_set_stow_mode_results(
-        "abc/def/ska001", ("123_SetStowMode", '[0, "Command Completed"]')
-    )
-    assert cm.logger.info.call_count > 1
-    assert cm.logger.debug.call_count > 1
-    cm.aggregate_set_stow_mode_results.assert_called_once()
-    assert cm.stow_mode_command_aggregated_result == ResultCode.OK
-    assert not cm.number_of_stow_mode_executed
-    result_code = cm.dishln_stow_mode_cmd_exe_data.get("ska001").get(
-        "result_code"
-    )
-    assert result_code == [0, "Command Completed"]
-
-
-def test_aggregate_set_stow_mode_results():
-    cm, _ = create_cm()
-    cm.aggregate_dish_stow_mode_events = MagicMock(return_value=True)
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {
-            "result_code": [3, "Command Failed"],
-            "dish_mode": None,
-        }
-    }
-    cm.aggregate_set_stow_mode_results()
-    assert not cm.stow_mode_aggregated_result
-    cm.dishln_stow_mode_cmd_exe_data = {"ska001": "Dish is unreachable"}
-    cm.aggregate_set_stow_mode_results()
-    assert not cm.stow_mode_aggregated_result
-
-
-def test_all_dish_stow_mode_available():
-    cm, _ = create_cm()
-    cm.get_current_dish_mode_of_dln = MagicMock(return_value=2)
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {
-            "result_code": [3, "Command Failed"],
-            "dish_mode": None,
-        }
-    }
-    assert not cm.all_dish_stow_mode_available()
-    cm.get_current_dish_mode_of_dln = MagicMock(return_value=5)
-    assert cm.all_dish_stow_mode_available()
-
-
-def test_check_timeout_for_stow_mode_lrcr_events():
-    cm, _ = create_cm()
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {
-            "result_code": [3, "Timeout Occurred"],
-            "dish_mode": None,
-        }
-    }
-    assert cm.check_timeout_for_stow_mode_lrcr_events()
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {
-            "result_code": [3, "Command failed"],
-            "dish_mode": None,
-        }
-    }
-    assert not cm.check_timeout_for_stow_mode_lrcr_events()
-
-
 def test_get_current_dish_mode_of_dln():
     cm, _ = create_cm()
     dish_id = "ska001"
@@ -178,20 +102,6 @@ def test_get_current_dish_mode_of_dln():
     cm.get_dish_leaf_node_device_names.assert_called_once()
     cm._component.get_device.call_count >= 1
     assert result == expected_mode
-
-
-def test_aggregate_set_stow_mode_results_success():
-    cm, _ = create_cm()
-    cm.aggregate_dish_stow_mode_events = MagicMock(return_value=True)
-    cm.dishln_stow_mode_cmd_exe_data = {
-        "ska001": {"result_code": [int(ResultCode.OK), "OK"]},
-    }
-    cm.aggregate_set_stow_mode_results()
-    cm.aggregate_dish_stow_mode_events.assert_called_once()
-    assert cm.stow_mode_aggregated_result is True
-    cm.aggregate_dish_stow_mode_events = MagicMock(return_value=False)
-    cm.aggregate_set_stow_mode_results()
-    assert not cm.stow_mode_aggregated_result
 
 
 def test_apply_set_stow_command(task_callback):
@@ -230,13 +140,13 @@ def test_update_task_status(task_callback):
         logger=MagicMock(),
     )
     set_stow_command.process_update_task_for_command_failure = MagicMock()
-    set_stow_command.update_task_status("result_code", "exception")
+    set_stow_command.update_task_status([ResultCode.FAILED, "exception"])
     set_stow_command.process_update_task_for_command_failure.assert_called_once()
     set_stow_command.receptors_with_stow_mode_set = ["ska001"]
     cm.reset_stow_mode_data = MagicMock()
     cm.stow_mode_aggregated_result = True
     cm.dishln_stow_mode_cmd_exe_data = {
-        "ska002": {"result_code": [0, "success"], "dish_mode": "STOW"}
+        "ska002": {"result_code": [0, "success"]}
     }
     set_stow_command.task_callback = MagicMock()
     set_stow_command.update_task_status(
@@ -257,7 +167,6 @@ def test_update_task_status(task_callback):
 def test_process_update_task_for_command_failure():
     cm, _ = create_cm()
     adapter_factory = MagicMock()
-    task_callback = MagicMock()
     set_stow_command = SetStowMode(
         cm,
         adapter_factory,
@@ -267,14 +176,14 @@ def test_process_update_task_for_command_failure():
     )
     error_message = "SetStowMode failed"
     cm.dishln_stow_mode_cmd_exe_data = {
-        "ska002": {"result_code": [3, "FAILED"], "dish_mode": "STANDBY_LP"}
+        "ska002": {"result_code": [3, "FAILED"]}
     }
+    set_stow_command.task_callback = MagicMock()
     set_stow_command.process_update_task_for_command_failure(
         error_message=error_message,
-        task_callback=task_callback,
     )
-    task_callback.assert_called()
-    kwargs = task_callback.call_args.kwargs
+    set_stow_command.task_callback.assert_called()
+    kwargs = set_stow_command.task_callback.call_args.kwargs
 
     assert kwargs["status"] == TaskStatus.COMPLETED
     assert kwargs["result"][0] == ResultCode.FAILED
@@ -306,21 +215,18 @@ def test_set_stow_mode_do():
     set_stow_command._set_stow_mode_to_dish = MagicMock(
         return_value=([ResultCode.FAILED], ["Failed"])
     )
-
     set_stow_command.init_adapters = MagicMock(
         return_value=(ResultCode.OK, "Success")
     )
     result_code, message = set_stow_command.do(argin=["ska001"])
-    assert result_code[0] == [ResultCode.FAILED]
+    assert result_code[0] == ResultCode.FAILED
     assert "Failed" in message[0]
-
     set_stow_command._set_stow_mode_to_dish = MagicMock(
         return_value=([ResultCode.OK], ["Success"])
     )
     result_code, message = set_stow_command.do(argin=["ska001"])
-    assert result_code[0] == [ResultCode.OK]
-    assert "Success" in message[0]
-    logger.info.assert_called_once()
+    assert result_code == ResultCode.OK
+    assert "Command Completed" in message
 
 
 def test_set_stow_mode_to_dish():
@@ -375,7 +281,7 @@ def test_set_stow_mode_to_dish_normal_execution():
     cm.get_current_dish_mode_of_dln = MagicMock(return_value=2)
 
     # Command Failed
-    set_stow_command.send_command = MagicMock(
+    set_stow_command.invoke_command = MagicMock(
         return_value=(
             [int(ResultCode.FAILED)],
             ["Error in calling SetStowMode command"],
@@ -384,7 +290,7 @@ def test_set_stow_mode_to_dish_normal_execution():
 
     set_stow_command.set_stow_mode_cm_variables = MagicMock()
     set_stow_command._set_stow_mode_to_dish([dish_id])
-    set_stow_command.send_command.assert_called_once()
+    set_stow_command.invoke_command.assert_called_once()
     set_stow_command.set_stow_mode_cm_variables.assert_called_once_with(
         dish_id, False
     )
@@ -395,14 +301,14 @@ def test_set_stow_mode_to_dish_normal_execution():
     assert logger.info.call_count >= 1
 
     # Command Raised an Exception
-    set_stow_command.send_command = MagicMock(
+    set_stow_command.invoke_command = MagicMock(
         side_effect=Exception("Error in Calling SetStowMode command")
     )
     set_stow_command._set_stow_mode_to_dish([dish_id])
     assert logger.exception.call_count >= 1
 
     # Command Started with OK
-    set_stow_command.send_command = MagicMock(
+    set_stow_command.invoke_command = MagicMock(
         return_value=(
             [int(ResultCode.STARTED)],
             ["Command Completed"],
@@ -410,7 +316,7 @@ def test_set_stow_mode_to_dish_normal_execution():
     )
     set_stow_command.set_stow_mode_cm_variables = MagicMock()
     set_stow_command._set_stow_mode_to_dish([dish_id])
-    set_stow_command.send_command.assert_called_once()
+    set_stow_command.invoke_command.assert_called_once()
     set_stow_command.set_stow_mode_cm_variables.assert_called_once_with(
         dish_id, True
     )

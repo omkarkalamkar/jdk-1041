@@ -41,7 +41,6 @@ from ska_tmc_centralnode.manager.aggregate_process import (
 )
 from ska_tmc_centralnode.manager.aggregators import (
     DishAttrValueAggregator,
-    LoadDishCfgCommandResultAggregator,
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
 )
@@ -246,39 +245,25 @@ class CNComponentManagerMid(CNComponentManager):
         self.dishln_stow_mode_cmd_exe_data: dict = {}
         self.event_queue.update(
             {
-                "longRunningCommandResult": Queue(),
                 "dishMode": Queue(),
                 "kValueValidationResult": Queue(),
                 "DishVccMapValidationResult": Queue(),
                 "isSubsystemAvailable": Queue(),
                 "isSubarrayAvailable": Queue(),
                 "state": Queue(),
-                "loadDishConfigResult": Queue(),
-                "loadDishConfigResultAsync": Queue(),
-                "setGPMResult": Queue(),
                 "gpmVersion": Queue(),
-                "setStowModeResult": Queue(),
             }
         )
         handle_dish_vcc = self.handle_dish_vcc_validation_result
         self.event_processing_methods.update(
             {
-                "longRunningCommandResult": (
-                    self.update_long_running_command_result
-                ),
                 "dishMode": self.update_device_dish_mode,
                 "kValueValidationResult": self.update_k_value_validation,
                 "DishVccMapValidationResult": handle_dish_vcc,
                 "isSubsystemAvailable": self.update_telescope_availability,
                 "isSubarrayAvailable": self.update_telescope_availability,
                 "state": self.update_device_state,
-                "loadDishConfigResult": self.update_load_dish_cfg_results,
-                "loadDishConfigResultAsync": (
-                    self.update_load_dish_cfg_results_async
-                ),
-                "setGPMResult": self.update_set_gpm_results,
                 "gpmVersion": self.handle_gpm_version_event,
-                "setStowModeResult": self.update_set_stow_mode_results,
             }
         )
         self._start_event_processing_threads()
@@ -528,91 +513,6 @@ class CNComponentManagerMid(CNComponentManager):
             if count == self.dish_vcc_init_timeout:
                 break
         return False
-
-    def update_long_running_command_result(
-        self, dev_name: str, value: tuple
-    ) -> None:
-        """
-        Updates the LRCR callback with received event.
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
-        or (unique_id,TaskStatus)
-        Whenever there is exception occured , (unique_id,exception_msg)
-        event is first raised
-        and catched in ValueError.The exception_msg and command_id is then
-        passed to long_running_result_callback.
-        Command_mapping contains {centralnode_command_id:unique_id} ,
-        all events are verified with respect to this mapping.
-        If there is no command_mapping present the event
-        might be of old command.
-        Args:
-            dev_name (str): name of the device who's event has been
-            captured in this method
-            value: longRunningCommandResult attribute event.
-        """
-        unique_id, result_code_or_exception_or_task_status = value
-        if (
-            not unique_id.endswith(self.supported_commands)
-            or not result_code_or_exception_or_task_status
-            or unique_id not in self.command_mapping.values()
-        ):
-            return
-        command_id = self.get_command_id(unique_id)
-        self.logger.debug(
-            "Command ID: %s | longRunningCommandResult event for "
-            + "device %s. Event value: %s",
-            command_id,
-            dev_name,
-            str(value),
-        )
-        try:
-            result_code, message = json.loads(
-                result_code_or_exception_or_task_status
-            )
-            match int(result_code):
-                case ResultCode.OK:
-                    self.command_result = ResultCode.OK
-                    self.logger.debug(
-                        "Command ID: %s | Command with Unique ID %s on "
-                        + "%s succeeded.",
-                        command_id,
-                        str(unique_id),
-                        dev_name,
-                    )
-                case (
-                    ResultCode.FAILED
-                    | ResultCode.REJECTED
-                    | ResultCode.NOT_ALLOWED
-                    | ResultCode.ABORTED
-                ):
-                    self.logger.debug(
-                        "Command ID: %s | Updating LRCRCallback with "
-                        + "ResultCode: %s and Message: %s "
-                        + "for command %s on  %s.",
-                        command_id,
-                        ResultCode(result_code),
-                        message,
-                        str(unique_id),
-                        dev_name,
-                    )
-
-                    exp_string = (
-                        f"Exception occurred on device: {unique_id}: "
-                        f"{dev_name}: {message}"
-                    )
-                    self.long_running_result_callback(
-                        command_id,
-                        ResultCode.FAILED,
-                        exception_msg=exp_string,
-                    )
-                    self.observable.notify_observers(command_exception=True)
-        except Exception as exception:
-            self.logger.exception(
-                "Command ID: %s | Exception occurred while processing "
-                + "long running command result on %s: %s",
-                command_id,
-                dev_name,
-                exception,
-            )
 
     def update_device_state(self, device_name: str, state: DevState) -> None:
         """
@@ -1162,128 +1062,6 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.exception("Exception occured %s", exception)
             return set_stow_mode_command.reject_command(exception)
 
-    def update_load_dish_cfg_results_async(
-        self, dev_name: str, value: tuple
-    ) -> None:
-        """
-        This method is used to update the result returned
-        from Csp Master Leaf Node
-        and returned from Dish Leaf Nodes for SetKValue command.
-
-        Args:
-            dev_name (str): name of the device who's event
-                has been captured in this method
-            value: longRunningCommandResult attribute event.
-
-        """
-        self.update_load_dish_cfg_results(
-            dev_name, value, is_async_result=True
-        )
-
-    def update_load_dish_cfg_results(
-        self, dev_name: str, value: tuple, is_async_result: bool = False
-    ) -> None:
-        """
-        This method is used to update the result returned
-        from Csp Master Leaf Node
-        and returned from Dish Leaf Nodes for SetKValue command.
-        Update result_codes_mapping with dev name as a key and
-        command result as a value
-        If all events are received from all device then aggregate
-        the result
-        Value contains (unique_id, ResultCode) or (unique_id,exception_msg)
-        or (unique_id,TaskStatus)
-
-        Args:
-            dev_name (str): name of the device who's event has been
-                captured in this method
-            value (tuple): longRunningCommandResult attribute event.
-            is_async_result (bool): Whether this callback is called
-                from Async command result call or
-                longRunningCommandResult attribute callback
-
-        Examples of value:
-            .. code-block:: python
-
-                Async callback value: [array([0], dtype=int32), ['']]
-
-                LongRunningCommandResultCallBack value:
-                ('1698838234.9087641-LoadDishCfg',
-                'Exception occurred, command failed.')
-
-        """
-        self.logger.debug(
-            "longRunningCommandResult event for device: %s, with value: %s",
-            dev_name,
-            str(value),
-        )
-        with self.rlock:
-            result_code_or_exception = []
-            if is_async_result:
-                # Set result code and message
-                self.logger.debug(
-                    "Event from asynchronous command result callback %s",
-                    str(value),
-                )
-                result_code_or_exception = [value[0][0], value[1][0]]
-
-            else:
-                self.logger.debug(
-                    "Event from long command result callback %s", str(value)
-                )
-                unique_id, resultcode_message = value
-                if unique_id.endswith("LoadDishCfg"):
-                    result_code_or_exception = json.loads(resultcode_message)
-            if result_code_or_exception and self.dev_names_for_load_dish_cfg:
-                self.result_codes_mapping[dev_name] = result_code_or_exception
-                self.logger.debug(
-                    "Dev names for load_dish_cfg values %s "
-                    + "and result_codes_mapping are %s",
-                    str(self.dev_names_for_load_dish_cfg),
-                    str(self.result_codes_mapping),
-                )
-
-            # When all events received from dishes and Csp master leaf node
-            # then aggregate the result
-            if len(self.dev_names_for_load_dish_cfg) == len(
-                self.result_codes_mapping
-            ):
-                # Aggregate the result
-                self.logger.debug(
-                    "All Events received for load dish cfg Aggregating results"
-                )
-                self.aggregate_load_dish_cfg_results()
-
-    def aggregate_load_dish_cfg_results(self) -> None:
-        """
-        This method aggregate load dish cfg command result based on
-        generated data
-        """
-        load_dish_cfg_aggregator = LoadDishCfgCommandResultAggregator(
-            self, self.logger
-        )
-        (
-            load_dish_cfg_aggregated_result,
-            message,
-        ) = load_dish_cfg_aggregator.aggregate()
-        self.load_dish_cfg_aggregated_result = load_dish_cfg_aggregated_result
-        if (
-            self.load_dish_cfg_aggregated_result == ResultCode.FAILED
-            and self.load_dish_cfg_command_id
-        ):
-            exception_message = f"Exception occurred on device: {message}"
-            self.long_running_result_callback(
-                self.load_dish_cfg_command_id,
-                ResultCode.FAILED,
-                exception_msg=exception_message,
-            )
-            self.observable.notify_observers(command_exception=True)
-        elif (
-            self.load_dish_cfg_aggregated_result == ResultCode.OK
-            and self.load_dish_cfg_command_id
-        ):
-            self.observable.notify_observers(attribute_value_change=True)
-
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""
         self.logger.info("Resetting LoadDishCfg aggregated data")
@@ -1358,62 +1136,6 @@ class CNComponentManagerMid(CNComponentManager):
         if self.command_mapping.get(self.command_id):
             self.command_mapping.pop(self.command_id)
 
-    def update_set_gpm_results(self, dev_name: str, value: tuple) -> None:
-        """
-        This method is used to update the result returned
-        from Dish leaf nodes as part of SetGlobalPointingModel
-        command.
-        If all events are received from all device then aggregate
-        the result
-        Value contains (unique_id, ResultCode)
-        Args:
-            dev_name (str): Name of the device who's event has been
-            captured in this method
-            value (tuple): longRunningCommandResult attribute event.
-        """
-
-        self.logger.info(
-            "GPM longRunningCommandResult event for device: "
-            "%s, with value: %s",
-            dev_name,
-            str(value),
-        )
-        with self.dishln_gpm_lock:
-            dishln_id = dev_name.split("/")[-1]
-            result_code_or_exception = []
-            unique_id, resultcode_message = value
-            if unique_id.endswith("ApplyPointingModel"):
-                result_code_or_exception = json.loads(resultcode_message)
-            if result_code_or_exception:
-                if dishln_id in self.dishln_gpm_cmd_exe_data:
-                    band_value = self._get_band_dishln_gpm_cmd_data(unique_id)
-                    self.dishln_gpm_cmd_exe_data[dishln_id][
-                        band_value
-                    ] = result_code_or_exception
-                    self.logger.debug(
-                        "dishln gpm %s", self.dishln_gpm_cmd_exe_data
-                    )
-                if self.number_of_gpm_executed > 0:
-                    self.number_of_gpm_executed -= 1
-                self.logger.info(
-                    "Dev names for set gpm  %s &"
-                    " number of gpm executed remaining %s",
-                    str(self.dishln_gpm_cmd_exe_data),
-                    self.number_of_gpm_executed,
-                )
-
-            if (
-                not self.number_of_gpm_executed
-                and self.command_in_progress == "SetGlobalPointingModel"
-            ):
-                self.logger.info(
-                    "All Events received for set GPM version,"
-                    " Aggregating GPM results"
-                )
-                self.aggregate_set_gpm_results()
-                self.gpm_version_aggregated_result = ResultCode.OK
-                self.observable.notify_observers(command_exception=True)
-
     def _get_band_dishln_gpm_cmd_data(self, unique_id: str) -> str:
         """Return Band for the specified dish in unique id
         Args:
@@ -1427,38 +1149,6 @@ class CNComponentManagerMid(CNComponentManager):
                 band = command_data[unique_id]
         return band
 
-    def aggregate_set_gpm_results(self) -> None:
-        """
-        This method aggregate GPM command results.
-        """
-        break_outer = False
-        self.gpm_aggregated_result = True
-        for (
-            dishln_id,
-            bands,
-        ) in self.dishln_gpm_cmd_exe_data.items():
-            if isinstance(bands, str):
-                self.gpm_aggregated_result = False
-                break_outer = True
-                break
-            for band_name, result in bands.items():
-                first_value = result[0]
-                if not isinstance(first_value, int):
-                    try:
-                        first_value = int(first_value)
-                    except (ValueError, TypeError):
-                        self.logger.exception(
-                            "Invalid Value found %s -> %s result",
-                            dishln_id,
-                            band_name,
-                        )
-                if first_value != int(ResultCode.OK):
-                    self.gpm_aggregated_result = False
-                    break_outer = True
-                    break
-            if break_outer:
-                break
-
     def reset_stow_mode_data(self) -> None:
         """Reset StowMode data"""
         self.logger.debug("Resetting SetStowMode data")
@@ -1468,141 +1158,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.command_in_progress = ""
         if self.command_mapping.get(self.command_id):
             self.command_mapping.pop(self.command_id)
-
-    def update_set_stow_mode_results(
-        self, dev_name: str, value: tuple
-    ) -> None:
-        """
-        This method is used to update the result returned
-        from Dish leaf nodes as part of SetStowMode
-        command.
-        If all events are received from all device then aggregate
-        the result
-        Value contains (unique_id, ResultCode)
-        Args:
-            dev_name (str): Name of the device who's event has been
-            captured in this method
-            value (tuple): longRunningCommandResult attribute event.
-        """
-
-        self.logger.info(
-            "SetStowMode longRunningCommandResult event for device: "
-            "%s, with value: %s",
-            dev_name,
-            str(value),
-        )
-        with self.dishln_stow_mode_lock:
-            dishln_id = dev_name.split("/")[-1]
-            result_code_or_exception = []
-            unique_id, resultcode_message = value
-            if unique_id.endswith("SetStowMode"):
-                result_code_or_exception = json.loads(resultcode_message)
-            if result_code_or_exception:
-                if dishln_id in self.dishln_stow_mode_cmd_exe_data:
-                    self.dishln_stow_mode_cmd_exe_data[dishln_id][
-                        "result_code"
-                    ] = result_code_or_exception
-                    self.logger.debug(
-                        "Current dishln stow mode command data %s",
-                        self.dishln_stow_mode_cmd_exe_data,
-                    )
-                if self.number_of_stow_mode_executed > 0:
-                    self.number_of_stow_mode_executed -= 1
-                self.logger.debug(
-                    "Dev names for set stow mode  %s &"
-                    " number of stow mode execution remaining %s",
-                    str(self.dishln_stow_mode_cmd_exe_data),
-                    self.number_of_stow_mode_executed,
-                )
-
-            if (
-                not self.number_of_stow_mode_executed
-                and self.command_in_progress == "SetStowMode"
-            ):
-                self.logger.info(
-                    "All Events received for set stow mode,"
-                    " Aggregating stow mode results"
-                )
-                self.aggregate_set_stow_mode_results()
-                self.logger.debug(
-                    "stow_mode_aggregated_result: %s,"
-                    " dishln_stow_mode_cmd_exe_data: %s",
-                    self.stow_mode_aggregated_result,
-                    self.dishln_stow_mode_cmd_exe_data,
-                )
-                self.stow_mode_command_aggregated_result = ResultCode.OK
-                self.observable.notify_observers(attribute_value_change=True)
-
-    def aggregate_set_stow_mode_results(self) -> None:
-        """
-        This method aggregate StowMode command results.
-        """
-
-        self.stow_mode_aggregated_result = True
-        if not self.check_timeout_for_stow_mode_lrcr_events():
-            self.stow_mode_aggregated_result = (
-                self.aggregate_dish_stow_mode_events()
-            )
-            if self.stow_mode_aggregated_result:
-                for (
-                    _,
-                    result_code_or_exception,
-                ) in self.dishln_stow_mode_cmd_exe_data.items():
-                    if isinstance(result_code_or_exception, str):
-                        self.stow_mode_aggregated_result = False
-                        break
-                    if result_code_or_exception["result_code"][0] != int(
-                        ResultCode.OK
-                    ):
-                        self.stow_mode_aggregated_result = False
-                        break
-
-    def aggregate_dish_stow_mode_events(self) -> bool:
-        """
-        Wait for all dish stow mode events to be received within timeout.
-
-        Polls the dishln_stow_mode_cmd_exe_data dictionary to check if
-        all dishes have reported their mode values for the stow mode command.
-
-        Returns:
-            bool: True if all dishes reported their mode within the timeout
-                   period,False if timeout is reached before all dishes
-                   respond.
-        """
-        wait_event = threading.Event()
-        self.logger.debug(
-            "Command Timeout is %s seconds", self.command_timeout
-        )
-        interval = 0.5  # wait interval in seconds
-        end_time = time.monotonic() + (self.command_timeout - 3)
-        while time.monotonic() < end_time:
-            if self.all_dish_stow_mode_available():
-                self.logger.debug(
-                    "All dish_mode values are available. Exiting loop."
-                )
-                return True
-            wait_event.wait(interval)
-        wait_event.clear()
-        return False
-
-    def all_dish_stow_mode_available(self) -> bool:
-        """
-        Returns True only if all valid dish entries (dicts)
-        have  dish mode STOW.
-        Ignores non-dict entries.
-        """
-
-        flag = True
-        self.set_dish_mode_in_stow_mode_cmd_exe_data()
-        for dish in self.dishln_stow_mode_cmd_exe_data.values():
-            if (
-                isinstance(dish, dict)
-                and dish.get("dish_mode") != DishMode.STOW.name
-            ):
-                self.logger.debug("Dish data: %s", dish)
-                flag = False
-                break  # Early exit like any()
-        return flag
 
     def get_current_dish_mode_of_dln(self, dish_id: str) -> DishMode:
         """

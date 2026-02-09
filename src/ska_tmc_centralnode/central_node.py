@@ -259,15 +259,6 @@ class AbstractCentralNode(TMCBaseDevice):
 
             return (ResultCode.OK, "")
 
-    def always_executed_hook(self):
-        """always executed hook method"""
-
-    def delete_device(self):
-        # if the init is called more than once
-        # I need to stop all threads
-        if hasattr(self, "component_manager"):
-            self.component_manager.stop()
-
     # ------------------
     # Attributes methods
     # ------------------

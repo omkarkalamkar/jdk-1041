@@ -5,6 +5,7 @@ ReleaseResources class for CentralNode.
 import json
 from typing import Tuple
 
+from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
 
 from ska_tmc_centralnode.commands.release_resources_command import (
@@ -164,7 +165,12 @@ class ReleaseResourcesLow(ReleaseResources):
                 self.component_manager.subsystem_assigned_per_command_id[
                     self.command_id
                 ] = assigned_subsystem
-        return (ResultCode.OK, "")
+        return self.wait_for_command_completion(
+            len(self.command_subs_list),
+            ObsState.EMPTY,
+            "get_subarray_obsstate",
+            use_command_class_id=True,
+        )
 
     def release_all_resources_mccs(
         self, adapter, argin
@@ -180,7 +186,7 @@ class ReleaseResourcesLow(ReleaseResources):
             and lists of messages.
 
         """
-        return self.send_command(
+        return self.invoke_command(
             [adapter],
             f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
             + "device",

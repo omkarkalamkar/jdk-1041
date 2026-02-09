@@ -2,8 +2,8 @@ import time
 
 import mock
 import pytest
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -193,13 +193,11 @@ def test_telescope_off_command_rejected(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
 
-    data = task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.REJECTED,
-            "result": Anything,
-            "exception": Anything,
-        },
+    data = task_callback.assert_call(
+        status=TaskStatus.REJECTED,
+        result=Anything,
+        exception=Anything,
         lookahead=5,
     )
-    assert ResultCode.REJECTED == data["result"][0]
+    assert ResultCode.FAILED == data["result"][0]
     assert f"['{MCCS_MLN_DEVICE}'] not available" in data["result"][1]

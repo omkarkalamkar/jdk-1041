@@ -31,16 +31,15 @@ def test_standby_command_mid(
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
-
-    result, unique_id = central_node.TelescopeOn()
-    # Check whether the command ResultCode is OK
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    result, unique_id = central_node.TelescopeOn()
+    # Check whether the command ResultCode is OK
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
@@ -73,8 +72,7 @@ def test_standby_command_mid(
     )
 
     # Check whether the command ResultCode is OK
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -90,8 +88,8 @@ def test_standby_command_mid(
     )
 
     # Check whether the telescopeState is STANDBY
-    change_event_callbacks.assert_change_event(
-        "telescopeState", DevState.STANDBY, lookahead=12
+    change_event_callbacks["telescopeState"].assert_change_event(
+        DevState.STANDBY, lookahead=12
     )
     logger.info("telescopeState: %s", str(central_node.telescopeState))
 
@@ -109,15 +107,15 @@ def test_standby_command_low(
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
     ensure_checked_devices(central_node)
 
-    result, unique_id = central_node.TelescopeOn()
-    # Check whether the command ResultCode is OK
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    result, unique_id = central_node.TelescopeOn()
+    # Check whether the command ResultCode is OK
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
@@ -134,8 +132,7 @@ def test_standby_command_low(
     assert result[0] == ResultCode.QUEUED
 
     # Check whether the command ResultCode is OK
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=3,
     )
@@ -157,8 +154,8 @@ def test_standby_command_low(
     )
 
     # Check whether the telescopeState is STANDBY
-    change_event_callbacks.assert_change_event(
-        "telescopeState", DevState.STANDBY, lookahead=4
+    change_event_callbacks["telescopeState"].assert_change_event(
+        DevState.STANDBY, lookahead=4
     )
     logger.info("telescopeState: %s", str(central_node.telescopeState))
 

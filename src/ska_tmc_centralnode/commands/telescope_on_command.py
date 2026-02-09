@@ -4,8 +4,8 @@ import logging
 import threading
 from typing import Callable, List, Optional, Tuple
 
+from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
