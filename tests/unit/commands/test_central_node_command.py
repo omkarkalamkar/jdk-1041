@@ -1,3 +1,4 @@
+import threading
 from unittest.mock import Mock, patch
 
 from ska_control_model import ResultCode
@@ -13,7 +14,7 @@ def test_send_command_with_argin():
     cc = CentralNodeCommand(cm)
     adapters = Mock()
     cc.invoke_commands_without_lrc = Mock()
-    cc.send_command(adapters, "testcommand", "new")
+    cc.send_command(adapters, "command failed", "testcommand", "argin")
     cc.invoke_commands_without_lrc.assert_called_once()
 
 
@@ -42,3 +43,14 @@ def test_command_error(mock_invoke_lrc):
     )
     assert result == ResultCode.FAILED
     assert "command rejected" in message
+
+
+def test_wait_for_completion():
+    cm = Mock(
+        command_timeout=5.0, command_completion_cond=threading.Condition()
+    )
+    cc = CentralNodeCommand(cm)
+    cc.command_results["dummy_device"] = (ResultCode.FAILED, "error")
+    result, message = cc.wait_for_command_completion(1)
+    assert result == ResultCode.FAILED
+    assert "error" in message
