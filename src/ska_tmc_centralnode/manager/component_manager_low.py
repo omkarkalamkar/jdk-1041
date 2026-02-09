@@ -14,7 +14,7 @@ from logging import Logger
 from queue import Queue
 from typing import Callable, Dict, Tuple
 
-from ska_control_model import AdminMode, ObsState, TaskStatus
+from ska_control_model import AdminMode, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_telmodel.schema import validate
