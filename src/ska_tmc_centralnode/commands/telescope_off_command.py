@@ -67,7 +67,7 @@ class TelescopeOff(TelescopeOnOff):
             task_callback(
                 status=TaskStatus.COMPLETED, result=(ResultCode.OK, message)
             )
-        # return return_code, message
+        return return_code, message
 
     def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
         """
