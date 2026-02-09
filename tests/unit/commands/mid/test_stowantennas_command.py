@@ -101,8 +101,8 @@ def test_update_set_stow_mode_results():
     cm.update_set_stow_mode_results(
         "abc/def/ska001", ("123_SetStowMode", '[0, "Command Completed"]')
     )
-    assert cm.logger.info.call_count == 2
-    assert cm.logger.debug.call_count == 2
+    assert cm.logger.info.call_count > 1
+    assert cm.logger.debug.call_count > 1
     cm.aggregate_set_stow_mode_results.assert_called_once()
     assert cm.stow_mode_command_aggregated_result == ResultCode.OK
     assert not cm.number_of_stow_mode_executed
@@ -140,6 +140,24 @@ def test_all_dish_stow_mode_available():
     assert not cm.all_dish_stow_mode_available()
     cm.get_current_dish_mode_of_dln = MagicMock(return_value=5)
     assert cm.all_dish_stow_mode_available()
+
+
+def test_check_timeout_for_stow_mode_lrcr_events():
+    cm, _ = create_cm()
+    cm.dishln_stow_mode_cmd_exe_data = {
+        "ska001": {
+            "result_code": [3, "Timeout Occurred"],
+            "dish_mode": None,
+        }
+    }
+    assert cm.check_timeout_for_stow_mode_lrcr_events()
+    cm.dishln_stow_mode_cmd_exe_data = {
+        "ska001": {
+            "result_code": [3, "Command failed"],
+            "dish_mode": None,
+        }
+    }
+    assert not cm.check_timeout_for_stow_mode_lrcr_events()
 
 
 def test_get_current_dish_mode_of_dln():

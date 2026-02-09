@@ -1150,6 +1150,7 @@ class CNComponentManagerMid(CNComponentManager):
                 else:
                     raise ValueError(messgae + " " + example)
             GPMJsonModel.validate_dish_ids(stow_input)
+            stow_input = [dish_id.lower() for dish_id in stow_input]
             self.logger.info("Stow command dish list: %s", stow_input)
             task_status, response = self.submit_task(
                 set_stow_mode_command.apply_stow_mode,
@@ -1523,6 +1524,12 @@ class CNComponentManagerMid(CNComponentManager):
                     " Aggregating stow mode results"
                 )
                 self.aggregate_set_stow_mode_results()
+                self.logger.debug(
+                    "stow_mode_aggregated_result: %s,"
+                    " dishln_stow_mode_cmd_exe_data: %s",
+                    self.stow_mode_aggregated_result,
+                    self.dishln_stow_mode_cmd_exe_data,
+                )
                 self.stow_mode_command_aggregated_result = ResultCode.OK
                 self.observable.notify_observers(attribute_value_change=True)
 
@@ -1532,22 +1539,23 @@ class CNComponentManagerMid(CNComponentManager):
         """
 
         self.stow_mode_aggregated_result = True
-        self.stow_mode_aggregated_result = (
-            self.aggregate_dish_stow_mode_events()
-        )
-        if self.stow_mode_aggregated_result:
-            for (
-                _,
-                result_code_or_exception,
-            ) in self.dishln_stow_mode_cmd_exe_data.items():
-                if isinstance(result_code_or_exception, str):
-                    self.stow_mode_aggregated_result = False
-                    break
-                if result_code_or_exception["result_code"][0] != int(
-                    ResultCode.OK
-                ):
-                    self.stow_mode_aggregated_result = False
-                    break
+        if not self.check_timeout_for_stow_mode_lrcr_events():
+            self.stow_mode_aggregated_result = (
+                self.aggregate_dish_stow_mode_events()
+            )
+            if self.stow_mode_aggregated_result:
+                for (
+                    _,
+                    result_code_or_exception,
+                ) in self.dishln_stow_mode_cmd_exe_data.items():
+                    if isinstance(result_code_or_exception, str):
+                        self.stow_mode_aggregated_result = False
+                        break
+                    if result_code_or_exception["result_code"][0] != int(
+                        ResultCode.OK
+                    ):
+                        self.stow_mode_aggregated_result = False
+                        break
 
     def aggregate_dish_stow_mode_events(self) -> bool:
         """
@@ -1562,23 +1570,20 @@ class CNComponentManagerMid(CNComponentManager):
                    respond.
         """
         wait_event = threading.Event()
-
-        timeout = self.command_timeout - 3  # total timeout in seconds
+        self.logger.debug(
+            "Command Timeout is %s seconds", self.command_timeout
+        )
         interval = 0.5  # wait interval in seconds
-        start_time = time.time()
-
-        while True:
+        end_time = time.monotonic() + (self.command_timeout - 3)
+        while time.monotonic() < end_time:
             if self.all_dish_stow_mode_available():
-                self.logger.info(
+                self.logger.debug(
                     "All dish_mode values are available. Exiting loop."
                 )
                 return True
-
-            if time.time() - start_time >= timeout:
-                self.logger.info("Timeout reached. Exiting loop.")
-                return False
-
             wait_event.wait(interval)
+        wait_event.clear()
+        return False
 
     def all_dish_stow_mode_available(self) -> bool:
         """
@@ -1588,19 +1593,13 @@ class CNComponentManagerMid(CNComponentManager):
         """
 
         flag = True
-        for dish_id, data in self.dishln_stow_mode_cmd_exe_data.items():
-            if isinstance(data, dict):
-                data["dish_mode"] = DishMode(
-                    self.get_current_dish_mode_of_dln(dish_id)
-                ).name
-                self.logger.info(
-                    "Current dish mode for %s is %s", dish_id, data
-                )
+        self.set_dish_mode_in_stow_mode_cmd_exe_data()
         for dish in self.dishln_stow_mode_cmd_exe_data.values():
             if (
                 isinstance(dish, dict)
                 and dish.get("dish_mode") != DishMode.STOW.name
             ):
+                self.logger.debug("Dish data: %s", dish)
                 flag = False
                 break  # Early exit like any()
         return flag
@@ -1624,6 +1623,35 @@ class CNComponentManagerMid(CNComponentManager):
                 break
         dev_info = self.component.get_device(dish_dev_name)
         return dev_info.dish_mode
+
+    def check_timeout_for_stow_mode_lrcr_events(self) -> bool:
+        """Check timeout error in dishln_stow_mode_cmd_exe_data dictionary"""
+        for (
+            dish_id,
+            result_code_or_exception,
+        ) in self.dishln_stow_mode_cmd_exe_data.items():
+            if isinstance(result_code_or_exception, str):
+                continue
+            result_code = result_code_or_exception.get("result_code", [])
+            _, message = result_code if len(result_code) == 2 else (None, "")
+            if "timeout" in message.lower():
+                self.logger.debug(
+                    "%s: %s",
+                    dish_id,
+                    result_code_or_exception["result_code"],
+                )
+                self.set_dish_mode_in_stow_mode_cmd_exe_data()
+                self.stow_mode_aggregated_result = False
+                return True
+        return False
+
+    def set_dish_mode_in_stow_mode_cmd_exe_data(self) -> None:
+        """ "Set dish mode in stow mode command execution data dictionary."""
+        for dish_id, data in self.dishln_stow_mode_cmd_exe_data.items():
+            if isinstance(data, dict):
+                data["dish_mode"] = DishMode(
+                    self.get_current_dish_mode_of_dln(dish_id)
+                ).name
 
     def validate_assign_json(self, argin: str):
         """Validates assign resources json

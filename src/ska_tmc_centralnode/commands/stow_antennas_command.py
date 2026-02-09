@@ -81,7 +81,7 @@ class SetStowMode(SetDishGPM):
             exception (str): any message returned as a part of command
 
         """
-        if not self.component_manager.stow_mode_aggregated_result:
+        if not self.component_manager.stow_mode_aggregated_result or exception:
             error_message = (
                 "SetStowMode failed: Command failure"
                 " or dish not in STOW mode: "
