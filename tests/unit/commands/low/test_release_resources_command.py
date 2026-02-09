@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 
 import mock
@@ -38,7 +39,11 @@ def test_low_release_resources_command(
     cm.subsystems_to_config = ["mccs", "csp", "sdp"]
 
     release_input_str = json_factory("release_resource_low")
-    cm.release_resources(release_input_str, task_callback=task_callback)
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -84,7 +89,9 @@ def test_low_release_resources_empty_input_json(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    (res_code, _) = cm.release_resources("", task_callback=task_callback)
+    (res_code, _) = cm.release_resources(
+        "", task_callback=task_callback, task_abort_event=threading.Event()
+    )
     assert res_code == TaskStatus.REJECTED
 
 
@@ -98,7 +105,9 @@ def test_low_release_resources_command_with_invalide_key(
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     release_input_str = json_factory("invalid_key_ReleaseResources")
     (res_code, message) = cm.release_resources(
-        release_input_str, task_callback=task_callback
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert (
@@ -119,7 +128,9 @@ def test_low_release_resources_missing_subarray_id(
     del json_argument["subarray_id"]
 
     (res_code, message) = cm.release_resources(
-        json.dumps(json_argument), task_callback=task_callback
+        json.dumps(json_argument),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert res_code == TaskStatus.REJECTED
     assert (

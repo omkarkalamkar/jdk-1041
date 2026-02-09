@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 from os.path import dirname, join
 
@@ -43,7 +44,11 @@ def test_mid_release_resources_command_with_ok(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     release_input_str = get_release_input_str()
-    cm.release_resources(release_input_str, task_callback=task_callback)
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -90,7 +95,9 @@ def test_mid_release_resources_command_empty_input_json(
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("ReleaseResources")
-    (res_code, _) = cm.release_resources("", task_callback=task_callback)
+    (res_code, _) = cm.release_resources(
+        "", task_callback=task_callback, task_abort_event=threading.Event()
+    )
     assert res_code == TaskStatus.REJECTED
 
 
@@ -120,7 +127,9 @@ def test_mid_release_resources_command_with_invalide_key(
     release_input_str = json_factory("invalid_key_ReleaseResources")
     # with pytest.raises(InvalidJSONError):
     result_code, message = cm.release_resources(
-        release_input_str, task_callback=task_callback
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert result_code == TaskStatus.REJECTED
 
@@ -155,7 +164,11 @@ def test_release_resources_command_timeout(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.release_resources(release_input_str, task_callback=task_callback)
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -193,7 +206,11 @@ def test_release_resources_exception_on_sn(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     release_input_str = get_release_input_str()
-    cm.release_resources(release_input_str, task_callback=task_callback)
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
@@ -234,7 +251,11 @@ def test_mid_release_resources_raises_state_model_exception(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     release_input_str = get_release_input_str()
-    cm.release_resources(release_input_str, task_callback=task_callback)
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.QUEUED}
     )
