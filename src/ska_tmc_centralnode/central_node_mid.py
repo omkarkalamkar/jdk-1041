@@ -415,7 +415,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     #     dtype_in="str",
     #     dtype_out="DevVarLongStringArray",
     # )
-    @submit_lrc_task(fisallowed="is_LoadDishCfg_allowed")
+    @submit_lrc_task
     @DebugIt()
     def LoadDishCfg(self, argin):
         """
@@ -451,7 +451,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         # result_code, unique_id = handler(argin)
         # return [[result_code], [str(unique_id)]]
 
-    def is_setGlobalPointingModel_allowed(self) -> bool:
+    def is_SetGlobalPointingModel_allowed(self) -> bool:
         """
         Checks whether setGlobalPointingModel command is allowed to be run
         in current device state.
@@ -464,7 +464,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     #     dtype_in="str",
     #     dtype_out="DevVarLongStringArray",
     # )
-    @submit_lrc_task(fisallowed="is_setGlobalPointingModel_allowed")
+    @submit_lrc_task
     @DebugIt()
     def SetGlobalPointingModel(self, argin):
         """
@@ -513,7 +513,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         # result_code, unique_id = handler(argin)
         # return [[result_code], [str(unique_id)]]
 
-    def is_setStowMode_allowed(self) -> bool:
+    def is_SetStowMode_allowed(self) -> bool:
         """
         Checks whether setStowMode command is allowed to be run
         in current device state.
@@ -526,7 +526,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     #     dtype_in="str",
     #     dtype_out="DevVarLongStringArray",
     # )
-    @submit_lrc_task(fisallowed="is_setStowMode_allowed")
+    @submit_lrc_task
     @DebugIt()
     def SetStowMode(self, argin):
         """

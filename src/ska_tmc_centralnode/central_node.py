@@ -448,7 +448,7 @@ class AbstractCentralNode(TMCBaseDevice):
     # @command(
     #     dtype_out="DevVarLongStringArray",
     # )
-    @submit_lrc_task(fisallowed="is_TelescopeOn_allowed")
+    @submit_lrc_task
     @DebugIt()
     def TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
         """
@@ -489,7 +489,7 @@ class AbstractCentralNode(TMCBaseDevice):
     # @command(
     #     dtype_out="DevVarLongStringArray",
     # )
-    @submit_lrc_task(fisallowed="is_TelescopeStandby_allowed")
+    @submit_lrc_task
     @DebugIt()
     def TelescopeStandby(self):
         """
@@ -527,7 +527,7 @@ class AbstractCentralNode(TMCBaseDevice):
         )
 
     # @command(dtype_out="DevVarLongStringArray")
-    @submit_lrc_task(fisallowed="is_TelescopeOff_allowed")
+    @submit_lrc_task
     @DebugIt()
     def TelescopeOff(self):
         """
@@ -660,7 +660,7 @@ class AbstractCentralNode(TMCBaseDevice):
     #     dtype_in="str",
     #     dtype_out="DevVarLongStringArray",
     # )
-    @submit_lrc_task(fisallowed="is_AssignResources_allowed")
+    @submit_lrc_task
     @DebugIt()
     def AssignResources(self, argin):
         """
@@ -705,7 +705,7 @@ class AbstractCentralNode(TMCBaseDevice):
     #     dtype_in="str",
     #     dtype_out="DevVarLongStringArray",
     # )
-    @submit_lrc_task(fisallowed="is_ReleaseResources_allowed")
+    @submit_lrc_task
     @DebugIt()
     def ReleaseResources(self, argin):
         """
