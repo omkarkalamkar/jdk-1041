@@ -164,20 +164,6 @@ class AssignResourcesLow(AssignResources):
             )
 
         if (
-            "csp"
-            in self.component_manager.subsystem_assigned_per_subarray[
-                self.subarray_id
-            ]
-        ):
-            try:
-                self.update_subarray_pss_beams_mapping(json_argument)
-            except Exception as exception:
-                return (
-                    ResultCode.FAILED,
-                    str(exception),
-                )
-
-        if (
             "mccs"
             in self.component_manager.subsystem_assigned_per_subarray[
                 self.subarray_id
@@ -246,53 +232,3 @@ class AssignResourcesLow(AssignResources):
             raise Exception(
                 "Error while creating MCCS input json"
             ) from exception
-
-    def update_subarray_pss_beams_mapping(self, json_argument: dict) -> dict:
-        """
-        Method to update the mapping of subarray_id to the assigned pss beams
-
-        Args:
-            json_argument (dict): The string in JSON format.
-
-        Returns:
-            dict: The string in JSON format.
-
-
-        """
-        try:
-            subarray_id = json_argument["subarray_id"]
-            csp_input = json_argument["csp"]
-            pss_key = csp_input.get("pss", None)
-            if pss_key is None:
-                return
-            pss_beam_ids = pss_key["pss_beam_ids"]
-            assigned_pss_beams = set()
-            for (
-                assigned_subarray_id,
-                beams,
-            ) in (
-                self.component_manager.pss_beams_assigned_per_subarray.items()
-            ):
-                if assigned_subarray_id != subarray_id:
-                    assigned_pss_beams.update(beams)
-
-            # Check if pss_beam_id is already assigned to another subarray
-            conflicting_beams = [
-                beam for beam in pss_beam_ids if beam in assigned_pss_beams
-            ]
-            if conflicting_beams:
-                self.logger.error(
-                    "PSS beams: %s already assigned to another subarray",
-                    conflicting_beams,
-                )
-                raise Exception(
-                    f"PSS beams: {conflicting_beams} already assigned"
-                    f" to another subarray"
-                )
-
-            self.component_manager.pss_beams_assigned_per_subarray[
-                subarray_id
-            ] = pss_beam_ids
-
-        except Exception as exception:
-            raise exception

@@ -27,7 +27,7 @@ def assign_resources_low(
     change_event_callbacks,
     subarray_device,
     subarray2_device,
-    second_assign_failed=True,
+    second_assign_rejected=True,
 ):
     """AssignResources Test method."""
     logger.info("%s", tango_context)
@@ -74,32 +74,25 @@ def assign_resources_low(
 
     assert unique_id1[0].endswith("AssignResources")
     assert result1[0] == ResultCode.QUEUED
-
-    assert unique_id2[0].endswith("AssignResources")
-    assert result2[0] == ResultCode.QUEUED
+    if second_assign_rejected:
+        assert result2[0] == ResultCode.REJECTED
+        conflicting_pss_beams = list(
+            set(pss_beams).intersection(assigned_pss_beams)
+        )
+        assert unique_id2[0] == (
+            f"PSS beams: {conflicting_pss_beams} already "
+            "assigned to another subarray"
+        )
+    else:
+        assert unique_id2[0].endswith("AssignResources")
+        assert result2[0] == ResultCode.QUEUED
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id1[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-    if second_assign_failed:
-        conflicting_pss_beams = list(
-            set(pss_beams).intersection(assigned_pss_beams)
-        )
-        change_event_callbacks["longRunningCommandResult"].assert_change_event(
-            (
-                unique_id2[0],
-                json.dumps(
-                    (
-                        int(ResultCode.FAILED),
-                        f"PSS beams: {conflicting_pss_beams}"
-                        " already assigned to another subarray",
-                    )
-                ),
-            ),
-            lookahead=4,
-        )
-    else:
+
+    if not second_assign_rejected:
         change_event_callbacks["longRunningCommandResult"].assert_change_event(
             (
                 unique_id2[0],
@@ -110,20 +103,25 @@ def assign_resources_low(
 
     release_input_string1 = release_input_string
     release_input = json.loads(release_input_string)
-    release_input["subarray_id"] = 2
-    release_input_string2 = json.dumps(release_input)
-
     result1, unique_id1 = central_node.ReleaseResources(release_input_string1)
-    result2, unique_id2 = central_node.ReleaseResources(release_input_string2)
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id1[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id2[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
+    if not second_assign_rejected:
+        release_input["subarray_id"] = 2
+        release_input_string2 = json.dumps(release_input)
+        result2, unique_id2 = central_node.ReleaseResources(
+            release_input_string2
+        )
+        change_event_callbacks["longRunningCommandResult"].assert_change_event(
+            (
+                unique_id2[0],
+                json.dumps((int(ResultCode.OK), "Command Completed")),
+            ),
+            lookahead=4,
+        )
     tmc_subarray = dev_factory.get_device(subarray_device)
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
@@ -160,7 +158,7 @@ def test_assign_res_with_two_subarray_low_same_pss_beam(
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
         LOW_SUBARRAY2_DEVICE,
-        second_assign_failed=True,
+        second_assign_rejected=True,
     )
 
 
@@ -193,5 +191,5 @@ def test_assign_res_with_two_subarray_low_different_pss_beam(
         change_event_callbacks,
         LOW_SUBARRAY_DEVICE,
         LOW_SUBARRAY2_DEVICE,
-        second_assign_failed=False,
+        second_assign_rejected=False,
     )
