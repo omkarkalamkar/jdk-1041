@@ -98,7 +98,10 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.component_manager.dish_vcc_validation_status = {
                 CENTRALNODE_MID: error_message
             }
-            self.update_task_status(result=(ResultCode.FAILED,error_message),exception=error_message)
+            self.update_task_status(
+                result=(ResultCode.FAILED, error_message),
+                exception=error_message,
+            )
             return ResultCode.FAILED, error_message
 
         # Save validated config
@@ -108,7 +111,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         # Execute device-level command
         self.component_manager.load_dish_cfg_command_id = self.command_id
         result, message = self.do(argin)
-        self.update_task_status(result=(result,message),exception=message)
+        self.update_task_status(result=(result, message), exception=message)
         return result, message
 
     def update_task_status(

@@ -188,5 +188,3 @@ def test_low_release_resources_raises_state_model_exception(
             ),
         }
     )
-
-

@@ -63,7 +63,7 @@ class SetStowMode(SetDishGPM):
         self.task_callback(status=TaskStatus.IN_PROGRESS)
         self.receptors = argin
         result, message = self.do(argin)
-        self.update_task_status(result=(result,message),exception=message)
+        self.update_task_status(result=(result, message), exception=message)
         return result, message
 
     def update_task_status(

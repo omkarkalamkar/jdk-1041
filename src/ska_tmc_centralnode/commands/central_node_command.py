@@ -97,7 +97,6 @@ class CentralNodeCommand(TMCCommand):
 
         return result
 
-
     def invoke_command(
         self,
         adapters: List,
