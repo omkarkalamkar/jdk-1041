@@ -282,7 +282,7 @@ version = "1.1"
 description = "Simple assertion library for unit testing in python with a fluent API"
 optional = false
 python-versions = "*"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "assertpy-1.1.tar.gz", hash = "sha256:acc64329934ad71a3221de185517a43af33e373bb44dc05b5a9b174394ef4833"},
 ]
@@ -1004,7 +1004,7 @@ version = "2.1.0"
 description = "A library to handle automated deprecations"
 optional = false
 python-versions = "*"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "deprecation-2.1.0-py2.py3-none-any.whl", hash = "sha256:a10811591210e1fb0e768a8c25517cabeabcba6f0bf96564f8ff45189f90b14a"},
     {file = "deprecation-2.1.0.tar.gz", hash = "sha256:72b3bde64e5d778694b0cf68178aed03d15e15477116add3fb773e581f9518ff"},
@@ -1045,7 +1045,7 @@ version = "0.17.0"
 description = "Parse Python docstrings in reST, Google and Numpydoc format"
 optional = false
 python-versions = ">=3.8"
-groups = ["main"]
+groups = ["main", "dev"]
 files = [
     {file = "docstring_parser-0.17.0-py3-none-any.whl", hash = "sha256:cf2569abd23dce8099b300f9b4fa8191e9582dda731fd533daf54c4551658708"},
     {file = "docstring_parser-0.17.0.tar.gz", hash = "sha256:583de4a309722b3315439bb31d64ba3eebada841f2e2cee23b99df001434c912"},
@@ -1736,6 +1736,7 @@ optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
+    {file = "junit-xml-2-1.9.tar.gz", hash = "sha256:3b8d9635c5215f754c7807104f6493e3ea3bc9481e2d33db294560da3a1b00f7"},
     {file = "junit_xml_2-1.9-py2.py3-none-any.whl", hash = "sha256:05093d75fe11120ccd51293884b5ee334ff3bc4b5106647c2bcc928486600588"},
 ]
 
@@ -3305,8 +3306,8 @@ name = "pytango"
 version = "10.1.2"
 description = "Python bindings for the cppTango library; part of the Tango Distributed Control System toolkit"
 optional = false
-python-versions = ">=3.9"
-groups = ["main"]
+python-versions = ">=3.10"
+groups = ["main", "dev"]
 files = [
     {file = "pytango-10.1.2-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:77ab5df70ec9475bb017274209f0f9180b39adaffa92330cb3424b518b27e936"},
     {file = "pytango-10.1.2-cp310-cp310-macosx_12_0_x86_64.whl", hash = "sha256:2baeec370fc733bcabf9436311db55f2756828caa97d80f62a18dd93d5e773f6"},
@@ -4311,8 +4312,8 @@ name = "ska-tango-base"
 version = "1.4.0"
 description = "SKA Tango base classes"
 optional = false
-python-versions = ">=3.10,<4.0"
-groups = ["main"]
+python-versions = ">=3.10.0,<4.0.0"
+groups = ["main", "dev"]
 files = [
     {file = "ska_tango_base-1.4.0-py3-none-any.whl", hash = "sha256:9db60153edd40115ae89ecb98e1de22348cf3a2e9278d4c4a04dd57a078ee205"},
     {file = "ska_tango_base-1.4.0.tar.gz", hash = "sha256:41006a5b9ce576e4fa43b5d2da58fbf1c37bd4f0b296d0e49b809cd908d740f6"},
@@ -4340,8 +4341,8 @@ name = "ska-tango-testing"
 version = "0.8.0"
 description = "Test harness for testing SKA Tango devices"
 optional = false
-python-versions = ">=3.8.1,<4.0.0"
-groups = ["main"]
+python-versions = ">=3.10,<4.0"
+groups = ["main", "dev"]
 files = [
     {file = "ska_tango_testing-0.8.0-py3-none-any.whl", hash = "sha256:9135d4126fdf85cfbfa89e439baf72e77c711446334203ee4eb6c08ece8f43aa"},
     {file = "ska_tango_testing-0.8.0.tar.gz", hash = "sha256:7b376647496da1ec97a7e0b9c4782629dc0b773db40e1d1622fc60a21240fc29"},
@@ -4448,14 +4449,14 @@ reference = "ska-nexus"
 
 [[package]]
 name = "ska-tmc-simulators"
-version = "1.9.1"
+version = "1.9.5"
 description = "SKA TMC Simulators contains helper classes required for Telescope Monitoring and Control(TMC)."
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["dev"]
 files = [
-    {file = "ska_tmc_simulators-1.9.1-py3-none-any.whl", hash = "sha256:58c33c558f9a993bf631eb4f36e6da1bd010b08c1cf33bb0d3abd7e39c1679c3"},
-    {file = "ska_tmc_simulators-1.9.1.tar.gz", hash = "sha256:76a1faa50ce9f62d3d4321c7ad536dd8d225aaecee661fbe88732d71ed04ec15"},
+    {file = "ska_tmc_simulators-1.9.5-py3-none-any.whl", hash = "sha256:65677e0a320dbeba8d0a1d74a64853ff4a3d0681c7308a8d57a6c325c559df19"},
+    {file = "ska_tmc_simulators-1.9.5.tar.gz", hash = "sha256:c11c49a8ca775b5a777a8540bba7153ffed7fa9067201f431d3c16bbc228b731"},
 ]
 
 [package.dependencies]
@@ -5258,4 +5259,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "42f499bf4b32f124fb1bcb8cf9ffbb7e487e7d819dff37d0b19617e80d478165"
+content-hash = "ca165c25eb8662358e0bdba623b46a2fb80cc7c76f7069ef009ab75574e916ee"
