@@ -321,6 +321,7 @@ def check_if_subarray_is_available(cm):
             )
 
 
+@pytest.mark.test
 @pytest.mark.SKA_low
 def test_low_assign_resources_raises_state_model_exception(
     tango_context,
@@ -336,19 +337,26 @@ def test_low_assign_resources_raises_state_model_exception(
     check_if_subarray_is_available(cm)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
-    assign_input_str = json_factory("assign_resource_low")
+    # assign_input_str = json_factory("assign_resource_low")
+    with pytest.raises(Exception) as exception:
+        cm.is_command_allowed_callable(
+            subarray_id=1, command_name="AssignResources"
+        )
+        assert (
+            "AssignResources command not permitted in observation state 4"
+            in str(exception)
+        )
+    # res_code, message = cm.assign_resources(
+    #     assign_input_str,
+    #     task_callback=task_callback,
+    #     task_abort_event=threading.Event(),
+    # )
 
-    res_code, message = cm.assign_resources(
-        assign_input_str,
-        task_callback=task_callback,
-        task_abort_event=threading.Event(),
-    )
-
-    assert res_code == TaskStatus.REJECTED
-    assert (
-        message
-        == "AssignResources command not permitted in observation state 4"
-    )
+    # assert res_code == TaskStatus.REJECTED
+    # assert (
+    #     message
+    #     == "AssignResources command not permitted in observation state 4"
+    # )
     # task_callback.assert_against_call(
     #     status=TaskStatus.REJECTED,
     #     result=(

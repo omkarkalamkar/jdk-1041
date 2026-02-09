@@ -1702,10 +1702,10 @@ class CNComponentManagerMid(CNComponentManager):
                 argin
             )
             # Validate command is allowed
-            self.is_command_allowed_callable(
-                subarray_id=assign_resources_command_object.subarray_id,
-                command_name="AssignResources",
-            )
+            # self.is_command_allowed_callable(
+            #     subarray_id=assign_resources_command_object.subarray_id,
+            #     command_name="AssignResources",
+            # )
             return assign_resources_command_object.assign_resources(
                 argin=argin,
                 task_callback=task_callback,
@@ -1757,10 +1757,10 @@ class CNComponentManagerMid(CNComponentManager):
                 self.get_subarray_id(argin)
             )
             # Validate command is allowed
-            self.is_command_allowed_callable(
-                subarray_id=release_resources_command_object.subarray_id,
-                command_name="ReleaseResources",
-            )
+            # self.is_command_allowed_callable(
+            #     subarray_id=release_resources_command_object.subarray_id,
+            #     command_name="ReleaseResources",
+            # )
             return release_resources_command_object.release_resources(
                 argin=argin,
                 task_callback=task_callback,

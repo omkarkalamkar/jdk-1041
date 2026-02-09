@@ -694,9 +694,13 @@ class AbstractCentralNode(TMCBaseDevice):
             "ReleaseResources"
         )
 
+    @command(
+        dtype_in="str",
+        dtype_out="DevVarLongStringArray",
+    )
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def execute_ReleaseResources(self, argin):
+    def ReleaseResources(self, argin):
         """
         Releases all the resources assigned to the given Subarray.
         """
