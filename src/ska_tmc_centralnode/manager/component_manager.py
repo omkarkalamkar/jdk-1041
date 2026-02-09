@@ -1176,9 +1176,9 @@ class CNComponentManager(TmcComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        self.is_command_allowed_callable(
-            command_name="TelescopeOn",
-        )
+        # self.is_command_allowed_callable(
+        #     command_name="TelescopeOn",
+        # )
 
         return telescope_on_command_object.telescope_on(
             logger=self.logger,
@@ -1218,9 +1218,9 @@ class CNComponentManager(TmcComponentManager):
         telescopestandby_command_object = TelescopeStandby(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        self.is_command_allowed_callable(
-            command_name="TelescopeStandby",
-        )
+        # self.is_command_allowed_callable(
+        #     command_name="TelescopeStandby",
+        # )
         return telescopestandby_command_object.telescope_standby(
             logger=self.logger,
             task_callback=task_callback,
@@ -1337,7 +1337,6 @@ class CNComponentManager(TmcComponentManager):
     def is_command_allowed_callable(
         self,
         subarray_id: int = 0,
-        desired_obsstate: List | None = None,
         command_name: str = "",
     ):
         """This method provides callable for command not allowed
@@ -1352,20 +1351,43 @@ class CNComponentManager(TmcComponentManager):
             return exception.
         """
 
-        self.check_device_responsiveness_command(command_name, subarray_id)
-        if subarray_id and desired_obsstate:
-            subarray_devices = self.input_parameter.subarray_dev_names
-            for device in subarray_devices:
-                subarray_device_id = re.findall(r"\d+", device)
-                if subarray_id == int(subarray_device_id[0]):
-                    subarray_obstate = self.get_device(device).obs_state
-                    if subarray_obstate not in desired_obsstate:
-                        raise StateModelError(
-                            f"{command_name} command not permitted "
-                            + f"in observation state {subarray_obstate}"
-                        )
-                        # return False
-        return True
+        def is_subarray_in_right_obs_state() -> bool:
+            """
+            Checks subarray obsstate before invoking command
+
+            :param subarray_id: subarray id on which command invoke
+            :type subarray_id: int
+            :param desired_obsstate: list of obs states which are allowed
+            :type desired_obsstate: List
+            :param command_name: name of command for obstate check
+            :type: str
+
+            :return: return boolean value if command in valid obstate else
+                return exception.
+            """
+            self.check_device_responsiveness_command(command_name, subarray_id)
+            allowed_obs_states = {
+                "AssignResources": [ObsState.EMPTY, ObsState.IDLE],
+                "ReleaseResources": [ObsState.IDLE],
+            }
+            if command_name in allowed_obs_states:
+                desired_obsstate = allowed_obs_states.get(command_name)
+            else:
+                desired_obsstate = None
+            if subarray_id and desired_obsstate:
+                subarray_devices = self.input_parameter.subarray_dev_names
+                for device in subarray_devices:
+                    subarray_device_id = re.findall(r"\d+", device)
+                    if subarray_id == int(subarray_device_id[0]):
+                        subarray_obstate = self.get_device(device).obs_state
+                        if subarray_obstate not in desired_obsstate:
+                            raise StateModelError(
+                                f"{command_name} command not permitted "
+                                + f"in observation state {subarray_obstate}"
+                            )
+            return True
+
+        return is_subarray_in_right_obs_state()
 
     def check_device_responsiveness_command(
         self, command_name: str, subarray_id: int

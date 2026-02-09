@@ -447,11 +447,15 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        return self.component_manager.is_command_allowed("TelescopeOn")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed("TelescopeOn")
+        return self.component_manager.is_command_allowed_callable(
+            "TelescopeOn"
+        )
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
+    def execute_TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
         """
         This command invokes TelescopeOn() command on DishLeadNode,
         CspMasterLeafNode,SdpMasterLeafNode.
@@ -479,11 +483,17 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        return self.component_manager.is_command_allowed("TelescopeStandby")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed(
+                "TelescopeStandby"
+            )
+        return self.component_manager.is_command_allowed_callable(
+            "TelescopeStandby"
+        )
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def TelescopeStandby(self):
+    def execute_TelescopeStandby(self):
         """
         This command invokes TelescopeStandby() command on CspMasterLeafNode,
         SdpMasterLeafNode and DishLeafNode.
@@ -512,11 +522,15 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        return self.component_manager.is_command_allowed("TelescopeOff")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed("TelescopeOff")
+        return self.component_manager.is_command_allowed_callable(
+            "TelescopeOff"
+        )
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def TelescopeOff(self):
+    def execute_TelescopeOff(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
         command on CspMasterLeafNode and SdpMasterLeafNode.
@@ -624,6 +638,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         if request_type == LRCReqType.ENQUEUE_REQ:
             return self.component_manager.is_command_allowed("AssignResources")
+
         return self.component_manager.is_command_allowed_callable(
             "AssignResources"
         )
@@ -636,9 +651,13 @@ class AbstractCentralNode(TMCBaseDevice):
     #     desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
     #     command_name="AssignResources",
     # )
+    @command(
+        dtype_in="str",
+        dtype_out="DevVarLongStringArray",
+    )
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def execute_AssignResources(self, argin):
+    def AssignResources(self, argin):
         """
         AssignResources command invokes the AssignResources command on
             lower level devices.
@@ -671,7 +690,7 @@ class AbstractCentralNode(TMCBaseDevice):
             return self.component_manager.is_command_allowed(
                 "ReleaseResources"
             )
-        return self.component_manager.command_not_allowed_callable(
+        return self.component_manager.is_command_allowed_callable(
             "ReleaseResources"
         )
 
