@@ -457,7 +457,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def execute_TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
+    def TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
         """
         This command invokes TelescopeOn() command on DishLeadNode,
         CspMasterLeafNode,SdpMasterLeafNode.
@@ -489,7 +489,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def execute_TelescopeStandby(self):
+    def TelescopeStandby(self):
         """
         This command invokes TelescopeStandby() command on CspMasterLeafNode,
         SdpMasterLeafNode and DishLeafNode.
@@ -522,7 +522,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def execute_TelescopeOff(self):
+    def TelescopeOff(self):
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
         command on CspMasterLeafNode and SdpMasterLeafNode.
@@ -654,6 +654,7 @@ class AbstractCentralNode(TMCBaseDevice):
             task_callback: TaskCallbackType, task_abort_event: Event
         ) -> None:
             self.component_manager.assign_resources(
+                argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
@@ -691,6 +692,7 @@ class AbstractCentralNode(TMCBaseDevice):
             task_callback: TaskCallbackType, task_abort_event: Event
         ) -> None:
             self.component_manager.release_resources(
+                argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )

@@ -496,7 +496,6 @@ class CNComponentManagerLow(CNComponentManager):
                 "Command is not allowed in current state :",
                 f"{str(self.op_state_model.op_state)}",
             )
-        self.command_not_allowed_callable(self.get_subarray_id)
         return True
 
     def check_device_responsiveness_command(
@@ -606,7 +605,7 @@ class CNComponentManagerLow(CNComponentManager):
             assign_resources_command_object.subarray_id = self.get_subarray_id(
                 argin
             )
-            # Validate command is allowed
+            # # Validate command is allowed
             self.is_command_allowed_callable(
                 subarray_id=assign_resources_command_object.subarray_id,
                 desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
