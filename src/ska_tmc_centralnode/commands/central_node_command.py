@@ -71,7 +71,6 @@ class CentralNodeCommand(TMCCommand):
         self.task_callback: TaskCallbackType = task_callback_default
         self.mccs_mln_adapter = None
         self.command_subs_list = []
-        self.abort_flag = False
         self.command_results = {}
         self.command_device_id_map = {}
         self.task_abort_event = threading.Event()
@@ -320,14 +319,6 @@ class CentralNodeCommand(TMCCommand):
             return ResultCode.FAILED, error_message
         return ResultCode.OK, ""
 
-    def set_abort_flag(self):
-        """This set abort flag to stop command completion
-        tracker
-        """
-        self.abort_flag = True
-        with self.component_manager.command_completion_cond:
-            self.component_manager.command_completion_cond.notify_all()
-
     def wait_for_command_completion(
         self,
         device_length: int,
@@ -341,12 +332,6 @@ class CentralNodeCommand(TMCCommand):
         self.logger.info("subs list %s", self.command_subs_list)
         with self.component_manager.command_completion_cond:
             while True:
-                if self.abort_flag:
-                    self.logger.info(
-                        "Command is Aborting %s",
-                        self.component_manager.command_in_progress,
-                    )
-                    return ResultCode.ABORTED, "Command Aborted"
                 self.logger.info(
                     "%s %s",
                     len(self.command_results.keys()),
