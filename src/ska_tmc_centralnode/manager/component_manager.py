@@ -1161,21 +1161,21 @@ class CNComponentManager(TmcComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, response = self.submit_task(
-            telescope_on_command_object.telescope_on,
-            args=[self.logger],
-            task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeOn"
-            ),
-        )
-        return task_status, response
-
-        # return telescope_on_command_object.telescope_on(
-        #     logger=self.logger,
+        # task_status, response = self.submit_task(
+        #     telescope_on_command_object.telescope_on,
+        #     args=[self.logger],
         #     task_callback=task_callback,
-        #     task_abort_event=task_abort_event,
+        #     is_cmd_allowed=self.command_not_allowed_callable(
+        #         command_name="TelescopeOn"
+        #     ),
         # )
+        # return task_status, response
+
+        return telescope_on_command_object.telescope_on(
+            logger=self.logger,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     def telescope_off(
         self, task_callback: Callable = None, task_abort_event=None
@@ -1189,20 +1189,20 @@ class CNComponentManager(TmcComponentManager):
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, response = self.submit_task(
-            telescope_off_command_object.telescope_off,
-            args=[self.logger],
-            task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeOff"
-            ),
-        )
-        return task_status, response
-        # return telescope_off_command_object.telescope_off(
-        #     logger=self.logger,
+        # task_status, response = self.submit_task(
+        #     telescope_off_command_object.telescope_off,
+        #     args=[self.logger],
         #     task_callback=task_callback,
-        #     task_abort_event=task_abort_event,
+        #     is_cmd_allowed=self.command_not_allowed_callable(
+        #         command_name="TelescopeOff"
+        #     ),
         # )
+        # return task_status, response
+        return telescope_off_command_object.telescope_off(
+            logger=self.logger,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     def telescope_standby(
         self, task_callback: Callable = None, task_abort_event=None
@@ -1215,20 +1215,20 @@ class CNComponentManager(TmcComponentManager):
         telescopestandby_command_object = TelescopeStandby(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
-        task_status, response = self.submit_task(
-            telescopestandby_command_object.telescope_standby,
-            args=[self.logger],
-            task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeStandby"
-            ),
-        )
-        return task_status, response
-        # return telescopestandby_command_object.telescope_standby(
-        #     logger=self.logger,
+        # task_status, response = self.submit_task(
+        #     telescopestandby_command_object.telescope_standby,
+        #     args=[self.logger],
         #     task_callback=task_callback,
-        #     task_abort_event=task_abort_event,
+        #     is_cmd_allowed=self.command_not_allowed_callable(
+        #         command_name="TelescopeStandby"
+        #     ),
         # )
+        # return task_status, response
+        return telescopestandby_command_object.telescope_standby(
+            logger=self.logger,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     def is_input_json_valid(self, argin: str) -> Tuple[bool, str]:
         """

@@ -9,11 +9,10 @@ import json
 from threading import Event
 from typing import List, Tuple, Union
 
-import ska_tango_base as stb
 import tango
 from ska_control_model import HealthState, ResultCode
 from ska_tango_base.base import TaskCallbackType
-from ska_tango_base.long_running_commands import LRCReqType
+from ska_tango_base.long_running_commands import LRCReqType, submit_lrc_task
 from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.exceptions import CommandNotAllowed, DeviceUnresponsive
 from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
@@ -68,6 +67,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         json_value = json.dumps(url_dict)
         self._memorize_attr("arrayLayoutURL", json_value)
+        self._array_layout_url = json_value
         # with tango.EnsureOmniThread():
         #     self.push_change_archive_events("arrayLayoutURL", json_value)
 
@@ -83,6 +83,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         json_value = json.dumps(url_dict)
         self._memorize_attr("DefaultArrayLayoutURL", json_value)
+        self._default_array_layout_url = json_value
         # with tango.EnsureOmniThread():
         #     self.push_change_archive_events(
         #         "DefaultArrayLayoutURL", json_value
@@ -441,13 +442,13 @@ class AbstractCentralNode(TMCBaseDevice):
         if request_type == LRCReqType.ENQUEUE_REQ:
             return self.component_manager.is_command_allowed("TelescopeOn")
         return self.component_manager.is_command_allowed_callable(
-            "TelescopeOn"
+            command_name="TelescopeOn"
         )
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-    )
-    @stb.long_running_commands.submit_lrc_task
+    # @command(
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    @submit_lrc_task(fisallowed="is_TelescopeOn_allowed")
     @DebugIt()
     def TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
         """
@@ -482,13 +483,13 @@ class AbstractCentralNode(TMCBaseDevice):
                 "TelescopeStandby"
             )
         return self.component_manager.is_command_allowed_callable(
-            "TelescopeStandby"
+            command_name="TelescopeStandby"
         )
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-    )
-    @stb.long_running_commands.submit_lrc_task
+    # @command(
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    @submit_lrc_task(fisallowed="is_TelescopeStandby_allowed")
     @DebugIt()
     def TelescopeStandby(self):
         """
@@ -522,11 +523,11 @@ class AbstractCentralNode(TMCBaseDevice):
         if request_type == LRCReqType.ENQUEUE_REQ:
             return self.component_manager.is_command_allowed("TelescopeOff")
         return self.component_manager.is_command_allowed_callable(
-            "TelescopeOff"
+            command_name="TelescopeOff"
         )
 
-    @command(dtype_out="DevVarLongStringArray")
-    @stb.long_running_commands.submit_lrc_task
+    # @command(dtype_out="DevVarLongStringArray")
+    @submit_lrc_task(fisallowed="is_TelescopeOff_allowed")
     @DebugIt()
     def TelescopeOff(self):
         """
@@ -623,7 +624,9 @@ class AbstractCentralNode(TMCBaseDevice):
 
     # pylint: disable=unnecessary-pass
     def is_AssignResources_allowed(
-        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self,
+        argin: str = None,
+        request_type: LRCReqType = LRCReqType.ENQUEUE_REQ,
     ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
         Checks whether this command is allowed to be run in current device
@@ -634,12 +637,16 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        if request_type == LRCReqType.ENQUEUE_REQ:
-            return self.component_manager.is_command_allowed("AssignResources")
+        self.component_manager.is_command_allowed("AssignResources")
 
-        return self.component_manager.is_command_allowed_callable(
-            "AssignResources"
-        )
+        if argin:
+            subarray_id = self.component_manager.get_subarray_id(argin)
+            self.logger.debug("subarray_id: %s", subarray_id)
+            return self.component_manager.is_command_allowed_callable(
+                subarray_id=subarray_id,
+                command_name="AssignResources",
+            )
+        return True
 
     def completed_AssignResources(self) -> None:
         """AssignResources command completed callback."""
@@ -649,11 +656,11 @@ class AbstractCentralNode(TMCBaseDevice):
     #     desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
     #     command_name="AssignResources",
     # )
-    @command(
-        dtype_in="str",
-        dtype_out="DevVarLongStringArray",
-    )
-    @stb.long_running_commands.submit_lrc_task
+    # @command(
+    #     dtype_in="str",
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    @submit_lrc_task(fisallowed="is_AssignResources_allowed")
     @DebugIt()
     def AssignResources(self, argin):
         """
@@ -673,7 +680,7 @@ class AbstractCentralNode(TMCBaseDevice):
         return task
 
     def is_ReleaseResources_allowed(
-        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, argin, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
         Checks whether ReleaseResources command is allowed to be run in
@@ -684,19 +691,21 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        if request_type == LRCReqType.ENQUEUE_REQ:
-            return self.component_manager.is_command_allowed(
-                "ReleaseResources"
-            )
-        return self.component_manager.is_command_allowed_callable(
-            "ReleaseResources"
-        )
+        self.component_manager.is_command_allowed("ReleaseResources")
 
-    @command(
-        dtype_in="str",
-        dtype_out="DevVarLongStringArray",
-    )
-    @stb.long_running_commands.submit_lrc_task
+        if argin:
+            subarray_id = self.component_manager.get_subarray_id(argin)
+            self.logger.debug("subarray_id: %s", subarray_id)
+            return self.component_manager.is_command_allowed_callable(
+                subarray_id=subarray_id, command_name="ReleaseResources"
+            )
+        return True
+
+    # @command(
+    #     dtype_in="str",
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    @submit_lrc_task(fisallowed="is_ReleaseResources_allowed")
     @DebugIt()
     def ReleaseResources(self, argin):
         """

@@ -8,8 +8,8 @@ of state and mode attributes defined by the SKA Control Model.
 import json
 from threading import Event
 
-import ska_tango_base as stb
 from ska_tango_base.base import TaskCallbackType
+from ska_tango_base.long_running_commands import submit_lrc_task
 from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
@@ -411,7 +411,11 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @stb.long_running_commands.submit_lrc_task
+    # @command(
+    #     dtype_in="str",
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    @submit_lrc_task(fisallowed="is_LoadDishCfg_allowed")
     @DebugIt()
     def LoadDishCfg(self, argin):
         """
@@ -456,7 +460,11 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @stb.long_running_commands.submit_lrc_task
+    # @command(
+    #     dtype_in="str",
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    @submit_lrc_task(fisallowed="is_setGlobalPointingModel_allowed")
     @DebugIt()
     def SetGlobalPointingModel(self, argin):
         """
@@ -514,7 +522,11 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @stb.long_running_commands.submit_lrc_task
+    # @command(
+    #     dtype_in="str",
+    #     dtype_out="DevVarLongStringArray",
+    # )
+    @submit_lrc_task(fisallowed="is_setStowMode_allowed")
     @DebugIt()
     def SetStowMode(self, argin):
         """
