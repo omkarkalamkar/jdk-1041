@@ -44,6 +44,11 @@ def assign_resources(
     subarray_proxy = dev_factory.get_device(subarray_device)
 
     ensure_checked_devices(central_node)
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
@@ -55,14 +60,7 @@ def assign_resources(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -101,15 +99,13 @@ def assign_resources(
 
     assert len(device["resources"]) > 0
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
     result, unique_id = central_node.ReleaseResources(release_input_string)
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -203,7 +199,11 @@ def assign_resources_with_invalid_json(
     subarray_proxy = dev_factory.get_device(subarray_device)
 
     ensure_checked_devices(central_node)
-
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
     result, unique_id = central_node.TelescopeOn()
     logger.info(
         "TelescopeOn Command ID: %s Returned result: %s",
@@ -214,14 +214,7 @@ def assign_resources_with_invalid_json(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -273,6 +266,11 @@ def assign_resources_without_subarray_id(
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
@@ -284,14 +282,7 @@ def assign_resources_without_subarray_id(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -323,8 +314,7 @@ def assign_resources_without_subarray_id(
     assert unique_id[0].endswith("TelescopeOff")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -365,6 +355,12 @@ def test_assign_resources_exception_propagation(
 
     ensure_checked_devices(central_node)
 
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
     result, unique_id = central_node.TelescopeOn()
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
@@ -375,14 +371,7 @@ def test_assign_resources_exception_propagation(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -404,8 +393,9 @@ def test_assign_resources_exception_propagation(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    event_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    event_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=8,
     )
@@ -434,6 +424,11 @@ def test_assign_resources_mid_timeout(
     subarray_proxy = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
@@ -445,14 +440,7 @@ def test_assign_resources_mid_timeout(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -476,8 +464,7 @@ def test_assign_resources_mid_timeout(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id[0],
             json.dumps(
@@ -511,6 +498,11 @@ def test_assign_resources_low_timeout(
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
 
     result, unique_id = central_node.TelescopeOn()
     logger.info(
@@ -522,14 +514,7 @@ def test_assign_resources_low_timeout(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id[0],
             json.dumps((int(ResultCode.OK), "Command Completed")),
@@ -556,8 +541,7 @@ def test_assign_resources_low_timeout(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id[0],
             json.dumps(
@@ -591,7 +575,11 @@ def test_assign_resources_low_error_aggregation(
     subarray_proxy = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
 
     ensure_checked_devices(central_node)
-
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
     result, unique_id = central_node.TelescopeOn()
     logger.info(
         "TelescopeOn Command ID: %s Returned result: %s",
@@ -602,14 +590,7 @@ def test_assign_resources_low_error_aggregation(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    central_node.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["longRunningCommandResult"],
-    )
-
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -631,8 +612,9 @@ def test_assign_resources_low_error_aggregation(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    event_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    event_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=8,
     )

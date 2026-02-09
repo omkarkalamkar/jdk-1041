@@ -190,7 +190,9 @@ def test_telescope_on_command_rejected(
         lookahead=5,
     )
     assert ResultCode.OK == data["result"][0]
-    assert f"Unavailable devices: ['{MCCS_MLN_DEVICE}']" in data["result"][1]
+    assert (
+        f"Unavailable devices are ['{MCCS_MLN_DEVICE}']" in data["result"][1]
+    )
 
     # data = task_callback.assert_against_call(
     #     call_kwargs={

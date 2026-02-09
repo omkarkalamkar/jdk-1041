@@ -17,9 +17,33 @@ from tests.settings import (
     LOW_SUBARRAY2_DEVICE,
     LOW_SUBARRAY_DEVICE,
     MCCS_MLN_DEVICE,
-    check_lrcr_events,
     check_subarray_availability,
 )
+
+
+@pytest.fixture()
+def subscribe_mccs_lrc_event():
+    """subscribe event"""
+    pytest.unique_id1 = ""
+    pytest.unique_id2 = ""
+
+    def cb(event):
+        """callback to event of mccsln"""
+        unique_id, result = event.attr_value.value
+        if unique_id.endswith("ReleaseAllResources"):
+            if result == json.dumps([ResultCode.OK, "Command Completed"]):
+                if not pytest.unique_id1 and pytest.unique_id1 != unique_id:
+                    pytest.unique_id1 = unique_id
+                    pytest.mccs_release1 = True
+                else:
+                    pytest.unique_id2 = unique_id
+                    pytest.mccs_release2 = True
+
+    mccs_master_proxy = DeviceProxy(MCCS_MLN_DEVICE)
+    pytest.sub_id = mccs_master_proxy.subscribe_event(
+        "longrunningcommandresult", tango.EventType.CHANGE_EVENT, cb
+    )
+    pytest.mccs_master_proxy = mccs_master_proxy
 
 
 @given(
@@ -40,14 +64,16 @@ def central_node():
 
 @given("assigned two subarrays to the central node")
 def invoke_assignresources_on_subarrays(
-    central_node, json_factory, change_event_callbacks
+    central_node,
+    json_factory,
+    change_event_callbacks,
+    subscribe_mccs_lrc_event,
 ):
     """Method invokes assign resources on two subarrays."""
     subarray_proxy = DeviceProxy(LOW_SUBARRAY_DEVICE)
     subarray_proxy.SetisSubarrayAvailable(True)
     subarray_proxy2 = DeviceProxy(LOW_SUBARRAY2_DEVICE)
     subarray_proxy2.SetisSubarrayAvailable(True)
-    mccs_master_proxy = DeviceProxy(MCCS_MLN_DEVICE)
 
     check_subarray_availability(central_node, LOW_SUBARRAY_DEVICE, True)
     check_subarray_availability(central_node, LOW_SUBARRAY2_DEVICE, True)
@@ -55,11 +81,6 @@ def invoke_assignresources_on_subarrays(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
-    )
-    mccs_master_proxy.subscribe_event(
-        "longRunningCommandResult",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["MCCSMLNlongRunningCommandResult"],
     )
     assign_res_string = json_factory("assign_resource_low")
     assign_data = json.loads(assign_res_string)
@@ -93,12 +114,6 @@ def invoke_release_resources_subarray(
         (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
         lookahead=10,
     )
-    pytest.mccs_release1 = check_lrcr_events(
-        change_event_callbacks,
-        "ReleaseAllResources",
-        callback_name="MCCSMLNlongRunningCommandResult",
-        result_to_check=json.dumps([ResultCode.OK, "Command Completed"]),
-    )
     release_resource_data["subarray_id"] = 2
     release_resource_string = json.dumps(release_resource_data)
     _, unique_id = central_node.ReleaseResources(release_resource_string)
@@ -106,17 +121,12 @@ def invoke_release_resources_subarray(
         (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
         lookahead=10,
     )
-    pytest.mccs_release2 = check_lrcr_events(
-        change_event_callbacks,
-        "ReleaseAllResources",
-        callback_name="MCCSMLNlongRunningCommandResult",
-        result_to_check=json.dumps([ResultCode.OK, "Command Completed"]),
-    )
 
 
 @then("the command is executed successfully on both the subarrays")
 def verify_subarraynode():
     """Method verifies if release was invoked on subarray node"""
+    pytest.mccs_master_proxy.unsubscribe_event(pytest.sub_id)
     subarray_proxy = DeviceProxy(LOW_SUBARRAY_DEVICE)
     subarray_proxy2 = DeviceProxy(LOW_SUBARRAY2_DEVICE)
     assert subarray_proxy.commandCallInfo[-1][0] == "ReleaseAllResources"
