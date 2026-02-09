@@ -280,8 +280,7 @@ def assign_resources_without_subarray_id(
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -313,8 +312,7 @@ def assign_resources_without_subarray_id(
     assert unique_id[0].endswith("TelescopeOff")
     assert result[0] == ResultCode.QUEUED
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
@@ -392,8 +390,9 @@ def test_assign_resources_exception_propagation(
     assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
 
-    event_data = change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    event_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
         (unique_id[0], Anything),
         lookahead=8,
     )

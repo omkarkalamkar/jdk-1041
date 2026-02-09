@@ -198,25 +198,24 @@ def check_command(central_node, command_name, change_event_callbacks):
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandsInQueue"],
     )
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandsInQueue",
-        (command_name,),
-        lookahead=4,
-    )
-
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-
-    next_result = change_event_callbacks.assert_against_call(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandsInQueue"].assert_change_event(
+        (command_name,),
+        lookahead=4,
     )
+
+    next_result = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_against_call()
     command_id, result = next_result["attribute_value"]
     if command_id != unique_id:
-        next_result = change_event_callbacks.assert_against_call(
-            "longRunningCommandResult",
+        next_result = change_event_callbacks[
+            "longRunningCommandResult"
+        ].assert_against_call(
             lookahead=4,
         )
         command_id, result = next_result["attribute_value"]
@@ -224,8 +223,7 @@ def check_command(central_node, command_name, change_event_callbacks):
     assert command_id == unique_id
     assert int(result) == ResultCode.OK or int(result) == ResultCode.FAILED
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandsInQueue",
+    change_event_callbacks["longRunningCommandsInQueue"].assert_change_event(
         (),
         lookahead=4,
     )

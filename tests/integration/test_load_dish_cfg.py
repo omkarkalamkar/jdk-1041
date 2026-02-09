@@ -293,8 +293,7 @@ def load_dish_cfg_when_csp_is_defective(
         str(result),
     )
 
-    change_event_callbacks.assert_change_event(
-        "longRunningCommandResult",
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
@@ -341,8 +340,7 @@ def load_dish_cfg_after_central_node_init(
         central_node, "isDishVccConfigSet", False
     ), "Timeout while waiting for validating attribute value"
 
-    change_event_callbacks.assert_change_event(
-        "isDishVccConfigSet",
+    change_event_callbacks["isDishVccConfigSet"].assert_change_event(
         (False),
         lookahead=4,
     )
@@ -351,8 +349,7 @@ def load_dish_cfg_after_central_node_init(
         central_node, "isDishVccConfigSet", True
     ), "Timeout while waiting for validating attribute value"
 
-    change_event_callbacks.assert_change_event(
-        "isDishVccConfigSet",
+    change_event_callbacks["isDishVccConfigSet"].assert_change_event(
         True,
         lookahead=4,
     )
@@ -396,8 +393,7 @@ def central_node_dish_vcc_after_csp_master_dish_ln_restart(
     )
 
     # Validate DishVccValidationResult return OK
-    change_event_callbacks.assert_change_event(
-        "DishVccMapValidationResult",
+    change_event_callbacks["DishVccMapValidationResult"].assert_change_event(
         str(int(ResultCode.OK)),
         lookahead=4,
     )
