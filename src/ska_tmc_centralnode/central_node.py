@@ -445,9 +445,9 @@ class AbstractCentralNode(TMCBaseDevice):
             command_name="TelescopeOn"
         )
 
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
     @submit_lrc_task
     @DebugIt()
     def TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
@@ -486,9 +486,9 @@ class AbstractCentralNode(TMCBaseDevice):
             command_name="TelescopeStandby"
         )
 
-    # @command(
-    #     dtype_out="DevVarLongStringArray",
-    # )
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
     @submit_lrc_task
     @DebugIt()
     def TelescopeStandby(self):
@@ -526,7 +526,7 @@ class AbstractCentralNode(TMCBaseDevice):
             command_name="TelescopeOff"
         )
 
-    # @command(dtype_out="DevVarLongStringArray")
+    @command(dtype_out="DevVarLongStringArray")
     @submit_lrc_task
     @DebugIt()
     def TelescopeOff(self):
@@ -656,10 +656,10 @@ class AbstractCentralNode(TMCBaseDevice):
     #     desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
     #     command_name="AssignResources",
     # )
-    # @command(
-    #     dtype_in="str",
-    #     dtype_out="DevVarLongStringArray",
-    # )
+    @command(
+        dtype_in="str",
+        dtype_out="DevVarLongStringArray",
+    )
     @submit_lrc_task
     @DebugIt()
     def AssignResources(self, argin):
@@ -701,10 +701,10 @@ class AbstractCentralNode(TMCBaseDevice):
             )
         return True
 
-    # @command(
-    #     dtype_in="str",
-    #     dtype_out="DevVarLongStringArray",
-    # )
+    @command(
+        dtype_in="str",
+        dtype_out="DevVarLongStringArray",
+    )
     @submit_lrc_task
     @DebugIt()
     def ReleaseResources(self, argin):
