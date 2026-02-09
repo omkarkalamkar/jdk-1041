@@ -6,7 +6,7 @@ import mock
 import pytest
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_base.executor import TaskStatus
+from ska_control_model import TaskStatus
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.exceptions import CommandNotAllowed

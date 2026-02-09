@@ -453,6 +453,9 @@ class AbstractCentralNode(TMCBaseDevice):
             "TelescopeOn"
         )
 
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
     def TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
@@ -491,6 +494,9 @@ class AbstractCentralNode(TMCBaseDevice):
             "TelescopeStandby"
         )
 
+    @command(
+        dtype_out="DevVarLongStringArray",
+    )
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
     def TelescopeStandby(self):
@@ -528,6 +534,7 @@ class AbstractCentralNode(TMCBaseDevice):
             "TelescopeOff"
         )
 
+    @command(dtype_out="DevVarLongStringArray")
     @stb.long_running_commands.submit_lrc_task
     @DebugIt()
     def TelescopeOff(self):

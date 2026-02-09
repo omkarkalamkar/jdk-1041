@@ -2,7 +2,7 @@ import json
 from unittest.mock import MagicMock
 
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.executor import TaskStatus
+from ska_control_model import TaskStatus
 
 from ska_tmc_centralnode.commands.stow_antennas_command import SetStowMode
 from tests.settings import create_cm
