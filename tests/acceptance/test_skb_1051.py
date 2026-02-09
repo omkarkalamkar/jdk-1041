@@ -63,7 +63,7 @@ def invoke_assignresources_on_subarrays(
     )
     assign_res_string = json_factory("assign_resource_low")
     assign_data = json.loads(assign_res_string)
-    _, unique_id = central_node.AssignResources(assign_res_string)
+    _, unique_id = central_node.execute_AssignResources(assign_res_string)
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
         lookahead=4,
@@ -73,7 +73,7 @@ def invoke_assignresources_on_subarrays(
     # pss_beam_ids can not be shared between subarrays
     assign_data["csp"]["pss"]["pss_beam_ids"] = [4, 5, 6]
     assign_res_string = json.dumps(assign_data)
-    _, unique_id = central_node.AssignResources(assign_res_string)
+    _, unique_id = central_node.execute_AssignResources(assign_res_string)
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
         lookahead=4,
@@ -88,7 +88,9 @@ def invoke_release_resources_subarray(
 
     release_resource_string = json_factory("release_resource_low")
     release_resource_data = json.loads(release_resource_string)
-    _, unique_id = central_node.ReleaseResources(release_resource_string)
+    _, unique_id = central_node.execute_ReleaseResources(
+        release_resource_string
+    )
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
         lookahead=10,
@@ -101,7 +103,9 @@ def invoke_release_resources_subarray(
     )
     release_resource_data["subarray_id"] = 2
     release_resource_string = json.dumps(release_resource_data)
-    _, unique_id = central_node.ReleaseResources(release_resource_string)
+    _, unique_id = central_node.execute_ReleaseResources(
+        release_resource_string
+    )
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
         lookahead=10,

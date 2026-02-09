@@ -11,12 +11,9 @@ from typing import List, Tuple, Union
 
 import ska_tango_base as stb
 import tango
-from ska_control_model import HealthState, ObsState, ResultCode
+from ska_control_model import HealthState, ResultCode
 from ska_tango_base.base import TaskCallbackType
-from ska_tango_base.long_running_commands import (
-    LRCReqType,
-    long_running_command,
-)
+from ska_tango_base.long_running_commands import LRCReqType
 from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.exceptions import CommandNotAllowed, DeviceUnresponsive
 from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
@@ -24,9 +21,6 @@ from tango import ApiUtil, AttrWriteType, Database, DebugIt
 from tango.server import command, device_property
 
 from ska_tmc_centralnode import release
-from ska_tmc_centralnode.utils.command_allowed_validator import (
-    check_command_allowed,
-)
 
 
 class AbstractCentralNode(TMCBaseDevice):
@@ -638,13 +632,13 @@ class AbstractCentralNode(TMCBaseDevice):
         """AssignResources command completed callback."""
         pass
 
-    @check_command_allowed(
-        desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
-        command_name="AssignResources",
-    )
-    @long_running_command
+    # @check_command_allowed(
+    #     desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
+    #     command_name="AssignResources",
+    # )
+    @stb.long_running_commands.submit_lrc_task
     @DebugIt()
-    def AssignResources(self, argin):
+    def execute_AssignResources(self, argin):
         """
         AssignResources command invokes the AssignResources command on
             lower level devices.
