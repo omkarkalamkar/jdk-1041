@@ -83,7 +83,7 @@ class SetGlobalPointingModel(SetDishGPM):
             gpm_data = self.form_gpm_path_from_receptors(self.dish_gpm_params)
 
         result, message = self.do(gpm_data)
-        self.call_update_task_status(result, message)
+        self.update_task_status(result=(result,message),exception=message)
         return result, message
 
     def update_task_status(

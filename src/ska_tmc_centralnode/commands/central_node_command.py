@@ -97,21 +97,6 @@ class CentralNodeCommand(TMCCommand):
 
         return result
 
-    def call_update_task_status(self, result, message) -> None:
-        """Call update task status and provide result, message
-        attribute
-        Args:
-            result(ResultCode): Result code
-            message(str): command success/error message
-        Returns:
-            None
-        """
-        if result != ResultCode.ABORTED:
-            self.update_task_status(
-                result=(result, message), exception=message
-            )
-        else:
-            self.update_task_status(status=TaskStatus.ABORTED)
 
     def invoke_command(
         self,

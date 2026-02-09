@@ -407,6 +407,11 @@ def test_release_resources_error_propagation(
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
     # Teardown
     result, unique_id = central_node.TelescopeOff()
+    change_event_callbacks.assert_change_event(
+        "longRunningCommandResult",
+        (unique_id[0], '[0, "Command Completed"]'),
+        lookahead=8,
+    )
     subarray_proxy.ClearCommandCallInfo()
 
 

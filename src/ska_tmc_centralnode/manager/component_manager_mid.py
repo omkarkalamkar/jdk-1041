@@ -1050,6 +1050,7 @@ class CNComponentManagerMid(CNComponentManager):
                 else:
                     raise ValueError(messgae + " " + example)
             GPMJsonModel.validate_dish_ids(stow_input)
+            stow_input = [dish_id.lower() for dish_id in stow_input]
             self.logger.info("Stow command dish list: %s", stow_input)
             task_status, response = self.submit_task(
                 set_stow_mode_command.apply_stow_mode,
@@ -1177,6 +1178,35 @@ class CNComponentManagerMid(CNComponentManager):
                 break
         dev_info = self.component.get_device(dish_dev_name)
         return dev_info.dish_mode
+
+    def check_timeout_for_stow_mode_lrcr_events(self) -> bool:
+        """Check timeout error in dishln_stow_mode_cmd_exe_data dictionary"""
+        for (
+            dish_id,
+            result_code_or_exception,
+        ) in self.dishln_stow_mode_cmd_exe_data.items():
+            if isinstance(result_code_or_exception, str):
+                continue
+            result_code = result_code_or_exception.get("result_code", [])
+            _, message = result_code if len(result_code) == 2 else (None, "")
+            if "timeout" in message.lower():
+                self.logger.debug(
+                    "%s: %s",
+                    dish_id,
+                    result_code_or_exception["result_code"],
+                )
+                self.set_dish_mode_in_stow_mode_cmd_exe_data()
+                self.stow_mode_aggregated_result = False
+                return True
+        return False
+
+    def set_dish_mode_in_stow_mode_cmd_exe_data(self) -> None:
+        """ "Set dish mode in stow mode command execution data dictionary."""
+        for dish_id, data in self.dishln_stow_mode_cmd_exe_data.items():
+            if isinstance(data, dict):
+                data["dish_mode"] = DishMode(
+                    self.get_current_dish_mode_of_dln(dish_id)
+                ).name
 
     def validate_assign_json(self, argin: str):
         """Validates assign resources json

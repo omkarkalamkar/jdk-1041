@@ -9,6 +9,12 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ************
 * Updated CN to support base class v1.4.0 and pytango v10.1.2.
 
+[0.29.2]
+*********
+Fixed
+-------
+* Fixed SetStowMode timeout error observed on mid integration.
+
 [0.29.1]
 *********
 Updated
