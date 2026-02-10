@@ -472,25 +472,6 @@ class CNComponentManagerLow(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-            # task_status, response = self.submit_task(
-            #     assign_resources_command_object.assign_resources,
-            #     kwargs={
-            #         "argin": argin,
-            #         "task_abort_event": task_abort_event,
-            #     },
-            #     task_callback=task_callback,
-            #     is_cmd_allowed=self.command_not_allowed_callable(
-            #         self.get_subarray_id(argin),
-            #         [ObsState.EMPTY, ObsState.IDLE],
-            #         "AssignResources",
-            #     ),
-            # )
-            # self.logger.info(
-            #     "AssignResources command's status: "
-            #     + f"{task_status.name}, and response: {response}"
-            # )
-
-            # return task_status, response
         except Exception as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
@@ -560,25 +541,6 @@ class CNComponentManagerLow(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-            # task_status, response = self.submit_task(
-            #     release_resources_command_object.release_resources,
-            #     kwargs={
-            #         "argin": argin,
-            #         "task_abort_event": task_abort_event,
-            #     },
-            #     task_callback=task_callback,
-            #     is_cmd_allowed=self.command_not_allowed_callable(
-            #         self.get_subarray_id(argin),
-            #         [ObsState.IDLE],
-            #         "ReleaseResources",
-            #     ),
-            # )
-            # self.logger.info(
-            #     "ReleaseResources command's status: "
-            #     + f"{task_status.name}, and response: {response}"
-            # )
-
-            # return task_status, response
         except Exception as exception:
             return release_resources_command_object.reject_command(
                 str(exception)
