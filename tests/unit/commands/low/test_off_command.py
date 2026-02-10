@@ -185,21 +185,3 @@ def test_telescope_off_command_rejected(
     with pytest.raises(Exception) as exception:
         cm.is_command_allowed_callable(command_name="TelescopeOff")
         assert "'low-tmc/leaf-node-mccs/0' not available in" in str(exception)
-
-    # cm.telescope_off(task_callback=task_callback)
-
-    # res_code, message = cm.telescope_off(
-    #     task_callback=task_callback, task_abort_event=threading.Event()
-    # )
-
-    # assert res_code == TaskStatus.REJECTED
-    # assert message == "'low-tmc/leaf-node-mccs/0' not available in "
-
-    # data = task_callback.assert_call(
-    #     status=TaskStatus.REJECTED,
-    #     result=Anything,
-    #     exception=Anything,
-    #     lookahead=5,
-    # )
-    # assert ResultCode.FAILED == data["result"][0]
-    # assert f"['{MCCS_MLN_DEVICE}'] not available" in data["result"][1]

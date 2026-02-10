@@ -622,22 +622,21 @@ class AbstractCentralNode(TMCBaseDevice):
         result_code, unique_id = handler()
         return [[result_code], [str(unique_id)]]
 
-    # pylint: disable=unnecessary-pass
     def is_AssignResources_allowed(
-        self,
-        argin: str = None,
-        request_type: LRCReqType = LRCReqType.ENQUEUE_REQ,
+        self, argin: str, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
-        Checks whether this command is allowed to be run in current device
-        state.
+        Checks whether AssignResources command is allowed with the given input.
 
-        :return: True if this command is allowed to be run in current device
-            state
+        :param argin: The command input argument
+        :param request_type: The type of request (ENQUEUE_REQ or EXECUTE_REQ)
+        :return: True if AssignResources is allowed
+            to be run in current device state
 
         :rtype: boolean
         """
-        self.component_manager.is_command_allowed("AssignResources")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed("AssignResources")
 
         if argin:
             subarray_id = self.component_manager.get_subarray_id(argin)
@@ -648,19 +647,14 @@ class AbstractCentralNode(TMCBaseDevice):
             )
         return True
 
+    # pylint: disable=unnecessary-pass
     def completed_AssignResources(self) -> None:
         """AssignResources command completed callback."""
         pass
 
-    # @check_command_allowed(
-    #     desired_obsstate=[ObsState.EMPTY, ObsState.IDLE],
-    #     command_name="AssignResources",
-    # )
-    @command(
-        dtype_in="str",
-        dtype_out="DevVarLongStringArray",
-    )
-    @submit_lrc_task
+    # pylint: enable=unnecessary-pass
+
+    @submit_lrc_task(fisallowed="is_AssignResources_allowed")
     @DebugIt()
     def AssignResources(self, argin):
         """
@@ -680,18 +674,22 @@ class AbstractCentralNode(TMCBaseDevice):
         return task
 
     def is_ReleaseResources_allowed(
-        self, argin, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, argin: str, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
-        Checks whether ReleaseResources command is allowed to be run in
-            current device state.
+        Checks whether ReleaseResources is allowed with the given input.
 
-        :return: True if ReleaseResources command is allowed to be
-            run in current device state.
+        :param argin: The command input argument
+        :param request_type: The type of request (ENQUEUE_REQ or EXECUTE_REQ)
+        :return: True if ReleaseResources command is allowed to be run in
+            current device state.
 
         :rtype: boolean
         """
-        self.component_manager.is_command_allowed("ReleaseResources")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed(
+                "ReleaseResources"
+            )
 
         if argin:
             subarray_id = self.component_manager.get_subarray_id(argin)
@@ -701,11 +699,7 @@ class AbstractCentralNode(TMCBaseDevice):
             )
         return True
 
-    @command(
-        dtype_in="str",
-        dtype_out="DevVarLongStringArray",
-    )
-    @submit_lrc_task
+    @submit_lrc_task(fisallowed="is_ReleaseResources_allowed")
     @DebugIt()
     def ReleaseResources(self, argin):
         """
