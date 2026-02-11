@@ -18,6 +18,9 @@ from ska_tmc_centralnode.commands.release_resources_command_low import (
     ReleaseResourcesLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    release_validate_json_args,
+)
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
@@ -104,12 +107,12 @@ def test_low_release_resources_command_with_invalide_key(
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     release_input_str = json_factory("invalid_key_ReleaseResources")
-    (res_code, message) = cm.release_resources(
-        release_input_str,
-        task_callback=task_callback,
-        task_abort_event=threading.Event(),
-    )
-    assert res_code == TaskStatus.REJECTED
+    json_decoded = json.dumps(release_input_str)
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, json_decoded)
+
+    assert result_code == [ResultCode.REJECTED]
     assert (
         "subarray_id key is not present in the input json argument" in message
     )
@@ -127,14 +130,15 @@ def test_low_release_resources_missing_subarray_id(
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
 
-    (res_code, message) = cm.release_resources(
-        json.dumps(json_argument),
-        task_callback=task_callback,
-        task_abort_event=threading.Event(),
-    )
-    assert res_code == TaskStatus.REJECTED
+    json_decoded = json.dumps(json_argument)
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, json_decoded)
+
+    assert result_code == [ResultCode.REJECTED]
     assert (
-        "subarray_id key is not present in the input json argument" in message
+        "subarray_id key is not present in the input json argument"
+        in message[0]
     )
 
 

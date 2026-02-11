@@ -75,8 +75,6 @@ class AbstractCentralNode(TMCBaseDevice):
         json_value = json.dumps(url_dict)
         self._memorize_attr("arrayLayoutURL", json_value)
         self._array_layout_url = json_value
-        # with tango.EnsureOmniThread():
-        #     self.push_change_archive_events("arrayLayoutURL", json_value)
 
     def update_default_array_layout_url_callback(self, url_dict: dict) -> None:
         """
@@ -91,10 +89,6 @@ class AbstractCentralNode(TMCBaseDevice):
         json_value = json.dumps(url_dict)
         self._memorize_attr("DefaultArrayLayoutURL", json_value)
         self._default_array_layout_url = json_value
-        # with tango.EnsureOmniThread():
-        #     self.push_change_archive_events(
-        #         "DefaultArrayLayoutURL", json_value
-        #     )
 
     TMCSubarrayNodes = device_property(
         dtype=("str",),
@@ -150,7 +144,7 @@ class AbstractCentralNode(TMCBaseDevice):
     # ----------
 
     _telescope_health_state: Signal[HealthState] = Signal[HealthState](
-        stored=True, initial_value=HealthState.UNKNOWN
+        stored=True, initial_value=HealthState.OK
     )
 
     def read_telescopeHealthState(self):
@@ -186,12 +180,6 @@ class AbstractCentralNode(TMCBaseDevice):
         access=AttrWriteType.READ,
     )
 
-    # telescopeState = attribute(
-    #     dtype="DevState",
-    #     access=AttrWriteType.READ,
-    #     doc="DevState of telescope",
-    # )
-
     _desired_telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
         stored=True, initial_value=tango.DevState.ON
     )
@@ -207,12 +195,6 @@ class AbstractCentralNode(TMCBaseDevice):
         description="desiredTelescopeState attribute of Central Node.",
         access=AttrWriteType.READ,
     )
-
-    # desiredTelescopeState = attribute(
-    #     dtype="DevState",
-    #     access=AttrWriteType.READ,
-    #     doc="desiredTelescopeState attribute of Central Node.",
-    # )
 
     _array_layout_url: Signal = Signal[str](stored=True)
 
@@ -238,21 +220,6 @@ class AbstractCentralNode(TMCBaseDevice):
         hw_memorized=True,
     )
 
-    # @attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    #     memorized=True,
-    #     hw_memorized=True,
-    # )
-    # def arrayLayoutURL(self) -> str:
-    #     """Returns the array layout URL attribute value."""
-    #     return json.dumps(self.component_manager.array_layout_url)
-
-    # @arrayLayoutURL.write
-    # def arrayLayoutURL(self, url: str) -> None:
-    #     """Sets the array layout URL."""
-    #     self.component_manager.array_layout_url = json.loads(url)
-
     _default_array_layout_url: Signal = Signal[str](stored=True)
 
     def read_DefaultArrayLayoutURL(self) -> str:
@@ -273,21 +240,6 @@ class AbstractCentralNode(TMCBaseDevice):
         hw_memorized=True,
     )
 
-    # @attribute(
-    #     dtype="DevString",
-    #     access=AttrWriteType.READ_WRITE,
-    #     memorized=True,
-    #     hw_memorized=True,
-    # )
-    # def DefaultArrayLayoutURL(self) -> str:
-    #     """Returns the default array layout URL attribute value."""
-    #     return json.dumps(self.component_manager.default_array_layout_url)
-
-    # @DefaultArrayLayoutURL.write
-    # def DefaultArrayLayoutURL(self, url: str) -> None:
-    #     """Sets the default array layout URL."""
-    #     self.component_manager.default_array_layout_url = json.loads(url)
-
     _tm_op_state: Signal[tango.DevState] = Signal[str](
         stored=True, initial_value=tango.DevState.UNKNOWN
     )
@@ -302,10 +254,6 @@ class AbstractCentralNode(TMCBaseDevice):
         dtype="DevState",
         access=AttrWriteType.READ,
     )
-
-    # tmOpState = attribute(
-    #     dtype="DevState",
-    # )
 
     _telescope_availability: Signal[str] = Signal[str](
         stored=True, initial_value=""
@@ -324,11 +272,6 @@ class AbstractCentralNode(TMCBaseDevice):
         access=AttrWriteType.READ,
     )
 
-    # telescopeAvailability = attribute(
-    #     dtype="str",
-    #     access=AttrWriteType.READ,
-    # )
-
     def update_device_callback(self, devInfo):
         """Update device callabacks"""
         self.last_device_info_changed = devInfo.to_json()
@@ -339,7 +282,6 @@ class AbstractCentralNode(TMCBaseDevice):
     def update_telescope_state_callback(self, telescope_state):
         """Update telescope state callback"""
         self._telescope_state = telescope_state
-        # self.push_change_archive_events("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         """Update Telescope health state callbacks"""
@@ -351,14 +293,10 @@ class AbstractCentralNode(TMCBaseDevice):
     def update_tmc_op_state_callback(self, tmc_op_state):
         """Update tmc operational state callbacks"""
         self._tm_op_state = tmc_op_state
-        # self.push_change_archive_events("tmOpState", tmc_op_state)
 
     def update_telescope_availability_callback(self, telescope_availability):
         """Update device availabililty callbacks"""
         self._telescope_availability = json.dumps(telescope_availability)
-        # self.push_change_archive_events(
-        #     "telescopeAvailability", json.dumps(telescope_availability)
-        # )
 
     # ---------------
     # General methods
@@ -398,16 +336,6 @@ class AbstractCentralNode(TMCBaseDevice):
     #     """Read value of telescopeHealthState"""
     #     return self.component_manager.component.telescope_health_state
 
-    # Moved above the attribute
-    # def read_telescopeState(self):
-    #     """Reads telescopeState"""
-    #     return self.component_manager.component.telescope_state
-
-    # Moved above attribute
-    # def read_desiredTelescopeState(self):
-    #     """Read Desired TelescopeState"""
-    #     return self.component_manager.component.desired_telescope_state
-
     def transformedInternalModel_read(self):
         """Tranformed InternalModelRead"""
         result = json.loads(super().transformedInternalModel_read())
@@ -419,16 +347,6 @@ class AbstractCentralNode(TMCBaseDevice):
             "telescope_health_state"
         ] = self.component_manager.get_telescope_health_state()
         return json.dumps(result)
-
-    # def read_tmOpState(self):
-    #     """Return the tmOpState attribute."""
-    #     return self.component_manager.component.tmc_op_state
-
-    # def read_telescopeAvailability(self):
-    #     "Returns telescope availability"
-    #     return json.dumps(
-    #         self.component_manager.component.telescope_availability
-    #     )
 
     # --------
     # Commands

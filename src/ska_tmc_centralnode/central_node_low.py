@@ -81,27 +81,6 @@ class LowTmcCentralNode(AbstractCentralNode):
         access=AttrWriteType.READ_WRITE,
     )
 
-    # @attribute(
-    #     dtype=str,
-    #     access=AttrWriteType.READ_WRITE,
-    #     doc="Schema version used for AssignResources.",
-    # )
-    # def assignResourcesSchemaVersion(self) -> str:
-    #     """Get the version of the AssignResources schema being used."""
-    #     return self.component_manager.assign_resources_schema_version
-
-    # @assignResourcesSchemaVersion.write
-    # def assignResourcesSchemaVersion_write(self, version: str) -> None:
-    #     """Set or update the AssignResources schema version."""
-    #     self.component_manager.assign_resources_schema_version = version
-    #     self.push_change_archive_events(
-    #         "assignResourcesSchemaVersion", version
-    #     )
-    #     self.logger.debug(
-    #         "assignResourcesSchemaVersion updated via callback to: %s",
-    #         version,
-    #     )
-
     _release_resources_schema_version: Signal = Signal[str](stored=True)
 
     def read_releaseResourcesSchemaVersion(self) -> str:
@@ -125,27 +104,6 @@ class LowTmcCentralNode(AbstractCentralNode):
         description="Schema version used for ReleaseResources.",
         access=AttrWriteType.READ_WRITE,
     )
-
-    # @attribute(
-    #     dtype=str,
-    #     access=AttrWriteType.READ_WRITE,
-    #     doc="Schema version used for ReleaseResources.",
-    # )
-    # def releaseResourcesSchemaVersion(self) -> str:
-    #     """Get the version of the ReleaseResources schema being used."""
-    #     return self.component_manager.release_resources_schema_version
-
-    # @releaseResourcesSchemaVersion.write
-    # def releaseResourcesSchemaVersion_write(self, version: str) -> None:
-    #     """Set or update the ReleaseResources schema version."""
-    #     self.component_manager.release_resources_schema_version = version
-    #     self.push_change_archive_events(
-    #         "releaseResourcesSchemaVersion", version
-    #     )
-    #     self.logger.debug(
-    #         "releaseResourcesSchemaVersion updated via callback to: %s",
-    #         version,
-    #     )
 
     def create_component_manager(self):
         self.op_state_model = TMCOpStateModel(

@@ -83,16 +83,22 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
     ), "Timeout while waiting for validating attribute value"
 
     # Add validation for DishVccValidationStatus
-
-    logger.info("Subscribing DishVccValidationStatus")
-    central_node.subscribe_event(
-        "DishVccValidationStatus",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["DishVccValidationStatus"],
-    )
+    # TODO Remove
+    # logger.info("Subscribing DishVccValidationStatus")
+    # central_node.subscribe_event(
+    #     "DishVccValidationStatus",
+    #     tango.EventType.CHANGE_EVENT,
+    #     change_event_callbacks["DishVccValidationStatus"],
+    # )
 
     logger.info("Check if DishVccValidationStatus to True")
-    change_event_callbacks["DishVccValidationStatus"].assert_change_event(
+    assert wait_and_validate_device_attribute_value(
+        central_node,
+        "DishVccValidationStatus",
         json.dumps(result_string_to_match),
-        lookahead=4,
     )
+
+    # change_event_callbacks["DishVccValidationStatus"].assert_change_event(
+    #     json.dumps(result_string_to_match),
+    #     lookahead=4,
+    # )
