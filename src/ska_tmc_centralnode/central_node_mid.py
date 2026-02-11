@@ -154,7 +154,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     )
 
     _is_dish_vcc_config_set: Signal[bool] = Signal[bool](
-        stored=True, initial_value=False
+        stored=True, initial_value=True
     )
 
     def read_isDishVccConfigSet(self):
@@ -415,7 +415,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     @long_running_command
     @DebugIt()
-    def LoadDishCfg(self, argin) -> Tuple[List[ResultCode], List[str]]:
+    def LoadDishCfg(self, argin: str) -> Tuple[List[ResultCode], List[str]]:
         """
         LoadDishCfg command to load dishID-vcc map config.
         This command get dishid-vcc map json string from Telmodel
@@ -461,7 +461,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     @long_running_command
     @DebugIt()
     def SetGlobalPointingModel(
-        self, argin
+        self, argin: str
     ) -> Tuple[List[ResultCode], List[str]]:
         """
         SetGlobalPointingModel command to send the GPM URI to dish leaf
@@ -520,7 +520,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     @long_running_command
     @DebugIt()
-    def SetStowMode(self, argin) -> Tuple[List[ResultCode], List[str]]:
+    def SetStowMode(self, argin: str) -> Tuple[List[ResultCode], List[str]]:
         """
         SetStowMode command to send the stow mode command to dish leaf
         nodes. This command gets a list in following form:
