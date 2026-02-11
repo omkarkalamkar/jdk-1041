@@ -14,8 +14,9 @@ from logging import Logger
 from queue import Queue
 from typing import Callable, Dict, Tuple
 
-from ska_control_model import AdminMode, TaskStatus
+from ska_control_model import AdminMode, ResultCode, TaskStatus
 from ska_tango_base.base import TaskCallbackType
+from ska_tango_base.faults import StateModelError
 from ska_telmodel.schema import validate
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -457,20 +458,34 @@ class CNComponentManagerLow(CNComponentManager):
                 logger=self.logger,
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )
-            self.validate_assign_json(argin)
+            # self.validate_assign_json(argin)
             assign_resources_command_object.subarray_id = self.get_subarray_id(
                 argin
             )
-            # # Validate command is allowed
-            # self.is_command_allowed_callable(
-            #     subarray_id=assign_resources_command_object.subarray_id,
-            #     command_name="AssignResources",
-            # )
+            # Validate command is allowed
+            self.is_command_allowed_callable(
+                subarray_id=assign_resources_command_object.subarray_id,
+                command_name="AssignResources",
+            )
             return assign_resources_command_object.assign_resources(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
+
+        except StateModelError as exception:
+            self.logger.exception(
+                "Exception occurred while processing " + "assignresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, str(exception)),
+            )
+            # return assign_resources_command_object.update_task_status(
+            #     status=TaskStatus.REJECTED,
+            #     result=(ResultCode.NOT_ALLOWED, str(exception)),
+            # )
 
         except Exception as exception:
             self.logger.exception(
@@ -524,21 +539,32 @@ class CNComponentManagerLow(CNComponentManager):
                 logger=self.logger,
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )
-            self.validate_release_json(argin)
+            # self.validate_release_json(argin)
 
             self.check_availability_for_release(argin)
             release_resources_command_object.subarray_id = (
                 self.get_subarray_id(argin)
             )
             # Validate command is allowed
-            # self.is_command_allowed_callable(
-            #     subarray_id=release_resources_command_object.subarray_id,
-            #     command_name="ReleaseResources",
-            # )
+            self.is_command_allowed_callable(
+                subarray_id=release_resources_command_object.subarray_id,
+                command_name="ReleaseResources",
+            )
             return release_resources_command_object.release_resources(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
+            )
+
+        except StateModelError as exception:
+            self.logger.exception(
+                "Exception occurred while processing "
+                + "releaseresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, str(exception)),
             )
 
         except Exception as exception:

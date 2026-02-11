@@ -9,11 +9,11 @@ import json
 from threading import Event
 
 from ska_tango_base.base import TaskCallbackType
-from ska_tango_base.long_running_commands import submit_lrc_task
+from ska_tango_base.long_running_commands import long_running_command
 from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
-from tango.server import attribute, command, device_property, run
+from tango.server import attribute, device_property, run
 
 from ska_tmc_centralnode.central_node import AbstractCentralNode
 from ska_tmc_centralnode.manager.component_manager_mid import (
@@ -411,11 +411,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @command(
-        dtype_in="str",
-        dtype_out="DevVarLongStringArray",
-    )
-    @submit_lrc_task
+    @long_running_command
     @DebugIt()
     def LoadDishCfg(self, argin):
         """
@@ -460,11 +456,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @command(
-        dtype_in="str",
-        dtype_out="DevVarLongStringArray",
-    )
-    @submit_lrc_task
+    @long_running_command
     @DebugIt()
     def SetGlobalPointingModel(self, argin):
         """
@@ -522,11 +514,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
-    @command(
-        dtype_in="str",
-        dtype_out="DevVarLongStringArray",
-    )
-    @submit_lrc_task
+    @long_running_command
     @DebugIt()
     def SetStowMode(self, argin):
         """

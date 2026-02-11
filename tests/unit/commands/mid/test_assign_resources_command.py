@@ -1,6 +1,7 @@
 """Test case file"""
 
 import json
+import threading
 import time
 from os.path import dirname, join
 
@@ -54,9 +55,10 @@ def test_assign_resources_command_completed(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -94,9 +96,10 @@ def test_assign_resources_command_with_mkt_ids_completed(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        json_argument,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -134,9 +137,10 @@ def test_assign_resources_exception_on_sn(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     assign_input_str = get_assign_input_str()
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -167,7 +171,9 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     del json_argument["sdp"]["processing_blocks"]
     json_argument = json.dumps(json_argument)
     res_code, message = cm.assign_resources(
-        json_argument, task_callback=task_callback
+        json_argument,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     assert (
         "JSON validation error: Validation"
@@ -187,9 +193,10 @@ def test_assign_resources_command_with_ok(
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -220,9 +227,10 @@ def test_assign_resources_command_with_mkt_ids_ok(
     json_argument["dish"]["receptor_ids"] = ["MKT001", "MKT002"]
     json_argument = json.dumps(json_argument)
 
-    cm.assign_resources(json_argument, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        json_argument,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -270,7 +278,9 @@ def test_telescope_assign_resources_command_empty_input_json(
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
-    (res_code, _) = cm.assign_resources("", task_callback=task_callback)
+    (res_code, _) = cm.assign_resources(
+        "", task_callback=task_callback, task_abort_event=threading.Event()
+    )
     assert res_code == TaskStatus.REJECTED
 
 
@@ -318,9 +328,10 @@ def test_assign_resources_command_timeout(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -387,7 +398,11 @@ def test_mid_assign_resources_raises_state_model_exception(
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     data = task_callback.assert_call(
         status=TaskStatus.REJECTED,
         result=Anything,

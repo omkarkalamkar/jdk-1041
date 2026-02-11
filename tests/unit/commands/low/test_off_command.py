@@ -160,7 +160,6 @@ def test_low_telescope_off_fail_check_allowed(
         cm.is_command_allowed("TelescopeOff")
 
 
-@pytest.mark.test
 @pytest.mark.SKA_low
 def test_telescope_off_command_rejected(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
@@ -184,4 +183,4 @@ def test_telescope_off_command_rejected(
     cm.is_command_allowed("TelescopeOff")
     with pytest.raises(Exception) as exception:
         cm.is_command_allowed_callable(command_name="TelescopeOff")
-        assert "'low-tmc/leaf-node-mccs/0' not available in" in str(exception)
+        assert "'low-tmc/leaf-node-mccs/0' not available" in str(exception)

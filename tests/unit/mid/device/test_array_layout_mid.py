@@ -1,6 +1,7 @@
 """Test case file"""
 
 import json
+import threading
 import time
 from os.path import dirname, join
 
@@ -107,9 +108,10 @@ def test_array_layout_assign_resources(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -185,12 +187,13 @@ def test_mid_assign_resources_fails_with_invalid_default_array_layout_json(
     )
 
     # Invoke AssignResources via the CM path
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
 
     # Task lifecycle expectations with failure result
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )

@@ -12,7 +12,10 @@ from typing import List, Tuple, Union
 import tango
 from ska_control_model import HealthState, ResultCode
 from ska_tango_base.base import TaskCallbackType
-from ska_tango_base.long_running_commands import LRCReqType, submit_lrc_task
+from ska_tango_base.long_running_commands import (
+    LRCReqType,
+    long_running_command,
+)
 from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.exceptions import CommandNotAllowed, DeviceUnresponsive
 from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
@@ -20,6 +23,10 @@ from tango import ApiUtil, AttrWriteType, Database, DebugIt
 from tango.server import command, device_property
 
 from ska_tmc_centralnode import release
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    assign_validate_json_args,
+    release_validate_json_args,
+)
 
 
 class AbstractCentralNode(TMCBaseDevice):
@@ -445,10 +452,7 @@ class AbstractCentralNode(TMCBaseDevice):
             command_name="TelescopeOn"
         )
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-    )
-    @submit_lrc_task
+    @long_running_command
     @DebugIt()
     def TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
         """
@@ -486,10 +490,7 @@ class AbstractCentralNode(TMCBaseDevice):
             command_name="TelescopeStandby"
         )
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-    )
-    @submit_lrc_task
+    @long_running_command
     @DebugIt()
     def TelescopeStandby(self):
         """
@@ -526,8 +527,7 @@ class AbstractCentralNode(TMCBaseDevice):
             command_name="TelescopeOff"
         )
 
-    @command(dtype_out="DevVarLongStringArray")
-    @submit_lrc_task
+    @long_running_command
     @DebugIt()
     def TelescopeOff(self):
         """
@@ -623,7 +623,7 @@ class AbstractCentralNode(TMCBaseDevice):
         return [[result_code], [str(unique_id)]]
 
     def is_AssignResources_allowed(
-        self, argin: str, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
         Checks whether AssignResources command is allowed with the given input.
@@ -638,13 +638,6 @@ class AbstractCentralNode(TMCBaseDevice):
         if request_type == LRCReqType.ENQUEUE_REQ:
             return self.component_manager.is_command_allowed("AssignResources")
 
-        if argin:
-            subarray_id = self.component_manager.get_subarray_id(argin)
-            self.logger.debug("subarray_id: %s", subarray_id)
-            return self.component_manager.is_command_allowed_callable(
-                subarray_id=subarray_id,
-                command_name="AssignResources",
-            )
         return True
 
     # pylint: disable=unnecessary-pass
@@ -653,8 +646,8 @@ class AbstractCentralNode(TMCBaseDevice):
         pass
 
     # pylint: enable=unnecessary-pass
-
-    @submit_lrc_task(fisallowed="is_AssignResources_allowed")
+    @assign_validate_json_args
+    @long_running_command
     @DebugIt()
     def AssignResources(self, argin):
         """
@@ -674,7 +667,7 @@ class AbstractCentralNode(TMCBaseDevice):
         return task
 
     def is_ReleaseResources_allowed(
-        self, argin: str, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
         Checks whether ReleaseResources is allowed with the given input.
@@ -691,15 +684,10 @@ class AbstractCentralNode(TMCBaseDevice):
                 "ReleaseResources"
             )
 
-        if argin:
-            subarray_id = self.component_manager.get_subarray_id(argin)
-            self.logger.debug("subarray_id: %s", subarray_id)
-            return self.component_manager.is_command_allowed_callable(
-                subarray_id=subarray_id, command_name="ReleaseResources"
-            )
         return True
 
-    @submit_lrc_task(fisallowed="is_ReleaseResources_allowed")
+    @release_validate_json_args
+    @long_running_command
     @DebugIt()
     def ReleaseResources(self, argin):
         """

@@ -128,7 +128,6 @@ def invoke_release_resources_subarray(
 @then("the command is executed successfully on both the subarrays")
 def verify_subarraynode():
     """Method verifies if release was invoked on subarray node"""
-    pytest.mccs_master_proxy.unsubscribe_event(pytest.sub_id)
     subarray_proxy = DeviceProxy(LOW_SUBARRAY_DEVICE)
     subarray_proxy2 = DeviceProxy(LOW_SUBARRAY2_DEVICE)
     assert subarray_proxy.commandCallInfo[-1][0] == "ReleaseAllResources"

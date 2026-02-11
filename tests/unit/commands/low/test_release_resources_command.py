@@ -187,9 +187,6 @@ def test_low_release_resources_raises_state_model_exception(
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
 
     task_callback.assert_against_call(
         call_kwargs={
