@@ -415,25 +415,37 @@ class CNComponentManagerLow(CNComponentManager):
 
         return True
 
-    def validate_assign_json(self, argin: str):
+    def validate_assign_json(self, argin: str) -> Tuple[str, str]:
         """Validates the assign resources json.
 
         :param argin: Assign resources json string.
         :type argin: str
-        """
-        json_argument = json.loads(argin)
-        self.validate_subarray_id(json_argument)
 
-        interface = (
-            json_argument.get("interface", None)
-            or self._assign_resources_schema_version
-        )
-        validate(
-            version=interface,
-            config=json_argument,
-            strictness=2,
-        )
-        self.update_subarray_pss_beams_mapping(json_argument)
+        :return: Returns the original argument and exception message.
+        :rtype: tuple[str, str]
+        """
+        exception_msg: str = ""
+        try:
+            json_argument = json.loads(argin)
+            self.validate_subarray_id(json_argument)
+
+            interface = (
+                json_argument.get("interface", None)
+                or self._assign_resources_schema_version
+            )
+            validate(
+                version=interface,
+                config=json_argument,
+                strictness=2,
+            )
+            self.update_subarray_pss_beams_mapping(json_argument)
+        except Exception as exception:
+            exception_msg = str(exception)
+            self.logger.exception(
+                "Exception occurred while processing assignresource: %s ",
+                exception_msg,
+            )
+        return argin, exception_msg
 
     # pylint: disable=unexpected-keyword-arg
     def assign_resources(
@@ -498,23 +510,35 @@ class CNComponentManagerLow(CNComponentManager):
 
     # pylint: enable=unexpected-keyword-arg
 
-    def validate_release_json(self, argin: str):
+    def validate_release_json(self, argin: str) -> Tuple[str, str]:
         """Validates the release resource json.
 
         :param argin: release resource json string.
         :type argin: str
+
+        :return: Returns the original argument and exception message.
+        :rtype: tuple[str, str]
         """
-        json_argument = json.loads(argin)
-        self.validate_subarray_id(json_argument)
-        interface = (
-            json_argument.get("interface", None)
-            or self._release_resources_schema_version
-        )
-        validate(
-            version=interface,
-            config=json_argument,
-            strictness=2,
-        )
+        exception_msg: str = ""
+        try:
+            json_argument = json.loads(argin)
+            self.validate_subarray_id(json_argument)
+            interface = (
+                json_argument.get("interface", None)
+                or self._release_resources_schema_version
+            )
+            validate(
+                version=interface,
+                config=json_argument,
+                strictness=2,
+            )
+        except Exception as exception:
+            exception_msg = str(exception)
+            self.logger.exception(
+                "Exception occurred while processing releaseresource: %s ",
+                exception_msg,
+            )
+        return argin, exception_msg
 
     # pylint: disable=unexpected-keyword-arg
     def release_resources(

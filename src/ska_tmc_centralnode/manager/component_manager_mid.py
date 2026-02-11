@@ -1239,28 +1239,40 @@ class CNComponentManagerMid(CNComponentManager):
                     self.get_current_dish_mode_of_dln(dish_id)
                 ).name
 
-    def validate_assign_json(self, argin: str):
+    def validate_assign_json(self, argin: str) -> Tuple[str, str]:
         """Validates assign resources json
 
         :param argin: json input
         :type argin: str
-        """
-        json_argument = json.loads(argin)
-        self.validate_subarray_id(json_argument)
-        # Utilize CDM to validate json.
-        available_subarrays_list = self.input_parameter.subarray_dev_names
-        dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
-        available_dish_leaf_node_devices = (
-            self.input_parameter.dish_leaf_node_dev_names
-        )
-        assign_validator = AssignResourceValidator(
-            available_subarrays_list,
-            available_dish_leaf_node_devices,
-            dish_leaf_node_prefix,
-            self.logger,
-        )
 
-        assign_validator.loads(argin)
+        :return: Returns the original argument and exception message.
+        :rtype: tuple[str, str]
+        """
+        exception_msg: str = ""
+        try:
+            json_argument = json.loads(argin)
+            self.validate_subarray_id(json_argument)
+            # Utilize CDM to validate json.
+            available_subarrays_list = self.input_parameter.subarray_dev_names
+            dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
+            available_dish_leaf_node_devices = (
+                self.input_parameter.dish_leaf_node_dev_names
+            )
+            assign_validator = AssignResourceValidator(
+                available_subarrays_list,
+                available_dish_leaf_node_devices,
+                dish_leaf_node_prefix,
+                self.logger,
+            )
+
+            assign_validator.loads(argin)
+        except Exception as exception:
+            exception_msg = str(exception)
+            self.logger.exception(
+                "Exception occurred while processing assignresource: %s ",
+                exception_msg,
+            )
+        return argin, exception_msg
 
     # pylint: disable=unexpected-keyword-arg
     def assign_resources(
@@ -1321,16 +1333,29 @@ class CNComponentManagerMid(CNComponentManager):
 
     # pylint: enable=unexpected-keyword-arg
 
-    def validate_release_json(self, argin: str):
+    def validate_release_json(self, argin: str) -> Tuple[str, str]:
         """Validates the release resource json.
 
         :param argin: release resource json string.
         :type argin: str
+
+        :return: Returns the original argument and exception message.
+        :rtype: tuple[str, str]
         """
-        json_argument = json.loads(argin)
-        self.validate_subarray_id(json_argument)
-        release_validator = ReleaseResourceValidator(self.logger)
-        release_validator.loads(argin)
+        exception_msg: str = ""
+        try:
+            json_argument = json.loads(argin)
+            self.validate_subarray_id(json_argument)
+            release_validator = ReleaseResourceValidator(self.logger)
+            release_validator.loads(argin)
+
+        except Exception as exception:
+            exception_msg = str(exception)
+            self.logger.exception(
+                "Exception occurred while processing releaseresource: %s ",
+                exception_msg,
+            )
+        return argin, exception_msg
 
     # pylint: disable=unexpected-keyword-arg
     def release_resources(
