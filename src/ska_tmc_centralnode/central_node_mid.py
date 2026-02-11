@@ -11,7 +11,10 @@ from typing import List, Tuple
 
 from ska_control_model import ResultCode
 from ska_tango_base.base import TaskCallbackType
-from ska_tango_base.long_running_commands import long_running_command
+from ska_tango_base.long_running_commands import (
+    LRCReqType,
+    long_running_command,
+)
 from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.op_state_model import TMCOpStateModel
 from tango import AttrWriteType, DebugIt
@@ -404,7 +407,9 @@ class MidTmcCentralNode(AbstractCentralNode):
             json.dumps(self.component_manager.get_default_gpm_version_params())
         )
 
-    def is_LoadDishCfg_allowed(self):
+    def is_LoadDishCfg_allowed(
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+    ) -> bool:
         """
         Checks whether LoadDishCfg command is allowed to be run
         in current device state.
@@ -449,7 +454,9 @@ class MidTmcCentralNode(AbstractCentralNode):
         # result_code, unique_id = handler(argin)
         # return [[result_code], [str(unique_id)]]
 
-    def is_SetGlobalPointingModel_allowed(self) -> bool:
+    def is_SetGlobalPointingModel_allowed(
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+    ) -> bool:
         """
         Checks whether setGlobalPointingModel command is allowed to be run
         in current device state.
@@ -509,7 +516,9 @@ class MidTmcCentralNode(AbstractCentralNode):
         # result_code, unique_id = handler(argin)
         # return [[result_code], [str(unique_id)]]
 
-    def is_SetStowMode_allowed(self) -> bool:
+    def is_SetStowMode_allowed(
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+    ) -> bool:
         """
         Checks whether setStowMode command is allowed to be run
         in current device state.
@@ -542,9 +551,6 @@ class MidTmcCentralNode(AbstractCentralNode):
             )
 
         return task
-        # handler = self.get_command_object("SetStowMode")
-        # result_code, unique_id = handler(argin)
-        # return [[result_code], [str(unique_id)]]
 
 
 # ----------

@@ -485,7 +485,7 @@ class CNComponentManagerLow(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-        except StateModelError as exception:
+        except (StateModelError, CommandNotAllowed) as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
                 exception,
@@ -494,18 +494,14 @@ class CNComponentManagerLow(CNComponentManager):
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, str(exception)),
             )
-            # return assign_resources_command_object.update_task_status(
-            #     status=TaskStatus.REJECTED,
-            #     result=(ResultCode.NOT_ALLOWED, str(exception)),
-            # )
-
         except Exception as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
                 exception,
             )
-            return assign_resources_command_object.reject_command(
-                str(exception)
+            return task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, str(exception)),
             )
 
     # pylint: enable=unexpected-keyword-arg
@@ -580,7 +576,7 @@ class CNComponentManagerLow(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-        except StateModelError as exception:
+        except (StateModelError, CommandNotAllowed) as exception:
             self.logger.exception(
                 "Exception occurred while processing "
                 + "releaseresource: %s ",
@@ -592,8 +588,14 @@ class CNComponentManagerLow(CNComponentManager):
             )
 
         except Exception as exception:
-            return release_resources_command_object.reject_command(
-                str(exception)
+            self.logger.exception(
+                "Exception occurred while processing "
+                + "releaseresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, str(exception)),
             )
 
     # pylint: enable=unexpected-keyword-arg

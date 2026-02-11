@@ -1316,7 +1316,7 @@ class CNComponentManagerMid(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-        except StateModelError as exception:
+        except (StateModelError, CommandNotAllowed) as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
                 exception,
@@ -1327,8 +1327,13 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
         except Exception as exception:
-            return assign_resources_command_object.reject_command(
-                str(exception)
+            self.logger.exception(
+                "Exception occurred while processing " + "assignresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, str(exception)),
             )
 
     # pylint: enable=unexpected-keyword-arg
@@ -1394,7 +1399,7 @@ class CNComponentManagerMid(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-        except StateModelError as exception:
+        except (StateModelError, CommandNotAllowed) as exception:
             self.logger.exception(
                 "Exception occurred while processing "
                 + "releaseresource: %s ",
@@ -1406,8 +1411,14 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
         except Exception as exception:
-            return release_resources_command_object.reject_command(
-                str(exception)
+            self.logger.exception(
+                "Exception occurred while processing "
+                + "releaseresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, str(exception)),
             )
 
     # pylint: enable=unexpected-keyword-arg
