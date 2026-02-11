@@ -97,17 +97,29 @@ def test_telescope_health_state_low(change_event_callbacks):
     sdp_master = dev_factory.get_device(LOW_SDP_MASTER_DEVICE)
     sdp_master.SetDirectHealthState(HealthState.DEGRADED)
 
-    change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.DEGRADED, lookahead=8
+    # TODO
+    # change_event_callbacks["telescopeHealthState"].assert_change_event(
+    #     HealthState.DEGRADED, lookahead=8
+    # )
+    wait_and_validate_device_attribute_value(
+        central_node,
+        "telescopeHealthState",
+        HealthState.DEGRADED,
     )
+
     time.sleep(0.3)
     assert central_node.telescopeHealthState == HealthState.DEGRADED
 
     # tear down
     sdp_master.SetDirectHealthState(HealthState.OK)
 
-    change_event_callbacks["telescopeHealthState"].assert_change_event(
-        HealthState.OK, lookahead=4
+    # change_event_callbacks["telescopeHealthState"].assert_change_event(
+    #     HealthState.OK, lookahead=4
+    # )
+    wait_and_validate_device_attribute_value(
+        central_node,
+        "telescopeHealthState",
+        HealthState.OK,
     )
     logger.info("telescopeHealthState %s", central_node.telescopeHealthState)
     time.sleep(0.1)

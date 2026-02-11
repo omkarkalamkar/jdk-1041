@@ -134,13 +134,17 @@ def set_stow_mode_command(
     result_code, unique_id = central_node.SetStowMode('["ALL","ska036"]')
     assert unique_id[0].endswith("SetStowMode")
     assert result_code[0] == ResultCode.QUEUED
+    message = (
+        "Invalid input: Expected a list of dish IDs "
+        + 'e.g., ["ska001", "ska002", ...] or ["ALL"]'
+    )
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id[0],
             json.dumps(
                 (
                     int(ResultCode.NOT_ALLOWED),
-                    "Invalid input: Expected a list of dish IDs",
+                    message,
                 )
             ),
         ),

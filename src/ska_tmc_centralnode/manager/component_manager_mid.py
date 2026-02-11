@@ -956,6 +956,7 @@ class CNComponentManagerMid(CNComponentManager):
                 "Dish Vcc command status: %s ",
                 str(DishConfigStatus(self.dish_vcc_command_status).name),
             )
+            self.logger.debug(message)
             return task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, message),

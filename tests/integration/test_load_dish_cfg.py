@@ -227,8 +227,29 @@ def load_dish_cfg_rejected(
     )
     # Invoke Another LoadDishCfg command
     second_result, second_unique_id = central_node.LoadDishCfg(config_str)
-    logger.info("second result is %s", second_unique_id)
-    assert second_result[0] == ResultCode.NOT_ALLOWED
+    logger.info(
+        "second LoadDishCfg Command ID: %s Returned result %s",
+        second_unique_id,
+        second_result,
+    )
+    assert second_result[0] == ResultCode.QUEUED
+    message = (
+        "Dish Vcc Configuration is in Progress. "
+        "Dish Vcc command status: %s ",
+        str(DishConfigStatus.IN_PROGRESS),
+    )
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (
+            second_unique_id[0],
+            json.dumps(
+                (
+                    int(ResultCode.NOT_ALLOWED),
+                    message,
+                )
+            ),
+        ),
+        lookahead=4,
+    )
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
