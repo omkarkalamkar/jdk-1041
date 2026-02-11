@@ -7,7 +7,9 @@ of state and mode attributes defined by the SKA Control Model.
 # pylint:disable = attribute-defined-outside-init
 import json
 from threading import Event
+from typing import List, Tuple
 
+from ska_control_model import ResultCode
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.long_running_commands import long_running_command
 from ska_tango_base.software_bus import Signal, attribute_from_signal
@@ -413,7 +415,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     @long_running_command
     @DebugIt()
-    def LoadDishCfg(self, argin):
+    def LoadDishCfg(self, argin) -> Tuple[List[ResultCode], List[str]]:
         """
         LoadDishCfg command to load dishID-vcc map config.
         This command get dishid-vcc map json string from Telmodel
@@ -458,7 +460,9 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     @long_running_command
     @DebugIt()
-    def SetGlobalPointingModel(self, argin):
+    def SetGlobalPointingModel(
+        self, argin
+    ) -> Tuple[List[ResultCode], List[str]]:
         """
         SetGlobalPointingModel command to send the GPM URI to dish leaf
         nodes. This command gets a dictionary in following form:
@@ -516,7 +520,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     @long_running_command
     @DebugIt()
-    def SetStowMode(self, argin):
+    def SetStowMode(self, argin) -> Tuple[List[ResultCode], List[str]]:
         """
         SetStowMode command to send the stow mode command to dish leaf
         nodes. This command gets a list in following form:

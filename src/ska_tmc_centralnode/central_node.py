@@ -492,7 +492,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     @long_running_command
     @DebugIt()
-    def TelescopeStandby(self):
+    def TelescopeStandby(self) -> Tuple[List[ResultCode], List[str]]:
         """
         This command invokes TelescopeStandby() command on CspMasterLeafNode,
         SdpMasterLeafNode and DishLeafNode.
@@ -529,7 +529,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     @long_running_command
     @DebugIt()
-    def TelescopeOff(self):
+    def TelescopeOff(self) -> Tuple[List[ResultCode], List[str]]:
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
         command on CspMasterLeafNode and SdpMasterLeafNode.
@@ -649,7 +649,9 @@ class AbstractCentralNode(TMCBaseDevice):
     @assign_validate_json_args
     @long_running_command
     @DebugIt()
-    def AssignResources(self, argin):
+    def AssignResources(
+        self, argin: str
+    ) -> Tuple[List[ResultCode], List[str]]:
         """
         AssignResources command invokes the AssignResources command on
             lower level devices.
@@ -689,7 +691,9 @@ class AbstractCentralNode(TMCBaseDevice):
     @release_validate_json_args
     @long_running_command
     @DebugIt()
-    def ReleaseResources(self, argin):
+    def ReleaseResources(
+        self, argin: str
+    ) -> Tuple[List[ResultCode], List[str]]:
         """
         Releases all the resources assigned to the given Subarray.
         """
