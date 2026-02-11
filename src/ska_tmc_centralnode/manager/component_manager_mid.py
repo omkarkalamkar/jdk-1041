@@ -956,7 +956,10 @@ class CNComponentManagerMid(CNComponentManager):
                 "Dish Vcc command status: %s ",
                 str(DishConfigStatus(self.dish_vcc_command_status).name),
             )
-            return loadishcfg_command_object.reject_command(message)
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, message),
+            )
 
         try:
             json.loads(argin)
@@ -965,8 +968,10 @@ class CNComponentManagerMid(CNComponentManager):
             self.dish_vcc_validation_status = {
                 CENTRALNODE_MID: "JsonDecodeError"
             }
-            return loadishcfg_command_object.reject_command(
-                f"The JSON string is malformed. Error: {str(e)}",
+            message = f"The JSON string is malformed. Error: {str(e)}"
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, message),
             )
 
         return loadishcfg_command_object.load_dish_cfg(
@@ -974,13 +979,6 @@ class CNComponentManagerMid(CNComponentManager):
             task_callback=task_callback,
             task_abort_event=task_abort_event,
         )
-
-        # task_status, response = self.submit_task(
-        #     loadishcfg_command_object.load_dish_cfg,
-        #     kwargs={"argin": argin, "task_abort_event": task_abort_event},
-        #     task_callback=task_callback,
-        # )
-        # return task_status, response
 
     def set_gpm_version(
         self, argin: str, task_callback: Callable = None, task_abort_event=None
@@ -1025,19 +1023,12 @@ class CNComponentManagerMid(CNComponentManager):
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
-            # task_status, response = self.submit_task(
-            #     set_gpm_version_command_object.apply_gpm,
-            #     args=[argin, self.logger],
-            #     kwargs={
-            #         "task_callback": task_callback,
-            #         "task_abort_event": task_abort_event,
-            #     },
-            #     task_callback=task_callback,
-            # )
-            # return task_status, response
         except Exception as exception:
             self.logger.exception("Exception occured %s", exception)
-            return set_gpm_version_command_object.reject_command(exception)
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, str(exception)),
+            )
 
     def set_stow_mode(
         self, argin: str, task_callback: Callable = None, task_abort_event=None
@@ -1078,18 +1069,12 @@ class CNComponentManagerMid(CNComponentManager):
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
-            # task_status, response = self.submit_task(
-            #     set_stow_mode_command_object.apply_stow_mode,
-            #     kwargs={
-            #         "argin": stow_input,
-            #         "task_abort_event": task_abort_event,
-            #     },
-            #     task_callback=task_callback,
-            # )
-            # return task_status, response
         except Exception as exception:
             self.logger.exception("Exception occured %s", exception)
-            return set_stow_mode_command_object.reject_command(exception)
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, str(exception)),
+            )
 
     # pylint: enable=unexpected-keyword-arg
 

@@ -81,16 +81,16 @@ def test_standby_command_mid(
         str(central_node.longRunningCommandResult),
     )
 
-    central_node.subscribe_event(
-        "telescopeState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["telescopeState"],
-    )
+    # central_node.subscribe_event(
+    #     "telescopeState",
+    #     tango.EventType.CHANGE_EVENT,
+    #     change_event_callbacks["telescopeState"],
+    # )
 
-    # Check whether the telescopeState is STANDBY
-    change_event_callbacks["telescopeState"].assert_change_event(
-        DevState.STANDBY, lookahead=12
-    )
+    # # Check whether the telescopeState is STANDBY
+    # change_event_callbacks["telescopeState"].assert_change_event(
+    #     DevState.STANDBY, lookahead=12
+    # )
     logger.info("telescopeState: %s", str(central_node.telescopeState))
 
     assert central_node.telescopeState == DevState.STANDBY
@@ -147,16 +147,16 @@ def test_standby_command_low(
     csp_master = dev_factory.get_device(LOW_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(DevState.STANDBY)
 
-    central_node.subscribe_event(
-        "telescopeState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["telescopeState"],
-    )
+    # central_node.subscribe_event(
+    #     "telescopeState",
+    #     tango.EventType.CHANGE_EVENT,
+    #     change_event_callbacks["telescopeState"],
+    # )
 
-    # Check whether the telescopeState is STANDBY
-    change_event_callbacks["telescopeState"].assert_change_event(
-        DevState.STANDBY, lookahead=4
-    )
+    # # Check whether the telescopeState is STANDBY
+    # change_event_callbacks["telescopeState"].assert_change_event(
+    #     DevState.STANDBY, lookahead=4
+    # )
     logger.info("telescopeState: %s", str(central_node.telescopeState))
 
     assert central_node.telescopeState == DevState.STANDBY

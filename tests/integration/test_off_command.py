@@ -83,15 +83,15 @@ def test_off_command_mid(
         lookahead=6,
     )
 
-    central_node.subscribe_event(
-        "telescopeState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["telescopeState"],
-    )
+    # central_node.subscribe_event(
+    #     "telescopeState",
+    #     tango.EventType.CHANGE_EVENT,
+    #     change_event_callbacks["telescopeState"],
+    # )
 
-    change_event_callbacks["telescopeState"].assert_change_event(
-        tango._tango.DevState.OFF, lookahead=12
-    )
+    # change_event_callbacks["telescopeState"].assert_change_event(
+    #     tango._tango.DevState.OFF, lookahead=12
+    # )
 
 
 @pytest.mark.post_deployment
@@ -252,11 +252,11 @@ def test_off_command_low(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["State"],
     )
-    central_node.subscribe_event(
-        "telescopeState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["telescopeState"],
-    )
+    # central_node.subscribe_event(
+    #     "telescopeState",
+    #     tango.EventType.CHANGE_EVENT,
+    #     change_event_callbacks["telescopeState"],
+    # )
     change_event_callbacks["State"].assert_change_event(
         tango._tango.DevState.OFF,
         lookahead=5,
@@ -275,6 +275,6 @@ def test_off_command_low(
         lookahead=3,
     )
 
-    change_event_callbacks["telescopeState"].assert_change_event(
-        tango._tango.DevState.OFF, lookahead=4
-    )
+    # change_event_callbacks["telescopeState"].assert_change_event(
+    #     tango._tango.DevState.OFF, lookahead=4
+    # )

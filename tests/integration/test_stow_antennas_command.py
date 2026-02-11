@@ -132,7 +132,7 @@ def set_stow_mode_command(
 
     # Invalid Input
     result_code, message = central_node.SetStowMode('["ALL","ska036"]')
-    assert ResultCode.REJECTED in result_code
+    assert ResultCode.NOT_ALLOWED in result_code
     assert "Invalid input: Expected a list of dish IDs" in message[0]
 
 

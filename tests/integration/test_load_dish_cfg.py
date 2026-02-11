@@ -228,7 +228,7 @@ def load_dish_cfg_rejected(
     # Invoke Another LoadDishCfg command
     second_result, second_unique_id = central_node.LoadDishCfg(config_str)
     logger.info("second result is %s", second_unique_id)
-    assert second_result[0] == ResultCode.REJECTED
+    assert second_result[0] == ResultCode.NOT_ALLOWED
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
