@@ -179,7 +179,7 @@ def test_low_assign_resources_command_with_invalide_key(
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-    assert res_code == TaskStatus.REJECTED
+    assert res_code == ResultCode.REJECTED
     assert (
         "subarray_id key is not present in the input json argument" in message
     )
