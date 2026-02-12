@@ -11,7 +11,9 @@ import time
 import traceback
 from collections import defaultdict
 from logging import Logger
-from multiprocessing import Event, Manager
+from multiprocessing import Event
+from multiprocessing import Lock as ProcessLock
+from multiprocessing import Manager
 from queue import Empty, Queue
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -148,7 +150,7 @@ class CNComponentManager(TmcComponentManager):
         self.event_data_manager = EventDataManager(self)
         self.event_manager: bool = _event_manager
         self.command_timeout = command_timeout
-        self.process_lock = threading.RLock()
+        self.process_lock = ProcessLock()
         self._component.set_op_callbacks(
             _update_device_callback,
             _update_telescope_state_callback,
@@ -177,7 +179,7 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_availability_aggregator = Aggregator(
             self, logger=logger
         )
-        self._stop_thread = threading.Event()
+        self._stop_thread: bool = False
         self._liveliness_probe = None
         self.supported_commands_for_responsive_check = [
             "TelescopeOn",
@@ -208,7 +210,7 @@ class CNComponentManager(TmcComponentManager):
         )
         self.aggregate_value_update_event = Event()
         self.aggregate_process_monitor_thread = threading.Thread(
-            target=self.aggregate_process_monitor, daemon=True
+            target=self.aggregate_process_monitor
         )
         self.aggregate_process_monitor_thread.start()
         self.event_manager_object: CentralNodeEventManager = (
@@ -396,11 +398,11 @@ class CNComponentManager(TmcComponentManager):
         """This method keep tracking aggregate health state changed
         from aggregation process
         """
-        with tango.EnsureOmniThread:
-            while not self._stop_thread.is_set():
-                if not self.aggregate_value_update_event.wait(0.5):
-                    continue
 
+        while not self._stop_thread:
+            # if not self.aggregate_value_update_event.wait(0.5):
+            #     continue
+            if self.aggregate_value_update_event.wait(0.5):
                 self.aggregate_value_update_event.clear()
                 current_health_state = self.aggregated_health_state[0]
                 self.component.telescope_health_state = current_health_state
@@ -423,7 +425,7 @@ class CNComponentManager(TmcComponentManager):
         :returns: None
 
         """
-        while not self._stop_thread.is_set():
+        while not self._stop_thread:
             try:
                 event_data = self.event_queue[attribute_name].get()
                 if not self.check_event_error(
@@ -467,14 +469,14 @@ class CNComponentManager(TmcComponentManager):
             return True
         return False
 
-    def _stop_aggregation_process(self):
+    def stop_aggregation_process(self):
         """Override this method in mid and low"""
         raise NotImplementedError
 
     def stop_all_process(self):
         """This stop aggregation process"""
         with self.process_lock:
-            self._stop_aggregation_process()
+            self.stop_aggregation_process()
             del self.event_data_queue
             del self.aggregated_health_state
             self.aggregate_process_manager.shutdown()
@@ -514,14 +516,15 @@ class CNComponentManager(TmcComponentManager):
 
     def stop(self) -> None:
         """stops liveliness probe"""
-        self._stop_thread.set()
-        self.aggregate_value_update_event.set()
-        try:
-            self.event_data_queue.put_nowait(None)
-        except Exception:
-            pass
-        self.stop_event_manager()
         self.stop_liveliness_probe()
+        # self._stop_thread.set()
+        # self.aggregate_value_update_event.set()
+        # try:
+        #     self.event_data_queue.put_nowait(None)
+        # except Exception:
+        #     pass
+        self.stop_event_manager()
+        self._stop_thread = True
 
     def reset(
         self: CNComponentManager, task_callback: Optional[Callable] = None

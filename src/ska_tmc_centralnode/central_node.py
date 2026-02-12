@@ -20,7 +20,7 @@ from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.exceptions import CommandNotAllowed, DeviceUnresponsive
 from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
 from tango import ApiUtil, AttrWriteType, Database, DebugIt
-from tango.server import command, device_property
+from tango.server import attribute, command, device_property
 
 from ska_tmc_centralnode import release
 from ska_tmc_centralnode.utils.json_validator_decorator import (
@@ -143,26 +143,26 @@ class AbstractCentralNode(TMCBaseDevice):
     # Attributes and methods
     # ----------------------
 
-    _telescope_health_state: Signal[HealthState] = Signal[HealthState](
-        stored=True, initial_value=HealthState.UNKNOWN
-    )
+    # _telescope_health_state: Signal[HealthState] = Signal[HealthState](
+    #     stored=True, initial_value=HealthState.UNKNOWN
+    # )
 
     def read_telescopeHealthState(self):
         """Read value of telescopeHealthState"""
         return self.component_manager.component.telescope_health_state
 
-    telescopeHealthState = attribute_from_signal(
-        _telescope_health_state,
-        fget=read_telescopeHealthState,
-        dtype=HealthState,
-        description="Health state of Telescope",
-        access=AttrWriteType.READ,
-    )
-
-    # telescopeHealthState = attribute(
+    # telescopeHealthState = attribute_from_signal(
+    #     _telescope_health_state,
+    #     fget=read_telescopeHealthState,
     #     dtype=HealthState,
-    #     doc="Health state of Telescope",
+    #     description="Health state of Telescope",
+    #     access=AttrWriteType.READ,
     # )
+
+    telescopeHealthState = attribute(
+        dtype=HealthState,
+        doc="Health state of Telescope",
+    )
 
     _telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
         stored=True, initial_value=tango.DevState.UNKNOWN
@@ -285,10 +285,13 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         """Update Telescope health state callbacks"""
-        self._telescope_health_state = telescope_health_state
-        # self.push_change_archive_events(
-        #     "telescopeHealthState", telescope_health_state
-        # )
+        # self._telescope_health_state = telescope_health_state
+        self.logger.debug(
+            "Pushing telescopeHealthState event %s", telescope_health_state
+        )
+        self.push_change_archive_events(
+            "telescopeHealthState", telescope_health_state
+        )
 
     def update_tmc_op_state_callback(self, tmc_op_state):
         """Update tmc operational state callbacks"""
@@ -315,6 +318,7 @@ class AbstractCentralNode(TMCBaseDevice):
         self.last_device_info_changed = ""
         for attribute_name in [
             "lastDeviceInfoChanged",
+            "telescopeHealthState",
         ]:
             self.set_change_event(attribute_name, True, False)
             self.set_archive_event(attribute_name, True)

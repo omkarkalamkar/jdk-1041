@@ -636,11 +636,12 @@ class CNComponentManagerMid(CNComponentManager):
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
-    def _stop_aggregation_process(self) -> None:
+    def stop_aggregation_process(self) -> None:
         """Stop aggregation process"""
-        agg_process = self.aggregation_process
-        if agg_process:
-            agg_process.stop_aggregation_process()
+        # TODO remove
+        # agg_process = self.aggregation_process
+        # if agg_process:
+        self.aggregation_process.stop_aggregation_process()
 
     def is_valid_admin_mode(self) -> bool:
         """
