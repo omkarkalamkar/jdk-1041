@@ -1,7 +1,6 @@
 import json
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-import pytest
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 
@@ -32,27 +31,70 @@ def test_cm_set_stow_mode_success(
     )
 
 
-@pytest.mark.skip("Need to refactor this test")
-def test_cm_set_stow_mode_all_dishes():
-    cm, adapter_factory = create_cm()
-    cm.adapter_factory = adapter_factory
-    cm.logger = MagicMock()
+def test_cm_set_stow_mode_all_dishes(
+    tango_context,
+    task_callback,
+):
+    """Test SetStowMode command with ALL dishes"""
+    cm, _ = create_cm()
+    adapter_factory = MagicMock()
+    set_stow_command = SetStowMode(
+        component_manager=cm,
+        adapter_factory=adapter_factory,
+        timeout_subarrays=3,
+        step_sleep=0.3,
+        logger=logger,
+    )
 
+    # Set up the component manager's stow mode data
+    cm.dishln_stow_mode_cmd_exe_data = {
+        "ska001": {"result_code": [0, "Command Completed"]},
+        "ska002": {"result_code": [0, "Command Completed"]},
+    }
+
+    # Mock get_dish_leaf_node_device_names to return dish list
     cm.get_dish_leaf_node_device_names = MagicMock(
         return_value=[
             "ska_mid/dish/ska001",
             "ska_mid/dish/ska002",
         ]
     )
-    cm.submit_task = MagicMock(
-        return_value=(ResultCode.OK, "Command Completed")
+
+    # Mock the _set_stow_mode_to_dish to avoid actual device calls
+    with patch.object(
+        set_stow_command,
+        "_set_stow_mode_to_dish",
+        return_value=([ResultCode.OK], ["SetStowMode Command Completed"]),
+    ):
+        # Mock wait_for_command_completion to complete immediately
+        with patch.object(
+            set_stow_command,
+            "wait_for_command_completion",
+            return_value=(ResultCode.OK, ""),
+        ):
+            result, message = set_stow_command.apply_stow_mode(
+                argin=["ALL"],
+                task_callback=task_callback,
+                task_abort_event=MagicMock(),
+            )
+
+    # Verify the result
+    assert result == ResultCode.OK
+
+    # Verify task callback was called with correct status transitions
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    argin = json.dumps(["ALL"])
-    result_code, _ = cm.set_stow_mode(argin)
-    cm.submit_task.assert_called_once()
-    kwargs = cm.submit_task.call_args.kwargs["kwargs"]
-    assert kwargs["argin"] == ["ska001", "ska002"]
-    assert result_code == ResultCode.OK
+    task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (
+                ResultCode.OK,
+                "SetStowMode succeeded on provided ['ska001', 'ska002'] dishes.",
+            ),
+        },
+        lookahead=2,
+    )
 
 
 def test_cm_set_stow_mode_all_dishes_exception(task_callback):

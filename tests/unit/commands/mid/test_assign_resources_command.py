@@ -172,17 +172,18 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     json_argument = json.loads(assign_input_str)
     del json_argument["sdp"]["execution_block"]["eb_id"]
     del json_argument["sdp"]["processing_blocks"]
-    json_argument = json.dumps(json_argument)
-    res_code, message = cm.assign_resources(
-        json_argument,
-        task_callback=task_callback,
-        task_abort_event=threading.Event(),
-    )
+
+    json_decoded = json.dumps(json_argument)
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, json_decoded)
+
+    assert result_code == [ResultCode.REJECTED]
+
     assert (
         "JSON validation error: Validation"
-        " 'Mid TMC assign resources 2.4'" in message
+        " 'Mid TMC assign resources 2.4'" in message[0]
     )
-    assert res_code == TaskStatus.REJECTED
 
 
 def test_assign_resources_command_with_ok(
