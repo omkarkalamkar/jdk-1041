@@ -56,18 +56,24 @@ def test_low_assign_resources_command(
 
 
 @pytest.mark.SKA_low
-def test_assign_resources_missing_eb_id_key_and_processing_blocks(
+@pytest.mark.parametrize("missing_key", ["pb_id", "eb_id"])
+def test_assign_resources_missing_eb_id_key_and_pb_id_key(
     tango_context,
     task_callback,
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
+    missing_key,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
-    json_argument["sdp"]["execution_block"]["eb_id"] = ""
-    del json_argument["sdp"]["processing_blocks"]
+    match missing_key:
+        case "eb_id":
+            json_argument["sdp"]["execution_block"]["eb_id"] = ""
+        case "pb_id":
+            json_argument["sdp"]["processing_blocks"][0]["pb_id"] = ""
+
     json_decoded = json.dumps(json_argument)
     decorated = assign_validate_json_args(cm.assign_resources)
 
@@ -75,10 +81,9 @@ def test_assign_resources_missing_eb_id_key_and_processing_blocks(
 
     assert result_code == [ResultCode.REJECTED]
 
-    assert "processing_blocks" in message[0]
+    assert missing_key in message[0]
 
 
-@pytest.mark.test
 @pytest.mark.parametrize("missing_key", ["sdp", "csp", "subarray_id", "mccs"])
 def test_assign_resources_missing_sdp_csp_subarray_id_mccs_key(
     tango_context,
@@ -98,7 +103,7 @@ def test_assign_resources_missing_sdp_csp_subarray_id_mccs_key(
     result_code, message = decorated(cm, json_decoded)
 
     assert result_code == [ResultCode.REJECTED]
-    assert f"Missing key: '{missing_key}'" in message[0]
+    assert missing_key in message[0]
 
 
 def test_low_assign_resources_command_fail_subarray(

@@ -74,16 +74,6 @@ def test_on_command_mid(
         lookahead=2,
     )
 
-    # central_node.subscribe_event(
-    #     "telescopeState",
-    #     tango.EventType.CHANGE_EVENT,
-    #     change_event_callbacks["telescopeState"],
-    # )
-
-    # change_event_callbacks["telescopeState"].assert_change_event(
-    #     tango._tango.DevState.ON, lookahead=12
-    # )
-
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown
     result, unique_id = central_node.TelescopeOff()
