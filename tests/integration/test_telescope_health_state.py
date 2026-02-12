@@ -101,7 +101,7 @@ def test_telescope_health_state_low(change_event_callbacks):
     # change_event_callbacks["telescopeHealthState"].assert_change_event(
     #     HealthState.DEGRADED, lookahead=8
     # )
-    wait_and_validate_device_attribute_value(
+    assert wait_and_validate_device_attribute_value(
         central_node,
         "telescopeHealthState",
         HealthState.DEGRADED,
@@ -116,7 +116,7 @@ def test_telescope_health_state_low(change_event_callbacks):
     # change_event_callbacks["telescopeHealthState"].assert_change_event(
     #     HealthState.OK, lookahead=4
     # )
-    wait_and_validate_device_attribute_value(
+    assert wait_and_validate_device_attribute_value(
         central_node,
         "telescopeHealthState",
         HealthState.OK,

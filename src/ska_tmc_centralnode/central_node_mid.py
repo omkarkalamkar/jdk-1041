@@ -512,10 +512,6 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         return task
 
-        # handler = self.get_command_object("SetGlobalPointingModel")
-        # result_code, unique_id = handler(argin)
-        # return [[result_code], [str(unique_id)]]
-
     def is_SetStowMode_allowed(
         self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> bool:

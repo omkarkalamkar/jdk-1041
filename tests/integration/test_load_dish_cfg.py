@@ -235,8 +235,7 @@ def load_dish_cfg_rejected(
     assert second_result[0] == ResultCode.QUEUED
     message = (
         "Dish Vcc Configuration is in Progress. "
-        "Dish Vcc command status: %s ",
-        str(DishConfigStatus.IN_PROGRESS),
+        f"Dish Vcc command status: {str(DishConfigStatus.IN_PROGRESS.name)}"
     )
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
