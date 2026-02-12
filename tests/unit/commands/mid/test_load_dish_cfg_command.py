@@ -4,7 +4,6 @@ import json
 from unittest.mock import patch
 
 import mock
-import pytest
 import tango
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode

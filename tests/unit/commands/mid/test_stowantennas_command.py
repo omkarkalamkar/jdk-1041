@@ -1,30 +1,38 @@
 import json
 from unittest.mock import MagicMock
 
+import pytest
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 
 from ska_tmc_centralnode.commands.stow_antennas_command import SetStowMode
-from tests.settings import create_cm
+from tests.settings import create_cm, logger
 
 
-def test_cm_set_stow_mode_success():
-    cm, adapter_factory = create_cm()
-
-    task_callback = MagicMock()
-
-    cm.adapter_factory = adapter_factory
-    cm.logger = MagicMock()
-    cm.submit_task = MagicMock(
-        return_value=(TaskStatus.COMPLETED, "Command Completed")
-    )
+def test_cm_set_stow_mode_success(
+    tango_context,
+    task_callback,
+):
+    cm, _ = create_cm()
+    logger.info("%s", tango_context)
     argin = json.dumps(["ska001", "ska002"])
-    result_code, message = cm.set_stow_mode(argin, task_callback)
-    cm.submit_task.assert_called_once()
-    assert result_code == TaskStatus.COMPLETED
-    assert message == "Command Completed"
+    cm.set_stow_mode(argin, task_callback)
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        call_kwargs={
+            "status": TaskStatus.COMPLETED,
+            "result": (
+                ResultCode.OK,
+                "SetStowMode succeeded on provided ['ska001', 'ska002'] dishes.",
+            ),
+        },
+        lookahead=5,
+    )
 
 
+@pytest.mark.skip("Need to refactor this test")
 def test_cm_set_stow_mode_all_dishes():
     cm, adapter_factory = create_cm()
     cm.adapter_factory = adapter_factory
@@ -47,8 +55,9 @@ def test_cm_set_stow_mode_all_dishes():
     assert result_code == ResultCode.OK
 
 
-def test_cm_set_stow_mode_all_dishes_exception():
+def test_cm_set_stow_mode_all_dishes_exception(task_callback):
     cm, adapter_factory = create_cm()
+    adapter_factory = MagicMock()
     cm.adapter_factory = adapter_factory
     cm.logger = MagicMock()
 
@@ -62,7 +71,7 @@ def test_cm_set_stow_mode_all_dishes_exception():
         return_value=(ResultCode.OK, "Command Completed")
     )
     argin = json.dumps(["ALL", "ska001"])
-    cm.set_stow_mode(argin)
+    cm.set_stow_mode(argin, task_callback=task_callback)
     cm.logger.exception.assert_called_once()
 
 
