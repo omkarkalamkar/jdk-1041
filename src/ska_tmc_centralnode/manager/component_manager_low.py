@@ -470,7 +470,6 @@ class CNComponentManagerLow(CNComponentManager):
                 logger=self.logger,
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )
-            # self.validate_assign_json(argin)
             assign_resources_command_object.subarray_id = self.get_subarray_id(
                 argin
             )
@@ -559,7 +558,6 @@ class CNComponentManagerLow(CNComponentManager):
                 logger=self.logger,
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )
-            # self.validate_release_json(argin)
 
             self.check_availability_for_release(argin)
             release_resources_command_object.subarray_id = (

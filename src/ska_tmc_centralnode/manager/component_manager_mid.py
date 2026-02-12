@@ -1286,7 +1286,6 @@ class CNComponentManagerMid(CNComponentManager):
                 adapter_factory=self.adapter_factory,
                 logger=self.logger,
             )
-            # self.validate_assign_json(argin)
             assign_resources_command_object.subarray_id = self.get_subarray_id(
                 argin
             )
@@ -1368,7 +1367,6 @@ class CNComponentManagerMid(CNComponentManager):
             release_resources_command_object = ReleaseResourcesMid(
                 self, adapter_factory=self.adapter_factory, logger=self.logger
             )
-            # self.validate_release_json(argin)
 
             self.check_availability_for_release(argin)
             release_resources_command_object.subarray_id = (
