@@ -20,7 +20,7 @@ from ska_tango_base.software_bus import Signal, attribute_from_signal
 from ska_tmc_common.exceptions import CommandNotAllowed, DeviceUnresponsive
 from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
 from tango import ApiUtil, AttrWriteType, Database, DebugIt
-from tango.server import attribute, command, device_property
+from tango.server import command, device_property
 
 from ska_tmc_centralnode import release
 from ska_tmc_centralnode.utils.json_validator_decorator import (
