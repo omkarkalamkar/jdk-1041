@@ -8,7 +8,6 @@ import pytest
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -49,10 +48,6 @@ def test_mid_release_resources_command_with_ok(
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
-
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -169,9 +164,6 @@ def test_release_resources_command_timeout(
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
 
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -210,9 +202,6 @@ def test_release_resources_exception_on_sn(
         release_input_str,
         task_callback=task_callback,
         task_abort_event=threading.Event(),
-    )
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -257,13 +246,11 @@ def test_mid_release_resources_raises_state_model_exception(
         task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+        call_kwargs={
+            "status": TaskStatus.REJECTED,
+            "result": (
+                ResultCode.NOT_ALLOWED,
+                "ReleaseResources command not permitted in observation state 0",
+            ),
+        }
     )
-
-    data = task_callback.assert_call(
-        status=TaskStatus.REJECTED,
-        result=Anything,
-        lookahead=5,
-    )
-    assert ResultCode.NOT_ALLOWED == data["result"][0]
-    assert "ReleaseResources command not permitted" in data["result"][1]

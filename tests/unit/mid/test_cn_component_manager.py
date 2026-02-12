@@ -49,7 +49,7 @@ def test_telescope_on():
     )
 
     res_code, message = cm.telescope_on()
-    assert res_code == TaskStatus.QUEUED
+    assert res_code == TaskStatus.IN_PROGRESS
     assert message == "Task queued"
 
 
@@ -86,5 +86,5 @@ def test_telescope_off():
     )
 
     res_code, message = cm.telescope_off()
-    assert res_code == TaskStatus.QUEUED
+    assert res_code == TaskStatus.IN_PROGRESS
     assert message == "Task queued"

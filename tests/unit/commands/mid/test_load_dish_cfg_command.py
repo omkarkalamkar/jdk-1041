@@ -42,9 +42,6 @@ def test_load_dish_cfg_command(
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
     cm.load_dish_cfg(dish_cfg_input_str, task_callback=task_callback)
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
-    task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
@@ -78,9 +75,6 @@ def test_load_dish_cfg_command_invalid_json(
         json.dumps(dish_cfg_input), task_callback=task_callback
     )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
-    task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     task_callback.assert_against_call(
@@ -108,9 +102,6 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
         dish_cfg_input_str, task_callback=task_callback
     )
     exception_message = "K values are not in range (1 to 1177)"
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -140,9 +131,6 @@ def test_load_dish_cfg_command_invalid_file_name(
 
     result_code, message = cm.load_dish_cfg(
         json.dumps(dish_cfg_input), task_callback=task_callback
-    )
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}

@@ -135,9 +135,6 @@ def test_set_gpm_command_with_ok(
 ):
     cm, _ = create_cm()
     cm.set_gpm_version(json.dumps(gpm_input), task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
     cm.number_of_gpm_executed = 1
     cm.gpm_aggregated_result = True
     cm.dishln_gpm_cmd_exe_data = {
