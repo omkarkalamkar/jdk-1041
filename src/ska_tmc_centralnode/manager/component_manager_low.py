@@ -306,9 +306,6 @@ class CNComponentManagerLow(CNComponentManager):
 
     def stop_aggregation_process(self):
         """Stop aggregation process"""
-        # TODO Remove
-        # aggregation_process = self.aggregation_process
-        # if aggregation_process:
         self.aggregation_process.stop_aggregation_process()
 
     def check_if_mccs_mln_is_available(self) -> bool:

@@ -163,16 +163,12 @@ def test_low_assign_resources_command_empty_input_json(
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    # TODO remove
-    # json_argument = json.loads(assign_input_str)
-    # del json_argument[missing_key]
-    # json_decoded = json.dumps(json_argument)
     decorated = assign_validate_json_args(cm.assign_resources)
 
     result_code, message = decorated(cm, " ")
 
     assert result_code == [ResultCode.REJECTED]
-    assert message[0] == "Empty input json argument"
+    assert message[0] == "Malformed input JSON"
 
 
 def test_low_assign_resources_command_with_invalide_key(

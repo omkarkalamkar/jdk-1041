@@ -22,6 +22,9 @@ from tango import DevState
 from ska_tmc_centralnode.commands.assign_resources_command_mid import (
     AssignResourcesMid,
 )
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    assign_validate_json_args,
+)
 from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
@@ -278,10 +281,12 @@ def test_telescope_assign_resources_command_empty_input_json(
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
-    (res_code, _) = cm.assign_resources(
-        "", task_callback=task_callback, task_abort_event=threading.Event()
-    )
-    assert res_code == TaskStatus.REJECTED
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, " ")
+
+    assert result_code == [ResultCode.REJECTED]
+    assert message[0] == "Malformed input JSON"
 
 
 def test_assign_resources_fail_check_allowed(

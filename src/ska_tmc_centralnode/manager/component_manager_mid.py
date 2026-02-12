@@ -638,9 +638,6 @@ class CNComponentManagerMid(CNComponentManager):
 
     def stop_aggregation_process(self) -> None:
         """Stop aggregation process"""
-        # TODO remove
-        # agg_process = self.aggregation_process
-        # if agg_process:
         self.aggregation_process.stop_aggregation_process()
 
     def is_valid_admin_mode(self) -> bool:

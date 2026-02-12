@@ -19,6 +19,9 @@ from ska_tmc_centralnode.commands.release_resources_command_mid import (
     ReleaseResourcesMid,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    release_validate_json_args,
+)
 from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
@@ -90,10 +93,12 @@ def test_mid_release_resources_command_empty_input_json(
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("ReleaseResources")
-    (res_code, _) = cm.release_resources(
-        "", task_callback=task_callback, task_abort_event=threading.Event()
-    )
-    assert res_code == TaskStatus.REJECTED
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, " ")
+
+    assert result_code == [ResultCode.REJECTED]
+    assert message[0] == "Malformed input JSON"
 
 
 def test_telescope_release_resources_fail_check_allowed(
@@ -121,12 +126,15 @@ def test_mid_release_resources_command_with_invalide_key(
     check_if_subarray_is_available(cm)
     release_input_str = json_factory("invalid_key_ReleaseResources")
     # with pytest.raises(InvalidJSONError):
-    result_code, message = cm.release_resources(
-        release_input_str,
-        task_callback=task_callback,
-        task_abort_event=threading.Event(),
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, release_input_str)
+
+    assert result_code == [ResultCode.REJECTED]
+    assert (
+        "subarray_id key is not present in the input json argument"
+        in message[0]
     )
-    assert result_code == TaskStatus.REJECTED
 
 
 def test_release_resources_command_timeout(

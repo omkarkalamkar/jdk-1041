@@ -92,10 +92,12 @@ def test_low_release_resources_empty_input_json(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    (res_code, _) = cm.release_resources(
-        "", task_callback=task_callback, task_abort_event=threading.Event()
-    )
-    assert res_code == TaskStatus.REJECTED
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, " ")
+
+    assert result_code == [ResultCode.REJECTED]
+    assert message[0] == "Malformed input JSON"
 
 
 @pytest.mark.SKA_low
@@ -113,7 +115,8 @@ def test_low_release_resources_command_with_invalide_key(
 
     assert result_code == [ResultCode.REJECTED]
     assert (
-        "subarray_id key is not present in the input json argument" in message
+        "subarray_id key is not present in the input json argument"
+        in message[0]
     )
 
 

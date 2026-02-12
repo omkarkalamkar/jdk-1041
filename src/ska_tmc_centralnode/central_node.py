@@ -143,22 +143,6 @@ class AbstractCentralNode(TMCBaseDevice):
     # Attributes and methods
     # ----------------------
 
-    # _telescope_health_state: Signal[HealthState] = Signal[HealthState](
-    #     stored=True, initial_value=HealthState.UNKNOWN
-    # )
-
-    def read_telescopeHealthState(self):
-        """Read value of telescopeHealthState"""
-        return self.component_manager.component.telescope_health_state
-
-    # telescopeHealthState = attribute_from_signal(
-    #     _telescope_health_state,
-    #     fget=read_telescopeHealthState,
-    #     dtype=HealthState,
-    #     description="Health state of Telescope",
-    #     access=AttrWriteType.READ,
-    # )
-
     telescopeHealthState = attribute(
         dtype=HealthState,
         doc="Health state of Telescope",
@@ -285,7 +269,6 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         """Update Telescope health state callbacks"""
-        # self._telescope_health_state = telescope_health_state
         self.logger.debug(
             "Pushing telescopeHealthState event %s", telescope_health_state
         )
@@ -334,6 +317,10 @@ class AbstractCentralNode(TMCBaseDevice):
     # ------------------
     # Attributes methods
     # ------------------
+
+    def read_telescopeHealthState(self):
+        """Read value of telescopeHealthState"""
+        return self.component_manager.component.telescope_health_state
 
     def transformedInternalModel_read(self):
         """Tranformed InternalModelRead"""
