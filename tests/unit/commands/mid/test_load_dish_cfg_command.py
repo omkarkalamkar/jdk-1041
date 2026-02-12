@@ -4,6 +4,7 @@ import json
 from unittest.mock import patch
 
 import mock
+import pytest
 import tango
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
@@ -225,7 +226,12 @@ def test_load_dish_config_command_fail(
 
     dish_cfg_input = json.loads(dish_cfg_input_str)
 
-    result_code, message = cm.load_dish_cfg(
-        json.dumps(dish_cfg_input), task_callback=task_callback
+    cm.load_dish_cfg(json.dumps(dish_cfg_input), task_callback=task_callback)
+
+    task_callback.assert_against_call(
+        status=TaskStatus.REJECTED,
+        result=(
+            ResultCode.NOT_ALLOWED,
+            "Dish Vcc Configuration is in Progress. Dish Vcc command status: IN_PROGRESS",
+        ),
     )
-    assert result_code == TaskStatus.REJECTED

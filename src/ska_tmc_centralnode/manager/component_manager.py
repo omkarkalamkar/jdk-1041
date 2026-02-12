@@ -400,8 +400,6 @@ class CNComponentManager(TmcComponentManager):
         """
 
         while not self._stop_thread:
-            # if not self.aggregate_value_update_event.wait(0.5):
-            #     continue
             if self.aggregate_value_update_event.wait(0.5):
                 self.aggregate_value_update_event.clear()
                 current_health_state = self.aggregated_health_state[0]
@@ -517,12 +515,6 @@ class CNComponentManager(TmcComponentManager):
     def stop(self) -> None:
         """stops liveliness probe"""
         self.stop_liveliness_probe()
-        # self._stop_thread.set()
-        # self.aggregate_value_update_event.set()
-        # try:
-        #     self.event_data_queue.put_nowait(None)
-        # except Exception:
-        #     pass
         self.stop_event_manager()
         self._stop_thread = True
 

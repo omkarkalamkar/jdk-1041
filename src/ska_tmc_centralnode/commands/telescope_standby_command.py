@@ -55,9 +55,9 @@ class TelescopeStandby(TelescopeOnOff):
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
 
-        ret_code, message = self.do(argin=None)
+        result_code, message = self.do(argin=None)
         self.logger.info(message)
-        if ret_code == ResultCode.FAILED:
+        if result_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.FAILED, message),
@@ -68,7 +68,7 @@ class TelescopeStandby(TelescopeOnOff):
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.OK, message),
             )
-        return ret_code, message
+        return result_code, message
 
     def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
         """

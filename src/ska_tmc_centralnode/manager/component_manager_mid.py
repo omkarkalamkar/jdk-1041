@@ -949,10 +949,13 @@ class CNComponentManagerMid(CNComponentManager):
             DishConfigStatus.STAGING,
             DishConfigStatus.IN_PROGRESS,
         ):
+            dish_config_status_name = DishConfigStatus(
+                self.dish_vcc_command_status
+            ).name
+
             message = (
                 "Dish Vcc Configuration is in Progress. "
-                "Dish Vcc command status: %s ",
-                str(DishConfigStatus(self.dish_vcc_command_status).name),
+                f"Dish Vcc command status: {dish_config_status_name}"
             )
             self.logger.debug(message)
             return task_callback(

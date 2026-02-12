@@ -61,7 +61,7 @@ def release_validate_json_args(meth):
         try:
             json.loads(json_str)
         except json.JSONDecodeError:
-            return [ResultCode.REJECTED], ["Malformed input json"]
+            return [ResultCode.REJECTED], ["Malformed input JSON"]
 
         validator = getattr(self, "component_manager", self)
         argin, exception_msg = validator.validate_release_json(json_str)
