@@ -244,6 +244,10 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         """
         try:
+            self.logger.debug(
+                "Pushing Dish Vcc command status to signal %s",
+                str(dish_vcc_command_status),
+            )
             self._dish_vcc_command_status = dish_vcc_command_status
 
         except Exception as exception:

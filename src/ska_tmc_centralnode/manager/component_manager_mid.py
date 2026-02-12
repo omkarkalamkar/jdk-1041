@@ -13,7 +13,7 @@ from logging import Logger
 from queue import Queue
 from typing import Callable, Tuple
 
-from ska_control_model import AdminMode, ObsState, TaskStatus
+from ska_control_model import AdminMode, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.faults import StateModelError
@@ -870,7 +870,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.logger.debug(
             "Dish Vcc Validation Event called with %s and Result: %s",
             dev_name,
-            ObsState(dish_vcc_validation_result).name,
+            ResultCode(dish_vcc_validation_result).name,
         )
         with self.dish_vcc_validation_attr_lock:
             if self.input_parameter.csp_mln_dev_name in dev_name:
