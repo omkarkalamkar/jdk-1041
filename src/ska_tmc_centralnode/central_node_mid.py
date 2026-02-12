@@ -26,6 +26,9 @@ from ska_tmc_centralnode.manager.component_manager_mid import (
 )
 from ska_tmc_centralnode.model.enum import DishConfigStatus, ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterMid
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    validate_dish_vcc_command_status,
+)
 
 __all__ = ["MidTmcCentralNode", "main"]
 
@@ -422,6 +425,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         """
         return True
 
+    @validate_dish_vcc_command_status
     @long_running_command
     @DebugIt()
     def LoadDishCfg(self, argin: str) -> Tuple[List[ResultCode], List[str]]:
