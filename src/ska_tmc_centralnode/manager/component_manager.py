@@ -1313,26 +1313,26 @@ class CNComponentManager(TmcComponentManager):
 
         Args:
             subarray_id (int): subarray_id
-            desired_obsstate (List): desired observation state
             command_name (str): command name
 
         Returns:
             boolean value if command in valid obstate else
             return exception.
+
+        Raises:
+            StateModelError: If command not permitted in observation state
+            SubarrayNotPresentError: If subarray not available
+            CommandNotAllowed: If command not allowed due to other
+                unavailable devices
+
         """
 
         def is_subarray_in_right_obs_state() -> bool:
             """
             Checks subarray obsstate before invoking command
 
-            :param subarray_id: subarray id on which command invoke
-            :type subarray_id: int
-            :param desired_obsstate: list of obs states which are allowed
-            :type desired_obsstate: List
-            :param command_name: name of command for obstate check
-            :type: str
-
-            :return: return boolean value if command in valid obstate else
+            Returns:
+                boolean value if command in valid obstate else
                 return exception.
             """
             self.check_device_responsiveness_command(command_name, subarray_id)

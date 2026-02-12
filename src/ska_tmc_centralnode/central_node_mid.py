@@ -398,12 +398,10 @@ class MidTmcCentralNode(AbstractCentralNode):
         """This callback is called when dishVccValidationResult is Unknown
         and Central Node needs to load dish cfg on csp
         """
-        # handler = self.get_command_object("LoadDishCfg")
         dish_cfg_json = json.dumps(
             self.component_manager.get_default_dish_vcc_config_params()
         )
         self.LoadDishCfg(dish_cfg_json)
-        # handler(dish_cfg_json)
 
     def invoke_set_gpm_command_callback(self):
         """This callback is called when dishVccValidationResult is Unknown
@@ -458,9 +456,6 @@ class MidTmcCentralNode(AbstractCentralNode):
             )
 
         return task
-        # handler = self.get_command_object("LoadDishCfg")
-        # result_code, unique_id = handler(argin)
-        # return [[result_code], [str(unique_id)]]
 
     def is_SetGlobalPointingModel_allowed(
         self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ

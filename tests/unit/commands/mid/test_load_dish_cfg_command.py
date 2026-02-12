@@ -15,6 +15,9 @@ from tango import ApiUtil
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.model.enum import DishConfigStatus
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    validate_dish_vcc_command_status,
+)
 from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
 
 # Helper Dish LN device is using Database API and in Unit test Database API
@@ -224,13 +227,12 @@ def test_load_dish_config_command_fail(
     dish_cfg_input_str = json_factory("command_load_dish_cfg_invalid")
 
     dish_cfg_input = json.loads(dish_cfg_input_str)
+    decorated = validate_dish_vcc_command_status(cm.load_dish_cfg)
 
-    cm.load_dish_cfg(json.dumps(dish_cfg_input), task_callback=task_callback)
+    result_code, message = decorated(cm, json.dumps(dish_cfg_input))
 
-    task_callback.assert_against_call(
-        status=TaskStatus.REJECTED,
-        result=(
-            ResultCode.NOT_ALLOWED,
-            "Dish Vcc Configuration is in Progress. Dish Vcc command status: IN_PROGRESS",
-        ),
+    assert result_code == [ResultCode.REJECTED]
+    assert (
+        message[0]
+        == "Dish Vcc Configuration is in Progress. Dish Vcc command status: IN_PROGRESS"
     )

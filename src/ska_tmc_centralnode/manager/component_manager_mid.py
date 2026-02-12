@@ -945,23 +945,6 @@ class CNComponentManagerMid(CNComponentManager):
             "Command Status: %s ",
             str(DishConfigStatus(self.dish_vcc_command_status).name),
         )
-        # if self.dish_vcc_command_status in (
-        #     DishConfigStatus.STAGING,
-        #     DishConfigStatus.IN_PROGRESS,
-        # ):
-        #     dish_config_status_name = DishConfigStatus(
-        #         self.dish_vcc_command_status
-        #     ).name
-
-        #     message = (
-        #         "Dish Vcc Configuration is in Progress. "
-        #         f"Dish Vcc command status: {dish_config_status_name}"
-        #     )
-        #     self.logger.debug(message)
-        #     return task_callback(
-        #         status=TaskStatus.REJECTED,
-        #         result=(ResultCode.NOT_ALLOWED, message),
-        #     )
 
         try:
             json.loads(argin)
