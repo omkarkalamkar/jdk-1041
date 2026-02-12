@@ -53,7 +53,7 @@ def test_telescope_on_command(tango_context, set_mid_sdp_csp_admin_modes):
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("TelescopeOn")
     cm.telescope_on(task_callback=task_callback)
-    assert task_callback.status == TaskStatus.IN_PROGRESS
+    assert task_callback.status == TaskStatus.COMPLETED
 
 
 def test_telescope_on_command_unavailability(

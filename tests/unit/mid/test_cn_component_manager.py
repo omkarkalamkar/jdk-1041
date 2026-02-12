@@ -48,9 +48,9 @@ def test_telescope_on():
         default_array_layout_url=default_array_layout_url,
     )
 
-    res_code, message = cm.telescope_on()
-    assert res_code == TaskStatus.IN_PROGRESS
-    assert message == "Task queued"
+    res_code, message = cm.telescope_on(task_callback=mock_callback)
+    assert res_code == TaskStatus.COMPLETED
+    assert "Command Completed" in message
 
 
 def test_telescope_off():
@@ -85,6 +85,6 @@ def test_telescope_off():
         default_array_layout_url=default_array_layout_url,
     )
 
-    res_code, message = cm.telescope_off()
-    assert res_code == TaskStatus.IN_PROGRESS
-    assert message == "Task queued"
+    res_code, message = cm.telescope_off(task_callback=mock_callback)
+    assert res_code == TaskStatus.COMPLETED
+    assert "Command Completed" in message

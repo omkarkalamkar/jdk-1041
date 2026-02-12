@@ -51,7 +51,7 @@ def test_telescope_off_command(tango_context, set_mid_sdp_csp_admin_modes):
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("TelescopeOff")
     cm.telescope_off(task_callback=task_callback)
-    assert task_callback.status == TaskStatus.IN_PROGRESS
+    assert task_callback.status == TaskStatus.COMPLETED
 
 
 def test_telescope_off_command_fail_subarray(

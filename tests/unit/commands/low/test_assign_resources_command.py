@@ -163,10 +163,16 @@ def test_low_assign_resources_command_empty_input_json(
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    (res_code, _) = cm.assign_resources(
-        " ", task_callback=task_callback, task_abort_event=threading.Event()
-    )
-    assert res_code == TaskStatus.REJECTED
+    # TODO remove
+    # json_argument = json.loads(assign_input_str)
+    # del json_argument[missing_key]
+    # json_decoded = json.dumps(json_argument)
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, " ")
+
+    assert result_code == [ResultCode.REJECTED]
+    assert message[0] == "Empty input json argument"
 
 
 def test_low_assign_resources_command_with_invalide_key(
@@ -178,15 +184,14 @@ def test_low_assign_resources_command_with_invalide_key(
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assign_input_str = json_factory("invalid_key_AssignResources")
-    # json_argument = json.loads(assign_input_str)
-    (res_code, message) = cm.assign_resources(
-        assign_input_str,
-        task_callback=task_callback,
-        task_abort_event=threading.Event(),
-    )
-    assert res_code == ResultCode.FAILED
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, assign_input_str)
+
+    assert result_code == [ResultCode.REJECTED]
     assert (
-        "subarray_id key is not present in the input json argument" in message
+        "subarray_id key is not present in the input json argument"
+        in message[0]
     )
 
 

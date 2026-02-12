@@ -107,10 +107,9 @@ def test_low_release_resources_command_with_invalide_key(
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     release_input_str = json_factory("invalid_key_ReleaseResources")
-    json_decoded = json.dumps(release_input_str)
     decorated = release_validate_json_args(cm.release_resources)
 
-    result_code, message = decorated(cm, json_decoded)
+    result_code, message = decorated(cm, release_input_str)
 
     assert result_code == [ResultCode.REJECTED]
     assert (
