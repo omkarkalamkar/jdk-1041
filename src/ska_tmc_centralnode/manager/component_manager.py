@@ -177,7 +177,7 @@ class CNComponentManager(TmcComponentManager):
         self._telescope_availability_aggregator = Aggregator(
             self, logger=logger
         )
-        self._stop_thread: bool = False
+        self._stop_thread = threading.Event()
         self._liveliness_probe = None
         self.supported_commands_for_responsive_check = [
             "TelescopeOn",
@@ -397,17 +397,17 @@ class CNComponentManager(TmcComponentManager):
         from aggregation process
         """
         with tango.EnsureOmniThread:
-            while not self._stop_thread:
-                if self.aggregate_value_update_event.wait(0.1):
-                    self.aggregate_value_update_event.clear()
-                    current_health_state = self.aggregated_health_state[0]
-                    self.component.telescope_health_state = (
-                        current_health_state
-                    )
-                    self.logger.debug(
-                        "Aggregate telescope health state called %s",
-                        str(current_health_state),
-                    )
+            while not self._stop_thread.is_set():
+                if not self.aggregate_value_update_event.wait(0.5):
+                    continue
+
+                self.aggregate_value_update_event.clear()
+                current_health_state = self.aggregated_health_state[0]
+                self.component.telescope_health_state = current_health_state
+                self.logger.debug(
+                    "Aggregate telescope health state called %s",
+                    str(current_health_state),
+                )
         self.logger.debug("aggregation process monitor thread stopped")
 
     def process_event(self, attribute_name: str) -> None:
@@ -423,7 +423,7 @@ class CNComponentManager(TmcComponentManager):
         :returns: None
 
         """
-        while not self._stop_thread:
+        while not self._stop_thread.is_set():
             try:
                 event_data = self.event_queue[attribute_name].get()
                 if not self.check_event_error(
@@ -467,14 +467,14 @@ class CNComponentManager(TmcComponentManager):
             return True
         return False
 
-    def stop_aggregation_process(self):
+    def _stop_aggregation_process(self):
         """Override this method in mid and low"""
         raise NotImplementedError
 
     def stop_all_process(self):
         """This stop aggregation process"""
         with self.process_lock:
-            self.stop_aggregation_process()
+            self._stop_aggregation_process()
             del self.event_data_queue
             del self.aggregated_health_state
             self.aggregate_process_manager.shutdown()
@@ -514,15 +514,14 @@ class CNComponentManager(TmcComponentManager):
 
     def stop(self) -> None:
         """stops liveliness probe"""
-        self.stop_liveliness_probe()
-        # self._stop_thread.set()
-        # self.aggregate_value_update_event.set()
-        # try:
-        #     self.event_data_queue.put_nowait(None)
-        # except Exception:
-        #     pass
+        self._stop_thread.set()
+        self.aggregate_value_update_event.set()
+        try:
+            self.event_data_queue.put_nowait(None)
+        except Exception:
+            pass
         self.stop_event_manager()
-        self._stop_thread = True
+        self.stop_liveliness_probe()
 
     def reset(
         self: CNComponentManager, task_callback: Optional[Callable] = None

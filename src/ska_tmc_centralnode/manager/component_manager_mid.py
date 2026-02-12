@@ -636,7 +636,7 @@ class CNComponentManagerMid(CNComponentManager):
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
-    def stop_aggregation_process(self) -> None:
+    def _stop_aggregation_process(self) -> None:
         """Stop aggregation process"""
         agg_process = self.aggregation_process
         if agg_process:

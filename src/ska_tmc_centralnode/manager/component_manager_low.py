@@ -304,9 +304,11 @@ class CNComponentManagerLow(CNComponentManager):
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
 
-    def stop_aggregation_process(self):
+    def _stop_aggregation_process(self):
         """Stop aggregation process"""
-        self.aggregation_process.stop_aggregation_process()
+        aggregation_process = self.aggregation_process
+        if aggregation_process:
+            self.aggregation_process.stop_aggregation_process()
 
     def check_if_mccs_mln_is_available(self) -> bool:
         """
