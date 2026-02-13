@@ -22,6 +22,7 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MASTER_DEVICE,
     MID_SDP_MASTER_DEVICE,
 )
+from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import DISH_DEFECT, RESET_DEFECT, logger
 
@@ -273,6 +274,9 @@ def test_off_command_low(
     change_event_callbacks["State"].assert_change_event(
         tango._tango.DevState.OFF,
         lookahead=3,
+    )
+    wait_and_validate_device_attribute_value(
+        central_node, "telescopeState", tango.DevState.OFF
     )
 
     change_event_callbacks["telescopeState"].assert_change_event(

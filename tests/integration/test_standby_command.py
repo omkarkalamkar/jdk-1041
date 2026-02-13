@@ -17,7 +17,6 @@ from ska_tmc_centralnode.utils.constants import (
     MCCS_MASTER_DEVICE,
     MID_CSP_MASTER_DEVICE,
 )
-from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
 from tests.settings import logger
 
@@ -81,7 +80,16 @@ def test_standby_command_mid(
         "longRunningCommandResult: %s",
         str(central_node.longRunningCommandResult),
     )
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
 
+    # Check whether the telescopeState is STANDBY
+    change_event_callbacks["telescopeState"].assert_change_event(
+        DevState.STANDBY, lookahead=12
+    )
     logger.info("telescopeState: %s", str(central_node.telescopeState))
 
     assert central_node.telescopeState == DevState.STANDBY
@@ -138,8 +146,16 @@ def test_standby_command_low(
     csp_master = dev_factory.get_device(LOW_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(DevState.STANDBY)
 
-    assert wait_and_validate_device_attribute_value(
-        central_node, "telescopeState", DevState.STANDBY
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
     )
+
+    # Check whether the telescopeState is STANDBY
+    change_event_callbacks["telescopeState"].assert_change_event(
+        DevState.STANDBY, lookahead=8
+    )
+    logger.info("telescopeState: %s", str(central_node.telescopeState))
 
     assert central_node.telescopeState == DevState.STANDBY

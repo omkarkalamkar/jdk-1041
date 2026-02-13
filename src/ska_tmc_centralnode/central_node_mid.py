@@ -276,6 +276,16 @@ class MidTmcCentralNode(AbstractCentralNode):
     # ---------------
     # General methods
     # ---------------
+    def init_device(self) -> None:
+        """
+        Initializes the CentralNode mid device.
+        """
+        super().init_device()
+        for attribute_name in ["DishVccValidationStatus"]:
+            self.set_change_event(attribute_name, True, False)
+            self.set_archive_event(attribute_name, True)
+
+        self.init_completed()
 
     # ------------------
     # Attributes methods
