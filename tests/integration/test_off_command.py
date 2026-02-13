@@ -270,6 +270,6 @@ def test_off_command_low(
         tango._tango.DevState.OFF,
         lookahead=3,
     )
-    wait_and_validate_device_attribute_value(
+    assert wait_and_validate_device_attribute_value(
         central_node, "telescopeState", tango.DevState.OFF
     )

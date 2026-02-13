@@ -400,7 +400,7 @@ class CNComponentManager(TmcComponentManager):
         """
 
         while not self._stop_thread:
-            if self.aggregate_value_update_event.wait(0.1):
+            if self.aggregate_value_update_event.wait(0.3):
                 self.aggregate_value_update_event.clear()
                 current_health_state = self.aggregated_health_state[0]
                 self.component.telescope_health_state = current_health_state
