@@ -152,9 +152,9 @@ class AbstractCentralNode(TMCBaseDevice):
         stored=True, initial_value=tango.DevState.UNKNOWN
     )
 
-    # def read_telescopeState(self):
-    #     """Reads telescopeState"""
-    #     return self.component_manager.component.telescope_state
+    def read_telescopeState(self):
+        """Reads telescopeState"""
+        return self.component_manager.component.telescope_state
 
     telescopeState = attribute_from_signal(
         _telescope_state,
