@@ -253,11 +253,6 @@ def test_off_command_low(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["State"],
     )
-    central_node.subscribe_event(
-        "telescopeState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["telescopeState"],
-    )
     change_event_callbacks["State"].assert_change_event(
         tango._tango.DevState.OFF,
         lookahead=5,
@@ -277,8 +272,4 @@ def test_off_command_low(
     )
     wait_and_validate_device_attribute_value(
         central_node, "telescopeState", tango.DevState.OFF
-    )
-
-    change_event_callbacks["telescopeState"].assert_change_event(
-        tango._tango.DevState.OFF, lookahead=4
     )

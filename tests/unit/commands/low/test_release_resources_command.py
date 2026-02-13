@@ -203,3 +203,50 @@ def test_low_release_resources_raises_state_model_exception(
             ),
         }
     )
+
+
+@pytest.mark.SKA_low
+def test_low_release_resources_bad_json(
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test release resources with bad JSON"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    adapter_factory = HelperAdapterFactory()
+
+    release_input_str = "{ invalid json"
+    assign_res_command = ReleaseResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
+    (res_code, message) = assign_res_command.do(release_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "Problem in loading the JSON string" in str(message)
+
+
+@pytest.mark.SKA_low
+def test_low_release_resources_subarray_not_found(
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test release resources when subarray adapter not found"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    adapter_factory = HelperAdapterFactory()
+
+    # Create a command with subarray_id=99 which won't be in adapters
+    release_input_str = json_factory("release_resource_low")
+    json_arg = json.loads(release_input_str)
+    json_arg["subarray_id"] = 99
+    release_input_str = json.dumps(json_arg)
+
+    assign_res_command = ReleaseResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
+    # Set subarray_id to match the JSON
+    assign_res_command.subarray_id = 99
+    (res_code, message) = assign_res_command.do(release_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "doesn't exit" in message

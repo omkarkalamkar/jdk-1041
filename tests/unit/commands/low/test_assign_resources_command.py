@@ -298,3 +298,63 @@ def test_low_assign_resources_raises_state_model_exception(
             "AssignResources command not permitted in observation state 4",
         ),
     )
+
+
+@pytest.mark.SKA_low
+def test_low_assign_resources_bad_json(
+    tango_context,
+    task_callback,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test assign resources with bad JSON"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    adapter_factory = HelperAdapterFactory()
+
+    assign_input_str = "{ invalid json"
+    assign_res_command = AssignResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
+    (res_code, message) = assign_res_command.do(assign_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "Problem in loading the JSON string" in str(message)
+
+
+@pytest.mark.SKA_low
+def test_low_assign_resources_with_invalid_default_array_layout_url(
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test assign resources with invalid default telmodel type"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+
+    # Set invalid default telmodel (should be dict)
+    with pytest.raises(ValueError) as exception:
+        cm.default_array_layout_url = "invalid_string_not_dict"
+        assert "Invalid default ArrayLayout" in exception
+
+
+@pytest.mark.SKA_low
+def test_low_assign_resources_subarray_not_found(
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test assign resources when subarray adapter not found"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    adapter_factory = HelperAdapterFactory()
+
+    assign_input_str = json_factory("assign_resource_low")
+    json_arg = json.loads(assign_input_str)
+    json_arg["subarray_id"] = 99
+    assign_input_str = json.dumps(json_arg)
+
+    assign_res_command = AssignResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
+    assign_res_command.subarray_id = 99
+    (res_code, message) = assign_res_command.do(assign_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "is not existing" in message
