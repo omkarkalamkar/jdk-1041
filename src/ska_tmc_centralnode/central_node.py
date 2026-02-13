@@ -301,6 +301,7 @@ class AbstractCentralNode(TMCBaseDevice):
         self.last_device_info_changed = ""
         for attribute_name in [
             "lastDeviceInfoChanged",
+            "telescopeState",
             "telescopeHealthState",
         ]:
             self.set_change_event(attribute_name, True, False)

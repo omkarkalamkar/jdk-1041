@@ -114,7 +114,9 @@ def test_cm_set_stow_mode_all_dishes_exception(task_callback):
         return_value=(ResultCode.OK, "Command Completed")
     )
     argin = json.dumps(["ALL", "ska001"])
-    cm.set_stow_mode(argin, task_callback=task_callback)
+    cm.set_stow_mode(
+        argin, task_callback=task_callback, task_abort_event=threading.Event()
+    )
     cm.logger.exception.assert_called_once()
 
 
