@@ -474,7 +474,7 @@ class CNComponentManagerLow(CNComponentManager):
                 argin
             )
             # Validate command is allowed
-            self.is_command_allowed_callable(
+            self.is_command_allowed_before_lrc_start(
                 subarray_id=assign_resources_command_object.subarray_id,
                 command_name="AssignResources",
             )
@@ -564,7 +564,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self.get_subarray_id(argin)
             )
             # Validate command is allowed
-            self.is_command_allowed_callable(
+            self.is_command_allowed_before_lrc_start(
                 subarray_id=release_resources_command_object.subarray_id,
                 command_name="ReleaseResources",
             )

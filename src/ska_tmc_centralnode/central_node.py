@@ -352,7 +352,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         if request_type == LRCReqType.ENQUEUE_REQ:
             return self.component_manager.is_command_allowed("TelescopeOn")
-        return self.component_manager.is_command_allowed_callable(
+        return self.component_manager.is_command_allowed_before_lrc_start(
             command_name="TelescopeOn"
         )
 
@@ -390,7 +390,7 @@ class AbstractCentralNode(TMCBaseDevice):
             return self.component_manager.is_command_allowed(
                 "TelescopeStandby"
             )
-        return self.component_manager.is_command_allowed_callable(
+        return self.component_manager.is_command_allowed_before_lrc_start(
             command_name="TelescopeStandby"
         )
 
@@ -427,7 +427,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         if request_type == LRCReqType.ENQUEUE_REQ:
             return self.component_manager.is_command_allowed("TelescopeOff")
-        return self.component_manager.is_command_allowed_callable(
+        return self.component_manager.is_command_allowed_before_lrc_start(
             command_name="TelescopeOff"
         )
 

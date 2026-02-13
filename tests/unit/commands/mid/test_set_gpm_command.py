@@ -1,6 +1,7 @@
 """Test cases for SetGlobalPointingModel command"""
 
 import json
+import threading
 from threading import RLock
 from unittest.mock import MagicMock, call, patch
 
@@ -160,8 +161,10 @@ def test_set_gpm_command_with_ok(
             return_value=(ResultCode.OK, ""),
         ):
             result, message = set_gpm_command.apply_gpm(
-                json.dumps(gpm_input),
+                dish_gpm_params=json.dumps(gpm_input),
+                logger=logger,
                 task_callback=task_callback,
+                task_abort_event=threading.Event(),
             )
 
     # Verify the result
@@ -195,7 +198,10 @@ def test_apply_gpm_no_receptors_and_empty_gpm_files():
 
     with patch.object(instance, "get_gpm_files", return_value=[]):
         instance.apply_gpm(
-            json.dumps(dish_gpm_params), task_callback=task_callback
+            json.dumps(dish_gpm_params),
+            logger,
+            task_callback=task_callback,
+            task_abort_event=threading.Event(),
         )
 
         calls = [

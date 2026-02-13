@@ -1304,12 +1304,12 @@ class CNComponentManager(TmcComponentManager):
 
         return is_subarray_in_right_obs_state
 
-    def is_command_allowed_callable(
+    def is_command_allowed_before_lrc_start(
         self,
         subarray_id: int = 0,
         command_name: str = "",
     ):
-        """This method provides callable for command not allowed
+        """This method checks if command is allowed before LRC start
 
         Args:
             subarray_id (int): subarray_id
@@ -1327,37 +1327,27 @@ class CNComponentManager(TmcComponentManager):
 
         """
 
-        def is_subarray_in_right_obs_state() -> bool:
-            """
-            Checks subarray obsstate before invoking command
-
-            Returns:
-                boolean value if command in valid obstate else
-                return exception.
-            """
-            self.check_device_responsiveness_command(command_name, subarray_id)
-            allowed_obs_states = {
-                "AssignResources": [ObsState.EMPTY, ObsState.IDLE],
-                "ReleaseResources": [ObsState.IDLE],
-            }
-            if command_name in allowed_obs_states:
-                desired_obsstate = allowed_obs_states.get(command_name)
-            else:
-                desired_obsstate = None
-            if subarray_id and desired_obsstate:
-                subarray_devices = self.input_parameter.subarray_dev_names
-                for device in subarray_devices:
-                    subarray_device_id = re.findall(r"\d+", device)
-                    if subarray_id == int(subarray_device_id[0]):
-                        subarray_obstate = self.get_device(device).obs_state
-                        if subarray_obstate not in desired_obsstate:
-                            raise StateModelError(
-                                f"{command_name} command not permitted "
-                                + f"in observation state {subarray_obstate}"
-                            )
-            return True
-
-        return is_subarray_in_right_obs_state()
+        self.check_device_responsiveness_command(command_name, subarray_id)
+        allowed_obs_states = {
+            "AssignResources": [ObsState.EMPTY, ObsState.IDLE],
+            "ReleaseResources": [ObsState.IDLE],
+        }
+        if command_name in allowed_obs_states:
+            desired_obsstate = allowed_obs_states.get(command_name)
+        else:
+            desired_obsstate = None
+        if subarray_id and desired_obsstate:
+            subarray_devices = self.input_parameter.subarray_dev_names
+            for device in subarray_devices:
+                subarray_device_id = re.findall(r"\d+", device)
+                if subarray_id == int(subarray_device_id[0]):
+                    subarray_obstate = self.get_device(device).obs_state
+                    if subarray_obstate not in desired_obsstate:
+                        raise StateModelError(
+                            f"{command_name} command not permitted "
+                            + f"in observation state {subarray_obstate}"
+                        )
+        return True
 
     def check_device_responsiveness_command(
         self, command_name: str, subarray_id: int

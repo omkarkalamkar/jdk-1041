@@ -1,6 +1,7 @@
 """Test module for command load dish cfg"""
 
 import json
+import threading
 from unittest.mock import patch
 
 import mock
@@ -43,7 +44,11 @@ def test_load_dish_cfg_command(
     cm.is_dish_vcc_config_set = True
 
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
-    cm.load_dish_cfg(dish_cfg_input_str, task_callback=task_callback)
+    cm.load_dish_cfg(
+        dish_cfg_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -74,8 +79,10 @@ def test_load_dish_cfg_command_invalid_json(
     dish_cfg_input = json.loads(dish_cfg_input_str)
     dish_cfg_input.pop("tm_data_sources")
 
-    result_code, message = cm.load_dish_cfg(
-        json.dumps(dish_cfg_input), task_callback=task_callback
+    cm.load_dish_cfg(
+        json.dumps(dish_cfg_input),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -101,8 +108,10 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("load_dish_cfg_kvalue_out_of_range")
-    result_code, message = cm.load_dish_cfg(
-        dish_cfg_input_str, task_callback=task_callback
+    cm.load_dish_cfg(
+        dish_cfg_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     exception_message = "K values are not in range (1 to 1177)"
     task_callback.assert_against_call(
@@ -132,8 +141,10 @@ def test_load_dish_cfg_command_invalid_file_name(
 
     dish_cfg_input = json.loads(dish_cfg_input_str)
 
-    result_code, message = cm.load_dish_cfg(
-        json.dumps(dish_cfg_input), task_callback=task_callback
+    cm.load_dish_cfg(
+        json.dumps(dish_cfg_input),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}

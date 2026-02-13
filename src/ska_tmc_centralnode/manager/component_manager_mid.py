@@ -926,7 +926,7 @@ class CNComponentManagerMid(CNComponentManager):
 
     # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(
-        self, argin: str, task_callback: Callable = None, task_abort_event=None
+        self, argin: str, task_callback: Callable, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """
         Load Dish Cfg command for Dish-VCC map.
@@ -966,7 +966,7 @@ class CNComponentManagerMid(CNComponentManager):
         )
 
     def set_gpm_version(
-        self, argin: str, task_callback: Callable = None, task_abort_event=None
+        self, argin: str, task_callback: Callable, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """
         Set GPM version for Dish.
@@ -1016,7 +1016,7 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
     def set_stow_mode(
-        self, argin: str, task_callback: Callable = None, task_abort_event=None
+        self, argin: str, task_callback: Callable, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """
         Set stow mode for given dishes.
@@ -1274,7 +1274,7 @@ class CNComponentManagerMid(CNComponentManager):
                 argin
             )
             # Validate command is allowed
-            self.is_command_allowed_callable(
+            self.is_command_allowed_before_lrc_start(
                 subarray_id=assign_resources_command_object.subarray_id,
                 command_name="AssignResources",
             )
@@ -1357,7 +1357,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self.get_subarray_id(argin)
             )
             # Validate command is allowed
-            self.is_command_allowed_callable(
+            self.is_command_allowed_before_lrc_start(
                 subarray_id=release_resources_command_object.subarray_id,
                 command_name="ReleaseResources",
             )

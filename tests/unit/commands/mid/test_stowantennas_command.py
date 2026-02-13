@@ -1,4 +1,5 @@
 import json
+import threading
 from unittest.mock import MagicMock, patch
 
 from ska_control_model import TaskStatus
@@ -15,7 +16,7 @@ def test_cm_set_stow_mode_success(
     cm, _ = create_cm()
     logger.info("%s", tango_context)
     argin = json.dumps(["ska001", "ska002"])
-    cm.set_stow_mode(argin, task_callback)
+    cm.set_stow_mode(argin, task_callback, task_abort_event=threading.Event())
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )

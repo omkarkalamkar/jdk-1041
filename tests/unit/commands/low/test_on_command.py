@@ -180,5 +180,5 @@ def test_telescope_on_command_rejected(
         time.sleep(0.5)
     cm.is_command_allowed("TelescopeOn")
     with pytest.raises(Exception) as exception:
-        cm.is_command_allowed_callable(command_name="TelescopeOn")
+        cm.is_command_allowed_before_lrc_start(command_name="TelescopeOn")
         assert "'low-tmc/leaf-node-mccs/0' not available" in str(exception)
