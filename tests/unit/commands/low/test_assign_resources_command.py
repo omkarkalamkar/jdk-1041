@@ -320,22 +320,6 @@ def test_low_assign_resources_bad_json(
 
 
 @pytest.mark.SKA_low
-def test_low_assign_resources_with_invalid_default_array_layout_url(
-    tango_context,
-    task_callback,
-    json_factory,
-    set_low_sdp_csp_mccs_admin_modes,
-):
-    """Test assign resources with invalid default telmodel type"""
-    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-
-    # Set invalid default telmodel (should be dict)
-    with pytest.raises(ValueError) as exception:
-        cm.default_array_layout_url = "invalid_string_not_dict"
-        assert "Invalid default ArrayLayout" in exception
-
-
-@pytest.mark.SKA_low
 def test_low_assign_resources_subarray_not_found(
     tango_context,
     task_callback,

@@ -423,35 +423,34 @@ class CNComponentManager(TmcComponentManager):
         :returns: None
 
         """
-        with tango.EnsureOmniThread():
-            while not self._stop_thread:
-                try:
-                    event_data = self.event_queue[attribute_name].get()
-                    if not self.check_event_error(
-                        event_data, f"{attribute_name}_Callback"
-                    ):
-                        if attribute_name in ("healthState", "adminMode"):
-                            self.event_processing_methods[attribute_name](
-                                event_data.device.dev_name(),
-                                event_data.attr_value.value,
-                                event_data.attr_value.time.todatetime(),
-                            )
-                        else:
-                            self.event_processing_methods[attribute_name](
-                                event_data.device.dev_name(),
-                                event_data.attr_value.value,
-                            )
-                    self.event_queue[attribute_name].task_done()
-                except Empty:
-                    # If an empty exception is raised by the Queue, we can
-                    # safely ignore it.
-                    pass
-                except Exception as exception:
-                    self.logger.error(
-                        "Exception: %s Traceback: %s",
-                        exception,
-                        traceback.print_exc(),
-                    )
+        while not self._stop_thread:
+            try:
+                event_data = self.event_queue[attribute_name].get()
+                if not self.check_event_error(
+                    event_data, f"{attribute_name}_Callback"
+                ):
+                    if attribute_name in ("healthState", "adminMode"):
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.attr_value.value,
+                            event_data.attr_value.time.todatetime(),
+                        )
+                    else:
+                        self.event_processing_methods[attribute_name](
+                            event_data.device.dev_name(),
+                            event_data.attr_value.value,
+                        )
+                self.event_queue[attribute_name].task_done()
+            except Empty:
+                # If an empty exception is raised by the Queue, we can
+                # safely ignore it.
+                pass
+            except Exception as exception:
+                self.logger.error(
+                    "Exception: %s Traceback: %s",
+                    exception,
+                    traceback.print_exc(),
+                )
 
     def check_event_error(self, event: tango.EventData, callback: str):
         """Method for checking event error."""
