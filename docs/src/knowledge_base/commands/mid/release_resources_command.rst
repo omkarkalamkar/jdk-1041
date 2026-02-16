@@ -23,7 +23,7 @@ ReleaseResourcesMid
 
     6. The following **state requirements** are applied for the **command execution** :-
 
-        A. TMC Subarray is in `'observation state'` **IDLE** .
+        A. TMC Subarray is in `'observation state'` **IDLE** . If not, the command is rejected with **'ResultCode - NOT_ALLOWED'**.
         B. :term:`telescopeAvailability` is checked to ensure the subsystems (SubarrayNode, CSP and SDP) are :term:`available`
 
     7. The **command execution** involves below **key operations** :-
