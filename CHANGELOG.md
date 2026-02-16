@@ -7,7 +7,12 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [unreleased]
 ************
+Updated
+-------
 * Updated CN to support base class v1.4.0 and pytango v10.1.2.
+* Used Signal for attribute wherever required for pushing event.
+* Updated is_command_allowed as per new base class.
+* Used long_running_command decorator for all commands.
 
 [0.29.2]
 *********
