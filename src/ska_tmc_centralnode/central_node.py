@@ -148,20 +148,25 @@ class AbstractCentralNode(TMCBaseDevice):
         doc="Health state of Telescope",
     )
 
-    _telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
-        stored=True, initial_value=tango.DevState.UNKNOWN
-    )
+    # _telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
+    #     stored=True, initial_value=tango.DevState.UNKNOWN
+    # )
 
     def read_telescopeState(self):
         """Reads telescopeState"""
         return self.component_manager.component.telescope_state
 
-    telescopeState = attribute_from_signal(
-        _telescope_state,
-        dtype="DevState",
-        description="DevState of telescope",
-        access=AttrWriteType.READ,
+    telescopeState = attribute(
+        dtype=tango.DevState,
+        doc="DevState of telescope",
     )
+
+    # telescopeState = attribute_from_signal(
+    #     _telescope_state,
+    #     dtype="DevState",
+    #     description="DevState of telescope",
+    #     access=AttrWriteType.READ,
+    # )
 
     _desired_telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
         stored=True, initial_value=tango.DevState.ON
@@ -172,7 +177,7 @@ class AbstractCentralNode(TMCBaseDevice):
         return self.component_manager.component.desired_telescope_state
 
     desiredTelescopeState = attribute_from_signal(
-        _telescope_state,
+        _desired_telescope_state,
         fget=read_desiredTelescopeState,
         dtype="DevState",
         description="desiredTelescopeState attribute of Central Node.",
@@ -265,7 +270,8 @@ class AbstractCentralNode(TMCBaseDevice):
     def update_telescope_state_callback(self, telescope_state):
         """Update telescope state callback"""
         self.logger.info("Updating telescope state %s", telescope_state)
-        self._telescope_state = telescope_state
+        # self._telescope_state = telescope_state
+        self.push_change_archive_events("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
         """Update Telescope health state callbacks"""
