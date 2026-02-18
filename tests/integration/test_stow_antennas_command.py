@@ -131,9 +131,25 @@ def set_stow_mode_command(
     assert "ska100" in result_data[1]
 
     # Invalid Input
-    result_code, message = central_node.SetStowMode('["ALL","ska036"]')
-    assert ResultCode.REJECTED in result_code
-    assert "Invalid input: Expected a list of dish IDs" in message[0]
+    result_code, unique_id = central_node.SetStowMode('["ALL","ska036"]')
+    assert unique_id[0].endswith("SetStowMode")
+    assert result_code[0] == ResultCode.QUEUED
+    message = (
+        "Invalid input: Expected a list of dish IDs "
+        + 'e.g., ["ska001", "ska002", ...] or ["ALL"]'
+    )
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (
+            unique_id[0],
+            json.dumps(
+                (
+                    int(ResultCode.NOT_ALLOWED),
+                    message,
+                )
+            ),
+        ),
+        lookahead=4,
+    )
 
 
 @pytest.mark.post_deployment

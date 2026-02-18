@@ -92,8 +92,7 @@ def assign_resources(
             json.dumps(
                 (
                     int(ResultCode.FAILED),
-                    "Exception from 'is_cmd_allowed' method: Subarray devices "
-                    + "not available: ['low-tmc/subarray/01']",
+                    "Subarray devices not available: ['low-tmc/subarray/01']",
                 )
             ),
         ),

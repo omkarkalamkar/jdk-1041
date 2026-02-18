@@ -13,9 +13,10 @@ from logging import Logger
 from queue import Queue
 from typing import Callable, Tuple
 
-from ska_control_model import AdminMode, ObsState
+from ska_control_model import AdminMode, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
+from ska_tango_base.faults import StateModelError
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
@@ -869,7 +870,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.logger.debug(
             "Dish Vcc Validation Event called with %s and Result: %s",
             dev_name,
-            ObsState(dish_vcc_validation_result).name,
+            ResultCode(dish_vcc_validation_result).name,
         )
         with self.dish_vcc_validation_attr_lock:
             if self.input_parameter.csp_mln_dev_name in dev_name:
@@ -923,8 +924,9 @@ class CNComponentManagerMid(CNComponentManager):
                         ]
                     }
 
+    # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(
-        self, argin: str, task_callback: Callable = None
+        self, argin: str, task_callback: Callable, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """
         Load Dish Cfg command for Dish-VCC map.
@@ -936,23 +938,13 @@ class CNComponentManagerMid(CNComponentManager):
             a result code and message
 
         """
-        loadishcfg_command = LoadDishCfg(
+        loadishcfg_command_object = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
         self.logger.debug(
             "Command Status: %s ",
             str(DishConfigStatus(self.dish_vcc_command_status).name),
         )
-        if self.dish_vcc_command_status in (
-            DishConfigStatus.STAGING,
-            DishConfigStatus.IN_PROGRESS,
-        ):
-            message = (
-                "Dish Vcc Configuration is in Progress. "
-                "Dish Vcc command status: %s ",
-                str(DishConfigStatus(self.dish_vcc_command_status).name),
-            )
-            return loadishcfg_command.reject_command(message)
 
         try:
             json.loads(argin)
@@ -961,19 +953,20 @@ class CNComponentManagerMid(CNComponentManager):
             self.dish_vcc_validation_status = {
                 CENTRALNODE_MID: "JsonDecodeError"
             }
-            return loadishcfg_command.reject_command(
-                f"The JSON string is malformed. Error: {str(e)}",
+            message = f"The JSON string is malformed. Error: {str(e)}"
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, message),
             )
 
-        task_status, response = self.submit_task(
-            loadishcfg_command.load_dish_cfg,
-            kwargs={"argin": argin},
+        return loadishcfg_command_object.load_dish_cfg(
+            argin=argin,
             task_callback=task_callback,
+            task_abort_event=task_abort_event,
         )
-        return task_status, response
 
     def set_gpm_version(
-        self, argin: str, task_callback: Callable = None
+        self, argin: str, task_callback: Callable, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """
         Set GPM version for Dish.
@@ -992,7 +985,7 @@ class CNComponentManagerMid(CNComponentManager):
             "tm_data_sources",
             "interface",
         ]
-        set_gpm_version_command = SetGlobalPointingModel(
+        set_gpm_version_command_object = SetGlobalPointingModel(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
@@ -1008,18 +1001,22 @@ class CNComponentManagerMid(CNComponentManager):
                     "Executing initialization/restart SetGPM on %s",
                     self.gpm_unknown_dishes,
                 )
-            task_status, response = self.submit_task(
-                set_gpm_version_command.apply_gpm,
-                args=[argin, self.logger],
+
+            return set_gpm_version_command_object.apply_gpm(
+                dish_gpm_params=argin,
+                logger=self.logger,
                 task_callback=task_callback,
+                task_abort_event=task_abort_event,
             )
-            return task_status, response
         except Exception as exception:
             self.logger.exception("Exception occured %s", exception)
-            return set_gpm_version_command.reject_command(exception)
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, str(exception)),
+            )
 
     def set_stow_mode(
-        self, argin: str, task_callback: Callable = None
+        self, argin: str, task_callback: Callable, task_abort_event
     ) -> Tuple[ResultCode, str]:
         """
         Set stow mode for given dishes.
@@ -1032,7 +1029,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
 
-        set_stow_mode_command = SetStowMode(
+        set_stow_mode_command_object = SetStowMode(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
@@ -1052,15 +1049,19 @@ class CNComponentManagerMid(CNComponentManager):
             GPMJsonModel.validate_dish_ids(stow_input)
             stow_input = [dish_id.lower() for dish_id in stow_input]
             self.logger.info("Stow command dish list: %s", stow_input)
-            task_status, response = self.submit_task(
-                set_stow_mode_command.apply_stow_mode,
-                kwargs={"argin": stow_input},
+            return set_stow_mode_command_object.apply_stow_mode(
+                argin=stow_input,
                 task_callback=task_callback,
+                task_abort_event=task_abort_event,
             )
-            return task_status, response
         except Exception as exception:
             self.logger.exception("Exception occured %s", exception)
-            return set_stow_mode_command.reject_command(exception)
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, str(exception)),
+            )
+
+    # pylint: enable=unexpected-keyword-arg
 
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""
@@ -1208,30 +1209,45 @@ class CNComponentManagerMid(CNComponentManager):
                     self.get_current_dish_mode_of_dln(dish_id)
                 ).name
 
-    def validate_assign_json(self, argin: str):
+    def validate_assign_json(self, argin: str) -> Tuple[str, str]:
         """Validates assign resources json
 
         :param argin: json input
         :type argin: str
+
+        :return: Returns the original argument and exception message.
+        :rtype: tuple[str, str]
         """
-        json_argument = json.loads(argin)
-        self.validate_subarray_id(json_argument)
-        # Utilize CDM to validate json.
-        available_subarrays_list = self.input_parameter.subarray_dev_names
-        dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
-        available_dish_leaf_node_devices = (
-            self.input_parameter.dish_leaf_node_dev_names
-        )
-        assign_validator = AssignResourceValidator(
-            available_subarrays_list,
-            available_dish_leaf_node_devices,
-            dish_leaf_node_prefix,
-            self.logger,
-        )
+        exception_msg: str = ""
+        try:
+            json_argument = json.loads(argin)
+            self.validate_subarray_id(json_argument)
+            # Utilize CDM to validate json.
+            available_subarrays_list = self.input_parameter.subarray_dev_names
+            dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
+            available_dish_leaf_node_devices = (
+                self.input_parameter.dish_leaf_node_dev_names
+            )
+            assign_validator = AssignResourceValidator(
+                available_subarrays_list,
+                available_dish_leaf_node_devices,
+                dish_leaf_node_prefix,
+                self.logger,
+            )
 
-        assign_validator.loads(argin)
+            assign_validator.loads(argin)
+        except Exception as exception:
+            exception_msg = str(exception)
+            self.logger.exception(
+                "Exception occurred while processing assignresource: %s ",
+                exception_msg,
+            )
+        return argin, exception_msg
 
-    def assign_resources(self, argin, task_callback: TaskCallbackType):
+    # pylint: disable=unexpected-keyword-arg
+    def assign_resources(
+        self, argin, task_callback: TaskCallbackType, task_abort_event
+    ) -> Tuple[TaskStatus, str]:
         """
         Submits the AssignResources command in queue.
 
@@ -1239,6 +1255,8 @@ class CNComponentManagerMid(CNComponentManager):
         :type argin: str
         :param task_callback: Update task state, defaults to None
         :type task_callback: TaskCallbackType
+        :param task_abort_event: Event to abort the task
+        :type task_abort_event: Event
         :return: task_status
         :rtype: tuple
         """
@@ -1247,44 +1265,76 @@ class CNComponentManagerMid(CNComponentManager):
             self.logger.debug(
                 "Calling component manager assign_resources method"
             )
-            assign_resources_command = AssignResourcesMid(
+            assign_resources_command_object = AssignResourcesMid(
                 self,
                 adapter_factory=self.adapter_factory,
                 logger=self.logger,
             )
-            self.validate_assign_json(argin)
-            assign_resources_command.subarray_id = self.get_subarray_id(argin)
-            task_status, response = self.submit_task(
-                assign_resources_command.assign_resources,
-                kwargs={"argin": argin},
+            assign_resources_command_object.subarray_id = self.get_subarray_id(
+                argin
+            )
+            # Validate command is allowed
+            self.is_command_allowed_before_lrc_start(
+                subarray_id=assign_resources_command_object.subarray_id,
+                command_name="AssignResources",
+            )
+
+            return assign_resources_command_object.assign_resources(
+                argin=argin,
                 task_callback=task_callback,
-                is_cmd_allowed=self.command_not_allowed_callable(
-                    self.get_subarray_id(argin),
-                    [ObsState.EMPTY, ObsState.IDLE],
-                    "AssignResources",
-                ),
-            )
-            self.logger.info(
-                "AssignResources command's status: "
-                + f"{task_status.name}, and response: {response}"
+                task_abort_event=task_abort_event,
             )
 
-            return task_status, response
+        except (StateModelError, CommandNotAllowed) as exception:
+            self.logger.exception(
+                "Exception occurred while processing " + "assignresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, str(exception)),
+            )
+
         except Exception as exception:
-            return assign_resources_command.reject_command(str(exception))
+            self.logger.exception(
+                "Exception occurred while processing " + "assignresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, str(exception)),
+            )
 
-    def validate_release_json(self, argin: str):
+    # pylint: enable=unexpected-keyword-arg
+
+    def validate_release_json(self, argin: str) -> Tuple[str, str]:
         """Validates the release resource json.
 
         :param argin: release resource json string.
         :type argin: str
-        """
-        json_argument = json.loads(argin)
-        self.validate_subarray_id(json_argument)
-        release_validator = ReleaseResourceValidator(self.logger)
-        release_validator.loads(argin)
 
-    def release_resources(self, argin: str, task_callback: TaskCallbackType):
+        :return: Returns the original argument and exception message.
+        :rtype: tuple[str, str]
+        """
+        exception_msg: str = ""
+        try:
+            json_argument = json.loads(argin)
+            self.validate_subarray_id(json_argument)
+            release_validator = ReleaseResourceValidator(self.logger)
+            release_validator.loads(argin)
+
+        except Exception as exception:
+            exception_msg = str(exception)
+            self.logger.exception(
+                "Exception occurred while processing releaseresource: %s ",
+                exception_msg,
+            )
+        return argin, exception_msg
+
+    # pylint: disable=unexpected-keyword-arg
+    def release_resources(
+        self, argin: str, task_callback: TaskCallbackType, task_abort_event
+    ) -> Tuple[TaskStatus, str]:
         """
         Submit the ReleaseResource command in queue.
 
@@ -1292,33 +1342,51 @@ class CNComponentManagerMid(CNComponentManager):
         :type argin: str
         :param task_callback: Updates task status
         :type task_callback: TaskCallbackType
+        :param task_abort_event: Event to abort the task
+        :type task_abort_event: Event
         :return: task_status
         :rtype: tuple
         """
         try:
-            release_resources_command = ReleaseResourcesMid(
+            release_resources_command_object = ReleaseResourcesMid(
                 self, adapter_factory=self.adapter_factory, logger=self.logger
             )
-            self.validate_release_json(argin)
 
             self.check_availability_for_release(argin)
-
-            task_status, response = self.submit_task(
-                release_resources_command.release_resources,
-                kwargs={"argin": argin},
+            release_resources_command_object.subarray_id = (
+                self.get_subarray_id(argin)
+            )
+            # Validate command is allowed
+            self.is_command_allowed_before_lrc_start(
+                subarray_id=release_resources_command_object.subarray_id,
+                command_name="ReleaseResources",
+            )
+            return release_resources_command_object.release_resources(
+                argin=argin,
                 task_callback=task_callback,
-                is_cmd_allowed=self.command_not_allowed_callable(
-                    self.get_subarray_id(argin),
-                    [ObsState.IDLE],
-                    "ReleaseResources",
-                ),
-            )
-            self.logger.info(
-                "ReleaseResources command's status: "
-                + f"{task_status.name}, and response: {response}"
+                task_abort_event=task_abort_event,
             )
 
-            return task_status, response
+        except (StateModelError, CommandNotAllowed) as exception:
+            self.logger.exception(
+                "Exception occurred while processing "
+                + "releaseresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, str(exception)),
+            )
 
         except Exception as exception:
-            return release_resources_command.reject_command(str(exception))
+            self.logger.exception(
+                "Exception occurred while processing "
+                + "releaseresource: %s ",
+                exception,
+            )
+            return task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, str(exception)),
+            )
+
+    # pylint: enable=unexpected-keyword-arg

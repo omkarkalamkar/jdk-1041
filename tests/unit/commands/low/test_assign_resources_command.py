@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 
 import mock
@@ -17,6 +18,9 @@ from ska_tmc_centralnode.commands.assign_resources_command_low import (
     AssignResourcesLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    assign_validate_json_args,
+)
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
@@ -35,9 +39,10 @@ def test_low_assign_resources_command(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     assign_input_str = json_factory("assign_resource_low")
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -51,60 +56,54 @@ def test_low_assign_resources_command(
 
 
 @pytest.mark.SKA_low
-def test_assign_resources_missing_eb_id_key_and_processing_blocks(
+@pytest.mark.parametrize("missing_key", ["pb_id", "eb_id"])
+def test_assign_resources_missing_eb_id_key_and_pb_id_key(
     tango_context,
     task_callback,
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
+    missing_key,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
-    json_argument["sdp"]["execution_block"]["eb_id"] = ""
-    del json_argument["sdp"]["processing_blocks"]
-    (res_code, _) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
-    with pytest.raises(Exception) as e:
-        assert "processing_blocks" in e
+    match missing_key:
+        case "eb_id":
+            json_argument["sdp"]["execution_block"]["eb_id"] = ""
+        case "pb_id":
+            json_argument["sdp"]["processing_blocks"][0]["pb_id"] = ""
+
+    json_decoded = json.dumps(json_argument)
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, json_decoded)
+
+    assert result_code == [ResultCode.REJECTED]
+
+    assert missing_key in message[0]
 
 
-def test_assign_resources_missing_sdp_key(
+@pytest.mark.parametrize("missing_key", ["sdp", "csp", "subarray_id", "mccs"])
+def test_assign_resources_missing_sdp_csp_subarray_id_mccs_key(
     tango_context,
     task_callback,
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
+    missing_key,
 ):
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
-    del json_argument["sdp"]
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
-    assert "sdp" in message
+    del json_argument[missing_key]
+    json_decoded = json.dumps(json_argument)
+    decorated = assign_validate_json_args(cm.assign_resources)
 
+    result_code, message = decorated(cm, json_decoded)
 
-def test_assign_resources_missing_csp_key(
-    tango_context,
-    task_callback,
-    json_factory,
-    set_low_sdp_csp_mccs_admin_modes,
-):
-    logger.info("%s", tango_context)
-    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    assign_input_str = json_factory("assign_resource_low")
-    json_argument = json.loads(assign_input_str)
-    del json_argument["csp"]
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
-    assert "csp" in message
+    assert result_code == [ResultCode.REJECTED]
+    assert missing_key in message[0]
 
 
 def test_low_assign_resources_command_fail_subarray(
@@ -148,11 +147,13 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
     del json_argument["mccs"]["subarray_beams"][0]["subarray_beam_id"]
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
-    assert "subarray_beam_id" in message
+    json_decoded = json.dumps(json_argument)
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, json_decoded)
+
+    assert result_code == [ResultCode.REJECTED]
+    assert "subarray_beam_id" in message[0]
 
 
 @pytest.mark.SKA_low
@@ -162,8 +163,12 @@ def test_low_assign_resources_command_empty_input_json(
     logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    (res_code, _) = cm.assign_resources(" ", task_callback=task_callback)
-    assert res_code == TaskStatus.REJECTED
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, " ")
+
+    assert result_code == [ResultCode.REJECTED]
+    assert message[0] == "Malformed input JSON"
 
 
 def test_low_assign_resources_command_with_invalide_key(
@@ -175,54 +180,15 @@ def test_low_assign_resources_command_with_invalide_key(
     logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assign_input_str = json_factory("invalid_key_AssignResources")
-    # json_argument = json.loads(assign_input_str)
-    (res_code, message) = cm.assign_resources(
-        assign_input_str, task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, assign_input_str)
+
+    assert result_code == [ResultCode.REJECTED]
     assert (
-        "subarray_id key is not present in the input json argument" in message
+        "subarray_id key is not present in the input json argument"
+        in message[0]
     )
-
-
-@pytest.mark.SKA_low
-def test_low_assign_resources_missing_subarray_id(
-    tango_context,
-    task_callback,
-    json_factory,
-    set_low_sdp_csp_mccs_admin_modes,
-):
-    logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
-    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    assign_input_str = json_factory("assign_resource_low")
-    json_argument = json.loads(assign_input_str)
-    del json_argument["subarray_id"]
-    (res_code, message) = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
-    assert "subarray_id" in message
-
-
-def test_low_assign_resources_command_missing_mccs(
-    tango_context,
-    task_callback,
-    json_factory,
-    set_low_sdp_csp_mccs_admin_modes,
-):
-    logger.info("%s", tango_context)
-    # import debugpy; debugpy.debug_this_thread()
-    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    assert cm.is_command_allowed("AssignResources")
-    assign_input_str = json_factory("assign_resource_low")
-    json_argument = json.loads(assign_input_str)
-    del json_argument["mccs"]
-    res_code, message = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
-    assert "mccs" in message
 
 
 def test_low_assign_resources_command_missing_aperture_id(
@@ -240,11 +206,13 @@ def test_low_assign_resources_command_missing_aperture_id(
     del json_argument["mccs"]["subarray_beams"][0]["apertures"][0][
         "aperture_id"
     ]
-    res_code, message = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
-    assert "aperture_id" in message
+    json_decoded = json.dumps(json_argument)
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, json_decoded)
+
+    assert result_code == [ResultCode.REJECTED]
+    assert "aperture_id" in message[0]
 
 
 def test_low_assign_resources_command_missing_station_ids(
@@ -263,11 +231,13 @@ def test_low_assign_resources_command_missing_station_ids(
     del json_argument["mccs"]["subarray_beams"][0]["apertures"][0][
         "station_id"
     ]
-    res_code, message = cm.assign_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
-    assert "station_id" in message
+    json_decoded = json.dumps(json_argument)
+    decorated = assign_validate_json_args(cm.assign_resources)
+
+    result_code, message = decorated(cm, json_decoded)
+
+    assert result_code == [ResultCode.REJECTED]
+    assert "station_id" in message[0]
 
 
 @pytest.mark.SKA_low
@@ -315,9 +285,10 @@ def test_low_assign_resources_raises_state_model_exception(
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("assign_resource_low")
-    cm.assign_resources(assign_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -327,3 +298,47 @@ def test_low_assign_resources_raises_state_model_exception(
             "AssignResources command not permitted in observation state 4",
         ),
     )
+
+
+@pytest.mark.SKA_low
+def test_low_assign_resources_bad_json(
+    tango_context,
+    task_callback,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test assign resources with bad JSON"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    adapter_factory = HelperAdapterFactory()
+
+    assign_input_str = "{ invalid json"
+    assign_res_command = AssignResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
+    (res_code, message) = assign_res_command.do(assign_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "Problem in loading the JSON string" in str(message)
+
+
+@pytest.mark.SKA_low
+def test_low_assign_resources_subarray_not_found(
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test assign resources when subarray adapter not found"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    adapter_factory = HelperAdapterFactory()
+
+    assign_input_str = json_factory("assign_resource_low")
+    json_arg = json.loads(assign_input_str)
+    json_arg["subarray_id"] = 99
+    assign_input_str = json.dumps(json_arg)
+
+    assign_res_command = AssignResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
+    assign_res_command.subarray_id = 99
+    (res_code, message) = assign_res_command.do(assign_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "is not existing" in message

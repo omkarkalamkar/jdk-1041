@@ -41,7 +41,7 @@ class TelescopeOn(TelescopeOnOff):
         logger: logging.Logger,
         task_callback: Callable = None,
         task_abort_event: Optional[threading.Event] = None,
-    ) -> None:
+    ) -> Tuple[ResultCode, str]:
         """
         This is a long running method for TelescopeOn command,
         it executes do hook,
@@ -56,9 +56,9 @@ class TelescopeOn(TelescopeOnOff):
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
 
-        ret_code, message = self.do(argin=None)
+        result_code, message = self.do(argin=None)
         self.logger.info(message)
-        if ret_code == ResultCode.FAILED:
+        if result_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.FAILED, message),
@@ -69,6 +69,8 @@ class TelescopeOn(TelescopeOnOff):
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.OK, message),
             )
+
+        return result_code, message
 
     def do_mid(self, argin=None) -> Tuple[ResultCode, str]:
         """

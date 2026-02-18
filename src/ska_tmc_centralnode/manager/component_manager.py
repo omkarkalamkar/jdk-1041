@@ -398,8 +398,9 @@ class CNComponentManager(TmcComponentManager):
         """This method keep tracking aggregate health state changed
         from aggregation process
         """
+
         while not self._stop_thread:
-            if self.aggregate_value_update_event.wait(0.1):
+            if self.aggregate_value_update_event.wait(0.3):
                 self.aggregate_value_update_event.clear()
                 current_health_state = self.aggregated_health_state[0]
                 self.component.telescope_health_state = current_health_state
@@ -1140,65 +1141,61 @@ class CNComponentManager(TmcComponentManager):
             else:
                 self.component.imaging = ModesAvailability.not_available
 
-    def telescope_on(self, task_callback: TaskCallbackType | None = None):
+    def telescope_on(
+        self,
+        task_callback: TaskCallbackType | None = None,
+        task_abort_event=None,
+    ):
         """
         Turn the Telescope On.
 
         :return: a result code and message
         """
-        telescope_on_command = TelescopeOn(
+        telescope_on_command_object = TelescopeOn(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, response = self.submit_task(
-            telescope_on_command.telescope_on,
-            args=[self.logger],
+        return telescope_on_command_object.telescope_on(
+            logger=self.logger,
             task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeOn"
-            ),
+            task_abort_event=task_abort_event,
         )
-        return task_status, response
 
-    def telescope_off(self, task_callback: Callable = None):
+    def telescope_off(
+        self, task_callback: Callable = None, task_abort_event=None
+    ):
         """
         Turn the Telescope Off.
 
         :return: a result code and message
         """
-        telescope_off_command = TelescopeOff(
+        telescope_off_command_object = TelescopeOff(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, response = self.submit_task(
-            telescope_off_command.telescope_off,
-            args=[self.logger],
+        return telescope_off_command_object.telescope_off(
+            logger=self.logger,
             task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeOff"
-            ),
+            task_abort_event=task_abort_event,
         )
-        return task_status, response
 
-    def telescope_standby(self, task_callback: Callable = None):
+    def telescope_standby(
+        self, task_callback: Callable = None, task_abort_event=None
+    ):
         """
         Standby the Telescope.
 
         :return: a result code and message
         """
-        telescopestandby_command = TelescopeStandby(
+        telescopestandby_command_object = TelescopeStandby(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
 
-        task_status, response = self.submit_task(
-            telescopestandby_command.telescope_standby,
-            args=[self.logger],
+        return telescopestandby_command_object.telescope_standby(
+            logger=self.logger,
             task_callback=task_callback,
-            is_cmd_allowed=self.command_not_allowed_callable(
-                command_name="TelescopeStandby"
-            ),
+            task_abort_event=task_abort_event,
         )
-        return task_status, response
 
     def is_input_json_valid(self, argin: str) -> Tuple[bool, str]:
         """
@@ -1306,6 +1303,51 @@ class CNComponentManager(TmcComponentManager):
             return True
 
         return is_subarray_in_right_obs_state
+
+    def is_command_allowed_before_lrc_start(
+        self,
+        subarray_id: int = 0,
+        command_name: str = "",
+    ):
+        """This method checks if command is allowed before LRC start
+
+        Args:
+            subarray_id (int): subarray_id
+            command_name (str): command name
+
+        Returns:
+            boolean value if command in valid obstate else
+            return exception.
+
+        Raises:
+            StateModelError: If command not permitted in observation state
+            SubarrayNotPresentError: If subarray not available
+            CommandNotAllowed: If command not allowed due to other
+                unavailable devices
+
+        """
+
+        self.check_device_responsiveness_command(command_name, subarray_id)
+        allowed_obs_states = {
+            "AssignResources": [ObsState.EMPTY, ObsState.IDLE],
+            "ReleaseResources": [ObsState.IDLE],
+        }
+        if command_name in allowed_obs_states:
+            desired_obsstate = allowed_obs_states.get(command_name)
+        else:
+            desired_obsstate = None
+        if subarray_id and desired_obsstate:
+            subarray_devices = self.input_parameter.subarray_dev_names
+            for device in subarray_devices:
+                subarray_device_id = re.findall(r"\d+", device)
+                if subarray_id == int(subarray_device_id[0]):
+                    subarray_obstate = self.get_device(device).obs_state
+                    if subarray_obstate not in desired_obsstate:
+                        raise StateModelError(
+                            f"{command_name} command not permitted "
+                            + f"in observation state {subarray_obstate}"
+                        )
+        return True
 
     def check_device_responsiveness_command(
         self, command_name: str, subarray_id: int

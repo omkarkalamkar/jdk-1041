@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 
 import pytest
@@ -84,11 +85,12 @@ def test_low_assign_resources_command_without_array_layout(
 
     assign_input = json.loads(assign_input)
     assign_input["telmodel"] = low_array_layout
-    cm.assign_resources(json.dumps(assign_input), task_callback=task_callback)
-
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.assign_resources(
+        json.dumps(assign_input),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
+
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -157,12 +159,13 @@ def test_low_assign_resources_fails_with_invalid_default_array_layout_json(
     )
 
     # Invoke AssignResources via the CM path
-    cm.assign_resources(json.dumps(assign_input), task_callback=task_callback)
+    cm.assign_resources(
+        json.dumps(assign_input),
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
 
     # Usual task lifecycle checks
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )

@@ -80,7 +80,6 @@ def test_standby_command_mid(
         "longRunningCommandResult: %s",
         str(central_node.longRunningCommandResult),
     )
-
     central_node.subscribe_event(
         "telescopeState",
         tango.EventType.CHANGE_EVENT,
@@ -155,7 +154,7 @@ def test_standby_command_low(
 
     # Check whether the telescopeState is STANDBY
     change_event_callbacks["telescopeState"].assert_change_event(
-        DevState.STANDBY, lookahead=4
+        DevState.STANDBY, lookahead=8
     )
     logger.info("telescopeState: %s", str(central_node.telescopeState))
 

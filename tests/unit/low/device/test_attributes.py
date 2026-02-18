@@ -61,3 +61,29 @@ def test_attributes(central_node_device):
     assert central_node_device.buildState == (
         "{},{},{}".format(release.name, release.version, release.description)
     )
+
+
+@pytest.mark.SKA_low
+def test_assign_resources_schema_version_attribute(central_node_device):
+    """Test assignResourcesSchemaVersion attribute read and write"""
+    # Test read
+    initial_version = central_node_device.assignResourcesSchemaVersion
+    assert isinstance(initial_version, str)
+
+    # Test write
+    test_version = "2.5"
+    central_node_device.assignResourcesSchemaVersion = test_version
+    assert central_node_device.assignResourcesSchemaVersion == test_version
+
+
+@pytest.mark.SKA_low
+def test_release_resources_schema_version_attribute(central_node_device):
+    """Test releaseResourcesSchemaVersion attribute read and write"""
+    # Test read
+    initial_version = central_node_device.releaseResourcesSchemaVersion
+    assert isinstance(initial_version, str)
+
+    # Test write
+    test_version = "3.0"
+    central_node_device.releaseResourcesSchemaVersion = test_version
+    assert central_node_device.releaseResourcesSchemaVersion == test_version

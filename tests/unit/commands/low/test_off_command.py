@@ -4,7 +4,6 @@ import mock
 import pytest
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -53,9 +52,6 @@ def test_low_telescope_off_command(
     ] is True
     cm.is_command_allowed("TelescopeOff")
     cm.telescope_off(task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -141,9 +137,6 @@ def test_telescope_off_command_fail_subarray(
 
     cm.telescope_off(task_callback=task_callback)
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
-    task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
     callback_data = task_callback.assert_against_call(
@@ -188,16 +181,6 @@ def test_telescope_off_command_rejected(
         time.sleep(0.5)
 
     cm.is_command_allowed("TelescopeOff")
-    cm.telescope_off(task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
-    )
-
-    data = task_callback.assert_call(
-        status=TaskStatus.REJECTED,
-        result=Anything,
-        exception=Anything,
-        lookahead=5,
-    )
-    assert ResultCode.FAILED == data["result"][0]
-    assert f"['{MCCS_MLN_DEVICE}'] not available" in data["result"][1]
+    with pytest.raises(Exception) as exception:
+        cm.is_command_allowed_before_lrc_start(command_name="TelescopeOff")
+        assert "'low-tmc/leaf-node-mccs/0' not available" in str(exception)

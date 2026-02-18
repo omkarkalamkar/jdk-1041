@@ -41,9 +41,9 @@ class SetGlobalPointingModel(SetDishGPM):
     def apply_gpm(
         self,
         dish_gpm_params: str,
-        logger=None,
-        task_callback: Callable = None,
-        task_abort_event: Optional[threading.Event] = None,
+        logger,
+        task_callback: Callable,
+        task_abort_event: Optional[threading.Event],
     ) -> None:
         """
         Applies the Global Pointing Model (GPM) to dishes
@@ -62,6 +62,8 @@ class SetGlobalPointingModel(SetDishGPM):
         """
         # Indicate that the task has started
         self.task_callback = task_callback
+        self.task_abort_event = task_abort_event
+        self.component_manager.abort_event = self.task_abort_event
         self.set_command_id(__class__.__name__)
         self.task_callback(status=TaskStatus.IN_PROGRESS)
         self.component_manager.command_in_progress = "SetGlobalPointingModel"

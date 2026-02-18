@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 from os.path import dirname, join
 
@@ -7,7 +8,6 @@ import pytest
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
@@ -19,6 +19,9 @@ from ska_tmc_centralnode.commands.release_resources_command_mid import (
     ReleaseResourcesMid,
 )
 from ska_tmc_centralnode.model.input import InputParameterMid
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    release_validate_json_args,
+)
 from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
@@ -43,11 +46,11 @@ def test_mid_release_resources_command_with_ok(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     release_input_str = get_release_input_str()
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
-
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -90,8 +93,12 @@ def test_mid_release_resources_command_empty_input_json(
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("ReleaseResources")
-    (res_code, _) = cm.release_resources("", task_callback=task_callback)
-    assert res_code == TaskStatus.REJECTED
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, " ")
+
+    assert result_code == [ResultCode.REJECTED]
+    assert message[0] == "Malformed input JSON"
 
 
 def test_telescope_release_resources_fail_check_allowed(
@@ -119,10 +126,15 @@ def test_mid_release_resources_command_with_invalide_key(
     check_if_subarray_is_available(cm)
     release_input_str = json_factory("invalid_key_ReleaseResources")
     # with pytest.raises(InvalidJSONError):
-    result_code, message = cm.release_resources(
-        release_input_str, task_callback=task_callback
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, release_input_str)
+
+    assert result_code == [ResultCode.REJECTED]
+    assert (
+        "subarray_id key is not present in the input json argument"
+        in message[0]
     )
-    assert result_code == TaskStatus.REJECTED
 
 
 def test_release_resources_command_timeout(
@@ -155,9 +167,10 @@ def test_release_resources_command_timeout(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
 
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -193,9 +206,10 @@ def test_release_resources_exception_on_sn(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     release_input_str = get_release_input_str()
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -234,15 +248,17 @@ def test_mid_release_resources_raises_state_model_exception(
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
     release_input_str = get_release_input_str()
-    cm.release_resources(release_input_str, task_callback=task_callback)
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+        call_kwargs={
+            "status": TaskStatus.REJECTED,
+            "result": (
+                ResultCode.NOT_ALLOWED,
+                "ReleaseResources command not permitted in observation state 0",
+            ),
+        }
     )
-
-    data = task_callback.assert_call(
-        status=TaskStatus.REJECTED,
-        result=Anything,
-        lookahead=5,
-    )
-    assert ResultCode.NOT_ALLOWED == data["result"][0]
-    assert "ReleaseResources command not permitted" in data["result"][1]

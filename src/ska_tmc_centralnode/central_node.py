@@ -6,15 +6,27 @@ of state and mode attributes defined by the SKA Control Model.
 
 # pylint:disable = attribute-defined-outside-init
 import json
+from threading import Event
+from typing import List, Tuple, Union
 
 import tango
-from ska_control_model import HealthState
-from ska_tango_base.commands import ResultCode, SubmittedSlowCommand
+from ska_control_model import HealthState, ResultCode
+from ska_tango_base.base import TaskCallbackType
+from ska_tango_base.long_running_commands import (
+    LRCReqType,
+    long_running_command,
+)
+from ska_tango_base.software_bus import Signal, attribute_from_signal
+from ska_tmc_common.exceptions import CommandNotAllowed, DeviceUnresponsive
 from ska_tmc_common.v1.tmc_base_device import TMCBaseDevice
 from tango import ApiUtil, AttrWriteType, Database, DebugIt
 from tango.server import attribute, command, device_property
 
 from ska_tmc_centralnode import release
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    assign_validate_json_args,
+    release_validate_json_args,
+)
 
 
 class AbstractCentralNode(TMCBaseDevice):
@@ -24,6 +36,8 @@ class AbstractCentralNode(TMCBaseDevice):
     inherited from SKABaseDevice class. TMCBaseDevice class contains
     attributes common to CentralNode and SubarrayNode.
     """
+
+    InitCommand = None
 
     # -----------------
     # Device Properties
@@ -60,8 +74,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         json_value = json.dumps(url_dict)
         self._memorize_attr("arrayLayoutURL", json_value)
-        with tango.EnsureOmniThread():
-            self.push_change_archive_events("arrayLayoutURL", json_value)
+        self._array_layout_url = json_value
 
     def update_default_array_layout_url_callback(self, url_dict: dict) -> None:
         """
@@ -75,10 +88,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         json_value = json.dumps(url_dict)
         self._memorize_attr("DefaultArrayLayoutURL", json_value)
-        with tango.EnsureOmniThread():
-            self.push_change_archive_events(
-                "DefaultArrayLayoutURL", json_value
-            )
+        self._default_array_layout_url = json_value
 
     TMCSubarrayNodes = device_property(
         dtype=("str",),
@@ -129,63 +139,113 @@ class AbstractCentralNode(TMCBaseDevice):
             "Example: 'instrument/ska1_mid/layout/mid-layout.json'"
         ),
     )
-    # ----------
-    # Attributes
-    # ----------
+    # ----------------------
+    # Attributes and methods
+    # ----------------------
 
     telescopeHealthState = attribute(
         dtype=HealthState,
         doc="Health state of Telescope",
     )
 
+    def read_telescopeState(self):
+        """Reads telescopeState"""
+        return self.component_manager.component.telescope_state
+
     telescopeState = attribute(
-        dtype="DevState",
-        access=AttrWriteType.READ,
+        dtype=tango.DevState,
         doc="DevState of telescope",
     )
 
-    desiredTelescopeState = attribute(
-        dtype="DevState",
-        access=AttrWriteType.READ,
-        doc="desiredTelescopeState attribute of Central Node.",
+    _desired_telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
+        stored=True, initial_value=tango.DevState.ON
     )
 
-    @attribute(
-        dtype="DevString",
-        access=AttrWriteType.READ_WRITE,
-        memorized=True,
-        hw_memorized=True,
+    def read_desiredTelescopeState(self):
+        """Read Desired TelescopeState"""
+        return self.component_manager.component.desired_telescope_state
+
+    desiredTelescopeState = attribute_from_signal(
+        _desired_telescope_state,
+        fget=read_desiredTelescopeState,
+        dtype="DevState",
+        description="desiredTelescopeState attribute of Central Node.",
+        access=AttrWriteType.READ,
     )
-    def arrayLayoutURL(self) -> str:
+
+    _array_layout_url: Signal = Signal[str](stored=True)
+
+    def read_arrayLayoutURL(self) -> str:
         """Returns the array layout URL attribute value."""
         return json.dumps(self.component_manager.array_layout_url)
 
-    @arrayLayoutURL.write
-    def arrayLayoutURL(self, url: str) -> None:
-        """Sets the array layout URL."""
+    def write_arrayLayoutURL(self, url: str) -> None:
+        """Set the Array Layout URL value.
+
+        Args:
+            uri (str): Array Layout URL
+        """
         self.component_manager.array_layout_url = json.loads(url)
 
-    @attribute(
-        dtype="DevString",
+    arrayLayoutURL = attribute_from_signal(
+        _array_layout_url,
+        fget=read_arrayLayoutURL,
+        fset=write_arrayLayoutURL,
+        dtype=str,
         access=AttrWriteType.READ_WRITE,
         memorized=True,
         hw_memorized=True,
     )
-    def DefaultArrayLayoutURL(self) -> str:
+
+    _default_array_layout_url: Signal = Signal[str](stored=True)
+
+    def read_DefaultArrayLayoutURL(self) -> str:
         """Returns the default array layout URL attribute value."""
         return json.dumps(self.component_manager.default_array_layout_url)
 
-    @DefaultArrayLayoutURL.write
-    def DefaultArrayLayoutURL(self, url: str) -> None:
+    def write_DefaultArrayLayoutURL(self, url: str) -> None:
         """Sets the default array layout URL."""
         self.component_manager.default_array_layout_url = json.loads(url)
 
-    tmOpState = attribute(
-        dtype="DevState",
+    DefaultArrayLayoutURL = attribute_from_signal(
+        _default_array_layout_url,
+        fget=read_DefaultArrayLayoutURL,
+        fset=write_DefaultArrayLayoutURL,
+        dtype=str,
+        access=AttrWriteType.READ_WRITE,
+        memorized=True,
+        hw_memorized=True,
     )
 
-    telescopeAvailability = attribute(
-        dtype="str",
+    _tm_op_state: Signal[tango.DevState] = Signal[str](
+        stored=True, initial_value=tango.DevState.UNKNOWN
+    )
+
+    def read_tmOpState(self):
+        """Return the tmOpState attribute."""
+        return self.component_manager.component.tmc_op_state
+
+    tmOpState = attribute_from_signal(
+        _tm_op_state,
+        fget=read_tmOpState,
+        dtype="DevState",
+        access=AttrWriteType.READ,
+    )
+
+    _telescope_availability: Signal[str] = Signal[str](
+        stored=True, initial_value=""
+    )
+
+    def read_telescopeAvailability(self):
+        "Returns telescope availability"
+        return json.dumps(
+            self.component_manager.component.telescope_availability
+        )
+
+    telescopeAvailability = attribute_from_signal(
+        _telescope_availability,
+        fget=read_telescopeAvailability,
+        dtype=str,
         access=AttrWriteType.READ,
     )
 
@@ -201,63 +261,49 @@ class AbstractCentralNode(TMCBaseDevice):
         self.push_change_archive_events("telescopeState", telescope_state)
 
     def update_telescope_health_state_callback(self, telescope_health_state):
-        """Update Telescope health state callabacks"""
+        """Update Telescope health state callbacks"""
         self.push_change_archive_events(
             "telescopeHealthState", telescope_health_state
         )
 
     def update_tmc_op_state_callback(self, tmc_op_state):
-        """Update tmc operational state callabacks"""
-        self.push_change_archive_events("tmOpState", tmc_op_state)
+        """Update tmc operational state callbacks"""
+        self._tm_op_state = tmc_op_state
 
     def update_telescope_availability_callback(self, telescope_availability):
-        """Update device availabililty callabacks"""
-        self.push_change_archive_events(
-            "telescopeAvailability", json.dumps(telescope_availability)
-        )
+        """Update device availabililty callbacks"""
+        self._telescope_availability = json.dumps(telescope_availability)
 
     # ---------------
     # General methods
     # ---------------
-    class InitCommand(TMCBaseDevice.InitCommand):
+
+    def init_device(self) -> None:
         """
-        A class for the TMC CentralNode's init_device() method.
+        Initializes the CentralNode device.
         """
+        super().init_device()
+        self._build_state = (
+            f"{release.name},{release.version},{release.description}"
+        )
 
-        def do(self):
-            """
-            Initializes the attributes and properties of the Central Node.
+        self._version_id = release.version
+        self.last_device_info_changed = ""
+        for attribute_name in [
+            "lastDeviceInfoChanged",
+            "telescopeState",
+            "telescopeHealthState",
+        ]:
+            self.set_change_event(attribute_name, True, False)
+            self.set_archive_event(attribute_name, True)
 
-            :return: A tuple containing a return code and a string message
-                indicating status.The message is for information purpose only.
+        ApiUtil.instance().set_asynch_cb_sub_model(
+            tango.cb_sub_model.PUSH_CALLBACK
+        )
+        self._health_state = HealthState.OK
+        self.op_state_model.perform_action("component_on")
 
-            :rtype: (ReturnCode, str)
-            """
-            super().do()
-
-            self._device._build_state = (
-                f"{release.name},{release.version},{release.description}"
-            )
-
-            self._device._version_id = release.version
-            self._device.last_device_info_changed = ""
-            for attribute_name in [
-                "telescopeHealthState",
-                "telescopeState",
-                "lastDeviceInfoChanged",
-                "tmOpState",
-                "telescopeAvailability",
-            ]:
-                self._device.set_change_event(attribute_name, True, False)
-                self._device.set_archive_event(attribute_name, True)
-
-            ApiUtil.instance().set_asynch_cb_sub_model(
-                tango.cb_sub_model.PUSH_CALLBACK
-            )
-            self._device._health_state = HealthState.OK
-            self._device.op_state_model.perform_action("component_on")
-
-            return (ResultCode.OK, "")
+        self.init_completed()
 
     # ------------------
     # Attributes methods
@@ -266,14 +312,6 @@ class AbstractCentralNode(TMCBaseDevice):
     def read_telescopeHealthState(self):
         """Read value of telescopeHealthState"""
         return self.component_manager.component.telescope_health_state
-
-    def read_telescopeState(self):
-        """Reads telescopeState"""
-        return self.component_manager.component.telescope_state
-
-    def read_desiredTelescopeState(self):
-        """Read Desired TelescopeState"""
-        return self.component_manager.component.desired_telescope_state
 
     def transformedInternalModel_read(self):
         """Tranformed InternalModelRead"""
@@ -287,21 +325,13 @@ class AbstractCentralNode(TMCBaseDevice):
         ] = self.component_manager.get_telescope_health_state()
         return json.dumps(result)
 
-    def read_tmOpState(self):
-        """Return the tmOpState attribute."""
-        return self.component_manager.component.tmc_op_state
-
-    def read_telescopeAvailability(self):
-        "Returns telescope availability"
-        return json.dumps(
-            self.component_manager.component.telescope_availability
-        )
-
     # --------
     # Commands
     # --------
 
-    def is_TelescopeOn_allowed(self):
+    def is_TelescopeOn_allowed(
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+    ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
         Checks whether this command is allowed to be run in current device
             state.
@@ -311,20 +341,33 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        return self.component_manager.is_command_allowed("TelescopeOn")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed("TelescopeOn")
+        return self.component_manager.is_command_allowed_before_lrc_start(
+            command_name="TelescopeOn"
+        )
 
-    @command(dtype_out="DevVarLongStringArray")
+    @long_running_command
     @DebugIt()
-    def TelescopeOn(self):
+    def TelescopeOn(self) -> Tuple[List[ResultCode], List[str]]:
         """
         This command invokes TelescopeOn() command on DishLeadNode,
         CspMasterLeafNode,SdpMasterLeafNode.
         """
-        handler = self.get_command_object("TelescopeOn")
-        result_code, unique_id = handler()
-        return [[result_code], [str(unique_id)]]
 
-    def is_TelescopeStandby_allowed(self):
+        def task(
+            task_callback: TaskCallbackType, task_abort_event: Event
+        ) -> None:
+            self.component_manager.telescope_on(
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
+            )
+
+        return task
+
+    def is_TelescopeStandby_allowed(
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+    ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
         Checks whether this command is allowed to be run in current device
         state.
@@ -334,23 +377,36 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        return self.component_manager.is_command_allowed("TelescopeStandby")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed(
+                "TelescopeStandby"
+            )
+        return self.component_manager.is_command_allowed_before_lrc_start(
+            command_name="TelescopeStandby"
+        )
 
-    @command(
-        dtype_out="DevVarLongStringArray",
-    )
+    @long_running_command
     @DebugIt()
-    def TelescopeStandby(self):
+    def TelescopeStandby(self) -> Tuple[List[ResultCode], List[str]]:
         """
         This command invokes TelescopeStandby() command on CspMasterLeafNode,
         SdpMasterLeafNode and DishLeafNode.
 
         """
-        handler = self.get_command_object("TelescopeStandby")
-        result_code, unique_id = handler()
-        return [[result_code], [str(unique_id)]]
 
-    def is_TelescopeOff_allowed(self):
+        def task(
+            task_callback: TaskCallbackType, task_abort_event: Event
+        ) -> None:
+            self.component_manager.telescope_standby(
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
+            )
+
+        return task
+
+    def is_TelescopeOff_allowed(
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+    ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
         Checks whether this command is allowed to be run in current
         device state.
@@ -360,19 +416,30 @@ class AbstractCentralNode(TMCBaseDevice):
 
         :rtype: boolean
         """
-        return self.component_manager.is_command_allowed("TelescopeOff")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed("TelescopeOff")
+        return self.component_manager.is_command_allowed_before_lrc_start(
+            command_name="TelescopeOff"
+        )
 
-    @command(dtype_out="DevVarLongStringArray")
+    @long_running_command
     @DebugIt()
-    def TelescopeOff(self):
+    def TelescopeOff(self) -> Tuple[List[ResultCode], List[str]]:
         """
         This command invokes SetStandbyLPMode() command on DishLeafNode, Off()
         command on CspMasterLeafNode and SdpMasterLeafNode.
 
         """
-        handler = self.get_command_object("TelescopeOff")
-        result_code, unique_id = handler()
-        return [[result_code], [str(unique_id)]]
+
+        def task(
+            task_callback: TaskCallbackType, task_abort_event: Event
+        ) -> None:
+            self.component_manager.telescope_off(
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
+            )
+
+        return task
 
     def is_On_allowed(self):
         """
@@ -450,129 +517,92 @@ class AbstractCentralNode(TMCBaseDevice):
         result_code, unique_id = handler()
         return [[result_code], [str(unique_id)]]
 
-    def is_AssignResources_allowed(self):
+    def is_AssignResources_allowed(
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+    ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
-        Checks whether this command is allowed to be run in current device
-        state.
+        Checks whether AssignResources command is allowed with the given input.
 
-        :return: True if this command is allowed to be run in current device
-            state
+        :param argin: The command input argument
+        :param request_type: The type of request (ENQUEUE_REQ or EXECUTE_REQ)
+        :return: True if AssignResources is allowed
+            to be run in current device state
 
         :rtype: boolean
         """
-        return self.component_manager.is_command_allowed("AssignResources")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed("AssignResources")
 
-    @command(
-        dtype_in="str",
-        doc_in="The string in JSON format. The JSON contains following values:"
-        "nsubarrayID: "
-        "DevShort\ndish: JSON object consisting\n- receptor_ids:"
-        " DevVarStringArray. "
-        "The individual string should contain dish numbers in string"
-        " format with "
-        "preceding zeroes upto 3 digits. E.g. SKA001, SKA002",
-        dtype_out="DevVarLongStringArray",
-        doc_out="information-only string",
-    )
+        return True
+
+    # pylint: disable=unnecessary-pass
+    def completed_AssignResources(self) -> None:
+        """AssignResources command completed callback."""
+        pass
+
+    # pylint: enable=unnecessary-pass
+    @assign_validate_json_args
+    @long_running_command
     @DebugIt()
-    def AssignResources(self, argin):
+    def AssignResources(
+        self, argin: str
+    ) -> Tuple[List[ResultCode], List[str]]:
         """
         AssignResources command invokes the AssignResources command on
             lower level devices.
         """
-        handler = self.get_command_object("AssignResources")
-        result_code, unique_id = handler(argin)
-        self.logger.info(
-            "AssignResource command is invoked, "
-            + "Result: %s, unique_id/message: %s",
-            result_code,
-            unique_id,
-        )
 
-        return [[result_code], [str(unique_id)]]
+        def task(
+            task_callback: TaskCallbackType, task_abort_event: Event
+        ) -> None:
+            self.component_manager.assign_resources(
+                argin=argin,
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
+            )
 
-    def is_ReleaseResources_allowed(self):
+        return task
+
+    def is_ReleaseResources_allowed(
+        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+    ) -> Union[bool, CommandNotAllowed, DeviceUnresponsive]:
         """
-        Checks whether ReleaseResources command is allowed to be run in
-            current device state.
+        Checks whether ReleaseResources is allowed with the given input.
 
-        :return: True if ReleaseResources command is allowed to be
-            run in current device state.
+        :param argin: The command input argument
+        :param request_type: The type of request (ENQUEUE_REQ or EXECUTE_REQ)
+        :return: True if ReleaseResources command is allowed to be run in
+            current device state.
 
         :rtype: boolean
         """
-        return self.component_manager.is_command_allowed("ReleaseResources")
+        if request_type == LRCReqType.ENQUEUE_REQ:
+            return self.component_manager.is_command_allowed(
+                "ReleaseResources"
+            )
 
-    @command(
-        dtype_in="str",
-        doc_in="The string in JSON format. The JSON contains following values:"
-        "\nsubarrayID: "
-        "releaseALL boolean as true and receptor_ids.",
-        dtype_out="DevVarLongStringArray",
-        doc_out="information-only string",
-    )
+        return True
+
+    @release_validate_json_args
+    @long_running_command
     @DebugIt()
-    def ReleaseResources(self, argin):
+    def ReleaseResources(
+        self, argin: str
+    ) -> Tuple[List[ResultCode], List[str]]:
         """
         Releases all the resources assigned to the given Subarray.
         """
-        handler = self.get_command_object("ReleaseResources")
-        result_code, unique_id = handler(argin)
-        self.logger.info(
-            "ReleaseResources command is invoked, "
-            + "Result: %s, unique_id/message: %s",
-            result_code,
-            unique_id,
-        )
 
-        return [[result_code], [str(unique_id)]]
+        def task(
+            task_callback: TaskCallbackType, task_abort_event: Event
+        ) -> None:
+            self.component_manager.release_resources(
+                argin=argin,
+                task_callback=task_callback,
+                task_abort_event=task_abort_event,
+            )
+
+        return task
 
     def create_component_manager(self):
         """Create component manager object for command invocation."""
-
-    def init_command_objects(self):
-        """
-        Initialises the command handlers for commands supported by this device.
-        """
-        registered_commands = []
-        failed_to_register_commands = []
-
-        super().init_command_objects()
-        for command_name, method_name in [
-            ("TelescopeOn", "telescope_on"),
-            ("TelescopeStandby", "telescope_standby"),
-            ("TelescopeOff", "telescope_off"),
-            ("AssignResources", "assign_resources"),
-            ("ReleaseResources", "release_resources"),
-        ]:
-            self.register_command_object(
-                command_name,
-                SubmittedSlowCommand(
-                    command_name,
-                    self._command_tracker,
-                    self.component_manager,
-                    method_name,
-                    logger=None,
-                ),
-            )
-
-            try:
-                registered_commands.append(command_name)
-            except Exception as e:
-                failed_to_register_commands.append(command_name)
-                self.logger.exception(
-                    "Failed to register command %s, Exception: %s ",
-                    command_name,
-                    str(e),
-                )
-        if registered_commands:
-            commands_list = ", ".join(registered_commands)
-            self.logger.info(
-                "TMC is now ready to process the following "
-                + "registered commands: %s",
-                str(commands_list),
-            )
-
-        if failed_to_register_commands:
-            failed_list = ", ".join(failed_to_register_commands)
-            self.logger.error("Unable to register commands: %s", failed_list)

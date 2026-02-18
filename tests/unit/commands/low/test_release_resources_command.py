@@ -1,4 +1,5 @@
 import json
+import threading
 import time
 
 import mock
@@ -17,6 +18,9 @@ from ska_tmc_centralnode.commands.release_resources_command_low import (
     ReleaseResourcesLow,
 )
 from ska_tmc_centralnode.model.input import InputParameterLow
+from ska_tmc_centralnode.utils.json_validator_decorator import (
+    release_validate_json_args,
+)
 from tests.settings import LOW_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
 
 
@@ -38,9 +42,10 @@ def test_low_release_resources_command(
     cm.subsystems_to_config = ["mccs", "csp", "sdp"]
 
     release_input_str = json_factory("release_resource_low")
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -87,8 +92,12 @@ def test_low_release_resources_empty_input_json(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    (res_code, _) = cm.release_resources("", task_callback=task_callback)
-    assert res_code == TaskStatus.REJECTED
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, " ")
+
+    assert result_code == [ResultCode.REJECTED]
+    assert message[0] == "Malformed input JSON"
 
 
 @pytest.mark.SKA_low
@@ -100,12 +109,14 @@ def test_low_release_resources_command_with_invalide_key(
 ):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     release_input_str = json_factory("invalid_key_ReleaseResources")
-    (res_code, message) = cm.release_resources(
-        release_input_str, task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, release_input_str)
+
+    assert result_code == [ResultCode.REJECTED]
     assert (
-        "subarray_id key is not present in the input json argument" in message
+        "subarray_id key is not present in the input json argument"
+        in message[0]
     )
 
 
@@ -121,12 +132,15 @@ def test_low_release_resources_missing_subarray_id(
     json_argument = json.loads(release_input_str)
     del json_argument["subarray_id"]
 
-    (res_code, message) = cm.release_resources(
-        json.dumps(json_argument), task_callback=task_callback
-    )
-    assert res_code == TaskStatus.REJECTED
+    json_decoded = json.dumps(json_argument)
+    decorated = release_validate_json_args(cm.release_resources)
+
+    result_code, message = decorated(cm, json_decoded)
+
+    assert result_code == [ResultCode.REJECTED]
     assert (
-        "subarray_id key is not present in the input json argument" in message
+        "subarray_id key is not present in the input json argument"
+        in message[0]
     )
 
 
@@ -174,9 +188,10 @@ def test_low_release_resources_raises_state_model_exception(
     check_if_subarray_is_available(cm)
 
     release_input_str = json_factory("release_resource_low")
-    cm.release_resources(release_input_str, task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
 
     task_callback.assert_against_call(
@@ -188,3 +203,50 @@ def test_low_release_resources_raises_state_model_exception(
             ),
         }
     )
+
+
+@pytest.mark.SKA_low
+def test_low_release_resources_bad_json(
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test release resources with bad JSON"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    adapter_factory = HelperAdapterFactory()
+
+    release_input_str = "{ invalid json"
+    assign_res_command = ReleaseResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
+    (res_code, message) = assign_res_command.do(release_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "Problem in loading the JSON string" in str(message)
+
+
+@pytest.mark.SKA_low
+def test_low_release_resources_subarray_not_found(
+    tango_context,
+    task_callback,
+    json_factory,
+    set_low_sdp_csp_mccs_admin_modes,
+):
+    """Test release resources when subarray adapter not found"""
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
+    adapter_factory = HelperAdapterFactory()
+
+    # Create a command with subarray_id=99 which won't be in adapters
+    release_input_str = json_factory("release_resource_low")
+    json_arg = json.loads(release_input_str)
+    json_arg["subarray_id"] = 99
+    release_input_str = json.dumps(json_arg)
+
+    assign_res_command = ReleaseResourcesLow(
+        cm, adapter_factory=adapter_factory, logger=logger
+    )
+    # Set subarray_id to match the JSON
+    assign_res_command.subarray_id = 99
+    (res_code, message) = assign_res_command.do(release_input_str)
+    assert res_code == ResultCode.FAILED
+    assert "doesn't exit" in message

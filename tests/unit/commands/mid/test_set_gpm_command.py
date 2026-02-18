@@ -1,6 +1,7 @@
 """Test cases for SetGlobalPointingModel command"""
 
 import json
+import threading
 from threading import RLock
 from unittest.mock import MagicMock, call, patch
 
@@ -133,17 +134,43 @@ def test_set_gpm_command_with_ok(
     tango_context,
     task_callback,
 ):
+    """Test SetGlobalPointingModel command with successful completion"""
     cm, _ = create_cm()
-    cm.set_gpm_version(json.dumps(gpm_input), task_callback=task_callback)
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.QUEUED}
+    adapter_factory = HelperAdapterFactory()
+    set_gpm_command = SetGlobalPointingModel(
+        component_manager=cm,
+        adapter_factory=adapter_factory,
+        logger=logger,
     )
-    cm.number_of_gpm_executed = 1
-    cm.gpm_aggregated_result = True
+
+    # Set up the component manager's gpm data
     cm.dishln_gpm_cmd_exe_data = {
         "ska001": {"Band_4": [0, "Command Completed"]}
     }
-    cm.gpm_version_aggregated_result = ResultCode.OK
+
+    # Mock the _set_gpm_to_dish to avoid actual device calls
+    with patch.object(
+        set_gpm_command,
+        "_set_gpm_to_dish",
+        return_value=([ResultCode.OK], []),
+    ):
+        # Mock wait_for_command_completion to complete immediately
+        with patch.object(
+            set_gpm_command,
+            "wait_for_command_completion",
+            return_value=(ResultCode.OK, ""),
+        ):
+            result, message = set_gpm_command.apply_gpm(
+                dish_gpm_params=json.dumps(gpm_input),
+                logger=logger,
+                task_callback=task_callback,
+                task_abort_event=threading.Event(),
+            )
+
+    # Verify the result
+    assert result == ResultCode.OK
+
+    # Verify task callback was called with correct status transitions
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
@@ -152,7 +179,7 @@ def test_set_gpm_command_with_ok(
             "status": TaskStatus.COMPLETED,
             "result": (ResultCode.OK, Anything),
         },
-        lookahead=5,
+        lookahead=2,
     )
 
 
@@ -171,7 +198,10 @@ def test_apply_gpm_no_receptors_and_empty_gpm_files():
 
     with patch.object(instance, "get_gpm_files", return_value=[]):
         instance.apply_gpm(
-            json.dumps(dish_gpm_params), task_callback=task_callback
+            json.dumps(dish_gpm_params),
+            logger,
+            task_callback=task_callback,
+            task_abort_event=threading.Event(),
         )
 
         calls = [
