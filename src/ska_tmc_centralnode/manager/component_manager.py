@@ -993,6 +993,8 @@ class CNComponentManager(TmcComponentManager):
                     devInfo.dev_name,
                     ObsState(devInfo.obs_state).name,
                 )
+                with self.command_completion_cond:
+                    self.command_completion_cond.notify_all()
                 devInfo.last_event_arrived = time.time()
                 self.component._invoke_device_callback(devInfo)
 
