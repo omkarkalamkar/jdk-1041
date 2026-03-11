@@ -320,7 +320,7 @@ class CNComponentManagerLow(CNComponentManager):
         """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["mccs_master_leaf_node"] is True:
-            self.logger.info(
+            self.logger.debug(
                 "MccsMasterLeafNode is not available to receive command"
             )
             return False

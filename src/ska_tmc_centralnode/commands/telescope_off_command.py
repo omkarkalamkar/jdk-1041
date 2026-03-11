@@ -91,7 +91,7 @@ class TelescopeOff(TelescopeOnOff):
             "Device states before executing TelescopeOff command."
         )
 
-        self.logger.info(
+        self.logger.debug(
             "Invoking Off command on the lower level devices",
         )
 
@@ -115,7 +115,7 @@ class TelescopeOff(TelescopeOnOff):
                     adapter.dev_name
                 ).obs_state
                 if obs_state != ObsState.EMPTY:
-                    self.logger.error(
+                    self.logger.debug(
                         "Subarray current ObsState %s, while "
                         "waiting for ObsState.EMPTY. ",
                         str(obs_state),
@@ -253,7 +253,7 @@ class TelescopeOff(TelescopeOnOff):
 
         """
         self.component_manager.component.desired_telescope_state = DevState.OFF
-        self.logger.info(
+        self.logger.debug(
             "Invoking Off command on the lower level devices",
         )
 

@@ -76,7 +76,7 @@ class SetGlobalPointingModel(SetDishGPM):
                 error_message = "No GPM files found on set GPM parameters."
                 self.process_update_task_for_command_failure(error_message)
                 self.component_manager.reset_gpm_data()
-                self.logger.debug("Error message: %s", error_message)
+                self.logger.error("Error message: %s", error_message)
                 return ResultCode.REJECTED, error_message
             gpm_data = self.form_gpm_file_for_each_dish(
                 gpm_files, self.dish_gpm_params
@@ -228,7 +228,7 @@ class SetGlobalPointingModel(SetDishGPM):
             tm_data_fpath = dish_gpm_params.get("tm_data_filepath", None)
             interface = dish_gpm_params.get("interface", None)
             version = dish_gpm_params.get("version", None)
-            self.logger.info(
+            self.logger.debug(
                 "GPM Files found on data repository: %s", gpm_files
             )
             file_names = []
@@ -286,7 +286,7 @@ class SetGlobalPointingModel(SetDishGPM):
             + initial_params.get("version", None)
             + "#tmdata"
         )
-        self.logger.info(
+        self.logger.debug(
             "Command ID: %s| The initial params are :  %s",
             self.component_manager.command_id,
             initial_params,
@@ -367,7 +367,7 @@ class SetGlobalPointingModel(SetDishGPM):
         return_codes = [ResultCode.UNKNOWN]
         message_or_unique_ids = []
         dishln_adapter = None
-        self.logger.info("GPM data for command execution:%s", gpm_data)
+        self.logger.debug("GPM data for command execution:%s", gpm_data)
         try:
             for dish_id, bands in gpm_data.items():
                 dishln_adapter = [

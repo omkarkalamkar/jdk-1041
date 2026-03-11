@@ -269,7 +269,7 @@ class SetStowMode(SetDishGPM):
                         return_codes[0],
                         message_or_unique_ids[0],
                     ]
-            self.logger.info(
+            self.logger.debug(
                 "Finished executing SetStowMode on DLN."
                 "Set Stow Mode data dictionary : %s",
                 self.component_manager.dishln_stow_mode_cmd_exe_data,
@@ -284,7 +284,7 @@ class SetStowMode(SetDishGPM):
                 )
         except Exception as e:
             self.logger.exception(
-                "Exception occured in Calling SetStowMode, Exception: %s",
+                "Exception occurred while calling SetStowMode, Exception: %s",
                 str(e),
             )
             return [ResultCode.FAILED], [

@@ -94,7 +94,7 @@ class TelescopeOn(TelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
 
-        self.logger.info("Invoking On command on the lower level devices")
+        self.logger.debug("Invoking On command on the lower level devices")
 
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
@@ -245,7 +245,7 @@ class TelescopeOn(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeOn command"
         )
-        self.logger.info(
+        self.logger.debug(
             "Invoking On command on the lower level devices",
         )
         # send commands to sub-devices
