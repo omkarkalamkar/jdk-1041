@@ -228,7 +228,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             return result_code, message
 
         dishid_vcc_map_params = json.loads(argin)
-        self.logger.info(
+        self.logger.debug(
             "Command ID: %s | DishId-VCC map parameters: %s",
             self.command_id,
             json.dumps(dishid_vcc_map_params, indent=4),
@@ -342,7 +342,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                     error_message = (
                         f"Dish adapter not found for dish id {dish_id}"
                     )
-                    self.logger.info(error_message)
+                    self.logger.error(error_message)
         except Exception as e:
             self.logger.exception(
                 "Exception occured in Calling setKvalue command on %s, "

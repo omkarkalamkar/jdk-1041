@@ -136,7 +136,7 @@ class CentralNodeCommand(TMCCommand):
                 )
                 return_codes.append(return_code)
                 message_or_unique_ids.append(message)
-                self.logger.info(
+                self.logger.debug(
                     "%s invoked on %s ", command_name, adapter.dev_name
                 )
 
@@ -151,7 +151,7 @@ class CentralNodeCommand(TMCCommand):
                     adapter.dev_name,
                     str(e),
                 )
-        self.logger.info(
+        self.logger.debug(
             "Current message_or_uniques_ids: %s", str(message_or_unique_ids)
         )
         return return_codes, message_or_unique_ids
@@ -321,7 +321,7 @@ class CentralNodeCommand(TMCCommand):
                     len(self.command_results.keys()),
                     self.command_results,
                 )
-                self.logger.info(device_length)
+                self.logger.debug("Device length: %s", device_length)
                 if len(self.command_results.keys()) == device_length:
                     # All command results received check if any Failure
                     failed_results_info = {}
@@ -387,7 +387,7 @@ class CentralNodeCommand(TMCCommand):
         """
 
         def callback(result=None, **kwargs):
-            logging.info("Got Command Result for %s %s", device_name, result)
+            LOGGER.info("Got Command Result for %s %s", device_name, result)
             if result:
                 with self.component_manager.command_completion_cond:
                     self.command_results[device_name] = result

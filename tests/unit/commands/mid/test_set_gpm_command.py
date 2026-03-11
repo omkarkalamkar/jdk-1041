@@ -218,7 +218,7 @@ def test_apply_gpm_no_receptors_and_empty_gpm_files():
 
         task_callback.assert_has_calls(calls)
         instance.component_manager.reset_gpm_data.assert_called_once()
-        mock_logger.debug.assert_called_once_with(
+        mock_logger.error.assert_called_once_with(
             "Error message: %s", "No GPM files found on set GPM parameters."
         )
 
