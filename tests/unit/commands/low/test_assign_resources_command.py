@@ -31,7 +31,6 @@ def test_low_assign_resources_command(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
 
     dev_factory = DevFactory()
@@ -64,7 +63,6 @@ def test_assign_resources_missing_eb_id_key_and_pb_id_key(
     set_low_sdp_csp_mccs_admin_modes,
     missing_key,
 ):
-    logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
@@ -92,7 +90,6 @@ def test_assign_resources_missing_sdp_csp_subarray_id_mccs_key(
     set_low_sdp_csp_mccs_admin_modes,
     missing_key,
 ):
-    logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assign_input_str = json_factory("assign_resource_low")
     json_argument = json.loads(assign_input_str)
@@ -112,7 +109,6 @@ def test_low_assign_resources_command_fail_subarray(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
@@ -141,7 +137,6 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assert cm.is_command_allowed("AssignResources")
     assign_input_str = json_factory("assign_resource_low")
@@ -160,7 +155,6 @@ def test_low_assign_resources_command_missing_subarray_beam_ids_key(
 def test_low_assign_resources_command_empty_input_json(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
-    logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     decorated = assign_validate_json_args(cm.assign_resources)
@@ -177,7 +171,6 @@ def test_low_assign_resources_command_with_invalide_key(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    logger.info("%s", tango_context)
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assign_input_str = json_factory("invalid_key_AssignResources")
     decorated = assign_validate_json_args(cm.assign_resources)
@@ -197,7 +190,6 @@ def test_low_assign_resources_command_missing_aperture_id(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assert cm.is_command_allowed("AssignResources")
@@ -221,7 +213,6 @@ def test_low_assign_resources_command_missing_station_ids(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
 
@@ -244,7 +235,6 @@ def test_low_assign_resources_command_missing_station_ids(
 def test_telescope_low_assign_resources_fail_check_allowed(
     tango_context, set_low_sdp_csp_mccs_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(

@@ -40,7 +40,6 @@ def test_assign_resources_command_completed(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     """Tests assign Resources completed"""
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -80,7 +79,6 @@ def test_assign_resources_command_with_mkt_ids_completed(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     """test assign resources command with meerkat id"""
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -121,7 +119,6 @@ def test_assign_resources_exception_on_sn(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     """Tests assign resources exception on sn"""
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -158,7 +155,6 @@ def test_assign_resources_command_missing_eb_id_key_and_processing_blocks(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     """Test Assign Resources command missing eb id"""
-    logger.info("%s", tango_context)
     cm, _ = create_cm()
 
     dev_factory = DevFactory()
@@ -218,7 +214,6 @@ def test_assign_resources_command_with_ok(
 def test_assign_resources_command_with_mkt_ids_ok(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
@@ -251,7 +246,6 @@ def test_assign_resources_command_with_mkt_ids_ok(
 def test_assign_resources_command_fail_subarray(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -278,7 +272,6 @@ def test_assign_resources_command_fail_subarray(
 def test_telescope_assign_resources_command_empty_input_json(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
@@ -293,7 +286,6 @@ def test_telescope_assign_resources_command_empty_input_json(
 def test_assign_resources_fail_check_allowed(
     tango_context, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -308,7 +300,6 @@ def test_assign_resources_fail_check_allowed(
 def test_assign_resources_command_timeout(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     cm.command_timeout = 2
     elapsed_time = time.time() - start_time
@@ -353,7 +344,6 @@ def test_assign_resources_command_timeout(
 def test_assign_resources_command_already_assigned(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(

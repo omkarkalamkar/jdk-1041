@@ -33,7 +33,6 @@ def assign_resources(
     subarray2_device,
 ):
     """AssignResources Test method."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(subarray_device)

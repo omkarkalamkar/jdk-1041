@@ -31,8 +31,6 @@ from tests.settings import (
 
 
 def test_telescope_standby_command(tango_context, set_mid_sdp_csp_admin_modes):
-    logger.info("%s", tango_context)
-
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -64,7 +62,6 @@ def test_telescope_standby_command(tango_context, set_mid_sdp_csp_admin_modes):
 def test_telescope_standby_command_task_completed(
     tango_context, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -103,7 +100,6 @@ def test_telescope_standby_command_task_completed(
 def test_telescope_standby_command_fail_subarray(
     tango_context, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -148,7 +144,6 @@ def test_telescope_standby_command_fail_subarray(
 def test_telescope_standby_command_fail_dish(
     tango_context, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -196,7 +191,6 @@ def test_telescope_standby_command_fail_dish(
 def test_telescope_standby_fail_check_allowed(
     tango_context, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(
@@ -212,7 +206,6 @@ def test_telescope_standby_fail_check_allowed(
 def test_telescope_standby_command_rejected(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time

@@ -61,7 +61,6 @@ def mock_callback(*args, **kwargs):
 @pytest.mark.SKA_low
 def test_low_some_working_other_faulty(tango_context):
     """Test low some working other faulty devices."""
-    logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
 
     default_array_layout_url = {

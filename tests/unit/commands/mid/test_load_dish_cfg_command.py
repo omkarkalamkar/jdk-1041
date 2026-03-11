@@ -38,7 +38,6 @@ def test_load_dish_cfg_command(
     ApiUtil.instance().set_asynch_cb_sub_model(
         tango.cb_sub_model.PUSH_CALLBACK
     )
-    logger.info("%s", tango_context)
     cm, _ = create_cm()
     _set_k_numbers_to_dish.return_value = ([ResultCode.QUEUED], [""])
     cm.is_dish_vcc_config_set = True
@@ -70,7 +69,6 @@ def test_load_dish_cfg_command_invalid_json(
     tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
     """Test LoadDishCfg command rejected when invalid json provided"""
-    logger.info("%s", tango_context)
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
@@ -103,7 +101,6 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
     tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
     """Test LoadDishCfg command rejected when kvalue is out of range"""
-    logger.info("%s", tango_context)
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
@@ -133,7 +130,6 @@ def test_load_dish_cfg_command_invalid_file_name(
     tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
     """Test LoadDishCfg command rejected when invalid json provided"""
-    logger.info("%s", tango_context)
     cm, _ = create_cm()
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")

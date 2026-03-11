@@ -30,7 +30,6 @@ def assign_resources_low(
     second_assign_rejected=True,
 ):
     """AssignResources Test method."""
-    logger.info("%s", tango_context)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(subarray_device)
