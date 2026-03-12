@@ -674,7 +674,7 @@ class CNComponentManager(TmcComponentManager):
         """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["csp_master_leaf_node"] is True:
-            self.logger.info(
+            self.logger.debug(
                 "CspMasterLeafNode is not available to receive command"
             )
             return False
@@ -688,7 +688,7 @@ class CNComponentManager(TmcComponentManager):
         """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["sdp_master_leaf_node"] is True:
-            self.logger.info(
+            self.logger.debug(
                 "SdpMasterLeafNode is not available to receive command"
             )
             return False
@@ -1394,7 +1394,7 @@ class CNComponentManager(TmcComponentManager):
         device_states = pd.DataFrame(
             {"Devices": device_names, "STATE": dev_states}
         )
-        self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
+        self.logger.debug("\n" + msg + "\n" + device_states.to_string() + "\n")
 
     def get_adapter_by_device_name(self, device_name: str):
         """

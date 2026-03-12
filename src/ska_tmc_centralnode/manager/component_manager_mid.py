@@ -286,7 +286,7 @@ class CNComponentManagerMid(CNComponentManager):
             False otherwise
 
         """
-        self.logger.info("Checking if dishes are responsive")
+        self.logger.debug("Checking if dishes are responsive")
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )
@@ -1048,7 +1048,7 @@ class CNComponentManagerMid(CNComponentManager):
                     raise ValueError(messgae + " " + example)
             GPMJsonModel.validate_dish_ids(stow_input)
             stow_input = [dish_id.lower() for dish_id in stow_input]
-            self.logger.info("Stow command dish list: %s", stow_input)
+            self.logger.debug("Stow command dish list: %s", stow_input)
             return set_stow_mode_command_object.apply_stow_mode(
                 argin=stow_input,
                 task_callback=task_callback,
@@ -1065,7 +1065,7 @@ class CNComponentManagerMid(CNComponentManager):
 
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""
-        self.logger.info("Resetting LoadDishCfg aggregated data")
+        self.logger.debug("Resetting LoadDishCfg aggregated data")
         self.load_dish_cfg_aggregated_result = ""
         self.dev_names_for_load_dish_cfg = []
         self.result_codes_mapping = {}
@@ -1100,7 +1100,7 @@ class CNComponentManagerMid(CNComponentManager):
             result (ResultCode): ResultCode
 
         """
-        self.logger.info(
+        self.logger.debug(
             "GPM versions received %s from %s", gpmVersion, dev_name
         )
         with self.dishln_gpm_lock:
@@ -1128,7 +1128,7 @@ class CNComponentManagerMid(CNComponentManager):
     def reset_gpm_data(self) -> None:
         """Reset GPM data"""
 
-        self.logger.info("Resetting SetGlobalPointingModel data")
+        self.logger.debug("Resetting SetGlobalPointingModel data")
         self.gpm_version_aggregated_result = ResultCode.UNKNOWN
         self.number_of_gpm_executed = 0
         self.dishln_gpm_cmd_exe_data = {}

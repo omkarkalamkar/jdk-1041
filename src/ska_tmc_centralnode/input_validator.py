@@ -102,7 +102,9 @@ class AssignResourceValidator:
             ):
                 self.logger.debug("Receptor %s. is not present.", receptor)
                 non_existing_receptors.append(receptor)
-        self.logger.debug(non_existing_receptors)
+        self.logger.debug(
+            "Non-existing receptors detected: %s", non_existing_receptors
+        )
         return non_existing_receptors
 
     def loads(self, input_string) -> dict:

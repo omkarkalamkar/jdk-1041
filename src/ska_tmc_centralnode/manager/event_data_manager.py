@@ -132,7 +132,7 @@ class EventDataManager:
          existing timestamp.
         """
 
-        LOGGER.info(
+        LOGGER.debug(
             "current_timestamp is  %s and received_timestamp is %s",
             current_timestamp,
             received_timestamp,
@@ -214,10 +214,10 @@ class EventDataManager:
                     f"{str(timestamp):<{col_widths['Timestamp']}}"
                 )
 
-            LOGGER.info("\n".join(table_lines))
+            LOGGER.debug("\n".join(table_lines))
             self.component_manager.event_data_queue.put(current_event_info)
 
-        LOGGER.info("Lock released from update_aggragation_queue ")
+        LOGGER.debug("Lock released from update_aggragation_queue ")
 
     @pre_process
     def update_event_data(
@@ -252,11 +252,11 @@ class EventDataManager:
                     is_dish_leaf_node=is_dish_leaf_node,
                     event_timestamp=received_timestamp,
                 )
-                LOGGER.info("HealthState - %s", target_dict[device_name])
+                LOGGER.debug("HealthState - %s", target_dict[device_name])
 
             elif data_type == "AdminMode":
                 data = self.get_enum_name_from_value(AdminMode, int(data))
                 target_dict[device_name] = AdminModeData(
                     admin_mode=data, event_timestamp=received_timestamp
                 )
-                LOGGER.info("AdminMode - %s", target_dict[device_name])
+                LOGGER.debug("AdminMode - %s", target_dict[device_name])

@@ -640,7 +640,7 @@ class CNComponentManagerLow(CNComponentManager):
                     f"PSS beams: {conflicting_beams} already assigned"
                     f" to another subarray"
                 )
-            self.logger.info(
+            self.logger.debug(
                 "PSS beams assigned for subarray %s: %s",
                 subarray_id,
                 pss_beam_ids,
