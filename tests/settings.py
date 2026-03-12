@@ -188,12 +188,12 @@ def invoke_set_gpm_command_callback():
 
 def array_layout_url_callback(url_dict):
     """Dummy method for array layout url callback"""
-    logger.debug(url_dict)
+    logger.debug("Array layout URL callback: %s", url_dict)
 
 
 def default_array_layout_url_callback(url_dict):
     """Dummy method for default array layout url callback"""
-    logger.debug(url_dict)
+    logger.debug("Default array layout URL callback: %s", url_dict)
 
 
 def create_cm(
@@ -344,7 +344,7 @@ def create_cm_no_faulty_devices(
     _input_parameter=InputParameterMid(None),
 ):
     """creates component manager with no faulty devices"""
-    logger.info("%s", tango_context)
+    logger.debug("Tango context: %s", tango_context)
     if isinstance(_input_parameter, InputParameterMid):
         _input_parameter = InputParameterMid(None)
         cm, start_time = create_cm(
@@ -500,7 +500,7 @@ def event_remover(group_callback, attributes: List[str]) -> None:
                 attribute
             ]._iterable
             for node in iterable:
-                logger.info("Payload is: %s", repr(node.payload))
+                logger.debug("Event payload removed: %s", repr(node.payload))
                 node.drop()
         except KeyError:
             pass
