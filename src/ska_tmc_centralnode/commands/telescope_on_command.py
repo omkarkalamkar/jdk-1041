@@ -97,8 +97,6 @@ class TelescopeOn(TelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
 
-        self.logger.debug("Invoking On command on the lower level devices")
-
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
             self.set_standby_fp_mode_dishes(),
@@ -247,9 +245,6 @@ class TelescopeOn(TelescopeOnOff):
 
         self.component_manager.log_state(
             "Device states before executing TelescopeOn command"
-        )
-        self.logger.debug(
-            "Invoking On command on the lower level devices",
         )
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()

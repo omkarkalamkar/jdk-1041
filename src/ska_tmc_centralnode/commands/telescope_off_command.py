@@ -94,10 +94,6 @@ class TelescopeOff(TelescopeOnOff):
             "Device states before executing TelescopeOff command."
         )
 
-        self.logger.debug(
-            "Invoking Off command on the lower level devices",
-        )
-
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -256,9 +252,6 @@ class TelescopeOff(TelescopeOnOff):
 
         """
         self.component_manager.component.desired_telescope_state = DevState.OFF
-        self.logger.debug(
-            "Invoking Off command on the lower level devices",
-        )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
