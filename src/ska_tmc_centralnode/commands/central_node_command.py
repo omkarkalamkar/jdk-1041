@@ -152,7 +152,9 @@ class CentralNodeCommand(TMCCommand):
                     str(e),
                 )
         self.logger.debug(
-            "Current message_or_uniques_ids: %s", str(message_or_unique_ids)
+            "Command '%s' returned responses/IDs: %s",
+            command_name,
+            str(message_or_unique_ids),
         )
         return return_codes, message_or_unique_ids
 
@@ -313,7 +315,9 @@ class CentralNodeCommand(TMCCommand):
         """This Method wait for desired obs state"""
         all_results_ok = False
         end_time = time.monotonic() + self.component_manager.command_timeout
-        self.logger.info("subs list %s", self.command_subs_list)
+        self.logger.debug(
+            "Command subscription list %s", self.command_subs_list
+        )
         with self.component_manager.command_completion_cond:
             while True:
                 self.logger.info(
@@ -387,7 +391,11 @@ class CentralNodeCommand(TMCCommand):
         """
 
         def callback(result=None, **kwargs):
-            LOGGER.info("Got Command Result for %s %s", device_name, result)
+            LOGGER.info(
+                "Received command result %s from device %s",
+                result,
+                device_name,
+            )
             if result:
                 with self.component_manager.command_completion_cond:
                     self.command_results[device_name] = result

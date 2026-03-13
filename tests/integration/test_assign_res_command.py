@@ -114,14 +114,13 @@ def assign_resources(
     result, unique_id = central_node.TelescopeOff()
 
 
-@pytest.mark.test1
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name, input_json",
     [
         (CENTRALNODE_MID, "command_AssignResources"),
-        # (CENTRALNODE_MID, "command_AssignResources_2_1"),
+        (CENTRALNODE_MID, "command_AssignResources_2_1"),
     ],
 )
 def test_assign_res_command_mid(

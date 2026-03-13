@@ -345,13 +345,13 @@ class LoadDishCfg(LoadDishCfgCommand):
                     self.logger.error(error_message)
         except Exception as e:
             self.logger.exception(
-                "Exception occured in Calling setKvalue command on %s, "
+                "Exception occured in calling setKvalue command on %s, "
                 + "Exception: %s",
                 dish_adapter.dev_name,
                 str(e),
             )
             return [ResultCode.FAILED], [
-                f"Error in Calling setKvalue command on dish adapter {e}"
+                f"Error in calling setKvalue command on dish adapter {e}"
             ]
 
         return return_codes, message_or_unique_ids

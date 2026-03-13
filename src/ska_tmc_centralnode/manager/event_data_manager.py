@@ -133,11 +133,11 @@ class EventDataManager:
         """
 
         LOGGER.debug(
-            "current_timestamp is  %s and received_timestamp is %s",
+            "Comparing timestamps: current event timestamp=%s, "
+            "received event timestamp=%s",
             current_timestamp,
             received_timestamp,
         )
-
         if received_timestamp is None:
             return False
         if current_timestamp < received_timestamp:

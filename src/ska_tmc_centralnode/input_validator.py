@@ -103,7 +103,8 @@ class AssignResourceValidator:
                 self.logger.debug("Receptor %s. is not present.", receptor)
                 non_existing_receptors.append(receptor)
         self.logger.debug(
-            "Non-existing receptors detected: %s", non_existing_receptors
+            "Invalid receptors identified from request: %s",
+            non_existing_receptors,
         )
         return non_existing_receptors
 

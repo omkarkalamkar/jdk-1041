@@ -284,7 +284,7 @@ class SetStowMode(SetDishGPM):
                 )
         except Exception as e:
             self.logger.exception(
-                "Exception occurred while calling SetStowMode, Exception: %s",
+                "Exception %s occurred while calling SetStowMode",
                 str(e),
             )
             return [ResultCode.FAILED], [
