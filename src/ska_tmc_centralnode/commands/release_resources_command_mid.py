@@ -34,6 +34,10 @@ class ReleaseResourcesMid(ReleaseResources):
 
         """
         ret_code, message = self.init_adapters()
+        self.logger.info(
+            "ReleaseResourcesLow started | command_id=%s",
+            self.command_id,
+        )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
@@ -67,6 +71,10 @@ class ReleaseResourcesMid(ReleaseResources):
             )
 
         if json_argument["release_all"] is True:
+            self.logger.info(
+                "Invoking ReleaseAllResources on subarray | device=%s",
+                self.subarray_adapter.dev_name,
+            )
             return_codes, message_or_unique_ids = self.release_all_resources(
                 self.subarray_adapter
             )

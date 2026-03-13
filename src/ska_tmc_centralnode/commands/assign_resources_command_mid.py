@@ -63,8 +63,8 @@ class AssignResourcesMid(AssignResources):
             if default_url:
                 if not isinstance(default_url, dict):
                     self.logger.error(
-                        "Command ID: %s | Default 'telmodel'"
-                        " must be a dict; got %s",
+                        "Command ID: %s | Invalid default telmodel type %s, "
+                        "expected dict",
                         self.command_id,
                         type(default_url).__name__,
                     )
@@ -102,7 +102,7 @@ class AssignResourcesMid(AssignResources):
 
         receptor_ids = json_argument["dish"]["receptor_ids"]
         self.logger.debug(
-            "Command ID: %s | Receptor IDs are: %s",
+            "Command ID %s: Receptor IDs requested for assignment: %s",
             self.command_id,
             receptor_ids,
         )

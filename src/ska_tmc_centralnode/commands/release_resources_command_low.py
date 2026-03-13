@@ -82,6 +82,10 @@ class ReleaseResourcesLow(ReleaseResources):
 
         """
         ret_code, message = self.init_adapters()
+        self.logger.info(
+            "ReleaseResourcesLow started | command_id=%s",
+            self.command_id,
+        )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 

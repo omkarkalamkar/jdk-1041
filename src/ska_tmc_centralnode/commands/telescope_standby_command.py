@@ -54,7 +54,10 @@ class TelescopeStandby(TelescopeOnOff):
         """
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
-
+        self.logger.info(
+            "Command ID: %s | Starting TelescopeStandby command",
+            self.component_manager.command_id,
+        )
         result_code, message = self.do(argin=None)
         self.logger.info(message)
         if result_code == ResultCode.FAILED:

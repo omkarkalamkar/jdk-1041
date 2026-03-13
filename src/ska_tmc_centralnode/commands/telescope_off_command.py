@@ -54,7 +54,10 @@ class TelescopeOff(TelescopeOnOff):
         """
 
         task_callback(status=TaskStatus.IN_PROGRESS)
-
+        self.logger.info(
+            "Command ID: %s | Starting TelescopeOff command",
+            self.component_manager.command_id,
+        )
         return_code, message = self.do(argin=None)
         self.logger.info(message)
         if return_code == ResultCode.FAILED:

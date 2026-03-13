@@ -76,6 +76,10 @@ class AssignResources(AssignReleaseResources):
 
         """
         self.component_manager.command_in_progress = "AssignResources"
+        self.logger.debug(
+            "Command %s: Starting AssignResources command",
+            self.command_id,
+        )
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event

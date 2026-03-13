@@ -57,6 +57,11 @@ class SetStowMode(SetDishGPM):
             None
         """
         self.component_manager.command_in_progress = "SetStowMode"
+        self.logger.info(
+            "Command ID: %s | Starting SetStowMode | receptors=%s",
+            self.component_manager.command_id,
+            argin,
+        )
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
@@ -246,7 +251,7 @@ class SetStowMode(SetDishGPM):
                     " Dish Leaf Node"
                 )
                 self.logger.info(
-                    "Command ID: %s | Invoking stow mode command on: %s",
+                    "Command ID: %s | Invoking SetStowMode on device=%s",
                     self.component_manager.command_id,
                     dishln_adapter.dev_name,
                 )

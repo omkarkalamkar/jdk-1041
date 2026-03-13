@@ -83,6 +83,11 @@ class AssignResourcesLow(AssignResources):
                 json_argument,
             )
         except Exception as exception:
+            self.logger.error(
+                "Command %s: Failed to parse AssignResources JSON input: %s",
+                self.command_id,
+                exception,
+            )
             return (
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", exception),
@@ -125,6 +130,12 @@ class AssignResourcesLow(AssignResources):
 
         assigned_subsystem: list = list(
             SUB_SYSTEMS.intersection(json_argument.keys())
+        )
+        self.logger.debug(
+            "Command %s: Subsystems assigned for subarray %s: %s",
+            self.command_id,
+            self.subarray_id,
+            assigned_subsystem,
         )
 
         self.component_manager.subsystem_assigned_per_subarray[
@@ -173,6 +184,12 @@ class AssignResourcesLow(AssignResources):
             try:
                 input_mccs_master = self.create_mccs_cmd_data(json_argument)
             except Exception as exception:
+                self.logger.error(
+                    "Command %s: Error while preparing MCCS AssignResources "
+                    "input: %s",
+                    self.command_id,
+                    exception,
+                )
                 return (
                     ResultCode.FAILED,
                     ("JSON arguments error:: %s", exception),

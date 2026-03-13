@@ -78,6 +78,10 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         """
         self.component_manager.command_in_progress = "LoadDishCfg"
+        self.logger.info(
+            "Command started | command=LoadDishCfg id=%s",
+            self.command_id,
+        )
         self.set_command_id("LoadDishCfg")
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
@@ -126,9 +130,8 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         """
         self.logger.debug(
-            "Command ID: %s | Calling task callback for "
-            + "LoadDishCfg with Result: "
-            + "%s and Message: %s",
+            "Task callback invoked | command=LoadDishCfg id=%s result=%s "
+            "message=%s",
             self.command_id,
             str(result[0]),
             exception,
@@ -221,7 +224,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             self.logger.error(
-                "Command ID: %s | Failed to initialize adapters: %s",
+                "Adapter initialization failed | command_id=%s error=%s",
                 self.command_id,
                 message,
             )
@@ -229,7 +232,7 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         dishid_vcc_map_params = json.loads(argin)
         self.logger.debug(
-            "Command ID: %s | DishId-VCC map parameters: %s",
+            "DishId-VCC map parameters | command_id=%s params=%s",
             self.command_id,
             json.dumps(dishid_vcc_map_params, indent=4),
         )

@@ -137,7 +137,9 @@ class CentralNodeCommand(TMCCommand):
                 return_codes.append(return_code)
                 message_or_unique_ids.append(message)
                 self.logger.debug(
-                    "%s invoked on %s ", command_name, adapter.dev_name
+                    "Command invoked | command=%s device=%s",
+                    command_name,
+                    adapter.dev_name,
                 )
 
             except Exception as e:
@@ -152,7 +154,7 @@ class CentralNodeCommand(TMCCommand):
                     str(e),
                 )
         self.logger.debug(
-            "Command '%s' returned responses/IDs: %s",
+            "Command responses received | command=%s responses=%s",
             command_name,
             str(message_or_unique_ids),
         )
@@ -189,7 +191,9 @@ class CentralNodeCommand(TMCCommand):
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
                 self.logger.info(
-                    "%s invoked on %s ", command_name, adapter.dev_name
+                    "Command invoked | command=%s device=%s",
+                    command_name,
+                    adapter.dev_name,
                 )
 
             except Exception as e:
@@ -198,7 +202,7 @@ class CentralNodeCommand(TMCCommand):
                     f"{err_msg} {adapter.dev_name}: {e}"
                 )
                 self.logger.error(
-                    "Error in invoking %s on %s, Exception: %s",
+                    "Error in invoking | command=%s device=%s error=%s",
                     command_name,
                     adapter.dev_name,
                     str(e),
@@ -369,8 +373,8 @@ class CentralNodeCommand(TMCCommand):
                         data = getattr(self.component_manager, function_name)()
                     else:
                         data = None
-                    self.logger.info(
-                        "No event command results %s state %s",
+                    self.logger.warning(
+                        "No event command results | command=%s state=%s",
                         self.command_results,
                         data,
                     )
@@ -443,7 +447,7 @@ class TelescopeOnOff(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node: %s",
+                "Adapter created | type=CSP_MASTER_LEAF_NODE device=%s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
             )
         except Exception as e:
@@ -486,7 +490,7 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                 except Exception as e:
                     self.logger.exception(
-                        "Exception in creating adapter for %s, Exception: %s",
+                        "Exception in creating adapter | device=%s error=%s",
                         dev_name,
                         str(e),
                     )
