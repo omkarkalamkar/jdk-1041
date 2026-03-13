@@ -85,7 +85,6 @@ class TelescopeStateAggregatorMid(Aggregator):
             )
             return DevState.UNKNOWN
         if dish_count == 0:
-            self._logger.debug("dish_count == 0")
             return DevState.UNKNOWN
         if (
             subsystem_states == {DevState.ON}

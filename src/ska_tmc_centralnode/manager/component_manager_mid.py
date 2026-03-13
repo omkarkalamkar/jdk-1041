@@ -703,7 +703,7 @@ class CNComponentManagerMid(CNComponentManager):
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
-            self.logger.info(
+            self.logger.warning(
                 f"{command_name} command is not supported "
                 + f"in {self.op_state_model.op_state} for CentralNode"
             )
@@ -892,7 +892,7 @@ class CNComponentManagerMid(CNComponentManager):
                         self.dish_vcc_command_status = DishConfigStatus.INIT
                         self.invoke_load_dish_cfg_command_callback()
                     else:
-                        self.logger.debug(
+                        self.logger.warning(
                             "Time Out while waiting for Dishes to be ready"
                         )
                         self.command_in_progress = ""
