@@ -2,7 +2,7 @@ name: "centralnode-test"
 function: telescope-monitoring
 domain: general-monitoring
 instances: ["01"]
-{{- $LoggingLevel := .Values.deviceServers.centralnode.low.LoggingLevel }}
+# {{- $LoggingLevel := .Values.deviceServers.centralnode.low.LoggingLevel }}
 command: "python3 /app/src/ska_tmc_centralnode/central_node_low.py"
 server:
   name: "central_node_low"
@@ -60,7 +60,7 @@ server:
             - "tango::logger"
         - name: "LoggingLevelDefault"
           values:
-            - "{{ $LoggingLevel }}"
+            - "5"
         - name: "LivelinessCheckPeriod"
           values:
             - "{{.Values.deviceServers.centralnode.LivelinessCheckPeriod}}"

@@ -5,7 +5,7 @@ instances: ["01"]
 {{- $DishMasterIdentifier := .Values.deviceServers.centralnode.mid.DishMasterIdentifier }}
 {{- $KValueValidRangeUpperLimit := .Values.deviceServers.centralnode.mid.KValueValidRange.max | int }}
 {{- $KValueValidRangeLowerLimit := .Values.deviceServers.centralnode.mid.KValueValidRange.min | int }}
-{{- $LoggingLevel := .Values.deviceServers.centralnode.mid.LoggingLevel }}
+# {{- $LoggingLevel := .Values.deviceServers.centralnode.mid.LoggingLevel }}
 
 
 {{- if ge $KValueValidRangeUpperLimit $KValueValidRangeLowerLimit }}
@@ -98,7 +98,7 @@ server:
             - "tango::logger"
         - name: "LoggingLevelDefault"
           values:
-            - "{{ $LoggingLevel }}"
+            - "5"
         - name: "LivelinessCheckPeriod"
           values:
             - "{{.Values.deviceServers.centralnode.LivelinessCheckPeriod}}"
