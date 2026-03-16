@@ -9,7 +9,12 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 *******
 Updated
 -------
-* * Update and improvement of log statements across codebase.
+* Logging improvements
+  - Removed unnecessary log statements.
+  - Changed log level from INFO to DEBUG where appropriate.
+  - Added log statements where required for better traceability.
+  - Updated version of ska-tmc-common to `1.6.0`. 
+
 
 
 [1.0.1]
