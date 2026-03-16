@@ -83,7 +83,7 @@ class ReleaseResourcesLow(ReleaseResources):
         """
         ret_code, message = self.init_adapters()
         self.logger.info(
-            "ReleaseResourcesLow started | command_id=%s",
+            "command_id=%s | ReleaseResourcesLow started",
             self.command_id,
         )
         if ret_code == ResultCode.FAILED:
@@ -112,6 +112,10 @@ class ReleaseResourcesLow(ReleaseResources):
             )
 
         if json_argument["release_all"] is True:
+            self.logger.info(
+                "Invoking ReleaseAllResources on subarray | device=%s",
+                self.subarray_adapter.dev_name,
+            )
             (
                 return_codes,
                 message_or_unique_ids,
@@ -169,6 +173,12 @@ class ReleaseResourcesLow(ReleaseResources):
                 self.component_manager.subsystem_assigned_per_command_id[
                     self.command_id
                 ] = assigned_subsystem
+        self.logger.info(
+            "Command ID: %s |  Release Resources "
+            "invoked successfully on: %s",
+            self.command_id,
+            self.subarray_adapter,
+        )
         return self.wait_for_command_completion(
             len(self.command_subs_list),
             ObsState.EMPTY,

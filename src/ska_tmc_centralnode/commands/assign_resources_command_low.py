@@ -137,6 +137,12 @@ class AssignResourcesLow(AssignResources):
             self.subarray_id,
             assigned_subsystem,
         )
+        # INFO log for command start
+        self.logger.info(
+            "Command ID: %s | AssignResources started for subarray %s",
+            self.command_id,
+            self.subarray_id,
+        )
 
         self.component_manager.subsystem_assigned_per_subarray[
             self.subarray_id
@@ -198,6 +204,11 @@ class AssignResourcesLow(AssignResources):
             self.component_manager.log_state(
                 "Device states before executing AssignResources command"
             )
+            self.logger.info(
+                "Command ID: %s | Invoking AssignResources on MCCS %s",
+                self.command_id,
+                self.mccs_mln_adapter,
+            )
 
             return_codes, message_or_unique_ids = self.invoke_command(
                 [self.mccs_mln_adapter],
@@ -220,6 +231,11 @@ class AssignResourcesLow(AssignResources):
             self.component_manager.subsystem_assigned_per_command_id[
                 self.command_id
             ] = assigned_subsystem
+        self.logger.info(
+            "Command ID: %s | Resources assigned successfully on: %s",
+            self.command_id,
+            self.tm_subarray_adapter,
+        )
         return self.wait_for_command_completion(
             len(self.command_subs_list),
             ObsState.IDLE,
