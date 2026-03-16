@@ -78,7 +78,7 @@ deviceServers:
     subarray_count: 2
     command: "CentralNodeDS"
     LivelinessCheckPeriod: 1.0
-    # LoggingLevel: 4
+    LoggingLevel: 4
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
     member: "0"
