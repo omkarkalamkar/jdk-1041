@@ -184,7 +184,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.logger.debug(
             "Command ID: %s | The initial params are : %s",
             self.command_id,
-            json.dumps(initial_params, indent=2),
+            json.dumps(initial_params),
         )
         if data_sources and tm_data_filepath:
             try:
