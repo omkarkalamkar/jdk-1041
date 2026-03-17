@@ -832,7 +832,7 @@ class CNComponentManagerMid(CNComponentManager):
                 if len(num_of_dish_values) == len(
                     self.input_parameter.dish_leaf_node_dev_names
                 ):
-                    self.logger.info("All dishes are available and ready.")
+                    self.logger.debug("All dishes are available and ready.")
                 return True
             except Exception as e:
                 self.logger.exception("Error %s", str(e))
