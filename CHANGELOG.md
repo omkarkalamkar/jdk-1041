@@ -13,7 +13,7 @@ Updated
   - Removed unnecessary log statements.
   - Changed log level from INFO to DEBUG where appropriate.
   - Added log statements where required for better traceability.
-  - Updated version of ska-tmc-common to `1.6.0`. 
+  - Updated version of ska-tmc-common to `1.6.0`
 
 
 
