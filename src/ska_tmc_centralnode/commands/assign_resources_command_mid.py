@@ -37,6 +37,7 @@ class AssignResourcesMid(AssignResources):
                 self.command_id,
             )
             json_argument = json.loads(argin)
+
         except Exception as e:
             return (
                 ResultCode.FAILED,

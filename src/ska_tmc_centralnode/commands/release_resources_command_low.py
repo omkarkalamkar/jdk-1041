@@ -148,6 +148,11 @@ class ReleaseResourcesLow(ReleaseResources):
                         ResultCode.FAILED,
                         ("Error in MCCS JSON argument: %s", exception),
                     )
+                self.logger.info(
+                    "Command ID: %s | Invoking ReleaseAllResources on MCCS %s",
+                    self.command_id,
+                    self.mccs_mln_adapter,
+                )
 
                 (
                     return_codes,
@@ -166,6 +171,12 @@ class ReleaseResourcesLow(ReleaseResources):
                         ResultCode.FAILED,
                         message_or_unique_id,
                     )
+                self.logger.info(
+                    "Command ID: %s | ReleaseAllResources completed "
+                    "successfully on MCCS %s",
+                    self.command_id,
+                    self.mccs_mln_adapter,
+                )
                 self.component_manager.subsystem_assigned_per_command_id[
                     self.command_id
                 ] = assigned_subsystem

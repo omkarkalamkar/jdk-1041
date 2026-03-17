@@ -228,6 +228,12 @@ class AssignResourcesLow(AssignResources):
                     ResultCode.FAILED,
                     message_or_unique_id,
                 )
+            self.logger.info(
+                "Command ID: %s | AssignResources completed successfully "
+                "on MCCS %s",
+                self.command_id,
+                self.mccs_mln_adapter,
+            )
             self.component_manager.subsystem_assigned_per_command_id[
                 self.command_id
             ] = assigned_subsystem

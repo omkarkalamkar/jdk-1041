@@ -27,7 +27,7 @@ def assign_validate_json_args(meth):
 
     @functools.wraps(meth)
     def wrapper(self, json_str: str):
-        logging.info("Validating JSON argument: %s", json_str)
+        logging.debug("Validating JSON argument: %s", json_str)
 
         try:
             json.loads(json_str)
@@ -59,7 +59,7 @@ def release_validate_json_args(meth):
 
     @functools.wraps(meth)
     def wrapper(self, json_str: str):
-        logging.info("Validating JSON argument: %s", json_str)
+        logging.debug("Validating JSON argument: %s", json_str)
         try:
             json.loads(json_str)
         except json.JSONDecodeError:
