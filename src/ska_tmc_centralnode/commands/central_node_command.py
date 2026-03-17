@@ -350,7 +350,7 @@ class CentralNodeCommand(TMCCommand):
 
                         return ResultCode.FAILED, exception_message
                     all_results_ok = True
-                self.logger.info(
+                self.logger.debug(
                     "function_name %s %s", function_name, all_results_ok
                 )
                 if (not function_name) and all_results_ok:

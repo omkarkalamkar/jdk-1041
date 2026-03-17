@@ -232,7 +232,7 @@ class AssignResourcesLow(AssignResources):
                 self.command_id
             ] = assigned_subsystem
         self.logger.info(
-            "Command ID: %s | Resources assigned successfully on: %s",
+            "Command ID: %s | AssignResources completed successfully on: %s",
             self.command_id,
             self.tm_subarray_adapter,
         )

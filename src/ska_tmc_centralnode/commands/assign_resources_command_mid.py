@@ -145,7 +145,7 @@ class AssignResourcesMid(AssignResources):
                 ] = message_or_unique_id
 
         self.logger.info(
-            "Command ID: %s | Resources assigned successfully on: %s",
+            "Command ID: %s | AssignResources completed successfully on: %s",
             self.command_id,
             self.tm_subarray_adapter,
         )

@@ -175,7 +175,7 @@ class ReleaseResourcesLow(ReleaseResources):
                 ] = assigned_subsystem
         self.logger.info(
             "Command ID: %s |  Release Resources "
-            "invoked successfully on: %s",
+            "completed successfully on: %s",
             self.command_id,
             self.subarray_adapter,
         )
