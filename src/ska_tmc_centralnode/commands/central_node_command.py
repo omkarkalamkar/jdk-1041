@@ -190,7 +190,7 @@ class CentralNodeCommand(TMCCommand):
                 return_code, message_or_unique_id = command_caller(adapter)
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
-                self.logger.info(
+                self.logger.debug(
                     "Command invoked | command=%s device=%s",
                     command_name,
                     adapter.dev_name,
@@ -207,7 +207,7 @@ class CentralNodeCommand(TMCCommand):
                     adapter.dev_name,
                     str(e),
                 )
-        self.logger.info(
+        self.logger.debug(
             "Current message_or_uniques_ids: %s", str(message_or_unique_ids)
         )
         return return_codes, message_or_unique_ids
@@ -324,8 +324,8 @@ class CentralNodeCommand(TMCCommand):
         )
         with self.component_manager.command_completion_cond:
             while True:
-                self.logger.info(
-                    "%s %s",
+                self.logger.debug(
+                    "Command progress | received=%s/%s",
                     len(self.command_results.keys()),
                     self.command_results,
                 )
@@ -395,7 +395,7 @@ class CentralNodeCommand(TMCCommand):
         """
 
         def callback(result=None, **kwargs):
-            LOGGER.info(
+            LOGGER.debug(
                 "Received command result %s from device %s",
                 result,
                 device_name,
