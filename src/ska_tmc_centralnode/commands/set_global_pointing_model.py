@@ -66,6 +66,10 @@ class SetGlobalPointingModel(SetDishGPM):
         self.component_manager.abort_event = self.task_abort_event
         self.set_command_id(__class__.__name__)
         self.task_callback(status=TaskStatus.IN_PROGRESS)
+        self.logger.info(
+            "Command ID: %s | SetGlobalPointingModel started",
+            self.component_manager.command_id,
+        )
         self.component_manager.command_in_progress = "SetGlobalPointingModel"
         self.component_manager.command_result = ResultCode.STARTED
         self.dish_gpm_params = json.loads(dish_gpm_params)
@@ -109,9 +113,8 @@ class SetGlobalPointingModel(SetDishGPM):
             result = tuple(result)
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.logger.info(
-            "Command ID: %s | Calling task callback for "
-            + "SetGlobalPointingModel with Result: "
-            + "%s and Message: %s",
+            "Command ID: %s |  SetGlobalPointingModel completed with "
+            "result: %s and Message is : %s",
             self.component_manager.command_id,
             result,
             exception,
@@ -238,7 +241,9 @@ class SetGlobalPointingModel(SetDishGPM):
                     f for f in gpm_files if dish_id.lower() in f.lower()
                 ]
                 if not file_names:
-                    self.logger.info("GPM file not found for dish %s", dish_id)
+                    self.logger.debug(
+                        "GPM file not found for dish %s", dish_id
+                    )
                     error_message = (
                         "No GPM files were found for any of"
                         + " the bands in the provided paths"

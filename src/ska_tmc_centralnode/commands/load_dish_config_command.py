@@ -78,11 +78,11 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         """
         self.component_manager.command_in_progress = "LoadDishCfg"
+        self.set_command_id("LoadDishCfg")
         self.logger.info(
-            "Command started | command=LoadDishCfg id=%s",
+            "Command ID: %s | LoadDishCfg started",
             self.command_id,
         )
-        self.set_command_id("LoadDishCfg")
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
@@ -234,7 +234,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.logger.debug(
             "DishId-VCC map parameters | command_id=%s params=%s",
             self.command_id,
-            json.dumps(dishid_vcc_map_params, indent=4),
+            json.dumps(dishid_vcc_map_params),
         )
 
         dish_parameters = self.dish_vcc_config_json.get("dish_parameters")
@@ -324,7 +324,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 if dish_adapter:
                     dish_adapter = dish_adapter[0]
                     k_value = vcc_k_map.get("k")
-                    self.logger.info(
+                    self.logger.debug(
                         "Command ID: %s | Invoking SetKValue command on: %s",
                         self.command_id,
                         dish_adapter.dev_name,
@@ -423,7 +423,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             return "", str(exp)
         self.logger.debug(
             "DishId Vcc Map Json: %s",
-            json.dumps(dishid_vcc_map_json, indent=4),
+            json.dumps(dishid_vcc_map_json),
         )
         # Validate the data
         (

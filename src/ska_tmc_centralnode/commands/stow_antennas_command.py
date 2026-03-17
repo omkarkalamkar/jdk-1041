@@ -113,9 +113,8 @@ class SetStowMode(SetDishGPM):
             result = tuple(result)
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.logger.info(
-            "Command ID: %s | Calling task callback for "
-            + "SetStowMode with Result: "
-            + "%s and exception is : %s",
+            "Command ID: %s | SetStowMode completed with"
+            " result: %s and Message is : %s",
             self.component_manager.command_id,
             result,
             exception,

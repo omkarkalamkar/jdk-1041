@@ -34,10 +34,6 @@ class ReleaseResourcesMid(ReleaseResources):
 
         """
         ret_code, message = self.init_adapters()
-        self.logger.info(
-            "command_id=%s | ReleaseResourcesMid started",
-            self.command_id,
-        )
         if ret_code == ResultCode.FAILED:
             return ret_code, message
 
