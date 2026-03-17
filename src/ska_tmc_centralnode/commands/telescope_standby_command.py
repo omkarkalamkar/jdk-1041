@@ -59,7 +59,11 @@ class TelescopeStandby(TelescopeOnOff):
             self.component_manager.command_id,
         )
         result_code, message = self.do(argin=None)
-        self.logger.info(message)
+        self.logger.info(
+            "Command ID: %s | TelescopeStandby completed with result=%s",
+            self.component_manager.command_id,
+            result_code.name,
+        )
         if result_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
