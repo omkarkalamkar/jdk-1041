@@ -5,6 +5,18 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[1.1.0]
+*******
+Updated
+-------
+* Logging improvements
+  - Removed unnecessary log statements.
+  - Changed log level from INFO to DEBUG where appropriate.
+  - Added log statements where required for better traceability.
+  - Updated version of ska-tmc-common to `1.6.0`.
+
+
+
 [1.0.1]
 *******
 Updated

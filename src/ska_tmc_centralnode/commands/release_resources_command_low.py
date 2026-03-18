@@ -108,6 +108,10 @@ class ReleaseResourcesLow(ReleaseResources):
             )
 
         if json_argument["release_all"] is True:
+            self.logger.info(
+                "Invoking ReleaseAllResources on subarray | device=%s",
+                self.subarray_adapter.dev_name,
+            )
             (
                 return_codes,
                 message_or_unique_ids,
@@ -144,6 +148,11 @@ class ReleaseResourcesLow(ReleaseResources):
                         ResultCode.FAILED,
                         ("Error in MCCS JSON argument: %s", exception),
                     )
+                self.logger.info(
+                    "Command ID: %s | Invoking ReleaseAllResources on MCCS %s",
+                    self.command_id,
+                    self.mccs_mln_adapter,
+                )
 
                 (
                     return_codes,
@@ -162,9 +171,21 @@ class ReleaseResourcesLow(ReleaseResources):
                         ResultCode.FAILED,
                         message_or_unique_id,
                     )
+                self.logger.info(
+                    "Command ID: %s | ReleaseAllResources completed "
+                    "successfully on MCCS %s",
+                    self.command_id,
+                    self.mccs_mln_adapter,
+                )
                 self.component_manager.subsystem_assigned_per_command_id[
                     self.command_id
                 ] = assigned_subsystem
+        self.logger.info(
+            "Command ID: %s |  Release Resources "
+            "completed successfully on: %s",
+            self.command_id,
+            self.subarray_adapter,
+        )
         return self.wait_for_command_completion(
             len(self.command_subs_list),
             ObsState.EMPTY,

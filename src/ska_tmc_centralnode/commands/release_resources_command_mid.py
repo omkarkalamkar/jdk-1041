@@ -67,6 +67,10 @@ class ReleaseResourcesMid(ReleaseResources):
             )
 
         if json_argument["release_all"] is True:
+            self.logger.info(
+                "Invoking ReleaseAllResources on subarray | device=%s",
+                self.subarray_adapter.dev_name,
+            )
             return_codes, message_or_unique_ids = self.release_all_resources(
                 self.subarray_adapter
             )
@@ -85,7 +89,7 @@ class ReleaseResourcesMid(ReleaseResources):
                     ] = message_or_unique_id
             self.logger.info(
                 "Command ID: %s |  Release Resources "
-                "invoked successfully on: %s",
+                "completed successfully on: %s",
                 self.command_id,
                 self.subarray_adapter,
             )

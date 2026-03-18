@@ -55,9 +55,16 @@ class TelescopeOn(TelescopeOnOff):
         """
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
-
+        self.logger.info(
+            "Command ID: %s | Starting TelescopeOn command",
+            self.component_manager.command_id,
+        )
         result_code, message = self.do(argin=None)
-        self.logger.info(message)
+        self.logger.info(
+            "Command ID: %s | TelescopeOn completed with result=%s",
+            self.component_manager.command_id,
+            result_code.name,
+        )
         if result_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
@@ -93,8 +100,6 @@ class TelescopeOn(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeOn command"
         )
-
-        self.logger.info("Invoking On command on the lower level devices")
 
         unavailable_devices = []
         for return_codes, message_or_unique_ids in [
@@ -244,9 +249,6 @@ class TelescopeOn(TelescopeOnOff):
 
         self.component_manager.log_state(
             "Device states before executing TelescopeOn command"
-        )
-        self.logger.info(
-            "Invoking On command on the lower level devices",
         )
         # send commands to sub-devices
         # import debugpy; debugpy.debug_this_thread()

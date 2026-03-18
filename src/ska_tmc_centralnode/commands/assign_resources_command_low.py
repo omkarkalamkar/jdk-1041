@@ -83,6 +83,11 @@ class AssignResourcesLow(AssignResources):
                 json_argument,
             )
         except Exception as exception:
+            self.logger.error(
+                "Command %s: Failed to parse AssignResources JSON input: %s",
+                self.command_id,
+                exception,
+            )
             return (
                 ResultCode.FAILED,
                 ("Problem in loading the JSON string: %s", exception),
@@ -125,6 +130,18 @@ class AssignResourcesLow(AssignResources):
 
         assigned_subsystem: list = list(
             SUB_SYSTEMS.intersection(json_argument.keys())
+        )
+        self.logger.debug(
+            "Command %s: Subsystems assigned for subarray %s: %s",
+            self.command_id,
+            self.subarray_id,
+            assigned_subsystem,
+        )
+        # INFO log for command start
+        self.logger.info(
+            "Command ID: %s | AssignResources started for subarray %s",
+            self.command_id,
+            self.subarray_id,
         )
 
         self.component_manager.subsystem_assigned_per_subarray[
@@ -173,6 +190,12 @@ class AssignResourcesLow(AssignResources):
             try:
                 input_mccs_master = self.create_mccs_cmd_data(json_argument)
             except Exception as exception:
+                self.logger.error(
+                    "Command %s: Error while preparing MCCS AssignResources "
+                    "input: %s",
+                    self.command_id,
+                    exception,
+                )
                 return (
                     ResultCode.FAILED,
                     ("JSON arguments error:: %s", exception),
@@ -180,6 +203,11 @@ class AssignResourcesLow(AssignResources):
 
             self.component_manager.log_state(
                 "Device states before executing AssignResources command"
+            )
+            self.logger.info(
+                "Command ID: %s | Invoking AssignResources on MCCS %s",
+                self.command_id,
+                self.mccs_mln_adapter,
             )
 
             return_codes, message_or_unique_ids = self.invoke_command(
@@ -200,9 +228,20 @@ class AssignResourcesLow(AssignResources):
                     ResultCode.FAILED,
                     message_or_unique_id,
                 )
+            self.logger.info(
+                "Command ID: %s | AssignResources completed successfully "
+                "on MCCS %s",
+                self.command_id,
+                self.mccs_mln_adapter,
+            )
             self.component_manager.subsystem_assigned_per_command_id[
                 self.command_id
             ] = assigned_subsystem
+        self.logger.info(
+            "Command ID: %s | AssignResources completed successfully on: %s",
+            self.command_id,
+            self.tm_subarray_adapter,
+        )
         return self.wait_for_command_completion(
             len(self.command_subs_list),
             ObsState.IDLE,

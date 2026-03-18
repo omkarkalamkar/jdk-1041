@@ -30,7 +30,6 @@ from tests.settings import (
 def test_low_telescope_standby_command(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
-    logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -69,7 +68,6 @@ def test_low_telescope_standby_command(
 def test_telescope_standby_command_unavailability(
     tango_context, set_low_sdp_csp_mccs_admin_modes
 ):
-    logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
@@ -108,7 +106,6 @@ def test_telescope_standby_command_unavailability(
 def test_low_telescope_standby_command_fail_subarray(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
@@ -153,7 +150,6 @@ def test_low_telescope_standby_command_fail_subarray(
 def test_low_telescope_standby_fail_check_allowed(
     tango_context, set_low_sdp_csp_mccs_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time
     logger.info(
@@ -168,7 +164,6 @@ def test_low_telescope_standby_fail_check_allowed(
 def test_telescope_standby_command_rejected(
     tango_context, task_callback, set_low_sdp_csp_mccs_admin_modes
 ):
-    logger.info("%s", tango_context)
     # import debugpy; debugpy.debug_this_thread()
     cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
     elapsed_time = time.time() - start_time

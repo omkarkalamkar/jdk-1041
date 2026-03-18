@@ -54,9 +54,16 @@ class TelescopeOff(TelescopeOnOff):
         """
 
         task_callback(status=TaskStatus.IN_PROGRESS)
-
+        self.logger.info(
+            "Command ID: %s | Starting TelescopeOff command",
+            self.component_manager.command_id,
+        )
         return_code, message = self.do(argin=None)
-        self.logger.info(message)
+        self.logger.info(
+            "Command ID: %s | TelescopeOff completed with result=%s",
+            self.component_manager.command_id,
+            return_code.name,
+        )
         if return_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
@@ -91,10 +98,6 @@ class TelescopeOff(TelescopeOnOff):
             "Device states before executing TelescopeOff command."
         )
 
-        self.logger.info(
-            "Invoking Off command on the lower level devices",
-        )
-
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -115,7 +118,7 @@ class TelescopeOff(TelescopeOnOff):
                     adapter.dev_name
                 ).obs_state
                 if obs_state != ObsState.EMPTY:
-                    self.logger.error(
+                    self.logger.debug(
                         "Subarray current ObsState %s, while "
                         "waiting for ObsState.EMPTY. ",
                         str(obs_state),
@@ -253,9 +256,6 @@ class TelescopeOff(TelescopeOnOff):
 
         """
         self.component_manager.component.desired_telescope_state = DevState.OFF
-        self.logger.info(
-            "Invoking Off command on the lower level devices",
-        )
 
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
@@ -263,9 +263,6 @@ class TelescopeOff(TelescopeOnOff):
 
         self.component_manager.log_state(
             "Device states before executing TelescopeOff command."
-        )
-        self.logger.info(
-            "Invoking Off command on the lower level devices",
         )
         return_codes, message_or_unique_ids = self.turn_off_subarrays()
         for return_code, message_or_unique_id in zip(

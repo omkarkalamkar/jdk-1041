@@ -478,11 +478,11 @@ class CNComponentManager(TmcComponentManager):
             del self.event_data_queue
             del self.aggregated_health_state
             self.aggregate_process_manager.shutdown()
-            self.logger.debug("aggregation process stopped")
+            self.logger.debug("Aggregation process stopped")
 
     def __del__(self):
         """shutdown aggregation process"""
-        self.logger.debug("component destructor called")
+        self.logger.debug("Component destructor called")
         self.stop_all_process()
         self.stop()
 
@@ -674,7 +674,7 @@ class CNComponentManager(TmcComponentManager):
         """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["csp_master_leaf_node"] is True:
-            self.logger.info(
+            self.logger.debug(
                 "CspMasterLeafNode is not available to receive command"
             )
             return False
@@ -688,7 +688,7 @@ class CNComponentManager(TmcComponentManager):
         """
         telescope_availability = self.get_telescope_availability()
         if not telescope_availability["sdp_master_leaf_node"] is True:
-            self.logger.info(
+            self.logger.debug(
                 "SdpMasterLeafNode is not available to receive command"
             )
             return False
@@ -1394,7 +1394,11 @@ class CNComponentManager(TmcComponentManager):
         device_states = pd.DataFrame(
             {"Devices": device_names, "STATE": dev_states}
         )
-        self.logger.info("\n" + msg + "\n" + device_states.to_string() + "\n")
+        self.logger.debug(
+            "%s\n%s",
+            msg,
+            device_states.to_string(),
+        )
 
     def get_adapter_by_device_name(self, device_name: str):
         """

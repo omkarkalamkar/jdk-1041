@@ -57,6 +57,11 @@ class SetStowMode(SetDishGPM):
             None
         """
         self.component_manager.command_in_progress = "SetStowMode"
+        self.logger.info(
+            "Command ID: %s | Starting SetStowMode | receptors=%s",
+            self.component_manager.command_id,
+            argin,
+        )
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
@@ -108,9 +113,8 @@ class SetStowMode(SetDishGPM):
             result = tuple(result)
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         self.logger.info(
-            "Command ID: %s | Calling task callback for "
-            + "SetStowMode with Result: "
-            + "%s and exception is : %s",
+            "Command ID: %s | SetStowMode completed with"
+            " result: %s and Message is : %s",
             self.component_manager.command_id,
             result,
             exception,
@@ -246,7 +250,7 @@ class SetStowMode(SetDishGPM):
                     " Dish Leaf Node"
                 )
                 self.logger.info(
-                    "Command ID: %s | Invoking stow mode command on: %s",
+                    "Command ID: %s | Invoking SetStowMode on device=%s",
                     self.component_manager.command_id,
                     dishln_adapter.dev_name,
                 )
@@ -269,7 +273,7 @@ class SetStowMode(SetDishGPM):
                         return_codes[0],
                         message_or_unique_ids[0],
                     ]
-            self.logger.info(
+            self.logger.debug(
                 "Finished executing SetStowMode on DLN."
                 "Set Stow Mode data dictionary : %s",
                 self.component_manager.dishln_stow_mode_cmd_exe_data,
@@ -284,7 +288,7 @@ class SetStowMode(SetDishGPM):
                 )
         except Exception as e:
             self.logger.exception(
-                "Exception occured in Calling SetStowMode, Exception: %s",
+                "Exception %s occurred while calling SetStowMode",
                 str(e),
             )
             return [ResultCode.FAILED], [

@@ -39,7 +39,6 @@ def mock_callback(*args, **kwargs):
 
 def test_all_devices_faulty(tango_context):
     """Test with all devices faulty"""
-    logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
 
     default_array_layout_url = {

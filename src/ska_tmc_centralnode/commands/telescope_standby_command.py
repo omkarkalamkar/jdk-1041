@@ -54,9 +54,16 @@ class TelescopeStandby(TelescopeOnOff):
         """
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
-
+        self.logger.info(
+            "Command ID: %s | Starting TelescopeStandby command",
+            self.component_manager.command_id,
+        )
         result_code, message = self.do(argin=None)
-        self.logger.info(message)
+        self.logger.info(
+            "Command ID: %s | TelescopeStandby completed with result=%s",
+            self.component_manager.command_id,
+            result_code.name,
+        )
         if result_code == ResultCode.FAILED:
             task_callback(
                 status=TaskStatus.COMPLETED,
@@ -95,7 +102,6 @@ class TelescopeStandby(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info("Invoking Standby command on the lower level devices")
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -116,7 +122,7 @@ class TelescopeStandby(TelescopeOnOff):
                     adapter.dev_name
                 ).obs_state
                 if obs_state != ObsState.EMPTY:
-                    self.logger.error(
+                    self.logger.debug(
                         "Subarray current ObsState %s, while "
                         "waiting for ObsState.EMPTY. ",
                         str(obs_state),
@@ -184,7 +190,6 @@ class TelescopeStandby(TelescopeOnOff):
         self.component_manager.log_state(
             "Device states before executing TelescopeStandby command"
         )
-        self.logger.info("Invoking Standby command on the lower level devices")
         return_codes, message_or_unique_ids = self.turn_standby_subarrays()
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -206,7 +211,7 @@ class TelescopeStandby(TelescopeOnOff):
                     ).obs_state
                     == ObsState.EMPTY
                 ):
-                    self.logger.error(
+                    self.logger.debug(
                         "Subarray %s still not empty", adapter.dev_name
                     )
                     all_empty = False

@@ -136,8 +136,10 @@ class CentralNodeCommand(TMCCommand):
                 )
                 return_codes.append(return_code)
                 message_or_unique_ids.append(message)
-                self.logger.info(
-                    "%s invoked on %s ", command_name, adapter.dev_name
+                self.logger.debug(
+                    "Command invoked | command=%s device=%s",
+                    command_name,
+                    adapter.dev_name,
                 )
 
             except Exception as e:
@@ -151,8 +153,10 @@ class CentralNodeCommand(TMCCommand):
                     adapter.dev_name,
                     str(e),
                 )
-        self.logger.info(
-            "Current message_or_uniques_ids: %s", str(message_or_unique_ids)
+        self.logger.debug(
+            "Command responses received | command=%s responses=%s",
+            command_name,
+            str(message_or_unique_ids),
         )
         return return_codes, message_or_unique_ids
 
@@ -186,8 +190,10 @@ class CentralNodeCommand(TMCCommand):
                 return_code, message_or_unique_id = command_caller(adapter)
                 return_codes.append(return_code[0])
                 message_or_unique_ids.append(message_or_unique_id[0])
-                self.logger.info(
-                    "%s invoked on %s ", command_name, adapter.dev_name
+                self.logger.debug(
+                    "Command invoked | command=%s device=%s",
+                    command_name,
+                    adapter.dev_name,
                 )
 
             except Exception as e:
@@ -196,12 +202,12 @@ class CentralNodeCommand(TMCCommand):
                     f"{err_msg} {adapter.dev_name}: {e}"
                 )
                 self.logger.error(
-                    "Error in invoking %s on %s, Exception: %s",
+                    "Error in invoking | command=%s device=%s error=%s",
                     command_name,
                     adapter.dev_name,
                     str(e),
                 )
-        self.logger.info(
+        self.logger.debug(
             "Current message_or_uniques_ids: %s", str(message_or_unique_ids)
         )
         return return_codes, message_or_unique_ids
@@ -313,15 +319,17 @@ class CentralNodeCommand(TMCCommand):
         """This Method wait for desired obs state"""
         all_results_ok = False
         end_time = time.monotonic() + self.component_manager.command_timeout
-        self.logger.info("subs list %s", self.command_subs_list)
+        self.logger.debug(
+            "Command subscription list %s", self.command_subs_list
+        )
         with self.component_manager.command_completion_cond:
             while True:
-                self.logger.info(
-                    "%s %s",
+                self.logger.debug(
+                    "Command progress | received=%s/%s",
                     len(self.command_results.keys()),
                     self.command_results,
                 )
-                self.logger.info(device_length)
+                self.logger.debug("Device length: %s", device_length)
                 if len(self.command_results.keys()) == device_length:
                     # All command results received check if any Failure
                     failed_results_info = {}
@@ -342,7 +350,7 @@ class CentralNodeCommand(TMCCommand):
 
                         return ResultCode.FAILED, exception_message
                     all_results_ok = True
-                self.logger.info(
+                self.logger.debug(
                     "function_name %s %s", function_name, all_results_ok
                 )
                 if (not function_name) and all_results_ok:
@@ -365,8 +373,8 @@ class CentralNodeCommand(TMCCommand):
                         data = getattr(self.component_manager, function_name)()
                     else:
                         data = None
-                    self.logger.info(
-                        "No event command results %s state %s",
+                    self.logger.warning(
+                        "No event command results | command=%s state=%s",
                         self.command_results,
                         data,
                     )
@@ -387,7 +395,11 @@ class CentralNodeCommand(TMCCommand):
         """
 
         def callback(result=None, **kwargs):
-            logging.info("Got Command Result for %s %s", device_name, result)
+            LOGGER.debug(
+                "Received command result %s from device %s",
+                result,
+                device_name,
+            )
             if result:
                 with self.component_manager.command_completion_cond:
                     self.command_results[device_name] = result
@@ -435,7 +447,7 @@ class TelescopeOnOff(CentralNodeCommand):
                 AdapterType.CSP_MASTER_LEAF_NODE,
             )
             self.logger.debug(
-                "Adapter is created for CSP Master Leaf Node: %s",
+                "Adapter created | type=CSP_MASTER_LEAF_NODE device=%s",
                 self.component_manager.input_parameter.csp_mln_dev_name,
             )
         except Exception as e:
@@ -478,7 +490,7 @@ class TelescopeOnOff(CentralNodeCommand):
                     )
                 except Exception as e:
                     self.logger.exception(
-                        "Exception in creating adapter for %s, Exception: %s",
+                        "Exception in creating adapter | device=%s error=%s",
                         dev_name,
                         str(e),
                     )

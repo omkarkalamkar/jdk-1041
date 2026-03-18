@@ -68,7 +68,6 @@ def test_low_one_working_other_faulty(
     tango_context,
 ):
     """Test low one working other faulty devices"""
-    logger.info("%s", tango_context)
     op_state_model = TMCOpStateModel(logger)
 
     default_array_layout_url = {

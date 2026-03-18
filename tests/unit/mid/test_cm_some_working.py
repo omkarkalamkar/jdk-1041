@@ -69,7 +69,6 @@ def mock_callback(*args, **kwargs):
 
 def test_some_working_other_faulty(tango_context):
     """Test with some working and some faulty devices"""
-    logger.info("%s", tango_context)
 
     op_state_model = TMCOpStateModel(logger)
 

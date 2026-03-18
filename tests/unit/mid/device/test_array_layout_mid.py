@@ -88,7 +88,6 @@ def test_array_layout_assign_resources(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes, mid_array_layout
 ):
     """Tests assign Resources completed"""
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(

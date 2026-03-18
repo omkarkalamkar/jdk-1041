@@ -47,7 +47,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 1.0.1
+    tag: 1.1.0
     pullPolicy: IfNotPresent
 
 ska_tmc_simulators:
@@ -78,6 +78,7 @@ deviceServers:
     subarray_count: 2
     command: "CentralNodeDS"
     LivelinessCheckPeriod: 1.0
+    LoggingLevel: 4
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
     member: "0"

@@ -74,7 +74,7 @@ class TelescopeStateAggregatorMid(Aggregator):
                 return DevState.UNKNOWN
 
         if not sdp_master and not csp_master:
-            self._logger.info(
+            self._logger.debug(
                 "Checking if sdp and csp master are responsive: "
                 + "%s,responsive : %s "
                 + "%s, responsive: %s ",
@@ -85,7 +85,6 @@ class TelescopeStateAggregatorMid(Aggregator):
             )
             return DevState.UNKNOWN
         if dish_count == 0:
-            self._logger.debug("dish_count == 0")
             return DevState.UNKNOWN
         if (
             subsystem_states == {DevState.ON}
@@ -160,7 +159,7 @@ class TelescopeStateAggregatorLow(Aggregator):
                 sdp_master = True
 
         telescopeSetStateList = set(telescopeStateList)
-        self._logger.info(
+        self._logger.debug(
             "Telescope state list is : %s", str(telescopeStateList)
         )
         if not sdp_master and not csp_master and not mccs_master:
@@ -445,7 +444,7 @@ class DishAttrValueAggregator:
         """
         initializing_gpm = True
         gpm_unknown_dishes = []
-        self.logger.info(
+        self.logger.debug(
             "Current GPM Status %s",
             self._component_manager.global_pointing_model_status,
         )
@@ -469,7 +468,7 @@ class DishAttrValueAggregator:
                 if initializing_gpm:
                     gpm_unknown_dishes.append(dish_id)
                 initializing_gpm = True
-        self.logger.info(
+        self.logger.debug(
             "Dishes for which GPM version not set: %s", gpm_unknown_dishes
         )
         return gpm_unknown_dishes

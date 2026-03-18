@@ -118,7 +118,6 @@ def test_telescope_release_resources_fail_check_allowed(
 def test_mid_release_resources_command_with_invalide_key(
     tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, _ = create_cm()
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -140,7 +139,6 @@ def test_mid_release_resources_command_with_invalide_key(
 def test_release_resources_command_timeout(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     cm.command_timeout = 2
     elapsed_time = time.time() - start_time
@@ -186,7 +184,6 @@ def test_release_resources_command_timeout(
 def test_release_resources_exception_on_sn(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
-    logger.info("%s", tango_context)
     cm, start_time = create_cm()
     elapsed_time = time.time() - start_time
     logger.info(

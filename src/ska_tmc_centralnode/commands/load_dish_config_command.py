@@ -79,6 +79,10 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         self.component_manager.command_in_progress = "LoadDishCfg"
         self.set_command_id("LoadDishCfg")
+        self.logger.info(
+            "Command ID: %s | LoadDishCfg started",
+            self.command_id,
+        )
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
@@ -126,9 +130,8 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         """
         self.logger.debug(
-            "Command ID: %s | Calling task callback for "
-            + "LoadDishCfg with Result: "
-            + "%s and Message: %s",
+            "Task callback invoked | command=LoadDishCfg id=%s result=%s "
+            "message=%s",
             self.command_id,
             str(result[0]),
             exception,
@@ -181,7 +184,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.logger.debug(
             "Command ID: %s | The initial params are : %s",
             self.command_id,
-            json.dumps(initial_params, indent=2),
+            json.dumps(initial_params),
         )
         if data_sources and tm_data_filepath:
             try:
@@ -221,17 +224,17 @@ class LoadDishCfg(LoadDishCfgCommand):
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             self.logger.error(
-                "Command ID: %s | Failed to initialize adapters: %s",
+                "Adapter initialization failed | command_id=%s error=%s",
                 self.command_id,
                 message,
             )
             return result_code, message
 
         dishid_vcc_map_params = json.loads(argin)
-        self.logger.info(
-            "Command ID: %s | DishId-VCC map parameters: %s",
+        self.logger.debug(
+            "DishId-VCC map parameters | command_id=%s params=%s",
             self.command_id,
-            json.dumps(dishid_vcc_map_params, indent=4),
+            json.dumps(dishid_vcc_map_params),
         )
 
         dish_parameters = self.dish_vcc_config_json.get("dish_parameters")
@@ -321,7 +324,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 if dish_adapter:
                     dish_adapter = dish_adapter[0]
                     k_value = vcc_k_map.get("k")
-                    self.logger.info(
+                    self.logger.debug(
                         "Command ID: %s | Invoking SetKValue command on: %s",
                         self.command_id,
                         dish_adapter.dev_name,
@@ -342,16 +345,16 @@ class LoadDishCfg(LoadDishCfgCommand):
                     error_message = (
                         f"Dish adapter not found for dish id {dish_id}"
                     )
-                    self.logger.info(error_message)
+                    self.logger.error(error_message)
         except Exception as e:
             self.logger.exception(
-                "Exception occured in Calling setKvalue command on %s, "
+                "Exception occured in calling setKvalue command on %s, "
                 + "Exception: %s",
                 dish_adapter.dev_name,
                 str(e),
             )
             return [ResultCode.FAILED], [
-                f"Error in Calling setKvalue command on dish adapter {e}"
+                f"Error in calling setKvalue command on dish adapter {e}"
             ]
 
         return return_codes, message_or_unique_ids
@@ -420,7 +423,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             return "", str(exp)
         self.logger.debug(
             "DishId Vcc Map Json: %s",
-            json.dumps(dishid_vcc_map_json, indent=4),
+            json.dumps(dishid_vcc_map_json),
         )
         # Validate the data
         (
