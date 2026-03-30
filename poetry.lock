@@ -3211,21 +3211,21 @@ reference = "ska-nexus"
 
 [[package]]
 name = "ska-tmc-cdm"
-version = "14.9.0"
+version = "14.8.1"
 description = "SKA Control Data Model serialisation library"
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["main"]
 files = [
-    {file = "ska_tmc_cdm-14.9.0-py3-none-any.whl", hash = "sha256:9cc2ab415d448aa4566833ba0d08a759107e0ef9edfb7804a331304cc73d71fb"},
-    {file = "ska_tmc_cdm-14.9.0.tar.gz", hash = "sha256:60a95fc3c4a21a3ae5f6b8b3f63937a9dfb6ffdc87d02c4a99305539ce83f507"},
+    {file = "ska_tmc_cdm-14.8.1-py3-none-any.whl", hash = "sha256:f50ab6cd2f97e76ec127199ede89f7fac3ddff742d5faab9dd33383f2ab5219e"},
+    {file = "ska_tmc_cdm-14.8.1.tar.gz", hash = "sha256:6ab2aea0f40f3386e00b0819856f7b34e74e3f95d0a0130ddd7eabd036d0ff11"},
 ]
 
 [package.dependencies]
 astropy = ">=6.1,<7.0"
 pydantic = ">=2.10.6,<3.0.0"
-ska-schemas = ">=1.36.0,<2.0.0"
 ska-ser-logging = ">=0.4.3,<0.5.0"
+ska-telmodel = ">=1.32.0,<2.0.0"
 
 [package.source]
 type = "legacy"
@@ -3905,4 +3905,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "353066b1a833395e401d07fded41b45bf6efce4b2f28ee2c43d6eda8e8379a3f"
+content-hash = "d7852b7b893d399d5ed36fe871f3b348350d88324fc3ddbe8e1239f136516ddf"
