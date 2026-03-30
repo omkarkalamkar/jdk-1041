@@ -151,8 +151,8 @@ sample_assign_resources_request = {
                     "phase_dir": {
                         "ra": [123, 0.1],
                         "dec": [80, 0.1],
-                        "reference_time": "...",
-                        "reference_frame": "icrs",
+                        "reference_time": "2023-01-01T00:00:00Z",
+                        "reference_frame": "ICRF3",
                     },
                     "pointing_fqdn": "low-tmc/telstate/0/pointing",
                 }
