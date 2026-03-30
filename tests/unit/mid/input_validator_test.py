@@ -18,7 +18,7 @@ from ska_tmc_centralnode.input_validator import AssignResourceValidator
 # Sample 'good' JSON
 
 sample_assign_resources_request = {
-    "interface": "https://schema.skao.int/ska-tmc-assignresources/2.1",
+    "interface": "https://schema.skao.int/ska-tmc-assignresources/2.4",
     "transaction_id": "txn-....-00001",
     "subarray_id": 1,
     "dish": {"receptor_ids": ["SKA001"]},
