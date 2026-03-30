@@ -18,7 +18,7 @@ from ska_tmc_centralnode.input_validator import AssignResourceValidator
 # Sample 'good' JSON
 
 sample_assign_resources_request = {
-    "interface": "https://schema.skao.int/ska-tmc-assignresources/2.4",
+    "interface": "https://schema.skao.int/ska-tmc-assignresources/2.1",
     "transaction_id": "txn-....-00001",
     "subarray_id": 1,
     "dish": {"receptor_ids": ["SKA001"]},
@@ -152,7 +152,7 @@ sample_assign_resources_request = {
                         "ra": [123, 0.1],
                         "dec": [80, 0.1],
                         "reference_time": "...",
-                        "reference_frame": "ICRF3",
+                        "reference_frame": "icrs",
                     },
                     "pointing_fqdn": "low-tmc/telstate/0/pointing",
                 }
@@ -304,6 +304,7 @@ class TestAssignResourceValidator:
         "mid-tmc/leaf-node-dish/ska004",
     ]
 
+    @pytest.mark.test1
     def test_validate_good_json(self):
         """This function tests the validate method when good
         formatted json is provided"""
@@ -318,6 +319,7 @@ class TestAssignResourceValidator:
         )
         assert output_config == sample_assign_resources_request
 
+    @pytest.mark.test1
     def test_validate_wrong_subarray_id(self):
         """
         Tests that InvalidJSONError is raised when a wrong subarray id is given
