@@ -17,7 +17,7 @@ from typing import Callable, Dict, Tuple
 from ska_control_model import AdminMode, ResultCode, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.faults import StateModelError
-from ska_telmodel.schema import validate
+from ska_schemas.schema import validate
 from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
