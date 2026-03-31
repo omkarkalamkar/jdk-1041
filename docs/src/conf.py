@@ -49,7 +49,6 @@ autodoc_mock_imports = [
     "rule_engine", 
     "tenacity",
     "pydantic",
-    "ska_schemas",
 ]
 
 import os
