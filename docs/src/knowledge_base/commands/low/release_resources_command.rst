@@ -3,7 +3,7 @@ ReleaseResourcesLow
 ===================
 
     1. Central Node provides API for **ReleaseResources workflow**.
-    2. Input JSON is as per schema detailed at - https://developer.skao.int/projects/ska-telmodel/en/latest/schemas/tmc/ska-low-tmc-releaseres.html
+    2. Input JSON is as per schema detailed at - https://developer.skao.int/projects/ska-schemas/en/latest/schemas/tmc/ska-low-tmc-releaseres.html
     3. The Central Node **accepts the command** if :-
 
         a. Admin mode reported by each of the system - CSP,SDP,MCCS controller are in **ONLINE/ENGINEERING/RESERVED**
@@ -17,7 +17,7 @@ ReleaseResourcesLow
     5. The Input JSON is validated as below, and Command is `'Rejected'` with **exception message if they are not met** :-
 
         a. JSON should not be empty or malformed
-        b. JSON validation against the schema specified in the Telescope Model (https://developer.skao.int/projects/ska-telmodel/en/latest/schemas/tmc/ska-low-tmc-releaseres.html)
+        b. JSON validation against the schema specified in the Telescope Model (https://developer.skao.int/projects/ska-schemas/en/latest/schemas/tmc/ska-low-tmc-releaseres.html)
     
     6. The following **state requirements** are applied for the **command execution** :-
 
