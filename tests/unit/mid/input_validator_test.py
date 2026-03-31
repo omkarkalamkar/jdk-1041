@@ -151,7 +151,7 @@ sample_assign_resources_request = {
                     "phase_dir": {
                         "ra": [123, 0.1],
                         "dec": [80, 0.1],
-                        "reference_time": "2023-01-01T00:00:00Z",
+                        "reference_time": "2026-01-01T00:00:00Z",
                         "reference_frame": "ICRF3",
                     },
                     "pointing_fqdn": "low-tmc/telstate/0/pointing",
@@ -304,7 +304,6 @@ class TestAssignResourceValidator:
         "mid-tmc/leaf-node-dish/ska004",
     ]
 
-    @pytest.mark.test1
     def test_validate_good_json(self):
         """This function tests the validate method when good
         formatted json is provided"""
@@ -319,7 +318,6 @@ class TestAssignResourceValidator:
         )
         assert output_config == sample_assign_resources_request
 
-    @pytest.mark.test1
     def test_validate_wrong_subarray_id(self):
         """
         Tests that InvalidJSONError is raised when a wrong subarray id is given
