@@ -72,8 +72,6 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
 
 
-# @pytest.mark.test1
-# @pytest.mark.repeat(10)
 def test_tmc_state_fault_over_standby(tango_context):
     """tests for tmc state fault over standby"""
     devFactory = DevFactory()
