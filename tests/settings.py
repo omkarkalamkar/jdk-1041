@@ -385,7 +385,6 @@ def ensure_tmc_op_state(cm, state, expected_elapsed_time):
     elapsed_time = 0
     while cm.component.tmc_op_state != state:
         elapsed_time = time.time() - start_time
-        time.sleep(1)
         if elapsed_time > TIMEOUT:
             pytest.fail("Timeout occurred while executing the test")
     assert elapsed_time < expected_elapsed_time

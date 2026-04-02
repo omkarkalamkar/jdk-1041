@@ -76,7 +76,7 @@ def test_tmc_state_fault_over_standby(tango_context):
     """tests for tmc state fault over standby"""
     devFactory = DevFactory()
     cm = create_cm_no_faulty_devices(tango_context, True, True)
-    set_one_device_fault(devFactory, cm, 90)
+    set_one_device_fault(devFactory, cm, 30)
     assert cm.component.tmc_op_state == tango.DevState.FAULT
 
 
