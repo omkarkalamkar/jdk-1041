@@ -1,7 +1,6 @@
 """Test cases file"""
 
 import pytest
-import time
 import tango
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_simulators import HelperBaseDevice
@@ -71,6 +70,7 @@ def set_one_device_fault(devFactory, cm, expected_elapsed_time):
     set_device_state(MID_CSP_MLN_DEVICE, tango.DevState.STANDBY, devFactory)
     set_device_state(MID_SDP_MLN_DEVICE, tango.DevState.STANDBY, devFactory)
     ensure_tmc_op_state(cm, tango.DevState.FAULT, expected_elapsed_time)
+
 
 def test_tmc_state_fault_over_standby(tango_context):
     """tests for tmc state fault over standby"""
