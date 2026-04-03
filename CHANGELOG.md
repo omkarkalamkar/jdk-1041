@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 
-[1.2.0]
-*******
+[Unreleased]
+************
 Updated
 -------
 * Utilised ska-schemas 1.36.0, updated ska-telmodel to 1.33.0, and ska-tmc-cdm to 14.9.0.
