@@ -7,7 +7,7 @@ The AssignResources command allocates telescope resources to a specific subarray
 
     1. Central Node provides API for **AssignResources workflow**.
 
-    2. Input JSON is as per schema detailed at - https://developer.skao.int/projects/ska-telmodel/en/latest/schemas/tmc/ska-low-tmc-assignres.html
+    2. Input JSON is as per schema detailed at - https://developer.skao.int/projects/ska-schemas/en/latest/schemas/tmc/ska-low-tmc-assignres.html
     3. The Central Node accepts the AssignResources command with a JSON input which specifies the sub-array ID and resource specifications for MCCS, CSP, and SDP.
     4. The Central Node **accepts the command** if :-
 
@@ -22,7 +22,7 @@ The AssignResources command allocates telescope resources to a specific subarray
     6. The Input JSON is validated as below, and Command is `'Rejected'` with **exception message if they are not met** :-
 
         a. JSON should not be empty or malformed
-        b. JSON validation against the schema specified in the Telescope Model (https://developer.skao.int/projects/ska-telmodel/en/latest/schemas/tmc/ska-low-tmc-assignres.html)
+        b. JSON validation against the schema specified in the Telescope Model (https://developer.skao.int/projects/ska-schemas/en/latest/schemas/tmc/ska-low-tmc-assignres.html)
 
     7. CentralNode validates the pss beam_ids in assign json:
             - If already assigned to different SubarrayNode: Command is rejected with **'RESULT_CODE - REJECTED'** with a message mentioning the exact pss beam ids that are already assigned to different subarray.

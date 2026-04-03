@@ -5,7 +5,7 @@ AssignResourcesMid
 The AssignResources command allocates telescope resources to a specific subarray in the SKA-Mid telescope configuration.
 
     1. Central Node provides API for **AssignResources workflow**.
-    2. **Input JSON** is as per schema detailed at - https://developer.skao.int/projects/ska-telmodel/en/latest/schemas/tmc/ska-tmc-assignresources.html
+    2. **Input JSON** is as per schema detailed at - https://developer.skao.int/projects/ska-schemas/en/latest/schemas/tmc/ska-tmc-assignresources.html
     3. The Central Node accepts the AssignResources command with a JSON input which specifies the sub-array ID and resource specifications for CSP, and SDP.
     4. The Central Node **accepts the command** if :-
 

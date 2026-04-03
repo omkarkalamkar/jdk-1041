@@ -3,7 +3,7 @@ ReleaseResourcesMid
 ===================
 
     1. Central Node provides API for **ReleaseResources workflow**.
-    2. **Input JSON** is as per schema detailed at - https://developer.skao.int/projects/ska-telmodel/en/latest/schemas/tmc/ska-tmc-releaseresources.html
+    2. **Input JSON** is as per schema detailed at - https://developer.skao.int/projects/ska-schemas/en/latest/schemas/tmc/ska-tmc-releaseresources.html
     3. The Central Node **accepts the command** if :-
 
         A. **Admin mode** reported by each of the system - CSP,SDP are in **ONLINE/ENGINEERING/RESERVED**
