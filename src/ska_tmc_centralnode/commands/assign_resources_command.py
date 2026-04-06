@@ -76,6 +76,7 @@ class AssignResources(AssignReleaseResources):
 
         """
         self.component_manager.command_in_progress = "AssignResources"
+        self.set_command_id("AssignResources")
         self.logger.debug(
             "Command %s: Starting AssignResources command",
             self.command_id,
@@ -126,8 +127,17 @@ class AssignResources(AssignReleaseResources):
             enum value and a string message.
 
         """
+        normalised_subarray_id = str(subarray_id).zfill(2)
+        # basicall converts 1 to 01, 2 to 02 and 16 to 16, as subarray
+        #  dev names are in format : SKA-TMC/Subarray/01, SKA-TMC/Subarray/02,
+        # ... SKA-TMC/Subarray/16
+        self.logger.debug(
+            "Command ID: %s | Attempting to get adapter for Subarray ID: %s",
+            self.command_id,
+            normalised_subarray_id,
+        )
         for adapter in self.subarray_adapters:
-            if str(subarray_id) in adapter.dev_name:
+            if normalised_subarray_id in adapter.dev_name:
                 self.tm_subarray_adapter = adapter
                 self.subarray_devname = adapter.dev_name
 

@@ -294,6 +294,7 @@ class CentralNodeCommand(TMCCommand):
                 command_args=(command_input,) if command_input else None,
                 logger=self.logger,
             )
+            self.command_device_id_map[adapter.dev_name] = lrc_data.command_id
             self.command_subs_list.append(lrc_data)
         except CommandError as err:
             self.logger.error("command error %s", str(err))

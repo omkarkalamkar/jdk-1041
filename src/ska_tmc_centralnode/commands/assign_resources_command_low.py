@@ -34,7 +34,7 @@ class AssignResourcesLow(AssignResources):
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
         """
-        Updates the task status for command ReleaseResources
+        Updates the task status for command AssignResourcesLow.
 
         Args:
             result: A tuple containing the result code and a message.

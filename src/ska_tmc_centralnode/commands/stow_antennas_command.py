@@ -57,9 +57,10 @@ class SetStowMode(SetDishGPM):
             None
         """
         self.component_manager.command_in_progress = "SetStowMode"
+        self.set_command_id("SetStowMode")
         self.logger.info(
             "Command ID: %s | Starting SetStowMode | receptors=%s",
-            self.component_manager.command_id,
+            self.command_id,
             argin,
         )
         self.task_callback = task_callback
