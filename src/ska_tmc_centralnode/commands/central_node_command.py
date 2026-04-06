@@ -294,7 +294,6 @@ class CentralNodeCommand(TMCCommand):
                 command_args=(command_input,) if command_input else None,
                 logger=self.logger,
             )
-            self.command_device_id_map[adapter.dev_name] = lrc_data.command_id
             self.command_subs_list.append(lrc_data)
         except CommandError as err:
             self.logger.error("command error %s", str(err))
@@ -644,6 +643,8 @@ class AssignReleaseResources(CentralNodeCommand):
     ):
         super().__init__(component_manager, logger=logger, *args, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
+        self.tm_subarray_adapter: Optional[AdapterFactory] = None
+        self.subarray_devname = ""
         self.dish_adapters = []
         self.subarray_adapters = []
 
@@ -660,6 +661,41 @@ class AssignReleaseResources(CentralNodeCommand):
             self.command_id,
             command_name,
         )
+
+    def get_subarray_adapter(self, subarray_id: int) -> Tuple[ResultCode, str]:
+        """
+        Method for obtaining the adapter for a subarray.
+
+        Args:
+            subarray_id (int): An integer representing
+                the subarray ID.
+
+        Returns:
+            A tuple containing a ResultCode
+            enum value and a string message.
+
+        """
+        normalised_subarray_id = str(subarray_id).zfill(2)
+        # basicall converts 1 to 01, 2 to 02 and 16 to 16, as subarray
+        #  dev names are in format : ska-tmc/subarray/01, ska-tmc/subarray/02,
+        # ... ska-tmc/subarray/16
+        self.logger.debug(
+            "Command ID: %s | Attempting to get adapter for Subarray ID: %s",
+            self.command_id,
+            normalised_subarray_id,
+        )
+        for adapter in self.subarray_adapters:
+            if normalised_subarray_id in adapter.dev_name:
+                self.tm_subarray_adapter = adapter
+                self.subarray_devname = adapter.dev_name
+
+        if self.tm_subarray_adapter is None:
+            return (
+                ResultCode.FAILED,
+                f"SubArray Id {subarray_id} is not existing!",
+            )
+
+        return ResultCode.OK, ""
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
         """

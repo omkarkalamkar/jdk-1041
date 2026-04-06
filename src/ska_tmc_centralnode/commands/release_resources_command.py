@@ -43,8 +43,6 @@ class ReleaseResources(AssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.my_subarray_adapter = None
-        self.subarray_adapter = None
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
         self.subarray_id = ""
