@@ -74,6 +74,11 @@ class AssignResourcesLow(AssignResources):
 
             AssertionError if  Mccs On command is not completed.
         """
+        self.set_command_id("AssignResourcesLow")
+        self.logger.debug(
+            "Command %s: Starting AssignResourcesLow command",
+            self.command_id,
+        )
         try:
             json_argument = json.loads(argin)
             self.logger.debug(

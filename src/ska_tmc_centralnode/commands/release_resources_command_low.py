@@ -81,6 +81,11 @@ class ReleaseResourcesLow(ReleaseResources):
             SubarrayNode is not successful
 
         """
+        self.set_command_id("ReleaseResourcesLow")
+        self.logger.debug(
+            "Command %s: Starting ReleaseResourcesLow command",
+            self.command_id,
+        )
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message

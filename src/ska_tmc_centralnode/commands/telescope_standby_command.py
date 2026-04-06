@@ -91,6 +91,11 @@ class TelescopeStandby(TelescopeOnOff):
             and a string message indicating status.
 
         """
+        self.set_command_id("TelescopeStandbyMid")
+        self.logger.debug(
+            "Command %s: Starting TelescopeStandbyMid command",
+            self.command_id,
+        )
         self.component_manager.component.desired_telescope_state = (
             DevState.STANDBY
         )
@@ -179,6 +184,11 @@ class TelescopeStandby(TelescopeOnOff):
             and a string message indicating status.
 
         """
+        self.set_command_id("TelescopeStandbyLow")
+        self.logger.debug(
+            "Command %s: Starting TelescopeStandbyLow command",
+            self.command_id,
+        )
         self.component_manager.component.desired_telescope_state = (
             DevState.STANDBY
         )

@@ -71,7 +71,6 @@ class SetGlobalPointingModel(SetDishGPM):
             self.component_manager.command_id,
         )
         self.component_manager.command_in_progress = "SetGlobalPointingModel"
-        self.set_command_id("SetGlobalPointingModel")
         self.logger.debug(
             "Command ID: %s | Received GPM parameters: %s",
             self.component_manager.command_id,

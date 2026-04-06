@@ -74,11 +74,6 @@ class ReleaseResources(AssignReleaseResources):
         :rtype: `Tuple[ResultCode, str]`
         """
         self.component_manager.command_in_progress = "ReleaseResources"
-        self.set_command_id("ReleaseResources")
-        self.logger.debug(
-            "Command %s: Starting ReleaseResources command",
-            self.command_id,
-        )
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event

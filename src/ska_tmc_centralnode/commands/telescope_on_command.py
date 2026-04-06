@@ -91,6 +91,11 @@ class TelescopeOn(TelescopeOnOff):
             and a string message indicating status.
 
         """
+        self.set_command_id("TelescopeOnMid")
+        self.logger.debug(
+            "Command %s: Starting TelescopeOnMid command",
+            self.command_id,
+        )
         self.component_manager.component.desired_telescope_state = DevState.ON
 
         return_code, message = self.init_adapters()
@@ -241,6 +246,11 @@ class TelescopeOn(TelescopeOnOff):
             and a string message indicating status.
 
         """
+        self.set_command_id("TelescopeOnLow")
+        self.logger.debug(
+            "Command %s: Starting TelescopeOnLow command",
+            self.command_id,
+        )
         self.component_manager.component.desired_telescope_state = DevState.ON
 
         return_code, message = self.init_adapters()

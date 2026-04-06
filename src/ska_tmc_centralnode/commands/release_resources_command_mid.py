@@ -33,6 +33,11 @@ class ReleaseResourcesMid(ReleaseResources):
             For Example: (ResultCode.OK, "")
 
         """
+        self.set_command_id("ReleaseResourcesMid")
+        self.logger.debug(
+            "Command %s: Starting ReleaseResourcesMid command",
+            self.command_id,
+        )
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message

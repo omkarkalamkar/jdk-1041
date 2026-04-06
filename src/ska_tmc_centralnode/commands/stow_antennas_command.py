@@ -57,12 +57,6 @@ class SetStowMode(SetDishGPM):
             None
         """
         self.component_manager.command_in_progress = "SetStowMode"
-        self.set_command_id("SetStowMode")
-        self.logger.info(
-            "Command ID: %s | Starting SetStowMode | receptors=%s",
-            self.command_id,
-            argin,
-        )
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
@@ -166,6 +160,11 @@ class SetStowMode(SetDishGPM):
             Tuple(ResultCode, str): Result code and message
 
         """
+        self.set_command_id("SetStowMode")
+        self.logger.debug(
+            "Command %s: Starting SetStowMode command",
+            self.command_id,
+        )
         if not argin:
             self.logger.error(
                 "Command ID: %s | Provided argin is empty.",
