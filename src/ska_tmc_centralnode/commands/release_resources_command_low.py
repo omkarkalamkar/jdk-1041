@@ -81,9 +81,9 @@ class ReleaseResourcesLow(ReleaseResources):
             SubarrayNode is not successful
 
         """
-        self.set_command_id("ReleaseResourcesLow")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting ReleaseResourcesLow command",
+            "Command %s: Starting ReleaseResources command",
             self.command_id,
         )
         ret_code, message = self.init_adapters()
@@ -108,7 +108,7 @@ class ReleaseResourcesLow(ReleaseResources):
         if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", self.subarray_id),
+                ("Subarray Id %s is not existing!", self.subarray_id),
             )
 
         if json_argument["release_all"] is True:

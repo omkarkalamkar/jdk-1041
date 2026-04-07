@@ -215,7 +215,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             Tuple(ResultCode, str): Result code and message
 
         """
-        self.set_command_id("LoadDishCfg")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
             "Command %s: Starting LoadDishCfg command",
             self.command_id,

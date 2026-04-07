@@ -160,7 +160,7 @@ class SetStowMode(SetDishGPM):
             Tuple(ResultCode, str): Result code and message
 
         """
-        self.set_command_id("SetStowMode")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
             "Command %s: Starting SetStowMode command",
             self.command_id,

@@ -33,9 +33,9 @@ class ReleaseResourcesMid(ReleaseResources):
             For Example: (ResultCode.OK, "")
 
         """
-        self.set_command_id("ReleaseResourcesMid")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting ReleaseResourcesMid command",
+            "Command %s: Starting ReleaseResources command",
             self.command_id,
         )
         ret_code, message = self.init_adapters()
@@ -65,7 +65,7 @@ class ReleaseResourcesMid(ReleaseResources):
         if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", self.subarray_id),
+                ("Subarray Id %s is not existing!", self.subarray_id),
             )
 
         if json_argument["release_all"] is True:

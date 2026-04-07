@@ -668,34 +668,35 @@ class AssignReleaseResources(CentralNodeCommand):
 
         Args:
             subarray_id (int): An integer representing
-                the subarray ID.
+              the subarray ID (1-16 typically).
+            telescope_type (str): The type of the telescope.
 
         Returns:
-            A tuple containing a ResultCode
-            enum value and a string message.
-
+            Tuple[ResultCode, str]: (ResultCode, message)
         """
-        normalised_subarray_id = str(subarray_id).zfill(2)
-        # basicall converts 1 to 01, 2 to 02 and 16 to 16, as subarray
-        #  dev names are in format : ska-tmc/subarray/01, ska-tmc/subarray/02,
-        # ... ska-tmc/subarray/16
-        self.logger.debug(
-            "Command ID: %s | Attempting to get adapter for Subarray ID: %s",
-            self.command_id,
-            normalised_subarray_id,
+
+        subarray_adapter_dev_name = (
+            self.component_manager.subarray_trl_prefix
+            + str(subarray_id).zfill(2)
         )
+
+        self.logger.debug(
+            "Command ID: %s | Attempting to get adapter for Subarray: %s",
+            self.command_id,
+            subarray_adapter_dev_name,
+        )
+
         for adapter in self.subarray_adapters:
-            if normalised_subarray_id in adapter.dev_name:
+            if adapter.dev_name == subarray_adapter_dev_name:
                 self.tm_subarray_adapter = adapter
                 self.subarray_devname = adapter.dev_name
+                return ResultCode.OK, ""
 
-        if self.tm_subarray_adapter is None:
-            return (
-                ResultCode.FAILED,
-                f"SubArray Id {subarray_id} is not existing!",
-            )
-
-        return ResultCode.OK, ""
+        return (
+            ResultCode.FAILED,
+            f"Subarray Id {subarray_id}({subarray_adapter_dev_name}) is"
+            " not existing!",
+        )
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
         """

@@ -91,7 +91,7 @@ class TelescopeStandby(TelescopeOnOff):
             and a string message indicating status.
 
         """
-        self.set_command_id("TelescopeStandbyMid")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
             "Command %s: Starting TelescopeStandbyMid command",
             self.command_id,
@@ -184,7 +184,7 @@ class TelescopeStandby(TelescopeOnOff):
             and a string message indicating status.
 
         """
-        self.set_command_id("TelescopeStandbyLow")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
             "Command %s: Starting TelescopeStandbyLow command",
             self.command_id,

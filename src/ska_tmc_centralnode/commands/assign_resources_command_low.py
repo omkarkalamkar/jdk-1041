@@ -74,9 +74,9 @@ class AssignResourcesLow(AssignResources):
 
             AssertionError if  Mccs On command is not completed.
         """
-        self.set_command_id("AssignResourcesLow")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting AssignResourcesLow command",
+            "Command %s: Starting AssignResources command",
             self.command_id,
         )
         try:
@@ -163,7 +163,7 @@ class AssignResourcesLow(AssignResources):
         if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", self.subarray_id),
+                ("Subarray Id %s is not existing!", self.subarray_id),
             )
 
         return_codes, message_or_unique_ids = self.invoke_command(

@@ -334,6 +334,11 @@ class SetGlobalPointingModel(SetDishGPM):
             Tuple(ResultCode, str): Result code and message
 
         """
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Starting SetGlobalPointingModel command",
+            self.command_id,
+        )
         if not argin:
             err_message = "Set GPM Command failed, argin is empty"
             self.logger.error(err_message)

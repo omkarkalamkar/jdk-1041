@@ -88,9 +88,9 @@ class TelescopeOff(TelescopeOnOff):
             and a string message indicating status.
 
         """
-        self.set_command_id("TelescopeOffMid")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting TelescopeOffMid command",
+            "Command %s: Starting TelescopeOff command",
             self.command_id,
         )
         self.component_manager.component.desired_telescope_state = DevState.OFF
@@ -260,9 +260,9 @@ class TelescopeOff(TelescopeOnOff):
             and a string message indicating status.
 
         """
-        self.set_command_id("TelescopeOffLow")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting TelescopeOffLow command",
+            "Command %s: Starting TelescopeOff command",
             self.command_id,
         )
         self.component_manager.component.desired_telescope_state = DevState.OFF

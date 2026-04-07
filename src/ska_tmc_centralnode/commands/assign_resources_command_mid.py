@@ -31,9 +31,9 @@ class AssignResourcesMid(AssignResources):
             Tuple(ResultCode, str): Result code and message
 
         """
-        self.set_command_id("AssignResourcesMid")
+        self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting AssignResourcesMid command",
+            "Command %s: Starting AssignResources command",
             self.command_id,
         )
         try:
