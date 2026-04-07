@@ -71,6 +71,11 @@ class SetGlobalPointingModel(SetDishGPM):
             self.component_manager.command_id,
         )
         self.component_manager.command_in_progress = "SetGlobalPointingModel"
+        self.logger.debug(
+            "Command ID: %s | Received GPM parameters: %s",
+            self.component_manager.command_id,
+            dish_gpm_params,
+        )
         self.component_manager.command_result = ResultCode.STARTED
         self.dish_gpm_params = json.loads(dish_gpm_params)
         error_message = ""
@@ -329,6 +334,11 @@ class SetGlobalPointingModel(SetDishGPM):
             Tuple(ResultCode, str): Result code and message
 
         """
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Executing SetGlobalPointingModel command",
+            self.command_id,
+        )
         if not argin:
             err_message = "Set GPM Command failed, argin is empty"
             self.logger.error(err_message)

@@ -3,12 +3,12 @@ AssignResources Command class for CentralNode.
 """
 
 import time
-from typing import Optional, Tuple
+from typing import Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tmc_common import AdapterFactory, TimeKeeper, TimeoutCallback
+from ska_tmc_common import TimeKeeper, TimeoutCallback
 
 from ska_tmc_centralnode.commands.central_node_command import (
     AssignReleaseResources,
@@ -42,11 +42,9 @@ class AssignResources(AssignReleaseResources):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self.tm_subarray_adapter: Optional[AdapterFactory] = None
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
         self.subarray_id = ""
-        self.subarray_devname = ""
         self.timekeeper = TimeKeeper(
             self.component_manager.command_timeout, logger
         )
@@ -76,10 +74,6 @@ class AssignResources(AssignReleaseResources):
 
         """
         self.component_manager.command_in_progress = "AssignResources"
-        self.logger.debug(
-            "Command %s: Starting AssignResources command",
-            self.command_id,
-        )
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
@@ -112,32 +106,6 @@ class AssignResources(AssignReleaseResources):
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)
-
-    def get_subarray_adapter(self, subarray_id: int) -> Tuple[ResultCode, str]:
-        """
-        Method for obtaining the adapter for a subarray.
-
-        Args:
-            subarray_id (int): An integer representing
-                the subarray ID.
-
-        Returns:
-            A tuple containing a ResultCode
-            enum value and a string message.
-
-        """
-        for adapter in self.subarray_adapters:
-            if str(subarray_id) in adapter.dev_name:
-                self.tm_subarray_adapter = adapter
-                self.subarray_devname = adapter.dev_name
-
-        if self.tm_subarray_adapter is None:
-            return (
-                ResultCode.FAILED,
-                f"SubArray Id {subarray_id} is not existing!",
-            )
-
-        return ResultCode.OK, ""
 
     def do_mid(self, *args):
         """Temporary, will be removed after all command refactoring"""

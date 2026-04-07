@@ -34,7 +34,7 @@ class AssignResourcesLow(AssignResources):
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
         """
-        Updates the task status for command ReleaseResources
+        Updates the task status for command AssignResourcesLow.
 
         Args:
             result: A tuple containing the result code and a message.
@@ -74,6 +74,11 @@ class AssignResourcesLow(AssignResources):
 
             AssertionError if  Mccs On command is not completed.
         """
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Executing AssignResources command",
+            self.command_id,
+        )
         try:
             json_argument = json.loads(argin)
             self.logger.debug(
@@ -158,7 +163,7 @@ class AssignResourcesLow(AssignResources):
         if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("SubArray Id %s is not existing!", self.subarray_id),
+                ("Subarray Id %s is not existing!", self.subarray_id),
             )
 
         return_codes, message_or_unique_ids = self.invoke_command(

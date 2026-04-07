@@ -242,11 +242,11 @@ def test_low_release_resources_subarray_not_found(
     json_arg["subarray_id"] = 99
     release_input_str = json.dumps(json_arg)
 
-    assign_res_command = ReleaseResourcesLow(
+    release_resources_command = ReleaseResourcesLow(
         cm, adapter_factory=adapter_factory, logger=logger
     )
     # Set subarray_id to match the JSON
-    assign_res_command.subarray_id = 99
-    (res_code, message) = assign_res_command.do(release_input_str)
+    release_resources_command.subarray_id = 99
+    (res_code, message) = release_resources_command.do(release_input_str)
     assert res_code == ResultCode.FAILED
-    assert "doesn't exit" in message
+    assert "is not existing" in message

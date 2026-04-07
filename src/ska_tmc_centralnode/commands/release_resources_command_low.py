@@ -81,6 +81,11 @@ class ReleaseResourcesLow(ReleaseResources):
             SubarrayNode is not successful
 
         """
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Executing ReleaseResources command",
+            self.command_id,
+        )
         ret_code, message = self.init_adapters()
         if ret_code == ResultCode.FAILED:
             return ret_code, message
@@ -96,26 +101,25 @@ class ReleaseResourcesLow(ReleaseResources):
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
 
-        for adapter in self.subarray_adapters:
-            if str(self.subarray_id) in adapter.dev_name:
-                self.subarray_adapter = adapter
-                self.subarray_devname = adapter.dev_name
+        result_code, message = self.get_subarray_adapter(self.subarray_id)
+        if result_code == ResultCode.FAILED:
+            return result_code, message
 
-        if self.subarray_adapter is None:
+        if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                f"Subarray Id {self.subarray_id} doesn't exit!",
+                ("Subarray Id %s is not existing!", self.subarray_id),
             )
 
         if json_argument["release_all"] is True:
             self.logger.info(
                 "Invoking ReleaseAllResources on subarray | device=%s",
-                self.subarray_adapter.dev_name,
+                self.tm_subarray_adapter.dev_name,
             )
             (
                 return_codes,
                 message_or_unique_ids,
-            ) = self.release_all_resources(self.subarray_adapter)
+            ) = self.release_all_resources(self.tm_subarray_adapter)
             (
                 return_code,
                 message_or_unique_id,
@@ -184,7 +188,7 @@ class ReleaseResourcesLow(ReleaseResources):
             "Command ID: %s |  Release Resources "
             "completed successfully on: %s",
             self.command_id,
-            self.subarray_adapter,
+            self.tm_subarray_adapter,
         )
         return self.wait_for_command_completion(
             len(self.command_subs_list),

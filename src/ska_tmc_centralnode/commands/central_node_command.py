@@ -643,6 +643,8 @@ class AssignReleaseResources(CentralNodeCommand):
     ):
         super().__init__(component_manager, logger=logger, *args, **kwargs)
         self._adapter_factory = adapter_factory or AdapterFactory()
+        self.tm_subarray_adapter: Optional[AdapterFactory] = None
+        self.subarray_devname = ""
         self.dish_adapters = []
         self.subarray_adapters = []
 
@@ -658,6 +660,42 @@ class AssignReleaseResources(CentralNodeCommand):
             "Setting command id as %s for command: %s",
             self.command_id,
             command_name,
+        )
+
+    def get_subarray_adapter(self, subarray_id: int) -> Tuple[ResultCode, str]:
+        """
+        Method for obtaining the adapter for a subarray.
+
+        Args:
+            subarray_id (int): An integer representing
+              the subarray ID (1-16 typically).
+            telescope_type (str): The type of the telescope.
+
+        Returns:
+            Tuple[ResultCode, str]: (ResultCode, message)
+        """
+
+        subarray_adapter_dev_name = (
+            self.component_manager.subarray_trl_prefix
+            + str(subarray_id).zfill(2)
+        )
+
+        self.logger.debug(
+            "Command ID: %s | Attempting to get adapter for Subarray: %s",
+            self.command_id,
+            subarray_adapter_dev_name,
+        )
+
+        for adapter in self.subarray_adapters:
+            if adapter.dev_name == subarray_adapter_dev_name:
+                self.tm_subarray_adapter = adapter
+                self.subarray_devname = adapter.dev_name
+                return ResultCode.OK, ""
+
+        return (
+            ResultCode.FAILED,
+            f"Subarray Id {subarray_id}({subarray_adapter_dev_name}) is"
+            " not existing!",
         )
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:

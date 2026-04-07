@@ -31,6 +31,11 @@ class AssignResourcesMid(AssignResources):
             Tuple(ResultCode, str): Result code and message
 
         """
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Executing AssignResources command",
+            self.command_id,
+        )
         try:
             self.logger.debug(
                 "Command ID: %s | Loading the AssignResource JSON string",

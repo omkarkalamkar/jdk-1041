@@ -6,11 +6,15 @@ All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 
-[Unreleased]
-************
+[1.2.0]
+*******
 Updated
 -------
 * Utilised ska-schemas 1.36.0, updated ska-telmodel to 1.33.0, and ska-tmc-cdm to 14.9.0.
+Fixed
+------
+* Fixed issue where wrong subarraynode adapter was getting assigned based on subarray id for assign and release command.
+* Fixed issue where command id was none.
 
 [1.1.0]
 *******
@@ -95,14 +99,14 @@ Updated
 Added
 -----
 * Added Tango Resource Locator(TRL) page in knowledge base
-* Removed hardcoding of the array layout 
+* Removed hardcoding of the array layout
 
 [0.25.0]
 ********
 
 Fixed
 -----
-* Fixed the command allowed logic to check the responsiveness flag for specific 
+* Fixed the command allowed logic to check the responsiveness flag for specific
   subarray in case of commands AssignResources and ReleaseResources
 * Fixed RTD structure.
 * Fixed all the existing docs-build warnings from master.
@@ -112,8 +116,8 @@ Added
 * Added knowledge base and glossary in RTD.
 * Added Command workflow in knowledge base for Subarray Node to resolve comments on SKB-808.
 * Added Attribute for Support change ArrayLayout after deployment
-* Refactored AssignResources to support arrayLayout 
- 
+* Refactored AssignResources to support arrayLayout
+
 [0.24.3]
 ********
 Updated

@@ -78,11 +78,6 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         """
         self.component_manager.command_in_progress = "LoadDishCfg"
-        self.set_command_id("LoadDishCfg")
-        self.logger.info(
-            "Command ID: %s | LoadDishCfg started",
-            self.command_id,
-        )
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
@@ -220,6 +215,11 @@ class LoadDishCfg(LoadDishCfgCommand):
             Tuple(ResultCode, str): Result code and message
 
         """
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Executing LoadDishCfg command",
+            self.command_id,
+        )
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
