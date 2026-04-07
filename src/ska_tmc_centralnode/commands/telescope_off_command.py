@@ -55,7 +55,7 @@ class TelescopeOff(TelescopeOnOff):
 
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.logger.info(
-            "Command ID: %s | Starting TelescopeOff command",
+            "Command ID: %s | Executing TelescopeOff command",
             self.component_manager.command_id,
         )
         return_code, message = self.do(argin=None)
@@ -90,7 +90,7 @@ class TelescopeOff(TelescopeOnOff):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting TelescopeOff command",
+            "Command %s: Executing TelescopeOff command",
             self.command_id,
         )
         self.component_manager.component.desired_telescope_state = DevState.OFF
@@ -262,7 +262,7 @@ class TelescopeOff(TelescopeOnOff):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting TelescopeOff command",
+            "Command %s: Executing TelescopeOff command",
             self.command_id,
         )
         self.component_manager.component.desired_telescope_state = DevState.OFF

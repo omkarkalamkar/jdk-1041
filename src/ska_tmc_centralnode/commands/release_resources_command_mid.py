@@ -35,7 +35,7 @@ class ReleaseResourcesMid(ReleaseResources):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting ReleaseResources command",
+            "Command %s: Executing ReleaseResources command",
             self.command_id,
         )
         ret_code, message = self.init_adapters()

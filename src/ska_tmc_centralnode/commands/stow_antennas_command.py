@@ -162,7 +162,7 @@ class SetStowMode(SetDishGPM):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting SetStowMode command",
+            "Command %s: Executing SetStowMode command",
             self.command_id,
         )
         if not argin:

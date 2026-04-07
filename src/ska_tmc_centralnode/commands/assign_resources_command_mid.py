@@ -33,7 +33,7 @@ class AssignResourcesMid(AssignResources):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting AssignResources command",
+            "Command %s: Executing AssignResources command",
             self.command_id,
         )
         try:

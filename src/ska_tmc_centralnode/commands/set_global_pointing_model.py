@@ -336,7 +336,7 @@ class SetGlobalPointingModel(SetDishGPM):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting SetGlobalPointingModel command",
+            "Command %s: Executing SetGlobalPointingModel command",
             self.command_id,
         )
         if not argin:

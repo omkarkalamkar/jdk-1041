@@ -55,7 +55,7 @@ class TelescopeStandby(TelescopeOnOff):
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.logger.info(
-            "Command ID: %s | Starting TelescopeStandby command",
+            "Command ID: %s | Executing TelescopeStandby command",
             self.component_manager.command_id,
         )
         result_code, message = self.do(argin=None)
@@ -93,7 +93,7 @@ class TelescopeStandby(TelescopeOnOff):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting TelescopeStandbyMid command",
+            "Command %s: Executing TelescopeStandbyMid command",
             self.command_id,
         )
         self.component_manager.component.desired_telescope_state = (
@@ -186,7 +186,7 @@ class TelescopeStandby(TelescopeOnOff):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting TelescopeStandbyLow command",
+            "Command %s: Executing TelescopeStandbyLow command",
             self.command_id,
         )
         self.component_manager.component.desired_telescope_state = (

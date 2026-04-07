@@ -56,7 +56,7 @@ class TelescopeOn(TelescopeOnOff):
         # Indicate that the task has started
         task_callback(status=TaskStatus.IN_PROGRESS)
         self.logger.info(
-            "Command ID: %s | Starting TelescopeOn command",
+            "Command ID: %s | Executing TelescopeOn command",
             self.component_manager.command_id,
         )
         result_code, message = self.do(argin=None)
@@ -93,7 +93,7 @@ class TelescopeOn(TelescopeOnOff):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting TelescopeOn command",
+            "Command %s: Executing TelescopeOn command",
             self.command_id,
         )
         self.component_manager.component.desired_telescope_state = DevState.ON
@@ -248,7 +248,7 @@ class TelescopeOn(TelescopeOnOff):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting TelescopeOn command",
+            "Command %s: Executing TelescopeOn command",
             self.command_id,
         )
         self.component_manager.component.desired_telescope_state = DevState.ON

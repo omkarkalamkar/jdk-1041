@@ -217,7 +217,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         self.set_command_id(self.__class__.__name__)
         self.logger.debug(
-            "Command %s: Starting LoadDishCfg command",
+            "Command %s: Executing LoadDishCfg command",
             self.command_id,
         )
 
