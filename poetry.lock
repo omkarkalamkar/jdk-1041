@@ -166,14 +166,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "astropy-iers-data"
-version = "0.2026.4.1.15.5.49"
+version = "0.2026.4.13.0.58.2"
 description = "IERS Earth Rotation and Leap Second tables for the astropy core package"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "astropy_iers_data-0.2026.4.1.15.5.49-py3-none-any.whl", hash = "sha256:ca90106817015638234cfeb41a6543d51149d64ab0b495b76863d33411846f25"},
-    {file = "astropy_iers_data-0.2026.4.1.15.5.49.tar.gz", hash = "sha256:0f76474e6a0d6a7cecf086d08dc4c00d0540518fc6e0133a24e13cf7fcae8a53"},
+    {file = "astropy_iers_data-0.2026.4.13.0.58.2-py3-none-any.whl", hash = "sha256:f93d788bda4b0b20dfc7672719699178c106ddd15e2048069a6f74ee7cf2a7ef"},
+    {file = "astropy_iers_data-0.2026.4.13.0.58.2.tar.gz", hash = "sha256:a079f31cd3e235afd9b9d435be53fc69ae619aef93339c54863767c3c76e4807"},
 ]
 
 [package.extras]
@@ -483,14 +483,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "click"
-version = "8.3.1"
+version = "8.3.2"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "click-8.3.1-py3-none-any.whl", hash = "sha256:981153a64e25f12d547d3426c367a4857371575ee7ad18df2a6183ab0545b2a6"},
-    {file = "click-8.3.1.tar.gz", hash = "sha256:12ff4785d337a1bb490bb7e9c2b1ee5da3112e94a8622f26a6c77f5d2fc6842a"},
+    {file = "click-8.3.2-py3-none-any.whl", hash = "sha256:1924d2c27c5653561cd2cae4548d1406039cb79b858b747cfea24924bbc1616d"},
+    {file = "click-8.3.2.tar.gz", hash = "sha256:14162b8b3b3550a7d479eafa77dfd3c38d9dc8951f6f69c78913a8f9a7540fd5"},
 ]
 
 [package.dependencies]
@@ -721,7 +721,7 @@ version = "0.17.0"
 description = "Parse Python docstrings in reST, Google and Numpydoc format"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "dev"]
+groups = ["main", "dev", "docs"]
 files = [
     {file = "docstring_parser-0.17.0-py3-none-any.whl", hash = "sha256:cf2569abd23dce8099b300f9b4fa8191e9582dda731fd533daf54c4551658708"},
     {file = "docstring_parser-0.17.0.tar.gz", hash = "sha256:583de4a309722b3315439bb31d64ba3eebada841f2e2cee23b99df001434c912"},
@@ -1157,6 +1157,7 @@ optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
+    {file = "junit-xml-2-1.9.tar.gz", hash = "sha256:3b8d9635c5215f754c7807104f6493e3ea3bc9481e2d33db294560da3a1b00f7"},
     {file = "junit_xml_2-1.9-py2.py3-none-any.whl", hash = "sha256:05093d75fe11120ccd51293884b5ee334ff3bc4b5106647c2bcc928486600588"},
 ]
 
@@ -1452,7 +1453,7 @@ version = "1.26.4"
 description = "Fundamental package for array computing in Python"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "dev"]
+groups = ["main", "dev", "docs"]
 files = [
     {file = "numpy-1.26.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9ff0f4f29c51e2803569d7a51c2304de5554655a60c5d776e35b4a41413830d0"},
     {file = "numpy-1.26.4-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:2e4ee3380d6de9c9ec04745830fd9e2eccb3e6cf790d39d7b98ffd19b0dd754a"},
@@ -1702,14 +1703,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "platformdirs"
-version = "4.9.4"
+version = "4.9.6"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "platformdirs-4.9.4-py3-none-any.whl", hash = "sha256:68a9a4619a666ea6439f2ff250c12a853cd1cbd5158d258bd824a7df6be2f868"},
-    {file = "platformdirs-4.9.4.tar.gz", hash = "sha256:1ec356301b7dc906d83f371c8f487070e99d3ccf9e501686456394622a01a934"},
+    {file = "platformdirs-4.9.6-py3-none-any.whl", hash = "sha256:e61adb1d5e5cb3441b4b7710bea7e4c12250ca49439228cc1021c00dcfac0917"},
+    {file = "platformdirs-4.9.6.tar.gz", hash = "sha256:3bfa75b0ad0db84096ae777218481852c0ebc6c727b3168c1b9e0118e458cf0a"},
 ]
 
 [package.source]
@@ -1804,7 +1805,7 @@ version = "7.2.2"
 description = "Cross-platform lib for process and system monitoring."
 optional = false
 python-versions = ">=3.6"
-groups = ["main", "dev"]
+groups = ["main", "dev", "docs"]
 files = [
     {file = "psutil-7.2.2-cp313-cp313t-macosx_10_13_x86_64.whl", hash = "sha256:2edccc433cbfa046b980b0df0171cd25bcaeb3a68fe9022db0979e7aa74a826b"},
     {file = "psutil-7.2.2-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:e78c8603dcd9a04c7364f1a3e670cea95d51ee865e4efb3556a3a63adef958ea"},
@@ -2224,7 +2225,7 @@ version = "10.1.2"
 description = "Python bindings for the cppTango library; part of the Tango Distributed Control System toolkit"
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "dev"]
+groups = ["main", "dev", "docs"]
 files = [
     {file = "pytango-10.1.2-cp310-cp310-macosx_12_0_arm64.whl", hash = "sha256:77ab5df70ec9475bb017274209f0f9180b39adaffa92330cb3424b518b27e936"},
     {file = "pytango-10.1.2-cp310-cp310-macosx_12_0_x86_64.whl", hash = "sha256:2baeec370fc733bcabf9436311db55f2756828caa97d80f62a18dd93d5e773f6"},
@@ -2563,6 +2564,13 @@ optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
+    {file = "PyYAML-6.0.3-cp38-cp38-macosx_10_13_x86_64.whl", hash = "sha256:c2514fceb77bc5e7a2f7adfaa1feb2fb311607c9cb518dbc378688ec73d8292f"},
+    {file = "PyYAML-6.0.3-cp38-cp38-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9c57bb8c96f6d1808c030b1687b9b5fb476abaa47f0db9c0101f5e9f394e97f4"},
+    {file = "PyYAML-6.0.3-cp38-cp38-manylinux2014_s390x.manylinux_2_17_s390x.manylinux_2_28_s390x.whl", hash = "sha256:efd7b85f94a6f21e4932043973a7ba2613b059c4a000551892ac9f1d11f5baf3"},
+    {file = "PyYAML-6.0.3-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:22ba7cfcad58ef3ecddc7ed1db3409af68d023b7f940da23c6c2a1890976eda6"},
+    {file = "PyYAML-6.0.3-cp38-cp38-musllinux_1_2_x86_64.whl", hash = "sha256:6344df0d5755a2c9a276d4473ae6b90647e216ab4757f8426893b5dd2ac3f369"},
+    {file = "PyYAML-6.0.3-cp38-cp38-win32.whl", hash = "sha256:3ff07ec89bae51176c0549bc4c63aa6202991da2d9a6129d7aef7f1407d3f295"},
+    {file = "PyYAML-6.0.3-cp38-cp38-win_amd64.whl", hash = "sha256:5cf4e27da7e3fbed4d6c3d8e797387aaad68102272f8f9752883bc32d61cb87b"},
     {file = "pyyaml-6.0.3-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:214ed4befebe12df36bcc8bc2b64b396ca31be9304b8f59e25c11cf94a4c033b"},
     {file = "pyyaml-6.0.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:02ea2dfa234451bbb8772601d7b8e426c2bfa197136796224e50e35a78777956"},
     {file = "pyyaml-6.0.3-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b30236e45cf30d2b8e7b3e85881719e98507abed1011bf463a8fa23e9c3e98a8"},
@@ -3154,6 +3162,27 @@ url = "https://artefact.skao.int/repository/pypi-internal/simple"
 reference = "ska-nexus"
 
 [[package]]
+name = "ska-tango-difdoc"
+version = "0.3.0"
+description = "SKA Tango Device Interface Documentation Generator"
+optional = false
+python-versions = ">=3.10.0,<4.0.0"
+groups = ["docs"]
+files = [
+    {file = "ska_tango_difdoc-0.3.0-py3-none-any.whl", hash = "sha256:6cb8062c2177b4f3a0ae376d09334f5d62f513d9e6cdffa03a644585a1e75d1d"},
+    {file = "ska_tango_difdoc-0.3.0.tar.gz", hash = "sha256:116e06e3f2ce52cb7b65addc9e5d62225aa369e220494b288771da5f4847054a"},
+]
+
+[package.dependencies]
+pytango = ">=9.4.2,<9.5.1 || >9.5.1,<11.0.0"
+tomli = ">=2.0.0,<3.0.0"
+
+[package.source]
+type = "legacy"
+url = "https://artefact.skao.int/repository/pypi-internal/simple"
+reference = "ska-nexus"
+
+[[package]]
 name = "ska-tango-testing"
 version = "0.8.0"
 description = "Test harness for testing SKA Tango devices"
@@ -3669,7 +3698,7 @@ version = "2.4.1"
 description = "A lil' TOML parser"
 optional = false
 python-versions = ">=3.8"
-groups = ["main", "dev"]
+groups = ["main", "dev", "docs"]
 files = [
     {file = "tomli-2.4.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:f8f0fc26ec2cc2b965b7a3b87cd19c5c6b8c5e5f436b984e85f486d652285c30"},
     {file = "tomli-2.4.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:4ab97e64ccda8756376892c53a72bd1f964e519c77236368527f758fbc36a53a"},
@@ -3902,4 +3931,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "d24d1da25d49f74ced1ccca5ccdb784d19002f4ae42ae855ea265bbbd9b0e09b"
+content-hash = "84e9cdd7c634a892874b0a0c323a5c54f0a296ebc8c27039dbc8c653210c879b"

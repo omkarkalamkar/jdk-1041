@@ -30,9 +30,9 @@ class LowTmcCentralNode(AbstractCentralNode):
     # -----------------
     # Device Properties
     # -----------------
-    MCCSMasterLeafNodeFQDN = device_property(dtype="str")
+    MCCSMasterLeafNodeFQDN = device_property(dtype="str", default_value="")
 
-    MCCSMasterFQDN = device_property(dtype="str")
+    MCCSMasterFQDN = device_property(dtype="str", default_value="")
 
     IsAutoRecoveryEnabled = device_property(
         dtype=bool,

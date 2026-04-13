@@ -5,64 +5,38 @@ Link to the TMC User documentation is `here <https://confluence.skatelescope.org
 
 See the :ref:`commands` section for details about TMC command workflows.
 
-Subpackages
------------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
+   :caption: TMC Central Node
 
+   ska_tmc_centralnode.centralnode
    ska_tmc_centralnode.commands
-   ska_tmc_centralnode.manager
    ska_tmc_centralnode.model
    ska_tmc_centralnode.utils
+   ska_tmc_centralnode.manager
+   
 
-Submodules
-----------
+.. toctree::
+   :maxdepth: 1
+   :caption: TMC Central Node Low
 
-ska\_tmc\_centralnode.central\_node module
-------------------------------------------
+   ska_tmc_centralnode.central_node_low
+   low-tmc-central-node-device
 
-.. automodule:: ska_tmc_centralnode.central_node
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 1
+   :caption: TMC Central Node Mid
 
-ska\_tmc\_centralnode.central\_node\_low module
------------------------------------------------
+   ska_tmc_centralnode.central_node_mid
+   mid-tmc-central-node-device
 
-.. automodule:: ska_tmc_centralnode.central_node_low
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
-ska\_tmc\_centralnode.central\_node\_mid module
------------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.central_node_mid
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 ska\_tmc\_centralnode.input\_validator module
 ---------------------------------------------
 
 .. automodule:: ska_tmc_centralnode.input_validator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ska\_tmc\_centralnode.release module
-------------------------------------
-
-.. automodule:: ska_tmc_centralnode.release
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ska_tmc_centralnode
    :members:
    :undoc-members:
    :show-inheritance:

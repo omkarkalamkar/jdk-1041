@@ -95,13 +95,13 @@ class AbstractCentralNode(TMCBaseDevice):
         doc="List of TMC Mid Subarray Node devices",
         default_value=tuple(),
     )
-    CspMasterLeafNodeFQDN = device_property(dtype="str")
+    CspMasterLeafNodeFQDN = device_property(dtype="str", default_value="")
 
-    CspMasterFQDN = device_property(dtype="str")
+    CspMasterFQDN = device_property(dtype="str", default_value="")
 
-    SdpMasterLeafNodeFQDN = device_property(dtype="str")
+    SdpMasterLeafNodeFQDN = device_property(dtype="str", default_value="")
 
-    SdpMasterFQDN = device_property(dtype="str")
+    SdpMasterFQDN = device_property(dtype="str", default_value="")
 
     CspSubarrayLeafNodes = device_property(
         dtype=("str",),
