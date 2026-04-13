@@ -14,8 +14,9 @@ See the :ref:`commands` section for details about TMC command workflows.
    ska_tmc_centralnode.commands
    ska_tmc_centralnode.model
    ska_tmc_centralnode.utils
+   ska_tmc_centralnode.input_validator
    ska_tmc_centralnode.manager
-   
+
 
 .. toctree::
    :maxdepth: 1
@@ -31,15 +32,6 @@ See the :ref:`commands` section for details about TMC command workflows.
    ska_tmc_centralnode.central_node_mid
    mid-tmc-central-node-device
 
-
-
-ska\_tmc\_centralnode.input\_validator module
----------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.input_validator
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 
 ##########################
@@ -69,7 +61,7 @@ Properties in Central Node
 | EventSubscriptionCheckPeriod  | DevFloat        | Period for the event subscriber to check the device subscriptions in a loop    |
 +-------------------------------+-----------------+--------------------------------------------------------------------------------+
 | CommandTimeOutDefault         | DevUShort       | Default Timeout for the command execution                                      |
-+-----------------------------------+-----------------+----------------------------------------------------------------------------+
++-------------------------------+-----------------+--------------------------------------------------------------------------------+
 
 #########################################
 Additional Properties in Central Node Mid
