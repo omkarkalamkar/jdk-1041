@@ -5,12 +5,23 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[1.3.0]
+*******
+Added
+-----
+* ska-tango-difdoc v0.3.0 to automatically generate documentation for tango devices
+
+Updated
+-------
+* Updated ska-tango-util and ska-tango-base charts to v1.0.7
+
 
 [1.2.0]
 *******
 Updated
 -------
 * Utilised ska-schemas 1.36.0, updated ska-telmodel to 1.33.0, and ska-tmc-cdm to 14.9.0.
+
 Fixed
 ------
 * Fixed issue where wrong subarraynode adapter was getting assigned based on subarray id for assign and release command.

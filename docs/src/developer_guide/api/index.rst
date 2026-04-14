@@ -6,6 +6,7 @@ SKA Confluence. Please refer to the Solution Intent space <https://confluence.sk
 
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
+   :caption: TMC Central Node
 
    ska_tmc_centralnode

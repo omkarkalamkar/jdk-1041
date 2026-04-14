@@ -101,6 +101,17 @@ K8S_TEST_TEST_COMMAND = $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
 -include .make/base.mk
 -include PrivateRules.mak
 
+DOCGEN_TARGETS := html singlehtml
+
+# Run tangodocgen for specific build targets
+ifneq (,$(filter $(DOCS_TARGET_ARGS),$(DOCGEN_TARGETS)))
+docs-pre-build:
+	@if [ -v CI_JOB_TOKEN ]; then \
+		poetry install --only-root; \
+	fi
+	tangodocgen --auto -o docs/src/developer_guide/api --timeout 100
+endif
+
 # flag this up for the oneshot /Dockerfile
 OCI_IMAGES=ska-tmc-centralnode
 

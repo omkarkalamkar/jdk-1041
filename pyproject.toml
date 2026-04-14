@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ska-tmc-centralnode"
-version = "1.2.0"
+version = "1.3.0"
 description = "Central Node is a coordinator of the complete M&C system"
 authors = ["Team SAHYADRI & Team HIMALAYA <telmgt-internal@googlegroups.com>"]
 license = "BSD-3-Clause"
@@ -8,7 +8,8 @@ packages = [{ include = "ska_tmc_centralnode", from = "src" }]
 include = [{ path = 'tests' }]
 
 [tool.poetry.scripts]
-CentralNodeDS = 'ska_tmc_centralnode.central_node_mid:main'
+MidTmcCentralNode = 'ska_tmc_centralnode.central_node_mid:main'
+LowTmcCentralNode = 'ska_tmc_centralnode.central_node_low:main'
 
 [[tool.poetry.source]]
 name = 'ska-nexus'
@@ -75,6 +76,7 @@ sphinxcontrib-plantuml = "^0.22"
 typing_extensions = "^4.3.0"
 sphinx-rtd-theme = "^1.2.2"
 recommonmark = "^0.7.1"
+ska-tango-difdoc = "^0.3.0"
 
 [tool.isort]
 multi_line_output = 3

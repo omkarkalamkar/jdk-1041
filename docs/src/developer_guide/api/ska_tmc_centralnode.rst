@@ -5,67 +5,33 @@ Link to the TMC User documentation is `here <https://confluence.skatelescope.org
 
 See the :ref:`commands` section for details about TMC command workflows.
 
-Subpackages
------------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
+   :caption: TMC Central Node
 
+   ska_tmc_centralnode.centralnode
    ska_tmc_centralnode.commands
-   ska_tmc_centralnode.manager
    ska_tmc_centralnode.model
    ska_tmc_centralnode.utils
+   ska_tmc_centralnode.input_validator
+   ska_tmc_centralnode.manager
 
-Submodules
-----------
 
-ska\_tmc\_centralnode.central\_node module
-------------------------------------------
+.. toctree::
+   :maxdepth: 1
+   :caption: TMC Central Node Low
 
-.. automodule:: ska_tmc_centralnode.central_node
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   ska_tmc_centralnode.central_node_low
+   low-tmc-central-node-device
 
-ska\_tmc\_centralnode.central\_node\_low module
------------------------------------------------
+.. toctree::
+   :maxdepth: 1
+   :caption: TMC Central Node Mid
 
-.. automodule:: ska_tmc_centralnode.central_node_low
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   ska_tmc_centralnode.central_node_mid
+   mid-tmc-central-node-device
 
-ska\_tmc\_centralnode.central\_node\_mid module
------------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.central_node_mid
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ska\_tmc\_centralnode.input\_validator module
----------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.input_validator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-ska\_tmc\_centralnode.release module
-------------------------------------
-
-.. automodule:: ska_tmc_centralnode.release
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: ska_tmc_centralnode
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 
 ##########################
@@ -95,7 +61,7 @@ Properties in Central Node
 | EventSubscriptionCheckPeriod  | DevFloat        | Period for the event subscriber to check the device subscriptions in a loop    |
 +-------------------------------+-----------------+--------------------------------------------------------------------------------+
 | CommandTimeOutDefault         | DevUShort       | Default Timeout for the command execution                                      |
-+-----------------------------------+-----------------+----------------------------------------------------------------------------+
++-------------------------------+-----------------+--------------------------------------------------------------------------------+
 
 #########################################
 Additional Properties in Central Node Mid
