@@ -107,11 +107,11 @@ class ReleaseResources(AssignReleaseResources):
             self.component_manager.command_mapping.pop(self.command_id)
         if hasattr(self.component_manager, "subsystem_assigned_per_subarray"):
             self.component_manager.subsystem_assigned_per_subarray.pop(
-                self.subarray_id
+                self.subarray_id, None
             )
         if hasattr(self.component_manager, "pss_beams_assigned_per_subarray"):
             self.component_manager.pss_beams_assigned_per_subarray.pop(
-                self.subarray_id
+                self.subarray_id, None
             )
 
     def release_all_resources(
