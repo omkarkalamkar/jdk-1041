@@ -237,6 +237,7 @@ def test_on_command_low(
         lookahead=4,
     )
 
+
 @pytest.mark.test1
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
@@ -278,7 +279,7 @@ def test_on_command_mid_with_partial_dish_availability(
     )
 
     # -------------------------------
-    # 🔥 KEY PART: Multiple dishes
+    #  KEY PART: Multiple dishes
     # -------------------------------
     dish1 = dev_factory.get_device(DISH_LEAF_NODE_1)
     dish2 = dev_factory.get_device(DISH_LEAF_NODE_36)
@@ -292,11 +293,11 @@ def test_on_command_mid_with_partial_dish_availability(
     )
 
     # Set only ONE usable dish
-    dish1.SetDirectDishMode(DishMode.STANDBY_FP)   # ✅ usable
+    dish1.SetDirectDishMode(DishMode.STANDBY_FP)  # usable
 
     # Other dishes NOT usable
-    dish2.SetDirectDishMode(DishMode.STANDBY_LP)   # ❌
-    dish3.SetDirectDishMode(DishMode.SHUTDOWN)     # ❌
+    dish2.SetDirectDishMode(DishMode.STANDBY_LP)  #
+    dish3.SetDirectDishMode(DishMode.SHUTDOWN)  #
 
     # Validate dish mode event (optional)
     change_event_callbacks["dishMode"].assert_change_event(
@@ -305,7 +306,7 @@ def test_on_command_mid_with_partial_dish_availability(
     )
 
     # -------------------------------
-    # ✅ Validate Telescope State
+    #  Validate Telescope State
     # -------------------------------
     central_node.subscribe_event(
         "telescopeState",
@@ -329,4 +330,3 @@ def test_on_command_mid_with_partial_dish_availability(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
     )
-⚠️ Before running this test
