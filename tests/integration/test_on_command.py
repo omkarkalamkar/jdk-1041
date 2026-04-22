@@ -236,3 +236,97 @@ def test_on_command_low(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
+
+@pytest.mark.test1
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_on_command_mid_with_partial_dish_availability(
+    change_event_callbacks,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
+    """Verify telescope goes ON when only one dish is usable (FP)"""
+
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
+
+    assert central_node.HealthState == HealthState.OK
+    ensure_checked_devices(central_node)
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    # Trigger ON command
+    result, unique_id = central_node.TelescopeOn()
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    # Set CSP and SDP to ON
+    csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master.SetDirectState(tango.DevState.ON)
+
+    sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
+    sdp_master.SetDirectState(tango.DevState.ON)
+
+    # Wait for command completion
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+
+    # -------------------------------
+    # 🔥 KEY PART: Multiple dishes
+    # -------------------------------
+    dish1 = dev_factory.get_device(DISH_LEAF_NODE_1)
+    dish2 = dev_factory.get_device(DISH_LEAF_NODE_36)
+    dish3 = dev_factory.get_device(DISH_LEAF_NODE_63)
+
+    # Subscribe to one dish (optional)
+    dish1.subscribe_event(
+        "dishMode",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["dishMode"],
+    )
+
+    # Set only ONE usable dish
+    dish1.SetDirectDishMode(DishMode.STANDBY_FP)   # ✅ usable
+
+    # Other dishes NOT usable
+    dish2.SetDirectDishMode(DishMode.STANDBY_LP)   # ❌
+    dish3.SetDirectDishMode(DishMode.SHUTDOWN)     # ❌
+
+    # Validate dish mode event (optional)
+    change_event_callbacks["dishMode"].assert_change_event(
+        DishMode.STANDBY_FP,
+        lookahead=2,
+    )
+
+    # -------------------------------
+    # ✅ Validate Telescope State
+    # -------------------------------
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    change_event_callbacks["telescopeState"].assert_change_event(
+        tango.DevState.ON,
+        lookahead=12,
+    )
+
+    assert central_node.telescopeState == tango.DevState.ON
+
+    # -------------------------------
+    # Teardown
+    # -------------------------------
+    result, unique_id = central_node.TelescopeOff()
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=8,
+    )
+⚠️ Before running this test
