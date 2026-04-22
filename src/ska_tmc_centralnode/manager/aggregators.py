@@ -86,22 +86,17 @@ class TelescopeStateAggregatorMid(Aggregator):
             return DevState.UNKNOWN
         if dish_count == 0:
             return DevState.UNKNOWN
-        if (
-            subsystem_states == {DevState.ON}
-            and dish_modes == {DishMode.STANDBY_FP}
-            or dish_modes == {DishMode.OPERATE}
-            or dish_modes == {DishMode.CONFIG}
-            or dish_modes == {DishMode.STANDBY_FP, DishMode.OPERATE}
-            or dish_modes == {DishMode.STANDBY_FP, DishMode.CONFIG}
-            or dish_modes
-            == {DishMode.STANDBY_FP, DishMode.OPERATE, DishMode.CONFIG}
-            or dish_modes == {DishMode.OPERATE, DishMode.CONFIG}
-        ):
+        usable_modes = {
+            DishMode.STANDBY_FP,
+            DishMode.OPERATE,
+            DishMode.CONFIG,
+        }
+        has_usable_dish = any(mode in usable_modes for mode in dish_modes)
+        if subsystem_states == {DevState.ON} and has_usable_dish:
             return DevState.ON
-        if (
-            subsystem_states == {DevState.OFF}
-            and dish_modes == {DishMode.STANDBY_LP}
-            or dish_modes == {DishMode.SHUTDOWN}
+        if subsystem_states == {DevState.OFF} and dish_modes in (
+            {DishMode.STANDBY_LP},
+            {DishMode.SHUTDOWN},
         ):
             return DevState.OFF
         if DevState.INIT in subsystem_states:
