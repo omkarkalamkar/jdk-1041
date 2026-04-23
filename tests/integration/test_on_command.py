@@ -251,7 +251,7 @@ def test_on_command_low(
                 "dish3": DishMode.SHUTDOWN,
             },
             tango.DevState.ON,
-            HealthState.DEGRADED,
+            HealthState.OK,
         ),
         # All usable (healthy scenario)
         (
@@ -271,7 +271,7 @@ def test_on_command_low(
                 "dish3": DishMode.SHUTDOWN,
             },
             tango.DevState.OFF,
-            HealthState.DEGRADED,
+            HealthState.FAILED,
         ),
     ],
 )
