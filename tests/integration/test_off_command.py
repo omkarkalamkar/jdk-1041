@@ -208,6 +208,80 @@ def test_off_command_dish_fail(
 
 
 @pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+def test_off_command_mid_all_dishes_standby_lp(
+    change_event_callbacks,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
+    """Verify telescope goes OFF when all dishes are in STANDBY_LP and
+    subsystems are OFF"""
+
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
+    ensure_checked_devices(central_node)
+    # Subscribe command result
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    result_on, unique_id_on = central_node.TelescopeOn()
+    assert result_on[0] == ResultCode.QUEUED
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (
+            unique_id_on[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
+        lookahead=4,
+    )
+
+    # Trigger OFF command
+    result, unique_id = central_node.TelescopeOff()
+
+    assert unique_id[0].endswith("TelescopeOff")
+    assert result[0] == ResultCode.QUEUED
+
+    # Set CSP and SDP to OFF (IMPORTANT)
+    csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master.SetDirectState(tango.DevState.OFF)
+
+    sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
+    sdp_master.SetDirectState(tango.DevState.OFF)
+
+    # Wait for command completion
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=6,
+    )
+
+    # -------------------------------
+    # Set ALL dishes to STANDBY_LP
+    # -------------------------------
+    dish1 = dev_factory.get_device(DISH_LEAF_NODE_1)
+    dish2 = dev_factory.get_device(DISH_LEAF_NODE_36)
+    dish3 = dev_factory.get_device(DISH_LEAF_NODE_63)
+
+    dish1.SetDirectDishMode(DishMode.STANDBY_LP)
+    dish2.SetDirectDishMode(DishMode.STANDBY_LP)
+    dish3.SetDirectDishMode(DishMode.STANDBY_LP)
+
+    # Subscribe telescope state
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    # Verify telescope goes OFF
+    change_event_callbacks["telescopeState"].assert_change_event(
+        tango.DevState.OFF,
+        lookahead=12,
+    )
+    assert central_node.telescopeState == tango.DevState.OFF
+
+
+@pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_off_command_low(
     change_event_callbacks,
