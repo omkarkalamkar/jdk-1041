@@ -266,12 +266,12 @@ def test_on_command_low(
         # No usable dishes (failure scenario)
         (
             {
-                "dish1": DishMode.STANDBY_LP,
-                "dish2": DishMode.SHUTDOWN,
-                "dish3": DishMode.SHUTDOWN,
+                "dish1": DishMode.STANDBY_FP,
+                "dish2": DishMode.OPERATE,
+                "dish3": DishMode.CONFIG,
             },
-            tango.DevState.OFF,
-            HealthState.FAILED,
+            tango.DevState.ON,
+            HealthState.OK,
         ),
     ],
 )
