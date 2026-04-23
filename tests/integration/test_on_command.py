@@ -296,8 +296,8 @@ def test_on_command_mid_with_partial_dish_availability(
     dish1.SetDirectDishMode(DishMode.STANDBY_FP)  # usable
 
     # Other dishes NOT usable
-    dish2.SetDirectDishMode(DishMode.STANDBY_LP)  #
-    dish3.SetDirectDishMode(DishMode.SHUTDOWN)  #
+    dish2.SetDirectDishMode(DishMode.STANDBY_LP)
+    dish3.SetDirectDishMode(DishMode.SHUTDOWN)
 
     # Validate dish mode event (optional)
     change_event_callbacks["dishMode"].assert_change_event(
@@ -305,9 +305,6 @@ def test_on_command_mid_with_partial_dish_availability(
         lookahead=2,
     )
 
-    # -------------------------------
-    #  Validate Telescope State
-    # -------------------------------
     central_node.subscribe_event(
         "telescopeState",
         tango.EventType.CHANGE_EVENT,
