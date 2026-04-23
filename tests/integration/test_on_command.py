@@ -240,17 +240,55 @@ def test_on_command_low(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_on_command_mid_with_partial_dish_availability(
+@pytest.mark.parametrize(
+    "dish_modes, expected_state, expected_health",
+    [
+        # Partial availability (degraded scenario)
+        (
+            {
+                "dish1": DishMode.STANDBY_FP,
+                "dish2": DishMode.STANDBY_LP,
+                "dish3": DishMode.SHUTDOWN,
+            },
+            tango.DevState.ON,
+            HealthState.DEGRADED,
+        ),
+        # All usable (healthy scenario)
+        (
+            {
+                "dish1": DishMode.STANDBY_FP,
+                "dish2": DishMode.STANDBY_FP,
+                "dish3": DishMode.STANDBY_FP,
+            },
+            tango.DevState.ON,
+            HealthState.OK,
+        ),
+        # No usable dishes (failure scenario)
+        (
+            {
+                "dish1": DishMode.STANDBY_LP,
+                "dish2": DishMode.SHUTDOWN,
+                "dish3": DishMode.SHUTDOWN,
+            },
+            tango.DevState.OFF,
+            HealthState.DEGRADED,
+        ),
+    ],
+)
+def test_on_command_mid_dish_availability_parametrized(
+    dish_modes,
+    expected_state,
+    expected_health,
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
-    """Verify telescope goes ON when only one dish is usable (FP)"""
-
+    """Test ON command with different dish availability scenarios"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
 
-    assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
+
+    assert central_node.HealthState == HealthState.OK
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -258,52 +296,35 @@ def test_on_command_mid_with_partial_dish_availability(
         change_event_callbacks["longRunningCommandResult"],
     )
 
-    # Trigger ON command
     result, unique_id = central_node.TelescopeOn()
 
     assert unique_id[0].endswith("TelescopeOn")
     assert result[0] == ResultCode.QUEUED
 
-    # Set CSP and SDP to ON
+    # CSP + SDP ON
     csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
     csp_master.SetDirectState(tango.DevState.ON)
 
     sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
     sdp_master.SetDirectState(tango.DevState.ON)
 
-    # Wait for command completion
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
 
     # -------------------------------
-    #  KEY PART: Multiple dishes
+    # Dish configuration (parametrized)
     # -------------------------------
     dish1 = dev_factory.get_device(DISH_LEAF_NODE_1)
     dish2 = dev_factory.get_device(DISH_LEAF_NODE_36)
     dish3 = dev_factory.get_device(DISH_LEAF_NODE_63)
 
-    # Subscribe to one dish (optional)
-    dish1.subscribe_event(
-        "dishMode",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["dishMode"],
-    )
+    dish1.SetDirectDishMode(dish_modes["dish1"])
+    dish2.SetDirectDishMode(dish_modes["dish2"])
+    dish3.SetDirectDishMode(dish_modes["dish3"])
 
-    # Set only ONE usable dish
-    dish1.SetDirectDishMode(DishMode.STANDBY_FP)  # usable
-
-    # Other dishes NOT usable
-    dish2.SetDirectDishMode(DishMode.STANDBY_LP)
-    dish3.SetDirectDishMode(DishMode.SHUTDOWN)
-
-    # Validate dish mode event (optional)
-    change_event_callbacks["dishMode"].assert_change_event(
-        DishMode.STANDBY_FP,
-        lookahead=2,
-    )
-
+    # Subscribe telescope state
     central_node.subscribe_event(
         "telescopeState",
         tango.EventType.CHANGE_EVENT,
@@ -311,11 +332,20 @@ def test_on_command_mid_with_partial_dish_availability(
     )
 
     change_event_callbacks["telescopeState"].assert_change_event(
-        tango.DevState.ON,
+        expected_state,
         lookahead=12,
     )
 
-    assert central_node.telescopeState == tango.DevState.ON
+    assert central_node.telescopeState == expected_state
+
+    # -------------------------------
+    # ADR-128 Health validation
+    # -------------------------------
+    assert central_node.HealthState == expected_health
+
+    # Optional but recommended if implemented in aggregator
+    if expected_health != HealthState.OK:
+        assert central_node.healthInfo  # must not be empty
 
     # -------------------------------
     # Teardown
