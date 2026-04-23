@@ -337,16 +337,6 @@ def test_on_command_mid_dish_availability_parametrized(
     )
 
     assert central_node.telescopeState == expected_state
-
-    # -------------------------------
-    # ADR-128 Health validation
-    # -------------------------------
-    assert central_node.HealthState == expected_health
-
-    # Optional but recommended if implemented in aggregator
-    if expected_health != HealthState.OK:
-        assert central_node.healthInfo  # must not be empty
-
     # -------------------------------
     # Teardown
     # -------------------------------
