@@ -5,6 +5,12 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[1.3.2]
+*******
+Fixed
+-----
+* Fixed the Telescope state incorrectly reported - should be ON when at least one dish is available Resolves SKB-1309.
+
 [1.3.1]
 *******
 Fixed
