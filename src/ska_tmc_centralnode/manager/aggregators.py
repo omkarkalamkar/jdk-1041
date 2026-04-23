@@ -94,9 +94,10 @@ class TelescopeStateAggregatorMid(Aggregator):
         has_usable_dish = any(mode in usable_modes for mode in dish_modes)
         if subsystem_states == {DevState.ON} and has_usable_dish:
             return DevState.ON
-        if subsystem_states == {DevState.OFF} and dish_modes in (
-            {DishMode.STANDBY_LP},
-            {DishMode.SHUTDOWN},
+        if (
+            subsystem_states == {DevState.OFF}
+            and dish_modes == {DishMode.STANDBY_LP}
+            or dish_modes == {DishMode.SHUTDOWN}
         ):
             return DevState.OFF
         if DevState.INIT in subsystem_states:
