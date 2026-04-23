@@ -238,7 +238,6 @@ def test_on_command_low(
     )
 
 
-@pytest.mark.test1
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_on_command_mid_with_partial_dish_availability(
