@@ -262,12 +262,29 @@ def test_on_command_low(
             },
             tango.DevState.ON,
             HealthState.OK,
-        ),
-        # No usable dishes (failure scenario)
+        ),  # Mixed modes but still usable (healthy scenario)
         (
             {
                 "dish1": DishMode.STANDBY_FP,
                 "dish2": DishMode.OPERATE,
+                "dish3": DishMode.CONFIG,
+            },
+            tango.DevState.ON,
+            HealthState.OK,
+        ),
+        (
+            {
+                "dish1": DishMode.STANDBY_LP,
+                "dish2": DishMode.OPERATE,
+                "dish3": DishMode.SHUTDOWN,
+            },
+            tango.DevState.ON,
+            HealthState.OK,
+        ),
+        (
+            {
+                "dish1": DishMode.STANDBY_LP,
+                "dish2": DishMode.SHUTDOWN,
                 "dish3": DishMode.CONFIG,
             },
             tango.DevState.ON,
