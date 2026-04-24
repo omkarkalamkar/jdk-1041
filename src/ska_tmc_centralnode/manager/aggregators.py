@@ -86,12 +86,12 @@ class TelescopeStateAggregatorMid(Aggregator):
             return DevState.UNKNOWN
         if dish_count == 0:
             return DevState.UNKNOWN
-        usable_modes = {
+        usable_dish_modes = {
             DishMode.STANDBY_FP,
             DishMode.OPERATE,
             DishMode.CONFIG,
         }
-        has_usable_dish = any(mode in usable_modes for mode in dish_modes)
+        has_usable_dish = any(mode in usable_dish_modes for mode in dish_modes)
         if subsystem_states == {DevState.ON} and has_usable_dish:
             return DevState.ON
         if (
