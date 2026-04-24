@@ -236,3 +236,130 @@ def test_on_command_low(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "dish_modes, expected_state, expected_health",
+    [
+        # Partial availability (degraded scenario)
+        (
+            {
+                "dish1": DishMode.STANDBY_FP,
+                "dish2": DishMode.STANDBY_LP,
+                "dish3": DishMode.SHUTDOWN,
+            },
+            tango.DevState.ON,
+            HealthState.OK,
+        ),
+        # All usable (healthy scenario)
+        (
+            {
+                "dish1": DishMode.STANDBY_FP,
+                "dish2": DishMode.STANDBY_FP,
+                "dish3": DishMode.STANDBY_FP,
+            },
+            tango.DevState.ON,
+            HealthState.OK,
+        ),  # Mixed modes but still usable (healthy scenario)
+        (
+            {
+                "dish1": DishMode.STANDBY_FP,
+                "dish2": DishMode.OPERATE,
+                "dish3": DishMode.CONFIG,
+            },
+            tango.DevState.ON,
+            HealthState.OK,
+        ),
+        (
+            {
+                "dish1": DishMode.STANDBY_LP,
+                "dish2": DishMode.OPERATE,
+                "dish3": DishMode.SHUTDOWN,
+            },
+            tango.DevState.ON,
+            HealthState.OK,
+        ),
+        (
+            {
+                "dish1": DishMode.STANDBY_LP,
+                "dish2": DishMode.SHUTDOWN,
+                "dish3": DishMode.CONFIG,
+            },
+            tango.DevState.ON,
+            HealthState.OK,
+        ),
+    ],
+)
+def test_on_command_mid_dish_availability_parametrized(
+    dish_modes,
+    expected_state,
+    expected_health,
+    change_event_callbacks,
+    set_mid_sdp_csp_mln_availability_for_aggregation,
+):
+    """Test ON command with different dish availability scenarios"""
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(CENTRALNODE_MID)
+
+    ensure_checked_devices(central_node)
+
+    assert central_node.HealthState == HealthState.OK
+
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+
+    result, unique_id = central_node.TelescopeOn()
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    # CSP + SDP ON
+    csp_master = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master.SetDirectState(tango.DevState.ON)
+
+    sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
+    sdp_master.SetDirectState(tango.DevState.ON)
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+
+    # -------------------------------
+    # Dish configuration (parametrized)
+    # -------------------------------
+    dish1 = dev_factory.get_device(DISH_LEAF_NODE_1)
+    dish2 = dev_factory.get_device(DISH_LEAF_NODE_36)
+    dish3 = dev_factory.get_device(DISH_LEAF_NODE_63)
+
+    dish1.SetDirectDishMode(dish_modes["dish1"])
+    dish2.SetDirectDishMode(dish_modes["dish2"])
+    dish3.SetDirectDishMode(dish_modes["dish3"])
+
+    # Subscribe telescope state
+    central_node.subscribe_event(
+        "telescopeState",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["telescopeState"],
+    )
+
+    change_event_callbacks["telescopeState"].assert_change_event(
+        expected_state,
+        lookahead=12,
+    )
+
+    assert central_node.telescopeState == expected_state
+    # -------------------------------
+    # Teardown
+    # -------------------------------
+    result, unique_id = central_node.TelescopeOff()
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=8,
+    )
