@@ -61,6 +61,15 @@ def test_attributes(central_node_device):
     assert central_node_device.buildState == (
         "{},{},{}".format(release.name, release.version, release.description)
     )
+    assert central_node_device.arrayLayoutFileProvided is False
+    print(
+        "central_node_device.DefaultArrayLayoutURL",
+        json.loads(central_node_device.DefaultArrayLayoutURL),
+    )
+    assert json.loads(central_node_device.DefaultArrayLayoutURL) == {
+        "source_uris": [None],
+        "array_layout_path": None,
+    }
 
 
 @pytest.mark.SKA_low

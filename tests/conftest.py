@@ -43,6 +43,7 @@ from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
     DISH_MASTER_DEVICE,
+    LOW_CENTRAL_NODE,
     LOW_CSP_MASTER_DEVICE,
     LOW_CSP_MLN_DEVICE,
     LOW_CSP_SLN_DEVICE,
@@ -290,6 +291,45 @@ def is_dish_vcc_set(request):
             "isDishVccConfigSet",
             True,
         ), "Timeout while waiting for validating attribute value"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_default_array_layout_url_attribute(request):
+    """set DefaultArrayLayoutURL attribute"""
+    marker = request.node.get_closest_marker("SKA_mid")
+    dev_factory = DevFactory()
+    if marker:
+        central_node = dev_factory.get_device(MID_CENTRAL_NODE)
+        logging.info(
+            "CentralNode Mid Initial DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+        central_node.DefaultArrayLayoutURL = (
+            '{"source_uris":["gitlab://'
+            + 'gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"],'
+            + '"array_layout_path":"instrument/ska1_mid/layout/'
+            + 'mid-layout.json",}'
+        )
+        logging.info(
+            "CentralNode Mid DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+    else:
+        central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
+        logging.info(
+            "CentralNode Low Initial DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+        central_node.DefaultArrayLayoutURL = (
+            '{"source_uris":["gitlab:'
+            + '//gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"],'
+            + '"array_layout_path":"instrument/ska1_low/layout/'
+            + 'low-layout.json",}'
+        )
+        logging.info(
+            "CentralNode Low DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
 
 
 @pytest.fixture
