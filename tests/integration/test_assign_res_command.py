@@ -43,6 +43,11 @@ def assign_resources(
     central_node = dev_factory.get_device(central_node_name)
     subarray_proxy = dev_factory.get_device(subarray_device)
 
+    logger.info(
+        "CentralNode Low DefaultArrayLayoutURL: %s",
+        central_node.DefaultArrayLayoutURL,
+    )
+
     ensure_checked_devices(central_node)
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -112,6 +117,7 @@ def assign_resources(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
     result, unique_id = central_node.TelescopeOff()
+    assert 0
 
 
 @pytest.mark.post_deployment
