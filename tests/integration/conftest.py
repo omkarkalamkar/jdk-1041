@@ -75,16 +75,16 @@ def set_default_array_layout_url_attribute(request):
     # )
     # else:
     central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
-    # logging.info(
-    #     "CentralNode Low Initial DefaultArrayLayoutURL: %s",
-    #     central_node.DefaultArrayLayoutURL,
-    # )
-    # central_node.DefaultArrayLayoutURL = (
-    #     '{"source_uris":["gitlab:'
-    #     + '//gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"],'
-    #     + '"array_layout_path":"instrument/ska1_low/layout/'
-    #     + 'low-layout.json"}'
-    # )
+    logging.info(
+        "CentralNode Low Initial DefaultArrayLayoutURL: %s",
+        central_node.DefaultArrayLayoutURL,
+    )
+    central_node.DefaultArrayLayoutURL = {
+        "source_uris": [
+            "gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"
+        ],
+        "array_layout_path": "instrument/ska1_low/layout/low-layout.json",
+    }
     logging.info(
         "CentralNode Low DefaultArrayLayoutURL: %s",
         central_node.DefaultArrayLayoutURL,
