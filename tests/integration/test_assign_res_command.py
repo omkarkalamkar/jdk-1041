@@ -117,7 +117,6 @@ def assign_resources(
     tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
     result, unique_id = central_node.TelescopeOff()
-    assert 0
 
 
 @pytest.mark.post_deployment
