@@ -68,7 +68,24 @@ def set_default_array_layout_url_attribute(request):
     telescope = os.getenv("TELESCOPE")
     logging.info("telescope: %s", telescope)
 
-    if telescope == "SKA-mid":
+    if telescope == "SKA-low":
+        central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
+        logging.info(
+            "CentralNode Low Initial DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+        url = (
+            '{"source_uris":["gitlab://gitlab.com/ska-telescope/'
+            + 'ska-telmodel-data?main#tmdata"],"array_layout_path":'
+            + '"instrument/ska1_low/layout/low-layout.json"}'
+        )
+        logging.info("URL is: %s", url)
+        central_node.DefaultArrayLayoutURL = url
+        logging.info(
+            "CentralNode Low DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+    else:
         central_node = dev_factory.get_device(MID_CENTRAL_NODE)
         logging.info(
             "CentralNode Mid Initial DefaultArrayLayoutURL: %s",
@@ -84,22 +101,5 @@ def set_default_array_layout_url_attribute(request):
         central_node.DefaultArrayLayoutURL = url
         logging.info(
             "CentralNode Mid DefaultArrayLayoutURL: %s",
-            central_node.DefaultArrayLayoutURL,
-        )
-    else:
-        central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
-        logging.info(
-            "CentralNode Low Initial DefaultArrayLayoutURL: %s",
-            central_node.DefaultArrayLayoutURL,
-        )
-        url = (
-            '{"source_uris":["gitlab://gitlab.com/ska-telescope/'
-            + 'ska-telmodel-data?main#tmdata"],"array_layout_path":'
-            + '"instrument/ska1_low/layout/low-layout.json"}'
-        )
-        logging.info("URL is: %s", url)
-        central_node.DefaultArrayLayoutURL = url
-        logging.info(
-            "CentralNode Low DefaultArrayLayoutURL: %s",
             central_node.DefaultArrayLayoutURL,
         )
