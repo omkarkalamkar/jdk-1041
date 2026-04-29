@@ -74,6 +74,11 @@ def set_default_array_layout_url_attribute(request):
     if mid_instance_list.value_string:
         central_node = dev_factory.get_device(MID_CENTRAL_NODE)
         logging.info(
+            "CentralNode Mid Initial arrayLayoutFileProvided: %s",
+            central_node.arrayLayoutFileProvided,
+        )
+        assert central_node.arrayLayoutFileProvided is False
+        logging.info(
             "CentralNode Mid Initial DefaultArrayLayoutURL: %s",
             central_node.DefaultArrayLayoutURL,
         )
@@ -89,8 +94,18 @@ def set_default_array_layout_url_attribute(request):
             "CentralNode Mid DefaultArrayLayoutURL: %s",
             central_node.DefaultArrayLayoutURL,
         )
+        logging.info(
+            "CentralNode Mid arrayLayoutFileProvided: %s",
+            central_node.arrayLayoutFileProvided,
+        )
+        assert central_node.arrayLayoutFileProvided is True
     else:
         central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
+        logging.info(
+            "CentralNode Low Initial arrayLayoutFileProvided: %s",
+            central_node.arrayLayoutFileProvided,
+        )
+        assert central_node.arrayLayoutFileProvided is False
         logging.info(
             "CentralNode Low Initial DefaultArrayLayoutURL: %s",
             central_node.DefaultArrayLayoutURL,
@@ -106,3 +121,8 @@ def set_default_array_layout_url_attribute(request):
             "CentralNode Low DefaultArrayLayoutURL: %s",
             central_node.DefaultArrayLayoutURL,
         )
+        logging.info(
+            "CentralNode Low Initial arrayLayoutFileProvided: %s",
+            central_node.arrayLayoutFileProvided,
+        )
+        assert central_node.arrayLayoutFileProvided is True

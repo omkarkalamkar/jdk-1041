@@ -218,9 +218,14 @@ class AbstractCentralNode(TMCBaseDevice):
         self.component_manager.default_array_layout_url = url_json
         if url == "":
             self._array_layout_file_provided = False
-        elif url_json["array_layout_path"] == "":
+        elif (
+            url_json["array_layout_path"] == ""
+            or url_json["array_layout_path"] is None
+        ):
             self._array_layout_file_provided = False
-        elif url_json["source_uris"] == [""]:
+        elif (
+            url_json["source_uris"] == [""] or url_json["source_uris"] is None
+        ):
             self._array_layout_file_provided = False
         self._array_layout_file_provided = True
         self.logger.info("DefaultArrayLayoutURL is set to %s", url)
