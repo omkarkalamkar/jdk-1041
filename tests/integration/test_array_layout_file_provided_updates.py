@@ -32,6 +32,10 @@ def test_array_layout_file_provided_updates(
         "CentralNode Low Initial arrayLayoutFileProvided: %s",
         central_node.arrayLayoutFileProvided,
     )
+    logging.info(
+        "central_node.DefaultArrayLayoutURL is: %s",
+        central_node.DefaultArrayLayoutURL,
+    )
     assert central_node.arrayLayoutFileProvided is True
 
     central_node.DefaultArrayLayoutURL = ""
