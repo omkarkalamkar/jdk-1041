@@ -8,6 +8,7 @@ import time
 
 import pytest
 from ska_tmc_common.dev_factory import DevFactory
+from tango import Database
 
 from tests.settings import (
     LOW_CENTRAL_NODE,
@@ -64,6 +65,13 @@ def assert_event_arrived():
 def set_default_array_layout_url_attribute(request):
     """set DefaultArrayLayoutURL attribute"""
     dev_factory = DevFactory()
+
+    database = Database()
+    instance_list = database.get_device_exported_for_class("LowTmcCentralNode")
+    logging.info("Low instance_list: %s", instance_list)
+
+    instance_list = database.get_device_exported_for_class("MidTmcCentralNode")
+    logging.info("Mid instance_list: %s", instance_list)
 
     telescope = os.getenv("TELESCOPE")
     logging.info("telescope: %s", telescope)
