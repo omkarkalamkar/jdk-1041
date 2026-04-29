@@ -229,6 +229,10 @@ class AbstractCentralNode(TMCBaseDevice):
             self._array_layout_file_provided = False
         self._array_layout_file_provided = True
         self.logger.info("DefaultArrayLayoutURL is set to %s", url)
+        self.logger.info(
+            "arrayLayoutFileProvided is set to %s",
+            self._array_layout_file_provided,
+        )
         self.push_change_archive_events(
             "arrayLayoutFileProvided", self._array_layout_file_provided
         )

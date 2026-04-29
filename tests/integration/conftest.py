@@ -60,8 +60,8 @@ def assert_event_arrived():
     assert pytest.event_arrived
 
 
-@pytest.fixture(scope="session", autouse=True)
-def set_default_array_layout_url_attribute(request):
+@pytest.fixture(scope="session")
+def set_default_array_layout_url_attribute():
     """set DefaultArrayLayoutURL attribute"""
     dev_factory = DevFactory()
 
