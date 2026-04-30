@@ -205,7 +205,10 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def write_DefaultArrayLayoutURL(self, url: str) -> None:
         """Sets the default array layout URL."""
-        self.component_manager.default_array_layout_url = json.loads(url)
+        url_dict = json.loads(url)
+        self.component_manager._default_array_layout_url = url_dict
+        if self.component_manager._default_array_layout_url_callback:
+            self.component_manager._default_array_layout_url_callback(url_dict)
 
     DefaultArrayLayoutURL = attribute_from_signal(
         _default_array_layout_url,

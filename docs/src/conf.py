@@ -93,15 +93,11 @@ extensions = [
 
 intersphinx_mapping = {
     "ska-tmc-low-integration": (
-        "https://developer.skao.int/projects/ska-tmc-low-integration/develop/",
+        "https://developer.skao.int/projects/ska-tmc-low-integration/en/latest/",
         None,
     ),
     "ska-tmc-mid-integration": (
-        "https://developer.skao.int/projects/ska-tmc-mid-integration/develop/",
-        None,
-    ),
-    "ska-tmc-subarraynode": (
-        "https://developer.skao.int/projects/ska-tmc-subarraynode/develop/",
+        "https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/",
         None,
     ),
 }
