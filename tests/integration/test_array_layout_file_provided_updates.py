@@ -1,7 +1,5 @@
 """Test cases for ON command"""
 
-import logging
-
 import pytest
 from ska_control_model import HealthState
 from ska_tmc_common.dev_factory import DevFactory
@@ -13,9 +11,6 @@ from ska_tmc_centralnode.utils.constants import (
 from tests.integration.conftest import ensure_checked_devices
 
 
-# pylint:disable=c-extension-no-member
-# this linting warning is suppressed cause its not able to recognise
-# tango._tango.Devstate which is c-extension member
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_array_layout_file_provided_updates(
@@ -29,18 +24,9 @@ def test_array_layout_file_provided_updates(
     assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
-    logging.info(
-        "CentralNode Low Initial arrayLayoutFileProvided: %s",
-        central_node.arrayLayoutFileProvided,
-    )
-    logging.info(
-        "central_node.DefaultArrayLayoutURL is: %s",
-        central_node.DefaultArrayLayoutURL,
-    )
     assert central_node.arrayLayoutFileProvided is True
 
     url = '{"source_uris":[""],"array_layout_path":""}'
-    logging.info("URL is: %s", url)
     central_node.DefaultArrayLayoutURL = url
     assert central_node.arrayLayoutFileProvided is False
 
@@ -49,7 +35,6 @@ def test_array_layout_file_provided_updates(
         + 'ska-telmodel-data?main#tmdata"],"array_layout_path":'
         + '"instrument/ska1_mid/layout/mid-layout.json"}'
     )
-    logging.info("URL is: %s", url)
     central_node.DefaultArrayLayoutURL = url
     assert central_node.arrayLayoutFileProvided is True
 
@@ -67,14 +52,9 @@ def test_on_command_low(
     assert central_node.HealthState == HealthState.OK
     ensure_checked_devices(central_node)
 
-    logging.info(
-        "CentralNode Low Initial arrayLayoutFileProvided: %s",
-        central_node.arrayLayoutFileProvided,
-    )
     assert central_node.arrayLayoutFileProvided is True
 
     url = '{"source_uris":[""],"array_layout_path":""}'
-    logging.info("URL is: %s", url)
     central_node.DefaultArrayLayoutURL = url
     assert central_node.arrayLayoutFileProvided is False
 
@@ -83,6 +63,5 @@ def test_on_command_low(
         + 'ska-telmodel-data?main#tmdata"],"array_layout_path":'
         + '"instrument/ska1_low/layout/low-layout.json"}'
     )
-    logging.info("URL is: %s", url)
     central_node.DefaultArrayLayoutURL = url
     assert central_node.arrayLayoutFileProvided is True

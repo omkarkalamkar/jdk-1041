@@ -333,11 +333,6 @@ class AbstractCentralNode(TMCBaseDevice):
             tango.cb_sub_model.PUSH_CALLBACK
         )
         self._health_state = HealthState.OK
-        print(
-            "self.DefaultArrayLayoutSourceURIs: ",
-            self.DefaultArrayLayoutSourceURIs,
-        )
-        print("self.DefaultArrayLayoutPath: ", self.DefaultArrayLayoutPath)
         if (
             self.DefaultArrayLayoutSourceURIs == ""
             or self.DefaultArrayLayoutPath == ""

@@ -63,14 +63,11 @@ def assert_event_arrived():
 @pytest.fixture(scope="session")
 def set_default_array_layout_url_attribute():
     """set DefaultArrayLayoutURL attribute"""
-    logging.info("--- Session Setup ---")
     dev_factory = DevFactory()
-
     database = Database()
     mid_instance_list = database.get_device_exported_for_class(
         "MidTmcCentralNode"
     )
-    logging.info("Mid instance_list: %s", mid_instance_list)
 
     if mid_instance_list.value_string:
         central_node = dev_factory.get_device(MID_CENTRAL_NODE)
@@ -89,7 +86,6 @@ def set_default_array_layout_url_attribute():
             + 'ska-telmodel-data?main#tmdata"],"array_layout_path":'
             + '"instrument/ska1_mid/layout/mid-layout.json"}'
         )
-        logging.info("URL is: %s", url)
         central_node.DefaultArrayLayoutURL = url
         logging.info(
             "CentralNode Mid DefaultArrayLayoutURL: %s",
@@ -116,7 +112,6 @@ def set_default_array_layout_url_attribute():
             + 'ska-telmodel-data?main#tmdata"],"array_layout_path":'
             + '"instrument/ska1_low/layout/low-layout.json"}'
         )
-        logging.info("URL is: %s", url)
         central_node.DefaultArrayLayoutURL = url
         logging.info(
             "CentralNode Low DefaultArrayLayoutURL: %s",
@@ -127,4 +122,3 @@ def set_default_array_layout_url_attribute():
             central_node.arrayLayoutFileProvided,
         )
         assert central_node.arrayLayoutFileProvided is True
-    logging.info("--- Session Teardown ---")
