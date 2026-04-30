@@ -63,6 +63,7 @@ def assert_event_arrived():
 @pytest.fixture(scope="session", autouse=True)
 def set_default_array_layout_url_attribute():
     """set DefaultArrayLayoutURL attribute"""
+    logging.info("--- Session Setup ---")
     dev_factory = DevFactory()
 
     database = Database()
@@ -126,3 +127,5 @@ def set_default_array_layout_url_attribute():
             central_node.arrayLayoutFileProvided,
         )
         assert central_node.arrayLayoutFileProvided is True
+    yield
+    logging.info("--- Session Teardown ---")
