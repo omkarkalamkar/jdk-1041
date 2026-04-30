@@ -227,7 +227,8 @@ class AbstractCentralNode(TMCBaseDevice):
             url_json["source_uris"] == [""] or url_json["source_uris"] is None
         ):
             self._array_layout_file_provided = False
-        self._array_layout_file_provided = True
+        else:
+            self._array_layout_file_provided = True
         self.logger.info("DefaultArrayLayoutURL is set to %s", url)
         self.logger.info(
             "arrayLayoutFileProvided is set to %s",
