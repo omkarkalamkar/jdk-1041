@@ -21,7 +21,6 @@ from tests.integration.conftest import ensure_checked_devices
 def test_array_layout_file_provided_updates(
     change_event_callbacks,
     set_mid_sdp_csp_mln_availability_for_aggregation,
-    set_default_array_layout_url_attribute,
 ):
     """Test case to verify"""
     dev_factory = DevFactory()
@@ -59,7 +58,6 @@ def test_array_layout_file_provided_updates(
 def test_on_command_low(
     change_event_callbacks,
     set_low_devices_availability_for_aggregation,
-    set_default_array_layout_url_attribute,
 ):
     """Test cases for ON command for low"""
     dev_factory = DevFactory()
