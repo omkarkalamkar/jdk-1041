@@ -155,3 +155,5 @@ within the TelModel data. The default value of the property is set to empty stri
 ::
 
    instrument/ska1_mid/layout/mid-layout.json
+
+.. note:: The properties `DefaultArrayLayoutSourceURIs` and `DefaultArrayLayoutPath` are set to empty strings as per SKB-1282 resolution.
