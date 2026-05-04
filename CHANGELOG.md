@@ -5,6 +5,13 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[1.3.3]
+*******
+Fixed
+-----
+* Set the default value of the properties DefaultArrayLayoutSourceURIs and DefaultArrayLayoutPath to empty string to resolve SKB-1282
+* Inytoduced a read-only boolean attribute arrayLayoutFileProvided on CentralNode.  An alarm event can be generated when the default layout file url is not defined.
+
 [1.3.2]
 *******
 Fixed

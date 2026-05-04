@@ -207,6 +207,18 @@ Attributes
 	:data format: SCALAR
 
 .. index::
+	single: arrayLayoutFileProvided; LowTmcCentralNode.arrayLayoutFileProvided
+
+.. py:attribute:: arrayLayoutFileProvided
+	:module: LowTmcCentralNode
+
+	Returns the boolean indicating whether the  default array layout URL is provided.
+
+	:access: READ
+	:data type: DevBoolean
+	:data format: SCALAR
+
+.. index::
 	single: State; LowTmcCentralNode.State
 
 .. py:attribute:: State
