@@ -2,11 +2,20 @@
 
 # pylint: disable=redefined-outer-name
 import json
+import logging
 import time
 
 import pytest
+from ska_tmc_common.dev_factory import DevFactory
+from tango import Database
 
-from tests.settings import SLEEP_TIME, TIMEOUT, logger
+from tests.settings import (
+    LOW_CENTRAL_NODE,
+    MID_CENTRAL_NODE,
+    SLEEP_TIME,
+    TIMEOUT,
+    logger,
+)
 
 pytest.event_arrived = False
 
@@ -49,3 +58,67 @@ def assert_event_arrived():
             pytest.fail("Timeout occurred while executing the test")
 
     assert pytest.event_arrived
+
+
+@pytest.fixture(scope="session")
+def set_default_array_layout_url_attribute():
+    """set DefaultArrayLayoutURL attribute"""
+    dev_factory = DevFactory()
+    database = Database()
+    mid_instance_list = database.get_device_exported_for_class(
+        "MidTmcCentralNode"
+    )
+
+    if mid_instance_list.value_string:
+        central_node = dev_factory.get_device(MID_CENTRAL_NODE)
+        logging.info(
+            "CentralNode Mid Initial arrayLayoutFileProvided: %s",
+            central_node.arrayLayoutFileProvided,
+        )
+        assert central_node.arrayLayoutFileProvided is False
+        logging.info(
+            "CentralNode Mid Initial DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+
+        url = (
+            '{"source_uris":["gitlab://gitlab.com/ska-telescope/'
+            + 'ska-telmodel-data?main#tmdata"],"array_layout_path":'
+            + '"instrument/ska1_mid/layout/mid-layout.json"}'
+        )
+        central_node.DefaultArrayLayoutURL = url
+        logging.info(
+            "CentralNode Mid DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+        logging.info(
+            "CentralNode Mid arrayLayoutFileProvided: %s",
+            central_node.arrayLayoutFileProvided,
+        )
+        assert central_node.arrayLayoutFileProvided is True
+    else:
+        central_node = dev_factory.get_device(LOW_CENTRAL_NODE)
+        logging.info(
+            "CentralNode Low Initial arrayLayoutFileProvided: %s",
+            central_node.arrayLayoutFileProvided,
+        )
+        assert central_node.arrayLayoutFileProvided is False
+        logging.info(
+            "CentralNode Low Initial DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+        url = (
+            '{"source_uris":["gitlab://gitlab.com/ska-telescope/'
+            + 'ska-telmodel-data?main#tmdata"],"array_layout_path":'
+            + '"instrument/ska1_low/layout/low-layout.json"}'
+        )
+        central_node.DefaultArrayLayoutURL = url
+        logging.info(
+            "CentralNode Low DefaultArrayLayoutURL: %s",
+            central_node.DefaultArrayLayoutURL,
+        )
+        logging.info(
+            "CentralNode Low Initial arrayLayoutFileProvided: %s",
+            central_node.arrayLayoutFileProvided,
+        )
+        assert central_node.arrayLayoutFileProvided is True

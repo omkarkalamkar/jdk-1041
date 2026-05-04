@@ -148,6 +148,15 @@ class AbstractCentralNode(TMCBaseDevice):
         doc="Health state of Telescope",
     )
 
+    def read_arrayLayoutFileProvided(self):
+        """Reads arrayLayoutFileProvided attribute"""
+        return self._array_layout_file_provided
+
+    arrayLayoutFileProvided = attribute(
+        dtype=bool,
+        doc="Flag to indicate whether array layout file is defined or not",
+    )
+
     def read_telescopeState(self):
         """Reads telescopeState"""
         return self.component_manager.component.telescope_state
@@ -205,7 +214,29 @@ class AbstractCentralNode(TMCBaseDevice):
 
     def write_DefaultArrayLayoutURL(self, url: str) -> None:
         """Sets the default array layout URL."""
-        self.component_manager.default_array_layout_url = json.loads(url)
+        url_json = json.loads(url)
+        self.component_manager.default_array_layout_url = url_json
+        if url == "":
+            self._array_layout_file_provided = False
+        elif (
+            url_json["array_layout_path"] == ""
+            or url_json["array_layout_path"] is None
+        ):
+            self._array_layout_file_provided = False
+        elif (
+            url_json["source_uris"] == [""] or url_json["source_uris"] is None
+        ):
+            self._array_layout_file_provided = False
+        else:
+            self._array_layout_file_provided = True
+        self.logger.info("DefaultArrayLayoutURL is set to %s", url)
+        self.logger.info(
+            "arrayLayoutFileProvided is set to %s",
+            self._array_layout_file_provided,
+        )
+        self.push_change_archive_events(
+            "arrayLayoutFileProvided", self._array_layout_file_provided
+        )
 
     DefaultArrayLayoutURL = attribute_from_signal(
         _default_array_layout_url,
@@ -293,6 +324,7 @@ class AbstractCentralNode(TMCBaseDevice):
             "lastDeviceInfoChanged",
             "telescopeState",
             "telescopeHealthState",
+            "arrayLayoutFileProvided",
         ]:
             self.set_change_event(attribute_name, True, False)
             self.set_archive_event(attribute_name, True)
@@ -301,6 +333,24 @@ class AbstractCentralNode(TMCBaseDevice):
             tango.cb_sub_model.PUSH_CALLBACK
         )
         self._health_state = HealthState.OK
+        if (
+            self.DefaultArrayLayoutSourceURIs == ""
+            or self.DefaultArrayLayoutPath == ""
+            or self.DefaultArrayLayoutSourceURIs is None
+            or self.DefaultArrayLayoutPath is None
+        ):
+            self._array_layout_file_provided = False
+            self.logger.info(
+                "The Default version of the array layout file is not defined."
+            )
+        else:
+            self._array_layout_file_provided = True
+            self.logger.info(
+                "The Default version of the array layout file is defined."
+            )
+        self.push_change_archive_events(
+            "arrayLayoutFileProvided", self._array_layout_file_provided
+        )
         self.op_state_model.perform_action("component_on")
 
         self.init_completed()

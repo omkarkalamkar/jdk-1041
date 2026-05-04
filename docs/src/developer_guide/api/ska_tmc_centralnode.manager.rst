@@ -105,13 +105,16 @@ Usage
   - Configurable in the deployment configuration (e.g., ``values.yaml``).
   - Sets the initial timeout value at startup.
 
-Array Layout URL
-=================
+Array Layout URL Attributes
+===========================
 
 The ``DefaultArrayLayoutURL`` attribute is introduced to define the default array
 layout configuration used by the Central Node. This attribute specifies the default
 array layout source and path that the system will use at startup or when no specific
 layout is provided.
+
+The ``arrayLayoutFileProvided`` attribute is introduced to indicating whether the
+default array layout URL is provided.
 
 The ``ArrayLayoutURL`` attribute is introduced to indicate the current array layout
 configuration actively in use by the Central Node. This allows dynamic updates to
@@ -119,22 +122,13 @@ the array layout at runtime without requiring a redeployment, providing flexibil
 for testing or operational adjustments.
 
 
-# Array Layout URL
-
-The `DefaultArrayLayoutURL` attribute is introduced to define the default array
-layout configuration used by the Central Node. This attribute specifies the default
-array layout source and path that the system will use at startup or when no specific
-layout is provided.
-
-The `ArrayLayoutURL` attribute is introduced to indicate the current array layout
-configuration actively in use by the Central Node. This allows dynamic updates to
-the array layout at runtime without requiring a redeployment, providing flexibility
-for testing or operational adjustments.
+# Array Layout URL Properties
 
 ## DefaultArrayLayoutSourceURIs
 
 The `DefaultArrayLayoutSourceURIs` device property defines the default source URIs
-for the Array Layout. It specifies the TelModel repository source(s).
+for the Array Layout. It specifies the TelModel repository source(s). The default
+value of the property is set to empty string.
 
 **Example:**
 
@@ -148,7 +142,7 @@ ka-telescope/ska-telmodel-data?main#tmdata
 ## DefaultArrayLayoutPath
 
 The ``DefaultArrayLayoutPath`` device property defines the default array layout path
-within the TelModel data.
+within the TelModel data. The default value of the property is set to empty string.
 
 **Example:**
 
@@ -161,3 +155,5 @@ within the TelModel data.
 ::
 
    instrument/ska1_mid/layout/mid-layout.json
+
+.. note:: The properties `DefaultArrayLayoutSourceURIs` and `DefaultArrayLayoutPath` are set to empty strings as per SKB-1282 resolution.
