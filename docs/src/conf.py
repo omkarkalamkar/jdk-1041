@@ -91,17 +91,6 @@ extensions = [
     "sphinx_autodoc_typehints",
 ]
 
-intersphinx_mapping = {
-    "ska-tmc-low-integration": (
-        "https://developer.skao.int/projects/ska-tmc-low-integration/en/latest/",
-        None,
-    ),
-    "ska-tmc-mid-integration": (
-        "https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/",
-        None,
-    ),
-}
-
 # Add any paths that contain templates here, relative to this directory.
 #templates_path = []
 
@@ -242,3 +231,14 @@ epub_exclude_files = ["search.html"]
 
 
 # -- Extension configuration -------------------------------------------------
+
+intersphinx_mapping = {
+    "ska-tmc-low-integration": (
+        "https://developer.skao.int/projects/ska-tmc-low-integration/en/latest/",
+        None,
+    ),
+    "ska-tmc-mid-integration": (
+        "https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/",
+        None,
+    ),
+}
