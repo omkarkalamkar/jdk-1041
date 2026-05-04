@@ -101,7 +101,6 @@ class AssignResourcesLow(AssignResources):
         if "telmodel" in json_argument:
             array_url = json_argument["telmodel"]
             self.component_manager.array_layout_url = array_url
-            self.component_manager.default_array_layout_url = array_url
             self.logger.debug(
                 "Command ID: %s | Array layout url in input JSON: %s",
                 self.command_id,
