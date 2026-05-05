@@ -166,14 +166,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "astropy-iers-data"
-version = "0.2026.4.20.0.58.15"
+version = "0.2026.5.4.1.4.54"
 description = "IERS Earth Rotation and Leap Second tables for the astropy core package"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "astropy_iers_data-0.2026.4.20.0.58.15-py3-none-any.whl", hash = "sha256:37e9c1c32215584067a55839b8ce744cf0b3b0a30b7ebebc2d1e908b0556a24d"},
-    {file = "astropy_iers_data-0.2026.4.20.0.58.15.tar.gz", hash = "sha256:f54c3ecf435c8d7fe627dee7e75c5bc390beac3f3350b36b04730b54df72ccf1"},
+    {file = "astropy_iers_data-0.2026.5.4.1.4.54-py3-none-any.whl", hash = "sha256:9d9014f530020fec2da8de29d5ada776b95cf3616cfac41311853f9f753d1928"},
+    {file = "astropy_iers_data-0.2026.5.4.1.4.54.tar.gz", hash = "sha256:74b70c810e430c274ff9f0c91680d56f7703add8c367c842902dd53130f70832"},
 ]
 
 [package.extras]
@@ -898,14 +898,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "gitpython"
-version = "3.1.47"
+version = "3.1.49"
 description = "GitPython is a Python library used to interact with Git repositories"
 optional = false
 python-versions = ">=3.7"
 groups = ["main", "dev"]
 files = [
-    {file = "gitpython-3.1.47-py3-none-any.whl", hash = "sha256:489f590edfd6d20571b2c0e72c6a6ac6915ee8b8cd04572330e3842207a78905"},
-    {file = "gitpython-3.1.47.tar.gz", hash = "sha256:dba27f922bd2b42cb54c87a8ab3cb6beb6bf07f3d564e21ac848913a05a8a3cd"},
+    {file = "gitpython-3.1.49-py3-none-any.whl", hash = "sha256:024b0422d7f84d15cd794844e029ffebd4c5d42a7eb9b936b458697ef550a02c"},
+    {file = "gitpython-3.1.49.tar.gz", hash = "sha256:42f9399c9eb33fc581014bedd76049dfbaf6375aa2a5754575966387280315e1"},
 ]
 
 [package.dependencies]
@@ -1056,23 +1056,22 @@ reference = "PyPI-public"
 
 [[package]]
 name = "jedi"
-version = "0.19.2"
+version = "0.20.0"
 description = "An autocompletion tool for Python that can be used for text editors."
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "jedi-0.19.2-py2.py3-none-any.whl", hash = "sha256:a8ef22bde8490f57fe5c7681a3c83cb58874daf72b4784de3cce5b6ef6edb5b9"},
-    {file = "jedi-0.19.2.tar.gz", hash = "sha256:4770dc3de41bde3966b02eb84fbcf557fb33cce26ad23da12c742fb50ecb11f0"},
+    {file = "jedi-0.20.0-py2.py3-none-any.whl", hash = "sha256:7bdd9c2634f56713299976f4cbd59cb3fa92165cc5e05ea811fb253480728b67"},
+    {file = "jedi-0.20.0.tar.gz", hash = "sha256:c3f4ccbd276696f4b19c54618d4fb18f9fc24b0aef02acf704b23f487daa1011"},
 ]
 
 [package.dependencies]
-parso = ">=0.8.4,<0.9.0"
+parso = ">=0.8.6,<0.9.0"
 
 [package.extras]
-docs = ["Jinja2 (==2.11.3)", "MarkupSafe (==1.1.1)", "Pygments (==2.8.1)", "alabaster (==0.7.12)", "babel (==2.9.1)", "chardet (==4.0.0)", "commonmark (==0.8.1)", "docutils (==0.17.1)", "future (==0.18.2)", "idna (==2.10)", "imagesize (==1.2.0)", "mock (==1.0.1)", "packaging (==20.9)", "pyparsing (==2.4.7)", "pytz (==2021.1)", "readthedocs-sphinx-ext (==2.1.4)", "recommonmark (==0.5.0)", "requests (==2.25.1)", "six (==1.15.0)", "snowballstemmer (==2.1.0)", "sphinx (==1.8.5)", "sphinx-rtd-theme (==0.4.3)", "sphinxcontrib-serializinghtml (==1.1.4)", "sphinxcontrib-websupport (==1.2.4)", "urllib3 (==1.26.4)"]
-qa = ["flake8 (==5.0.4)", "mypy (==0.971)", "types-setuptools (==67.2.0.1)"]
-testing = ["Django", "attrs", "colorama", "docopt", "pytest (<9.0.0)"]
+dev = ["Django", "attrs", "colorama", "docopt", "flake8 (==7.1.2)", "pytest (<9.0.0)", "types-setuptools (==80.9.0.20250529)", "typing-extensions", "zuban (==0.7.0)"]
+docs = ["Jinja2 (==3.1.6)", "MarkupSafe (==3.0.3)", "Pygments (==2.20.0)", "Sphinx (==9.1.0)", "alabaster (==1.0.0)", "babel (==2.18.0)", "certifi (==2026.4.22)", "charset-normalizer (==3.4.7)", "docutils (==0.22.4)", "idna (==3.13)", "imagesize (==2.0.0)", "iniconfig (==2.3.0)", "packaging (==26.2)", "pluggy (==1.6.0)", "pytest (==9.0.3)", "requests (==2.33.1)", "roman-numerals (==4.1.0)", "snowballstemmer (==3.0.1)", "sphinx-rtd-theme (==3.1.0)", "sphinxcontrib-applehelp (==2.0.0)", "sphinxcontrib-devhelp (==2.0.0)", "sphinxcontrib-htmlhelp (==2.1.0)", "sphinxcontrib-jquery (==4.1)", "sphinxcontrib-jsmath (==1.0.1)", "sphinxcontrib-qthelp (==2.0.0)", "sphinxcontrib-serializinghtml (==2.0.0)", "urllib3 (==2.6.3)"]
 
 [package.source]
 type = "legacy"
@@ -1157,6 +1156,7 @@ optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
+    {file = "junit-xml-2-1.9.tar.gz", hash = "sha256:3b8d9635c5215f754c7807104f6493e3ea3bc9481e2d33db294560da3a1b00f7"},
     {file = "junit_xml_2-1.9-py2.py3-none-any.whl", hash = "sha256:05093d75fe11120ccd51293884b5ee334ff3bc4b5106647c2bcc928486600588"},
 ]
 
@@ -1215,14 +1215,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "mako"
-version = "1.3.11"
+version = "1.3.12"
 description = "A super-fast templating language that borrows the best ideas from the existing templating languages."
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "mako-1.3.11-py3-none-any.whl", hash = "sha256:e372c6e333cf004aa736a15f425087ec977e1fcbd2966aae7f17c8dc1da27a77"},
-    {file = "mako-1.3.11.tar.gz", hash = "sha256:071eb4ab4c5010443152255d77db7faa6ce5916f35226eb02dc34479b6858069"},
+    {file = "mako-1.3.12-py3-none-any.whl", hash = "sha256:8f61569480282dbf557145ce441e4ba888be453c30989f879f0d652e39f53ea9"},
+    {file = "mako-1.3.12.tar.gz", hash = "sha256:9f778e93289bd410bb35daadeb4fc66d95a746f0b75777b942088b7fd7af550a"},
 ]
 
 [package.dependencies]
@@ -1516,14 +1516,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "packaging"
-version = "26.1"
+version = "26.2"
 description = "Core utilities for Python packages"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev", "docs"]
 files = [
-    {file = "packaging-26.1-py3-none-any.whl", hash = "sha256:5d9c0669c6285e491e0ced2eee587eaf67b670d94a19e94e3984a481aba6802f"},
-    {file = "packaging-26.1.tar.gz", hash = "sha256:f042152b681c4bfac5cae2742a55e103d27ab2ec0f3d88037136b6bfe7c9c5de"},
+    {file = "packaging-26.2-py3-none-any.whl", hash = "sha256:5fc45236b9446107ff2415ce77c807cee2862cb6fac22b8a73826d0693b0980e"},
+    {file = "packaging-26.2.tar.gz", hash = "sha256:ff452ff5a3e828ce110190feff1178bb1f2ea2281fa2075aadb987c2fb221661"},
 ]
 
 [package.source]
@@ -1577,14 +1577,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "parse"
-version = "1.21.1"
+version = "1.22.0"
 description = "parse() is the opposite of format()"
 optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
-    {file = "parse-1.21.1-py2.py3-none-any.whl", hash = "sha256:55339ca698019815df3b8e8b550e5933933527e623b0cdf1ca2f404da35ffb47"},
-    {file = "parse-1.21.1.tar.gz", hash = "sha256:825e1a88e9d9fb481b8d2ca709c6195558b6eaa97c559ad3a9a20aa2d12815a3"},
+    {file = "parse-1.22.0-py2.py3-none-any.whl", hash = "sha256:eea8ed34e2614cea65d9c1d4af9cb68cce26aea13d44bdcaf83c1b40884fe945"},
+    {file = "parse-1.22.0.tar.gz", hash = "sha256:d4987d68ccf08b6ba3bf80b5004ff7de61c4337cba2d8350ae5c9925794979d9"},
 ]
 
 [package.source]
@@ -1620,14 +1620,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "parso"
-version = "0.8.6"
+version = "0.8.7"
 description = "A Python Parser"
 optional = false
 python-versions = ">=3.6"
 groups = ["main"]
 files = [
-    {file = "parso-0.8.6-py2.py3-none-any.whl", hash = "sha256:2c549f800b70a5c4952197248825584cb00f033b29c692671d3bf08bf380baff"},
-    {file = "parso-0.8.6.tar.gz", hash = "sha256:2b9a0332696df97d454fa67b81618fd69c35a7b90327cbe6ba5c92d2c68a7bfd"},
+    {file = "parso-0.8.7-py2.py3-none-any.whl", hash = "sha256:a8926eb2a1b915486941fdbd31e86a4baf88fe8c210f25f2f35ecec5b574ca1c"},
+    {file = "parso-0.8.7.tar.gz", hash = "sha256:eaaac4c9fdd5e9e8852dc778d2d7405897ec510f2a298071453e5e3a07914bb1"},
 ]
 
 [package.extras]
@@ -1641,14 +1641,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "pathspec"
-version = "1.1.0"
+version = "1.1.1"
 description = "Utility library for gitignore style pattern matching of file paths."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "pathspec-1.1.0-py3-none-any.whl", hash = "sha256:574b128f7456bd899045ccd142dd446af7e6cfd0072d63ad73fbc55fbb4aaa42"},
-    {file = "pathspec-1.1.0.tar.gz", hash = "sha256:f5d7c555da02fd8dde3e4a2354b6aba817a89112fa8f333f7917a2a4834dd080"},
+    {file = "pathspec-1.1.1-py3-none-any.whl", hash = "sha256:a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189"},
+    {file = "pathspec-1.1.1.tar.gz", hash = "sha256:17db5ecd524104a120e173814c90367a96a98d07c45b2e10c2f3919fff91bf5a"},
 ]
 
 [package.extras]
@@ -2512,14 +2512,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "python-gitlab"
-version = "8.2.0"
+version = "8.3.0"
 description = "The python wrapper for the GitLab REST and GraphQL APIs."
 optional = false
 python-versions = ">=3.10.0"
 groups = ["main", "dev"]
 files = [
-    {file = "python_gitlab-8.2.0-py3-none-any.whl", hash = "sha256:884618d4d60beadb21bb0c5f0cca46e70c6e501784f136bf0b6f85f5bc15ce62"},
-    {file = "python_gitlab-8.2.0.tar.gz", hash = "sha256:de874dc538db6dceb48929f4c8fb55d6064dd19cb3ffdad1100190f835c5b674"},
+    {file = "python_gitlab-8.3.0-py3-none-any.whl", hash = "sha256:7aace3585d57ee97ebcb74bc776f30af3e861e285290082a91646348aca3f22a"},
+    {file = "python_gitlab-8.3.0.tar.gz", hash = "sha256:2ca67cf64b8d9290fe64463cfef6e77dbde066285dd848db2eb7816d6a7e9ec9"},
 ]
 
 [package.dependencies]
@@ -2538,14 +2538,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "pytz"
-version = "2026.1.post1"
+version = "2026.2"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "pytz-2026.1.post1-py2.py3-none-any.whl", hash = "sha256:f2fd16142fda348286a75e1a524be810bb05d444e5a081f37f7affc635035f7a"},
-    {file = "pytz-2026.1.post1.tar.gz", hash = "sha256:3378dde6a0c3d26719182142c56e60c7f9af7e968076f31aae569d72a0358ee1"},
+    {file = "pytz-2026.2-py2.py3-none-any.whl", hash = "sha256:04156e608bee23d3792fd45c94ae47fae1036688e75032eea2e3bf0323d1f126"},
+    {file = "pytz-2026.2.tar.gz", hash = "sha256:0e60b47b29f21574376f218fe21abc009894a2321ea16c6754f3cad6eb7cdd6a"},
 ]
 
 [package.source]
@@ -2561,6 +2561,13 @@ optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
+    {file = "PyYAML-6.0.3-cp38-cp38-macosx_10_13_x86_64.whl", hash = "sha256:c2514fceb77bc5e7a2f7adfaa1feb2fb311607c9cb518dbc378688ec73d8292f"},
+    {file = "PyYAML-6.0.3-cp38-cp38-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9c57bb8c96f6d1808c030b1687b9b5fb476abaa47f0db9c0101f5e9f394e97f4"},
+    {file = "PyYAML-6.0.3-cp38-cp38-manylinux2014_s390x.manylinux_2_17_s390x.manylinux_2_28_s390x.whl", hash = "sha256:efd7b85f94a6f21e4932043973a7ba2613b059c4a000551892ac9f1d11f5baf3"},
+    {file = "PyYAML-6.0.3-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:22ba7cfcad58ef3ecddc7ed1db3409af68d023b7f940da23c6c2a1890976eda6"},
+    {file = "PyYAML-6.0.3-cp38-cp38-musllinux_1_2_x86_64.whl", hash = "sha256:6344df0d5755a2c9a276d4473ae6b90647e216ab4757f8426893b5dd2ac3f369"},
+    {file = "PyYAML-6.0.3-cp38-cp38-win32.whl", hash = "sha256:3ff07ec89bae51176c0549bc4c63aa6202991da2d9a6129d7aef7f1407d3f295"},
+    {file = "PyYAML-6.0.3-cp38-cp38-win_amd64.whl", hash = "sha256:5cf4e27da7e3fbed4d6c3d8e797387aaad68102272f8f9752883bc32d61cb87b"},
     {file = "pyyaml-6.0.3-cp310-cp310-macosx_10_13_x86_64.whl", hash = "sha256:214ed4befebe12df36bcc8bc2b64b396ca31be9304b8f59e25c11cf94a4c033b"},
     {file = "pyyaml-6.0.3-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:02ea2dfa234451bbb8772601d7b8e426c2bfa197136796224e50e35a78777956"},
     {file = "pyyaml-6.0.3-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b30236e45cf30d2b8e7b3e85881719e98507abed1011bf463a8fa23e9c3e98a8"},
@@ -3885,14 +3892,14 @@ reference = "PyPI-public"
 
 [[package]]
 name = "wcwidth"
-version = "0.6.0"
+version = "0.7.0"
 description = "Measures the displayed width of unicode strings in a terminal"
 optional = false
 python-versions = ">=3.8"
 groups = ["main", "dev"]
 files = [
-    {file = "wcwidth-0.6.0-py3-none-any.whl", hash = "sha256:1a3a1e510b553315f8e146c54764f4fb6264ffad731b3d78088cdb1478ffbdad"},
-    {file = "wcwidth-0.6.0.tar.gz", hash = "sha256:cdc4e4262d6ef9a1a57e018384cbeb1208d8abbc64176027e2c2455c81313159"},
+    {file = "wcwidth-0.7.0-py3-none-any.whl", hash = "sha256:5d69154c429a82910e241c738cd0e2976fac8a2dd47a1a805f4afed1c0f136f2"},
+    {file = "wcwidth-0.7.0.tar.gz", hash = "sha256:90e3a7ea092341c44b99562e75d09e4d5160fe7a3974c6fb842a101a95e7eed0"},
 ]
 
 [package.source]

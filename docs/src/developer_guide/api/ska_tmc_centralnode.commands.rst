@@ -17,6 +17,8 @@ ska\_tmc\_centralnode.commands.central\_node\_command module
 ska\_tmc\_centralnode.commands.assign\_resources\_command module
 ----------------------------------------------------------------
 
+.. _assign_resources:
+
 .. automodule:: ska_tmc_centralnode.commands.assign_resources_command
    :members:
    :undoc-members:
@@ -24,6 +26,8 @@ ska\_tmc\_centralnode.commands.assign\_resources\_command module
 
 ska\_tmc\_centralnode.commands.release\_resources\_command module
 -----------------------------------------------------------------
+
+.. _release_resources:
 
 .. automodule:: ska_tmc_centralnode.commands.release_resources_command
    :members:
@@ -41,6 +45,8 @@ ska\_tmc\_centralnode.commands.stow\_antennas\_command module
 ska\_tmc\_centralnode.commands.telescope\_off\_command module
 -------------------------------------------------------------
 
+.. _telescope_off:
+
 .. automodule:: ska_tmc_centralnode.commands.telescope_off_command
    :members:
    :undoc-members:
@@ -49,6 +55,8 @@ ska\_tmc\_centralnode.commands.telescope\_off\_command module
 ska\_tmc\_centralnode.commands.telescope\_on\_command module
 ------------------------------------------------------------
 
+.. _telescope_on:
+
 .. automodule:: ska_tmc_centralnode.commands.telescope_on_command
    :members:
    :undoc-members:
@@ -56,6 +64,8 @@ ska\_tmc\_centralnode.commands.telescope\_on\_command module
 
 ska\_tmc\_centralnode.commands.telescope\_standby\_command module
 -----------------------------------------------------------------
+
+.. _telescope_standby:
 
 .. automodule:: ska_tmc_centralnode.commands.telescope_standby_command
    :members:

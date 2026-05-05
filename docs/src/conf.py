@@ -231,3 +231,14 @@ epub_exclude_files = ["search.html"]
 
 
 # -- Extension configuration -------------------------------------------------
+
+intersphinx_mapping = {
+    "ska-tmc-low-integration": (
+        "https://developer.skao.int/projects/ska-tmc-low-integration/en/latest/",
+        None,
+    ),
+    "ska-tmc-mid-integration": (
+        "https://developer.skao.int/projects/ska-tmc-mid-integration/en/latest/",
+        None,
+    ),
+}
