@@ -363,14 +363,13 @@ class MidTmcCentralNode(AbstractCentralNode):
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
         for dish in self.DishIDs:
-            if "MKT" in dish:
+            if "ska" not in dish.lower():
                 continue
+            dishln_name: str = self.DishLeafNodePrefix + "/" + dish
+            if self.DishLeafNodePrefix.endswith("/"):
+                dishln_name = self.DishLeafNodePrefix + dish
 
-            # For now get FQDNs for SKA dishes only
-            dish_id = dish[3:]
-            cm.input_parameter.dish_leaf_node_dev_names.append(
-                self.DishLeafNodePrefix + dish_id
-            )
+            cm.input_parameter.dish_leaf_node_dev_names.append(dishln_name)
 
         for dish_name in self.DishMasterFQDNs:
             if ("ska" in dish_name) or ("SKA" in dish_name):
