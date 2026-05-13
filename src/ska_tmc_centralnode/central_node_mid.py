@@ -366,7 +366,9 @@ class MidTmcCentralNode(AbstractCentralNode):
             dishln_name: str = self.DishLeafNodePrefix + "/" + dish
             if self.DishLeafNodePrefix.endswith("/"):
                 dishln_name = self.DishLeafNodePrefix + dish
-            cm.input_parameter.dish_leaf_node_dev_names.append(dishln_name)
+            cm.input_parameter.dish_leaf_node_dev_names.append(
+                dishln_name.lower()
+            )
 
         for dish_name in self.DishMasterFQDNs:
             cm.input_parameter.dish_dev_names.append(dish_name)
