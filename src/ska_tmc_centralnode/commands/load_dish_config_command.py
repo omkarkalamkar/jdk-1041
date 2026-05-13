@@ -315,11 +315,10 @@ class LoadDishCfg(LoadDishCfgCommand):
         try:
             for dish_id, vcc_k_map in dish_parameters.items():
                 # Get Dish Number from dish id to get dish adapter
-                dish_number = dish_id[-3:]
                 dish_adapter = [
                     dish_adapter
                     for dish_adapter in self.dish_adapters
-                    if dish_adapter.dev_name[-3:] == dish_number
+                    if dish_adapter.dev_name.endswith(dish_id)
                 ]
                 if dish_adapter:
                     dish_adapter = dish_adapter[0]
