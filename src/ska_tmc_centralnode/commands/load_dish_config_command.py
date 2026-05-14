@@ -318,7 +318,7 @@ class LoadDishCfg(LoadDishCfgCommand):
                 dish_adapter = [
                     dish_adapter
                     for dish_adapter in self.dish_adapters
-                    if dish_adapter.dev_name.endswith(dish_id)
+                    if dish_adapter.dev_name.endswith(dish_id.lower())
                 ]
                 if dish_adapter:
                     dish_adapter = dish_adapter[0]
