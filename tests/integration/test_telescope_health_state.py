@@ -14,6 +14,7 @@ from ska_tmc_centralnode.utils.constants import (
     DISH_LEAF_NODE_36,
     DISH_LEAF_NODE_63,
     DISH_LEAF_NODE_100,
+    DISH_LEAF_NODE_MKT,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MASTER_DEVICE,
     LOW_SDP_MLN_DEVICE,
@@ -198,6 +199,7 @@ def test_telescope_health_state_handles_multi_dish_failure(
     dish_ln_36 = dev_factory.get_device(DISH_LEAF_NODE_36)
     dish_ln_63 = dev_factory.get_device(DISH_LEAF_NODE_63)
     dish_ln_100 = dev_factory.get_device(DISH_LEAF_NODE_100)
+    dish_ln_mkt = dev_factory.get_device(DISH_LEAF_NODE_MKT)
 
     ensure_checked_devices(central_node)
 
@@ -236,6 +238,7 @@ def test_telescope_health_state_handles_multi_dish_failure(
     dish_ln_36.SetDirectHealthState(HealthState.FAILED)
     dish_ln_63.SetDirectHealthState(HealthState.FAILED)
     dish_ln_100.SetDirectHealthState(HealthState.FAILED)
+    dish_ln_mkt.SetDirectHealthState(HealthState.FAILED)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.FAILED, lookahead=8
@@ -251,6 +254,7 @@ def test_telescope_health_state_handles_multi_dish_failure(
     dish_ln_36.SetDirectHealthState(HealthState.OK)
     dish_ln_63.SetDirectHealthState(HealthState.OK)
     dish_ln_100.SetDirectHealthState(HealthState.OK)
+    dish_ln_mkt.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["healthState"].assert_change_event(
         HealthState.OK, lookahead=8
