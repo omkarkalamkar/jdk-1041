@@ -125,7 +125,7 @@ def invoke_load_dish_config(
             "tm_data_sources": [
                 # correct SKA CAR
                 "car://gitlab.com/ska-telescope/ska-tmc/"
-                "ska-tmc-simulators?main#tmdata"
+                "ska-tmc-simulators?hm-912#tmdata"
             ]
         }
     )
