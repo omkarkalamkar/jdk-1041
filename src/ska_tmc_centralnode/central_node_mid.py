@@ -6,6 +6,7 @@ of state and mode attributes defined by the SKA Control Model.
 
 # pylint:disable = attribute-defined-outside-init
 import json
+import os
 from threading import Event
 from typing import List, Tuple
 
@@ -363,19 +364,13 @@ class MidTmcCentralNode(AbstractCentralNode):
         cm.input_parameter.dish_leaf_node_dev_names = []
         cm.input_parameter.dish_dev_names = []
         for dish in self.DishIDs:
-            if "MKT" in dish:
-                continue
-
-            # For now get FQDNs for SKA dishes only
-            dish_id = dish[3:]
+            dishln_name: str = os.path.join(self.DishLeafNodePrefix, dish)
             cm.input_parameter.dish_leaf_node_dev_names.append(
-                self.DishLeafNodePrefix + dish_id
+                dishln_name.lower()
             )
 
         for dish_name in self.DishMasterFQDNs:
-            if ("ska" in dish_name) or ("SKA" in dish_name):
-                cm.input_parameter.dish_dev_names.append(dish_name)
-
+            cm.input_parameter.dish_dev_names.append(dish_name)
         cm.input_parameter.subarray_dev_names = self.TMCSubarrayNodes
         cm.input_parameter.csp_master_dev_name = self.CspMasterFQDN or ""
         cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""

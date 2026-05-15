@@ -442,13 +442,13 @@ class TestAssignResourceValidator:
         """
 
         input_json = sample_assign_resources_request
-        invalid_receptor_id_list = ["SKA004"]
+        invalid_receptor_id_list = ["SKA005"]
         input_json["dish"]["receptor_ids"] = invalid_receptor_id_list
 
         input_validator = AssignResourceValidator(
             self._test_subarray_list,
             self._test_receptor_id_list,
-            "mid-tmc/leaf-node-dish/ska0",
+            "mid-tmc/leaf-node-dish/",
         )
 
         with pytest.raises(ResourceNotPresentError) as excinfo:

@@ -47,7 +47,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 1.3.3
+    tag: 1.4.0
     pullPolicy: IfNotPresent
 
 ska_tmc_simulators:
@@ -78,7 +78,7 @@ deviceServers:
     subarray_count: 2
     command: "CentralNodeDS"
     LivelinessCheckPeriod: 1.0
-    LoggingLevel: 4
+    LoggingLevel: 5
     EventSubscriptionCheckPeriod: 1.0
     family: "central-node"
     member: "0"
@@ -89,13 +89,12 @@ deviceServers:
       CspMasterFQDN: "mid-csp/control/0"
       SdpMasterLeafNodeFQDN: "mid-tmc/leaf-node-sdp/0"
       SdpMasterFQDN: "mid-sdp/control/0"
-      DishLeafNodePrefix: "mid-tmc/leaf-node-dish/"
-      DishType: "ska"
+      DishLeafNodePrefix: "mid-tmc/leaf-node-dish"
       DishMasterIdentifier: "elt/master"
       DishIDs: ["SKA001", "MKT001", "SKA036", "SKA063", "SKA100"]
       DishVccConfig:
         DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
-        DishVccFilePath: "instrument/dishid_vcc_map_configuration/mid_cbf_initial_parameters.json"
+        DishVccFilePath: "instrument/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt.json"
       EnableDishVccInit: "true"
       KValueValidRange:
         min: 1

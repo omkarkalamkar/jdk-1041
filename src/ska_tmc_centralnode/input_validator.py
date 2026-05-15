@@ -58,9 +58,7 @@ class AssignResourceValidator:
         # FQDNs. The list is used later to search for any invalid receptor id
         # in AssignReources request JSON.
         for receptor in receptor_list:
-            self._receptor_list.append(
-                receptor.replace(dish_leaf_node_prefix, "SKA")
-            )
+            self._receptor_list.append(receptor.split("/")[-1].upper())
         self.logger.debug("Available dish ids: %s", str(self._receptor_list))
 
     def _subarray_exists(self, subarray_id):

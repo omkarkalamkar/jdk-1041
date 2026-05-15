@@ -119,6 +119,7 @@ def assign_resources(
 @pytest.mark.parametrize(
     "central_node_name, input_json",
     [
+        (CENTRALNODE_MID, "command_AssignResources_with_mkt"),
         (CENTRALNODE_MID, "command_AssignResources"),
         (CENTRALNODE_MID, "command_AssignResources_2_1"),
     ],
