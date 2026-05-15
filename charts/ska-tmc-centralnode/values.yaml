@@ -47,7 +47,7 @@ centralnode:
   image:
     registry: artefact.skao.int
     image: ska-tmc-centralnode
-    tag: 1.3.3
+    tag: 1.4.0
     pullPolicy: IfNotPresent
 
 ska_tmc_simulators:
@@ -93,7 +93,7 @@ deviceServers:
       DishMasterIdentifier: "elt/master"
       DishIDs: ["SKA001", "MKT001", "SKA036", "SKA063", "SKA100"]
       DishVccConfig:
-        DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?hm-912#tmdata"
+        DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
         DishVccFilePath: "instrument/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt.json"
       EnableDishVccInit: "true"
       KValueValidRange:
