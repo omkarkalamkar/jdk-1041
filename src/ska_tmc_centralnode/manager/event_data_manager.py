@@ -107,6 +107,7 @@ class EventDataManager:
     def __init__(self, component_manager):
         self.event_info = EventDataStorage()
         self.component_manager = component_manager
+        self.logger = component_manager.logger
 
         self.attribute_mapping: Dict[str, str] = {
             "HealthState": "health_state_data",
@@ -132,7 +133,7 @@ class EventDataManager:
          existing timestamp.
         """
 
-        LOGGER.debug(
+        self.logger.debug(
             "Comparing timestamps: current event timestamp=%s, "
             "received event timestamp=%s",
             current_timestamp,
@@ -214,10 +215,10 @@ class EventDataManager:
                     f"{str(timestamp):<{col_widths['Timestamp']}}"
                 )
 
-            LOGGER.debug("\n".join(table_lines))
+            self.logger.debug("\n".join(table_lines))
             self.component_manager.event_data_queue.put(current_event_info)
 
-        LOGGER.debug("Lock released from update_aggragation_queue ")
+        self.logger.debug("Lock released from update_aggragation_queue ")
 
     @pre_process
     def update_event_data(
@@ -252,11 +253,11 @@ class EventDataManager:
                     is_dish_leaf_node=is_dish_leaf_node,
                     event_timestamp=received_timestamp,
                 )
-                LOGGER.debug("HealthState - %s", target_dict[device_name])
+                self.logger.debug("HealthState - %s", target_dict[device_name])
 
             elif data_type == "AdminMode":
                 data = self.get_enum_name_from_value(AdminMode, int(data))
                 target_dict[device_name] = AdminModeData(
                     admin_mode=data, event_timestamp=received_timestamp
                 )
-                LOGGER.debug("AdminMode - %s", target_dict[device_name])
+                self.logger.debug("AdminMode - %s", target_dict[device_name])
