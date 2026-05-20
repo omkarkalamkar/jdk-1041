@@ -126,6 +126,9 @@ class MidTmcCentralNode(AbstractCentralNode):
         default_value="",
     )
 
+    MeerKatExtensionID = device_property(
+        dtype=str, doc="ID of Meerkat Extension dishes.", default_value="MKE"
+    )
     # ----------
     # Attributes
     # ----------
@@ -359,6 +362,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             gpm_data_sources_prefix=self.GPMDataSourcesPrefix,
             gpm_file_path_prefix=self.GPMFilePathPrefix,
             default_array_layout_url=default_array_layout_url_dict,
+            mkt_extension_id=self.MeerKatExtensionID,
         )
 
         cm.input_parameter.dish_leaf_node_dev_names = []
