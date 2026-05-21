@@ -4,11 +4,19 @@ import pytest
 from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
 
 
+@pytest.mark.aki
 def test_gpm():
     gpm = {"version": "1.0", "receptors": {"MKT000": ["Band_1"]}}
     assert GPMJsonModel(**gpm)
 
+    gpm = {"version": "1.0", "receptors": {"MKE000": ["Band_1"]}}
+    assert GPMJsonModel(**gpm)
+
     gpm = {"version": "1.0", "receptors": {"MK001": ["Band_1"]}}
+    with pytest.raises(ValueError):
+        GPMJsonModel(**gpm)
+
+    gpm = {"version": "1.0", "receptors": {"ME001": ["Band_1"]}}
     with pytest.raises(ValueError):
         GPMJsonModel(**gpm)
 
