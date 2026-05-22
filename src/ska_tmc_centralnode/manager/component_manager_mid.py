@@ -100,6 +100,7 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_data_sources_prefix=None,
         gpm_file_path_prefix=None,
         default_array_layout_url: dict | None = None,
+        mkt_extension_id: str = "MKE",
         *args,
         **kwargs,
     ) -> None:
@@ -239,6 +240,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.is_gpm_init = True
         self.dishln_stow_mode_lock = threading.RLock()
         self.number_of_stow_mode_executed: int = 0
+        self.mkt_extension_id = mkt_extension_id
         self.stow_mode_command_aggregated_result: ResultCode = (
             ResultCode.UNKNOWN
         )
@@ -1233,6 +1235,7 @@ class CNComponentManagerMid(CNComponentManager):
                 available_dish_leaf_node_devices,
                 dish_leaf_node_prefix,
                 self.logger,
+                self.mkt_extension_id,
             )
 
             assign_validator.loads(argin)

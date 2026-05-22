@@ -43,10 +43,12 @@ class AssignResourceValidator:
         receptor_list,
         dish_leaf_node_prefix,
         logger=module_logger,
+        mkt_extension_id="MKE",
     ):
         self.logger = logger
         self._subarrays = []
         self._receptor_list = []
+        self.mkt_extension_id = mkt_extension_id
 
         # get the ids of the numerical ids of available subarrays
         for subarray in subarray_list:
@@ -95,7 +97,7 @@ class AssignResourceValidator:
         """
         non_existing_receptors = []
         for receptor in receptor_id_list:
-            if (receptor[:3] != "MKT") and (
+            if (receptor[:3] not in ["MKT", self.mkt_extension_id]) and (
                 receptor not in self._receptor_list
             ):
                 self.logger.debug("Receptor %s. is not present.", receptor)
@@ -181,7 +183,7 @@ class AssignResourceValidator:
             if not leaf_id[3:].isdigit():
                 exp_msg = "The dish id {leaf_id} not in correct format."
                 raise InvalidReceptorIdError(exp_msg)
-            if leaf_id[:3] not in ["SKA", "MKT"]:
+            if leaf_id[:3] not in ["SKA", "MKT", self.mkt_extension_id]:
                 exception_message = f"The dish prefix {leaf_id} is invalid."
                 raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] == "SKA":

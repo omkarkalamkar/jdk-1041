@@ -6,6 +6,7 @@ class DishConfigValidator:
         dish_config_json: dict,
         k_value_valid_range_lower_limit,
         k_value_valid_range_upper_limit,
+        mkt_extension_id: str = "MKE",
     ):
         """
         params:
@@ -14,6 +15,7 @@ class DishConfigValidator:
         self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
         self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
         self.dish_config_json = dish_config_json
+        self.mkt_extension_id = mkt_extension_id
 
     def _get_vcc_k_values(self) -> tuple:
         """Extract vcc and k values from dish config"""
@@ -71,7 +73,7 @@ class DishConfigValidator:
                 dish_suffix = int(dish_id[3:])
                 if dish_suffix not in range(1, 64):
                     return False, f"MKT id {dish_id} not in range (1,63)"
-            else:
+            elif not dish_id.startswith(self.mkt_extension_id):
                 return False, f"Invalid Dish id {dish_id} provided in Json"
         return True, ""
 

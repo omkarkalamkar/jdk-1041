@@ -63,12 +63,14 @@ class GPMJsonModel:
         """
         pattern = r"^ska(00[1-9]|0[1-9][0-9]|1[0-3]{2})$"  # allow 001-133
         pattern2 = r"^mkt(00[0-9]|0[1-5][0-9]|06[0-3])$"  # allow 000-063
+        pattern3 = r"^mke(00[0-9]|0[1-5][0-9]|06[0-3])$"  # allow 000-063
         for dish in dish_ids:
             dish = dish.lower()
             match = re.fullmatch(pattern, dish)
             match2 = re.fullmatch(pattern2, dish)
-            if not (match or match2):
+            match3 = re.fullmatch(pattern3, dish)
+            if not (match or match2 or match3):
                 raise ValueError(
-                    f"Invalid dish '{dish}': does not match pattern '{pattern}' or '{pattern2}'"
+                    f"Invalid dish '{dish}': does not match pattern '{pattern}' or '{pattern2}' or '{pattern3}'"
                 )
         return dish_ids
