@@ -27,8 +27,8 @@ MID_CSP_SUBARRAY_LN = "mid-tmc/subarray-leaf-node-csp/01"
 MID_SDP_SUBARRAY_LN = "mid-tmc/subarray-leaf-node-sdp/01"
 LOW_CSP_SUBARRAY = "low-csp/subarray/01"
 LOW_SDP_SUBARRAY = "low-sdp/subarray/01"
-DISH_DEVICE_PREFIX = "elt/master"
-DISH_MASTER_1 = "ska001/elt/master"
+DISH_DEVICE_PREFIX = "mid-dish/dish-manager"
+DISH_MASTER_1 = "mid-dish/dish-manager/ska001"
 mccs_release_interface = (
     "https://schema.skatelescope.org/ska-low-mccs-controller-release/2.0"
 )

@@ -100,7 +100,7 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_data_sources_prefix=None,
         gpm_file_path_prefix=None,
         default_array_layout_url: dict | None = None,
-        mkt_extension_id: str = "MKE",
+        mkt_extension_id: str = "",
         *args,
         **kwargs,
     ) -> None:

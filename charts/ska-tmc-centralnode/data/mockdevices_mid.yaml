@@ -42,7 +42,7 @@ server:
       - name: "HelperDishDevice"
         devices:
         {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
-        - name: "{{ . | lower }}/{{ $DishMasterIdentifier }}"
+        - name: "{{ $DishMasterIdentifier }}/{{. | lower }}"
         {{- end }}
     - name: "06"
       classes:
@@ -85,6 +85,21 @@ server:
       - name: "HelperDishLNDevice"
         devices:
         - name: "mid-tmc/leaf-node-dish/mkt001"
+    - name: "14"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska099"
+    - name: "15"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska500"
+    - name: "16"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska999"
 depends_on:
   - device: sys/database/2
 image:

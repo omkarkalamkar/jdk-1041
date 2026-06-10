@@ -43,7 +43,7 @@ class AssignResourceValidator:
         receptor_list,
         dish_leaf_node_prefix,
         logger=module_logger,
-        mkt_extension_id="MKE",
+        mkt_extension_id="",
     ):
         self.logger = logger
         self._subarrays = []
@@ -187,7 +187,7 @@ class AssignResourceValidator:
                 exception_message = f"The dish prefix {leaf_id} is invalid."
                 raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] == "SKA":
-                if int(leaf_id[3:]) not in range(1, 134):
+                if int(leaf_id[3:]) not in range(1, 1000):
                     exception_message = (
                         f"The SKA dish id {leaf_id} is invalid."
                     )

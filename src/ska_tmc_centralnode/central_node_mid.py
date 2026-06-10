@@ -127,7 +127,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     )
 
     MeerKatExtensionID = device_property(
-        dtype=str, doc="ID of Meerkat Extension dishes.", default_value="MKE"
+        dtype=str, doc="ID of Meerkat Extension dishes.", default_value=""
     )
     # ----------
     # Attributes

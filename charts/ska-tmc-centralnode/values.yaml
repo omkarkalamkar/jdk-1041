@@ -90,8 +90,8 @@ deviceServers:
       SdpMasterLeafNodeFQDN: "mid-tmc/leaf-node-sdp/0"
       SdpMasterFQDN: "mid-sdp/control/0"
       DishLeafNodePrefix: "mid-tmc/leaf-node-dish"
-      DishMasterIdentifier: "elt/master"
-      DishIDs: ["SKA001", "MKT001", "SKA036", "SKA063", "SKA100"]
+      DishMasterIdentifier: "mid-dish/dish-manager"
+      DishIDs: ["SKA001", "MKT001", "SKA036", "SKA063", "SKA100", "SKA999","SKA500","SKA099"]
       DishVccConfig:
         DishVccUri: "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
         DishVccFilePath: "instrument/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt.json"

@@ -6,7 +6,7 @@ class DishConfigValidator:
         dish_config_json: dict,
         k_value_valid_range_lower_limit,
         k_value_valid_range_upper_limit,
-        mkt_extension_id: str = "MKE",
+        mkt_extension_id: str = "",
     ):
         """
         params:

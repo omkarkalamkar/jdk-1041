@@ -54,7 +54,15 @@ MID_SUBARRAY2_DEVICE = "mid-tmc/subarray/02"
 LOW_SUBARRAY_DEVICE = "low-tmc/subarray/01"
 LOW_SUBARRAY2_DEVICE = "low-tmc/subarray/02"
 DISH_LEAF_NODE_DEVICE = "mid-tmc/leaf-node-dish/ska001"
-DISH_MASTER_DEVICE = "ska001/elt/master"
+DISH_LEAF_NODE_DEVICE_099 = "mid-tmc/leaf-node-dish/ska099"
+DISH_LEAF_NODE_DEVICE_500 = "mid-tmc/leaf-node-dish/ska500"
+DISH_LEAF_NODE_DEVICE_999 = "mid-tmc/leaf-node-dish/ska999"
+
+DISH_MASTER_DEVICE = "mid-dish/dish-manager/ska001"
+DISH_MASTER_DEVICE_099 = "mid-dish/dish-manager/ska099"
+DISH_MASTER_DEVICE_500 = "mid-dish/dish-manager/ska500"
+DISH_MASTER_DEVICE_999 = "mid-dish/dish-manager/ska999"
+
 MID_SDP_MASTER_DEVICE = "mid-sdp/control/0"
 MID_CSP_MASTER_DEVICE = "mid-csp/control/0"
 LOW_CSP_MASTER_DEVICE = "low-csp/control/0"
@@ -69,8 +77,14 @@ DEVICE_LIST_MID = [
     "mid-tmc/subarray/01",
     "mid-tmc/subarray-leaf-node-csp/01",
     "mid-tmc/subarray-leaf-node-sdp/01",
-    "mid-tmc/leaf-node-dish/ska001",
-    "ska001/elt/master",
+    DISH_LEAF_NODE_DEVICE,
+    DISH_LEAF_NODE_DEVICE_999,
+    DISH_LEAF_NODE_DEVICE_500,
+    DISH_LEAF_NODE_DEVICE_099,
+    DISH_MASTER_DEVICE_099,
+    DISH_MASTER_DEVICE,
+    DISH_MASTER_DEVICE_500,
+    DISH_MASTER_DEVICE_999,
 ]
 DEVICE_LIST_LOW = [
     "low-tmc/leaf-node-mccs/0",

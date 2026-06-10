@@ -18,7 +18,13 @@ from ska_tmc_simulators.helper_subarray_leaf_device import (
 
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
+    DISH_LEAF_NODE_DEVICE_099,
+    DISH_LEAF_NODE_DEVICE_500,
+    DISH_LEAF_NODE_DEVICE_999,
     DISH_MASTER_DEVICE,
+    DISH_MASTER_DEVICE_099,
+    DISH_MASTER_DEVICE_500,
+    DISH_MASTER_DEVICE_999,
     LOW_CSP_MASTER_DEVICE,
     LOW_CSP_MLN_DEVICE,
     LOW_CSP_SLN_DEVICE,
@@ -97,12 +103,18 @@ def devices_to_load():
             "class": HelperDishDevice,
             "devices": [
                 {"name": DISH_MASTER_DEVICE},
+                {"name": DISH_MASTER_DEVICE_999},
+                {"name": DISH_MASTER_DEVICE_500},
+                {"name": DISH_MASTER_DEVICE_099},
             ],
         },
         {
             "class": HelperDishLNDevice,
             "devices": [
                 {"name": DISH_LEAF_NODE_DEVICE},
+                {"name": DISH_LEAF_NODE_DEVICE_099},
+                {"name": DISH_LEAF_NODE_DEVICE_500},
+                {"name": DISH_LEAF_NODE_DEVICE_999},
             ],
         },
     )
