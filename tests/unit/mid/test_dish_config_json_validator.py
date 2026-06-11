@@ -51,7 +51,7 @@ class TestDishConfigValidator:
                 "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
             ),
             "dish_parameters": {
-                "SKA187": {"vcc": 1, "k": 11},
+                "SKA1000": {"vcc": 1, "k": 11},
                 "SKA100": {"vcc": 2, "k": 101},
                 "SKA036": {"vcc": 3, "k": 1127},
                 "SKA133": {"vcc": 4, "k": 620},
