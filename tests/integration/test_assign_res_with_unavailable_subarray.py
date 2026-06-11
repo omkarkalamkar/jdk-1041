@@ -120,7 +120,10 @@ def assign_resources(
     [CENTRALNODE_MID],
 )
 def test_assign_res_command_mid_unavailable_subarray(
-    central_node_name, change_event_callbacks, json_factory
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_admin_modes,
 ):
     """Test Assign Resources command for low unavailable subarray for mid"""
     return assign_resources(
