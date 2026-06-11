@@ -67,8 +67,8 @@ class DishConfigValidator:
         for dish_id in dish_id_list:
             if dish_id.startswith("SKA"):
                 dish_suffix = int(dish_id[3:])
-                if dish_suffix not in range(1, 134):
-                    return False, f"Dish id {dish_id} not in range (1,133)"
+                if dish_suffix not in range(1, 1000):
+                    return False, f"Dish id {dish_id} not in range (1,999)"
             elif dish_id.startswith("MKT"):
                 dish_suffix = int(dish_id[3:])
                 if dish_suffix not in range(1, 64):
