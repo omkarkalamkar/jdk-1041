@@ -124,10 +124,10 @@ clean:
 unit-test: python-test
 
 PYTHON_BUILD_TYPE = non_tag_setup
-DISH_VCC_URI ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-centralnode?$(CI_COMMIT_BRANCH)\#tests"
+DISH_VCC_URI ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode?$(CI_COMMIT_BRANCH)\#tests"
 DISH_VCC_PATH ?= "data/config_files/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt-mke.json"
 GPM_FILE_PATH ?= "data/config_files/global_pointing_model_data"
-GPM_SOURCES ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-mid-centralnode?$(CI_COMMIT_BRANCH)\#tests"
+GPM_SOURCES ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode?$(CI_COMMIT_BRANCH)\#tests"
 
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set global.cluster_domain=$(CLUSTER_DOMAIN) \
