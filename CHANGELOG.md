@@ -5,6 +5,18 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+
+[1.5.0]
+*******
+Updated
+-----
+* Updated Pytango version to 10.3.0.
+
+Fixed
+------
+* Fixed `IsAutoRecoveryEnabled` property registration in Low CentralNode by correcting the Helm value reference in `centralnode_low.yaml`.
+* This prevents startup failures introduced by stricter boolean property validation in PyTango 10.3.0.
+
 [1.4.1]
 *******
 Added
