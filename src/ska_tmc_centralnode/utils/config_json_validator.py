@@ -73,8 +73,9 @@ class DishConfigValidator:
                 dish_suffix = int(dish_id[3:])
                 if dish_suffix not in range(1, 64):
                     return False, f"MKT id {dish_id} not in range (1,63)"
-            elif self.mkt_extension_id and not dish_id.startswith(
+            elif not (
                 self.mkt_extension_id
+                and dish_id.startswith(self.mkt_extension_id)
             ):
                 return False, f"Invalid Dish id {dish_id} provided in Json"
         return True, ""
