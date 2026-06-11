@@ -67,7 +67,7 @@ server:
         - name: "DishMasterFQDNs"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
-          - "{{ . | lower }}/{{ $DishMasterIdentifier }}"
+          - "{{ $DishMasterIdentifier }}/{{. | lower }}"
           {{- end }}
         - name: "TMCSubarrayNodes"
           values:
