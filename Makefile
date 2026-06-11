@@ -142,7 +142,7 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set ska-taranta.enabled=$(TARANTA) \
 	--set central_node.deviceServers.centralnode.SkuidService=$(SKUID) \
 	--set central_node.deviceServers.centralnode.mid.DishVccConfig.DishVccUri=$(DISH_VCC_URI) \
-	--set central_node.deviceServers.centralnode.mid.DishVccFilePath=$(DISH_VCC_PATH) \
+	--set central_node.deviceServers.centralnode.mid.DishVccConfig.DishVccFilePath=$(DISH_VCC_PATH) \
 	--set central_node.deviceServers.centralnode.mid.global_pointing_model.data_sources_prefix=$(GPM_SOURCES) \
 	--set central_node.deviceServers.centralnode.mid.global_pointing_model.file_path_prefix=$(GPM_FILE_PATH) \
 	--set central_node.deviceServers.centralnode.mid.global_pointing_model.version=$(GPM_VERSION) \
