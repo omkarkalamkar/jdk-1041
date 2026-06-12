@@ -61,9 +61,9 @@ class GPMJsonModel:
         :return: Returns dish IDs after validation
         :rtype: list
         """
-        pattern = r"^[1-9]\d{0,2}$"  # allow 001-133
+        pattern = r"^ska(00[1-9]|0[1-9]\d|[1-9]\d{2})$"  # allow 001-133
         pattern2 = r"^mkt(00[0-9]|0[1-5][0-9]|06[0-3])$"  # allow 000-063
-        pattern3 = r"^mke(00[0-9]|0[1-5][0-9]|06[0-3])$"  # allow 000-063
+        pattern3 = r"^mke(\d{3})$"  # allow 000-063
         for dish in dish_ids:
             dish = dish.lower()
             match = re.fullmatch(pattern, dish)
