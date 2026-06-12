@@ -123,6 +123,15 @@ clean:
 
 unit-test: python-test
 
+BRANCH_NAME ?= $(CI_COMMIT_BRANCH)
+ifeq ($(strip $(CI_COMMIT_BRANCH)),)
+ifeq ($(strip $(CI_MERGE_REQUEST_SOURCE_BRANCH_NAME)),)
+	BRANCH_NAME := $(CI_COMMIT_TAG)
+else
+	BRANCH_NAME := $(CI_MERGE_REQUEST_SOURCE_BRANCH_NAME)
+endif
+endif
+
 PYTHON_BUILD_TYPE = non_tag_setup
 DISH_VCC_URI ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode?$(CI_COMMIT_BRANCH)\#tmdata"
 DISH_VCC_PATH ?= "config_files/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt.json"
