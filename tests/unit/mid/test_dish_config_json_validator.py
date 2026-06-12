@@ -60,7 +60,7 @@ class TestDishConfigValidator:
         dish_config_validator = DishConfigValidator(dish_config_json, 1, 1177)
         is_valid, msg = dish_config_validator.is_json_valid()
         assert is_valid is False
-        assert msg == "Dish id SKA187 not in range (1,133)"
+        assert msg == "Dish id SKA1000 not in range (1,999)"
 
     def test_dish_config_validator_for_duplicate_vcc_ids(self):
         """Validate Dish Config Json validator when vcc ids are not unique"""
