@@ -69,7 +69,7 @@ server:
             - "{{.Values.deviceServers.centralnode.EventSubscriptionCheckPeriod}}"
         - name: "IsAutoRecoveryEnabled"
           values:
-            - "{{.Values.deviceServers.centralnode.IsAutoRecoveryEnabled}}"
+            - "{{.Values.deviceServers.centralnode.low.IsAutoRecoveryEnabled}}"
         - name: "DefaultArrayLayoutSourceURIs"
           values:
             - "{{.Values.deviceServers.centralnode.low.DefaultArrayLayoutSourceURIs}}"
