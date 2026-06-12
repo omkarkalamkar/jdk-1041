@@ -13,7 +13,10 @@ from ska_tmc_centralnode.utils.constants import (
     DISH_LEAF_NODE_1,
     DISH_LEAF_NODE_36,
     DISH_LEAF_NODE_63,
+    DISH_LEAF_NODE_099,
     DISH_LEAF_NODE_100,
+    DISH_LEAF_NODE_500,
+    DISH_LEAF_NODE_999,
     DISH_LEAF_NODE_MKT,
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MASTER_DEVICE,
@@ -190,16 +193,20 @@ def test_telescope_health_state_handles_multi_dish_failure(
     dev_factory = DevFactory()
 
     central_node = dev_factory.get_device(CENTRALNODE_MID)
-    dish_ln = dev_factory.get_device(DISH_LEAF_NODE_1)
     sdp_mln = dev_factory.get_device(MID_SDP_MLN_DEVICE)
     csp_mln = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     sdp_mln.SetSdpControllerAdminMode(AdminMode.ONLINE)
     csp_mln.SetCspControllerAdminMode(AdminMode.ONLINE)
-
-    dish_ln_36 = dev_factory.get_device(DISH_LEAF_NODE_36)
-    dish_ln_63 = dev_factory.get_device(DISH_LEAF_NODE_63)
-    dish_ln_100 = dev_factory.get_device(DISH_LEAF_NODE_100)
-    dish_ln_mkt = dev_factory.get_device(DISH_LEAF_NODE_MKT)
+    dish_lns = [
+        DISH_LEAF_NODE_1,
+        DISH_LEAF_NODE_36,
+        DISH_LEAF_NODE_63,
+        DISH_LEAF_NODE_100,
+        DISH_LEAF_NODE_099,
+        DISH_LEAF_NODE_500,
+        DISH_LEAF_NODE_999,
+        DISH_LEAF_NODE_MKT,
+    ]
 
     ensure_checked_devices(central_node)
 
@@ -209,56 +216,25 @@ def test_telescope_health_state_handles_multi_dish_failure(
         change_event_callbacks["telescopeHealthState"],
     )
 
-    dish_ln.subscribe_event(
-        "healthState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["healthState"],
-    )
-
-    dish_ln_36.subscribe_event(
-        "healthState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["healthState"],
-    )
-
-    dish_ln_63.subscribe_event(
-        "healthState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["healthState"],
-    )
-
-    dish_ln_100.subscribe_event(
-        "healthState",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["healthState"],
-    )
-
-    # Dish reports FAILED
-    dish_ln.SetDirectHealthState(HealthState.FAILED)
-    dish_ln_36.SetDirectHealthState(HealthState.FAILED)
-    dish_ln_63.SetDirectHealthState(HealthState.FAILED)
-    dish_ln_100.SetDirectHealthState(HealthState.FAILED)
-    dish_ln_mkt.SetDirectHealthState(HealthState.FAILED)
+    for dish_ln in dish_lns:
+        dish_ln_proxy = dev_factory.get_device(dish_ln)
+        dish_ln_proxy.SetDirectHealthState(HealthState.FAILED)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.FAILED, lookahead=8
     )
 
-    #  Dish reports OK
-    dish_ln.SetDirectHealthState(HealthState.OK)
+    #  Dish1 reports OK
+    dish_ln1_proxy = dev_factory.get_device(dish_lns[0])
+    dish_ln1_proxy.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.DEGRADED, lookahead=8
     )
     # Tear down: Dish reports OK
-    dish_ln_36.SetDirectHealthState(HealthState.OK)
-    dish_ln_63.SetDirectHealthState(HealthState.OK)
-    dish_ln_100.SetDirectHealthState(HealthState.OK)
-    dish_ln_mkt.SetDirectHealthState(HealthState.OK)
-
-    change_event_callbacks["healthState"].assert_change_event(
-        HealthState.OK, lookahead=8
-    )
+    for dish_ln in dish_lns:
+        dish_ln_proxy = dev_factory.get_device(dish_ln)
+        dish_ln_proxy.SetDirectHealthState(HealthState.OK)
 
     change_event_callbacks["telescopeHealthState"].assert_change_event(
         HealthState.OK, lookahead=8
