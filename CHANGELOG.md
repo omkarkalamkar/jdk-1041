@@ -5,6 +5,12 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+[1.5.0]
+*******
+Updated
+-------
+* Updated SKA dish id validation to be support till 999.
+
 [1.4.1]
 *******
 Added
