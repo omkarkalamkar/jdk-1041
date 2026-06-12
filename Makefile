@@ -133,10 +133,10 @@ endif
 endif
 
 PYTHON_BUILD_TYPE = non_tag_setup
-DISH_VCC_URI ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode?$(CI_COMMIT_BRANCH)\#tmdata"
+DISH_VCC_URI ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode?$(BRANCH_NAME)\#tmdata"
 DISH_VCC_PATH ?= "config_files/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt.json"
 GPM_FILE_PATH ?= "config_files/global_pointing_model_data"
-GPM_VERSION ?= "$(CI_COMMIT_BRANCH)"
+GPM_VERSION ?= "$(BRANCH_NAME)"
 GPM_SOURCES ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode"
 
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
