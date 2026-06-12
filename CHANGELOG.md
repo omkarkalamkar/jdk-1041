@@ -11,6 +11,17 @@ Updated
 -------
 * Updated SKA dish id validation to be support till 999.
 
+[1.5.0]
+*******
+Updated
+-----
+* Updated Pytango version to 10.3.0.
+
+Fixed
+------
+* Fixed `IsAutoRecoveryEnabled` property registration in Low CentralNode by correcting the Helm value reference in `centralnode_low.yaml`.
+* This prevents startup failures introduced by stricter boolean property validation in PyTango 10.3.0.
+
 [1.4.1]
 *******
 Added
