@@ -404,7 +404,7 @@ class TestAssignResourceValidator:
         """
 
         input_json = sample_assign_resources_request
-        invalid_receptor_id_list = ["SKA200"]
+        invalid_receptor_id_list = ["SKA1000"]
         input_json["dish"]["receptor_ids"] = invalid_receptor_id_list
 
         input_validator = AssignResourceValidator(

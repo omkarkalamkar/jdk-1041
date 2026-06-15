@@ -19,10 +19,6 @@ def test_gpm():
     with pytest.raises(ValueError):
         GPMJsonModel(**gpm)
 
-    gpm = {"version": "1.0", "receptors": {"ska000": ["Band_1"]}}
-    with pytest.raises(ValueError):
-        GPMJsonModel(**gpm)
-
     gpm = {"version": "1.0", "receptors": {"sak000": ["Band_1"]}}
     with pytest.raises(ValueError):
         GPMJsonModel(**gpm)

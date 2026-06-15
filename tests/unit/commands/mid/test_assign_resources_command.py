@@ -25,7 +25,25 @@ from ska_tmc_centralnode.commands.assign_resources_command_mid import (
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     assign_validate_json_args,
 )
-from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
+from tests.settings import (
+    DISH_LEAF_NODE_DEVICE_099,
+    DISH_LEAF_NODE_DEVICE_500,
+    DISH_LEAF_NODE_DEVICE_999,
+    MID_SUBARRAY_DEVICE,
+    TIMEOUT,
+    create_cm,
+    logger,
+)
+
+VALID_DISH_IDS = ["SKA999", "SKA500", "SKA099"]
+VALID_DISH_LNS = [
+    DISH_LEAF_NODE_DEVICE_500,
+    DISH_LEAF_NODE_DEVICE_099,
+    DISH_LEAF_NODE_DEVICE_999,
+]
+
+INVALID_DISH_IDS = ["SKA1000"]
+MKT_DISH_IDS = ["MKT001", "MKT002"]
 
 
 def get_assign_input_str(assign_input_file="command_AssignResources.json"):
@@ -48,9 +66,13 @@ def test_assign_resources_command_completed(
     cm.is_dish_vcc_config_set = True
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
-
+    cm.input_parameter.dish_leaf_node_dev_names = VALID_DISH_LNS
     assign_input_str = get_assign_input_str()
-
+    json_argument = json.loads(assign_input_str)
+    json_argument["dish"]["receptor_ids"] = VALID_DISH_IDS
+    json_argument = json.dumps(json_argument)
+    _, message = cm.validate_assign_json(json_argument)
+    assert message == ""
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
 
@@ -58,7 +80,7 @@ def test_assign_resources_command_completed(
     check_if_subarray_is_available(cm)
 
     cm.assign_resources(
-        assign_input_str,
+        json_argument,
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
@@ -75,6 +97,27 @@ def test_assign_resources_command_completed(
     )
 
 
+def test_assign_resources_command_failure_with_incorrect_id(
+    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+):
+    """Tests assign Resources completed"""
+    cm, start_time = create_cm()
+    elapsed_time = time.time() - start_time
+    logger.info(
+        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    )
+    cm.is_dish_vcc_config_set = True
+    result = cm.is_command_allowed("AssignResources")
+    logger.info(f"Command allowed result is: {result}")
+
+    assign_input_str = get_assign_input_str()
+    json_argument = json.loads(assign_input_str)
+    json_argument["dish"]["receptor_ids"] = INVALID_DISH_IDS
+    json_argument = json.dumps(json_argument)
+    _, message = cm.validate_assign_json(json_argument)
+    assert message == "The dish id SKA1000 is not of the correct length."
+
+
 def test_assign_resources_command_with_mkt_ids_completed(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
@@ -89,7 +132,7 @@ def test_assign_resources_command_with_mkt_ids_completed(
     logger.info(f"Command allowed result is: {result}")
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    json_argument["dish"]["receptor_ids"] = ["MKT001", "MKT002"]
+    json_argument["dish"]["receptor_ids"] = MKT_DISH_IDS
     json_argument = json.dumps(json_argument)
 
     dev_factory = DevFactory()
@@ -223,7 +266,7 @@ def test_assign_resources_command_with_mkt_ids_ok(
     check_if_subarray_is_available(cm)
     assign_input_str = get_assign_input_str()
     json_argument = json.loads(assign_input_str)
-    json_argument["dish"]["receptor_ids"] = ["MKT001", "MKT002"]
+    json_argument["dish"]["receptor_ids"] = MKT_DISH_IDS
     json_argument = json.dumps(json_argument)
 
     cm.assign_resources(

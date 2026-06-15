@@ -123,7 +123,21 @@ clean:
 
 unit-test: python-test
 
+BRANCH_NAME ?= $(CI_COMMIT_BRANCH)
+ifeq ($(strip $(CI_COMMIT_BRANCH)),)
+ifeq ($(strip $(CI_MERGE_REQUEST_SOURCE_BRANCH_NAME)),)
+	BRANCH_NAME := $(CI_COMMIT_TAG)
+else
+	BRANCH_NAME := $(CI_MERGE_REQUEST_SOURCE_BRANCH_NAME)
+endif
+endif
+
 PYTHON_BUILD_TYPE = non_tag_setup
+DISH_VCC_URI ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode?$(BRANCH_NAME)\#tmdata"
+DISH_VCC_PATH ?= "config_files/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt.json"
+GPM_FILE_PATH ?= "config_files/global_pointing_model_data"
+GPM_VERSION ?= "$(BRANCH_NAME)"
+GPM_SOURCES ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode"
 
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set global.cluster_domain=$(CLUSTER_DOMAIN) \
@@ -136,6 +150,11 @@ K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set central_node.telescope=$(TELESCOPE) \
 	--set ska-taranta.enabled=$(TARANTA) \
 	--set central_node.deviceServers.centralnode.SkuidService=$(SKUID) \
+	--set central_node.deviceServers.centralnode.mid.DishVccConfig.DishVccUri=$(DISH_VCC_URI) \
+	--set central_node.deviceServers.centralnode.mid.DishVccConfig.DishVccFilePath=$(DISH_VCC_PATH) \
+	--set central_node.deviceServers.centralnode.mid.global_pointing_model.data_sources_prefix=$(GPM_SOURCES) \
+	--set central_node.deviceServers.centralnode.mid.global_pointing_model.file_path_prefix=$(GPM_FILE_PATH) \
+	--set central_node.deviceServers.centralnode.mid.global_pointing_model.version=$(GPM_VERSION) \
 	$(CUSTOM_VALUES) \
 	--values gilab_values.yaml
 

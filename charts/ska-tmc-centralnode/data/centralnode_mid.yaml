@@ -67,7 +67,7 @@ server:
         - name: "DishMasterFQDNs"
           values:
           {{- range  (.Values.deviceServers.centralnode.mid.DishIDs)  }}
-          - "{{ . | lower }}/{{ $DishMasterIdentifier }}"
+          - "{{ $DishMasterIdentifier }}/{{. | lower }}"
           {{- end }}
         - name: "TMCSubarrayNodes"
           values:
@@ -123,6 +123,18 @@ server:
         - name: "DefaultArrayLayoutPath"
           values:
             - "{{.Values.deviceServers.centralnode.mid.DefaultArrayLayoutPath}}"
+        - name: "MeerKatDishIdLowerLimit"
+          values:
+            - "{{.Values.deviceServers.centralnode.mid.MeerKatDishIdLowerLimit}}"
+        - name: "MeerKatDishIdUpperLimit"
+          values:
+            - "{{.Values.deviceServers.centralnode.mid.MeerKatDishIdUpperLimit}}"
+        - name: "SkaDishIdLowerLimit"
+          values:
+            - "{{.Values.deviceServers.centralnode.mid.SkaDishIdLowerLimit}}"
+        - name: "SkaDishIdUpperLimit"
+          values:
+            - "{{.Values.deviceServers.centralnode.mid.SkaDishIdUpperLimit}}"
         
 
         

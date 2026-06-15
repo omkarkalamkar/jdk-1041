@@ -130,6 +130,7 @@ def test_assign_res_command_mid(
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
+    set_mid_sdp_csp_admin_modes,
 ):
     """Test assign Resources command for mid"""
     return assign_resources(
@@ -330,6 +331,7 @@ def test_assign_res_command_mid_without_subarray_id(
     change_event_callbacks,
     json_factory,
     set_mid_sdp_csp_mln_availability_for_aggregation,
+    set_mid_sdp_csp_admin_modes,
 ):
     """Test assign Resources command mid without subarray id"""
     return assign_resources_without_subarray_id(
