@@ -1,3 +1,6 @@
+from typing import Callable
+
+
 class DishConfigValidator:
     """This class implement method to validate DishConfig json"""
 
@@ -6,6 +9,7 @@ class DishConfigValidator:
         dish_config_json: dict,
         k_value_valid_range_lower_limit,
         k_value_valid_range_upper_limit,
+        validate_dish_ids: Callable,
     ):
         """
         params:
@@ -14,6 +18,7 @@ class DishConfigValidator:
         self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
         self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
         self.dish_config_json = dish_config_json
+        self.validate_dish_ids = validate_dish_ids
 
     def _get_vcc_k_values(self) -> tuple:
         """Extract vcc and k values from dish config"""
@@ -62,7 +67,7 @@ class DishConfigValidator:
             return False, "Duplicate dish ids found in Json"
 
         # Check if dish id are within valid range
-        return self.component_manager.validate_dish_ids(dish_id_list)
+        return self.validate_dish_ids(dish_id_list)
 
     def is_json_valid(self) -> tuple[bool, str]:
         """
