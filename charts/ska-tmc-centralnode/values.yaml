@@ -110,6 +110,10 @@ deviceServers:
         file_path_prefix: "instrument/ska_mid1/global_pointing_model_data"
       DefaultArrayLayoutSourceURIs: ""
       DefaultArrayLayoutPath: ""
+      MeerKatDishIdLowerLimit: 0
+      MeerKatDishIdUpperLimit: 63
+      SkaDishIdLowerLimit: 1
+      SkaDishIdUpperLimit: 999
 
     low:
       file: "data/centralnode_low.yaml"
