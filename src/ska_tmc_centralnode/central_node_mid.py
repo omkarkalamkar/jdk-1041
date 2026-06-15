@@ -129,6 +129,20 @@ class MidTmcCentralNode(AbstractCentralNode):
     MeerKatExtensionID = device_property(
         dtype=str, doc="ID of Meerkat Extension dishes.", default_value=""
     )
+
+    MeerKatDishIdLowerLimit = device_property(
+        dtype=int, doc="Lower limit of Meerkat Dish IDs.", default_value=0
+    )
+    MeerKatDishIdUpperLimit = device_property(
+        dtype=int, doc="Upper limit of Meerkat Dish IDs.", default_value=63
+    )
+    SkaDishIdLowerLimit = device_property(
+        dtype=int, doc="Lower limit of SKA Dish IDs.", default_value=1
+    )
+    SkaDishIdUpperLimit = device_property(
+        dtype=int, doc="Upper limit of SKA Dish IDs.", default_value=999
+    )
+
     # ----------
     # Attributes
     # ----------
@@ -363,6 +377,14 @@ class MidTmcCentralNode(AbstractCentralNode):
             gpm_file_path_prefix=self.GPMFilePathPrefix,
             default_array_layout_url=default_array_layout_url_dict,
             mkt_extension_id=self.MeerKatExtensionID,
+            ska_dish_ranges=(
+                self.SkaDishIdLowerLimit,
+                self.SkaDishIdUpperLimit,
+            ),
+            mkt_dish_ranges=(
+                self.MeerKatDishIdLowerLimit,
+                self.MeerKatDishIdUpperLimit,
+            ),
         )
 
         cm.input_parameter.dish_leaf_node_dev_names = []

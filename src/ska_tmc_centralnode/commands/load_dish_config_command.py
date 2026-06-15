@@ -375,7 +375,6 @@ class LoadDishCfg(LoadDishCfgCommand):
             argin,
             self.component_manager.k_value_valid_range_lower_limit,
             self.component_manager.k_value_valid_range_upper_limit,
-            self.component_manager.mkt_extension_id,
         )
         is_valid_dish_cfg, message = config_json_validator.is_json_valid()
         return is_valid_dish_cfg, message

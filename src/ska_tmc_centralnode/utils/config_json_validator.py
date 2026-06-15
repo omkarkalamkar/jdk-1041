@@ -6,7 +6,6 @@ class DishConfigValidator:
         dish_config_json: dict,
         k_value_valid_range_lower_limit,
         k_value_valid_range_upper_limit,
-        mkt_extension_id: str = "",
     ):
         """
         params:
@@ -15,7 +14,6 @@ class DishConfigValidator:
         self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
         self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
         self.dish_config_json = dish_config_json
-        self.mkt_extension_id = mkt_extension_id
 
     def _get_vcc_k_values(self) -> tuple:
         """Extract vcc and k values from dish config"""
@@ -64,21 +62,7 @@ class DishConfigValidator:
             return False, "Duplicate dish ids found in Json"
 
         # Check if dish id are within valid range
-        for dish_id in dish_id_list:
-            if dish_id.startswith("SKA"):
-                dish_suffix = int(dish_id[3:])
-                if dish_suffix not in range(1, 1000):
-                    return False, f"Dish id {dish_id} not in range (1,999)"
-            elif dish_id.startswith("MKT"):
-                dish_suffix = int(dish_id[3:])
-                if dish_suffix not in range(1, 64):
-                    return False, f"MKT id {dish_id} not in range (1,63)"
-            elif not (
-                self.mkt_extension_id
-                and dish_id.startswith(self.mkt_extension_id)
-            ):
-                return False, f"Invalid Dish id {dish_id} provided in Json"
-        return True, ""
+        return self.component_manager.validate_dish_ids(dish_id_list)
 
     def is_json_valid(self) -> tuple[bool, str]:
         """
