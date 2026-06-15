@@ -1247,6 +1247,8 @@ class CNComponentManagerMid(CNComponentManager):
                 dish_leaf_node_prefix,
                 self.logger,
                 self.mkt_extension_id,
+                self.ska_dish_ranges,
+                self.mkt_dish_ranges,
             )
 
             assign_validator.loads(argin)

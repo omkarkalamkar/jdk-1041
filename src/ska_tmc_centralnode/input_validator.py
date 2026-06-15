@@ -44,11 +44,15 @@ class AssignResourceValidator:
         dish_leaf_node_prefix,
         logger=module_logger,
         mkt_extension_id="",
+        ska_dish_ranges: tuple = (1, 999),
+        mkt_dish_ranges: tuple = (0, 63),
     ):
         self.logger = logger
         self._subarrays = []
         self._receptor_list = []
         self.mkt_extension_id = mkt_extension_id
+        self.ska_dish_ranges = ska_dish_ranges
+        self.mkt_dish_ranges = mkt_dish_ranges
 
         # get the ids of the numerical ids of available subarrays
         for subarray in subarray_list:
@@ -187,13 +191,19 @@ class AssignResourceValidator:
                 exception_message = f"The dish prefix {leaf_id} is invalid."
                 raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] == "SKA":
-                if int(leaf_id[3:]) not in range(1, 1000):
+                dishid = int(leaf_id[3:])
+                if (dishid > self.ska_dish_ranges[1]) or (
+                    dishid < self.ska_dish_ranges[0]
+                ):
                     exception_message = (
                         f"The SKA dish id {leaf_id} is invalid."
                     )
                     raise InvalidReceptorIdError(exception_message)
             if leaf_id[:3] == "MKT":
-                if int(leaf_id[3:]) not in range(0, 64):
+                dishid = int(leaf_id[3:])
+                if (dishid > self.mkt_dish_ranges[1]) or (
+                    dishid < self.mkt_dish_ranges[0]
+                ):
                     exception_message = (
                         f"The MKT dish id {leaf_id} is invalid."
                     )
