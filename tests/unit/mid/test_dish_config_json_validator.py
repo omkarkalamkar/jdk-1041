@@ -11,7 +11,7 @@ class TestDishConfigValidator:
 
     def test_valid_dish_config_json(self):
         """Validate Correct Dish Config json"""
-        cm = create_cm()
+        cm, _ = create_cm()
         dish_config_json = {
             "interface": (
                 "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
@@ -31,7 +31,7 @@ class TestDishConfigValidator:
 
     def test_dish_config_validator_for_invalid_dishids(self):
         """Validate Dish Config Json validator when dish ids are invalid"""
-        cm = create_cm()
+        cm, _ = create_cm()
         dish_config_json = {
             "interface": (
                 "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
@@ -53,7 +53,7 @@ class TestDishConfigValidator:
     def test_dish_config_validator_for_invalid_dishids_range(self):
         """Validate Dish Config Json validator when dish ids
         are not within range"""
-        cm = create_cm()
+        cm, _ = create_cm()
         dish_config_json = {
             "interface": (
                 "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
@@ -74,7 +74,7 @@ class TestDishConfigValidator:
 
     def test_dish_config_validator_for_duplicate_vcc_ids(self):
         """Validate Dish Config Json validator when vcc ids are not unique"""
-        cm = create_cm()
+        cm, _ = create_cm()
         dish_config_json = {
             "interface": (
                 "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
@@ -95,7 +95,7 @@ class TestDishConfigValidator:
 
     def test_invalid_k_value_exceeds_range(self):
         """Test case for invalid k value exceeding the range"""
-        cm = create_cm()
+        cm, _ = create_cm()
         dish_config_json = {
             "interface": (
                 "https://schema.skao.int/ska-mid-cbf-initial-parameters/2.2"
