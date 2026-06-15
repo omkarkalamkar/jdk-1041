@@ -1411,18 +1411,14 @@ class CNComponentManagerMid(CNComponentManager):
             dish_id = dish_id.upper()
             if dish_id.startswith("SKA"):
                 dish_suffix = int(dish_id[3:])
-                if (
-                    self.ska_dish_ranges[0]
-                    <= dish_suffix
-                    <= self.ska_dish_ranges[1]
+                if (self.ska_dish_ranges[1] < dish_suffix) or (
+                    dish_suffix < self.ska_dish_ranges[0]
                 ):
                     return False, f"Dish id {dish_id} not in range (1,999)"
             elif dish_id.startswith("MKT"):
                 dish_suffix = int(dish_id[3:])
-                if (
-                    self.mkt_dish_ranges[0]
-                    <= dish_suffix
-                    <= self.mkt_dish_ranges[1]
+                if (self.mkt_dish_ranges[1] < dish_suffix) or (
+                    dish_suffix < self.mkt_dish_ranges[0]
                 ):
                     return False, f"MKT id {dish_id} not in range (1,63)"
             elif not (
