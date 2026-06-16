@@ -103,7 +103,7 @@ class CNComponentManager(TmcComponentManager):
         _event_manager: bool = True,
         proxy_timeout=500,
         event_subscription_check_period=1,
-        liveliness_check_period=1,
+        liveliness_check_period=1000,
         command_timeout=30,
         retry_attempts: int = 5,
         retry_delay: float = 3.0,

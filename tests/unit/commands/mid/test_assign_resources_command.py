@@ -62,7 +62,6 @@ def test_assign_resources_command_completed(
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )

@@ -10,7 +10,7 @@ import os
 from threading import Event
 from typing import List, Tuple
 
-from ska_control_model import ResultCode
+from ska_control_model import LoggingLevel, ResultCode
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.long_running_commands import (
     LRCReqType,
@@ -33,6 +33,12 @@ from ska_tmc_centralnode.utils.json_validator_decorator import (
 
 __all__ = ["MidTmcCentralNode", "main"]
 
+a = "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
+b = (
+    "instrument/dishid_vcc_map_configuration/"
+    "ska-mid-cbf-system-parameters-mkt.json"
+)
+
 
 class MidTmcCentralNode(AbstractCentralNode):
     """
@@ -46,15 +52,19 @@ class MidTmcCentralNode(AbstractCentralNode):
     # Device Properties
     # -----------------
 
+    LoggingLevelDefault = device_property(
+        dtype="uint16", default_value=LoggingLevel.DEBUG
+    )
+
     DishIDs = device_property(
         dtype=("str",),
         doc="List of the available dish ids",
-        default_value=tuple(),
+        default_value=("SKA001", "SKA036", "SKA063", "SKA100"),
     )
 
     DishLeafNodePrefix = device_property(
         dtype="str",
-        default_value="",
+        default_value="mid-tmc/leaf-node-dish",
         doc="Device name prefix for Dish Leaf Node",
     )
 
@@ -67,19 +77,19 @@ class MidTmcCentralNode(AbstractCentralNode):
     DishMasterIdentifier = device_property(
         dtype="str",
         doc="Device name tag for Dish Master device",
-        default_value="",
+        default_value="elt/master",
     )
 
     DishVccUri = device_property(
         dtype="str",
         doc="Default DishVccConfig URI",
-        default_value="",
+        default_value="gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?1.13.2#tmdata",
     )
 
     DishVccFilePath = device_property(
         dtype="str",
         doc="Default DishVccConfig File Path",
-        default_value="",
+        default_value="instrument/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt.json",
     )
 
     EnableDishVccInit = device_property(
