@@ -5,15 +5,17 @@ import threading
 from unittest.mock import patch
 
 import mock
+import pytest
 import tango
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
+from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from tango import ApiUtil
+from tango import ApiUtil, DevState
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.model.enum import DishConfigStatus
@@ -21,6 +23,7 @@ from ska_tmc_centralnode.utils.json_validator_decorator import (
     validate_dish_vcc_command_status,
 )
 from tests.settings import (
+    MID_CSP_MASTER_DEVICE,
     MID_CSP_MLN_DEVICE,
     create_cm,
     logger,
@@ -264,3 +267,16 @@ def test_load_dish_config_command_fail(
         message[0]
         == "Dish Vcc Configuration is in Progress. Dish Vcc command status: IN_PROGRESS"
     )
+
+
+def test_load_dish_cfg_gets_rejected_when_csp_masster_off(
+    tango_context,
+):
+    """Test load dish cfg invoke on devices with task status as completed"""
+
+    csp_master = tango.DeviceProxy(MID_CSP_MASTER_DEVICE)
+    csp_master.SetDirectState(DevState.ON)
+    assert csp_master.state() == DevState.ON
+    cm, _ = create_cm()
+    with pytest.raises(CommandNotAllowed):
+        cm.is_load_dish_cfg_command_allowed()
