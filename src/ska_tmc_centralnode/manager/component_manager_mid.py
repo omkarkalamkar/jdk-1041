@@ -697,6 +697,17 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
         if self.enable_dish_vcc_init:
+            # csp_master =self._adapter_factory.get_or_create_adapter(
+            #     self.input_parameter.csp_master_dev_name, AdapterType.CSPMASTER
+            # )
+            # if (
+            #      command_name == "LoadDishCfg" and
+            #      csp_master.state() != DevState.OFF
+            # ):
+            #     raise CommandNotAllowed(
+            #         "LoadDishCfg command is allowed in"
+            #         " CSP Master DevState.OFF only",
+            #     )
             if not self.is_dish_vcc_config_set and command_name not in [
                 "TelescopeOff",
                 "TelescopeStandby",

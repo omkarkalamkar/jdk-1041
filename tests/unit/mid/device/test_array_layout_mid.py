@@ -191,6 +191,14 @@ def test_mid_assign_resources_fails_with_invalid_default_array_layout_json(
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetisSubarrayAvailable(True)
     check_if_subarray_is_available(cm)
+    cm.is_dish_vcc_config_set = True
+    cm.dish_kvalue_validation_aggregator.dln_kvalue_validation_results = (
+        MagicMock(return_value=DISH_VCC_VALIDATION_RESULT_STATUS)
+    )
+    cm.dish_vcc_validation_status = MagicMock(
+        return_value=DISH_VCC_VALIDATION_RESULT_STATUS
+    )
+    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
 
     # Patch the CM's getter so default_array_layout_url returns a non-dict.
     # This avoids the setter ValueError test and directly exercises the command path.

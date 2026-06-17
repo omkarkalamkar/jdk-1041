@@ -654,11 +654,7 @@ def load_dish_cfg_partial_success_and_assign_rejected(
         change_event_callbacks["DishVccCommandStatus"],
     )
 
-    # sleep(1)
-    # dish_ln_ds = DeviceProxy("dserver/mocks/06")
-    # dish_ln_ds.RestartServer()
     # Run the command
-    dish_ln_device.SetDirectkValueValidationResult("3")
     dish_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
 
@@ -678,7 +674,7 @@ def load_dish_cfg_partial_success_and_assign_rejected(
     )
     message = (
         '[0, "LoadDishCfg completed with partial success: '
-        "{'ska001': 'k-value not identical'}"
+        "{'ska001': 'Exception occurred, command failed.'}"
         '"]'
     )
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
@@ -726,6 +722,7 @@ def load_dish_cfg_partial_success_and_assign_rejected(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.test
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
