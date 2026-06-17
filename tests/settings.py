@@ -124,6 +124,10 @@ RESET_DEFECT = json.dumps(
 
 CURRENT_TEST_DISH_VCC_KVALUE = 1
 
+DISH_VCC_VALIDATION_RESULT_STATUS = {
+    "dish": "ALL DISH OK",
+}
+
 
 def set_devices_unresponsive(cm, device_names: list):
     """Sets devices unresponsive

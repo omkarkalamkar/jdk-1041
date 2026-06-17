@@ -132,6 +132,9 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         flag = False
         count = 0
+        cm = self.component_manager
+        aggregator = cm.dish_kvalue_validation_aggregator
+        val_results = aggregator.dln_kvalue_validation_results
         self.logger.debug(
             "Task callback invoked | command=LoadDishCfg id=%s result=%s "
             "message=%s",
@@ -142,9 +145,18 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.component_manager.dish_vcc_command_status = (
             DishConfigStatus.COMPLETED
         )
-        for res in self.command_results.values():
+        # If error/exception occurred on SetKValue
+        for dev, res in self.command_results.items():
             if res[0] == ResultCode.FAILED:
+                if "csp" in dev.lower():
+                    flag = True
+                    continue
+                with self.component_manager.dish_vcc_validation_attr_lock:
+                    val_results[dev.split("/")[2].lower()] = res[1]
                 count += 1
+        if count:
+            with self.component_manager.dish_vcc_validation_attr_lock:
+                self.component_manager.dish_vcc_validation_status = val_results
         status = json.loads(self.component_manager.dish_vcc_validation_status)
         if status.get(MID_CSP_MLN_DEVICE) != (
             DISH_VCC_VALIDATION_RESULT_STATUS[ResultCode.OK]
@@ -156,13 +168,12 @@ class LoadDishCfg(LoadDishCfgCommand):
             "exception" in result[1].lower()
             or "exception" in exception.lower()
         ):
-            result_code, message = self.command_results[MID_CSP_MLN_DEVICE]
-            if result_code == ResultCode.FAILED:
-                result = (ResultCode.FAILED, message)
+            if flag:  # if error occurred for CSPMLN
+                result = (ResultCode.FAILED, result[1])
             else:
                 result = (ResultCode.OK, result[1])
         else:
-            result = (ResultCode.OK, "Command Failed.")
+            result = (ResultCode.OK, "")
 
         if result[0] == ResultCode.FAILED or flag:
             error_message = result[1] + " LoadDishCfg command failed: "
@@ -170,9 +181,6 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.process_update_task_for_loaddishcfg_failure(error_message)
         else:
             message = ""
-            cm = self.component_manager
-            aggregator = cm.dish_kvalue_validation_aggregator
-            val_results = aggregator.dln_kvalue_validation_results
             status = [v.lower() for v in val_results.values()]
             if set(status) == set(
                 [DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK].lower()]
