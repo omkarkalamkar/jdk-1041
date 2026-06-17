@@ -7,7 +7,7 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
-from tango import DeviceProxy
+from tango import DeviceProxy, DevState
 
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
@@ -20,6 +20,7 @@ from tests.settings import (
     CURRENT_TEST_DISH_VCC_KVALUE,
     DISH_LEAF_NODE_DEVICE,
     ERROR_PROPAGATION_DEFECT,
+    MID_CSP_MASTER_DEVICE,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
     check_lrcr_events,
@@ -46,8 +47,21 @@ def load_dish_cfg(central_node_name, config_str, change_event_callbacks):
     central_node = dev_factory.get_device(central_node_name)
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
-
     ensure_checked_devices(central_node)
+
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -100,6 +114,12 @@ def load_dish_cfg(central_node_name, config_str, change_event_callbacks):
     validate_attribute_after_restart(
         csp_master_ln_device,
         config_str,
+    )
+
+    csp_master_device.SetDirectState(DevState.ON)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
     )
 
 
@@ -200,6 +220,19 @@ def load_dish_cfg_rejected(
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
 
     ensure_checked_devices(central_node)
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -250,6 +283,12 @@ def load_dish_cfg_rejected(
         lookahead=8,
     )
     csp_master_ln_device.SetDelay(2)
+    csp_master_device.SetDirectState(DevState.ON)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
+    )
 
 
 def load_dish_cfg_when_csp_is_defective(
@@ -264,6 +303,19 @@ def load_dish_cfg_when_csp_is_defective(
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     ensure_checked_devices(central_node)
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -308,6 +360,13 @@ def load_dish_cfg_when_csp_is_defective(
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
+    )
+
+    csp_master_device.SetDirectState(DevState.ON)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
     )
 
 
@@ -534,7 +593,20 @@ def load_dish_cfg_with_wrong_path(
     logger.info("%s", config_str)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
     ensure_checked_devices(central_node)
+
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     dish_cfg_input = json.loads(config_str)
     dish_cfg_input.update(
@@ -591,6 +663,12 @@ def load_dish_cfg_with_wrong_path(
         change_event_callbacks,
     )
 
+    csp_master_device.SetDirectState(DevState.ON)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
+    )
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
@@ -628,7 +706,20 @@ def load_dish_cfg_partial_success_and_assign_rejected(
     central_node = dev_factory.get_device(central_node_name)
     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
 
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
     ensure_checked_devices(central_node)
+
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     # Correct path for tm_data_sources
     dish_cfg_input = json.loads(config_str)
@@ -718,6 +809,11 @@ def load_dish_cfg_partial_success_and_assign_rejected(
         lookahead=4,
     )
     logger.info("Successfully reloaded Dish VCC configuration.")
+    csp_master_device.SetDirectState(DevState.ON)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
+    )
 
 
 @pytest.mark.post_deployment
