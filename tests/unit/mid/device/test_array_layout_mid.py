@@ -4,6 +4,7 @@ import json
 import threading
 import time
 from os.path import dirname, join
+from unittest.mock import MagicMock
 
 import pytest
 import tango
@@ -14,7 +15,14 @@ from tango.test_utils import DeviceTestContext
 
 from ska_tmc_centralnode.central_node_mid import MidTmcCentralNode
 from ska_tmc_centralnode.model.input import InputParameterMid
-from tests.settings import MID_SUBARRAY_DEVICE, TIMEOUT, create_cm, logger
+from tests.settings import (
+    DISH_LEAF_NODE_DEVICE,
+    DISH_VCC_VALIDATION_RESULT_STATUS,
+    MID_SUBARRAY_DEVICE,
+    TIMEOUT,
+    create_cm,
+    logger,
+)
 
 # ---------- Fixtures ----------
 
@@ -94,6 +102,13 @@ def test_array_layout_assign_resources(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
     cm.is_dish_vcc_config_set = True
+    cm.dish_kvalue_validation_aggregator.dln_kvalue_validation_results = (
+        MagicMock(return_value=DISH_VCC_VALIDATION_RESULT_STATUS)
+    )
+    cm.dish_vcc_validation_status = MagicMock(
+        return_value=DISH_VCC_VALIDATION_RESULT_STATUS
+    )
+    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
 
