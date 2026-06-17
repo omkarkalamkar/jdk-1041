@@ -722,7 +722,6 @@ def load_dish_cfg_partial_success_and_assign_rejected(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-@pytest.mark.test
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],

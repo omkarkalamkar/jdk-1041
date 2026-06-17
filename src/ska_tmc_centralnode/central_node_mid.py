@@ -416,7 +416,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         :rtype: boolean
         """
-        return True
+        return self.component_manager.is_load_dish_cfg_command_allowed()
 
     @validate_dish_vcc_command_status
     @long_running_command

@@ -503,10 +503,10 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         count = 0
-        devices_to_check_list = [self.input_parameter.csp_mln_dev_name]
-        devices_to_check_list.extend(
-            self.input_parameter.dish_leaf_node_dev_names
-        )
+        devices_to_check_list = [
+            self.input_parameter.csp_mln_dev_name,
+            self.input_parameter.csp_master_dev_name,
+        ]
 
         dev_state_list = [
             self.get_device(device).state for device in devices_to_check_list
@@ -697,17 +697,6 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
         if self.enable_dish_vcc_init:
-            # csp_master =self._adapter_factory.get_or_create_adapter(
-            #     self.input_parameter.csp_master_dev_name, AdapterType.CSPMASTER
-            # )
-            # if (
-            #      command_name == "LoadDishCfg" and
-            #      csp_master.state() != DevState.OFF
-            # ):
-            #     raise CommandNotAllowed(
-            #         "LoadDishCfg command is allowed in"
-            #         " CSP Master DevState.OFF only",
-            #     )
             if not self.is_dish_vcc_config_set and command_name not in [
                 "TelescopeOff",
                 "TelescopeStandby",
@@ -749,6 +738,19 @@ class CNComponentManagerMid(CNComponentManager):
         super().check_device_responsiveness_command(command_name, subarray_id)
         if command_name in self.supported_commands_for_responsive_check:
             self.check_if_dishes_are_responsive()
+
+    def is_load_dish_cfg_command_allowed(self) -> bool:
+        """Checks LoadDishCfg command is allowed or not"""
+        csp_master = self.adapter_factory.get_or_create_adapter(
+            self.input_parameter.csp_master_dev_name, AdapterType.CSPMASTER
+        )
+        self.logger.debug("Current CSP master state: %s", csp_master.state)
+        if csp_master.state != DevState.OFF:
+            raise CommandNotAllowed(
+                "LoadDishCfg command is allowed in"
+                " CSP Master DevState.OFF only.",
+            )
+        return True
 
     def update_k_value_validation(
         self, dev_name: str, kvalue: ResultCode
@@ -862,11 +864,25 @@ class CNComponentManagerMid(CNComponentManager):
                         k_val_result = adapter._proxy.kValueValidationResult
                         if k_val_result != "1":
                             num_of_dish_values[dish_name] = k_val_result
-                if len(num_of_dish_values) == len(
-                    self.input_parameter.dish_leaf_node_dev_names
+
+                csp_mln_state = self.get_device(
+                    self.input_parameter.csp_mln_dev_name
+                ).state
+
+                csp_controller_state = self.get_device(
+                    self.input_parameter.csp_master_dev_name
+                ).state
+                if (
+                    len(num_of_dish_values)
+                    == len(self.input_parameter.dish_leaf_node_dev_names)
+                    and csp_mln_state == DevState.ON
+                    and csp_controller_state == DevState.OFF
                 ):
-                    self.logger.debug("All dishes are available and ready.")
-                return True
+                    self.logger.debug(
+                        "All dishes and csp master devices are"
+                        " available and ready."
+                    )
+                    return True
             except Exception as e:
                 self.logger.exception("Error %s", str(e))
             count += 1
