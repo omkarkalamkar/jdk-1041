@@ -653,7 +653,7 @@ def load_dish_cfg_partial_success_and_assign_rejected(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["DishVccCommandStatus"],
     )
-    
+
     # sleep(1)
     # dish_ln_ds = DeviceProxy("dserver/mocks/06")
     # dish_ln_ds.RestartServer()
@@ -661,7 +661,7 @@ def load_dish_cfg_partial_success_and_assign_rejected(
     dish_ln_device.SetDirectkValueValidationResult("3")
     dish_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
-    
+
     logger.info(
         "Reattempted LoadDishCfg Command ID: %s Returned result: %s",
         unique_id,
@@ -670,7 +670,7 @@ def load_dish_cfg_partial_success_and_assign_rejected(
     # Command should queue
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
-    
+
     # Validate sequence of events
     change_event_callbacks["DishVccCommandStatus"].assert_change_event(
         DishConfigStatus.IN_PROGRESS,
@@ -685,7 +685,7 @@ def load_dish_cfg_partial_success_and_assign_rejected(
         (unique_id[0], message),
         lookahead=4,
     )
-    assert central_node.isDishVccConfigSet == True
+    assert central_node.isDishVccConfigSet
     change_event_callbacks["DishVccCommandStatus"].assert_change_event(
         DishConfigStatus.COMPLETED,
         lookahead=4,

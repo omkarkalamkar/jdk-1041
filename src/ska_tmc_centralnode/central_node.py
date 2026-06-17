@@ -95,19 +95,13 @@ class AbstractCentralNode(TMCBaseDevice):
         doc="List of TMC Mid Subarray Node devices",
         default_value=tuple(),
     )
-    CspMasterLeafNodeFQDN = device_property(
-        dtype="str", default_value="mid-tmc/leaf-node-csp/0"
-    )
+    CspMasterLeafNodeFQDN = device_property(dtype="str", default_value="")
 
     CspMasterFQDN = device_property(dtype="str", default_value="")
 
-    SdpMasterLeafNodeFQDN = device_property(
-        dtype="str", default_value="mid-dish/dish-manager/ska001"
-    )
+    SdpMasterLeafNodeFQDN = device_property(dtype="str", default_value="")
 
-    SdpMasterFQDN = device_property(
-        dtype="str", default_value="mid-dish/dish-manager/ska001"
-    )
+    SdpMasterFQDN = device_property(dtype="str", default_value="")
 
     CspSubarrayLeafNodes = device_property(
         dtype=("str",),
@@ -125,7 +119,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
     SubarrayPrefix = device_property(
         dtype="DevString",
-        default_value="mid-dish/dish-manager/ska0",
+        default_value="",
     )
 
     DefaultArrayLayoutSourceURIs = device_property(

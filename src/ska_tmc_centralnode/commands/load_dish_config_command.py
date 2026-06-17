@@ -142,8 +142,8 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.component_manager.dish_vcc_command_status = (
             DishConfigStatus.COMPLETED
         )
-        for result in self.command_results.values():
-            if result[0] == ResultCode.FAILED:
+        for res in self.command_results.values():
+            if res[0] == ResultCode.FAILED:
                 count += 1
         status = json.loads(self.component_manager.dish_vcc_validation_status)
         if status.get(MID_CSP_MLN_DEVICE) != (
@@ -152,7 +152,10 @@ class LoadDishCfg(LoadDishCfgCommand):
             flag = True
         elif "timeout" in result[1].lower() or "timeout" in exception.lower():
             result = (ResultCode.OK, result[1])
-        elif "exception" in result[1].lower() or "exception" in exception.lower():
+        elif (
+            "exception" in result[1].lower()
+            or "exception" in exception.lower()
+        ):
             result_code, message = self.command_results[MID_CSP_MLN_DEVICE]
             if result_code == ResultCode.FAILED:
                 result = (ResultCode.FAILED, message)
@@ -338,9 +341,9 @@ class LoadDishCfg(LoadDishCfgCommand):
                     "dish"
                 ] = "No Dish Leaf Node found to invoke SetKValue command"
                 self.component_manager.dish_vcc_validation_status = val_results
-                self.logger.debug("\n\n\n\nn\n\n %s \n\n\n\n\n\\", val_results)
                 self.logger.debug(
-                    "\n\n\n\nn\n\n %s \n\n\n\n\n\\",
+                    "Dish aggregator: %s CSP Dish aggregator: %s",
+                    val_results,
                     self.component_manager.dish_vcc_validation_status,
                 )
             return result_code, message
@@ -417,7 +420,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             with self.component_manager.dish_vcc_validation_result_lock:
                 self.component_manager.number_of_dish_vcc_event_processed += 1
                 self.logger.debug(
-                    "<<<<<<< Number of dish VCC events processed: %s",
+                    "Number of dish VCC events processed: %s",
                     self.component_manager.number_of_dish_vcc_event_processed,
                 )
         elif return_codes[0] == ResultCode.FAILED:

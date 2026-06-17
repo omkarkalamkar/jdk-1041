@@ -13,9 +13,9 @@ from ska_tmc_centralnode.utils.constants import (
     DISH_LEAF_NODE_1,
     DISH_LEAF_NODE_36,
     DISH_LEAF_NODE_63,
-    DISH_LEAF_NODE_100,
     DISH_LEAF_NODE_77,
-    DISH_LEAF_NODE_MKT
+    DISH_LEAF_NODE_100,
+    DISH_LEAF_NODE_MKT,
 )
 from tests.common_utils import wait_and_validate_device_attribute_value
 from tests.integration.conftest import ensure_checked_devices
@@ -29,18 +29,18 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
     dev_factory = DevFactory()
     central_node = DeviceProxy(CENTRALNODE_MID)
     ensure_checked_devices(central_node)
-    dish_leaf_node_01 = dev_factory.get_device(DISH_LEAF_NODE_1)
-    dish_leaf_node_36 = dev_factory.get_device(DISH_LEAF_NODE_36)
-    dish_leaf_node_63 = dev_factory.get_device(DISH_LEAF_NODE_63)
-    dish_leaf_node_100 = dev_factory.get_device(DISH_LEAF_NODE_100)
-    dish_leaf_node_77 = dev_factory.get_device(DISH_LEAF_NODE_77)
-    dish_leaf_node_mkt = dev_factory.get_device(DISH_LEAF_NODE_MKT)
-    dish_list = ["01", "36", "63", "100", "77", "mkt"]
+    dln_proxy = {
+        "ska001": dev_factory.get_device(DISH_LEAF_NODE_1),
+        "ska036": dev_factory.get_device(DISH_LEAF_NODE_36),
+        "ska063": dev_factory.get_device(DISH_LEAF_NODE_63),
+        "ska100": dev_factory.get_device(DISH_LEAF_NODE_100),
+        "ska077": dev_factory.get_device(DISH_LEAF_NODE_77),
+        "mkt001": dev_factory.get_device(DISH_LEAF_NODE_MKT),
+    }
+
     # invoke the dish leaf node kValueValidationResult as FAILED
-    for dish in dish_list:
-        node = f"dish_leaf_node_{dish}"
-        proxy = locals()[node]
-        proxy.SetDirectkValueValidationResult(str(int(ResultCode.FAILED)))
+    for dl_node in dln_proxy.values():
+        dl_node.SetDirectkValueValidationResult(str(int(ResultCode.FAILED)))
 
     assert wait_and_validate_device_attribute_value(
         central_node, "isdishvccconfigset", False
@@ -67,10 +67,8 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
 
     # Verify if all dish leaf node gives k-value validation ResultCode.Ok
 
-    for dish in dish_list:
-        node = f"dish_leaf_node_{dish}"
-        proxy = locals()[node]
-        proxy.SetDirectkValueValidationResult(str(int(ResultCode.OK)))
+    for dl_node in dln_proxy.values():
+        dl_node.SetDirectkValueValidationResult(str(int(ResultCode.OK)))
 
     assert wait_and_validate_device_attribute_value(
         central_node, "isdishvccconfigset", True
@@ -112,12 +110,12 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
     )
 
     # partial success
-    dish_leaf_node_01.SetDirectkValueValidationResult(str("4"))
+    dln_01 = dln_proxy["ska001"]
+    dln_01.SetDirectkValueValidationResult(str("4"))
     assert wait_and_validate_device_attribute_value(
         central_node, "isdishvccconfigset", True
     ), "Timeout while waiting for validating attribute value"
 
-    str1 = "TMC and CSP Master Dish Vcc Version is Same"
     dict_to_compare = {
         "mid-tmc/leaf-node-csp/0": "TMC and CSP Master Dish"
         + " Vcc Version is Same",
@@ -129,7 +127,7 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
         json.dumps(dict_to_compare),
         is_json=True,
     ), "Timeout while waiting for validating attribute value"
-    dish_leaf_node_01.SetDirectkValueValidationResult(str(int(ResultCode.OK)))
+    dln_01.SetDirectkValueValidationResult(str(int(ResultCode.OK)))
 
     result_string_to_match = {
         "dish": "ALL DISH OK",

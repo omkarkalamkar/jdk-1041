@@ -304,7 +304,8 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         self.logger.debug(
-            "^^^^^^^^^^^^^^^ %s %s",
+            "Remaining csp dish validation events: %s"
+            "  load_dish_cfg_aggregated_result: %s",
             self.number_of_dish_vcc_event_processed,
             self.load_dish_cfg_aggregated_result,
         )
@@ -1312,22 +1313,22 @@ class CNComponentManagerMid(CNComponentManager):
                 json.loads(argin).get("dish", {}).get("receptor_ids", [])
             )
             k_value_status = json.loads(self.dish_vcc_validation_status)
-            
+
             for d in receptors:
                 dish = d.lower()
                 if dish in k_value_status:
                     k_value_failed_dishes[dish] = k_value_status[dish]
-            
-                  
+
             if k_value_failed_dishes:
                 err_msg = (
                     "Can't assign receptors with k-value issues:"
-                     f" {k_value_failed_dishes}"
+                    f" {k_value_failed_dishes}"
                 )
                 self.logger.debug(
-                    "Dish k-value STATUS: %s, receptors assigned: %s", 
-                    k_value_status, receptors
-                ) 
+                    "Dish k-value STATUS: %s, receptors assigned: %s",
+                    k_value_status,
+                    receptors,
+                )
                 return task_callback(
                     status=TaskStatus.REJECTED,
                     result=(ResultCode.NOT_ALLOWED, err_msg),
