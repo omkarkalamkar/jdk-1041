@@ -65,6 +65,7 @@ def test_internal_model_events_mid(
 
     assert pytest.num_events_arrived >= 1
     central_node.unsubscribe_event(event_id)
+    csp_master.SetDirectState(tango.DevState.ON)
 
 
 @pytest.mark.post_deployment

@@ -150,7 +150,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             if res[0] == ResultCode.FAILED:
                 if "csp" in dev.lower():
                     flag = True
-                    continue
+                    break
                 with self.component_manager.dish_vcc_validation_attr_lock:
                     val_results[dev.split("/")[2].lower()] = res[1]
                 count += 1

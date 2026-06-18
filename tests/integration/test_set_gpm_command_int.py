@@ -21,6 +21,18 @@ from tests.settings import (
 )
 
 
+def validate_gpm_lrcr(central_node, command_id):
+    """validate lrcr value"""
+    timeout = 600
+    while timeout >= 0:
+        timeout -= 10
+        cmd_id, _ = central_node.longrunningcommandresult
+        if cmd_id == command_id:
+            return central_node.longrunningcommandresult
+        time.sleep(10)
+    return None
+
+
 def set_gpm_command(tango_context, central_node_name, change_event_callbacks):
     """Test cases for SetGlobalPointing command"""
 
@@ -62,21 +74,18 @@ def set_gpm_command(tango_context, central_node_name, change_event_callbacks):
     )
 
     assert unique_id[0].endswith("SetGlobalPointingModel")
+
     assert result[0] == ResultCode.QUEUED
     change_event_callbacks["GlobalPointingModelStatus"].assert_change_event(
         Anything,
         lookahead=4,
     )
 
-    assertion_data = change_event_callbacks[
-        "longRunningCommandResult"
-    ].assert_change_event(
-        (unique_id[0], Anything),
-        lookahead=4,
-    )
+    assertion_data = validate_gpm_lrcr(central_node, unique_id[0])
+    assert assertion_data is not None
+    assert unique_id[0] == assertion_data[0]
 
-    result_data = json.loads(assertion_data["attribute_value"][1])
-
+    result_data = json.loads(assertion_data[1])
     command_completed = [0, "Command Completed"]
     output_data = result_data[1]
     gpm_input = json.loads(gpm_input)
@@ -152,14 +161,11 @@ def set_gpm_command_negative_scenarios(
         lookahead=4,
     )
 
-    assertion_data = change_event_callbacks[
-        "longRunningCommandResult"
-    ].assert_change_event(
-        (unique_id[0], Anything),
-        lookahead=4,
-    )
+    assertion_data = validate_gpm_lrcr(central_node, unique_id[0])
+    assert assertion_data is not None
     dln_100.SetDefective(RESET_DEFECT)
-    result_data = json.loads(assertion_data["attribute_value"][1])
+    assert unique_id[0] == assertion_data[0]
+    result_data = json.loads(assertion_data[1])
     gpm_status = json.loads(central_node.GlobalPointingModelStatus)
     assert result_data[0] == int(ResultCode.FAILED)
     result_data = ast.literal_eval(
@@ -313,7 +319,7 @@ def test_set_gpm_command_negative_scenarios_all(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.SKA_mid
+@pytest.mark.test
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
