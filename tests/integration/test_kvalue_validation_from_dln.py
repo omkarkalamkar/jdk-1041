@@ -14,7 +14,10 @@ from ska_tmc_centralnode.utils.constants import (
     DISH_LEAF_NODE_36,
     DISH_LEAF_NODE_63,
     DISH_LEAF_NODE_77,
+    DISH_LEAF_NODE_099,
     DISH_LEAF_NODE_100,
+    DISH_LEAF_NODE_500,
+    DISH_LEAF_NODE_999,
     DISH_LEAF_NODE_MKT,
 )
 from tests.common_utils import wait_and_validate_device_attribute_value
@@ -24,6 +27,7 @@ from tests.settings import logger
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.test
 def test_dln_kvalue_validation_result(change_event_callbacks):
     """Test Dish leaf node kvalue validation result"""
     dev_factory = DevFactory()
@@ -35,6 +39,9 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
         "ska063": dev_factory.get_device(DISH_LEAF_NODE_63),
         "ska100": dev_factory.get_device(DISH_LEAF_NODE_100),
         "ska077": dev_factory.get_device(DISH_LEAF_NODE_77),
+        "ska099": dev_factory.get_device(DISH_LEAF_NODE_099),
+        "ska500": dev_factory.get_device(DISH_LEAF_NODE_500),
+        "ska999": dev_factory.get_device(DISH_LEAF_NODE_999),
         "mkt001": dev_factory.get_device(DISH_LEAF_NODE_MKT),
     }
 
@@ -55,6 +62,9 @@ def test_dln_kvalue_validation_result(change_event_callbacks):
         "ska063": "k-value not identical",
         "ska100": "k-value not identical",
         "ska077": "k-value not identical",
+        "ska099": "k-value not identical",
+        "ska500": "k-value not identical",
+        "ska999": "k-value not identical",
         "mkt001": "k-value not identical",
     }
 
