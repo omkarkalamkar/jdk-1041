@@ -33,9 +33,5 @@ central_node:
     mocks:
       enabled: true
 
-    centralnode:
-      enabled: true
-      DishMasterIdentifier: "elt/master"
-
 ska-taranta:
   enabled: false

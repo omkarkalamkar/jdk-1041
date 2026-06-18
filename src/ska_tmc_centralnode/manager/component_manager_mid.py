@@ -19,7 +19,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.faults import StateModelError
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
-from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.exceptions import CommandNotAllowed, InvalidReceptorIdError
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command_mid import (
@@ -55,9 +55,10 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
 )
 
+# pylint:disable=too-many-instance-attributes
+# pylint:disable=too-many-arguments
 
-# pylint:disable=too-many-instance-attributes
-# pylint:disable=too-many-instance-attributes
+
 class CNComponentManagerMid(CNComponentManager):
     """Component manager class for central node mid"""
 
@@ -100,7 +101,9 @@ class CNComponentManagerMid(CNComponentManager):
         gpm_data_sources_prefix=None,
         gpm_file_path_prefix=None,
         default_array_layout_url: dict | None = None,
-        mkt_extension_id: str = "MKE",
+        mkt_extension_id: str = "",
+        mkt_dish_ranges: tuple[int, int] = (0, 63),
+        ska_dish_ranges: tuple[int, int] = (1, 999),
         *args,
         **kwargs,
     ) -> None:
@@ -243,6 +246,8 @@ class CNComponentManagerMid(CNComponentManager):
         self.dishln_stow_mode_lock = threading.RLock()
         self.number_of_stow_mode_executed: int = 0
         self.mkt_extension_id = mkt_extension_id
+        self.mkt_dish_ranges = mkt_dish_ranges
+        self.ska_dish_ranges = ska_dish_ranges
         self.stow_mode_command_aggregated_result: ResultCode = (
             ResultCode.UNKNOWN
         )
@@ -280,6 +285,8 @@ class CNComponentManagerMid(CNComponentManager):
             telescope="mid",
         )
         self.aggregation_process.start_aggregation_process()
+
+    # pylint:enable=too-many-arguments
 
     def check_if_dishes_are_responsive(self) -> bool:
         """
@@ -1064,6 +1071,10 @@ class CNComponentManagerMid(CNComponentManager):
             )
             if not all(key in gpm_input for key in keys_to_allow_skip):
                 GPMJsonModel(**gpm_input)
+                if not self.validate_dish_ids(gpm_input["receptors"].keys()):
+                    raise InvalidReceptorIdError(
+                        f"Incorrect receptor id in json: {gpm_input}"
+                    )
             else:
                 self.logger.debug(
                     "Executing initialization/restart SetGPM on %s",
@@ -1114,7 +1125,7 @@ class CNComponentManagerMid(CNComponentManager):
                         stow_input.append(dish_id.rsplit("/", 1)[-1])
                 else:
                     raise ValueError(messgae + " " + example)
-            GPMJsonModel.validate_dish_ids(stow_input)
+            self.validate_dish_ids(stow_input)
             stow_input = [dish_id.lower() for dish_id in stow_input]
             self.logger.debug("Stow command dish list: %s", stow_input)
             return set_stow_mode_command_object.apply_stow_mode(
@@ -1303,6 +1314,8 @@ class CNComponentManagerMid(CNComponentManager):
                 dish_leaf_node_prefix,
                 self.logger,
                 self.mkt_extension_id,
+                self.ska_dish_ranges,
+                self.mkt_dish_ranges,
             )
 
             assign_validator.loads(argin)
@@ -1485,3 +1498,26 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
     # pylint: enable=unexpected-keyword-arg
+
+    def validate_dish_ids(self, receptors: list[str]) -> bool:
+        """Validates dish ids."""
+        for dish_id in receptors:
+            dish_id = dish_id.upper()
+            if dish_id.startswith("SKA"):
+                dish_suffix = int(dish_id[3:])
+                if (self.ska_dish_ranges[1] < dish_suffix) or (
+                    dish_suffix < self.ska_dish_ranges[0]
+                ):
+                    return False, f"Dish id {dish_id} not in range (1,999)"
+            elif dish_id.startswith("MKT"):
+                dish_suffix = int(dish_id[3:])
+                if (self.mkt_dish_ranges[1] < dish_suffix) or (
+                    dish_suffix < self.mkt_dish_ranges[0]
+                ):
+                    return False, f"MKT id {dish_id} not in range (1,63)"
+            elif not (
+                self.mkt_extension_id
+                and dish_id.startswith(self.mkt_extension_id)
+            ):
+                return False, f"Invalid Dish id {dish_id} provided in Json"
+        return True, ""

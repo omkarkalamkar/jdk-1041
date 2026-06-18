@@ -319,7 +319,6 @@ def test_set_gpm_command_negative_scenarios_all(
 
 
 @pytest.mark.post_deployment
-@pytest.mark.test
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],

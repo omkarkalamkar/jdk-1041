@@ -3,7 +3,7 @@
   "transaction_id": "txn-....-00001",
   "subarray_id": 1,
   "dish": {
-      "receptor_ids": ["SKA001", "MKT001"]
+      "receptor_ids": ["SKA001","SKA500","SKA099","SKA999", "MKT001"]
   },
 "csp": {
     "pst": {
