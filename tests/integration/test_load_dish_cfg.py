@@ -815,6 +815,21 @@ def load_dish_cfg_partial_success_and_assign_rejected(
         lookahead=4,
     )
 
+    result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
+    assert unique_id[0].endswith("LoadDishCfg")
+    assert result[0] == ResultCode.QUEUED
+    expected_failed_message = json.dumps(
+        [
+            ResultCode.NOT_ALLOWED,
+            "LoadDishCfg command is allowed in CSP Master DevState.OFF only.",
+        ]
+    )
+    assert check_lrcr_events(
+        change_event_callback=change_event_callbacks,
+        command_name="LoadDishCfg",
+        result_to_check=expected_failed_message,
+    )
+
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid

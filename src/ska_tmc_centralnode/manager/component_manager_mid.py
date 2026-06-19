@@ -224,6 +224,7 @@ class CNComponentManagerMid(CNComponentManager):
         self._global_pointing_model_status = {}
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.dishln_gpm_lock = threading.RLock()
+        self.dishln_gpm_command_lock = threading.RLock()
         self.dish_vcc_validation_result_lock = threading.RLock()
         self.number_of_dish_vcc_event_processed: int = 0
         self.enable_dish_vcc_init = enable_dish_vcc_init
@@ -499,10 +500,10 @@ class CNComponentManagerMid(CNComponentManager):
         """
         self._global_pointing_model_status = gpm_version
 
-    def is_csp_dish_ready(self) -> bool:
+    def is_csp_mln_csp_master_ready(self) -> str:
         """
-        his method wait for csp master leaf node and
-        dish leaf nodes to become ready to accept request
+        This method wait for csp master leaf node and
+        csp_master to become ready to accept request
 
         Returns:
             True, if csp master leaf node and
@@ -510,27 +511,32 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         count = 0
-        devices_to_check_list = [
-            self.input_parameter.csp_mln_dev_name,
-            self.input_parameter.csp_master_dev_name,
-        ]
+        while count <= self.dish_vcc_init_timeout:
+            try:
+                csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
+                    self.input_parameter.csp_mln_dev_name,
+                    adapter_type=AdapterType.CSP_MASTER_LEAF_NODE,
+                )
+                csp_master_adapter = (
+                    self.adapter_factory.get_or_create_adapter(
+                        self.input_parameter.csp_master_dev_name,
+                        adapter_type=AdapterType.CSPMASTER,
+                    )
+                )
+                self.logger.debug(
+                    "CSP MLN admin mode: %s CSP master admin mode: %s",
+                    csp_mln_adapter.cspControllerAdminMode,
+                    csp_master_adapter.state,
+                )
 
-        dev_state_list = [
-            self.get_device(device).state for device in devices_to_check_list
-        ]
-        while True:
-            if set(dev_state_list) == set([DevState.ON]):
-                return True
-            time.sleep(1)
-            dev_state_list = [
-                self.get_device(device).state
-                for device in devices_to_check_list
-            ]
-            self.logger.debug("Current device states: %s", str(dev_state_list))
+                if csp_master_adapter.state != DevState.OFF:
+                    return ResultCode.NOT_ALLOWED
+                return ResultCode.OK
+            except Exception as e:
+                self.logger.exception("Error %s", str(e))
             count += 1
-            if count == self.dish_vcc_init_timeout:
-                break
-        return False
+            time.sleep(1)
+        return ResultCode.FAILED
 
     def update_device_state(self, device_name: str, state: DevState) -> None:
         """
@@ -746,19 +752,6 @@ class CNComponentManagerMid(CNComponentManager):
         if command_name in self.supported_commands_for_responsive_check:
             self.check_if_dishes_are_responsive()
 
-    def is_load_dish_cfg_command_allowed(self) -> bool:
-        """Checks LoadDishCfg command is allowed or not"""
-        csp_master = self.adapter_factory.get_or_create_adapter(
-            self.input_parameter.csp_master_dev_name, AdapterType.CSPMASTER
-        )
-        self.logger.debug("Current CSP master state: %s", csp_master.state)
-        if csp_master.state != DevState.OFF:
-            raise CommandNotAllowed(
-                "LoadDishCfg command is allowed in"
-                " CSP Master DevState.OFF only.",
-            )
-        return True
-
     def update_k_value_validation(
         self, dev_name: str, kvalue: ResultCode
     ) -> None:
@@ -872,18 +865,8 @@ class CNComponentManagerMid(CNComponentManager):
                         if k_val_result != "1":
                             num_of_dish_values[dish_name] = k_val_result
 
-                csp_mln_state = self.get_device(
-                    self.input_parameter.csp_mln_dev_name
-                ).state
-
-                csp_controller_state = self.get_device(
-                    self.input_parameter.csp_master_dev_name
-                ).state
-                if (
-                    len(num_of_dish_values)
-                    == len(self.input_parameter.dish_leaf_node_dev_names)
-                    and csp_mln_state == DevState.ON
-                    and csp_controller_state == DevState.OFF
+                if len(num_of_dish_values) == len(
+                    self.input_parameter.dish_leaf_node_dev_names
                 ):
                     self.logger.debug(
                         "All dishes and csp master devices are"
@@ -1013,6 +996,23 @@ class CNComponentManagerMid(CNComponentManager):
             a result code and message
 
         """
+
+        status = self.is_csp_mln_csp_master_ready()
+        if status != ResultCode.OK:
+            if status == ResultCode.NOT_ALLOWED:
+                err_msg = (
+                    "LoadDishCfg command is allowed in"
+                    " CSP Master DevState.OFF only."
+                )
+            else:
+                err_msg = (
+                    "CSP master or CSP MLN is not available for"
+                    " loaddishcfg execution"
+                )
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, err_msg),
+            )
         loadishcfg_command_object = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
@@ -1149,7 +1149,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.dev_names_for_load_dish_cfg = []
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
-        self.dish_vcc_command_status = DishConfigStatus.COMPLETED
         self.command_in_progress = ""
         self._check_init_and_invoke_gpm()
 
