@@ -23,6 +23,7 @@ from ska_tmc_centralnode.utils.json_validator_decorator import (
     validate_dish_vcc_command_status,
 )
 from tests.settings import (
+    DISH_VCC_VALIDATION_RESULT_STATUS,
     MID_CSP_MASTER_DEVICE,
     MID_CSP_MLN_DEVICE,
     create_cm,
@@ -61,6 +62,9 @@ def test_load_dish_cfg_command(
     )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    cm.dish_kvalue_validation_aggregator.dln_kvalue_validation_results = (
+        DISH_VCC_VALIDATION_RESULT_STATUS
     )
     task_callback.assert_against_call(
         call_kwargs={
