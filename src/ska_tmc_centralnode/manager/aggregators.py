@@ -378,19 +378,19 @@ class DishAttrValueAggregator:
         """
         This method updates the DishVccValidationStatus of Central Node.
         """
-        flag = set(self.dln_kvalue_validation_results.values()) == set(
-            ["k-value identical"]
-        )
+        check_set_k_val_success_on_all_dln = set(
+            self.dln_kvalue_validation_results.values()
+        ) == set(["k-value identical"])
         self.logger.debug(
             "kValueValidationResult dictionary: %s",
             self.dln_kvalue_validation_results.values(),
         )
-        if not flag:
-            flag = any(
+        if not check_set_k_val_success_on_all_dln:
+            is_set_k_value_successful = any(
                 v == "k-value identical"
                 for v in self.dln_kvalue_validation_results.values()
             )
-            if flag:
+            if is_set_k_value_successful:
                 self._component_manager.is_dish_vcc_config_set = True
             else:
                 self._component_manager.is_dish_vcc_config_set = False

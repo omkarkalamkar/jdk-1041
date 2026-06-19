@@ -554,11 +554,12 @@ class SetGlobalPointingModel(SetDishGPM):
                             "dishln gpm %s",
                             self.component_manager.dishln_gpm_cmd_exe_data,
                         )
-                    name = f"{dishln_id}_{band_value}"
-                    with self.component_manager.command_completion_cond:
-                        self.command_results[name] = result
-                        cond = self.component_manager.command_completion_cond
-                        with cond:
-                            cond.notify_all()
+            if result:
+                name = f"{dishln_id}_{band_value}"
+                with self.component_manager.command_completion_cond:
+                    self.command_results[name] = result
+                    cond = self.component_manager.command_completion_cond
+                    with cond:
+                        cond.notify_all()
 
         return callback

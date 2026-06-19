@@ -130,11 +130,9 @@ class LoadDishCfg(LoadDishCfgCommand):
             exception (str): any message returned as a part of command
 
         """
-        flag = False
-        count = 0
         cm = self.component_manager
         aggregator = cm.dish_kvalue_validation_aggregator
-        val_results = aggregator.dln_kvalue_validation_results
+        k_val_results = aggregator.dln_kvalue_validation_results
         self.logger.debug(
             "Task callback invoked | command=LoadDishCfg id=%s result=%s "
             "message=%s",
@@ -142,9 +140,98 @@ class LoadDishCfg(LoadDishCfgCommand):
             str(result[0]),
             exception,
         )
+        result = self.process_loaddishcfg_as_per_err_message_or_exception(
+            result=result,
+            k_val_results=k_val_results,
+            exception=exception,
+        )
+        if result[0] == ResultCode.FAILED or result[2]:
+            error_message = result[1] + " LoadDishCfg command failed: "
+            self.component_manager.update_dish_vcc_flag(False)
+            self.process_update_task_for_loaddishcfg_failure(error_message)
+        else:
+            self.process_loaddishcfg_as_per_k_val_results(k_val_results)
+            self.update_memorized_attribute()
+        if self.component_manager.command_mapping.get(self.command_id):
+            self.component_manager.command_mapping.pop(self.command_id)
         self.component_manager.dish_vcc_command_status = (
             DishConfigStatus.COMPLETED
         )
+        self.component_manager.reset_load_dish_cfg_data()
+
+    def process_loaddishcfg_as_per_k_val_results(self, k_val_results) -> None:
+        """
+        Process the command output as per the k value validation results.
+
+        Args:
+            k_val_results (dict): Mapping of dish IDs or component names to
+                their k-value validation result strings.
+
+        Returns:
+            None
+        """
+
+        message = ""
+        status = [v.lower() for v in k_val_results.values()]
+        if set(status) == set(
+            [DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK].lower()]
+        ):
+            message = "Command Completed"
+            self.task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.OK, message),
+            )
+            self.component_manager.update_dish_vcc_flag(True)
+        elif DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK] in status:
+            message = "LoadDishCfg completed with partial success: " + str(
+                self.filter_failed_data(
+                    json.loads(
+                        self.component_manager.dish_vcc_validation_status
+                    )
+                )
+            )
+            self.task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.OK, message),
+            )
+            self.component_manager.update_dish_vcc_flag(True)
+        else:
+            message = "LoadDishCfg failed: " + str(
+                self.filter_failed_data(
+                    json.loads(
+                        self.component_manager.dish_vcc_validation_status
+                    )
+                )
+            )
+            self.task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, message),
+                exception=message,
+            )
+            self.component_manager.update_dish_vcc_flag(False)
+
+    def process_loaddishcfg_as_per_err_message_or_exception(
+        self,
+        result: Tuple[ResultCode, str],
+        k_val_results: dict,
+        exception: str = "",
+    ) -> Tuple[ResultCode, str, bool]:
+        """
+        Process result based on an error message or exception.
+
+        Args:
+            result (Tuple[ResultCode, str]): The original result code and
+                message from the invoked commands.
+            exception (str): Optional exception or error text.
+            k_val_results (dict): Mapping of dish/component to k-value
+                validation results.
+
+        Returns:
+            Tuple[ResultCode, str, bool]: Adjusted result code and message.
+        """
+
+        count = 0
+        flag = False
         # If error/exception occurred on SetKValue
         for dev, res in self.command_results.items():
             if res[0] == ResultCode.FAILED:
@@ -152,11 +239,13 @@ class LoadDishCfg(LoadDishCfgCommand):
                     flag = True
                     break
                 with self.component_manager.dish_vcc_validation_attr_lock:
-                    val_results[dev.split("/")[2].lower()] = res[1]
+                    k_val_results[dev.split("/")[2].lower()] = res[1]
                 count += 1
         if count:
             with self.component_manager.dish_vcc_validation_attr_lock:
-                self.component_manager.dish_vcc_validation_status = val_results
+                self.component_manager.dish_vcc_validation_status = (
+                    k_val_results
+                )
         status = json.loads(self.component_manager.dish_vcc_validation_status)
         if status.get(MID_CSP_MLN_DEVICE) != (
             DISH_VCC_VALIDATION_RESULT_STATUS[ResultCode.OK]
@@ -175,53 +264,9 @@ class LoadDishCfg(LoadDishCfgCommand):
         else:
             result = (ResultCode.OK, "")
 
-        if result[0] == ResultCode.FAILED or flag:
-            error_message = result[1] + " LoadDishCfg command failed: "
-            self.component_manager.update_dish_vcc_flag(False)
-            self.process_update_task_for_loaddishcfg_failure(error_message)
-        else:
-            message = ""
-            status = [v.lower() for v in val_results.values()]
-            if set(status) == set(
-                [DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK].lower()]
-            ):
-                message = "Command Completed"
-                self.task_callback(
-                    status=TaskStatus.COMPLETED,
-                    result=(ResultCode.OK, message),
-                )
-                self.component_manager.update_dish_vcc_flag(True)
-            elif DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK] in status:
-                message = "LoadDishCfg completed with partial success: " + str(
-                    self.filter_failed_data(
-                        json.loads(
-                            self.component_manager.dish_vcc_validation_status
-                        )
-                    )
-                )
-                self.task_callback(
-                    status=TaskStatus.COMPLETED,
-                    result=(ResultCode.OK, message),
-                )
-                self.component_manager.update_dish_vcc_flag(True)
-            else:
-                message = "LoadDishCfg failed: " + str(
-                    self.filter_failed_data(
-                        json.loads(
-                            self.component_manager.dish_vcc_validation_status
-                        )
-                    )
-                )
-                self.task_callback(
-                    status=TaskStatus.COMPLETED,
-                    result=(ResultCode.FAILED, message),
-                    exception=message,
-                )
-                self.component_manager.update_dish_vcc_flag(False)
-            self.update_memorized_attribute()
-        if self.component_manager.command_mapping.get(self.command_id):
-            self.component_manager.command_mapping.pop(self.command_id)
-        self.component_manager.reset_load_dish_cfg_data()
+        processed_result = (result[0], result[1], flag)
+
+        return processed_result
 
     def process_update_task_for_loaddishcfg_failure(
         self, error_message: str
