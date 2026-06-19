@@ -513,6 +513,8 @@ class CNComponentManagerMid(CNComponentManager):
         count = 0
         while count <= self.dish_vcc_init_timeout:
             try:
+                count += 2
+                time.sleep(2)
                 csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
                     self.input_parameter.csp_mln_dev_name,
                     adapter_type=AdapterType.CSP_MASTER_LEAF_NODE,
@@ -524,8 +526,8 @@ class CNComponentManagerMid(CNComponentManager):
                     )
                 )
                 self.logger.debug(
-                    "CSP MLN admin mode: %s CSP master admin mode: %s",
-                    csp_mln_adapter.cspControllerAdminMode,
+                    "CSP MLN version: %s CSP master state: %s",
+                    csp_mln_adapter._proxy.GetVersionInfo(),
                     csp_master_adapter.state,
                 )
 
@@ -534,8 +536,6 @@ class CNComponentManagerMid(CNComponentManager):
                 return ResultCode.OK
             except Exception as e:
                 self.logger.exception("Error %s", str(e))
-            count += 1
-            time.sleep(1)
         return ResultCode.FAILED
 
     def update_device_state(self, device_name: str, state: DevState) -> None:

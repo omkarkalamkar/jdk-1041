@@ -46,6 +46,7 @@ def test_load_dish_cfg_command(
         tango.cb_sub_model.PUSH_CALLBACK
     )
     cm, _ = create_cm()
+    cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     dln = tango.DeviceProxy("mid-tmc/leaf-node-dish/ska001")
     _set_k_numbers_to_dish.return_value = ([ResultCode.QUEUED], [""])
     dln.SetDirectkValueValidationResult("0")
@@ -83,6 +84,7 @@ def test_load_dish_cfg_command_invalid_json(
 ):
     """Test LoadDishCfg command rejected when invalid json provided"""
     cm, _ = create_cm()
+    cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
@@ -123,6 +125,7 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
 ):
     """Test LoadDishCfg command rejected when kvalue is out of range"""
     cm, _ = create_cm()
+    cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("load_dish_cfg_kvalue_out_of_range")
@@ -154,6 +157,7 @@ def test_load_dish_cfg_command_invalid_file_name(
 ):
     """Test LoadDishCfg command rejected when invalid json provided"""
     cm, _ = create_cm()
+    cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg_invalid")
