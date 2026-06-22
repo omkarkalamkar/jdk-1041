@@ -121,7 +121,6 @@ def test_load_dish_cfg_command_invalid_json(
     assert err_message in assertion_data["call_kwargs"]["result"][1]
     assert err_message in assertion_data["call_kwargs"]["exception"]
     logger.info("Assertion data: %s", assertion_data)
-    # assert 0
 
 
 def test_load_dish_cfg_command_kvalue_out_of_range(
