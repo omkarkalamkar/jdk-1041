@@ -159,56 +159,68 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
         self.component_manager.reset_load_dish_cfg_data()
 
-    def process_loaddishcfg_as_per_k_val_results(self, k_val_results) -> None:
+    def process_loaddishcfg_as_per_k_val_results(
+        self, k_val_results: dict
+    ) -> None:
         """
         Process the command output as per the k value validation results.
 
         Args:
             k_val_results (dict): Mapping of dish IDs or component names to
                 their k-value validation result strings.
+        """
+        ok_status = DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK].lower()
+        statuses = {v.lower() for v in k_val_results.values()}
+
+        all_ok = statuses == {ok_status}
+        partial_ok = not all_ok and ok_status in statuses
+
+        message, result_code, dish_vcc_flag = self._build_loaddishcfg_outcome(
+            all_ok, partial_ok
+        )
+
+        self.task_callback(
+            status=TaskStatus.COMPLETED,
+            result=(result_code, message),
+            **(
+                {"exception": message}
+                if result_code == ResultCode.FAILED
+                else {}
+            ),
+        )
+        self.component_manager.update_dish_vcc_flag(dish_vcc_flag)
+
+    def _build_loaddishcfg_outcome(
+        self, all_ok: bool, partial_ok: bool
+    ) -> Tuple[str, ResultCode, bool]:
+        """
+        Derive the message, result code, and dish VCC flag
+        from validation outcome.
+
+        Args:
+            all_ok (bool): True if every dish passed k-value validation.
+            partial_ok (bool): True if only some dishes passed.
 
         Returns:
-            None
+            Tuple[str, ResultCode, bool]: message, result code, dish_vcc_flag.
         """
+        if all_ok:
+            return "Command Completed", ResultCode.OK, True
 
-        message = ""
-        status = [v.lower() for v in k_val_results.values()]
-        if set(status) == set(
-            [DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK].lower()]
-        ):
-            message = "Command Completed"
-            self.task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.OK, message),
+        failed_data = str(
+            self.filter_failed_data(
+                json.loads(self.component_manager.dish_vcc_validation_status)
             )
-            self.component_manager.update_dish_vcc_flag(True)
-        elif DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK] in status:
-            message = "LoadDishCfg completed with partial success: " + str(
-                self.filter_failed_data(
-                    json.loads(
-                        self.component_manager.dish_vcc_validation_status
-                    )
-                )
+        )
+
+        if partial_ok:
+            message = (
+                f"LoadDishCfg completed with partial success: {failed_data}"
             )
-            self.task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.OK, message),
-            )
-            self.component_manager.update_dish_vcc_flag(True)
-        else:
-            message = "LoadDishCfg failed: " + str(
-                self.filter_failed_data(
-                    json.loads(
-                        self.component_manager.dish_vcc_validation_status
-                    )
-                )
-            )
-            self.task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, message),
-                exception=message,
-            )
-            self.component_manager.update_dish_vcc_flag(False)
+            return message, ResultCode.OK, True
+
+        message = f"LoadDishCfg failed: {failed_data}"
+        return message, ResultCode.FAILED, False
 
     def process_loaddishcfg_as_per_err_message_or_exception(
         self,
@@ -222,51 +234,113 @@ class LoadDishCfg(LoadDishCfgCommand):
         Args:
             result (Tuple[ResultCode, str]): The original result code and
                 message from the invoked commands.
-            exception (str): Optional exception or error text.
             k_val_results (dict): Mapping of dish/component to k-value
                 validation results.
+            exception (str): Optional exception or error text.
 
         Returns:
-            Tuple[ResultCode, str, bool]: Adjusted result code and message.
+            Tuple[ResultCode, str, bool]: Adjusted result code, message,
+                and a flag indicating whether CSP failure occurred.
         """
+        csp_failed, failed_count = self._collect_failed_kvalue_results(
+            k_val_results
+        )
 
-        count = 0
-        flag = False
-        # If error/exception occurred on SetKValue
-        for dev, res in self.command_results.items():
-            if res[0] == ResultCode.FAILED:
-                if "csp" in dev.lower():
-                    flag = True
-                    break
-                with self.component_manager.dish_vcc_validation_attr_lock:
-                    k_val_results[dev.split("/")[2].lower()] = res[1]
-                count += 1
-        if count:
+        if failed_count:
+            self._persist_kvalue_validation_results(k_val_results)
+
+        csp_failed = csp_failed or self._csp_validation_status_failed(
+            failed_count
+        )
+
+        adjusted_result = self._adjust_result(result, exception, csp_failed)
+
+        return (*adjusted_result, csp_failed)
+
+    def _collect_failed_kvalue_results(
+        self, k_val_results: dict
+    ) -> Tuple[bool, int]:
+        """
+        Iterate command results, collecting failures.
+
+        Args:
+            k_val_results (dict): k-value validation results mapping.
+
+        Returns:
+            Tuple[bool, int]: (csp_failed, non_csp_failure_count)
+        """
+        failed_count = 0
+
+        for device, (result_code, message) in self.command_results.items():
+            if result_code != ResultCode.FAILED:
+                continue
+
+            if "csp" in device.lower():
+                return True, failed_count
+
+            dish_id = device.split("/")[2].lower()
             with self.component_manager.dish_vcc_validation_attr_lock:
-                self.component_manager.dish_vcc_validation_status = (
-                    k_val_results
-                )
+                k_val_results[dish_id] = message
+
+            failed_count += 1
+
+        return False, failed_count
+
+    def _persist_kvalue_validation_results(self, k_val_results: dict) -> None:
+        """Persist updated k-value validation results to component manager.
+
+        Args:
+         k_val_results (dict): k-value validation results mapping.
+        """
+        with self.component_manager.dish_vcc_validation_attr_lock:
+            self.component_manager.dish_vcc_validation_status = k_val_results
+
+    def _csp_validation_status_failed(self, failed_count: int) -> bool:
+        """
+        Check whether CSP MLN validation status is non-OK or all
+        subscribed commands have failed.
+
+        Args:
+            failed_count: count for command failure on invoked devices.
+        """
         status = json.loads(self.component_manager.dish_vcc_validation_status)
-        if status.get(MID_CSP_MLN_DEVICE) != (
+        csp_status_not_ok = status.get(MID_CSP_MLN_DEVICE) != (
             DISH_VCC_VALIDATION_RESULT_STATUS[ResultCode.OK]
-        ) or count >= len(self.command_subs_list):
-            flag = True
-        elif "timeout" in result[1].lower() or "timeout" in exception.lower():
-            result = (ResultCode.OK, result[1])
-        elif (
-            "exception" in result[1].lower()
-            or "exception" in exception.lower()
-        ):
-            if flag:  # if error occurred for CSPMLN
-                result = (ResultCode.FAILED, result[1])
-            else:
-                result = (ResultCode.OK, result[1])
-        else:
-            result = (ResultCode.OK, "")
+        )
+        all_commands_failed = failed_count >= len(self.command_subs_list)
+        return csp_status_not_ok or all_commands_failed
 
-        processed_result = (result[0], result[1], flag)
+    def _adjust_result(
+        self,
+        result: Tuple[ResultCode, str],
+        exception: str,
+        csp_failed: bool,
+    ) -> Tuple[ResultCode, str]:
+        """
+        Determine the final result code and message based on the error
+        type and whether a CSP failure occurred.
 
-        return processed_result
+        Args:
+            result (Tuple[ResultCode, str]): The original result code and
+                message from the invoked commands.
+            exception: Exception string.
+            csp_failed (bool): Does command failed on CSP.
+        """
+        combined_text = f"{result[1]} {exception}".lower()
+
+        if csp_failed:
+            return result  # Preserve original FAILED result
+
+        if "timeout" in combined_text:
+            return ResultCode.OK, result[1]
+
+        if "exception" in combined_text:
+            return (
+                ResultCode.FAILED if csp_failed else ResultCode.OK,
+                result[1],
+            )
+
+        return ResultCode.OK, ""
 
     def process_update_task_for_loaddishcfg_failure(
         self, error_message: str

@@ -1009,6 +1009,7 @@ class CNComponentManagerMid(CNComponentManager):
                     "CSP master or CSP MLN is not available for"
                     " loaddishcfg execution"
                 )
+            self.update_dish_vcc_flag(False)
             return task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, err_msg),

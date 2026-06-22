@@ -829,6 +829,40 @@ def load_dish_cfg_partial_success_and_assign_rejected(
         command_name="LoadDishCfg",
         result_to_check=expected_failed_message,
     )
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", False
+    ), "Timeout while waiting for validating attribute value"
+
+    csp_master_device.SetDirectState(DevState.OFF)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
+    result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
+
+    logger.info(
+        "Reattempted LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+    # Command should queue
+    assert unique_id[0].endswith("LoadDishCfg")
+    assert result[0] == ResultCode.QUEUED
+
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", True
+    ), "Timeout while waiting for validating attribute value"
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+
+    csp_master_device.SetDirectState(DevState.ON)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
+    )
 
 
 @pytest.mark.post_deployment
