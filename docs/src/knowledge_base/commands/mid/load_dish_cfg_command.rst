@@ -34,4 +34,18 @@ The LoadDishCfg command applies the Dish VCC configuration to the specified dish
 
     11. The **isDishVccConfigSet** attribute indicates whether the command(AssignResources, ReleaseResources, On, etc) is allowed to execute on TMC.
 
+    12. **Example input JSON**:
+
+    .. code-block:: json
+
+        {
+            "interface": "https://schema.skao.int/ska-mid-cbf-initsysparam/1.0",
+            "tm_data_sources": [
+                "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators?main#tmdata"
+            ],
+            "tm_data_filepath": "instrument/dishid_vcc_map_configuration/ska-mid-cbf-system-parameters-mkt.json"
+        }
+
+
+
         
