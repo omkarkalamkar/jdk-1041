@@ -5,6 +5,15 @@ Change Log
 All notable changes to this project will be documented in this file.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+
+[1.7.0]
+*******
+Updated
+-------
+* Updated LoadDishCfg command to support partial success.
+* LoadDishCfg is successful if it gets success on any of the dish in the provided JSON.
+* Partial success is not allowed if LoadDishCfg fails on CSP master.
+
 [1.6.0]
 *******
 Updated
