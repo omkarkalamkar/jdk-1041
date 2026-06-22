@@ -54,7 +54,7 @@ class MidTmcCentralNode(AbstractCentralNode):
 
     DishLeafNodePrefix = device_property(
         dtype="str",
-        default_value="mid-tmc/leaf-node-dish",
+        default_value="",
         doc="Device name prefix for Dish Leaf Node",
     )
 
