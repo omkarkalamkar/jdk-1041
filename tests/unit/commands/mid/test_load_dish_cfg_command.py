@@ -22,7 +22,6 @@ from ska_tmc_centralnode.utils.json_validator_decorator import (
 )
 from tests.settings import (
     DISH_LEAF_NODE_DEVICE,
-    DISH_VCC_VALIDATION_RESULT_STATUS,
     MID_CSP_MLN_DEVICE,
     create_cm,
     logger,
@@ -54,16 +53,18 @@ def test_load_dish_cfg_command(
     cm.is_dish_vcc_config_set = True
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
     set_ldcfg_aggr_result(cm)
-    cm.load_dish_cfg(
-        dish_cfg_input_str,
-        task_callback=task_callback,
-        task_abort_event=threading.Event(),
-    )
+    with mock.patch.object(
+        cm.dish_kvalue_validation_aggregator,
+        "dln_kvalue_validation_results",
+        {"ska001": "k-value identical"},
+    ):
+        cm.load_dish_cfg(
+            dish_cfg_input_str,
+            task_callback=task_callback,
+            task_abort_event=threading.Event(),
+        )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
-    )
-    cm.dish_kvalue_validation_aggregator.dln_kvalue_validation_results = (
-        DISH_VCC_VALIDATION_RESULT_STATUS
     )
     cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
     task_callback.assert_against_call(
