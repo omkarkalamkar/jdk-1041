@@ -5,13 +5,15 @@ LowTmcCentralNode Tango Device
     Central Node is a coordinator of the complete Telescope system
     
 
+.. currentmodule:: ska_tmc_centralnode.central_node_low
+
 Properties
 ----------
 .. index::
 	single: CommandTimeOutDefault; LowTmcCentralNode.CommandTimeOutDefault
 
 .. py:attribute:: CommandTimeOutDefault
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevFloat
 	:default value: 30
@@ -20,7 +22,7 @@ Properties
 	single: CspMasterFQDN; LowTmcCentralNode.CspMasterFQDN
 
 .. py:attribute:: CspMasterFQDN
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevString
 
@@ -28,7 +30,7 @@ Properties
 	single: CspMasterLeafNodeFQDN; LowTmcCentralNode.CspMasterLeafNodeFQDN
 
 .. py:attribute:: CspMasterLeafNodeFQDN
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevString
 
@@ -36,7 +38,7 @@ Properties
 	single: CspSubarrayLeafNodes; LowTmcCentralNode.CspSubarrayLeafNodes
 
 .. py:attribute:: CspSubarrayLeafNodes
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	List of CspSubarrayLeafNode devices
 
@@ -46,7 +48,7 @@ Properties
 	single: DefaultArrayLayoutPath; LowTmcCentralNode.DefaultArrayLayoutPath
 
 .. py:attribute:: DefaultArrayLayoutPath
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	Default array layout path within the TelModel data. Example: 'instrument/ska1_mid/layout/mid-layout.json'
 
@@ -56,7 +58,7 @@ Properties
 	single: DefaultArrayLayoutSourceURIs; LowTmcCentralNode.DefaultArrayLayoutSourceURIs
 
 .. py:attribute:: DefaultArrayLayoutSourceURIs
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	Default source URIs for the Array Layout. Defines the TelModel repository source(s). Example: ["gitlab://gitlab.com/ska-telescope/ska-telmodel-data?main#tmdata"]
 
@@ -66,7 +68,7 @@ Properties
 	single: EventSubscriptionCheckPeriod; LowTmcCentralNode.EventSubscriptionCheckPeriod
 
 .. py:attribute:: EventSubscriptionCheckPeriod
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevFloat
 	:default value: 1
@@ -75,7 +77,7 @@ Properties
 	single: GroupDefinitions; LowTmcCentralNode.GroupDefinitions
 
 .. py:attribute:: GroupDefinitions
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevVarStringArray
 
@@ -83,7 +85,7 @@ Properties
 	single: IsAutoRecoveryEnabled; LowTmcCentralNode.IsAutoRecoveryEnabled
 
 .. py:attribute:: IsAutoRecoveryEnabled
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevBoolean
 
@@ -91,7 +93,7 @@ Properties
 	single: LivelinessCheckPeriod; LowTmcCentralNode.LivelinessCheckPeriod
 
 .. py:attribute:: LivelinessCheckPeriod
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevFloat
 	:default value: 1
@@ -100,7 +102,7 @@ Properties
 	single: LoggingLevelDefault; LowTmcCentralNode.LoggingLevelDefault
 
 .. py:attribute:: LoggingLevelDefault
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevUShort
 	:default value: 4
@@ -109,7 +111,7 @@ Properties
 	single: LoggingTargetsDefault; LowTmcCentralNode.LoggingTargetsDefault
 
 .. py:attribute:: LoggingTargetsDefault
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevVarStringArray
 	:default value: ['tango::logger']
@@ -118,7 +120,7 @@ Properties
 	single: MCCSMasterFQDN; LowTmcCentralNode.MCCSMasterFQDN
 
 .. py:attribute:: MCCSMasterFQDN
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevString
 
@@ -126,7 +128,7 @@ Properties
 	single: MCCSMasterLeafNodeFQDN; LowTmcCentralNode.MCCSMasterLeafNodeFQDN
 
 .. py:attribute:: MCCSMasterLeafNodeFQDN
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevString
 
@@ -134,7 +136,7 @@ Properties
 	single: ProxyTimeout; LowTmcCentralNode.ProxyTimeout
 
 .. py:attribute:: ProxyTimeout
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevUShort
 	:default value: 500
@@ -143,7 +145,7 @@ Properties
 	single: SdpMasterFQDN; LowTmcCentralNode.SdpMasterFQDN
 
 .. py:attribute:: SdpMasterFQDN
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevString
 
@@ -151,7 +153,7 @@ Properties
 	single: SdpMasterLeafNodeFQDN; LowTmcCentralNode.SdpMasterLeafNodeFQDN
 
 .. py:attribute:: SdpMasterLeafNodeFQDN
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevString
 
@@ -159,7 +161,7 @@ Properties
 	single: SdpSubarrayLeafNodes; LowTmcCentralNode.SdpSubarrayLeafNodes
 
 .. py:attribute:: SdpSubarrayLeafNodes
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	List of SdpSubarrayLeafNode devices
 
@@ -169,7 +171,7 @@ Properties
 	single: SkaLevel; LowTmcCentralNode.SkaLevel
 
 .. py:attribute:: SkaLevel
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevShort
 	:default value: 4
@@ -178,7 +180,7 @@ Properties
 	single: SubarrayPrefix; LowTmcCentralNode.SubarrayPrefix
 
 .. py:attribute:: SubarrayPrefix
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	:data type: DevString
 
@@ -186,7 +188,7 @@ Properties
 	single: TMCSubarrayNodes; LowTmcCentralNode.TMCSubarrayNodes
 
 .. py:attribute:: TMCSubarrayNodes
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	List of TMC Mid Subarray Node devices
 
@@ -198,7 +200,7 @@ Attributes
 	single: DefaultArrayLayoutURL; LowTmcCentralNode.DefaultArrayLayoutURL
 
 .. py:attribute:: DefaultArrayLayoutURL
-	:module: LowTmcCentralNode
+	:module: ska_tmc_centralnode.central_node_low
 
 	Returns the default array layout URL attribute value.
 
@@ -210,9 +212,8 @@ Attributes
 	single: arrayLayoutFileProvided; LowTmcCentralNode.arrayLayoutFileProvided
 
 .. py:attribute:: arrayLayoutFileProvided
-	:module: LowTmcCentralNode
 
-	Returns the boolean indicating whether the  default array layout URL is provided.
+	Returns the boolean indicating whether the default array layout URL is provided.
 
 	:access: READ
 	:data type: DevBoolean

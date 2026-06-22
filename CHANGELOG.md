@@ -23,7 +23,7 @@ Updated
 [1.5.0]
 *******
 Updated
------
+-------
 * Updated Pytango version to 10.3.0.
 
 Fixed
