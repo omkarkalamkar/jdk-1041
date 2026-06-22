@@ -58,6 +58,7 @@ def test_load_dish_cfg_command(
         "dln_kvalue_validation_results",
         {"ska001": "k-value identical"},
     ):
+        cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
         cm.load_dish_cfg(
             dish_cfg_input_str,
             task_callback=task_callback,
