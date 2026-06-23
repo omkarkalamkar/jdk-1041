@@ -1,12 +1,13 @@
 """Test cases for Load_Dish_Config command"""
 
 import json
+from time import sleep
 
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tmc_common.dev_factory import DevFactory
-from tango import DeviceProxy
+from tango import DeviceProxy, DevState
 
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_MID
@@ -19,6 +20,7 @@ from tests.settings import (
     CURRENT_TEST_DISH_VCC_KVALUE,
     DISH_LEAF_NODE_DEVICE,
     ERROR_PROPAGATION_DEFECT,
+    MID_CSP_MASTER_DEVICE,
     MID_CSP_MLN_DEVICE,
     RESET_DEFECT,
     check_lrcr_events,
@@ -45,8 +47,21 @@ def load_dish_cfg(central_node_name, config_str, change_event_callbacks):
     central_node = dev_factory.get_device(central_node_name)
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
-
     ensure_checked_devices(central_node)
+
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -78,6 +93,7 @@ def load_dish_cfg(central_node_name, config_str, change_event_callbacks):
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
+
     change_event_callbacks["DishVccCommandStatus"].assert_change_event(
         DishConfigStatus.COMPLETED,
         lookahead=4,
@@ -98,6 +114,12 @@ def load_dish_cfg(central_node_name, config_str, change_event_callbacks):
     validate_attribute_after_restart(
         csp_master_ln_device,
         config_str,
+    )
+
+    csp_master_device.SetDirectState(DevState.ON)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
     )
 
 
@@ -198,6 +220,19 @@ def load_dish_cfg_rejected(
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
 
     ensure_checked_devices(central_node)
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -248,6 +283,12 @@ def load_dish_cfg_rejected(
         lookahead=8,
     )
     csp_master_ln_device.SetDelay(2)
+    csp_master_device.SetDirectState(DevState.ON)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
+    )
 
 
 def load_dish_cfg_when_csp_is_defective(
@@ -262,6 +303,19 @@ def load_dish_cfg_when_csp_is_defective(
     csp_master_ln_device = dev_factory.get_device(MID_CSP_MLN_DEVICE)
     csp_master_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
     ensure_checked_devices(central_node)
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     central_node.subscribe_event(
         "longRunningCommandResult",
@@ -278,19 +332,20 @@ def load_dish_cfg_when_csp_is_defective(
 
     assert unique_id[0].endswith("LoadDishCfg")
     assert result[0] == ResultCode.QUEUED
-
-    expected_failed_message = (
-        f'[{ResultCode.FAILED}, "Exception occurred on the following devices: '
-        f'{MID_CSP_MLN_DEVICE}: Exception occurred, command failed."]'
-    )
+    err_msg = "Exception occurred, command failed. LoadDishCfg command failed"
+    expected_failed_message = f'[3, "{err_msg}"]'
     logger.info(f"{expected_failed_message} is this")
-
     assert check_lrcr_events(
         change_event_callback=change_event_callbacks,
         command_name="LoadDishCfg",
         result_to_check=expected_failed_message,
     )
-
+    count = 30
+    while count > 0:
+        if central_node.DishVccCommandStatus == DishConfigStatus.COMPLETED:
+            break
+        sleep(1)
+        count -= 1
     assert central_node.telescopeState == tango.DevState.UNKNOWN
 
     csp_master_ln_device.SetDefective(RESET_DEFECT)
@@ -305,6 +360,13 @@ def load_dish_cfg_when_csp_is_defective(
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=8,
+    )
+
+    csp_master_device.SetDirectState(DevState.ON)
+
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
     )
 
 
@@ -531,7 +593,20 @@ def load_dish_cfg_with_wrong_path(
     logger.info("%s", config_str)
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
     ensure_checked_devices(central_node)
+
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
 
     dish_cfg_input = json.loads(config_str)
     dish_cfg_input.update(
@@ -575,12 +650,23 @@ def load_dish_cfg_with_wrong_path(
     )
 
     assert central_node.telescopeState == tango.DevState.UNKNOWN
-
+    count = 30
+    while count > 0:
+        if central_node.DishVccCommandStatus == DishConfigStatus.COMPLETED:
+            break
+        sleep(1)
+        count -= 1
     # Recover by loading the correct Dish VCC config
     invoke_load_dish_config(
         central_node_name,
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
+    )
+
+    csp_master_device.SetDirectState(DevState.ON)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
     )
 
 
@@ -601,4 +687,201 @@ def test_load_dish_cfg_with_wrong_path(
         json_factory("command_load_dish_cfg"),
         change_event_callbacks,
         json_factory,
+    )
+
+
+def load_dish_cfg_partial_success_and_assign_rejected(
+    central_node_name,
+    config_str,
+    assign_input_str,
+    release_input_string,
+    change_event_callbacks,
+):
+    """Invoke LoadDishCfg with correct Dish VCC
+    map path to recover from failed state."""
+
+    logger.info("Invoking LoadDishCfg with correct VCC map path...")
+
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    dish_ln_device = dev_factory.get_device(DISH_LEAF_NODE_DEVICE)
+
+    csp_master_device = dev_factory.get_device(MID_CSP_MASTER_DEVICE)
+    ensure_checked_devices(central_node)
+
+    csp_master_device.subscribe_event(
+        "State",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["State"],
+    )
+
+    csp_master_device.SetDirectState(DevState.OFF)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
+
+    # Correct path for tm_data_sources
+    dish_cfg_input = json.loads(config_str)
+    dish_cfg_input.update(
+        {
+            "tm_data_sources": [
+                # correct SKA CAR
+                "car://gitlab.com/ska-telescope/ska-tmc/"
+                "ska-tmc-simulators?main#tmdata"
+            ]
+        }
+    )
+
+    # Subscribe to events
+    central_node.subscribe_event(
+        "longRunningCommandResult",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["longRunningCommandResult"],
+    )
+    central_node.subscribe_event(
+        "DishVccCommandStatus",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["DishVccCommandStatus"],
+    )
+
+    # Run the command
+    dish_ln_device.SetDefective(ERROR_PROPAGATION_DEFECT)
+    result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
+
+    logger.info(
+        "Reattempted LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+    # Command should queue
+    assert unique_id[0].endswith("LoadDishCfg")
+    assert result[0] == ResultCode.QUEUED
+
+    # Validate sequence of events
+    change_event_callbacks["DishVccCommandStatus"].assert_change_event(
+        DishConfigStatus.IN_PROGRESS,
+        lookahead=4,
+    )
+    message = (
+        '[0, "LoadDishCfg completed with partial success: '
+        "{'ska001': 'Exception occurred, command failed.'}"
+        '"]'
+    )
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], message),
+        lookahead=4,
+    )
+    assert central_node.isDishVccConfigSet
+    change_event_callbacks["DishVccCommandStatus"].assert_change_event(
+        DishConfigStatus.COMPLETED,
+        lookahead=4,
+    )
+    result, unique_id = central_node.AssignResources(assign_input_str)
+    assert unique_id[0].endswith("AssignResources")
+    assert result[0] == ResultCode.QUEUED
+    expected_failed_message = json.dumps(
+        [
+            ResultCode.NOT_ALLOWED,
+            "Can't assign receptors with k-value issues",
+        ]
+    )
+    assert check_lrcr_events(
+        change_event_callback=change_event_callbacks,
+        command_name="AssignResources",
+        result_to_check=expected_failed_message,
+    )
+
+    # Reset the changes done
+    dish_ln_device.SetDefective(RESET_DEFECT)
+    dish_ln_device.SetDirectkValueValidationResult("0")
+    sleep(2)
+    vcc_status = json.loads(central_node.DishVccValidationStatus)
+    assert "ALL DISH OK" in vcc_status.values()
+    result, unique_id = central_node.AssignResources(assign_input_str)
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+    result, unique_id = central_node.ReleaseResources(release_input_string)
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+    logger.info("Successfully reloaded Dish VCC configuration.")
+    csp_master_device.SetDirectState(DevState.ON)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
+    )
+
+    result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
+    assert unique_id[0].endswith("LoadDishCfg")
+    assert result[0] == ResultCode.QUEUED
+    expected_failed_message = json.dumps(
+        [
+            ResultCode.NOT_ALLOWED,
+            "LoadDishCfg command is allowed in CSP Master DevState.OFF only.",
+        ]
+    )
+    assert check_lrcr_events(
+        change_event_callback=change_event_callbacks,
+        command_name="LoadDishCfg",
+        result_to_check=expected_failed_message,
+    )
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", False
+    ), "Timeout while waiting for validating attribute value"
+
+    csp_master_device.SetDirectState(DevState.OFF)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.OFF,
+        lookahead=4,
+    )
+    result, unique_id = central_node.LoadDishCfg(json.dumps(dish_cfg_input))
+
+    logger.info(
+        "Reattempted LoadDishCfg Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+    # Command should queue
+    assert unique_id[0].endswith("LoadDishCfg")
+    assert result[0] == ResultCode.QUEUED
+
+    assert wait_and_validate_device_attribute_value(
+        central_node, "isDishVccConfigSet", True
+    ), "Timeout while waiting for validating attribute value"
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+
+    csp_master_device.SetDirectState(DevState.ON)
+    change_event_callbacks["State"].assert_change_event(
+        DevState.ON,
+        lookahead=4,
+    )
+
+
+@pytest.mark.post_deployment
+@pytest.mark.SKA_mid
+@pytest.mark.parametrize(
+    "central_node_name",
+    [CENTRALNODE_MID],
+)
+def test_load_dish_cfg_partial_success_and_assign_rejected(
+    central_node_name,
+    change_event_callbacks,
+    json_factory,
+    set_mid_sdp_csp_admin_modes,
+):
+    """Test cases for Load_Dish_Config command"""
+    return load_dish_cfg_partial_success_and_assign_rejected(
+        central_node_name,
+        json_factory("command_load_dish_cfg"),
+        json_factory("command_AssignResources"),
+        json_factory("command_ReleaseResources"),
+        change_event_callbacks,
     )

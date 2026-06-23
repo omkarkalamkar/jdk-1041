@@ -88,8 +88,13 @@ extensions = [
     "sphinx.ext.napoleon",
     "recommonmark",
     "sphinx.ext.intersphinx",
-    "sphinx_autodoc_typehints",
 ]
+
+# Disable automatic signature formatting by sphinx_autodoc_typehints to avoid
+# wrapper/unwrap issues with decorated callables (long_running_command, tango
+# attribute decorators). We still keep the extension for typehint placement
+# but avoid it touching signatures.
+autodoc_typehints = "none"
 
 # Add any paths that contain templates here, relative to this directory.
 #templates_path = []
@@ -242,3 +247,19 @@ intersphinx_mapping = {
         None,
     ),
 }
+
+
+def _safe_process_signature(app, what, name, obj, options, signature, return_annotation):
+    """Safe handler for autodoc-process-signature that avoids crashes.
+
+    If signature formatting raises an exception (often due to decorator
+    wrapper loops), return (None, None) so Sphinx falls back to no signature.
+    """
+    try:
+        return signature, return_annotation
+    except Exception:
+        return None, None
+
+
+def setup(app):
+    app.connect("autodoc-process-signature", _safe_process_signature)

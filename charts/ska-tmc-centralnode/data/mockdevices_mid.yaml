@@ -13,6 +13,7 @@ instances:
   - "ska001"
   - "ska036"
   - "ska063"
+  - "ska077"
   - "ska100"
   - "ska099"
   - "ska500"
@@ -80,6 +81,11 @@ server:
       - name: "HelperDishLNDevice"
         devices:
         - name: "mid-tmc/leaf-node-dish/ska063"
+    - name: "ska077"
+      classes:
+      - name: "HelperDishLNDevice"
+        devices:
+        - name: "mid-tmc/leaf-node-dish/ska077"
     - name: "ska100"
       classes:
       - name: "HelperDishLNDevice"

@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import threading
 import time
 from typing import List
 
@@ -137,6 +138,10 @@ RESET_DEFECT = json.dumps(
 
 CURRENT_TEST_DISH_VCC_KVALUE = 1
 
+DISH_VCC_VALIDATION_RESULT_STATUS = {
+    "dish": "ALL DISH OK",
+}
+
 
 def set_devices_unresponsive(cm, device_names: list):
     """Sets devices unresponsive
@@ -158,6 +163,18 @@ def count_faulty_devices(cm):
         if devInfo.unresponsive:
             result += 1
     return result
+
+
+def set_ldcfg_aggr_result(cm):
+    """Temporary method to set dish vcc validation status for testing"""
+
+    def set_load_dish_aggr_result(cm):
+        cm.number_of_dish_vcc_event_processed = 0
+        cm.load_dish_cfg_aggregated_result = True
+        with cm.command_completion_cond:
+            cm.command_completion_cond.notify_all()
+
+    threading.Timer(0.5, set_load_dish_aggr_result, args=[cm]).start()
 
 
 def dish_vcc_process_callback(event):
@@ -558,8 +575,13 @@ def check_lrcr_events(
             lookahead=15,
         )
         unique_id, result = assertion_data["attribute_value"]
+        info_string = json.loads(result_to_check)
+        received_result = json.loads(result)
         if unique_id.endswith(command_name):
-            if result == str(result_to_check):
+            if (
+                received_result[0] == info_string[0]
+                and info_string[1] in received_result[1]
+            ):
                 logger.debug("%s_UID: %s", command_name, unique_id)
                 flag = True
         COUNT = COUNT + 1

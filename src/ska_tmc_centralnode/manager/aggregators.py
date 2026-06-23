@@ -378,11 +378,22 @@ class DishAttrValueAggregator:
         """
         This method updates the DishVccValidationStatus of Central Node.
         """
-        flag = set(self.dln_kvalue_validation_results.values()) == set(
-            ["k-value identical"]
+        check_set_k_val_success_on_all_dln = set(
+            self.dln_kvalue_validation_results.values()
+        ) == set(["k-value identical"])
+        self.logger.debug(
+            "kValueValidationResult dictionary: %s",
+            self.dln_kvalue_validation_results.values(),
         )
-        if not flag:
-            self._component_manager.is_dish_vcc_config_set = False
+        if not check_set_k_val_success_on_all_dln:
+            is_set_k_value_successful = any(
+                v == "k-value identical"
+                for v in self.dln_kvalue_validation_results.values()
+            )
+            if is_set_k_value_successful:
+                self._component_manager.is_dish_vcc_config_set = True
+            else:
+                self._component_manager.is_dish_vcc_config_set = False
             # Report dish leaf nodes with error.
             self._component_manager.dish_vcc_validation_status = (
                 self.dln_kvalue_validation_results
@@ -417,13 +428,8 @@ class DishAttrValueAggregator:
             ] = DISH_KVALUE_VALIDATION_RESULT_STATUS[
                 dish_kvalue_validation_result
             ]
-            self.logger.debug(
-                "kValueValidationResult dictionary: %s",
-                str(self.dln_kvalue_validation_results),
-            )
             # Update the Central Node result attribute.
-            if self.is_events_received_percentage_valid():
-                self.update_central_node_with_result()
+            self.update_central_node_with_result()
 
     def aggregate_gpm(self) -> list:
         """

@@ -224,6 +224,9 @@ class CNComponentManagerMid(CNComponentManager):
         self._global_pointing_model_status = {}
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.dishln_gpm_lock = threading.RLock()
+        self.dishln_gpm_command_lock = threading.RLock()
+        self.dish_vcc_validation_result_lock = threading.RLock()
+        self.number_of_dish_vcc_event_processed: int = 0
         self.enable_dish_vcc_init = enable_dish_vcc_init
         self.command_result = None
         self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
@@ -308,6 +311,12 @@ class CNComponentManagerMid(CNComponentManager):
             Aggregated command result for Load Dish Cfg command
 
         """
+        self.logger.debug(
+            "Remaining csp dish validation events: %s"
+            "  load_dish_cfg_aggregated_result: %s",
+            self.number_of_dish_vcc_event_processed,
+            self.load_dish_cfg_aggregated_result,
+        )
         return self.load_dish_cfg_aggregated_result
 
     def get_set_gpm_version_resultcode(self) -> ResultCode:
@@ -491,10 +500,10 @@ class CNComponentManagerMid(CNComponentManager):
         """
         self._global_pointing_model_status = gpm_version
 
-    def is_csp_dish_ready(self) -> bool:
+    def is_csp_mln_csp_master_ready(self) -> str:
         """
-        his method wait for csp master leaf node and
-        dish leaf nodes to become ready to accept request
+        This method wait for csp master leaf node and
+        csp_master to become ready to accept request
 
         Returns:
             True, if csp master leaf node and
@@ -502,27 +511,32 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         count = 0
-        devices_to_check_list = [self.input_parameter.csp_mln_dev_name]
-        devices_to_check_list.extend(
-            self.input_parameter.dish_leaf_node_dev_names
-        )
+        while count <= self.dish_vcc_init_timeout:
+            try:
+                count += 2
+                time.sleep(2)
+                csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
+                    self.input_parameter.csp_mln_dev_name,
+                    adapter_type=AdapterType.CSP_MASTER_LEAF_NODE,
+                )
+                csp_master_adapter = (
+                    self.adapter_factory.get_or_create_adapter(
+                        self.input_parameter.csp_master_dev_name,
+                        adapter_type=AdapterType.CSPMASTER,
+                    )
+                )
+                self.logger.debug(
+                    "CSP MLN version: %s CSP master state: %s",
+                    csp_mln_adapter._proxy.GetVersionInfo(),
+                    csp_master_adapter.state,
+                )
 
-        dev_state_list = [
-            self.get_device(device).state for device in devices_to_check_list
-        ]
-        while True:
-            if set(dev_state_list) == set([DevState.ON]):
-                return True
-            time.sleep(1)
-            dev_state_list = [
-                self.get_device(device).state
-                for device in devices_to_check_list
-            ]
-            self.logger.debug("Current device states: %s", str(dev_state_list))
-            count += 1
-            if count == self.dish_vcc_init_timeout:
-                break
-        return False
+                if csp_master_adapter.state != DevState.OFF:
+                    return ResultCode.NOT_ALLOWED
+                return ResultCode.OK
+            except Exception as e:
+                self.logger.exception("Error %s", str(e))
+        return ResultCode.FAILED
 
     def update_device_state(self, device_name: str, state: DevState) -> None:
         """
@@ -750,6 +764,18 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         self.dish_kvalue_validation_aggregator.aggregate(dev_name, kvalue)
+        with self.dish_vcc_validation_result_lock:
+            if self.command_in_progress == "LoadDishCfg":
+                self.number_of_dish_vcc_event_processed -= 1
+                self.logger.debug(
+                    "Device: %s Number of dish VCC events processed: %s",
+                    dev_name,
+                    self.number_of_dish_vcc_event_processed,
+                )
+                if self.number_of_dish_vcc_event_processed == 0:
+                    self.load_dish_cfg_aggregated_result = True
+                    with self.command_completion_cond:
+                        self.command_completion_cond.notify_all()
 
     def update_telescope_availability(
         self, device_name: str, event_value
@@ -838,15 +864,25 @@ class CNComponentManagerMid(CNComponentManager):
                         k_val_result = adapter._proxy.kValueValidationResult
                         if k_val_result != "1":
                             num_of_dish_values[dish_name] = k_val_result
+
                 if len(num_of_dish_values) == len(
                     self.input_parameter.dish_leaf_node_dev_names
                 ):
-                    self.logger.debug("All dishes are available and ready.")
-                return True
+                    self.logger.debug(
+                        "All dishes and csp master devices are"
+                        " available and ready."
+                    )
+                    return True
             except Exception as e:
                 self.logger.exception("Error %s", str(e))
             count += 1
             time.sleep(1)
+
+        # If Any of the dish leaf node is available
+        # execute LoadDishCfg command.
+        if len(num_of_dish_values):
+            return True
+
         return False
 
     def handle_dish_vcc_validation_result(
@@ -933,6 +969,19 @@ class CNComponentManagerMid(CNComponentManager):
                         ]
                     }
 
+        with self.dish_vcc_validation_result_lock:
+            if self.command_in_progress == "LoadDishCfg":
+                self.number_of_dish_vcc_event_processed -= 1
+                self.logger.debug(
+                    "Device: %s Number of dish VCC events processed: %s",
+                    dev_name,
+                    self.number_of_dish_vcc_event_processed,
+                )
+                if self.number_of_dish_vcc_event_processed == 0:
+                    self.load_dish_cfg_aggregated_result = True
+                    with self.command_completion_cond:
+                        self.command_completion_cond.notify_all()
+
     # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(
         self, argin: str, task_callback: Callable, task_abort_event
@@ -947,6 +996,24 @@ class CNComponentManagerMid(CNComponentManager):
             a result code and message
 
         """
+
+        status = self.is_csp_mln_csp_master_ready()
+        if status != ResultCode.OK:
+            if status == ResultCode.NOT_ALLOWED:
+                err_msg = (
+                    "LoadDishCfg command is allowed in"
+                    " CSP Master DevState.OFF only."
+                )
+            else:
+                err_msg = (
+                    "CSP master or CSP MLN is not available for"
+                    " loaddishcfg execution"
+                )
+            self.update_dish_vcc_flag(False)
+            return task_callback(
+                status=TaskStatus.REJECTED,
+                result=(ResultCode.NOT_ALLOWED, err_msg),
+            )
         loadishcfg_command_object = LoadDishCfg(
             self, adapter_factory=self.adapter_factory, logger=self.logger
         )
@@ -1083,7 +1150,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.dev_names_for_load_dish_cfg = []
         self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
-        self.dish_vcc_command_status = DishConfigStatus.COMPLETED
+        self.command_in_progress = ""
         self._check_init_and_invoke_gpm()
 
     def _check_init_and_invoke_gpm(self):
@@ -1277,10 +1344,35 @@ class CNComponentManagerMid(CNComponentManager):
         :rtype: tuple
         """
         try:
+            k_value_failed_dishes = {}
             # Execute the command if the input JSON is valid
             self.logger.debug(
                 "Calling component manager assign_resources method"
             )
+            receptors = (
+                json.loads(argin).get("dish", {}).get("receptor_ids", [])
+            )
+            k_value_status = json.loads(self.dish_vcc_validation_status)
+
+            for d in receptors:
+                dish = d.lower()
+                if dish in k_value_status:
+                    k_value_failed_dishes[dish] = k_value_status[dish]
+
+            if k_value_failed_dishes:
+                err_msg = (
+                    "Can't assign receptors with k-value issues:"
+                    f" {k_value_failed_dishes}"
+                )
+                self.logger.debug(
+                    "Dish k-value STATUS: %s, receptors assigned: %s",
+                    k_value_status,
+                    receptors,
+                )
+                return task_callback(
+                    status=TaskStatus.REJECTED,
+                    result=(ResultCode.NOT_ALLOWED, err_msg),
+                )
             assign_resources_command_object = AssignResourcesMid(
                 self,
                 adapter_factory=self.adapter_factory,

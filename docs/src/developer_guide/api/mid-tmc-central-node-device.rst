@@ -335,10 +335,13 @@ Attributes
 .. index::
 	single: arrayLayoutFileProvided; LowTmcCentralNode.arrayLayoutFileProvided
 
-.. py:attribute:: arrayLayoutFileProvided
-	:module: LowTmcCentralNode
+Note: see the `arrayLayoutFileProvided` attribute on the LowTmcCentralNode (documented in the low-node API).
 
-	Returns the boolean indicating whether the  default array layout URL is provided.
+.. py:attribute:: arrayLayoutFileProvided
+	:module: ska_tmc_centralnode.central_node_low
+	:noindex:
+
+	Returns the boolean indicating whether the default array layout URL is provided.
 
 	:access: READ
 	:data type: DevBoolean
@@ -361,7 +364,7 @@ Attributes
 
 .. py:attribute:: DishVccValidationStatus
 	:module: MidTmcCentralNode
-
+ 
 	Return the DishVccValidationStatus
 
 	:access: READ

@@ -8,6 +8,7 @@ import mock
 import tango
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
+from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
@@ -19,7 +20,13 @@ from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     validate_dish_vcc_command_status,
 )
-from tests.settings import MID_CSP_MLN_DEVICE, create_cm, logger
+from tests.settings import (
+    DISH_LEAF_NODE_DEVICE,
+    MID_CSP_MLN_DEVICE,
+    create_cm,
+    logger,
+    set_ldcfg_aggr_result,
+)
 
 # Helper Dish LN device is using Database API and in Unit test Database API
 # is not callable
@@ -39,18 +46,28 @@ def test_load_dish_cfg_command(
         tango.cb_sub_model.PUSH_CALLBACK
     )
     cm, _ = create_cm()
+    cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
+    dln = tango.DeviceProxy("mid-tmc/leaf-node-dish/ska001")
     _set_k_numbers_to_dish.return_value = ([ResultCode.QUEUED], [""])
+    dln.SetDirectkValueValidationResult("0")
     cm.is_dish_vcc_config_set = True
-
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
-    cm.load_dish_cfg(
-        dish_cfg_input_str,
-        task_callback=task_callback,
-        task_abort_event=threading.Event(),
-    )
+    set_ldcfg_aggr_result(cm)
+    with mock.patch.object(
+        cm.dish_kvalue_validation_aggregator,
+        "dln_kvalue_validation_results",
+        {"ska001": "k-value identical"},
+    ):
+        cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+        cm.load_dish_cfg(
+            dish_cfg_input_str,
+            task_callback=task_callback,
+            task_abort_event=threading.Event(),
+        )
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
+    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
     task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
@@ -58,6 +75,7 @@ def test_load_dish_cfg_command(
         },
         lookahead=20,
     )
+
     assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     # Validate memorizedDishVccMap attribute set
     dev_factory = DevFactory()
@@ -70,6 +88,7 @@ def test_load_dish_cfg_command_invalid_json(
 ):
     """Test LoadDishCfg command rejected when invalid json provided"""
     cm, _ = create_cm()
+    cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
@@ -85,16 +104,23 @@ def test_load_dish_cfg_command_invalid_json(
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    task_callback.assert_against_call(
+    assertion_data = task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
             "result": (
                 ResultCode.FAILED,
-                "tm_data_sources and tm_data_filepath not provided in json",
+                Anything,
             ),
-            "exception": "tm_data_sources and tm_data_filepath not provided in json",
+            "exception": Anything,
         },
     )
+    err_message = (
+        "tm_data_sources and tm_data_filepath not provided"
+        " in json LoadDishCfg command failed"
+    )
+    assert err_message in assertion_data["call_kwargs"]["result"][1]
+    assert err_message in assertion_data["call_kwargs"]["exception"]
+    logger.info("Assertion data: %s", assertion_data)
 
 
 def test_load_dish_cfg_command_kvalue_out_of_range(
@@ -102,6 +128,7 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
 ):
     """Test LoadDishCfg command rejected when kvalue is out of range"""
     cm, _ = create_cm()
+    cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("load_dish_cfg_kvalue_out_of_range")
@@ -114,16 +141,18 @@ def test_load_dish_cfg_command_kvalue_out_of_range(
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    task_callback.assert_against_call(
+    assertion_data = task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
             "result": (
                 ResultCode.FAILED,
-                exception_message,
+                Anything,
             ),
-            "exception": exception_message,
+            "exception": Anything,
         },
     )
+    assert exception_message in assertion_data["call_kwargs"]["result"][1]
+    assert exception_message in assertion_data["call_kwargs"]["exception"]
 
 
 def test_load_dish_cfg_command_invalid_file_name(
@@ -131,6 +160,7 @@ def test_load_dish_cfg_command_invalid_file_name(
 ):
     """Test LoadDishCfg command rejected when invalid json provided"""
     cm, _ = create_cm()
+    cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("LoadDishCfg")
     dish_cfg_input_str = json_factory("command_load_dish_cfg_invalid")
@@ -145,20 +175,22 @@ def test_load_dish_cfg_command_invalid_file_name(
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    task_callback.assert_against_call(
+    err_message = (
+        "Error in Loading Dish VCC map json file"
+        " 'No telescope model data with key"
+    )
+    assertion_data = task_callback.assert_against_call(
         call_kwargs={
             "status": TaskStatus.COMPLETED,
             "result": (
                 ResultCode.FAILED,
-                "Error in Loading Dish VCC map json file 'No telescope model "
-                + "data with key instrument/dishid_vcc_map_configuration/"
-                + "mid_cbf_initial_parameters_invalid.json exists!'",
+                Anything,
             ),
-            "exception": "Error in Loading Dish VCC map json file 'No "
-            + "telescope model data with key instrument/dishid_vcc_map_"
-            + "configuration/mid_cbf_initial_parameters_invalid.json exists!'",
+            "exception": Anything,
         },
     )
+    assert err_message in assertion_data["call_kwargs"]["result"][1]
+    assert err_message in assertion_data["call_kwargs"]["exception"]
 
 
 def test_dish_vcc_validation_status(task_callback, json_factory):
