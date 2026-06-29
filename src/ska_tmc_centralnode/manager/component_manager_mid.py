@@ -225,8 +225,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.dishln_gpm_lock = threading.RLock()
         self.dishln_gpm_command_lock = threading.RLock()
-        self.dish_vcc_validation_result_lock = threading.RLock()
-        self.number_of_dish_vcc_event_processed: int = 0
         self.enable_dish_vcc_init = enable_dish_vcc_init
         self.command_result = None
         self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
@@ -302,22 +300,6 @@ class CNComponentManagerMid(CNComponentManager):
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )
-
-    def get_load_disg_cfg_resultcode(self) -> ResultCode:
-        """
-        Return Aggregated command result for Load Dish Cfg command
-
-        Returns:
-            Aggregated command result for Load Dish Cfg command
-
-        """
-        self.logger.debug(
-            "Remaining csp dish validation events: %s"
-            "  load_dish_cfg_aggregated_result: %s",
-            self.number_of_dish_vcc_event_processed,
-            self.load_dish_cfg_aggregated_result,
-        )
-        return self.load_dish_cfg_aggregated_result
 
     def get_set_gpm_version_resultcode(self) -> ResultCode:
         """
@@ -764,18 +746,6 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         self.dish_kvalue_validation_aggregator.aggregate(dev_name, kvalue)
-        with self.dish_vcc_validation_result_lock:
-            if self.command_in_progress == "LoadDishCfg":
-                self.number_of_dish_vcc_event_processed -= 1
-                self.logger.debug(
-                    "Device: %s Number of dish VCC events processed: %s",
-                    dev_name,
-                    self.number_of_dish_vcc_event_processed,
-                )
-                if self.number_of_dish_vcc_event_processed == 0:
-                    self.load_dish_cfg_aggregated_result = True
-                    with self.command_completion_cond:
-                        self.command_completion_cond.notify_all()
 
     def update_telescope_availability(
         self, device_name: str, event_value
@@ -969,18 +939,8 @@ class CNComponentManagerMid(CNComponentManager):
                         ]
                     }
 
-        with self.dish_vcc_validation_result_lock:
-            if self.command_in_progress == "LoadDishCfg":
-                self.number_of_dish_vcc_event_processed -= 1
-                self.logger.debug(
-                    "Device: %s Number of dish VCC events processed: %s",
-                    dev_name,
-                    self.number_of_dish_vcc_event_processed,
-                )
-                if self.number_of_dish_vcc_event_processed == 0:
-                    self.load_dish_cfg_aggregated_result = True
-                    with self.command_completion_cond:
-                        self.command_completion_cond.notify_all()
+            with self.command_completion_cond:
+                self.command_completion_cond.notify_all()
 
     # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(

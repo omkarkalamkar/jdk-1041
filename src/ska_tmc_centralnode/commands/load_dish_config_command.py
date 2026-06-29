@@ -507,9 +507,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             self.csp_mln_adapter.dev_name,
         )
         return self.wait_for_command_completion(
-            device_length=len(self.command_subs_list),
-            desired_state=True,
-            function_name="get_load_disg_cfg_resultcode",
+            device_length=len(self.command_subs_list)
         )
 
     def _invoke_load_dish_cfg_on_csp_master_ln(
@@ -528,7 +526,6 @@ class LoadDishCfg(LoadDishCfgCommand):
             ResultCode and message
 
         """
-        self.component_manager.number_of_dish_vcc_event_processed = 0
         self.logger.debug(
             "Command ID: %s | Invoking LoadDishCfg command on: %s",
             self.command_id,
@@ -543,14 +540,11 @@ class LoadDishCfg(LoadDishCfgCommand):
             "LoadDishCfg",
             json.dumps(dishid_vcc_map_params),
         )
-        if return_codes[0] == ResultCode.OK:
-            with self.component_manager.dish_vcc_validation_result_lock:
-                self.component_manager.number_of_dish_vcc_event_processed += 1
-                self.logger.debug(
-                    "Number of dish VCC events processed: %s",
-                    self.component_manager.number_of_dish_vcc_event_processed,
-                )
-        elif return_codes[0] == ResultCode.FAILED:
+        if return_codes[0] not in [
+            ResultCode.OK,
+            ResultCode.QUEUED,
+            ResultCode.STARTED,
+        ]:
             err = "Failed LoadDishCfg command on Csp Master Leaf Node"
             self.component_manager.dish_vcc_validation_status = {
                 f"{self.csp_mln_adapter.dev_name}": err
@@ -715,14 +709,6 @@ class LoadDishCfg(LoadDishCfgCommand):
             if event_data:
                 value = event_data.argout
                 result = [value[0][0], value[1][0]]
-                with self.component_manager.dish_vcc_validation_result_lock:
-                    cm = self.component_manager
-                    if result[0] == ResultCode.OK:
-                        cm.number_of_dish_vcc_event_processed += 1
-                        self.logger.debug(
-                            "Number of dish VCC events processed: %s",
-                            cm.number_of_dish_vcc_event_processed,
-                        )
                 with self.component_manager.command_completion_cond:
                     self.command_results[device_name] = result
                     cond = self.component_manager.command_completion_cond
