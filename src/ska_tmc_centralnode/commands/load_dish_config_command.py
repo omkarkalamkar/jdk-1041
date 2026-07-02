@@ -280,13 +280,13 @@ class LoadDishCfg(LoadDishCfgCommand):
                 ResultCode.REJECTED,
                 ResultCode.NOT_ALLOWED,
             ]:
-                if "csp" not in device:
+                if "csp" not in device.lower():
                     msg = DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK]
                     if k_val_results.get(dev_id) != msg:
                         with cm.dish_vcc_validation_attr_lock:
-                            k_val_results[dev_id] = message
+                            k_val_results[dev_id] = msg
             else:
-                if "csp" in device:
+                if "csp" in device.lower():
                     flag = True
                     continue  # Skip CSP failures for k-value aggregation
                 with cm.dish_vcc_validation_attr_lock:
