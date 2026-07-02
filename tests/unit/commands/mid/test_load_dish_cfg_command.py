@@ -5,7 +5,6 @@ import threading
 from unittest.mock import patch
 
 import mock
-import pytest
 import tango
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
@@ -34,8 +33,6 @@ from tests.settings import (
 # Patch this particular method which mock return value from SetKValue command
 
 
-@pytest.mark.repeat(100)
-@pytest.mark.abcd
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
 def test_load_dish_cfg_command(
     _set_k_numbers_to_dish,
