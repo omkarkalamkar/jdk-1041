@@ -5,6 +5,7 @@ import threading
 from unittest.mock import patch
 
 import mock
+import pytest
 import tango
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
@@ -33,6 +34,8 @@ from tests.settings import (
 # Patch this particular method which mock return value from SetKValue command
 
 
+@pytest.mark.repeat(100)
+@pytest.mark.abcd
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
 def test_load_dish_cfg_command(
     _set_k_numbers_to_dish,
@@ -64,17 +67,17 @@ def test_load_dish_cfg_command(
             task_callback=task_callback,
             task_abort_event=threading.Event(),
         )
-    task_callback.assert_against_call(
-        call_kwargs={"status": TaskStatus.IN_PROGRESS}
-    )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
-    task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.COMPLETED,
-            "result": (ResultCode.OK, "Command Completed"),
-        },
-        lookahead=20,
-    )
+        task_callback.assert_against_call(
+            call_kwargs={"status": TaskStatus.IN_PROGRESS}
+        )
+        cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+        task_callback.assert_against_call(
+            call_kwargs={
+                "status": TaskStatus.COMPLETED,
+                "result": (ResultCode.OK, "Command Completed"),
+            },
+            lookahead=20,
+        )
 
     assert cm.dish_vcc_command_status == DishConfigStatus.COMPLETED
     # Validate memorizedDishVccMap attribute set
