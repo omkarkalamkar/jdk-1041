@@ -271,27 +271,27 @@ class LoadDishCfg(LoadDishCfgCommand):
         """
         failed_count = 0
         flag = False
+        cm = self.component_manager
         for device, (result_code, message) in self.command_results.items():
             dev_id = device.split("/")[2].lower()
+            self.logger.info("<<<<<<<<< %s", k_val_results)
             if result_code not in [
                 ResultCode.FAILED,
                 ResultCode.REJECTED,
                 ResultCode.NOT_ALLOWED,
             ]:
-                if "csp" not in dev_id:
+                if "csp" not in device:
                     msg = DISH_KVALUE_VALIDATION_RESULT_STATUS[ResultCode.OK]
                     if k_val_results.get(dev_id) != msg:
-                        message = msg
+                        with cm.dish_vcc_validation_attr_lock:
+                            k_val_results[dev_id] = message
             else:
-                if "csp" in dev_id:
+                if "csp" in device:
                     flag = True
                     continue  # Skip CSP failures for k-value aggregation
-
-            with self.component_manager.dish_vcc_validation_attr_lock:
-                k_val_results[dev_id] = message
-
-            failed_count += 1
-
+                with cm.dish_vcc_validation_attr_lock:
+                    k_val_results[dev_id] = message
+                failed_count += 1
         return flag, failed_count
 
     def _persist_kvalue_validation_results(self, k_val_results: dict) -> None:
