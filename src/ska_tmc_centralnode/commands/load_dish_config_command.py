@@ -274,7 +274,6 @@ class LoadDishCfg(LoadDishCfgCommand):
         cm = self.component_manager
         for device, (result_code, message) in self.command_results.items():
             dev_id = device.split("/")[2].lower()
-            self.logger.info("<<<<<<<<< %s", k_val_results)
             if result_code not in [
                 ResultCode.FAILED,
                 ResultCode.REJECTED,
