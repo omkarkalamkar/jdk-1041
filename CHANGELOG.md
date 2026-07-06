@@ -8,6 +8,12 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 [1.7.0]
 *******
+[Fixed]
+-------
+* Fixed kvalue validation results not getting updated with loaddishcfg command success.
+
+[1.7.0]
+*******
 Updated
 -------
 * Updated LoadDishCfg command to support partial success.
