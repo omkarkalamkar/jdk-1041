@@ -10,13 +10,20 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
+from ska_tmc_centralnode.refactored_commands.assignresources import (
+    AssignResourcesPreparation,
+    AssignResourcesPreparationError,
+    AssignResourcesPrepError,
+    AssignResourcesRequest,
+    MidAssignResourcesStrategy,
+)
 
 
 class AssignResourcesMid(AssignResources):
     """A class for CentralNode's AssignResources() command for Mid."""
 
     # pylint:disable=signature-differs
-    def do(self, argin: str) -> Tuple[ResultCode, str]:
+    def do(self, argin: str) -> Tuple[ResultCode, str]:  # type: ignore[override]
         """
         Method to invoke the AssignResources command on a Subarray.
 
@@ -37,76 +44,31 @@ class AssignResourcesMid(AssignResources):
             self.command_id,
         )
         try:
-            self.logger.debug(
-                "Command ID: %s | Loading the AssignResource JSON string",
-                self.command_id,
-            )
-            json_argument = json.loads(argin)
-
-        except Exception as e:
-            return (
-                ResultCode.FAILED,
-                f"Problem in loading the JSON string: {e}",
-            )
-
-        if "transaction_id" in json_argument:
-            del json_argument["transaction_id"]
-
-        if "telmodel" in json_argument:
-            array_url = json_argument["telmodel"]
-            self.component_manager.array_layout_url = array_url
-            self.logger.debug(
-                "Command ID: %s | array_layout_url in argin: %s",
-                self.command_id,
-                array_url,
-            )
-        else:
-            default_url = getattr(
+            request = AssignResourcesPreparation(
                 self.component_manager,
-                "default_array_layout_url",
-                "",
-            )
-            if default_url:
-                if not isinstance(default_url, dict):
-                    self.logger.error(
-                        "Command ID: %s | Invalid default telmodel type %s, "
-                        "expected dict",
-                        self.command_id,
-                        type(default_url).__name__,
-                    )
-                    return (
-                        ResultCode.FAILED,
-                        "Invalid default 'telmodel': expected a dictionary.",
-                    )
-                json_argument["telmodel"] = default_url
-                self.component_manager.array_layout_url = default_url
-                self.logger.debug(
-                    "Command ID: %s | array_layout_url not provided, "
-                    "using default: %s",
-                    self.command_id,
-                    default_url,
-                )
-            else:
-                self.logger.debug(
-                    "Command ID: %s | No array_layout_url in argin and no "
-                    "default_array_layout_url set in component manager.",
-                    self.command_id,
-                )
+                self.logger,
+            ).prepare_request(argin, remove_transaction_id=True)
+            json_argument = request.copy_data()
+        except AssignResourcesPreparationError as exception:
+            return ResultCode.FAILED, str(exception)
 
-        # --------------------------------------------------------------
-        # existing logic below
-        # --------------------------------------------------------------
+        try:
+            request = AssignResourcesRequest(json_argument)
+            plan = MidAssignResourcesStrategy(self.logger).build_plan(request)
+        except AssignResourcesPrepError as exception:
+            return ResultCode.FAILED, str(exception)
+
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        subarray_id = int(json_argument["subarray_id"])
+        subarray_id = int(plan.subarray_id)
 
         result_code, message = self.get_subarray_adapter(subarray_id)
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        receptor_ids = json_argument["dish"]["receptor_ids"]
+        receptor_ids = plan.receptor_ids
         self.logger.debug(
             "Command ID %s: Receptor IDs requested for assignment: %s",
             self.command_id,

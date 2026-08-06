@@ -10,7 +10,13 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_centralnode.commands.assign_resources_command import (
     AssignResources,
 )
-from ska_tmc_centralnode.utils.constants import SUB_SYSTEMS
+from ska_tmc_centralnode.refactored_commands.assignresources import (
+    AssignResourcesPreparation,
+    AssignResourcesPreparationError,
+    AssignResourcesPrepError,
+    AssignResourcesRequest,
+    LowAssignResourcesStrategy,
+)
 
 
 class AssignResourcesLow(AssignResources):
@@ -51,7 +57,7 @@ class AssignResourcesLow(AssignResources):
         )
 
     # pylint:disable=signature-differs
-    def do(self, argin: str) -> Tuple[ResultCode, str]:
+    def do(self, argin: str) -> Tuple[ResultCode, str]:  # type: ignore[override]
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -80,14 +86,18 @@ class AssignResourcesLow(AssignResources):
             self.command_id,
         )
         try:
-            json_argument = json.loads(argin)
+            request = AssignResourcesPreparation(
+                self.component_manager,
+                self.logger,
+            ).prepare_request(argin)
+            json_argument = request.copy_data()
             self.logger.debug(
                 "Command ID: %s | Executing AssignResources command with "
                 "arguments: %s",
                 self.command_id,
                 json_argument,
             )
-        except Exception as exception:
+        except AssignResourcesPreparationError as exception:
             self.logger.error(
                 "Command %s: Failed to parse AssignResources JSON input: %s",
                 self.command_id,
@@ -95,47 +105,17 @@ class AssignResourcesLow(AssignResources):
             )
             return (
                 ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", exception),
+                f"Problem in loading the JSON string: {exception}",
             )
 
-        if "telmodel" in json_argument:
-            array_url = json_argument["telmodel"]
-            self.component_manager.array_layout_url = array_url
-            self.logger.debug(
-                "Command ID: %s | Array layout url in input JSON: %s",
-                self.command_id,
-                array_url,
-            )
-        else:
-            default_url = getattr(
-                self.component_manager,
-                "default_array_layout_url",
-                "",
-            )
+        try:
+            request = AssignResourcesRequest(json_argument)
+            plan = LowAssignResourcesStrategy(self.logger).build_plan(request)
+            self.subarray_id = plan.subarray_id
+        except AssignResourcesPrepError as exception:
+            return ResultCode.FAILED, str(exception)
 
-            if default_url:
-                if not isinstance(default_url, dict):
-                    self.logger.error(
-                        "Command ID:%s | Default telmodel must"
-                        " be a dict got %s",
-                        self.command_id,
-                        type(default_url).__name__,
-                    )
-                    return (
-                        ResultCode.FAILED,
-                        "Invalid default ArrayLayout : expected a dictionary.",
-                    )
-                json_argument["telmodel"] = default_url
-                self.component_manager.array_layout_url = default_url
-                self.logger.debug(
-                    "Command ID:%s | Default array layout url will be used:%s",
-                    self.command_id,
-                    default_url,
-                )
-
-        assigned_subsystem: list = list(
-            SUB_SYSTEMS.intersection(json_argument.keys())
-        )
+        assigned_subsystem: list = list(plan.subsystems)
         self.logger.debug(
             "Command %s: Subsystems assigned for subarray %s: %s",
             self.command_id,
@@ -163,7 +143,7 @@ class AssignResourcesLow(AssignResources):
         if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("Subarray Id %s is not existing!", self.subarray_id),
+                f"Subarray Id {self.subarray_id} is not existing!",
             )
 
         return_codes, message_or_unique_ids = self.invoke_command(
@@ -193,7 +173,7 @@ class AssignResourcesLow(AssignResources):
             and not self.is_auto_recovery_enabled
         ):
             try:
-                input_mccs_master = self.create_mccs_cmd_data(json_argument)
+                input_mccs_master = json.loads(plan.mccs_payload)
             except Exception as exception:
                 self.logger.error(
                     "Command %s: Error while preparing MCCS AssignResources "
@@ -203,7 +183,7 @@ class AssignResourcesLow(AssignResources):
                 )
                 return (
                     ResultCode.FAILED,
-                    ("JSON arguments error:: %s", exception),
+                    f"JSON arguments error:: {exception}",
                 )
 
             self.component_manager.log_state(
@@ -273,6 +253,6 @@ class AssignResourcesLow(AssignResources):
             mccs_input["subarray_id"] = subarray_id
             return mccs_input
         except Exception as exception:
-            raise Exception(
+            raise ValueError(
                 "Error while creating MCCS input json"
             ) from exception
