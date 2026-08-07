@@ -22,9 +22,6 @@ from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
-from ska_tmc_centralnode.commands.assign_resources_command_low import (
-    AssignResourcesLow,
-)
 from ska_tmc_centralnode.commands.release_resources_command_low import (
     ReleaseResourcesLow,
 )
@@ -36,6 +33,19 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorLow,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.refactored_commands.assignresources import (
+    ArrayLayoutContext,
+    AssignedSubsystemContext,
+    CommandInProgressContext,
+    LowAssignResourcesContext,
+    ObsStateContext,
+    RecoveryContext,
+    SbIDContext,
+    SubarrayIDContext,
+)
+from ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command_low import (
+    AssignResourcesLow,
+)
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
@@ -446,6 +456,73 @@ class CNComponentManagerLow(CNComponentManager):
                 exception_msg,
             )
         return argin, exception_msg
+
+    def _get_assign_context(self) -> LowAssignResourcesContext:
+        """Build LowAssignResourcesContext bound to this component manager.
+
+        :return: Runtime context for AssignResources command execution.
+        :rtype: LowAssignResourcesContext
+        """
+        cm = self
+        return LowAssignResourcesContext(
+            cmd_inprogress_ctx=CommandInProgressContext(
+                get_id=lambda: cm.command_in_progress,
+                update_id=lambda name: setattr(
+                    cm, "command_in_progress", name
+                ),
+                update_name=lambda name: setattr(
+                    cm, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(cm, "command_in_progress", ""),
+                get_name=lambda: cm.command_in_progress,
+                obj_update_cmd=lambda *a, **kw: None,
+            ),
+            array_layout_ctx=ArrayLayoutContext(
+                download=lambda *a, **kw: ({}, ""),
+                validate_schema=lambda *a, **kw: (True, ""),
+                update_url=lambda url: setattr(cm, "array_layout_url", url),
+                set=lambda _: None,
+            ),
+            subarray_id_ctx=SubarrayIDContext(
+                set=lambda sid: None,
+                get=lambda: None,
+                reset=lambda: None,
+            ),
+            sb_id_ctx=SbIDContext(
+                set=lambda _: None,
+                reset=lambda: None,
+            ),
+            obs_state_ctx=ObsStateContext(
+                get=lambda: None,
+                change_callback=lambda *a, **kw: None,
+            ),
+            csp_assign_interface="",
+            get_evt_data_manager=lambda: cm.event_data_manager,
+            input_parameter=cm.input_parameter,
+            update_abort_evt=lambda evt: setattr(cm, "abort_event", evt),
+            get_dev_info=cm.get_device,
+            recovery_ctx=RecoveryContext(
+                update_progress=lambda *a, **kw: None,
+                is_enabled=cm.is_auto_recovery_enabled,
+                check_time_duration=0,
+                set_device_list=lambda *a, **kw: None,
+                mccs_release_interface="",
+                is_in_progress=lambda: False,
+            ),
+            assigned_subsystem_ctx=AssignedSubsystemContext(
+                update=lambda subsystems: (
+                    cm.subsystem_assigned_per_subarray.__setitem__(
+                        None, list(subsystems)
+                    )
+                ),
+                get=lambda: [],
+                set_configured=lambda *a, **kw: None,
+            ),
+            set_subarray_empty=lambda: None,
+            set_cmd_fail_info=lambda *a, **kw: None,
+            clear_cmd_fail_info=lambda: None,
+            set_subarr_to_be_cfgd=lambda *a, **kw: None,
+        )
 
     # pylint: disable=unexpected-keyword-arg
     def assign_resources(

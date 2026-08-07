@@ -7,15 +7,14 @@ from typing import Tuple
 from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
 
-from ska_tmc_centralnode.commands.assign_resources_command import (
-    AssignResources,
-)
 from ska_tmc_centralnode.refactored_commands.assignresources import (
     AssignResourcesPreparation,
     AssignResourcesPreparationError,
     AssignResourcesPrepError,
-    AssignResourcesRequest,
-    MidAssignResourcesStrategy,
+    MidAssignResourcesContext,
+)
+from ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command import (
+    AssignResources,
 )
 
 
@@ -52,17 +51,26 @@ class AssignResourcesMid(AssignResources):
         except AssignResourcesPreparationError as exception:
             return ResultCode.FAILED, str(exception)
 
+        ctx = self._build_context()
         try:
-            request = AssignResourcesRequest(json_argument)
-            plan = MidAssignResourcesStrategy(self.logger).build_plan(request)
+            plan = ctx.make_strategy(self.logger).build_plan(request)
         except AssignResourcesPrepError as exception:
             return ResultCode.FAILED, str(exception)
+
+        ctx.apply_plan(plan)
+
+        # Normalize payloads using strategy output so preparation and
+        # execution stay aligned.
+        json_argument["csp"] = json.loads(plan.csp_payload)
+        json_argument["sdp"] = json.loads(plan.sdp_payload)
+        if plan.telmodel:
+            json_argument["telmodel"] = plan.telmodel
 
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        subarray_id = int(plan.subarray_id)
+        subarray_id = int(self.subarray_id)
 
         result_code, message = self.get_subarray_adapter(subarray_id)
         if result_code == ResultCode.FAILED:
@@ -124,3 +132,7 @@ class AssignResourcesMid(AssignResources):
             "get_subarray_obsstate",
             use_command_class_id=True,
         )
+
+    def _build_context(self) -> MidAssignResourcesContext:
+        """Delegate context construction to the component manager."""
+        return self.component_manager._get_assign_context()

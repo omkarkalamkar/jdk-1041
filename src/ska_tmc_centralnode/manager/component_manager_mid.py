@@ -22,9 +22,6 @@ from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed, InvalidReceptorIdError
 from tango import DevState
 
-from ska_tmc_centralnode.commands.assign_resources_command_mid import (
-    AssignResourcesMid,
-)
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.commands.release_resources_command_mid import (
     ReleaseResourcesMid,
@@ -48,6 +45,20 @@ from ska_tmc_centralnode.manager.aggregators import (
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
 from ska_tmc_centralnode.model.enum import DishConfigStatus
+from ska_tmc_centralnode.refactored_commands.assignresources import (
+    ArrayLayoutContext,
+    AssignedResourcesAttributeContext,
+    CommandInProgressContext,
+    DishContext,
+    DishLeafNodeContext,
+    MidAssignResourcesContext,
+    ObsStateContext,
+    SbIDContext,
+    SubarrayIDContext,
+)
+from ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command_mid import (
+    AssignResourcesMid,
+)
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -1286,6 +1297,67 @@ class CNComponentManagerMid(CNComponentManager):
                 exception_msg,
             )
         return argin, exception_msg
+
+    def _get_assign_context(self) -> MidAssignResourcesContext:
+        """Build MidAssignResourcesContext bound to this component manager.
+
+        :return: Runtime context for AssignResources command execution.
+        :rtype: MidAssignResourcesContext
+        """
+        cm = self
+        return MidAssignResourcesContext(
+            cmd_inprogress_ctx=CommandInProgressContext(
+                get_id=lambda: cm.command_in_progress,
+                update_id=lambda name: setattr(
+                    cm, "command_in_progress", name
+                ),
+                update_name=lambda name: setattr(
+                    cm, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(cm, "command_in_progress", ""),
+                get_name=lambda: cm.command_in_progress,
+                obj_update_cmd=lambda *a, **kw: None,
+            ),
+            array_layout_ctx=ArrayLayoutContext(
+                download=lambda *a, **kw: ({}, ""),
+                validate_schema=lambda *a, **kw: (True, ""),
+                update_url=lambda url: setattr(cm, "array_layout_url", url),
+                set=lambda _: None,
+            ),
+            subarray_id_ctx=SubarrayIDContext(
+                set=lambda sid: None,
+                get=lambda: None,
+                reset=lambda: None,
+            ),
+            sb_id_ctx=SbIDContext(
+                set=lambda _: None,
+                reset=lambda: None,
+            ),
+            obs_state_ctx=ObsStateContext(
+                get=lambda: None,
+                change_callback=lambda *a, **kw: None,
+            ),
+            csp_assign_interface="",
+            get_evt_data_manager=lambda: cm.event_data_manager,
+            input_parameter=cm.input_parameter,
+            update_abort_evt=lambda evt: setattr(cm, "abort_event", evt),
+            get_dev_info=cm.get_device,
+            dishln_ctx=DishLeafNodeContext(
+                set_device_names=lambda *a, **kw: None,
+                unsubscribe_events=lambda *a, **kw: None,
+                get_fqdn=lambda *a, **kw: None,
+            ),
+            dish_ctx=DishContext(
+                set_device_names=lambda *a, **kw: None,
+            ),
+            assigned_resources_attr_ctx=AssignedResourcesAttributeContext(
+                set=lambda *a, **kw: None,
+                clear=lambda *a, **kw: None,
+            ),
+            set_sdpqc_fqdn=lambda *a, **kw: None,
+            remove_device_lp=lambda *a, **kw: None,
+            remove_dish=lambda *a, **kw: None,
+        )
 
     # pylint: disable=unexpected-keyword-arg
     def assign_resources(

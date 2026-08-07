@@ -20,7 +20,7 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 )
 from tango import DevState
 
-from ska_tmc_centralnode.commands.assign_resources_command_mid import (
+from ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command_mid import (
     AssignResourcesMid,
 )
 from ska_tmc_centralnode.utils.json_validator_decorator import (

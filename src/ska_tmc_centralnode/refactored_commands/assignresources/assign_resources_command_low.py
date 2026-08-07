@@ -7,15 +7,14 @@ from typing import Tuple
 from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
 
-from ska_tmc_centralnode.commands.assign_resources_command import (
-    AssignResources,
-)
 from ska_tmc_centralnode.refactored_commands.assignresources import (
     AssignResourcesPreparation,
     AssignResourcesPreparationError,
     AssignResourcesPrepError,
-    AssignResourcesRequest,
-    LowAssignResourcesStrategy,
+    LowAssignResourcesContext,
+)
+from ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command import (
+    AssignResources,
 )
 
 
@@ -108,12 +107,23 @@ class AssignResourcesLow(AssignResources):
                 f"Problem in loading the JSON string: {exception}",
             )
 
+        ctx = self._build_context()
         try:
-            request = AssignResourcesRequest(json_argument)
-            plan = LowAssignResourcesStrategy(self.logger).build_plan(request)
-            self.subarray_id = plan.subarray_id
+            plan = ctx.make_strategy(self.logger).build_plan(request)
         except AssignResourcesPrepError as exception:
             return ResultCode.FAILED, str(exception)
+
+        # apply_plan propagates subarray_id to self and subsystems to cm.
+        ctx.apply_plan(plan)
+
+        # Normalize payloads using strategy output so preparation and
+        # execution stay aligned.
+        json_argument["csp"] = json.loads(plan.csp_payload)
+        json_argument["sdp"] = json.loads(plan.sdp_payload)
+        if "mccs" in json_argument:
+            json_argument["mccs"] = json.loads(plan.mccs_payload)
+        if plan.telmodel:
+            json_argument["telmodel"] = plan.telmodel
 
         assigned_subsystem: list = list(plan.subsystems)
         self.logger.debug(
@@ -128,15 +138,11 @@ class AssignResourcesLow(AssignResources):
             self.command_id,
             self.subarray_id,
         )
-
-        self.component_manager.subsystem_assigned_per_subarray[
-            self.subarray_id
-        ] = assigned_subsystem
         result_code, message = self.init_adapters()
         if result_code == ResultCode.FAILED:
             return result_code, message
 
-        result_code, message = self.get_subarray_adapter(self.subarray_id)
+        result_code, message = self.get_subarray_adapter(int(self.subarray_id))
         if result_code == ResultCode.FAILED:
             return result_code, message
 
@@ -256,3 +262,7 @@ class AssignResourcesLow(AssignResources):
             raise ValueError(
                 "Error while creating MCCS input json"
             ) from exception
+
+    def _build_context(self) -> LowAssignResourcesContext:
+        """Delegate context construction to the component manager."""
+        return self.component_manager._get_assign_context()
