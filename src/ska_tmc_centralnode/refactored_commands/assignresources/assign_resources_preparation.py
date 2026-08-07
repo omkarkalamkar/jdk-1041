@@ -57,7 +57,8 @@ class AssignResourcesPreparation:
         )
         if not default_url:
             self.logger.debug(
-                "No array_layout_url in argin and no default_array_layout_url set"
+                "No array_layout_url in argin and no "
+                "default_array_layout_url set"
             )
             return
 

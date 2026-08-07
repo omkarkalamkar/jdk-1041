@@ -43,12 +43,13 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     SbIDContext,
     SubarrayIDContext,
 )
-from ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command_low import (
-    AssignResourcesLow,
-)
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
+)
+
+from ..refactored_commands.assignresources.assign_resources_low import (
+    AssignResourcesLow,
 )
 
 

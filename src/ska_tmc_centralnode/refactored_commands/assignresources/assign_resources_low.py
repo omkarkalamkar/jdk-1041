@@ -13,9 +13,8 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     AssignResourcesPrepError,
     LowAssignResourcesContext,
 )
-from ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command import (
-    AssignResources,
-)
+
+from .assign_resources_command import AssignResources
 
 
 class AssignResourcesLow(AssignResources):
@@ -56,7 +55,7 @@ class AssignResourcesLow(AssignResources):
         )
 
     # pylint:disable=signature-differs
-    def do(self, argin: str) -> Tuple[ResultCode, str]:  # type: ignore[override]
+    def do(self, argin: str) -> Tuple[ResultCode, str]:
         """
         Method to invoke AssignResources command on Subarray.
 

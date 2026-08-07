@@ -56,14 +56,15 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     SbIDContext,
     SubarrayIDContext,
 )
-from ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command_mid import (
-    AssignResourcesMid,
-)
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
     DISH_VCC_VALIDATION_RESULT_STATUS,
     MID_CSP_MLN_DEVICE,
+)
+
+from ..refactored_commands.assignresources.assign_resources_mid import (
+    AssignResourcesMid,
 )
 
 # pylint:disable=too-many-instance-attributes
