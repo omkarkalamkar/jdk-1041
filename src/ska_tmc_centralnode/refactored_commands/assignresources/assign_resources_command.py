@@ -115,6 +115,7 @@ class AssignResources(BaseCNCommand):
 
     def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
         """Temporary, will be removed after all command refactoring"""
+        raise NotImplementedError
 
     def do_mid(self, *args):
         """Temporary, will be removed after all command refactoring"""

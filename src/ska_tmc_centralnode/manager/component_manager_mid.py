@@ -23,9 +23,6 @@ from ska_tmc_common.exceptions import CommandNotAllowed, InvalidReceptorIdError
 from tango import DevState
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
-from ska_tmc_centralnode.commands.release_resources_command_mid import (
-    ReleaseResourcesMid,
-)
 from ska_tmc_centralnode.commands.set_global_pointing_model import (
     SetGlobalPointingModel,
 )
@@ -55,6 +52,9 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     ObsStateContext,
     SbIDContext,
     SubarrayIDContext,
+)
+from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    ReleaseResourcesMid,
 )
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,

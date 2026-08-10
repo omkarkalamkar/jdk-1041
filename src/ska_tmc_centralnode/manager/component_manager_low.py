@@ -22,9 +22,6 @@ from ska_tmc_common.enum import LivelinessProbeType
 from ska_tmc_common.exceptions import CommandNotAllowed
 from tango import DevState
 
-from ska_tmc_centralnode.commands.release_resources_command_low import (
-    ReleaseResourcesLow,
-)
 from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
@@ -42,6 +39,9 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     RecoveryContext,
     SbIDContext,
     SubarrayIDContext,
+)
+from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    ReleaseResourcesLow,
 )
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
