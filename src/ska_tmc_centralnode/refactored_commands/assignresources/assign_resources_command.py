@@ -2,20 +2,21 @@
 AssignResources Command class for CentralNode.
 """
 
+import logging
 import time
-from typing import Tuple
+from typing import Optional, Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common import TimeKeeper, TimeoutCallback
 
-from ska_tmc_centralnode.commands.central_node_command import (
-    AssignReleaseResources,
-)
+from .base_command import BaseCNCommand
+
+LOGGER = logging.getLogger(__name__)
 
 
-class AssignResources(AssignReleaseResources):
+class AssignResources(BaseCNCommand):
     """
     A class for CentralNode's AssignResources() command.
 
@@ -39,14 +40,19 @@ class AssignResources(AssignReleaseResources):
         logger=None,
         **kwargs,
     ):
+        resolved_logger = logger or LOGGER
         super().__init__(
-            component_manager, adapter_factory, logger=logger, *args, **kwargs
+            component_manager,
+            adapter_factory,
+            logger=resolved_logger,
+            *args,
+            **kwargs,
         )
         self.timeout_id = f"{time.time()}_{__class__.__name__}"
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
-        self.subarray_id = ""
+        self.subarray_id: int | str = 0
         self.timekeeper = TimeKeeper(
-            self.component_manager.command_timeout, logger
+            self.component_manager.command_timeout, self.logger
         )
 
     def get_subarray_obsstate(self) -> ObsState:
@@ -107,8 +113,27 @@ class AssignResources(AssignReleaseResources):
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)
 
+    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
+        """Temporary, will be removed after all command refactoring"""
+
     def do_mid(self, *args):
         """Temporary, will be removed after all command refactoring"""
 
     def do_low(self, *args):
         """Temporary, will be removed after all command refactoring"""
+
+    def start_assign_resources(self) -> None:
+        """Initialize command id and standard execution log."""
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Executing AssignResources command",
+            self.command_id,
+        )
+
+    def prepare_subarray_command_target(self) -> Tuple[ResultCode, str]:
+        """Initialize adapters and resolve the target subarray adapter."""
+        result_code, message = self.init_adapters()
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        return self.get_subarray_adapter(int(self.subarray_id))

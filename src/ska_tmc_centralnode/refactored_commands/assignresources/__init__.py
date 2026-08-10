@@ -29,6 +29,7 @@ from .assign_resources_strategy import (
     LowAssignResourcesStrategy,
     MidAssignResourcesStrategy,
 )
+from .base_command import BaseCNCommand
 from .common_context import (
     AbortedDishContext,
     AssignedResourcesAttributeContext,
@@ -40,6 +41,7 @@ from .common_context import (
 )
 
 __all__ = [
+    "BaseCNCommand",
     "AssignResourcesPlan",
     "MidAssignResourcesPlan",
     "LowAssignResourcesPlan",

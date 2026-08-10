@@ -63,9 +63,9 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
 )
 
-from ..refactored_commands.assignresources.assign_resources_mid import (
-    AssignResourcesMid,
-)
+from ..refactored_commands.assignresources import assign_resources_command_mid
+
+AssignResourcesMid = assign_resources_command_mid.AssignResourcesMid
 
 # pylint:disable=too-many-instance-attributes
 # pylint:disable=too-many-arguments
@@ -1299,7 +1299,7 @@ class CNComponentManagerMid(CNComponentManager):
             )
         return argin, exception_msg
 
-    def _get_assign_context(self) -> MidAssignResourcesContext:
+    def _get_assign_context(self, command=None) -> MidAssignResourcesContext:
         """Build MidAssignResourcesContext bound to this component manager.
 
         :return: Runtime context for AssignResources command execution.
@@ -1326,16 +1326,32 @@ class CNComponentManagerMid(CNComponentManager):
                 set=lambda _: None,
             ),
             subarray_id_ctx=SubarrayIDContext(
-                set=lambda sid: None,
-                get=lambda: None,
-                reset=lambda: None,
+                set=(
+                    lambda sid: setattr(command, "subarray_id", sid)
+                    if command is not None
+                    else None
+                ),
+                get=(
+                    lambda: getattr(command, "subarray_id", None)
+                    if command is not None
+                    else None
+                ),
+                reset=(
+                    lambda: setattr(command, "subarray_id", "")
+                    if command is not None
+                    else None
+                ),
             ),
             sb_id_ctx=SbIDContext(
                 set=lambda _: None,
                 reset=lambda: None,
             ),
             obs_state_ctx=ObsStateContext(
-                get=lambda: None,
+                get=(
+                    lambda: cm.get_subarray_obsstate(command.subarray_devname)
+                    if command is not None and command.subarray_devname
+                    else None
+                ),
                 change_callback=lambda *a, **kw: None,
             ),
             csp_assign_interface="",

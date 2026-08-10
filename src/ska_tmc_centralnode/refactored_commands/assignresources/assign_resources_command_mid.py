@@ -2,7 +2,7 @@
 AssignResourcesLow Command class for CentralNode.
 """
 import json
-from typing import Tuple
+from typing import Optional, Tuple
 
 from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
@@ -20,8 +20,23 @@ from .assign_resources_command import AssignResources
 class AssignResourcesMid(AssignResources):
     """A class for CentralNode's AssignResources() command for Mid."""
 
+    def __init__(
+        self,
+        component_manager,
+        *args,
+        adapter_factory=None,
+        logger=None,
+        **kwargs,
+    ):
+        super().__init__(
+            component_manager, adapter_factory, *args, logger=logger, **kwargs
+        )
+        self.receptor_ids: list = []
+        self._plan = None
+        self._json_argument: dict = {}
+
     # pylint:disable=signature-differs
-    def do(self, argin: str) -> Tuple[ResultCode, str]:
+    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
         """
         Method to invoke the AssignResources command on a Subarray.
 
@@ -36,11 +51,42 @@ class AssignResourcesMid(AssignResources):
             Tuple(ResultCode, str): Result code and message
 
         """
-        self.set_command_id(self.__class__.__name__)
-        self.logger.debug(
-            "Command %s: Executing AssignResources command",
+        if argin is None:
+            return ResultCode.FAILED, "AssignResources input is required"
+
+        self.start_assign_resources()
+
+        result_code, message = self.prepare_command(argin)
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        result_code, message = self.build_device_commands()
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        validation_failure = self._validate_receptors()
+        if validation_failure is not None:
+            return validation_failure
+
+        result_code, message = self._invoke_assign_on_subarray()
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        self.logger.info(
+            "Command ID: %s | AssignResources completed successfully on: %s",
             self.command_id,
+            self.tm_subarray_adapter,
         )
+
+        return self.wait_for_command_completion(
+            len(self.command_subs_list),
+            ObsState.IDLE,
+            "get_subarray_obsstate",
+            use_command_class_id=True,
+        )
+
+    def prepare_command(self, argin: str) -> Tuple[ResultCode, str]:
+        """Parse input and build execution plan/context for MID."""
         try:
             request = AssignResourcesPreparation(
                 self.component_manager,
@@ -64,24 +110,25 @@ class AssignResourcesMid(AssignResources):
         json_argument["sdp"] = json.loads(plan.sdp_payload)
         if plan.telmodel:
             json_argument["telmodel"] = plan.telmodel
+        self._plan = plan
+        self._json_argument = json_argument
+        self.receptor_ids = plan.receptor_ids
+        return ResultCode.OK, ""
 
-        result_code, message = self.init_adapters()
-        if result_code == ResultCode.FAILED:
-            return result_code, message
+    def build_device_commands(self) -> Tuple[ResultCode, str]:
+        """Prepare adapters/target subarray for AssignResources invocation."""
+        return self.prepare_subarray_command_target()
 
-        subarray_id = int(self.subarray_id)
-
-        result_code, message = self.get_subarray_adapter(subarray_id)
-        if result_code == ResultCode.FAILED:
-            return result_code, message
-
-        receptor_ids = plan.receptor_ids
+    def _validate_receptors(
+        self,
+    ) -> Tuple[ResultCode, str] | None:
+        """Validate requested receptors are available for assignment."""
         self.logger.debug(
             "Command ID %s: Receptor IDs requested for assignment: %s",
             self.command_id,
-            receptor_ids,
+            self.receptor_ids,
         )
-        for receptor_id in receptor_ids:
+        for receptor_id in self.receptor_ids:
             if self.component_manager.is_already_assigned(receptor_id):
                 return (
                     ResultCode.FAILED,
@@ -90,8 +137,12 @@ class AssignResourcesMid(AssignResources):
             self.logger.debug(
                 "Command ID: %s | Dish %s is available for assignment.",
                 self.command_id,
-                receptor_ids,
+                self.receptor_ids,
             )
+        return None
+
+    def _invoke_assign_on_subarray(self) -> Tuple[ResultCode, str]:
+        """Invoke AssignResources on target TM subarray."""
         self.component_manager.log_state(
             "Device states before executing AssignResources command"
         )
@@ -106,7 +157,7 @@ class AssignResourcesMid(AssignResources):
             [self.tm_subarray_adapter],
             "Error in calling AssignResources on subarray",
             "AssignResources",
-            json.dumps(json_argument),
+            json.dumps(self._json_argument),
         )
         for return_code, message_or_unique_id in zip(
             return_codes, message_or_unique_ids
@@ -118,20 +169,8 @@ class AssignResourcesMid(AssignResources):
                 self.component_manager.command_mapping[
                     self.command_id
                 ] = message_or_unique_id
-
-        self.logger.info(
-            "Command ID: %s | AssignResources completed successfully on: %s",
-            self.command_id,
-            self.tm_subarray_adapter,
-        )
-
-        return self.wait_for_command_completion(
-            len(self.command_subs_list),
-            ObsState.IDLE,
-            "get_subarray_obsstate",
-            use_command_class_id=True,
-        )
+        return ResultCode.OK, ""
 
     def _build_context(self) -> MidAssignResourcesContext:
         """Delegate context construction to the component manager."""
-        return self.component_manager._get_assign_context()
+        return self.component_manager._get_assign_context(command=self)

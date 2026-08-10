@@ -2,7 +2,7 @@
 AssignResourcesLow Command class for CentralNode.
 """
 import json
-from typing import Tuple
+from typing import Optional, Tuple
 
 from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
@@ -33,6 +33,9 @@ class AssignResourcesLow(AssignResources):
             component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
+        self._plan = None
+        self._json_argument: dict = {}
+        self._assigned_subsystem: list = []
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -55,7 +58,7 @@ class AssignResourcesLow(AssignResources):
         )
 
     # pylint:disable=signature-differs
-    def do(self, argin: str) -> Tuple[ResultCode, str]:
+    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
         """
         Method to invoke AssignResources command on Subarray.
 
@@ -78,11 +81,40 @@ class AssignResourcesLow(AssignResources):
 
             AssertionError if  Mccs On command is not completed.
         """
-        self.set_command_id(self.__class__.__name__)
-        self.logger.debug(
-            "Command %s: Executing AssignResources command",
+        if argin is None:
+            return ResultCode.FAILED, "AssignResources input is required"
+
+        self.start_assign_resources()
+        result_code, message = self.prepare_command(argin)
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        result_code, message = self.build_device_commands()
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        result_code, message = self._invoke_assign_on_subarray()
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        result_code, message = self._invoke_assign_on_mccs_if_required()
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        self.logger.info(
+            "Command ID: %s | AssignResources completed successfully on: %s",
             self.command_id,
+            self.tm_subarray_adapter,
         )
+        return self.wait_for_command_completion(
+            len(self.command_subs_list),
+            ObsState.IDLE,
+            "get_subarray_obsstate",
+            use_command_class_id=True,
+        )
+
+    def prepare_command(self, argin: str) -> Tuple[ResultCode, str]:
+        """Parse input and build execution plan/context for LOW."""
         try:
             request = AssignResourcesPreparation(
                 self.component_manager,
@@ -124,26 +156,28 @@ class AssignResourcesLow(AssignResources):
         if plan.telmodel:
             json_argument["telmodel"] = plan.telmodel
 
-        assigned_subsystem: list = list(plan.subsystems)
+        self._plan = plan
+        self._json_argument = json_argument
+        self._assigned_subsystem = list(plan.subsystems)
         self.logger.debug(
             "Command %s: Subsystems assigned for subarray %s: %s",
             self.command_id,
             self.subarray_id,
-            assigned_subsystem,
+            self._assigned_subsystem,
         )
-        # INFO log for command start
         self.logger.info(
             "Command ID: %s | AssignResources started for subarray %s",
             self.command_id,
             self.subarray_id,
         )
-        result_code, message = self.init_adapters()
-        if result_code == ResultCode.FAILED:
-            return result_code, message
+        return ResultCode.OK, ""
 
-        result_code, message = self.get_subarray_adapter(int(self.subarray_id))
-        if result_code == ResultCode.FAILED:
-            return result_code, message
+    def build_device_commands(self) -> Tuple[ResultCode, str]:
+        """Prepare adapters/target subarray for AssignResources invocation."""
+        return self.prepare_subarray_command_target()
+
+    def _invoke_assign_on_subarray(self) -> Tuple[ResultCode, str]:
+        """Invoke AssignResources on target TM subarray."""
 
         if self.tm_subarray_adapter is None:
             return (
@@ -156,7 +190,7 @@ class AssignResourcesLow(AssignResources):
             "Error in calling AssignResources on subarray:"
             + self.tm_subarray_adapter.dev_name,
             "AssignResources",
-            json.dumps(json_argument),
+            json.dumps(self._json_argument),
         )
         (
             return_code,
@@ -170,6 +204,11 @@ class AssignResourcesLow(AssignResources):
                 message_or_unique_id,
             )
 
+        return ResultCode.OK, ""
+
+    def _invoke_assign_on_mccs_if_required(self) -> Tuple[ResultCode, str]:
+        """Invoke AssignResources on MCCS when required by subsystems."""
+
         if (
             "mccs"
             in self.component_manager.subsystem_assigned_per_subarray[
@@ -177,8 +216,10 @@ class AssignResourcesLow(AssignResources):
             ]
             and not self.is_auto_recovery_enabled
         ):
+            if self._plan is None:
+                return ResultCode.FAILED, "AssignResources plan is not set"
             try:
-                input_mccs_master = json.loads(plan.mccs_payload)
+                input_mccs_master = json.loads(self._plan.mccs_payload)
             except Exception as exception:
                 self.logger.error(
                     "Command %s: Error while preparing MCCS AssignResources "
@@ -226,18 +267,9 @@ class AssignResourcesLow(AssignResources):
             )
             self.component_manager.subsystem_assigned_per_command_id[
                 self.command_id
-            ] = assigned_subsystem
-        self.logger.info(
-            "Command ID: %s | AssignResources completed successfully on: %s",
-            self.command_id,
-            self.tm_subarray_adapter,
-        )
-        return self.wait_for_command_completion(
-            len(self.command_subs_list),
-            ObsState.IDLE,
-            "get_subarray_obsstate",
-            use_command_class_id=True,
-        )
+            ] = self._assigned_subsystem
+
+        return ResultCode.OK, ""
 
     def create_mccs_cmd_data(self, json_argument: dict) -> dict:
         """
@@ -264,4 +296,4 @@ class AssignResourcesLow(AssignResources):
 
     def _build_context(self) -> LowAssignResourcesContext:
         """Delegate context construction to the component manager."""
-        return self.component_manager._get_assign_context()
+        return self.component_manager._get_assign_context(command=self)
