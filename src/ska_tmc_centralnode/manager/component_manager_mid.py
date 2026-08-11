@@ -19,7 +19,11 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.faults import StateModelError
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
-from ska_tmc_common.exceptions import CommandNotAllowed, InvalidReceptorIdError
+from ska_tmc_common.exceptions import (
+    CommandNotAllowed,
+    InvalidReceptorIdError,
+    SubarrayNotPresentError,
+)
 from tango import DevState
 
 from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
@@ -1470,7 +1474,11 @@ class CNComponentManagerMid(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-        except (StateModelError, CommandNotAllowed) as exception:
+        except (
+            StateModelError,
+            CommandNotAllowed,
+            SubarrayNotPresentError,
+        ) as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
                 exception,
@@ -1552,7 +1560,11 @@ class CNComponentManagerMid(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-        except (StateModelError, CommandNotAllowed) as exception:
+        except (
+            StateModelError,
+            CommandNotAllowed,
+            SubarrayNotPresentError,
+        ) as exception:
             self.logger.exception(
                 "Exception occurred while processing "
                 + "releaseresource: %s ",

@@ -19,7 +19,10 @@ from ska_schemas.schema import validate
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.faults import StateModelError
 from ska_tmc_common.enum import LivelinessProbeType
-from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.exceptions import (
+    CommandNotAllowed,
+    SubarrayNotPresentError,
+)
 from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregate_process import (
@@ -708,7 +711,11 @@ class CNComponentManagerLow(CNComponentManager):
                 task_abort_event=task_abort_event,
             )
 
-        except (StateModelError, CommandNotAllowed) as exception:
+        except (
+            StateModelError,
+            CommandNotAllowed,
+            SubarrayNotPresentError,
+        ) as exception:
             self.logger.exception(
                 "Exception occurred while processing "
                 + "releaseresource: %s ",
