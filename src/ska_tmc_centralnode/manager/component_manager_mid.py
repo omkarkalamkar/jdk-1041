@@ -1006,6 +1006,9 @@ class CNComponentManagerMid(CNComponentManager):
             append_dish_dev_names=self.append_dish_dev_names,
             update_kval_aggregator=self.update_kval_aggregator,
             dish_kvalue_validation_aggregator=self.dish_kvalue_validation_aggregator,
+            k_value_valid_range_lower_limit=self.k_value_valid_range_lower_limit,
+            k_value_valid_range_upper_limit=self.k_value_valid_range_upper_limit,
+            validate_dish_ids=self.validate_dish_ids,
         )
 
     # pylint: disable=unexpected-keyword-arg

@@ -75,10 +75,10 @@ class LoadDishCfg(BaseTMCCommand):
         runtime = self.command_runtime_context
         self.context.device_commands = [
             DeviceCommand(
-                device_name=runtime.device_ctx.csp_mln_dev_name,
+                device_name=runtime.device_ctx.csp_mln_device_name,
                 adapter_type=AdapterType.CSP_MASTER_LEAF_NODE,
-                command_name="Configure",
-                command_input=json.dumps(self.plan.dish_cfg_params),
+                command_name="LoadDishCfg",
+                command_input=self.plan.dish_cfg_params,
                 update_event_callback=self._update_event_callback,
             )
         ]
@@ -273,7 +273,9 @@ class LoadDishCfg(BaseTMCCommand):
         runtime_ctx = self.command_runtime_context
         failed_data = str(
             self.filter_failed_data(
-                json.loads(runtime_ctx.get_dish_vcc_validation_status())
+                json.loads(
+                    runtime_ctx.command_ctx.get_dish_vcc_validation_status()
+                )
             )
         )
 
@@ -379,7 +381,9 @@ class LoadDishCfg(BaseTMCCommand):
             failed_count: count for command failure on invoked devices.
         """
         runtime_ctx = self.command_runtime_context
-        status = json.loads(runtime_ctx.get_dish_vcc_validation_status())
+        status = json.loads(
+            runtime_ctx.command_ctx.get_dish_vcc_validation_status()
+        )
         csp_status_not_ok = status.get(MID_CSP_MLN_DEVICE) != (
             DISH_VCC_VALIDATION_RESULT_STATUS[ResultCode.OK]
         )

@@ -68,3 +68,6 @@ class LoadDishCfgRuntimeContext(CommandRuntimeContext):
     append_dish_dev_names: Callable[[list[str]], None]
     update_kval_aggregator: Callable[[str, Any], None]
     dish_kvalue_validation_aggregator: Any
+    k_value_valid_range_lower_limit: int
+    k_value_valid_range_upper_limit: int
+    validate_dish_ids: Any
