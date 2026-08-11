@@ -806,6 +806,9 @@ class LoadDishCfg(BaseTMCCommand):
             if event_data:
                 value = event_data.argout
                 result = [value[0][0], value[1][0]]
+                self.logger.debug(
+                    "Event Value %s and Result: %s", value, result
+                )
                 with runtime_ctx.command_completion_condition:
                     self.context.results[device_name] = CommandResult(
                         device_name=device_name,
