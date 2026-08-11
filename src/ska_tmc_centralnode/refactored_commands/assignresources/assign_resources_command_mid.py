@@ -2,7 +2,7 @@
 AssignResourcesLow Command class for CentralNode.
 """
 import json
-from typing import Optional, Tuple
+from typing import Tuple
 
 from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
@@ -35,35 +35,8 @@ class AssignResourcesMid(AssignResources):
         self._plan = None
         self._json_argument: dict = {}
 
-    # pylint:disable=signature-differs
-    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
-        """
-        Method to invoke the AssignResources command on a Subarray.
-
-         Args:
-            argin (str): Input argument for the command
-
-        .. literalinclude:: ../../../tests/data/command_AssignResources.json
-            :language: json
-            :caption: Example JSON for Assign Resources mid
-
-        Returns:
-            Tuple(ResultCode, str): Result code and message
-
-        """
-        if argin is None:
-            return ResultCode.FAILED, "AssignResources input is required"
-
-        self.start_assign_resources()
-
-        result_code, message = self.prepare_command(argin)
-        if result_code == ResultCode.FAILED:
-            return result_code, message
-
-        result_code, message = self.build_device_commands()
-        if result_code == ResultCode.FAILED:
-            return result_code, message
-
+    def execute_command(self) -> Tuple[ResultCode, str]:
+        """Execute AssignResources after prepare/build lifecycle steps."""
         validation_failure = self._validate_receptors()
         if validation_failure is not None:
             return validation_failure

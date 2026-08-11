@@ -54,7 +54,11 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     SubarrayIDContext,
 )
 from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    MidReleaseResourcesContext,
     ReleaseResourcesMid,
+)
+from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    SubarrayIDContext as ReleaseSubarrayIDContext,
 )
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
@@ -1374,6 +1378,30 @@ class CNComponentManagerMid(CNComponentManager):
             set_sdpqc_fqdn=lambda *a, **kw: None,
             remove_device_lp=lambda *a, **kw: None,
             remove_dish=lambda *a, **kw: None,
+        )
+
+    def _get_release_context(self, command=None) -> MidReleaseResourcesContext:
+        """Build MidReleaseResourcesContext bound to this component manager."""
+        cm = self
+        return MidReleaseResourcesContext(
+            subarray_id_ctx=ReleaseSubarrayIDContext(
+                set=(
+                    lambda sid: setattr(command, "subarray_id", sid)
+                    if command is not None
+                    else None
+                ),
+                get=(
+                    lambda: getattr(command, "subarray_id", None)
+                    if command is not None
+                    else None
+                ),
+                reset=(
+                    lambda: setattr(command, "subarray_id", "")
+                    if command is not None
+                    else None
+                ),
+            ),
+            input_parameter=cm.input_parameter,
         )
 
     # pylint: disable=unexpected-keyword-arg

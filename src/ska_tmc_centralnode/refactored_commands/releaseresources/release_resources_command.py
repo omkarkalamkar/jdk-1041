@@ -2,7 +2,7 @@
 
 import logging
 import time
-from typing import Optional, Tuple
+from typing import Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
@@ -79,9 +79,37 @@ class ReleaseResources(BaseCNCommand):
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
         self.task_callback(status=TaskStatus.IN_PROGRESS)
-        result, message = self.do(argin)
+        if argin is None:
+            result, message = (
+                ResultCode.FAILED,
+                "ReleaseResources input is required",
+            )
+        else:
+            self.start_release_resources()
+
+            result, message = self.prepare_command(argin)
+            if result != ResultCode.FAILED:
+                result, message = self.build_device_commands()
+            if result != ResultCode.FAILED:
+                result, message = self.execute_command()
         self.update_task_status(result=(result, message), exception=message)
         return result, message
+
+    def start_release_resources(self) -> None:
+        """Initialize command id and standard execution log."""
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Executing ReleaseResources command",
+            self.command_id,
+        )
+
+    def prepare_command(self, argin: str) -> Tuple[ResultCode, str]:
+        """Prepare command data before device command execution."""
+        raise NotImplementedError
+
+    def execute_command(self) -> Tuple[ResultCode, str]:
+        """Execute device-level ReleaseResources after preparation."""
+        raise NotImplementedError
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -130,16 +158,19 @@ class ReleaseResources(BaseCNCommand):
             "ReleaseAllResources",
         )
 
-    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
-        """Temporary, will be removed after all command refactoring."""
-        raise NotImplementedError
-
     def build_device_commands(self) -> Tuple[ResultCode, str]:
-        """Not used by ReleaseResources; satisfies abstract interface."""
+        """Prepare adapters and target subarray for command invocation."""
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+
+        result_code, message = self.get_subarray_adapter(int(self.subarray_id))
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        if self.tm_subarray_adapter is None:
+            return (
+                ResultCode.FAILED,
+                f"Subarray Id {self.subarray_id} is not existing!",
+            )
         return ResultCode.OK, ""
-
-    def do_mid(self, *args):
-        """Temporary, will be removed after all command refactoring."""
-
-    def do_low(self, *args):
-        """Temporary, will be removed after all command refactoring."""

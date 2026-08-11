@@ -4,7 +4,7 @@ AssignResources Command class for CentralNode.
 
 import logging
 import time
-from typing import Optional, Tuple
+from typing import Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
@@ -84,9 +84,29 @@ class AssignResources(BaseCNCommand):
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
         self.task_callback(status=TaskStatus.IN_PROGRESS)
-        result, message = self.do(argin)
+        if argin is None:
+            result, message = (
+                ResultCode.FAILED,
+                "AssignResources input is required",
+            )
+        else:
+            self.start_assign_resources()
+
+            result, message = self.prepare_command(argin)
+            if result != ResultCode.FAILED:
+                result, message = self.build_device_commands()
+            if result != ResultCode.FAILED:
+                result, message = self.execute_command()
         self.update_task_status(result=(result, message), exception=message)
         return result, message
+
+    def prepare_command(self, argin: str) -> Tuple[ResultCode, str]:
+        """Prepare command data before device command execution."""
+        raise NotImplementedError
+
+    def execute_command(self) -> Tuple[ResultCode, str]:
+        """Execute device-level AssignResources after preparation."""
+        raise NotImplementedError
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -112,16 +132,6 @@ class AssignResources(BaseCNCommand):
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)
-
-    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
-        """Temporary, will be removed after all command refactoring"""
-        raise NotImplementedError
-
-    def do_mid(self, *args):
-        """Temporary, will be removed after all command refactoring"""
-
-    def do_low(self, *args):
-        """Temporary, will be removed after all command refactoring"""
 
     def start_assign_resources(self) -> None:
         """Initialize command id and standard execution log."""

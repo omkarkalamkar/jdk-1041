@@ -2,7 +2,7 @@
 AssignResourcesLow Command class for CentralNode.
 """
 import json
-from typing import Optional, Tuple
+from typing import Tuple
 
 from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
@@ -57,42 +57,8 @@ class AssignResourcesLow(AssignResources):
             self.command_id, None
         )
 
-    # pylint:disable=signature-differs
-    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
-        """
-        Method to invoke AssignResources command on Subarray.
-
-        Args:
-            argin (str): Input argument for the command
-
-        .. literalinclude:: ../../../tests/data/assign_resource_low.json
-            :language: json
-            :caption: Example JSON for Assign Resources low
-
-        Returns:
-            Tuple(ResultCode, str): tuple containing a
-            return code and a string msg.
-            For Example: (ResultCode.OK, "")
-
-        :raises:
-            KeyError if input argument json string contains invalid key
-
-            ValueError if input argument json string contains invalid value
-
-            AssertionError if  Mccs On command is not completed.
-        """
-        if argin is None:
-            return ResultCode.FAILED, "AssignResources input is required"
-
-        self.start_assign_resources()
-        result_code, message = self.prepare_command(argin)
-        if result_code == ResultCode.FAILED:
-            return result_code, message
-
-        result_code, message = self.build_device_commands()
-        if result_code == ResultCode.FAILED:
-            return result_code, message
-
+    def execute_command(self) -> Tuple[ResultCode, str]:
+        """Execute AssignResources after prepare/build lifecycle steps."""
         result_code, message = self._invoke_assign_on_subarray()
         if result_code == ResultCode.FAILED:
             return result_code, message

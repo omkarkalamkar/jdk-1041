@@ -41,11 +41,16 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     SubarrayIDContext,
 )
 from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    LowReleaseResourcesContext,
     ReleaseResourcesLow,
+)
+from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    SubarrayIDContext as ReleaseSubarrayIDContext,
 )
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
+    mccs_release_interface,
 )
 
 from ..refactored_commands.assignresources import assign_resources_command_low
@@ -549,6 +554,31 @@ class CNComponentManagerLow(CNComponentManager):
             set_cmd_fail_info=lambda *a, **kw: None,
             clear_cmd_fail_info=lambda: None,
             set_subarr_to_be_cfgd=lambda *a, **kw: None,
+        )
+
+    def _get_release_context(self, command=None) -> LowReleaseResourcesContext:
+        """Build LowReleaseResourcesContext bound to this component manager."""
+        cm = self
+        return LowReleaseResourcesContext(
+            subarray_id_ctx=ReleaseSubarrayIDContext(
+                set=(
+                    lambda sid: setattr(command, "subarray_id", sid)
+                    if command is not None
+                    else None
+                ),
+                get=(
+                    lambda: getattr(command, "subarray_id", None)
+                    if command is not None
+                    else None
+                ),
+                reset=(
+                    lambda: setattr(command, "subarray_id", "")
+                    if command is not None
+                    else None
+                ),
+            ),
+            input_parameter=cm.input_parameter,
+            mccs_release_interface=mccs_release_interface,
         )
 
     # pylint: disable=unexpected-keyword-arg

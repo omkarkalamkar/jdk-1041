@@ -1,66 +1,68 @@
 """ReleaseResourcesMid command class for CentralNode."""
 
-import json
-from typing import Optional, Tuple
+from typing import Tuple
 
 from ska_control_model import ObsState
 from ska_tango_base.commands import ResultCode
 
 from .release_resources_command import ReleaseResources
+from .release_resources_context import MidReleaseResourcesContext
+from .release_resources_plan import MidReleaseResourcesPlan
+from .release_resources_preparation import (
+    ReleaseResourcesPreparation,
+    ReleaseResourcesPreparationError,
+)
+from .release_resources_strategy import ReleaseResourcesPrepError
 
 
 class ReleaseResourcesMid(ReleaseResources):
     """Release Resources command class for Mid."""
 
-    # pylint:disable=signature-differs
-    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
-        """
-        Method to invoke ReleaseResources command on Subarray.
-
-        Args:
-            argin (str): Input argument for the command
-
-        Returns:
-            A tuple containing a return code and a string msg.
-            For Example: (ResultCode.OK, "")
-        """
-        self.set_command_id(self.__class__.__name__)
-        self.logger.debug(
-            "Command %s: Executing ReleaseResources command",
-            self.command_id,
+    def __init__(
+        self,
+        component_manager,
+        *args,
+        adapter_factory=None,
+        logger=None,
+        **kwargs,
+    ):
+        super().__init__(
+            component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
-        ret_code, message = self.init_adapters()
-        if ret_code == ResultCode.FAILED:
-            return ret_code, message
+        self._plan: MidReleaseResourcesPlan | None = None
 
+    def prepare_command(self, argin: str) -> Tuple[ResultCode, str]:
+        """Parse and validate input data for MID release flow."""
         try:
-            json_argument = json.loads(argin)
-        except Exception as exception:
-            return (
-                ResultCode.FAILED,
-                f"Error while loading the Assign JSON string: {exception}",
-            )
+            request = ReleaseResourcesPreparation(
+                self.component_manager,
+                self.logger,
+            ).prepare_request(argin)
+        except ReleaseResourcesPreparationError as exception:
+            return ResultCode.FAILED, str(exception)
 
-        if "transaction_id" in json_argument:
-            del json_argument["transaction_id"]
+        ctx = self._build_context()
+        try:
+            plan = ctx.make_strategy(self.logger).build_plan(request)
+        except ReleaseResourcesPrepError as exception:
+            return ResultCode.FAILED, str(exception)
 
-        if "subarray_id" not in json_argument:
-            return (
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
+        ctx.apply_plan(plan)
+        self._plan = plan
+        return ResultCode.OK, ""
 
-        result_code, message = self.get_subarray_adapter(self.subarray_id)
-        if result_code == ResultCode.FAILED:
-            return result_code, message
+    def execute_command(self) -> Tuple[ResultCode, str]:
+        """Execute MID release command after prepare/build lifecycle."""
+        if self._plan is None:
+            return ResultCode.FAILED, "ReleaseResources plan is not set"
 
         if self.tm_subarray_adapter is None:
             return (
                 ResultCode.FAILED,
-                ("Subarray Id %s is not existing!", self.subarray_id),
+                f"Subarray Id {self.subarray_id} is not existing!",
             )
 
-        if json_argument["release_all"] is True:
+        if self._plan.release_all is True:
             self.logger.info(
                 "Invoking ReleaseAllResources on subarray | device=%s",
                 self.tm_subarray_adapter.dev_name,
@@ -96,3 +98,7 @@ class ReleaseResourcesMid(ReleaseResources):
             ResultCode.FAILED,
             "Partial release resources not supported!",
         )
+
+    def _build_context(self) -> MidReleaseResourcesContext:
+        """Delegate context construction to the component manager."""
+        return self.component_manager._get_release_context(command=self)
