@@ -28,7 +28,7 @@ class ReleaseResourcesPreparation:
             request = ReleaseResourcesRequest.from_json(argin)
         except ReleaseResourcesRequestError as exception:
             raise ReleaseResourcesPreparationError(
-                f"Error loading ReleaseResources JSON: {exception}"
+                f"Problem in loading the JSON string: {exception}"
             ) from exception
 
         request_data = request.copy_data()
