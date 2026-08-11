@@ -79,6 +79,11 @@ CUSTOM_VALUES = --set central_node.centralnode.image.image=$(PROJECT) \
 	--set central_node.centralnode.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
 endif
 
+PYTEST_FAIL_FAST :=
+ifeq ($(EXIT_AT_FAIL),true)
+PYTEST_FAIL_FAST := -x
+endif
+
 # override for python-test - must not have the above --true-context
 ifeq ($(MAKECMDGOALS),python-test)
 ADD_ARGS += -n8 --forked
@@ -139,11 +144,6 @@ DISH_VCC_PATH ?= "config_files/dishid_vcc_map_configuration/ska-mid-cbf-system-p
 GPM_FILE_PATH ?= "config_files/global_pointing_model_data"
 GPM_VERSION ?= "$(BRANCH_NAME)"
 GPM_SOURCES ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode"
-
-PYTEST_FAIL_FAST :=
-ifeq ($(EXIT_AT_FAIL),true)
-PYTEST_FAIL_FAST := -x
-endif
 
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set global.cluster_domain=$(CLUSTER_DOMAIN) \
