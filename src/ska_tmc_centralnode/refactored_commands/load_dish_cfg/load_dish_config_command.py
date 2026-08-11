@@ -438,7 +438,9 @@ class LoadDishCfg(BaseTMCCommand):
         runtime_ctx = self.command_runtime_context
         error_message = error_message + str(
             self.filter_failed_data(
-                json.loads(runtime_ctx.get_dish_vcc_validation_status())
+                json.loads(
+                    runtime_ctx.command_ctx.get_dish_vcc_validation_status()
+                )
             )
         )
         self.context.task_callback(
