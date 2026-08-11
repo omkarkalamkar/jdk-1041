@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 
+from ska_tmc_centralnode.model.input import InputParameterMid
+
 from .assign_resources_request import (
     AssignResourcesRequest,
     AssignResourcesRequestError,
@@ -64,9 +66,18 @@ class AssignResourcesPreparation:
             return
 
         if not isinstance(default_url, dict):
-            raise AssignResourcesPreparationError(
-                "Invalid default 'telmodel': expected a dictionary."
-            )
+            if isinstance(
+                self.component_manager.input_parameter,
+                InputParameterMid,
+            ):
+                message = (
+                    "Invalid default 'telmodel': expected a " + "dictionary."
+                )
+            else:
+                message = (
+                    "Invalid default ArrayLayout : expected a " + "dictionary."
+                )
+            raise AssignResourcesPreparationError(message)
 
         self._validate_array_layout(
             default_url,
