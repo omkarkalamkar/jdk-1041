@@ -83,7 +83,11 @@ def test_mid_release_resources_command_fail_subarray(
     assign_res_command = ReleaseResourcesMid(
         cm, adapter_factory=adapter_factory, logger=logger
     )
-    (res_code, _) = assign_res_command.do(release_input_str)
+    (res_code, _) = assign_res_command.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
 
 

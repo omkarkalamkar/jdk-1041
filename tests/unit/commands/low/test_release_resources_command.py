@@ -83,7 +83,11 @@ def test_low_release_resources_command_fail_subarray(
     assign_res_command = ReleaseResourcesLow(
         cm, adapter_factory=adapter_factory, logger=logger
     )
-    (res_code, _) = assign_res_command.do(release_input_str)
+    (res_code, _) = assign_res_command.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
 
 
@@ -220,7 +224,11 @@ def test_low_release_resources_bad_json(
     assign_res_command = ReleaseResourcesLow(
         cm, adapter_factory=adapter_factory, logger=logger
     )
-    (res_code, message) = assign_res_command.do(release_input_str)
+    (res_code, message) = assign_res_command.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
     assert "Problem in loading the JSON string" in str(message)
 
@@ -247,6 +255,10 @@ def test_low_release_resources_subarray_not_found(
     )
     # Set subarray_id to match the JSON
     release_resources_command.subarray_id = 99
-    (res_code, message) = release_resources_command.do(release_input_str)
+    (res_code, message) = release_resources_command.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
     assert "is not existing" in message

@@ -127,7 +127,11 @@ def test_low_assign_resources_command_fail_subarray(
     assign_res_command = AssignResourcesLow(
         cm, adapter_factory=adapter_factory, logger=logger
     )
-    (res_code, _) = assign_res_command.do(assign_input_str)
+    (res_code, _) = assign_res_command.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
 
 
@@ -304,7 +308,11 @@ def test_low_assign_resources_bad_json(
     assign_res_command = AssignResourcesLow(
         cm, adapter_factory=adapter_factory, logger=logger
     )
-    (res_code, message) = assign_res_command.do(assign_input_str)
+    (res_code, message) = assign_res_command.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
     assert "Problem in loading the JSON string" in str(message)
 
@@ -329,6 +337,10 @@ def test_low_assign_resources_subarray_not_found(
         cm, adapter_factory=adapter_factory, logger=logger
     )
     assign_res_command.subarray_id = 99
-    (res_code, message) = assign_res_command.do(assign_input_str)
+    (res_code, message) = assign_res_command.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
     assert "is not existing" in message

@@ -345,7 +345,11 @@ def test_assign_resources_command_fail_subarray(
     assign_res_command = AssignResourcesMid(
         cm, adapter_factory=adapter_factory, logger=logger
     )
-    (res_code, _) = assign_res_command.do(assign_input_str)
+    (res_code, _) = assign_res_command.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
 
 
@@ -458,7 +462,11 @@ def test_assign_resources_command_already_assigned(
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
-    (res_code, _) = assign_res_command.do(assign_input_str)
+    (res_code, _) = assign_res_command.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
     assert res_code == ResultCode.FAILED
 
 
