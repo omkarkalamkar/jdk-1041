@@ -711,6 +711,14 @@ class LoadDishCfg(BaseTMCCommand):
                         k_value,
                         self.async_cb(dish_adapter.dev_name),
                     )
+                    self.context.device_commands.append(
+                        DeviceCommand(
+                            device_name=dish_adapter.dev_name,
+                            adapter_type=AdapterType.DISH,
+                            command_name="SetKValue",
+                            command_input=k_value,
+                        )
+                    )
                     # name = dish_adapter.dev_name + "async"
                     # self.context.command_device_ids.append(name)
                     # Append dish dev names to track on which dish
