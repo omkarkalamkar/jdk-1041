@@ -473,6 +473,10 @@ class LoadDishCfg(BaseTMCCommand):
         attribute used to get dish map vcc version set before
         restart
         """
+        runtime_ctx = self.command_runtime_context
+        runtime_ctx.commad_ctx.update_memorized_attribute(
+            self.plan.dish_cfg_params
+        )
         # self.csp_mln_adapter.memorizedDishVccMap = self.dish_cfg_params
 
     def get_dishid_vcc_map_json(

@@ -972,6 +972,16 @@ class CNComponentManagerMid(CNComponentManager):
         if dish_dev_name not in self.dev_names_for_load_dish_cfg:
             self.dev_names_for_load_dish_cfg.append(dish_dev_name)
 
+    def update_memorized_attribute(self, dish_vcc_config):
+        """
+        Update the memorized attribute for the component manager
+        """
+        csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
+            self.input_parameter.csp_mln_dev_name,
+            AdapterType.CSP_MASTER_LEAF_NODE,
+        )
+        csp_mln_adapter.memorizedDishVccMap = dish_vcc_config
+
     def _get_load_dish_cfg_context(self) -> LoadDishCfgRuntimeContext:
         """
         Get the context for LoadDishCfg command
@@ -999,6 +1009,7 @@ class CNComponentManagerMid(CNComponentManager):
             set_dish_vcc_validation_status=lambda status: setattr(
                 self, "dish_vcc_validation_status", status
             ),
+            update_memorized_attribute=self.update_memorized_attribute,
         )
         return LoadDishCfgRuntimeContext(
             command_completion_condition=self.command_completion_cond,

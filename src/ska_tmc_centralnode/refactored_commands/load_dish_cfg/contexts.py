@@ -50,6 +50,8 @@ class CommandContext:
 
     set_dish_vcc_validation_status: Callable[[str, bool], None]
 
+    update_memorized_attribute: Callable
+
     # # Task / execution lifecycle
     # upd_abort_evt: Callable = None
     #
