@@ -211,14 +211,16 @@ class LoadDishCfg(BaseTMCCommand):
         )
         if result[0] == ResultCode.FAILED or result[2]:
             error_message = result[1] + " LoadDishCfg command failed: "
-            self.command_runtime_context.update_dish_vcc_flag(False)
+            self.command_runtime_context.command_ctx.update_dish_vcc_flag(
+                False
+            )
             self.process_update_task_for_loaddishcfg_failure(error_message)
         else:
             self.process_loaddishcfg_as_per_k_val_results(k_val_results)
             self.update_memorized_attribute()
         # if self.component_manager.command_mapping.get(self.command_id):
         #     self.component_manager.command_mapping.pop(self.command_id)
-        self.command_runtime_context.set_dish_vcc_command_status(
+        self.command_runtime_context.command_ctx.set_dish_vcc_command_status(
             DishConfigStatus.COMPLETED
         )
         # self.component_manager.reset_load_dish_cfg_data()
@@ -252,7 +254,9 @@ class LoadDishCfg(BaseTMCCommand):
                 else {}
             ),
         )
-        self.command_runtime_context.update_dish_vcc_flag(dish_vcc_flag)
+        self.command_runtime_context.command_ctx.update_dish_vcc_flag(
+            dish_vcc_flag
+        )
 
     def _build_loaddishcfg_outcome(
         self, all_ok: bool, partial_ok: bool
@@ -648,7 +652,7 @@ class LoadDishCfg(BaseTMCCommand):
         for (
             dev_name
         ) in self.command_runtime_context.device_ctx.dish_leaf_node_dev_names:
-            devInfo = self.command_runtime_context.get_dev(dev_name)
+            devInfo = self.command_runtime_context.device_ctx.get_dev(dev_name)
             if not devInfo.unresponsive:
                 try:
                     dish_adapters.append(
