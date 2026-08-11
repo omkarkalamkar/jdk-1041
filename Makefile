@@ -14,6 +14,7 @@ CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
 PROJECT = ska-tmc-centralnode
 KUBE_APP = ska-tmc-centralnode
 TELESCOPE ?= SKA-mid
+EXIT_AT_FAIL ?= true
 
 # KUBE_NAMESPACE defines the Kubernetes Namespace that will be deployed to
 # using Helm.  If this does not already exist it will be created
@@ -138,6 +139,11 @@ DISH_VCC_PATH ?= "config_files/dishid_vcc_map_configuration/ska-mid-cbf-system-p
 GPM_FILE_PATH ?= "config_files/global_pointing_model_data"
 GPM_VERSION ?= "$(BRANCH_NAME)"
 GPM_SOURCES ?= "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-centralnode"
+
+PYTEST_FAIL_FAST :=
+ifeq ($(EXIT_AT_FAIL),true)
+PYTEST_FAIL_FAST := -x
+endif
 
 K8S_CHART_PARAMS = --set global.minikube=$(MINIKUBE) \
 	--set global.cluster_domain=$(CLUSTER_DOMAIN) \
