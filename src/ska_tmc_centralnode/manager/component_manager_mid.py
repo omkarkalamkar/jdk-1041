@@ -1001,6 +1001,7 @@ class CNComponentManagerMid(CNComponentManager):
             ),
         )
         return LoadDishCfgRuntimeContext(
+            command_completion_condition=self.command_completion_cond,
             device_ctx=device_ctx,
             command_ctx=command_ctx,
             append_dish_dev_names=self.append_dish_dev_names,

@@ -802,16 +802,17 @@ class LoadDishCfg(BaseTMCCommand):
         """
 
         def callback(event_data):
+            runtime_ctx = self.command_runtime_context
             if event_data:
                 value = event_data.argout
                 result = [value[0][0], value[1][0]]
-                with self.command_runtime_context.command_completion_cond:
+                with runtime_ctx.command_completion_condition:
                     self.context.results[device_name] = CommandResult(
                         device_name=device_name,
                         result_code=result[0],
                         message=result[1],
                     )
-                    cond = self.command_runtime_context.command_completion_cond
+                    cond = runtime_ctx.command_completion_condition
                     with cond:
                         cond.notify_all()
 
