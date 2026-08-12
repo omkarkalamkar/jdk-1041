@@ -11,6 +11,7 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     AssignResourcesPreparation,
     AssignResourcesPreparationError,
     AssignResourcesPrepError,
+    InvalidArrayLayoutError,
     LowAssignResourcesContext,
 )
 
@@ -103,6 +104,13 @@ class AssignResourcesLow(AssignResources):
                 ResultCode.FAILED,
                 f"Problem in loading the JSON string: {exception}",
             )
+        except InvalidArrayLayoutError as exception:
+            self.logger.error(
+                "Command %s: Invalid array layout: %s",
+                self.command_id,
+                exception,
+            )
+            return ResultCode.FAILED, str(exception)
 
         ctx = self._build_context()
         try:

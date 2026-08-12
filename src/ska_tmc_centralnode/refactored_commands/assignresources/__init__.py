@@ -18,6 +18,7 @@ from .assign_resources_plan import (
 from .assign_resources_preparation import (
     AssignResourcesPreparation,
     AssignResourcesPreparationError,
+    InvalidArrayLayoutError,
 )
 from .assign_resources_request import (
     AssignResourcesRequest,
@@ -68,4 +69,5 @@ __all__ = [
     "MidAssignResourcesStrategy",
     "LowAssignResourcesStrategy",
     "AssignResourcesPrepError",
+    "InvalidArrayLayoutError",
 ]

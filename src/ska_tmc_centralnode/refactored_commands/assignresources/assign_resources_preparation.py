@@ -13,7 +13,12 @@ from .assign_resources_request import (
 
 
 class AssignResourcesPreparationError(Exception):
-    """Raised when AssignResources preparation fails."""
+    """Raised when AssignResources JSON input fails to parse."""
+
+
+class InvalidArrayLayoutError(Exception):
+    """Raised when default array layout is not a dict. Message is final
+    and must not be re-wrapped by callers."""
 
 
 class AssignResourcesPreparation:
@@ -48,7 +53,6 @@ class AssignResourcesPreparation:
     def _apply_array_layout(self, request_data: dict) -> None:
         if "telmodel" in request_data:
             array_url = request_data["telmodel"]
-            self._validate_array_layout(array_url, key_name="telmodel")
             self.component_manager.array_layout_url = array_url
             self.logger.debug("array_layout_url in argin: %s", array_url)
             return
@@ -70,19 +74,12 @@ class AssignResourcesPreparation:
                 self.component_manager.input_parameter,
                 InputParameterMid,
             ):
-                message = (
-                    "Invalid default 'telmodel': expected a " + "dictionary."
-                )
+                message = "Invalid default 'telmodel': expected a dictionary."
             else:
                 message = (
-                    "Invalid default ArrayLayout : expected a " + "dictionary."
+                    "Invalid default ArrayLayout : expected a dictionary."
                 )
-            raise AssignResourcesPreparationError(message)
-
-        self._validate_array_layout(
-            default_url,
-            key_name="default_array_layout_url",
-        )
+            raise InvalidArrayLayoutError(message)
 
         request_data["telmodel"] = default_url
         self.component_manager.array_layout_url = default_url
@@ -90,43 +87,3 @@ class AssignResourcesPreparation:
             "array_layout_url not provided, using default: %s",
             default_url,
         )
-
-    def _validate_array_layout(
-        self,
-        array_url: dict,
-        *,
-        key_name: str,
-    ) -> None:
-        """Validate array layout payload required by AssignResources."""
-        if not isinstance(array_url, dict):
-            raise AssignResourcesPreparationError(
-                f"Invalid '{key_name}': expected a dictionary."
-            )
-
-        if "array_layout_path" not in array_url:
-            raise AssignResourcesPreparationError(
-                f"Invalid '{key_name}': missing 'array_layout_path'."
-            )
-        if not array_url["array_layout_path"]:
-            raise AssignResourcesPreparationError(
-                f"Invalid '{key_name}': empty 'array_layout_path'."
-            )
-
-        if "source_uris" not in array_url:
-            raise AssignResourcesPreparationError(
-                f"Invalid '{key_name}': missing 'source_uris'."
-            )
-
-        source_uris = array_url["source_uris"]
-        if not isinstance(source_uris, list):
-            raise AssignResourcesPreparationError(
-                f"Invalid '{key_name}': 'source_uris' must be a list."
-            )
-        if not source_uris:
-            raise AssignResourcesPreparationError(
-                f"Invalid '{key_name}': empty 'source_uris'."
-            )
-        if source_uris == [""]:
-            raise AssignResourcesPreparationError(
-                f"Invalid '{key_name}': empty URI in 'source_uris'."
-            )

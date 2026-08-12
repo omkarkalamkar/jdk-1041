@@ -11,6 +11,7 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     AssignResourcesPreparation,
     AssignResourcesPreparationError,
     AssignResourcesPrepError,
+    InvalidArrayLayoutError,
     MidAssignResourcesContext,
 )
 
@@ -68,7 +69,13 @@ class AssignResourcesMid(AssignResources):
             json_argument = request.copy_data()
         except AssignResourcesPreparationError as exception:
             return ResultCode.FAILED, str(exception)
-
+        except InvalidArrayLayoutError as exception:
+            self.logger.error(
+                "Command %s: Invalid array layout: %s",
+                self.command_id,
+                exception,
+            )
+            return ResultCode.FAILED, str(exception)
         ctx = self._build_context()
         try:
             plan = ctx.make_strategy(self.logger).build_plan(request)
