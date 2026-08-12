@@ -474,7 +474,7 @@ class LoadDishCfg(BaseTMCCommand):
         restart
         """
         runtime_ctx = self.command_runtime_context
-        runtime_ctx.commad_ctx.update_memorized_attribute(
+        runtime_ctx.command_ctx.update_memorized_attribute(
             self.plan.dish_cfg_params
         )
         # self.csp_mln_adapter.memorizedDishVccMap = self.dish_cfg_params
