@@ -209,6 +209,7 @@ class LoadDishCfg(BaseTMCCommand):
             k_val_results=k_val_results,
             exception=exception,
         )
+        self.logger.info("Result is %s", result)
         if result[0] == ResultCode.FAILED or result[2]:
             error_message = result[1] + " LoadDishCfg command failed: "
             self.command_runtime_context.command_ctx.update_dish_vcc_flag(
@@ -315,7 +316,7 @@ class LoadDishCfg(BaseTMCCommand):
         csp_failed, failed_count = self._collect_failed_kvalue_results(
             k_val_results
         )
-
+        self.logger.info("Exception is %s", exception)
         if failed_count:
             self._persist_kvalue_validation_results(k_val_results)
 
@@ -324,7 +325,7 @@ class LoadDishCfg(BaseTMCCommand):
         )
 
         adjusted_result = self._adjust_result(result, exception, csp_failed)
-
+        self.logger.info("Adjusted result %s", adjusted_result)
         return (*adjusted_result, csp_failed)
 
     def _collect_failed_kvalue_results(
