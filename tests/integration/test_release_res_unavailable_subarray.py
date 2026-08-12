@@ -96,7 +96,7 @@ def release_resources(
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.FAILED),
+                    int(ResultCode.NOT_ALLOWED),
                     "Subarray devices not available: ['low-tmc/subarray/01']",
                 )
             ),
