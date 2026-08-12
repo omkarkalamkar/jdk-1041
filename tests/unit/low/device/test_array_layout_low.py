@@ -174,9 +174,9 @@ def test_low_assign_resources_fails_with_invalid_default_array_layout_json(
             "status": TaskStatus.COMPLETED,
             "result": (
                 ResultCode.FAILED,
-                "Problem in loading the JSON string: Invalid default ArrayLayout : expected a dictionary.",
+                "Invalid default ArrayLayout : expected a dictionary.",
             ),
-            "exception": "Problem in loading the JSON string: Invalid default ArrayLayout : expected a dictionary.",
+            "exception": "Invalid default ArrayLayout : expected a dictionary.",
         }
     )
 
