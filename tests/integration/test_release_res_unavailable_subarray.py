@@ -153,7 +153,6 @@ def test_release_res_command_mid(change_event_callbacks, json_factory):
     )
 
 
-@pytest.mark.aki
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
 def test_release_res_command_low(
