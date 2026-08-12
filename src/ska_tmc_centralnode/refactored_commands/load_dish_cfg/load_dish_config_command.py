@@ -346,7 +346,7 @@ class LoadDishCfg(BaseTMCCommand):
         for device, (
             result_code,
             message,
-        ) in self.context.command_device_ids.items():
+        ) in self.context.results.items():
             dev_id = device.split("/")[2].lower()
             if result_code not in [
                 ResultCode.FAILED,
