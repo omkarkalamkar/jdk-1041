@@ -372,7 +372,7 @@ class LoadDishCfg(BaseTMCCommand):
         """
         runtime_ctx = self.command_runtime_context
         # with self.component_manager.dish_vcc_validation_attr_lock:
-        runtime_ctx.set_dish_vcc_validation_status(k_val_results)
+        runtime_ctx.command_ctx.set_dish_vcc_validation_status(k_val_results)
 
     def _csp_validation_status_failed(self, failed_count: int) -> bool:
         """
