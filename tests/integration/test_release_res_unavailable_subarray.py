@@ -156,7 +156,7 @@ def test_release_res_command_mid(change_event_callbacks, json_factory):
 @pytest.mark.aki
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_release_res_command_low(change_event_callbacks, json_factory):
+def test_release_res_command_low(change_event_callbacks, json_factory, set_low_sdp_csp_mccs_admin_modes):
     """Test release resources command for low"""
     return release_resources(
         CENTRALNODE_LOW,
