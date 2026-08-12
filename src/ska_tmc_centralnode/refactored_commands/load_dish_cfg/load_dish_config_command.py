@@ -343,12 +343,9 @@ class LoadDishCfg(BaseTMCCommand):
         failed_count = 0
         is_cmd_failed_on_csp = False
         # cm = self.component_manager
-        for device, (
-            result_code,
-            message,
-        ) in self.context.results.items():
+        for device, result in self.context.results.items():
             dev_id = device.split("/")[2].lower()
-            if result_code not in [
+            if result.result_code not in [
                 ResultCode.FAILED,
                 ResultCode.REJECTED,
                 ResultCode.NOT_ALLOWED,
@@ -363,7 +360,7 @@ class LoadDishCfg(BaseTMCCommand):
                     is_cmd_failed_on_csp = True
                     continue  # Skip CSP failures for k-value aggregation
                 # with cm.dish_vcc_validation_attr_lock:
-                k_val_results[dev_id] = message
+                k_val_results[dev_id] = result.message
                 failed_count += 1
         return is_cmd_failed_on_csp, failed_count
 
