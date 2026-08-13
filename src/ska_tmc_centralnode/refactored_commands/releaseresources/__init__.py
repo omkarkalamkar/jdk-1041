@@ -1,6 +1,6 @@
 """ReleaseResources refactored commands for CentralNode."""
 
-from .release_resources_command import ReleaseResources
+from .release_resources_command import BaseReleaseResourcesCN
 from .release_resources_command_low import ReleaseResourcesLow
 from .release_resources_command_mid import ReleaseResourcesMid
 from .release_resources_context import (
@@ -45,7 +45,7 @@ __all__ = [
     "MidReleaseResourcesStrategy",
     "LowReleaseResourcesStrategy",
     "ReleaseResourcesPrepError",
-    "ReleaseResources",
+    "BaseReleaseResourcesCN",
     "ReleaseResourcesMid",
     "ReleaseResourcesLow",
 ]
