@@ -87,9 +87,7 @@ class CentralComponent(SharingObserver, TmcComponent):
         self.lock = threading.Lock()
 
     def on_new_shared_bus(self):
-        self.logger.info("CALLING SUPER COMPONENT SHARED BUS")
         super().on_new_shared_bus()
-        self.logger.info("CALLING COMPONENT SHARED BUS")
         self._desired_telescope_state = tango.DevState.ON
         self._telescope_state = tango.DevState.UNKNOWN
         self._tmc_op_state = tango.DevState.UNKNOWN

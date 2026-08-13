@@ -51,7 +51,7 @@ class LowEventCallbackManager(EventCallbackManager):
             self.logger.debug("Event value is: %s", event_value)
 
             if device_name in self.input_parameter.subarray_dev_names:
-                self.subarray_availability.update({device_name: event_value})
+                self.subarray_availability[device_name] = event_value
             elif self.input_parameter.csp_mln_dev_name == device_name:
                 self.set_csp_mln_availability(event_value)
             elif self.input_parameter.sdp_mln_dev_name == device_name:

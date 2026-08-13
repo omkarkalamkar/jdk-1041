@@ -152,14 +152,11 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         )
 
     def on_new_shared_bus(self) -> None:
-        self.logger.info("CALLING SUPER CNCM SHARED BUS")
         super().on_new_shared_bus()
-        self.logger.info("CALLING CNCM SHARED BUS")
         self._array_layout_url = {}
         self._default_array_layout_url: dict = (
             self._config.array_layout_config.default_url
         )
-        self.logger.info("CALLING COMPLETED")
 
     def _get_event_handlers(self) -> dict:
         """Returns event handlers.
