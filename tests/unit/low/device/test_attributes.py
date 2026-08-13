@@ -72,7 +72,6 @@ def test_attributes(central_node_device):
     }
 
 
-@pytest.mark.new
 @pytest.mark.SKA_low
 def test_assign_resources_schema_version_attribute(central_node_device):
     """Test assignResourcesSchemaVersion attribute read and write"""

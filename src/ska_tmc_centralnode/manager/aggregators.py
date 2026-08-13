@@ -131,7 +131,6 @@ class TelescopeStateAggregatorLow(Aggregator):
         mccs_master = False
         csp_master = False
         sdp_master = False
-
         for device in self._component_manager.checked_devices:
             name = device.dev_name.lower()
             if device.unresponsive:

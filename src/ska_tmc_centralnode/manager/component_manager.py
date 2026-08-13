@@ -108,7 +108,6 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         self.event_manager = self._config.event_manager_enabled
         self.input_parameter = self._config.input_parameter
         self.adapter_factory = AdapterFactory()
-
         self.event_data_manager = EventDataManager(self)
         self.process_lock = ProcessLock()
         self._telescope_state_aggregator: Optional[
@@ -240,7 +239,6 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """This method keep tracking aggregate health state changed
         from aggregation process
         """
-
         while not self._stop_thread.is_set():
             if self.aggregate_value_update_event.wait(0.3):
                 self.aggregate_value_update_event.clear()
@@ -442,7 +440,10 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         which ultimately indicated availability of CspMasterNode
         """
         telescope_availability = self.get_telescope_availability()
-        if not telescope_availability["csp_master_leaf_node"] is True:
+        if (
+            not telescope_availability.get("csp_master_leaf_node", False)
+            is True
+        ):
             self.logger.debug(
                 "CspMasterLeafNode is not available to receive command"
             )
@@ -456,7 +457,10 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         which ultimately indicated availability of SdpMasterNode
         """
         telescope_availability = self.get_telescope_availability()
-        if not telescope_availability["sdp_master_leaf_node"] is True:
+        if (
+            not telescope_availability.get("sdp_master_leaf_node", False)
+            is True
+        ):
             self.logger.debug(
                 "SdpMasterLeafNode is not available to receive command"
             )

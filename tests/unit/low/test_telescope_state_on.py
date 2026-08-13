@@ -5,8 +5,10 @@ import tango
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_simulators import (
     HelperBaseDevice,
+    HelperCspMasterLeafDevice,
     HelperMCCSController,
     HelperMCCSMasterLeafNode,
+    HelperSDPMasterLeafNode,
 )
 from ska_tmc_simulators.cn_helper_subarray_device import CNHelperSubArrayDevice
 
@@ -39,11 +41,21 @@ def devices_to_load():
             ],
         },
         {
-            "class": HelperBaseDevice,
+            "class": HelperCspMasterLeafDevice,
             "devices": [
                 {"name": LOW_CSP_MLN_DEVICE},
-                {"name": LOW_CSP_MASTER_DEVICE},
+            ],
+        },
+        {
+            "class": HelperSDPMasterLeafNode,
+            "devices": [
                 {"name": LOW_SDP_MLN_DEVICE},
+            ],
+        },
+        {
+            "class": HelperBaseDevice,
+            "devices": [
+                {"name": LOW_CSP_MASTER_DEVICE},
                 {"name": LOW_SDP_MASTER_DEVICE},
             ],
         },
@@ -72,14 +84,17 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
         devFactory=devFactory,
         state=tango.DevState.ON,
     )
-    ensure_telescope_state(cm, tango.DevState.ON, expected_elapsed_time=12)
+    ensure_telescope_state(
+        cm, tango.DevState.ON, expected_elapsed_time=expected_elapsed_time
+    )
 
 
 @pytest.mark.SKA_low
 def test_telescope_state_on(tango_context):
     devFactory = DevFactory()
+
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_devices_on(cm, devFactory, 40)
+    set_devices_on(cm, devFactory, 2)
     assert cm.component.telescope_state == tango.DevState.ON

@@ -79,6 +79,4 @@ def test_check_device_responsiveness_command(tango_context):
             logger.info("Device unresponsive flag: %s", dev_info.unresponsive)
 
     with pytest.raises(SubarrayNotPresentError):
-        cm.cmd_allowed_validator.check_device_responsiveness_command(
-            "AssignResources", 1
-        )
+        cm.cmd_allowed_validator.check_device_responsiveness_command(1)

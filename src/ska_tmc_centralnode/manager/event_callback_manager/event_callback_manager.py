@@ -131,18 +131,17 @@ class EventCallbackManager:
         :param device_name: Device FQDN received in event.
         :type device_name: str
         """
-        dev_name = ""
         if "sdp" in device_name:
             # Update SDP Master device name with full FQDN for real SDP
             sdp_master_dev_name = self.input_parameter.sdp_master_dev_name
             if device_name in sdp_master_dev_name:
-                dev_name = sdp_master_dev_name
+                device_name = sdp_master_dev_name
         elif "csp" in device_name:
             # Update CSP Master device name with full FQDN for real CSP
             csp_master_dev_name = self.input_parameter.csp_master_dev_name
             if device_name in csp_master_dev_name:
-                dev_name = csp_master_dev_name
-        return dev_name
+                device_name = csp_master_dev_name
+        return device_name
 
     def update_device_health_state(
         self, device_name: str, health_state: HealthState, timestamp

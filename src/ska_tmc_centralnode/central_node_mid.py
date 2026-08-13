@@ -155,7 +155,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     # ----------
 
     imaging = attribute_from_signal(
-        "self.component_manager.component._imaging",
+        "_component_manager.component._imaging",
         dtype=ModesAvailability,
         description="Imaging Attribute",
         access=AttrWriteType.READ,
