@@ -158,7 +158,7 @@ class CommandAllowanceValidator:
         unresponsive_devices: list = []
         for dev_name in device_names:
             dev_info = self.get_device(dev_name)
-            if not dev_info and dev_info.unresponsive:
+            if not dev_info or dev_info.unresponsive:
                 unresponsive_devices.append(dev_name)
             else:
                 self.logger.debug(
