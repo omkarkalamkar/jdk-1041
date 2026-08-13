@@ -92,14 +92,14 @@ class LoadDishCfg(BaseTMCCommand):
         )
         super().invoke()
         dish_adapters = self.get_dish_adapters()
-        command_ctx = self.command_runtime_context.command_ctx
+        kval_aggregator = self.command_runtime_context.update_kval_aggregator
         dish_kvalue_executor = DishKValueExecutor(
             dish_adapters=dish_adapters,
             command_id=self.context.command_id,
             invoke_callback_factory=self.async_cb,
             add_device_command=self.context.device_commands.append,
             add_device_name=self.command_runtime_context.append_dish_dev_names,
-            update_kvalue_aggregator=(command_ctx.update_kval_aggregator),
+            update_kvalue_aggregator=kval_aggregator,
             logger=self.logger,
         )
         dish_kvalue_executor.execute(self.plan.dish_parameters)
