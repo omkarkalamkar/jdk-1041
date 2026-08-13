@@ -76,6 +76,7 @@ class CNComponentManagerLow(CNComponentManager):
         }
         telescope_availability = self.get_telescope_availability()
         telescope_availability["tmc_subarrays"] = self.subarray_availability
+        self.set_telescope_availability(telescope_availability)
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
         self.mccs_mln_availability = False
