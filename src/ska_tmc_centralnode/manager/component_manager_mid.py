@@ -163,10 +163,6 @@ class CNComponentManagerMid(CNComponentManager):
             get_device=self.get_device,
         )
 
-    # pylint:enable=too-many-arguments
-    def on_new_shared_bus(self) -> None:
-        super().on_new_shared_bus()
-
     def _get_event_cb_manager(self) -> MidEventCallbackManager:
         """Provides Instance Event Callaback Manager"""
         return MidEventCallbackManager(
