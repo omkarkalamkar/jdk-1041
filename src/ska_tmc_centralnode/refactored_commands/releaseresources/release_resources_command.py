@@ -13,8 +13,8 @@ from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
 
 from ..assignresources.base_command import BaseCNCommand
-from ..releaseresources import LowReleaseResourcesPlan as LRP
-from ..releaseresources import MidReleaseResourcesPlan as MRP
+from .release_resources_plan import LowReleaseResourcesPlan as LRP
+from .release_resources_plan import MidReleaseResourcesPlan as MRP
 
 
 class BaseReleaseResourcesCN(BaseCNCommand):
