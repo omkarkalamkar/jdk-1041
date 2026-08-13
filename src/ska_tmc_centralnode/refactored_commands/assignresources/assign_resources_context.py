@@ -4,6 +4,8 @@ import logging
 from dataclasses import dataclass
 from typing import Callable
 
+from ska_tmc_common.v4.command_context import CommandRuntimeContext
+
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
@@ -46,8 +48,14 @@ class SubarrayIDContext:
 
 
 @dataclass(kw_only=True)
-class AssignResourcesContext:
-    """Runtime context required for AssignResources execution."""
+class AssignResourcesContext(CommandRuntimeContext):
+    """Runtime context required for AssignResources execution.
+
+    Inherits CommandRuntimeContext so that command_completion_condition
+    and command_timeout are available to BaseTMCCommand's
+    initialize()/create_completion_context(), which read them directly
+    off command_runtime_context.
+    """
 
     cmd_inprogress_ctx: CommandInProgressContext
     array_layout_ctx: ArrayLayoutContext

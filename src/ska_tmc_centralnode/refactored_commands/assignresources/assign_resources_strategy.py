@@ -31,7 +31,8 @@ class AssignResourcesStrategy(ABC):
     def build_plan(
         self, request: AssignResourcesRequest
     ) -> AssignResourcesPlan:
-        """Build a typed execution plan from a parsed request."""
+        """Build a typed, fully-serialized execution plan from a parsed
+        request."""
 
 
 class MidAssignResourcesStrategy(AssignResourcesStrategy):
@@ -42,9 +43,12 @@ class MidAssignResourcesStrategy(AssignResourcesStrategy):
     ) -> MidAssignResourcesPlan:
         try:
             sb_id, scan_id, vis_bm_id = "", "", ""
-            csp_payload = request.copy_data().get("csp", {})
+            payload_data = request.copy_data()
+
+            csp_section = payload_data.get("csp", {})
             if self.csp_interface:
-                csp_payload["interface"] = self.csp_interface
+                csp_section["interface"] = self.csp_interface
+            payload_data["csp"] = csp_section
 
             if request.execution_block:
                 sb_id = request.execution_block["eb_id"]
@@ -67,13 +71,12 @@ class MidAssignResourcesStrategy(AssignResourcesStrategy):
             ) from exception
 
         return MidAssignResourcesPlan(
-            csp_payload=json.dumps(csp_payload),
-            sdp_payload=json.dumps(request.sdp),
+            payload=json.dumps(payload_data),
             sb_id=sb_id,
-            scan_type_id=scan_id,
-            visibilities_beam_id=vis_bm_id,
             telmodel=telmodel,
             subarray_id=subarray_id,
+            scan_type_id=scan_id,
+            visibilities_beam_id=vis_bm_id,
             receptor_ids=receptor_ids,
         )
 
@@ -111,17 +114,20 @@ class LowAssignResourcesStrategy(AssignResourcesStrategy):
     ) -> LowAssignResourcesPlan:
         try:
             sb_id: str = ""
-            csp_resources: dict = request.copy_data().get("csp", {})
+            payload_data = request.copy_data()
+
+            csp_section = payload_data.get("csp", {})
             if self.csp_interface:
-                csp_resources["interface"] = self.csp_interface
-            csp_resources.setdefault("common", {})
-            csp_resources["common"]["subarray_id"] = request.subarray_id
-            csp_resources.setdefault("lowcbf", {})
+                csp_section["interface"] = self.csp_interface
+            csp_section.setdefault("common", {})
+            csp_section["common"]["subarray_id"] = request.subarray_id
+            csp_section.setdefault("lowcbf", {})
+            payload_data["csp"] = csp_section
 
-            mccs_resources = request.copy_data().get("mccs", {})
-            mccs_resources["subarray_id"] = request.subarray_id
+            mccs_section = payload_data.get("mccs", {})
+            mccs_section["subarray_id"] = request.subarray_id
+            payload_data["mccs"] = mccs_section
 
-            sdp_resources = request.sdp
             if request.execution_block:
                 sb_id = request.execution_block["eb_id"]
 
@@ -141,9 +147,8 @@ class LowAssignResourcesStrategy(AssignResourcesStrategy):
             ) from exception
 
         return LowAssignResourcesPlan(
-            csp_payload=json.dumps(csp_resources),
-            sdp_payload=json.dumps(sdp_resources),
-            mccs_payload=json.dumps(mccs_resources),
+            payload=json.dumps(payload_data),
+            mccs_payload=json.dumps(mccs_section),
             sb_id=sb_id,
             telmodel=telmodel,
             subarray_id=request.subarray_id,

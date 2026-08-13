@@ -4,6 +4,8 @@ import logging
 from dataclasses import dataclass
 from typing import Callable
 
+from ska_tmc_common.v4.command_context import CommandRuntimeContext
+
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
@@ -29,11 +31,19 @@ class SubarrayIDContext:
 
 
 @dataclass(kw_only=True)
-class ReleaseResourcesContext:
-    """Runtime context required for ReleaseResources execution."""
+class ReleaseResourcesContext(CommandRuntimeContext):
+    """Runtime context required for ReleaseResources execution.
+
+    Inherits CommandRuntimeContext so that command_completion_condition
+    and command_timeout are available to BaseTMCCommand — same fix
+    applied to AssignResourcesContext. Also adds get_evt_data_manager,
+    which the original dataclass didn't declare but BaseCNCommand's
+    event-callback methods require.
+    """
 
     subarray_id_ctx: SubarrayIDContext
     input_parameter: InputParameterMid | InputParameterLow
+    get_evt_data_manager: Callable
 
     def make_strategy(self, logger: logging.Logger):
         """Create a telescope-specific ReleaseResources strategy."""

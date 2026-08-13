@@ -1,102 +1,61 @@
 """ReleaseResourcesMid command class for CentralNode."""
 
-from typing import Tuple
-
-from ska_control_model import ObsState
-from ska_tango_base.commands import ResultCode
-
-from .release_resources_command import ReleaseResources
+from .release_resources_command import BaseReleaseResourcesCN
 from .release_resources_context import MidReleaseResourcesContext
-from .release_resources_plan import MidReleaseResourcesPlan
-from .release_resources_preparation import (
-    ReleaseResourcesPreparation,
-    ReleaseResourcesPreparationError,
-)
-from .release_resources_strategy import ReleaseResourcesPrepError
+from .release_resources_preparation import ReleaseResourcesPreparation
 
 
-class ReleaseResourcesMid(ReleaseResources):
+class ReleaseResourcesMid(BaseReleaseResourcesCN):
     """Release Resources command class for Mid."""
 
-    def __init__(
-        self,
-        component_manager,
-        *args,
-        adapter_factory=None,
-        logger=None,
-        **kwargs,
-    ):
-        super().__init__(
-            component_manager, adapter_factory, *args, logger=logger, **kwargs
+    def pre_process(self, argin=None) -> None:
+        """Log entry into ReleaseResources."""
+        self.logger.debug(
+            "Executing ReleaseResources command for MID with arguments: %s",
+            argin,
         )
-        self._plan: MidReleaseResourcesPlan | None = None
 
-    def prepare_command(self, argin: str) -> Tuple[ResultCode, str]:
-        """Parse and validate input data for MID release flow."""
-        try:
-            request = ReleaseResourcesPreparation(
-                self.component_manager,
-                self.logger,
-            ).prepare_request(argin)
-        except ReleaseResourcesPreparationError as exception:
-            return ResultCode.FAILED, str(exception)
+    def prepare_command(self) -> None:
+        """Parse and validate input data, build the plan, for MID."""
+        request = ReleaseResourcesPreparation(
+            self.component_manager, self.logger
+        ).prepare_request(self.context.argin)
 
         ctx = self._build_context()
-        try:
-            plan = ctx.make_strategy(self.logger).build_plan(request)
-        except ReleaseResourcesPrepError as exception:
-            return ResultCode.FAILED, str(exception)
+        plan = ctx.make_strategy(self.logger).build_plan(request)
 
+        self.subarray_id = plan.subarray_id
         ctx.apply_plan(plan)
         self._plan = plan
-        return ResultCode.OK, ""
 
-    def execute_command(self) -> Tuple[ResultCode, str]:
-        """Execute MID release command after prepare/build lifecycle."""
-        if self._plan is None:
-            return ResultCode.FAILED, "ReleaseResources plan is not set"
+    def build_device_commands(self) -> None:
+        """Resolve the target subarray adapter and populate the device
+        command list.
 
-        if self.tm_subarray_adapter is None:
-            return (
-                ResultCode.FAILED,
-                f"Subarray Id {self.subarray_id} is not existing!",
-            )
+        Partial release is not supported for MID: matches the original
+        code's explicit failure when release_all is False. Raised here,
+        after adapter resolution, to preserve the original ordering
+        where an adapter failure surfaced before this check.
 
-        if self._plan.release_all is True:
-            self.logger.info(
-                "Invoking ReleaseAllResources on subarray | device=%s",
-                self.tm_subarray_adapter.dev_name,
-            )
-            return_codes, message_or_unique_ids = self.release_all_resources(
-                self.tm_subarray_adapter
-            )
-            for return_code, message_or_unique_id in zip(
-                return_codes, message_or_unique_ids
-            ):
-                if return_code in [ResultCode.FAILED, ResultCode.REJECTED]:
-                    return (
-                        ResultCode.FAILED,
-                        message_or_unique_id,
-                    )
-                if return_code in [ResultCode.QUEUED, ResultCode.OK]:
-                    self.component_manager.command_mapping[
-                        self.command_id
-                    ] = message_or_unique_id
-            self.logger.info(
-                "Command ID: %s | Release Resources "
-                "completed successfully on: %s",
-                self.command_id,
-                self.tm_subarray_adapter,
-            )
-            return self.wait_for_command_completion(
-                len(self.command_subs_list),
-                ObsState.EMPTY,
-                "get_subarray_obsstate",
-                use_command_class_id=True,
-            )
-        return (
-            ResultCode.FAILED,
-            "Partial release resources not supported!",
+        :raises ValueError: if release_all is False.
+        """
+        self.prepare_subarray_command_target()
+
+        if not self._plan.release_all:
+            raise ValueError("Partial release resources not supported!")
+
+        self.logger.info(
+            "Invoking ReleaseAllResources on subarray | device=%s",
+            self.tm_subarray_adapter.dev_name,
+        )
+        self.context.device_commands.append(
+            self._build_subarray_device_command()
+        )
+        self.logger.info(
+            "Command ID: %s | Release Resources "
+            "completed successfully on: %s",
+            self.context.command_id,
+            self.tm_subarray_adapter,
         )
 
     def _build_context(self) -> MidReleaseResourcesContext:

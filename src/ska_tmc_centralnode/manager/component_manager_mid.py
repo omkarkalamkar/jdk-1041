@@ -1315,6 +1315,7 @@ class CNComponentManagerMid(CNComponentManager):
         """
         cm = self
         return MidAssignResourcesContext(
+            command_timeout=cm.command_timeout,
             cmd_inprogress_ctx=CommandInProgressContext(
                 get_id=lambda: cm.command_in_progress,
                 update_id=lambda name: setattr(
@@ -1388,6 +1389,8 @@ class CNComponentManagerMid(CNComponentManager):
         """Build MidReleaseResourcesContext bound to this component manager."""
         cm = self
         return MidReleaseResourcesContext(
+            command_timeout=cm.command_timeout,
+            get_evt_data_manager=lambda: cm.event_data_manager,
             subarray_id_ctx=ReleaseSubarrayIDContext(
                 set=(
                     lambda sid: setattr(command, "subarray_id", sid)
@@ -1468,7 +1471,7 @@ class CNComponentManagerMid(CNComponentManager):
                 command_name="AssignResources",
             )
 
-            return assign_resources_command_object.assign_resources(
+            return assign_resources_command_object.execute(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
@@ -1541,6 +1544,7 @@ class CNComponentManagerMid(CNComponentManager):
         :rtype: tuple
         """
         try:
+            # pylint:disable=abstract-class-instantiated
             release_resources_command_object = ReleaseResourcesMid(
                 self, adapter_factory=self.adapter_factory, logger=self.logger
             )
@@ -1554,7 +1558,7 @@ class CNComponentManagerMid(CNComponentManager):
                 subarray_id=release_resources_command_object.subarray_id,
                 command_name="ReleaseResources",
             )
-            return release_resources_command_object.release_resources(
+            return release_resources_command_object.execute(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,

@@ -1,24 +1,17 @@
 """ReleaseResourcesLow command class for CentralNode."""
 
-import json
-from typing import Tuple
+from ska_tmc_common.adapters import AdapterType
+from ska_tmc_common.v4.command_context import DeviceCommand
 
-from ska_control_model import ObsState
-from ska_tango_base.commands import ResultCode
-
-from .release_resources_command import ReleaseResources
+from .release_resources_command import BaseReleaseResourcesCN
 from .release_resources_context import LowReleaseResourcesContext
-from .release_resources_plan import LowReleaseResourcesPlan
-from .release_resources_preparation import (
-    ReleaseResourcesPreparation,
-    ReleaseResourcesPreparationError,
-)
-from .release_resources_strategy import ReleaseResourcesPrepError
+from .release_resources_preparation import ReleaseResourcesPreparation
 
 
-class ReleaseResourcesLow(ReleaseResources):
+class ReleaseResourcesLow(BaseReleaseResourcesCN):
     """Release Resources command class for telescope Low."""
 
+    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
         component_manager,
@@ -28,168 +21,130 @@ class ReleaseResourcesLow(ReleaseResources):
         logger=None,
         **kwargs,
     ):
-        # pylint:disable=keyword-arg-before-vararg
         super().__init__(
             component_manager, adapter_factory, *args, logger=logger, **kwargs
         )
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
-        self._plan: LowReleaseResourcesPlan | None = None
+        self._assigned_subsystem: list = []
 
-    def update_task_status(
-        self, result: Tuple[ResultCode, str], exception: str = ""
-    ) -> None:
-        """Update task status for ReleaseResourcesLow.
-
-        Args:
-            result: A tuple containing the result code and a message.
-            exception (str): Exception message if the command failed.
-        """
-        super().update_task_status(result, exception)
-        self.component_manager.subsystem_assigned_per_subarray.pop(
-            self.subarray_id, None
-        )
-        self.component_manager.subsystem_assigned_per_command_id.pop(
-            self.command_id, None
-        )
-        self.component_manager.pss_beams_assigned_per_subarray.pop(
-            self.subarray_id, None
+    def pre_process(self, argin=None) -> None:
+        """Log entry into ReleaseResources."""
+        self.logger.debug(
+            "Executing ReleaseResources command for LOW with arguments: %s",
+            argin,
         )
 
-    def prepare_command(self, argin: str) -> Tuple[ResultCode, str]:
-        """Parse and normalize input data for LOW release flow."""
-        try:
-            request = ReleaseResourcesPreparation(
-                self.component_manager,
-                self.logger,
-            ).prepare_request(argin)
-        except ReleaseResourcesPreparationError as exception:
-            return ResultCode.FAILED, str(exception)
+    def prepare_command(self) -> None:
+        """Parse and normalize input data, build the plan, for LOW."""
+        request = ReleaseResourcesPreparation(
+            self.component_manager, self.logger
+        ).prepare_request(self.context.argin)
 
         ctx = self._build_context()
-        try:
-            plan = ctx.make_strategy(self.logger).build_plan(request)
-        except ReleaseResourcesPrepError as exception:
-            return ResultCode.FAILED, str(exception)
+        plan = ctx.make_strategy(self.logger).build_plan(request)
 
+        self.subarray_id = plan.subarray_id
         ctx.apply_plan(plan)
         self._plan = plan
-        return ResultCode.OK, ""
 
-    def execute_command(self) -> Tuple[ResultCode, str]:
-        """Execute LOW release command after prepare/build lifecycle."""
-        if self._plan is None:
-            return ResultCode.FAILED, "ReleaseResources plan is not set"
+    def build_device_commands(self) -> None:
+        """Resolve adapters and populate the device command list for LOW.
 
-        if self.tm_subarray_adapter is None:
-            return (
-                ResultCode.FAILED,
-                f"Subarray Id {self.subarray_id} is not existing!",
-            )
+        When release_all is False, no device commands are added. This
+        matches the original code exactly: unlike MID, LOW did not fail
+        explicitly on partial release — it silently skipped invocation
+        and still proceeded to wait for the subarray to reach EMPTY. That
+        no-op-but-still-wait behaviour is preserved here: leaving
+        context.device_commands empty means is_complete() is satisfied
+        trivially by 0 results == 0 device_commands, and completion still
+        hinges on is_state_complete() reaching ObsState.EMPTY.
+        """
+        self.prepare_subarray_command_target()
 
-        if self._plan.release_all is True:
+        if self._plan.release_all:
             self.logger.info(
                 "Invoking ReleaseAllResources on subarray | device=%s",
                 self.tm_subarray_adapter.dev_name,
             )
-            (
-                return_codes,
-                message_or_unique_ids,
-            ) = self.release_all_resources(self.tm_subarray_adapter)
-            (
-                return_code,
-                message_or_unique_id,
-            ) = self.put_result_in_command_mapping_dict(
-                return_codes, message_or_unique_ids
+            self.context.device_commands.append(
+                self._build_subarray_device_command()
             )
-            if return_code == ResultCode.FAILED:
-                return (
-                    ResultCode.FAILED,
-                    message_or_unique_id,
-                )
-            assigned_subsystem = (
+
+            self._assigned_subsystem = (
                 self.component_manager.subsystem_assigned_per_subarray[
                     self.subarray_id
                 ]
             )
-            if (
-                "mccs"
-                in self.component_manager.subsystem_assigned_per_subarray[
-                    self.subarray_id
-                ]
-                and not self.is_auto_recovery_enabled
-            ):
-                try:
-                    input_mccs_master = json.loads(self._plan.mccs_payload)
-                except Exception as exception:
-                    return (
-                        ResultCode.FAILED,
-                        f"Error in MCCS JSON argument: {exception}",
-                    )
+            if self._mccs_required():
                 self.logger.info(
                     "Command ID: %s | Invoking ReleaseAllResources"
                     " on MCCS %s",
-                    self.command_id,
+                    self.context.command_id,
                     self.mccs_mln_adapter,
                 )
-                (
-                    return_codes,
-                    message_or_unique_ids,
-                ) = self.release_all_resources_mccs(
-                    self.mccs_mln_adapter, input_mccs_master
+                self.context.device_commands.append(
+                    self._build_mccs_device_command()
                 )
-                (
-                    return_code,
-                    message_or_unique_id,
-                ) = self.put_result_in_command_mapping_dict(
-                    return_codes, message_or_unique_ids
-                )
-                if return_code == ResultCode.FAILED:
-                    return (
-                        ResultCode.FAILED,
-                        message_or_unique_id,
-                    )
-                self.logger.info(
-                    "Command ID: %s | ReleaseAllResources completed "
-                    "successfully on MCCS %s",
-                    self.command_id,
-                    self.mccs_mln_adapter,
-                )
-                self.component_manager.subsystem_assigned_per_command_id[
-                    self.command_id
-                ] = assigned_subsystem
+
         self.logger.info(
             "Command ID: %s | Release Resources "
             "completed successfully on: %s",
-            self.command_id,
+            self.context.command_id,
             self.tm_subarray_adapter,
         )
-        return self.wait_for_command_completion(
-            len(self.command_subs_list),
-            ObsState.EMPTY,
-            "get_subarray_obsstate",
-            use_command_class_id=True,
+
+    def _build_mccs_device_command(self) -> DeviceCommand:
+        """Method to build the ReleaseAllResources device command for the
+        MCCS Master Leaf Node.
+
+        Sends plan.mccs_payload directly. The original code did
+        json.loads(self._plan.mccs_payload) immediately followed by
+        json.dumps(...) with no mutation in between — a pure round trip —
+        so this sends the already-serialized string as-is, same
+        simplification already applied to AssignResources.
+        """
+        command_input = self._plan.mccs_payload if self._plan else ""
+        return DeviceCommand(
+            self.mccs_mln_adapter.dev_name,
+            self.command_name,
+            AdapterType.MCCS_MASTER_LEAF_NODE,
+            command_input,
+            self._update_event_callback,
+        )
+
+    def _mccs_required(self) -> bool:
+        """Whether MCCS should be released as part of this command."""
+        return (
+            "mccs"
+            in self.component_manager.subsystem_assigned_per_subarray[
+                self.subarray_id
+            ]
+            and not self.is_auto_recovery_enabled
+        )
+
+    def command_invoked_callback(self, cmd_ctx: DeviceCommand) -> None:
+        """Restore the generic event-manager placeholder update, then
+        additionally record subsystem assignment once the MCCS invocation
+        is accepted — mirrors the original, which set
+        subsystem_assigned_per_command_id right after invoke_command
+        returned an accepted result for MCCS.
+        """
+        super().command_invoked_callback(cmd_ctx)
+        if (
+            self.mccs_mln_adapter is not None
+            and cmd_ctx.device_name == self.mccs_mln_adapter.dev_name
+        ):
+            self.component_manager.subsystem_assigned_per_command_id[
+                self.context.command_id
+            ] = self._assigned_subsystem
+
+    def update_task_status(self, **kwargs) -> None:
+        """Update task status for ReleaseResourcesLow."""
+        super().update_task_status(**kwargs)
+        self.component_manager.subsystem_assigned_per_command_id.pop(
+            self.context.command_id, None
         )
 
     def _build_context(self) -> LowReleaseResourcesContext:
         """Delegate context construction to the component manager."""
         return self.component_manager._get_release_context(command=self)
-
-    def release_all_resources_mccs(
-        self, adapter, argin
-    ) -> Tuple[list[ResultCode], list[str]]:
-        """Invoke ReleaseAllResources on the MCCS master leaf node adapter.
-
-        Args:
-            adapter: MCCS master leaf node adapter.
-            argin: JSON argument for the command.
-
-        Returns:
-            Tuple(list, list): Result codes and messages.
-        """
-        return self.invoke_command(
-            [adapter],
-            f"Error in calling ReleaseAllResources() on {adapter.dev_name}"
-            "device",
-            "ReleaseAllResources",
-            json.dumps(argin),
-        )
