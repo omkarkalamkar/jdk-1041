@@ -9,16 +9,15 @@ package.
 import json
 import threading
 import time
-from logging import Logger
-from queue import Queue
-from typing import Callable, Tuple
+from typing import Callable, Dict, List, Tuple, cast
 
-from ska_control_model import AdminMode, TaskStatus
+from ska_control_model import TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.faults import StateModelError
-from ska_tmc_common import AdapterType
-from ska_tmc_common.enum import DishMode, LivelinessProbeType
+from ska_tango_base.software_bus import Signal
+from ska_tmc_common import AdapterType, DeviceInfo
+from ska_tmc_common.enum import DishMode
 from ska_tmc_common.exceptions import CommandNotAllowed, InvalidReceptorIdError
 from tango import DevState
 
@@ -45,7 +44,13 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeAvailabilityAggregatorMid,
     TelescopeStateAggregatorMid,
 )
+from ska_tmc_centralnode.manager.command_allowance_validator import (
+    MidCommandAllowanceValidator,
+)
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_config import (
+    MidCentralNodeComponentManagerConfig,
+)
 from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.utils.constants import (
@@ -55,6 +60,11 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
 )
 
+from .event_callback_manager.mid_event_callback_manager import (
+    MidEventCallbackManager,
+)
+from .event_processor import MidEventProcessor
+
 # pylint:disable=too-many-instance-attributes
 # pylint:disable=too-many-arguments
 
@@ -62,220 +72,74 @@ from ska_tmc_centralnode.utils.constants import (
 class CNComponentManagerMid(CNComponentManager):
     """Component manager class for central node mid"""
 
+    _is_dish_vcc_config_set: Signal[bool] = Signal[bool](
+        stored=True, initial_value=False
+    )
+    _dish_vcc_command_status: Signal[DishConfigStatus] = Signal[
+        DishConfigStatus
+    ](stored=True, initial_value=DishConfigStatus.STAGING)
+    _dish_vcc_validation_status: Signal[str] = Signal[str](
+        stored=True, initial_value="{}"
+    )
+    _global_pointing_model_status: Signal[dict] = Signal[dict](
+        stored=True, initial_value={}
+    )
+
     # pylint:disable=keyword-arg-before-vararg
-    def __init__(
-        self,
-        op_state_model,
-        _input_parameter,
-        logger: Logger,
-        _dish_vcc_command_status_callback: Callable,
-        _update_device_callback: Callable,
-        _update_telescope_state_callback: Callable,
-        _update_telescope_health_state_callback: Callable,
-        _update_tmc_op_state_callback: Callable,
-        _update_imaging_callback: Callable,
-        _telescope_availability_callback: Callable,
-        array_layout_url_callback: Callable,
-        default_array_layout_url_callback: Callable,
-        _update_dishvccconfig_callback: Callable,
-        _dishvccvalidation_callback: Callable,
-        _component=None,
-        _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
-        _event_manager=True,
-        proxy_timeout=500,
-        event_subscription_check_period=1,
-        liveliness_check_period=1,
-        command_timeout=30,
-        dish_vcc_uri=None,
-        dish_vcc_file_path=None,
-        dish_vcc_init_timeout=120,
-        dishKvalueAggregationAllowedPercent=100.0,
-        invoke_load_dish_cfg_command_callback=None,
-        invoke_set_gpm_command_callback=None,
-        enable_dish_vcc_init=True,
-        k_value_valid_range_upper_limit=1177,
-        k_value_valid_range_lower_limit=1,
-        subarray_trl_prefix: str = "mid-tmc/subarray/",
-        gpm_version=None,
-        gpm_interface=None,
-        gpm_data_sources_prefix=None,
-        gpm_file_path_prefix=None,
-        default_array_layout_url: dict | None = None,
-        mkt_extension_id: str = "",
-        mkt_dish_ranges: tuple[int, int] = (0, 63),
-        ska_dish_ranges: tuple[int, int] = (1, 999),
-        *args,
-        **kwargs,
-    ) -> None:
+    def __init__(self, config: MidCentralNodeComponentManagerConfig) -> None:
         """
         Initialise a new ComponentManager instance for mid.
 
         Args:
-            op_state_model: the op state model used by this
-                component manager
-            logger:
-                a logger for this component manager
-            _component: allows setting of the component to be
-                managed; for testing purposes only
-            _input_parameter :
-                specify input parameter for mid.
-            _liveliness_probe:
-                allows to enable/disable LivelinessProbe usage
-            _event_manager : allows to enable/disable
-                EventManager usage
-            max_workers: Optional. Maximum worker
-                threads for monitoring purpose.
-            proxy_timeout: Optional. Time period to wait for
-                event and responses.
-            event_subscription_check_period (int): Time in seconds
-                for sleep intervals in the event subsription thread.
-            liveliness_check_period (int): Period for the
-                liveliness probe to monitor each device in a loop
-            timeout : Optional. Time period to wait for
-                intialization of adapter.
-            command_timeout:
-                Command timeout
-            dish_vcc_uri:
-                Dish vcc uri
-            dish_vcc_file_path:
-                dish vcc file path
-            dish_vcc_init_timeout:
-                dish vcc default timeout
-            dishKvalueAggregationAllowedPercent:
-                dish Kvalue aggregation default
-            invoke_load_dish_cfg_command_callback:
-                callback for invoke load dish
-            invoke_set_gpm_command_callback:
-                callback for set GPM command
-            enable_dish_vcc_init:
-                enable dish vcc
-            k_value_valid_range_upper_limit:
-                k value upper limit
-            k_value_valid_range_lower_limit:
-                k value lower limit.
-            gpm_version: GPM version
-            gpm_interface: GPM interface,
-            gpm_data_sources_prefix: GPM data sources prefix path,
-            gpm_file_path_prefix: GPM file path prefix,
+           config:
 
         """
-        super().__init__(
-            op_state_model,
-            _input_parameter,
-            logger,
-            _update_device_callback,
-            _update_telescope_state_callback,
-            _update_telescope_health_state_callback,
-            _update_tmc_op_state_callback,
-            _update_imaging_callback,
-            _telescope_availability_callback,
-            array_layout_url_callback,
-            default_array_layout_url_callback,
-            _component,
-            _liveliness_probe,
-            _event_manager,
-            proxy_timeout,
-            event_subscription_check_period,
-            liveliness_check_period,
-            command_timeout,
-            subarray_trl_prefix=subarray_trl_prefix,
-            default_array_layout_url=default_array_layout_url,
-            *args,
-            **kwargs,
-        )
-
+        super().__init__(config)
+        self._config = config
         self.subarray_availability = {
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names
         }
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
-        telescope_availability = self.get_telescope_availability()
-        telescope_availability["tmc_subarrays"] = self.subarray_availability
-        self.set_telescope_availability(telescope_availability)
 
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorMid(self, self.logger)
         )
-
-        self._is_dish_vcc_config_set = False
-        self.dish_vcc_uri = dish_vcc_uri
-        self.dish_vcc_file_path = dish_vcc_file_path
-        self.dish_vcc_init_timeout = dish_vcc_init_timeout
-        self.invoke_load_dish_cfg_command_callback = (
-            invoke_load_dish_cfg_command_callback
-        )
-        self.invoke_set_gpm_command_callback = invoke_set_gpm_command_callback
-        self.dishKvalueAggregationAllowedPercent = (
-            dishKvalueAggregationAllowedPercent
-        )
         self.dish_kvalue_validation_aggregator = DishAttrValueAggregator(
             self, self.logger
         )
-        self.dev_names_for_load_dish_cfg = []
-        self.dishln_gpm_cmd_exe_data = (
-            {}
-        )  # dishln_gpm_data_created_during_command_execution
-        self.load_dish_cfg_aggregated_result = None
+        self.gpm_aggregator = DishAttrValueAggregator(self, self.logger)
+        self.dev_names_for_load_dish_cfg: List[str] = []
+        # dishln_gpm_data_created_during_command_execution
+        self.dishln_gpm_cmd_exe_data: Dict[str, str] = {}
         self.gpm_version_aggregated_result = ResultCode.UNKNOWN
         self.gpm_aggregated_result = True
         self.load_dish_cfg_command_id = None
-        self._dish_vcc_validation_status = "{}"
-        self._global_pointing_model_status = {}
         self.dish_vcc_validation_attr_lock = threading.Lock()
         self.dishln_gpm_lock = threading.RLock()
         self.dishln_gpm_command_lock = threading.RLock()
-        self.enable_dish_vcc_init = enable_dish_vcc_init
         self.command_result = None
-        self.k_value_valid_range_upper_limit = k_value_valid_range_upper_limit
-        self.k_value_valid_range_lower_limit = k_value_valid_range_lower_limit
-        self.update_dishvccconfig_callback = _update_dishvccconfig_callback
-        self.dishvccvalidation_callback = _dishvccvalidation_callback
-        self._dish_vcc_command_status = DishConfigStatus.STAGING
-        self.dish_vcc_command_status_callback = (
-            _dish_vcc_command_status_callback
-        )
         self.number_of_gpm_executed = 0
-        self.gpm_unknown_dishes = []
-        self.gpm_version = gpm_version
-        self.gpm_interface = gpm_interface
-        self.gpm_data_sources_prefix = gpm_data_sources_prefix
-        self.gpm_file_path_prefix = gpm_file_path_prefix
+        self.gpm_unknown_dishes: List[str] = []
         self.is_gpm_init = True
         self.dishln_stow_mode_lock = threading.RLock()
         self.number_of_stow_mode_executed: int = 0
-        self.mkt_extension_id = mkt_extension_id
-        self.mkt_dish_ranges = mkt_dish_ranges
-        self.ska_dish_ranges = ska_dish_ranges
         self.stow_mode_command_aggregated_result: ResultCode = (
             ResultCode.UNKNOWN
         )
         self.stow_mode_aggregated_result: bool = True
         self.dishln_stow_mode_cmd_exe_data: dict = {}
-        self.event_queue.update(
-            {
-                "dishMode": Queue(),
-                "kValueValidationResult": Queue(),
-                "DishVccMapValidationResult": Queue(),
-                "isSubsystemAvailable": Queue(),
-                "isSubarrayAvailable": Queue(),
-                "state": Queue(),
-                "gpmVersion": Queue(),
-            }
+        self._event_processor: MidEventProcessor = MidEventProcessor(
+            stop_event=self._stop_thread,
+            logger=config.logger,
+            on_error=self.update_event_failure,
         )
-        handle_dish_vcc = self.handle_dish_vcc_validation_result
-        self.event_processing_methods.update(
-            {
-                "dishMode": self.update_device_dish_mode,
-                "kValueValidationResult": self.update_k_value_validation,
-                "DishVccMapValidationResult": handle_dish_vcc,
-                "isSubsystemAvailable": self.update_telescope_availability,
-                "isSubarrayAvailable": self.update_telescope_availability,
-                "state": self.update_device_state,
-                "gpmVersion": self.handle_gpm_version_event,
-            }
+        self._event_cb_manager: MidEventCallbackManager = (
+            self._get_event_cb_manager()
         )
-        self._start_event_processing_threads()
+        self._register_event_handlers(self._get_event_handlers())
+        self._event_processor.start()
         # start the aggregation process
         self.aggregation_process = HealthStateAggregationProcessor(
             self.event_data_queue,
@@ -284,22 +148,105 @@ class CNComponentManagerMid(CNComponentManager):
             telescope="mid",
         )
         self.aggregation_process.start_aggregation_process()
+        self.cmd_allowed_validator = MidCommandAllowanceValidator(
+            logger=config.logger,
+            input_parameter=config.input_parameter,
+            subarray_trl_prefix=config.subarray_trl_prefix,
+            retry_attempts=config.retry_attempts,
+            retry_delay=config.retry_delay,
+            adapter_factory=self.adapter_factory,
+            get_op_state_model=lambda: self._config.op_state_model,
+            dish_vcc_init_enabled=self._config.dish_config.enable_init,
+            get_dish_vcc_config_set=lambda: self.is_dish_vcc_config_set,
+            get_device=self.get_device,
+        )
 
     # pylint:enable=too-many-arguments
+    def on_new_shared_bus(self) -> None:
+        self.logger.info("CALLING SUPER MICNCM SHARED BUS")
+        super().on_new_shared_bus()
+        self.logger.info("CALLING MIDCNCM SHARED BUS")
+        telescope_availability = self.get_telescope_availability()
+        telescope_availability["tmc_subarrays"] = self.subarray_availability
+        self.logger.info("CALLED MIDCNCM SHARED BUS")
 
-    def check_if_dishes_are_responsive(self) -> bool:
-        """
-        Checks whether dishes are responsive
-
-        Returns:
-            True, if dishes are responsive,
-            False otherwise
-
-        """
-        self.logger.debug("Checking if dishes are responsive")
-        return self._check_if_device_is_responsive(
-            self.input_parameter.dish_leaf_node_dev_names
+    def _get_event_cb_manager(self) -> MidEventCallbackManager:
+        """Provides Instance Event Callaback Manager"""
+        return MidEventCallbackManager(
+            logger=self.logger,
+            component=self.component,
+            command_completion_cond=self.command_completion_cond,
+            input_parameter=self.input_parameter,
+            event_data_manager=self.event_data_manager,
+            _aggregate_state=self._aggregate_state,
+            kvalue_validation_aggregator=(
+                self.dish_kvalue_validation_aggregator
+            ),
+            gpm_aggregator=self.gpm_aggregator,
+            update_dish_vcc_flag=self.update_dish_vcc_flag,
+            _telescope_availability_aggregator=(
+                self._telescope_availability_aggregator
+            ),
+            subarray_availability=self.subarray_availability,
+            set_csp_mln_availability=lambda availability: setattr(
+                self, "csp_mln_availability", availability
+            ),
+            set_sdp_mln_availability=lambda availability: setattr(
+                self, "sdp_mln_availability", availability
+            ),
+            gpm_invoke_command_callback=(
+                self._config.gpm_config.invoke_command_callback
+            ),
+            get_dish_vcc_command_status=lambda: self.dish_vcc_command_status,
+            dish_vcc_init_timeout=self._config.dish_config.init_timeout,
+            get_command_in_progress=lambda: self.command_in_progress,
+            set_command_in_progress=lambda cmd: setattr(
+                self, "command_in_progress", cmd
+            ),
+            set_dish_vcc_cmd_validation_status=lambda status: setattr(
+                self, "dish_vcc_validation_status", status
+            ),
+            set_dish_vcc_command_status=lambda status: setattr(
+                self, "dish_vcc_command_status", status
+            ),
+            get_global_pointing_model_status=(
+                lambda: self.global_pointing_model_status
+            ),
+            gpm_unknown_dishes=self.gpm_unknown_dishes,
+            dish_vcc_command_invoke_cb=(
+                self._config.dish_config.invoke_command_callback
+            ),
+            adapter_factory=self.adapter_factory,
+            check_if_csp_all_dish_ready=self.check_if_csp_all_dish_ready,
         )
+
+    def _get_event_handlers(self) -> dict:
+        """Returns event handlers with addition of mid specific.
+
+        :return: Dictionary with attribute name and its event handler.
+        :rtype: dict
+        """
+        event_handlers: dict = super()._get_event_handlers()
+        event_handlers.update(
+            {
+                "dishMode": self._event_cb_manager.update_device_dish_mode,
+                "kValueValidationResult": (
+                    self._event_cb_manager.update_k_value_validation
+                ),
+                "DishVccMapValidationResult": (
+                    self._event_cb_manager.handle_dish_vcc_validation_result
+                ),
+                "isSubsystemAvailable": (
+                    self._event_cb_manager.update_telescope_availability
+                ),
+                "isSubarrayAvailable": (
+                    self._event_cb_manager.update_telescope_availability
+                ),
+                "state": self._event_cb_manager.update_device_state,
+                "gpmVersion": self._event_cb_manager.handle_gpm_version_event,
+            }
+        )
+        return event_handlers
 
     def get_set_gpm_version_resultcode(self) -> ResultCode:
         """
@@ -331,7 +278,6 @@ class CNComponentManagerMid(CNComponentManager):
         """Set dish vcc command status and invoke callback"""
         self.logger.debug("Setting dish config status %s", str(value))
         self._dish_vcc_command_status = value
-        self.dish_vcc_command_status_callback(value)
 
     @property
     def is_dish_vcc_config_set(self):
@@ -344,7 +290,7 @@ class CNComponentManagerMid(CNComponentManager):
         self._is_dish_vcc_config_set = value
 
     @property
-    def dish_vcc_validation_status(self) -> dict:
+    def dish_vcc_validation_status(self) -> str:
         """
         Getter method for dish vcc validation status
 
@@ -402,18 +348,18 @@ class CNComponentManagerMid(CNComponentManager):
             }'
 
         """
-        csp_validation_status = ""
+        csp_validation_status: Dict = {}
         # Copying here as dictionary is getting passed by reference.
         updated_validation_status = validation_status.copy()
-        current_dish_vcc_validation_status = json.loads(
+        current_dish_vcc_validation_status: Dict[str, str] = json.loads(
             self._dish_vcc_validation_status
         )
         # Extract existing CSPMLN result
         if MID_CSP_MLN_DEVICE in current_dish_vcc_validation_status:
             csp_validation_status = {
-                MID_CSP_MLN_DEVICE: current_dish_vcc_validation_status[
+                MID_CSP_MLN_DEVICE: current_dish_vcc_validation_status.get(
                     MID_CSP_MLN_DEVICE
-                ]
+                )
             }
 
         # If all Dish are set, remove all other instances
@@ -458,7 +404,6 @@ class CNComponentManagerMid(CNComponentManager):
                 if value != "k-value identical"
             }
         )
-        self.dishvccvalidation_callback(self._dish_vcc_validation_status)
         # empty the dictionaries
         current_dish_vcc_validation_status = {}
         updated_validation_status = {}
@@ -482,7 +427,7 @@ class CNComponentManagerMid(CNComponentManager):
         """
         self._global_pointing_model_status = gpm_version
 
-    def is_csp_mln_csp_master_ready(self) -> str:
+    def is_csp_mln_csp_master_ready(self) -> ResultCode:
         """
         This method wait for csp master leaf node and
         csp_master to become ready to accept request
@@ -493,7 +438,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         count = 0
-        while count <= self.dish_vcc_init_timeout:
+        while count <= self._config.dish_config.init_timeout:
             try:
                 count += 2
                 time.sleep(2)
@@ -520,51 +465,6 @@ class CNComponentManagerMid(CNComponentManager):
                 self.logger.exception("Error %s", str(e))
         return ResultCode.FAILED
 
-    def update_device_state(self, device_name: str, state: DevState) -> None:
-        """
-        Update a monitored device state,
-        aggregate the states available
-        and call the relative callbacks if available
-
-        Args:
-            dev_name (str): name of the device
-            state: state of the device
-
-        """
-        with self.rlock:
-            self.logger.debug(f"State event for {device_name}: {state}")
-
-            if "sdp" in device_name:
-                # Update SDP Master device name with full FQDN for real SDP
-                sdp_master_dev_name = self.get_sdp_master_dev_name()
-                if device_name in sdp_master_dev_name:
-                    device_name = sdp_master_dev_name
-            if "csp" in device_name:
-                # Update CSP Master device name with full FQDN for real CSP
-                csp_master_dev_name = self.get_csp_master_dev_name()
-                if device_name in csp_master_dev_name:
-                    device_name = csp_master_dev_name
-            if self.input_parameter.dish_master_identifier in device_name:
-                # Update Dish Master device name with full FQDN in case of
-                # real Dish
-                dish_master_dev_names = self.get_dish_device_names()
-                for dish in dish_master_dev_names:
-                    if device_name in dish.lower():
-                        device_name = dish
-
-            devInfo = self.component.get_device(device_name)
-            if devInfo is not None:
-                devInfo.state = state
-                self.logger.debug(
-                    f"Updated Device State of {devInfo.dev_name}: "
-                    f"{devInfo.state}"
-                )
-                devInfo.last_event_arrived = time.time()
-                self.component._invoke_device_callback(devInfo)
-
-        self._aggregate_state()
-        self._update_imaging()
-
     def get_dish_leaf_node_device_names(self) -> tuple:
         """
         Return Dish leaf node device names
@@ -574,41 +474,6 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         return self.input_parameter.dish_leaf_node_dev_names
-
-    def update_device_dish_mode(
-        self, dev_name: str, dish_mode: DishMode
-    ) -> None:
-        """
-        Update the dish mode of the given dish leaf node
-        and call the relative callbacks if available.
-
-        Args:
-            dev_name (str): Device name
-            dishMode: Dish mode of the device
-
-        """
-        with self.rlock:
-            self.logger.debug(
-                f"Received dishMode event from {dev_name}: "
-                + f"{DishMode(dish_mode).name}"
-            )
-            # Update Dish leaf node device name with full FQDN for real Dish
-            dish_leaf_node_dev_names = self.get_dish_leaf_node_device_names()
-            for dish in dish_leaf_node_dev_names:
-                if dev_name in dish:
-                    dev_name = dish
-                    break
-            dev_info = self.component.get_device(dev_name)
-            dev_info.dish_mode = dish_mode
-            self.logger.debug(
-                "Updated DishMode of %s: %s",
-                dev_info.dev_name,
-                DishMode(dev_info.dish_mode).name,
-            )
-            dev_info.last_event_arrived = time.time()
-
-        self._aggregate_state()
-        self._update_imaging()
 
     def add_dishes(self, dln_prefix: str, num_dishes: int) -> list:
         """
@@ -633,8 +498,8 @@ class CNComponentManagerMid(CNComponentManager):
         Aggregates telescope state
         """
         if self._telescope_state_aggregator is None:
-            self._telescope_state_aggregator = TelescopeStateAggregatorMid(
-                self, self.logger
+            self._telescope_state_aggregator: TelescopeStateAggregatorMid = (
+                TelescopeStateAggregatorMid(self, self.logger)
             )
 
         with self.rlock:
@@ -644,128 +509,6 @@ class CNComponentManagerMid(CNComponentManager):
     def stop_aggregation_process(self) -> None:
         """Stop aggregation process"""
         self.aggregation_process.stop_aggregation_process()
-
-    def is_valid_admin_mode(self) -> bool:
-        """
-        Validates that all relevant subarray devices are in a valid admin mode.
-
-        Returns:
-            bool: True if all subarrays are in a valid mode, False otherwise.
-
-
-        """
-        sdp_admin_mode = self.get_sdp_controller_admin_mode()
-        csp_admin_mode = self.get_csp_controller_admin_mode()
-
-        admin_modes = [sdp_admin_mode, csp_admin_mode]
-
-        if any(
-            mode in [AdminMode.OFFLINE, AdminMode.NOT_FITTED]
-            for mode in admin_modes
-        ):
-            self.logger.debug(
-                "AdminMode check failed: SDP=%s, CSP=%s",
-                sdp_admin_mode,
-                csp_admin_mode,
-            )
-            return False
-        return True
-
-    def is_command_allowed(self, command_name=None) -> bool:
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        Args:
-            command_name (str): name of the command
-
-        Returns:
-            True if this command is allowed
-
-        """
-        if not self.is_valid_admin_mode():
-            raise CommandNotAllowed(
-                "One or more controller devices are in "
-                "adminMode OFFLINE or NOT-FITTED"
-            )
-
-        if self.enable_dish_vcc_init:
-            if not self.is_dish_vcc_config_set and command_name not in [
-                "TelescopeOff",
-                "TelescopeStandby",
-                "LoadDishCfg",
-            ]:
-                raise CommandNotAllowed(
-                    "Dish Vcc Config not Set. Please set using LoadDishCfg"
-                    " command. "
-                    "Current Telescope State is :"
-                    + f"{str(self.op_state_model.op_state)}",
-                )
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            self.logger.warning(
-                f"{command_name} command is not supported "
-                + f"in {self.op_state_model.op_state} for CentralNode"
-            )
-            raise CommandNotAllowed(
-                "Command is not allowed in current state :"
-                + f"{str(self.op_state_model.op_state)}",
-            )
-        return True
-
-    def check_device_responsiveness_command(
-        self, command_name: str, subarray_id: int
-    ) -> None:
-        """
-        This method overrides the method from super class
-        to add responsive checks for the devices
-
-        Args:
-            command_name (str): Command name for the check
-            subarray_id (int): Subarray id
-
-        """
-        super().check_device_responsiveness_command(command_name, subarray_id)
-        if command_name in self.supported_commands_for_responsive_check:
-            self.check_if_dishes_are_responsive()
-
-    def update_k_value_validation(
-        self, dev_name: str, kvalue: ResultCode
-    ) -> None:
-        """
-        Updates the k value validation value and starts the aggregation.
-
-        Args:
-            dev_name (str): device name
-            kvalue (ResultCode): k value validation result
-
-        """
-        self.dish_kvalue_validation_aggregator.aggregate(dev_name, kvalue)
-
-    def update_telescope_availability(
-        self, device_name: str, event_value
-    ) -> None:
-        """
-        Updates telescope availablity status
-
-        Args:
-            device_name (str): Device name
-            event_value: Event value
-
-        """
-        with self.rlock:
-            if device_name in self.input_parameter.subarray_dev_names:
-                self.subarray_availability[device_name] = event_value
-            elif self.input_parameter.csp_mln_dev_name == device_name:
-                self.csp_mln_availability = event_value
-            elif self.input_parameter.sdp_mln_dev_name == device_name:
-                self.sdp_mln_availability = event_value
-            self._telescope_availability_aggregator.aggregate()
 
     def update_dish_vcc_flag(self, value: bool) -> None:
         """
@@ -778,7 +521,6 @@ class CNComponentManagerMid(CNComponentManager):
         """
         self.logger.debug("Updating dish vcc config set flag to %s", value)
         self.is_dish_vcc_config_set = value
-        self.update_dishvccconfig_callback(self.is_dish_vcc_config_set)
         self._aggregate_telescope_state()
 
     def get_default_dish_vcc_config_params(self) -> dict:
@@ -791,8 +533,8 @@ class CNComponentManagerMid(CNComponentManager):
         """
         return {
             "interface": DISH_VCC_CONFIG_INTERFACE_VERSION,
-            "tm_data_sources": [self.dish_vcc_uri],
-            "tm_data_filepath": self.dish_vcc_file_path,
+            "tm_data_sources": [self._config.dish_config.uri],
+            "tm_data_filepath": self._config.dish_config.file_path,
         }
 
     def get_default_gpm_version_params(self) -> dict:
@@ -804,10 +546,10 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         return {
-            "version": self.gpm_version,
-            "interface": self.gpm_interface,
-            "tm_data_sources": [self.gpm_data_sources_prefix],
-            "tm_data_filepath": self.gpm_file_path_prefix,
+            "version": self._config.gpm_config.version,
+            "interface": self._config.gpm_config.interface,
+            "tm_data_sources": [self._config.gpm_config.data_sources_prefix],
+            "tm_data_filepath": self._config.gpm_config.file_path_prefix,
         }
 
     def check_if_csp_all_dish_ready(self) -> bool:
@@ -824,7 +566,7 @@ class CNComponentManagerMid(CNComponentManager):
         # This loop keep checking for kvalueValidationResult values
         # from all dishes which confirm that event is received from
         # all dishes
-        while count <= self.dish_vcc_init_timeout:
+        while count <= self._config.dish_config.init_timeout:
             try:
                 for dish_name in self.input_parameter.dish_leaf_node_dev_names:
                     if dish_name not in num_of_dish_values:
@@ -854,93 +596,6 @@ class CNComponentManagerMid(CNComponentManager):
             return True
 
         return False
-
-    def handle_dish_vcc_validation_result(
-        self, dev_name: str, result: ResultCode
-    ) -> None:
-        """
-        Handle Dish Vcc Validation Result
-        Based on following table Result codes handled and attributes updated\n
-
-        Result Code | Meaning\n
-        UNKNOWN     | Dish Vcc Config not set on CSP\n
-        OK          | Dish Vcc Config on CSP LN and CSP match\n
-        FAILED      | Mismatch in dish vcc version on CSP LN and CSP Master\n
-        NOT_ALLOWED | CSP master is not available\n\n
-
-        Result Code | Action\n
-        UNKNOWN     | Load Dish Config using LoadDishCfg command\n
-        OK          | Dish Vcc already set so set is_dish_vcc_config_set
-        to True\n
-        FAILED      | Dish Vcc is mismatch so set set is_dish_vcc_config_set
-        to False\n
-        NOT_ALLOWED | Set is_dish_vcc_config_set to False
-
-        Args:
-            dev_name (str): Device name
-            result (ResultCode): ResultCode
-
-        """
-        dish_vcc_validation_result = int(result)
-        self.logger.debug(
-            "Dish Vcc Validation Event called with %s and Result: %s",
-            dev_name,
-            ResultCode(dish_vcc_validation_result).name,
-        )
-        with self.dish_vcc_validation_attr_lock:
-            if self.input_parameter.csp_mln_dev_name in dev_name:
-                # Handle Csp Master Leaf Node event
-                csp_validation_result = int(result)
-                self.logger.debug(
-                    "Csp Validation Result is %s",
-                    ResultCode(csp_validation_result).name,
-                )
-                if (
-                    csp_validation_result == ResultCode.UNKNOWN
-                    and self.command_in_progress != "LoadDishCfg"
-                ):
-                    # Unknown Result code sent when no dish vcc set
-                    # so invoke LoadDishCfg
-
-                    self.command_in_progress = "LoadDishCfg"
-                    if self.check_if_csp_all_dish_ready():
-                        self.dish_vcc_command_status = DishConfigStatus.INIT
-                        self.invoke_load_dish_cfg_command_callback()
-                    else:
-                        self.logger.warning(
-                            "Time Out while waiting for Dishes to be ready"
-                        )
-                        self.command_in_progress = ""
-                        # Initialization Failed so mark
-                        # process status as failed
-                        self.dish_vcc_command_status = DishConfigStatus.FAILED
-                elif (
-                    csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
-                ):
-                    if csp_validation_result == ResultCode.OK:
-                        # Update dish config status to completed only
-                        # during central node initialization.
-                        # This handle scenario when dish vcc already set
-                        # and central node restart
-                        if (
-                            self.dish_vcc_command_status
-                            == DishConfigStatus.STAGING
-                        ):
-                            self.dish_vcc_command_status = (
-                                DishConfigStatus.COMPLETED
-                            )
-                        self.update_dish_vcc_flag(True)
-                    else:
-                        self.dish_vcc_command_status = DishConfigStatus.FAILED
-                        self.update_dish_vcc_flag(False)
-                    self.dish_vcc_validation_status = {
-                        MID_CSP_MLN_DEVICE: DISH_VCC_VALIDATION_RESULT_STATUS[
-                            csp_validation_result
-                        ]
-                    }
-
-            with self.command_completion_cond:
-                self.command_completion_cond.notify_all()
 
     # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(
@@ -1106,64 +761,19 @@ class CNComponentManagerMid(CNComponentManager):
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""
         self.logger.debug("Resetting LoadDishCfg aggregated data")
-        self.load_dish_cfg_aggregated_result = ""
         self.dev_names_for_load_dish_cfg = []
-        self.result_codes_mapping = {}
         self.load_dish_cfg_command_id = None
         self.command_in_progress = ""
         self._check_init_and_invoke_gpm()
 
     def _check_init_and_invoke_gpm(self):
         """If TMC is in initalization phase then invoke gpm"""
-        if self.is_gpm_init and self.invoke_set_gpm_command_callback:
-            self.invoke_set_gpm_command_callback()
+        if (
+            self.is_gpm_init
+            and self._config.gpm_config.invoke_command_callback
+        ):
+            self._config.gpm_config.invoke_command_callback()
             self.is_gpm_init = False
-
-    def handle_gpm_version_event(
-        self, dev_name: str, gpmVersion: dict
-    ) -> None:
-        """
-        Handle the GPM version
-        Based on following table Result codes handled and attributes updated\n
-
-        String       | Meaning\n
-        UNKNOWN      | GPM version not set on Dish\n
-        Version      | GPM is already invoked \n
-
-        String      | Action\n
-        UNKNOWN     | Apply GPM using SetGlobalPointingModel command\n
-        Version     | Version is set, no need to invoke SetGlobalPointingModel
-                      command
-
-        Args:
-            dev_name (str): Device name
-            result (ResultCode): ResultCode
-
-        """
-        self.logger.debug(
-            "GPM versions received %s from %s", gpmVersion, dev_name
-        )
-        with self.dishln_gpm_lock:
-            dish_id = dev_name.split("/")[-1]
-            self.global_pointing_model_status[dish_id] = json.loads(gpmVersion)
-            if self.check_if_csp_all_dish_ready():
-                gpm_aggregator = DishAttrValueAggregator(self, self.logger)
-                self.gpm_unknown_dishes = gpm_aggregator.aggregate_gpm()
-                self.logger.debug(
-                    "Command in progress %s and Dish-Vcc command status %s",
-                    self.command_in_progress,
-                    self._dish_vcc_command_status,
-                )
-                if self.gpm_unknown_dishes and not self.command_in_progress:
-                    if (
-                        self._dish_vcc_command_status
-                        == DishConfigStatus.COMPLETED
-                    ):
-                        self.logger.info(
-                            "Restart phase: Invoking Set GPM command on:  %s",
-                            self.gpm_unknown_dishes,
-                        )
-                        self.invoke_set_gpm_command_callback()
 
     def reset_gpm_data(self) -> None:
         """Reset GPM data"""
@@ -1185,7 +795,10 @@ class CNComponentManagerMid(CNComponentManager):
             band (str)
         """
         band = ""
-        for command_data in self.command_mapping[self.command_id]:
+        command_mapping = cast(
+            Dict[str, List[Dict[str, str]]], self.command_mapping
+        )
+        for command_data in command_mapping.get(self.command_id, {}):
             if unique_id in command_data:
                 band = command_data[unique_id]
         return band
@@ -1217,8 +830,8 @@ class CNComponentManagerMid(CNComponentManager):
             if dish_id in dish:
                 dish_dev_name = dish
                 break
-        dev_info = self.component.get_device(dish_dev_name)
-        return dev_info.dish_mode
+        dev_info = cast(DeviceInfo, self.component.get_device(dish_dev_name))
+        return cast(DishMode, dev_info.dish_mode)
 
     def check_timeout_for_stow_mode_lrcr_events(self) -> bool:
         """Check timeout error in dishln_stow_mode_cmd_exe_data dictionary"""
@@ -1264,18 +877,16 @@ class CNComponentManagerMid(CNComponentManager):
             self.validate_subarray_id(json_argument)
             # Utilize CDM to validate json.
             available_subarrays_list = self.input_parameter.subarray_dev_names
-            dish_leaf_node_prefix = self.input_parameter.dish_leaf_node_prefix
             available_dish_leaf_node_devices = (
                 self.input_parameter.dish_leaf_node_dev_names
             )
             assign_validator = AssignResourceValidator(
                 available_subarrays_list,
                 available_dish_leaf_node_devices,
-                dish_leaf_node_prefix,
                 self.logger,
-                self.mkt_extension_id,
-                self.ska_dish_ranges,
-                self.mkt_dish_ranges,
+                self._config.mkt_extension_id,
+                self._config.ska_dish_ranges,
+                self._config.mkt_dish_ranges,
             )
 
             assign_validator.loads(argin)
@@ -1290,7 +901,7 @@ class CNComponentManagerMid(CNComponentManager):
     # pylint: disable=unexpected-keyword-arg
     def assign_resources(
         self, argin, task_callback: TaskCallbackType, task_abort_event
-    ) -> Tuple[TaskStatus, str]:
+    ) -> None:
         """
         Submits the AssignResources command in queue.
 
@@ -1329,10 +940,11 @@ class CNComponentManagerMid(CNComponentManager):
                     k_value_status,
                     receptors,
                 )
-                return task_callback(
+                task_callback(
                     status=TaskStatus.REJECTED,
                     result=(ResultCode.NOT_ALLOWED, err_msg),
                 )
+                return
             assign_resources_command_object = AssignResourcesMid(
                 self,
                 adapter_factory=self.adapter_factory,
@@ -1342,12 +954,12 @@ class CNComponentManagerMid(CNComponentManager):
                 argin
             )
             # Validate command is allowed
-            self.is_command_allowed_before_lrc_start(
+            self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
                 subarray_id=assign_resources_command_object.subarray_id,
                 command_name="AssignResources",
             )
 
-            return assign_resources_command_object.assign_resources(
+            assign_resources_command_object.assign_resources(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
@@ -1358,17 +970,16 @@ class CNComponentManagerMid(CNComponentManager):
                 "Exception occurred while processing " + "assignresource: %s ",
                 exception,
             )
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, str(exception)),
             )
-
         except Exception as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
                 exception,
             )
-            return task_callback(
+            task_callback(
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.FAILED, str(exception)),
             )
@@ -1402,7 +1013,7 @@ class CNComponentManagerMid(CNComponentManager):
     # pylint: disable=unexpected-keyword-arg
     def release_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
-    ) -> Tuple[TaskStatus, str]:
+    ) -> None:
         """
         Submit the ReleaseResource command in queue.
 
@@ -1421,27 +1032,25 @@ class CNComponentManagerMid(CNComponentManager):
             )
 
             self.check_availability_for_release(argin)
-            release_resources_command_object.subarray_id = (
-                self.get_subarray_id(argin)
-            )
+            subarray_id = self.get_subarray_id(argin)
+            release_resources_command_object.subarray_id = str(subarray_id)
             # Validate command is allowed
-            self.is_command_allowed_before_lrc_start(
-                subarray_id=release_resources_command_object.subarray_id,
+            self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+                subarray_id=subarray_id,
                 command_name="ReleaseResources",
             )
-            return release_resources_command_object.release_resources(
+            release_resources_command_object.release_resources(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
-
         except (StateModelError, CommandNotAllowed) as exception:
             self.logger.exception(
                 "Exception occurred while processing "
                 + "releaseresource: %s ",
                 exception,
             )
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, str(exception)),
             )
@@ -1452,32 +1061,32 @@ class CNComponentManagerMid(CNComponentManager):
                 + "releaseresource: %s ",
                 exception,
             )
-            return task_callback(
+            task_callback(
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.FAILED, str(exception)),
             )
 
     # pylint: enable=unexpected-keyword-arg
 
-    def validate_dish_ids(self, receptors: list[str]) -> bool:
+    def validate_dish_ids(self, receptors: list[str]) -> Tuple[bool, str]:
         """Validates dish ids."""
         for dish_id in receptors:
             dish_id = dish_id.upper()
             if dish_id.startswith("SKA"):
                 dish_suffix = int(dish_id[3:])
-                if (self.ska_dish_ranges[1] < dish_suffix) or (
-                    dish_suffix < self.ska_dish_ranges[0]
+                if (self._config.ska_dish_ranges[1] < dish_suffix) or (
+                    dish_suffix < self._config.ska_dish_ranges[0]
                 ):
                     return False, f"Dish id {dish_id} not in range (1,999)"
             elif dish_id.startswith("MKT"):
                 dish_suffix = int(dish_id[3:])
-                if (self.mkt_dish_ranges[1] < dish_suffix) or (
-                    dish_suffix < self.mkt_dish_ranges[0]
+                if (self._config.mkt_dish_ranges[1] < dish_suffix) or (
+                    dish_suffix < self._config.mkt_dish_ranges[0]
                 ):
                     return False, f"MKT id {dish_id} not in range (1,63)"
             elif not (
-                self.mkt_extension_id
-                and dish_id.startswith(self.mkt_extension_id)
+                self._config.mkt_extension_id
+                and dish_id.startswith(self._config.mkt_extension_id)
             ):
                 return False, f"Invalid Dish id {dish_id} provided in Json"
         return True, ""

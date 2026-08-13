@@ -240,7 +240,7 @@ def test_telescope_low_assign_resources_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), str(elapsed_time)
     )
-    cm.op_state_model._op_state = DevState.FAULT
+    cm._config.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
 
@@ -248,9 +248,12 @@ def test_telescope_low_assign_resources_fail_check_allowed(
 def check_if_subarray_is_available(cm):
     start_time = time.time()
     elapsed_time = 0
-    while (cm.component.telescope_availability)["tmc_subarrays"][
-        LOW_SUBARRAY_DEVICE
-    ] is not True:
+    while (
+        cm.component.telescope_availability["tmc_subarrays"][
+            LOW_SUBARRAY_DEVICE
+        ]
+        is not True
+    ):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:

@@ -83,7 +83,6 @@ class LoadDishCfg(LoadDishCfgCommand):
 
         """
         self.component_manager.command_in_progress = "LoadDishCfg"
-        self.component_manager.load_dish_cfg_aggregated_result = False
         self.task_callback = task_callback
         self.task_abort_event = task_abort_event
         self.component_manager.abort_event = self.task_abort_event
@@ -137,7 +136,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             "Task callback invoked | command=LoadDishCfg id=%s result=%s "
             "message=%s",
             self.command_id,
-            str(result[0]),
+            str(result),
             exception,
         )
         result = self.process_loaddishcfg_as_per_err_message_or_exception(
@@ -254,7 +253,6 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
 
         adjusted_result = self._adjust_result(result, exception, csp_failed)
-
         return (*adjusted_result, csp_failed)
 
     def _collect_failed_kvalue_results(
@@ -639,10 +637,11 @@ class LoadDishCfg(LoadDishCfgCommand):
             and `string` representing `message`
 
         """
+        dish_config = self.component_manager._config.dish_config
         config_json_validator = DishConfigValidator(
             argin,
-            self.component_manager.k_value_valid_range_lower_limit,
-            self.component_manager.k_value_valid_range_upper_limit,
+            dish_config.k_value_valid_range_lower_limit,
+            dish_config.k_value_valid_range_upper_limit,
             self.component_manager.validate_dish_ids,
         )
         is_valid_dish_cfg, message = config_json_validator.is_json_valid()

@@ -1,6 +1,6 @@
 """Input Parameter class for central node"""
 
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 from ska_tmc_centralnode.utils.constants import (
     DISH_DEVICE_PREFIX,
@@ -30,8 +30,8 @@ class InputParameter:
     """Class for Input parameter this class is used to distinguish between
     between low and mid telescope"""
 
-    def __init__(self, changed_callback: Callable) -> None:
-        self._changed_callback: Callable = changed_callback
+    def __init__(self, changed_callback: Optional[Callable]) -> None:
+        self._changed_callback: Optional[Callable] = changed_callback
         self._subarray_dev_names: List[str] = []
         self._csp_subarray_dev_names: List[str] = []
         self._sdp_subarray_dev_names: List[str] = []
@@ -215,7 +215,9 @@ class InputParameter:
         if self._changed_callback is not None:
             self._changed_callback()
 
-    def update(self, component_manager) -> List[str]:
+    def update(
+        self, component_manager, list_dev_names: Optional[List[str]] = None
+    ) -> None:
         """
         Update method for input parameter
 
@@ -226,7 +228,8 @@ class InputParameter:
             List: List of device names
 
         """
-        list_dev_names: List[str] = []
+        if list_dev_names is None:
+            list_dev_names = []
         for dev_name in self.subarray_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
@@ -261,13 +264,12 @@ class InputParameter:
         if dev_name and component_manager.get_device(dev_name) is None:
             component_manager.add_device(dev_name)
             list_dev_names.append(dev_name)
-        return list_dev_names
 
 
 class InputParameterLow(InputParameter):
     """Class for input parameter for low."""
 
-    def __init__(self, changed_callback: Callable) -> None:
+    def __init__(self, changed_callback: Optional[Callable]) -> None:
         super().__init__(changed_callback=changed_callback)
         self._subarray_dev_names = [LOW_TMC_SUBARRAY]
         self._csp_subarray_dev_names = [LOW_CSP_SUBARRAY]
@@ -330,7 +332,9 @@ class InputParameterLow(InputParameter):
         if self._changed_callback is not None:
             self._changed_callback()
 
-    def update(self, component_manager) -> None:
+    def update(
+        self, component_manager, list_dev_names: Optional[List[str]] = None
+    ) -> None:
         """
         Update method for input parameter
 
@@ -338,7 +342,9 @@ class InputParameterLow(InputParameter):
             component_manager: Component manager
 
         """
-        list_dev_names = super().update(component_manager)
+        if list_dev_names is None:
+            list_dev_names = []
+        super().update(component_manager, list_dev_names)
         dev_name = self.mccs_mln_dev_name
         if dev_name and component_manager.get_device(dev_name) is None:
             component_manager.add_device(dev_name)
@@ -358,7 +364,7 @@ class InputParameterMid(InputParameter):
     """Class for Input parameter Mid this class is used to distinguish between
     between low and mid telescope"""
 
-    def __init__(self, changed_callback: Callable) -> None:
+    def __init__(self, changed_callback: Optional[Callable]) -> None:
         super().__init__(changed_callback=changed_callback)
         self._subarray_dev_names: List[str] = [MID_TMC_SUBARRAY]
         self._csp_subarray_dev_names: List[str] = [MID_CSP_SUBARRAY_LN]
@@ -371,7 +377,7 @@ class InputParameterMid(InputParameter):
         self._csp_mln_dev_name: str = MID_CSP_MLN_DEVICE
         self._dish_leaf_node_prefix: str = DISH_LEAF_NODE_PREFIX
         self._dish_master_identifier: str = DISH_DEVICE_PREFIX
-        self._changed_callback: Callable = changed_callback
+        self._changed_callback: Optional[Callable] = changed_callback
 
     @property
     def dish_leaf_node_prefix(self) -> str:
@@ -476,7 +482,9 @@ class InputParameterMid(InputParameter):
         if self._changed_callback is not None:
             self._changed_callback()
 
-    def update(self, component_manager) -> None:
+    def update(
+        self, component_manager, list_dev_names: Optional[List[str]] = None
+    ) -> None:
         """
         Update method for input parameters
 
@@ -484,7 +492,9 @@ class InputParameterMid(InputParameter):
             component_manager: Component manager
 
         """
-        list_dev_names = super().update(component_manager)
+        if list_dev_names is None:
+            list_dev_names = []
+        super().update(component_manager, list_dev_names)
         for dev_name in self.dish_leaf_node_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)

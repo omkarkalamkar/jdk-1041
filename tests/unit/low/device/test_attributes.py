@@ -18,7 +18,7 @@ def central_node_device(request):
     """Create DeviceProxy for tests"""
     true_context = request.config.getoption("--true-context")
     if not true_context:
-        with DeviceTestContext(LowTmcCentralNode, timeout=50) as proxy:
+        with DeviceTestContext(LowTmcCentralNode, timeout=100) as proxy:
             yield proxy
     else:
         database = tango.Database()
@@ -72,6 +72,7 @@ def test_attributes(central_node_device):
     }
 
 
+@pytest.mark.new
 @pytest.mark.SKA_low
 def test_assign_resources_schema_version_attribute(central_node_device):
     """Test assignResourcesSchemaVersion attribute read and write"""

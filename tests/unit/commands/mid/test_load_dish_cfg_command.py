@@ -28,11 +28,10 @@ from tests.settings import (
     set_ldcfg_aggr_result,
 )
 
+
 # Helper Dish LN device is using Database API and in Unit test Database API
 # is not callable
 # Patch this particular method which mock return value from SetKValue command
-
-
 @patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
 def test_load_dish_cfg_command(
     _set_k_numbers_to_dish,
@@ -58,7 +57,9 @@ def test_load_dish_cfg_command(
         "dln_kvalue_validation_results",
         {"ska001": "k-value identical"},
     ):
-        cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+        cm._event_cb_manager.update_k_value_validation(
+            DISH_LEAF_NODE_DEVICE, ResultCode.OK
+        )
         cm.load_dish_cfg(
             dish_cfg_input_str,
             task_callback=task_callback,
@@ -67,7 +68,6 @@ def test_load_dish_cfg_command(
         task_callback.assert_against_call(
             call_kwargs={"status": TaskStatus.IN_PROGRESS}
         )
-        cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
         task_callback.assert_against_call(
             call_kwargs={
                 "status": TaskStatus.COMPLETED,

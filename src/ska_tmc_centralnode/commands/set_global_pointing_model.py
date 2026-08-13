@@ -44,7 +44,7 @@ class SetGlobalPointingModel(SetDishGPM):
         logger,
         task_callback: Callable,
         task_abort_event: Optional[threading.Event],
-    ) -> None:
+    ) -> Tuple[ResultCode, str]:
         """
         Applies the Global Pointing Model (GPM) to dishes
         using the provided parameters. Parses the input

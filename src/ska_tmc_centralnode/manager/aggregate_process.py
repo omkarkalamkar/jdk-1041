@@ -3,7 +3,9 @@ This module contain process for aggregation
 """
 
 import logging
-from multiprocessing import Event, Queue
+from multiprocessing.managers import ListProxy
+from multiprocessing.synchronize import Event
+from queue import Queue
 
 from ska_control_model import HealthState
 from ska_ser_logging import configure_logging
@@ -54,7 +56,7 @@ class HealthStateAggregationProcessor(AggregationProcess):
     def __init__(
         self,
         event_data_queue: Queue,
-        aggregated_health_state: list,
+        aggregated_health_state: ListProxy,
         aggregate_update_event: Event,
         telescope: str = "mid",
         callback=None,

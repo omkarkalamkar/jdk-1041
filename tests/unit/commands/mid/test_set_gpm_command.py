@@ -334,9 +334,11 @@ def test_handle_gpm_version():
     cm.gpm_unknown_dishes = [dish_id]
     cm.command_in_progress = ""
     cm._dish_vcc_command_status = DishConfigStatus.COMPLETED
-    cm.invoke_set_gpm_command_callback = MagicMock()
+    cm._event_cb_manager.gpm_invoke_command_callback = MagicMock()
     cm.logger = MagicMock()
-    cm.check_if_csp_all_dish_ready = MagicMock(return_value=True)
+    cm._event_cb_manager.check_if_csp_all_dish_ready = MagicMock(
+        return_value=True
+    )
     gpm_version = json.dumps(
         {
             "Band_1": "UNKNOWN",
@@ -345,10 +347,10 @@ def test_handle_gpm_version():
     cm.global_pointing_model_status[dish_id] = json.loads(gpm_version)
     cm.command_in_progress = ""
     cm.is_gpm_init = False
-    cm.handle_gpm_version_event(
+    cm._event_cb_manager.handle_gpm_version_event(
         dev_name=f"mid-tmc/leaf-node-dish/{dish_id}", gpmVersion=gpm_version
     )
-    assert cm.invoke_set_gpm_command_callback.called
+    cm._event_cb_manager.gpm_invoke_command_callback.assert_called()
 
 
 @pytest.mark.parametrize(

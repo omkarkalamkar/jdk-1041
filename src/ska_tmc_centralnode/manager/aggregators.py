@@ -1,6 +1,7 @@
 """Aggregation method for telescope state Aggregating for Mid"""
 
 import logging
+from typing import Dict
 
 from ska_ser_logging import configure_logging
 from ska_tango_base.commands import ResultCode
@@ -69,7 +70,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             self._component_manager.is_dish_vcc_config_set,
         )
         # If Dish VCC config is not set then set telescope state to UNKNOWN
-        if self._component_manager.enable_dish_vcc_init:
+        if self._component_manager._config.dish_config.enable_init:
             if not self._component_manager.is_dish_vcc_config_set:
                 return DevState.UNKNOWN
 
@@ -269,10 +270,6 @@ class TelescopeAvailabilityAggregatorMid(Aggregator):
                         "sdp_master_leaf_node"
                     ] = self._component_manager.sdp_mln_availability
 
-            self._component_manager.set_telescope_availability(
-                telescope_availability
-            )
-
 
 class TelescopeAvailabilityAggregatorLow(Aggregator):
     """Class for TelescopeAvailablity for low Telescope"""
@@ -330,10 +327,6 @@ class TelescopeAvailabilityAggregatorLow(Aggregator):
                         "mccs_master_leaf_node"
                     ] = self._component_manager.mccs_mln_availability
 
-            self._component_manager.set_telescope_availability(
-                telescope_availability
-            )
-
 
 class DishAttrValueAggregator:
     """This Class Aggregate k-value validation results
@@ -348,7 +341,7 @@ class DishAttrValueAggregator:
         """
         self._component_manager = cm
         self.logger = logger
-        self.dln_kvalue_validation_results = {}
+        self.dln_kvalue_validation_results: Dict[str, str] = {}
         self.input_parameter_obj = self._component_manager.input_parameter
 
     def is_events_received_percentage_valid(self) -> bool:
@@ -367,9 +360,10 @@ class DishAttrValueAggregator:
                 total_events
                 / len(self.input_parameter_obj.dish_leaf_node_dev_names)
             ) * 100
+            config = self._component_manager._config.dish_config
             if (
                 percent_event_received
-                >= self._component_manager.dishKvalueAggregationAllowedPercent
+                >= config.dishKvalueAggregationAllowedPercent
             ):
                 return True
         return False
@@ -404,7 +398,7 @@ class DishAttrValueAggregator:
             }
 
     def aggregate(
-        self, dish_leaf_node_fqdn: str, kvalue_validation_result: str
+        self, dish_leaf_node_fqdn: str, kvalue_validation_result: ResultCode
     ) -> None:
         """
         Aggregate the k-value validation result received from
@@ -414,7 +408,7 @@ class DishAttrValueAggregator:
         Args:
             dish_leaf_node_fqdn (str):
                 dish leaf node fqdn
-            kvalue_validation_result (str):
+            kvalue_validation_result (ResultCode):
                 kvalue validation result code
 
         """

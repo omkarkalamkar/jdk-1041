@@ -73,7 +73,9 @@ def test_assign_resources_command_completed(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
     cm.input_parameter.dish_leaf_node_dev_names = VALID_DISH_LNS
@@ -143,7 +145,9 @@ def test_assign_resources_command_with_mkt_ids_completed(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
     assign_input_str = get_assign_input_str()
@@ -190,7 +194,9 @@ def test_assign_resources_exception_on_sn(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     defect = {
         "enabled": True,
@@ -263,7 +269,9 @@ def test_assign_resources_command_with_ok(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(
@@ -295,7 +303,9 @@ def test_assign_resources_command_with_mkt_ids_ok(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
@@ -360,7 +370,9 @@ def test_telescope_assign_resources_command_empty_input_json(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     decorated = assign_validate_json_args(cm.assign_resources)
 
@@ -378,7 +390,7 @@ def test_assign_resources_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model._op_state = DevState.FAULT
+    cm._config.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_dish_vcc_config_set = True
         cm.is_command_allowed("AssignResources")
@@ -388,7 +400,7 @@ def test_assign_resources_command_timeout(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     cm, start_time = create_cm()
-    cm.command_timeout = 2
+    cm._config.timeout_config.command_timeout = 2
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -400,7 +412,9 @@ def test_assign_resources_command_timeout(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     result = cm.is_command_allowed("AssignResources")
     logger.info(f"Command allowed result is: {result}")
 
@@ -465,9 +479,9 @@ def test_assign_resources_command_already_assigned(
 def check_if_subarray_is_available(cm):
     start_time = time.time()
     elapsed_time = 0
-    while (cm.component.telescope_availability)["tmc_subarrays"][
-        MID_SUBARRAY_DEVICE
-    ] is not True:
+    while (cm.component.telescope_availability).get("tmc_subarrays", {}).get(
+        MID_SUBARRAY_DEVICE, None
+    ) is not True:
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
@@ -492,7 +506,9 @@ def test_mid_assign_resources_raises_state_model_exception(
     cm.dish_vcc_validation_status = MagicMock(
         return_value=DISH_VCC_VALIDATION_RESULT_STATUS
     )
-    cm.update_k_value_validation(DISH_LEAF_NODE_DEVICE, ResultCode.OK)
+    cm._event_cb_manager.update_k_value_validation(
+        DISH_LEAF_NODE_DEVICE, ResultCode.OK
+    )
     cm.is_command_allowed("AssignResources")
     assign_input_str = get_assign_input_str()
     cm.assign_resources(

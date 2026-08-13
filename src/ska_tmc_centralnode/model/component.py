@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import tango
 from ska_control_model import HealthState
+from ska_tango_base.software_bus import SharingObserver, Signal
 from ska_tmc_common.device_info import DeviceInfo
 from ska_tmc_common.v2.tmc_component_manager import TmcComponent
 from tango import DevState
@@ -42,7 +43,7 @@ def dev_state_2_str(value: DevState) -> str:
     return dev_state_map.get(value, "DevState.UNKNOWN")
 
 
-class CentralComponent(TmcComponent):
+class CentralComponent(SharingObserver, TmcComponent):
     """
     A component class for Central Node
 
@@ -53,84 +54,49 @@ class CentralComponent(TmcComponent):
     * Monitoring its component
     """
 
+    _desired_telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
+        stored=True, initial_value=tango.DevState.ON
+    )
+    _telescope_state: Signal[tango.DevState] = Signal[tango.DevState](
+        stored=True, initial_value=tango.DevState.UNKNOWN
+    )
+    _tmc_op_state: Signal[tango.DevState] = Signal[str](
+        stored=True, initial_value=tango.DevState.UNKNOWN
+    )
+    _telescope_availability: Signal[dict] = Signal[dict](
+        stored=True, initial_value={}
+    )
+    _telescope_health_state: Signal[HealthState] = Signal[HealthState](
+        stored=True, initial_value=HealthState.UNKNOWN
+    )
+    _last_device_info_changed: Signal[str] = Signal[str](stored=True)
+    _imaging: Signal[ModesAvailability] = Signal[ModesAvailability](
+        stored=True, initial_value=ModesAvailability.not_available
+    )
+
     def __init__(self, logger):
         super().__init__(logger)
 
         self._devices = []
         self.logger = logger
-        self._telescope_state = DevState.UNKNOWN
-        self._tmc_op_state = DevState.UNKNOWN
-        self._telescope_health_state = HealthState.UNKNOWN
         # _health_state is never changing. Setter not implemented
         self._health_state = HealthState.OK
         self._vlbi = ModesAvailability.not_available
-        self._imaging = ModesAvailability.not_available
         self._pss = ModesAvailability.not_available
         self._pst = ModesAvailability.not_available
-        self._update_device_callback = None
-        self._update_telescope_state_callback = None
-        self._update_telescope_health_state_callback = None
-        self._update_tmc_op_state_callback = None
-        self._telescope_availability_callback = None
-        self._update_imaging_callback = None
-        self._telescope_availability = {}
         self.lock = threading.Lock()
-        self._desired_telescope_state = DevState.ON
 
-    def set_op_callbacks(
-        self,
-        _update_device_callback=None,
-        _update_telescope_state_callback=None,
-        _update_telescope_health_state_callback=None,
-        _update_tmc_op_state_callback=None,
-        _update_imaging_callback=None,
-        _telescope_availability_callback=None,
-    ):
-        """Sets Op state callback"""
-        self._update_device_callback = _update_device_callback
-        self._update_telescope_state_callback = (
-            _update_telescope_state_callback
-        )
-        self._update_telescope_health_state_callback = (
-            _update_telescope_health_state_callback
-        )
-        self._update_tmc_op_state_callback = _update_tmc_op_state_callback
-        self._update_imaging_callback = _update_imaging_callback
-        self._telescope_availability_callback = (
-            _telescope_availability_callback
-        )
-
-    def _invoke_device_callback(self, dev_info: DeviceInfo) -> None:
-        """invokes device callback"""
-        if self._update_device_callback is not None:
-            self._update_device_callback(dev_info)
-
-    def _invoke_telescope_state_callback(self) -> None:
-        """invokes telescope state callback"""
-        if self._update_telescope_state_callback is not None:
-            self._update_telescope_state_callback(self.telescope_state)
-
-    def _invoke_telescope_health_state_callback(self) -> None:
-        """invokes telescope health state callback"""
-        if self._update_telescope_health_state_callback is not None:
-            self._update_telescope_health_state_callback(
-                self.telescope_health_state
-            )
-
-    def _invoke_tmc_op_state_callback(self) -> None:
-        """Invokes tmc op_state callback"""
-        if self._update_tmc_op_state_callback is not None:
-            self._update_tmc_op_state_callback(self.tmc_op_state)
-
-    def _invoke_imaging_callback(self) -> None:
-        """Invokes imaging callback"""
-        if self._update_imaging_callback is not None:
-            self._update_imaging_callback(self.imaging)
-
-    def _invoke_telescope_availability_callback(self) -> None:
-        """Invokes telescope availablity callback"""
-        if self._telescope_availability_callback is not None:
-            self._telescope_availability_callback(self.telescope_availability)
+    def on_new_shared_bus(self):
+        self.logger.info("CALLING SUPER COMPONENT SHARED BUS")
+        super().on_new_shared_bus()
+        self.logger.info("CALLING COMPONENT SHARED BUS")
+        self._desired_telescope_state = tango.DevState.ON
+        self._telescope_state = tango.DevState.UNKNOWN
+        self._tmc_op_state = tango.DevState.UNKNOWN
+        self._telescope_availability = {}
+        self._telescope_health_state = HealthState.UNKNOWN
+        self._last_device_info_changed = ""
+        self._imaging = ModesAvailability.not_available
 
     @property
     def desired_telescope_state(self) -> tango.DevState:
@@ -198,7 +164,7 @@ class CentralComponent(TmcComponent):
         else:
             index = self._devices.index(dev_info)
             self._devices[index] = dev_info
-        self._invoke_device_callback(dev_info)
+        self._last_device_info_changed = dev_info.to_json()
 
     def update_device_exception(
         self, device_info: DeviceInfo, exception: str
@@ -212,13 +178,13 @@ class CentralComponent(TmcComponent):
         if device_info not in self._devices:
             device_info.update_unresponsive(True, exception)
             self._devices.append(device_info)
-            self._invoke_device_callback(device_info)
+            self._last_device_info_changed = device_info.to_json()
         else:
             index = self._devices.index(device_info)
             intdev_info = self._devices[index]
             intdev_info.state = DevState.UNKNOWN
             intdev_info.update_unresponsive(True, exception)
-            self._invoke_device_callback(intdev_info)
+            self._last_device_info_changed = device_info.to_json()
 
     @property
     def telescope_state(self) -> tango.DevState:
@@ -240,7 +206,6 @@ class CentralComponent(TmcComponent):
         """
         if self._telescope_state != value:
             self._telescope_state = value
-            self._invoke_telescope_state_callback()
 
     @property
     def telescope_availability(self) -> dict:
@@ -253,7 +218,7 @@ class CentralComponent(TmcComponent):
         return self._telescope_availability
 
     @telescope_availability.setter
-    def telescope_availability(self, value: tango.DevState) -> None:
+    def telescope_availability(self, value: dict) -> None:
         """
         Set telescope availability
 
@@ -262,7 +227,6 @@ class CentralComponent(TmcComponent):
         """
         if self._telescope_availability != value:
             self._telescope_availability = value
-            self._invoke_telescope_availability_callback()
 
     @property
     def telescope_health_state(self) -> HealthState:
@@ -284,7 +248,6 @@ class CentralComponent(TmcComponent):
         """
         if self._telescope_health_state != value:
             self._telescope_health_state = value
-            self._invoke_telescope_health_state_callback()
 
     @property
     def tmc_op_state(self) -> tango.DevState:
@@ -306,7 +269,6 @@ class CentralComponent(TmcComponent):
         """
         if self._tmc_op_state != value:
             self._tmc_op_state = value
-            self._invoke_tmc_op_state_callback()
 
     @property
     def vlbi(self) -> ModesAvailability:
@@ -350,7 +312,6 @@ class CentralComponent(TmcComponent):
         if isinstance(value, ModesAvailability):
             if self._imaging != value:
                 self._imaging = value
-                self._invoke_imaging_callback()
 
     @property
     def pss(self) -> ModesAvailability:

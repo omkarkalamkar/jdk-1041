@@ -28,7 +28,7 @@ pytango = "10.3.0"
 ska-ser-logging = "^0.4.1"
 ska-tango-base = "1.4.0"
 ska-tmc-cdm = "14.9.0"
-ska-tmc-common = "1.6.0"
+ska-tmc-common = "1.15.2"
 ska-ser-log-transactions = "*"
 mock = "^4.0.3"
 katpoint = "1.0a2"
@@ -65,6 +65,7 @@ pytest-xdist = "^2.4.0"
 pytest-repeat = "^0.9.1"
 ska-tmc-simulators = "1.9.5"
 ska-tango-testing = "0.8.0"
+mypy = "*"
 
 
 [tool.poetry.group.docs.dependencies]
@@ -87,3 +88,6 @@ line_length = 79
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+disable_error_code = ["import-untyped"]

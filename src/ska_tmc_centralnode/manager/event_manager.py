@@ -41,6 +41,7 @@ class CentralNodeEventManager(EventManager):
         )
 
         self._component_manager = component_manager
+        self.logger = logger
 
     def cspcontrolleradminmode_event_callback(
         self, event: tango.EventData
@@ -53,7 +54,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["adminMode"].put(event)
+        self._component_manager._event_processor.event_queues["adminMode"].put(
+            event
+        )
 
     def sdpcontrolleradminmode_event_callback(
         self, event: tango.EventData
@@ -66,7 +69,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["adminMode"].put(event)
+        self._component_manager._event_processor.event_queues["adminMode"].put(
+            event
+        )
 
     def mccscontrolleradminmode_event_callback(
         self, event: tango.EventData
@@ -79,7 +84,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["adminMode"].put(event)
+        self._component_manager._event_processor.event_queues["adminMode"].put(
+            event
+        )
 
     def healthstate_event_callback(self, event: tango.EventData) -> None:
         """
@@ -91,7 +98,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["healthState"].put(event)
+        self._component_manager._event_processor.event_queues[
+            "healthState"
+        ].put(event)
 
     def adminmode_event_callback(self, event: tango.EventData) -> None:
         """
@@ -103,7 +112,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["adminMode"].put(event)
+        self._component_manager._event_processor.event_queues["adminMode"].put(
+            event
+        )
 
     def state_event_callback(self, event: tango.EventData) -> None:
         """
@@ -115,7 +126,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["state"].put(event)
+        self._component_manager._event_processor.event_queues["state"].put(
+            event
+        )
 
     def assignedresources_event_callback(self, event: tango.EventData) -> None:
         """
@@ -126,7 +139,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["assignedResources"].put(event)
+        self._component_manager._event_processor.event_queues[
+            "assignedResources"
+        ].put(event)
 
     def obsstate_event_callback(self, event: tango.EventData) -> None:
         """
@@ -137,7 +152,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["obsState"].put(event)
+        self._component_manager._event_processor.event_queues["obsState"].put(
+            event
+        )
 
     def dishmode_event_callback(self, event: tango.EventData) -> None:
         """
@@ -149,7 +166,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["dishMode"].put(event)
+        self._component_manager._event_processor.event_queues["dishMode"].put(
+            event
+        )
 
     def kvaluevalidationresult_event_callback(
         self, event: tango.EventData
@@ -163,9 +182,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["kValueValidationResult"].put(
-            event
-        )
+        self._component_manager._event_processor.event_queues[
+            "kValueValidationResult"
+        ].put(event)
 
     def dishvccmapvalidationresult_event_callback(
         self, event: tango.EventData
@@ -178,9 +197,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["DishVccMapValidationResult"].put(
-            event
-        )
+        self._component_manager._event_processor.event_queues[
+            "DishVccMapValidationResult"
+        ].put(event)
 
     def issubsystemavailable_event_callback(
         self, event: tango.EventData
@@ -194,7 +213,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["isSubsystemAvailable"].put(event)
+        self._component_manager._event_processor.event_queues[
+            "isSubsystemAvailable"
+        ].put(event)
 
     def issubarrayavailable_event_callback(
         self, event: tango.EventData
@@ -208,7 +229,9 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["isSubarrayAvailable"].put(event)
+        self._component_manager._event_processor.event_queues[
+            "isSubarrayAvailable"
+        ].put(event)
 
     def gpmversion_event_callback(self, event: tango.EventData) -> None:
         """
@@ -219,4 +242,6 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager.event_queue["gpmVersion"].put(event)
+        self._component_manager._event_processor.event_queues[
+            "gpmVersion"
+        ].put(event)

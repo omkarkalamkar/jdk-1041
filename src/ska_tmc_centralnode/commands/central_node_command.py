@@ -318,7 +318,8 @@ class CentralNodeCommand(TMCCommand):
     ):
         """This Method wait for desired obs state"""
         all_results_ok = False
-        end_time = time.monotonic() + self.component_manager.command_timeout
+        timeout = self.component_manager._config.timeout_config.command_timeout
+        end_time = time.monotonic() + timeout
         self.logger.debug(
             "Command subscription list %s", self.command_subs_list
         )
@@ -676,7 +677,7 @@ class AssignReleaseResources(CentralNodeCommand):
         """
 
         subarray_adapter_dev_name = (
-            self.component_manager.subarray_trl_prefix
+            self.component_manager._config.subarray_trl_prefix
             + str(subarray_id).zfill(2)
         )
 

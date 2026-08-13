@@ -93,10 +93,12 @@ def test_low_admin_mode_validation_only(
 def test_check_device_responsiveness_command(tango_context):
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     device_name = "low-tmc/subarray/01"
-    for dev_info in cm._component.devices:
+    for dev_info in cm.component.devices:
         if device_name in dev_info.dev_name:
             dev_info.update_unresponsive(True)
             logger.info("Device unresponsive flag: %s", dev_info.unresponsive)
 
     with pytest.raises(SubarrayNotPresentError):
-        cm.check_device_responsiveness_command("AssignResources", 1)
+        cm.cmd_allowed_validator.check_device_responsiveness_command(
+            "AssignResources", 1
+        )

@@ -41,7 +41,6 @@ class AssignResourceValidator:
         self,
         subarray_list,
         receptor_list,
-        dish_leaf_node_prefix,
         logger=module_logger,
         mkt_extension_id="",
         ska_dish_ranges: tuple = (1, 999),

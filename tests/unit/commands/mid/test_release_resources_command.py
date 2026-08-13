@@ -109,7 +109,7 @@ def test_telescope_release_resources_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.op_state_model._op_state = DevState.FAULT
+    cm._config.op_state_model._op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_dish_vcc_config_set = True
         cm.is_command_allowed("ReleaseResources")
@@ -140,7 +140,7 @@ def test_release_resources_command_timeout(
     tango_context, task_callback, set_mid_sdp_csp_admin_modes
 ):
     cm, start_time = create_cm()
-    cm.command_timeout = 2
+    cm._config.timeout_config.command_timeout = 2
     elapsed_time = time.time() - start_time
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
@@ -222,9 +222,9 @@ def test_release_resources_exception_on_sn(
 def check_if_subarray_is_available(cm):
     start_time = time.time()
     elapsed_time = 0
-    while (cm.component.telescope_availability)["tmc_subarrays"][
-        MID_SUBARRAY_DEVICE
-    ] is not True:
+    while (cm.component.telescope_availability).get("tmc_subarrays", {}).get(
+        MID_SUBARRAY_DEVICE, None
+    ) is not True:
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:

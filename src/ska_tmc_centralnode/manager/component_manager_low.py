@@ -8,19 +8,15 @@ package.
 """
 
 import json
-import time
 from collections import defaultdict
-from logging import Logger
-from queue import Queue
 from typing import Callable, Dict, Tuple
 
-from ska_control_model import AdminMode, ResultCode, TaskStatus
+from ska_control_model import ResultCode, TaskStatus
 from ska_schemas.schema import validate
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.faults import StateModelError
-from ska_tmc_common.enum import LivelinessProbeType
+from ska_tango_base.software_bus import Signal
 from ska_tmc_common.exceptions import CommandNotAllowed
-from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command_low import (
     AssignResourcesLow,
@@ -35,90 +31,44 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeAvailabilityAggregatorLow,
     TelescopeStateAggregatorLow,
 )
+from ska_tmc_centralnode.manager.command_allowance_validator import (
+    LowCommandAllowanceValidator,
+)
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
+from ska_tmc_centralnode.manager.component_manager_config import (
+    LowCentralNodeComponentManagerConfig,
+)
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
+)
+
+from .event_callback_manager.low_event_callback_manager import (
+    LowEventCallbackManager,
 )
 
 
 class CNComponentManagerLow(CNComponentManager):
     """Component Manager class for low central node"""
 
+    _assign_resources_schema_version: Signal = Signal[str](
+        stored=True, initial_value=LOW_ASSIGN_RESOURCES_SCHEMA_VERSION
+    )
+    _release_resources_schema_version: Signal = Signal[str](
+        stored=True, initial_value=LOW_RELEASE_RESOURCES_SCHEMA_VERSION
+    )
+
     # pylint:disable=keyword-arg-before-vararg
-    def __init__(
-        self,
-        op_state_model,
-        _input_parameter,
-        logger: Logger,
-        _update_device_callback: Callable,
-        _update_telescope_state_callback: Callable,
-        _update_telescope_health_state_callback: Callable,
-        _update_tmc_op_state_callback: Callable,
-        _update_imaging_callback: Callable,
-        _telescope_availability_callback: Callable,
-        array_layout_url_callback: Callable,
-        default_array_layout_url_callback: Callable,
-        _component=None,
-        _liveliness_probe=LivelinessProbeType.MULTI_DEVICE,
-        _event_manager=True,
-        proxy_timeout=500,
-        event_subscription_check_period=1,
-        liveliness_check_period=1,
-        command_timeout=30,
-        subarray_trl_prefix: str = "low-tmc/subarray/",
-        is_auto_recovery_enabled: bool = True,
-        default_array_layout_url: dict | None = None,
-        *args,
-        **kwargs,
-    ):
+    def __init__(self, config: LowCentralNodeComponentManagerConfig):
         """
         Initialise a new ComponentManager instance for low.
 
-        :param op_state_model: the op state model used by this component
-            manager
-        :param logger: a logger for this component manager
-        :param _component: allows setting of the component to be
-            managed; for testing purposes only
-        :param _input_parameter : specify input parameter for low.
-        :param _liveliness_probe:allows to enable/disable LivelinessProbe usage
-        :param _event_manager : allows to enable/disable EventManager usage
-        :param max_workers: Optional. Maximum worker threads for
-            monitoring purpose.
-        :param proxy_timeout: Optional. Time period to wait for
-            event and responses.
-        :param event_subscription_check_period: (int) Time in seconds for sleep
-            intervals in the event subsription thread.
-        :param liveliness_check_period: (int) Period for the liveliness probe
-            to monitor each device in a loop
-        :param timeout : Optional. Time period to wait for
-            intialization of adapter.
+        Args:
+            config:
         """
-        super().__init__(
-            op_state_model,
-            _input_parameter,
-            logger,
-            _update_device_callback,
-            _update_telescope_state_callback,
-            _update_telescope_health_state_callback,
-            _update_tmc_op_state_callback,
-            _update_imaging_callback,
-            _telescope_availability_callback,
-            array_layout_url_callback,
-            default_array_layout_url_callback,
-            _component,
-            _liveliness_probe,
-            _event_manager,
-            proxy_timeout,
-            command_timeout=command_timeout,
-            event_subscription_check_period=event_subscription_check_period,
-            liveliness_check_period=liveliness_check_period,
-            subarray_trl_prefix=subarray_trl_prefix,
-            default_array_layout_url=default_array_layout_url,
-            *args,
-            **kwargs,
-        )
-        self.is_auto_recovery_enabled = is_auto_recovery_enabled
+
+        super().__init__(config=config)
+        self._config = config
         self._telescope_availability_aggregator = None
         self.subarray_availability = {
             subarray: False
@@ -127,38 +77,25 @@ class CNComponentManagerLow(CNComponentManager):
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
         self.mccs_mln_availability = False
-        telescope_availability = self.get_telescope_availability()
-        self._assign_resources_schema_version: str = (
-            LOW_ASSIGN_RESOURCES_SCHEMA_VERSION
-        )
-        self._release_resources_schema_version: str = (
-            LOW_RELEASE_RESOURCES_SCHEMA_VERSION
-        )
-        telescope_availability["tmc_subarrays"] = self.subarray_availability
-        self.set_telescope_availability(telescope_availability)
 
         self._telescope_availability_aggregator = (
             TelescopeAvailabilityAggregatorLow(self, self.logger)
         )
-        self.event_dict: dict = {}
-        self.error_count: int = 0
-        self.event_queue.update(
-            {
-                "longRunningCommandResult": Queue(),
-                "isSubsystemAvailable": Queue(),
-                "isSubarrayAvailable": Queue(),
-                "state": Queue(),
-            }
+        self.cmd_allowed_validator = LowCommandAllowanceValidator(
+            self.logger,
+            self.get_device,
+            self.input_parameter,
+            self._config.subarray_trl_prefix,
+            self._config.retry_attempts,
+            self._config.retry_delay,
+            adapter_factory=self.adapter_factory,
+            get_op_state_model=lambda: self._config.op_state_model,
         )
-
-        self.event_processing_methods.update(
-            {
-                "isSubsystemAvailable": self.update_telescope_availability,
-                "isSubarrayAvailable": self.update_telescope_availability,
-                "state": self.update_device_state,
-            }
+        self._event_cb_manager: LowEventCallbackManager = (
+            self._get_event_cb_manager()
         )
-        self._start_event_processing_threads()
+        self._register_event_handlers(self._get_event_handlers())
+        self._event_processor.start()
         # start the aggregation process
         self.aggregation_process = HealthStateAggregationProcessor(
             self.event_data_queue,
@@ -176,6 +113,61 @@ class CNComponentManagerLow(CNComponentManager):
         self.pss_beams_assigned_per_subarray: Dict[int, list] = defaultdict(
             list
         )
+
+    def on_new_shared_bus(self) -> None:
+        super().on_new_shared_bus()
+        telescope_availability = self.get_telescope_availability()
+        telescope_availability["tmc_subarrays"] = self.subarray_availability
+        self._assign_resources_schema_version = (
+            LOW_ASSIGN_RESOURCES_SCHEMA_VERSION
+        )
+        self._release_resources_schema_version = (
+            LOW_RELEASE_RESOURCES_SCHEMA_VERSION
+        )
+
+    def _get_event_cb_manager(self) -> LowEventCallbackManager:
+        """Provides Instance Event Callaback Manager"""
+        return LowEventCallbackManager(
+            logger=self.logger,
+            component=self.component,
+            command_completion_cond=self.command_completion_cond,
+            input_parameter=self.input_parameter,
+            event_data_manager=self.event_data_manager,
+            _aggregate_state=self._aggregate_state,
+            _telescope_availability_aggregator=(
+                self._telescope_availability_aggregator
+            ),
+            subarray_availability=self.subarray_availability,
+            set_csp_mln_availability=lambda availability: setattr(
+                self, "csp_mln_availability", availability
+            ),
+            set_sdp_mln_availability=lambda availability: setattr(
+                self, "sdp_mln_availability", availability
+            ),
+            set_mccs_mln_availability=lambda availability: setattr(
+                self, "mccs_mln_availability", availability
+            ),
+        )
+
+    def _get_event_handlers(self) -> Dict[str, Callable]:
+        """Returns event handlers with addition of low specific.
+
+        :return: Dictionary with attribute name and its event handler.
+        :rtype: dict
+        """
+        event_handlers: dict = super()._get_event_handlers()
+        event_handlers.update(
+            {
+                "isSubsystemAvailable": (
+                    self._event_cb_manager.update_telescope_availability
+                ),
+                "isSubarrayAvailable": (
+                    self._event_cb_manager.update_telescope_availability
+                ),
+                "state": self._event_cb_manager.update_device_state,
+            }
+        )
+        return event_handlers
 
     @property
     def assign_resources_schema_version(self) -> str:
@@ -223,74 +215,6 @@ class CNComponentManagerLow(CNComponentManager):
         if self._release_resources_schema_version != value:
             self._release_resources_schema_version = value
 
-    def check_if_mccs_mln_is_responsive(self):
-        """Checks whether mccs mln is responsive"""
-        return self._check_if_device_is_responsive(
-            [self.input_parameter.mccs_mln_dev_name]
-        )
-
-    def reset_event_count(self, command_id: str):
-        """Reset count function to reset sdp and csp events count and
-        error dictionary"""
-        del self.event_dict[command_id]
-        self.error_count = 0
-        del self.command_mapping[command_id]
-        self.logger.debug(
-            "Command mapping dictionary: %s and event dictionary: %s",
-            str(self.command_mapping),
-            str(self.event_dict),
-        )
-
-    def get_unique_ids(self) -> list:
-        """Provides unique id for processing long
-        running command result events.
-
-        Returns:
-            list: Provides list of unique ids under progress
-        """
-        unique_ids = []
-        for data in self.command_mapping.values():
-            for uid in data:
-                unique_ids.append(uid)
-        return unique_ids
-
-    def update_device_state(self, device_name, state):
-        """
-        Update a monitored device state,
-        aggregate the states available
-        and call the relative callbacks if available
-
-        :param device_name: name of the device
-        :type device_name: str
-        :param state: state of the device
-        :type state: DevState
-        """
-        with self.rlock:
-            self.logger.debug("State event for %s: %s", device_name, state)
-            if "sdp" in device_name:
-                # Update SDP Master device name with full FQDN in case of
-                # real SDP
-                sdp_master_dev_name = self.get_sdp_master_dev_name()
-                if device_name in sdp_master_dev_name:
-                    device_name = sdp_master_dev_name
-            if "csp" in device_name:
-                # Update CSP Master device name with full FQDN in case of
-                # real CSP
-                csp_master_dev_name = self.get_csp_master_dev_name()
-                if device_name in csp_master_dev_name:
-                    device_name = csp_master_dev_name
-
-            devInfo = self.component.get_device(device_name)
-            if devInfo is not None:
-                devInfo.state = state
-                self.logger.debug(
-                    "Updated State of %s: %s ", devInfo.dev_name, devInfo.state
-                )
-                devInfo.last_event_arrived = time.time()
-                self.component._invoke_device_callback(devInfo)
-
-        self._aggregate_state()
-
     def _aggregate_telescope_state(self):
         """
         Aggregates telescope state
@@ -324,95 +248,6 @@ class CNComponentManagerLow(CNComponentManager):
                 "MccsMasterLeafNode is not available to receive command"
             )
             return False
-        return True
-
-    def is_command_allowed(self, command_name=None) -> bool:
-        """
-        Checks whether this command is allowed
-        It checks that the device is in a state
-        to perform this command and that all the
-        component needed for the operation are not unresponsive
-
-        :param command_name: name of the command
-        :type command_name: str
-        :return: True if this command is allowed
-
-        :rtype: boolean
-        """
-        if not self.is_valid_admin_mode():
-            raise CommandNotAllowed(
-                "One or more controller devices are in "
-                "adminMode OFFLINE or NOT-FITTED"
-            )
-        if self.op_state_model.op_state in [
-            DevState.FAULT,
-            DevState.UNKNOWN,
-            DevState.DISABLE,
-        ]:
-            raise CommandNotAllowed(
-                "Command is not allowed in current state :",
-                f"{str(self.op_state_model.op_state)}",
-            )
-        return True
-
-    def check_device_responsiveness_command(
-        self, command_name: str, subarray_id: int
-    ) -> None:
-        """
-        This method overrides the method from super class
-        to add responsive checks for the devices
-
-        Args:
-            command_name (str): Command name for the check
-            subarray_id (int): Subarray id
-
-        """
-        super().check_device_responsiveness_command(command_name, subarray_id)
-        if command_name in self.supported_commands_for_responsive_check:
-            self.check_if_mccs_mln_is_responsive()
-
-    def update_telescope_availability(self, device_name, event_value):
-        """Updates telescope availability"""
-        with self.rlock:
-            self.logger.debug("Device name is: %s", device_name)
-            self.logger.debug("Event value is: %s", event_value)
-
-            if device_name in self.input_parameter.subarray_dev_names:
-                self.subarray_availability[device_name] = event_value
-            elif self.input_parameter.csp_mln_dev_name == device_name:
-                self.csp_mln_availability = event_value
-            elif self.input_parameter.sdp_mln_dev_name == device_name:
-                self.sdp_mln_availability = event_value
-            elif self.input_parameter.mccs_mln_dev_name == device_name:
-                self.mccs_mln_availability = event_value
-            self._telescope_availability_aggregator.aggregate()
-
-    def is_valid_admin_mode(self) -> bool:
-        """
-        Extends the base admin mode validation with MCCS
-        check for LOW telescope.
-
-        Returns:
-            bool: True if all controllers including MCCS
-            are in valid admin mode.
-        """
-        sdp_admin_mode = self.get_sdp_controller_admin_mode()
-        csp_admin_mode = self.get_csp_controller_admin_mode()
-        mccs_admin_mode = self.get_mccs_controller_admin_mode()
-        admin_modes = [sdp_admin_mode, csp_admin_mode, mccs_admin_mode]
-
-        if any(
-            mode in [AdminMode.OFFLINE, AdminMode.NOT_FITTED]
-            for mode in admin_modes
-        ):
-            self.logger.debug(
-                "AdminMode check failed: SDP=%s, CSP=%s, MCCS=%s",
-                sdp_admin_mode,
-                csp_admin_mode,
-                mccs_admin_mode,
-            )
-            return False
-
         return True
 
     def validate_assign_json(self, argin: str) -> Tuple[str, str]:
@@ -450,7 +285,7 @@ class CNComponentManagerLow(CNComponentManager):
     # pylint: disable=unexpected-keyword-arg
     def assign_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
-    ) -> Tuple[TaskStatus, str]:
+    ) -> None:
         """
         Submits the AssignResources command in queue.
 
@@ -468,17 +303,16 @@ class CNComponentManagerLow(CNComponentManager):
                 self,
                 adapter_factory=self.adapter_factory,
                 logger=self.logger,
-                is_auto_recovery_enabled=self.is_auto_recovery_enabled,
+                is_auto_recovery_enabled=self._config.is_auto_recovery_enabled,
             )
-            assign_resources_command_object.subarray_id = self.get_subarray_id(
-                argin
-            )
+            subarray_id = self.get_subarray_id(argin)
+            assign_resources_command_object.subarray_id = str(subarray_id)
             # Validate command is allowed
-            self.is_command_allowed_before_lrc_start(
-                subarray_id=assign_resources_command_object.subarray_id,
+            self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+                subarray_id=subarray_id,
                 command_name="AssignResources",
             )
-            return assign_resources_command_object.assign_resources(
+            assign_resources_command_object.assign_resources(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
@@ -486,19 +320,19 @@ class CNComponentManagerLow(CNComponentManager):
 
         except (StateModelError, CommandNotAllowed) as exception:
             self.logger.exception(
-                "Exception occurred while processing " + "assignresource: %s ",
+                "Exception occurred while processing  assignresource: %s ",
                 exception,
             )
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, str(exception)),
             )
         except Exception as exception:
             self.logger.exception(
-                "Exception occurred while processing " + "assignresource: %s ",
+                "Exception occurred while processing assignresource: %s ",
                 exception,
             )
-            return task_callback(
+            task_callback(
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.FAILED, str(exception)),
             )
@@ -538,7 +372,7 @@ class CNComponentManagerLow(CNComponentManager):
     # pylint: disable=unexpected-keyword-arg
     def release_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
-    ) -> Tuple[TaskStatus, str]:
+    ) -> None:
         """
         Submit the ReleaseResource command in queue.
 
@@ -556,19 +390,18 @@ class CNComponentManagerLow(CNComponentManager):
                 self,
                 adapter_factory=self.adapter_factory,
                 logger=self.logger,
-                is_auto_recovery_enabled=self.is_auto_recovery_enabled,
+                is_auto_recovery_enabled=self._config.is_auto_recovery_enabled,
             )
 
             self.check_availability_for_release(argin)
-            release_resources_command_object.subarray_id = (
-                self.get_subarray_id(argin)
-            )
+            subarray_id = self.get_subarray_id(argin)
+            release_resources_command_object.subarray_id = str(subarray_id)
             # Validate command is allowed
-            self.is_command_allowed_before_lrc_start(
-                subarray_id=release_resources_command_object.subarray_id,
+            self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+                subarray_id=subarray_id,
                 command_name="ReleaseResources",
             )
-            return release_resources_command_object.release_resources(
+            release_resources_command_object.release_resources(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
@@ -580,7 +413,7 @@ class CNComponentManagerLow(CNComponentManager):
                 + "releaseresource: %s ",
                 exception,
             )
-            return task_callback(
+            task_callback(
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, str(exception)),
             )
@@ -591,14 +424,14 @@ class CNComponentManagerLow(CNComponentManager):
                 + "releaseresource: %s ",
                 exception,
             )
-            return task_callback(
+            task_callback(
                 status=TaskStatus.COMPLETED,
                 result=(ResultCode.FAILED, str(exception)),
             )
 
     # pylint: enable=unexpected-keyword-arg
 
-    def update_subarray_pss_beams_mapping(self, json_argument: dict) -> dict:
+    def update_subarray_pss_beams_mapping(self, json_argument: dict) -> None:
         """
         Method to update the mapping of subarray_id to the assigned pss beams
 

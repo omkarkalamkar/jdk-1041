@@ -3,11 +3,12 @@
 import logging
 import threading
 import time
-from typing import Callable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
+from ska_tango_base.type_hints import TaskCallbackType
 from tango import DevState
 
 from ska_tmc_centralnode.commands.central_node_command import TelescopeOnOff
@@ -39,7 +40,7 @@ class TelescopeOff(TelescopeOnOff):
     def telescope_off(
         self,
         logger: logging.Logger,
-        task_callback: Callable = None,
+        task_callback: TaskCallbackType,
         task_abort_event: Optional[threading.Event] = None,
     ) -> Tuple[ResultCode, str]:
         """

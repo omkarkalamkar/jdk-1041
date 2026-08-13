@@ -48,7 +48,8 @@ class ReleaseResources(AssignReleaseResources):
         self.subarray_id = ""
         self.subarray_devname = ""
         self.timekeeper = TimeKeeper(
-            self.component_manager.command_timeout, logger
+            self.component_manager._config.timeout_config.command_timeout,
+            logger,
         )
 
     def get_subarray_obsstate(self) -> ObsState:
