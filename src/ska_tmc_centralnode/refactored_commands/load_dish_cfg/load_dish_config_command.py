@@ -3,7 +3,6 @@
 import json
 from typing import Tuple
 
-from retry import retry
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
 from ska_telmodel.data import TMData
@@ -19,7 +18,8 @@ from ska_tmc_centralnode.utils.constants import (
 )
 
 from .contexts import LoadDishCfgRuntimeContext
-from .errors import DishAdapterError, SetKValueError
+from .dish_k_executor import DishKValueExecutor
+from .errors import DishAdapterError
 from .load_dish_cfg_stragegy import LoadDishCfgStrategy
 
 
@@ -79,7 +79,6 @@ class LoadDishCfg(BaseTMCCommand):
                 adapter_type=AdapterType.CSP_MASTER_LEAF_NODE,
                 command_name="LoadDishCfg",
                 command_input=self.plan.dish_cfg_params,
-                update_event_callback=self._update_event_callback,
             )
         ]
 
@@ -92,96 +91,19 @@ class LoadDishCfg(BaseTMCCommand):
             self.context.command_id,
         )
         super().invoke()
-        self._set_k_numbers_to_dish(self.plan.dish_parameters)
-
-    def _update_event_callback(
-        self, device_name: str, command_id: str, result: str
-    ) -> None:
-        """
-        Callback to handle command events.
-
-        Args:
-            device_name (str): Name of the device.
-            command_id (str): ID of the command.
-            result (str): Result of the command.
-        """
-        self.logger.debug(
-            "Command ID: %s | Device: %s | Result: %s",
-            command_id,
-            device_name,
-            result,
+        dish_adapters = self.get_dish_adapters()
+        command_ctx = self.command_runtime_context.command_ctx
+        dish_kvalue_executor = DishKValueExecutor(
+            dish_adapters=dish_adapters,
+            command_id=self.context.command_id,
+            invoke_callback_factory=self.async_cb,
+            add_device_command=self.context.device_commands.append,
+            add_device_name=self.command_runtime_context.append_dish_dev_names,
+            update_kvalue_aggregator=(command_ctx.update_kval_aggregator),
+            logger=self.logger,
         )
-        # Here you can implement any additional logic needed to handle
-        # the command result, such as updating internal state or
-        # notifying other components.
-
-    # def set_command_id(self, command_name: str) -> None:
-    #     """Sets the command id for error propagation.
-    #
-    #     :param command_name: name of the command.
-    #     :type command_name: str
-    #     """
-    #     self.command_id = f"{time.time()}-{command_name}"
-    #     self.logger.info(
-    #         "Setting command id as %s for command: %s",
-    #         self.command_id,
-    #         command_name,
-    #     )
-    #     self.component_manager.command_id = self.command_id
-
-    # def load_dish_cfg(
-    #     self,
-    #     argin: str,
-    #     task_callback,
-    #     task_abort_event,
-    # ) -> Tuple[ResultCode, str]:
-    #     """
-    #     Load Dish Configuration command.
-    #     Validates dish-vcc data, executes lower-level command.
-    #
-    #     Args:
-    #         argin (str): Input argument for the command.
-    #
-    #     Returns:
-    #         Tuple(ResultCode, str): Result code and message.
-    #
-    #     """
-    #     self.component_manager.command_in_progress = "LoadDishCfg"
-    #     self.component_manager.load_dish_cfg_aggregated_result = False
-    #     self.task_callback = task_callback
-    #     self.task_abort_event = task_abort_event
-    #     self.component_manager.abort_event = self.task_abort_event
-    #     self.task_callback(status=TaskStatus.IN_PROGRESS)
-    #
-    #     # Set Dish-specific command status
-    #     self.component_manager.dish_vcc_command_status = (
-    #         DishConfigStatus.IN_PROGRESS
-    #     )
-    #
-    #     # # Validate
-    #     (
-    #         dish_vcc_map_json,
-    #         error_message,
-    #     ) = self.check_and_validate_dish_vcc_data(argin)
-    #     if error_message:
-    #         self.component_manager.dish_vcc_validation_status = {
-    #             CENTRALNODE_MID: error_message
-    #         }
-    #         self.update_task_status(
-    #             result=(ResultCode.FAILED, error_message),
-    #             exception=error_message,
-    #         )
-    #         return ResultCode.FAILED, error_message
-    #
-    #     # Save validated config
-    #     self.dish_vcc_config_json = dish_vcc_map_json
-    #     self.dish_cfg_params = argin
-    #
-    #     # Execute device-level command
-    #     self.component_manager.load_dish_cfg_command_id = self.command_id
-    #     result, message = self.do(argin)
-    #     self.update_task_status(result=(result, message), exception=message)
-    #     return result, message
+        dish_kvalue_executor.execute(self.plan.dish_parameters)
+        # self._set_k_numbers_to_dish(self.plan.dish_parameters)
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
@@ -517,132 +439,6 @@ class LoadDishCfg(BaseTMCCommand):
                 )
         return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
-    # pylint:disable=signature-differs
-    # def do(self, argin: str) -> Tuple[ResultCode, str]:
-    #     """
-    #     This command performs the following steps:\n
-    #     1. Loads the content of the DishId-VCC mapping file from CAR URI.\n
-    #     2. Validates the JSON.\n
-    #     3. Invokes a command on the CSP master leaf node.\n
-    #     4. Invokes the SetKValue
-    #     command on the Dish Leaf Node for each dish ID
-    #     provided in the DishId-VCC map.\n
-    #
-    #     Args:
-    #         argin (str): DishId-VCC map parameters in JSON string format.
-    #
-    #     Returns:
-    #         Tuple(ResultCode, str): Result code and message
-    #
-    #     """
-    #     self.set_command_id(self.__class__.__name__)
-    #     self.logger.debug(
-    #         "Command %s: Executing LoadDishCfg command",
-    #         self.command_id,
-    #     )
-    #
-    #     result_code, message = self.init_adapters()
-    #     if result_code == ResultCode.FAILED:
-    #         self.logger.error(
-    #             "Adapter initialization failed | command_id=%s error=%s",
-    #             self.command_id,
-    #             message,
-    #         )
-    #         if "Error in creating dish adapters" in message:
-    #             cm = self.component_manager
-    #             aggregator = cm.dish_kvalue_validation_aggregator
-    #             val_results = aggregator.dln_kvalue_validation_results
-    #             val_results.clear()
-    #             val_results[
-    #                 "dish"
-    #             ] = "No Dish Leaf Node found to invoke SetKValue command"
-    #             self.component_manager.
-    #             dish_vcc_validation_status = val_results
-    #             self.logger.debug(
-    #                 "Dish aggregator: %s CSP Dish aggregator: %s",
-    #                 val_results,
-    #                 self.component_manager.dish_vcc_validation_status,
-    #             )
-    #         return result_code, message
-    #
-    #     dishid_vcc_map_params = json.loads(argin)
-    #     self.logger.debug(
-    #         "DishId-VCC map parameters | command_id=%s params=%s",
-    #         self.command_id,
-    #         json.dumps(dishid_vcc_map_params),
-    #     )
-    #
-    #     dish_parameters = self.dish_vcc_config_json.get("dish_parameters")
-    #
-    #     for return_codes, message_or_unique_ids in [
-    #         self._invoke_load_dish_cfg_on
-    #         _csp_master_ln(dishid_vcc_map_params),
-    #         self._set_k_numbers_to_dish(dish_parameters),
-    #     ]:
-    #         for return_code, message_or_unique_id in zip(
-    #             return_codes, message_or_unique_ids
-    #         ):
-    #             if return_code == ResultCode.FAILED:
-    #                 self.logger.error(
-    #                     "Command ID: %s | LoadDishCfg command "
-    #                     + "failed with error: %s",
-    #                     self.command_id,
-    #                     message_or_unique_id,
-    #                 )
-    #                 return ResultCode.FAILED, message_or_unique_id
-    #
-    #     self.logger.info(
-    #         "Command ID: %s | Successfully invoked LoadDishCfg command on "
-    #         " %s",
-    #         self.command_id,
-    #         self.csp_mln_adapter.dev_name,
-    #     )
-    #     return self.wait_for_command_completion(
-    #         device_length=len(self.command_subs_list)
-    #     )
-
-    # def _invoke_load_dish_cfg_on_csp_master_ln(
-    #     self, dishid_vcc_map_params: str
-    # ) -> Tuple[ResultCode, list]:
-    #     """
-    #     Invoke LoadDishCfg command on Csp Master with
-    #     vcc_map_params argument
-    #
-    #     Args:
-    #         dishid_vcc_map_params (str): vcc_map_params
-    #             info containing vcc_dish mapping
-    #
-    #     Returns:
-    #         Tuple(ResultCode, str): tuple containing
-    #         ResultCode and message
-    #
-    #     """
-    #     self.logger.debug(
-    #         "Command ID: %s | Invoking LoadDishCfg command on: %s",
-    #         self.command_id,
-    #         self.csp_mln_adapter.dev_name,
-    #     )
-    #     self.component_manager.dev_names_for_load_dish_cfg.append(
-    #         self.csp_mln_adapter.dev_name
-    #     )
-    #     return_codes, message_or_unique_ids = self.invoke_command(
-    #         [self.csp_mln_adapter],
-    #         "Error in calling LoadDishCfg command on Csp Master Leaf Node",
-    #         "LoadDishCfg",
-    #         json.dumps(dishid_vcc_map_params),
-    #     )
-    #     if return_codes[0] not in [
-    #         ResultCode.OK,
-    #         ResultCode.QUEUED,
-    #         ResultCode.STARTED,
-    #     ]:
-    #         err = "Failed LoadDishCfg command on Csp Master Leaf Node"
-    #         self.component_manager.dish_vcc_validation_status = {
-    #             f"{self.csp_mln_adapter.dev_name}": err
-    #         }
-    #         self.component_manager.update_dish_vcc_flag(False)
-    #     return return_codes, message_or_unique_ids
-
     def get_dish_adapters(self) -> list:
         """
         Get the list of dish adapters.
@@ -681,126 +477,71 @@ class LoadDishCfg(BaseTMCCommand):
             )
         return dish_adapters
 
-    def _set_k_numbers_to_dish(self, dish_parameters: dict) -> None:
-        """
-        Set K numbers to Dish by invoking setKValue command on dish ln
-        Args:
-            dish_parameters (dict): Dish paramters
-                with dishid and k values
-        Returns:
-            None
-        """
-        dish_adapters = self.get_dish_adapters()
-        runtime_context = self.command_runtime_context
-        try:
-            for dish_id, vcc_k_map in dish_parameters.items():
-                # Get Dish Number from dish id to get dish adapter
-                dish_adapter = [
-                    dish_adapter
-                    for dish_adapter in dish_adapters
-                    if dish_adapter.dev_name.endswith(dish_id.lower())
-                ]
-                if dish_adapter:
-                    dish_adapter = dish_adapter[0]
-                    k_value = vcc_k_map.get("k")
-                    self.logger.debug(
-                        "Command ID: %s | Invoking SetKValue command on: %s",
-                        self.context.command_id,
-                        dish_adapter.dev_name,
-                    )
-                    dish_adapter.proxy.command_inout_asynch(
-                        "SetKValue",
-                        k_value,
-                        self.async_cb(dish_adapter.dev_name),
-                    )
-                    self.context.device_commands.append(
-                        DeviceCommand(
-                            device_name=dish_adapter.dev_name,
-                            adapter_type=AdapterType.DISH,
-                            command_name="SetKValue",
-                            command_input=k_value,
-                        )
-                    )
-                    # name = dish_adapter.dev_name + "async"
-                    # self.context.command_device_ids.append(name)
-                    # Append dish dev names to track on which dish
-                    # SetKValue is invoked
-                    runtime_context.append_dish_dev_names(
-                        dish_adapter.dev_name
-                    )
-                else:
-                    error_message = (
-                        f"Adapter not found for dish leaf node {dish_id}"
-                    )
-                    runtime_context.update_kval_aggregator(
-                        dish_id, error_message
-                    )
-                    self.logger.error(error_message)
-        except Exception as e:
-            self.logger.exception(
-                "Exception occured in calling setKvalue command on %s, "
-                + "Exception: %s",
-                dish_id,
-                str(e),
-            )
-            raise SetKValueError(
-                f"Error in calling setKvalue command on dish adapter {e}"
-            ) from e
-
-    @retry(tries=3, delay=1)
-    def fetch_dishid_vcc_map(self, dish_cfg_params: str) -> Tuple[dict, str]:
-        """
-        Fetch the DishId-VCC map JSON.
-
-        Args:
-            dish_cfg_params (str): Dish config parameters
-
-        Returns:
-            Tuple(dict, str): tuple of `DishId-VCC map JSON`
-            and `error message` if any
-
-        """
-        dish_vcc_map_json, error_message = self.get_dishid_vcc_map_json(
-            json.loads(dish_cfg_params)
-        )
-        if error_message:
-            raise Exception(error_message)
-        return dish_vcc_map_json, error_message
-
-    # def check_and_validate_dish_vcc_data(
-    #     self, dishid_vcc_map_params: str
-    # ) -> Tuple[dict, str]:
-    #     """This method downloads dish vcc json from telmodel
-    #     and validates the data.
-    #
-    #     Args:
-    #         dishid_vcc_map_params (str): JSON string containing parameters
-    #             to fetch the dish VCC map.
-    #
-    #     Returns:
-    #         Tuple[dict, str]: A tuple containing the dish VCC map JSON
-    #             and an error message string (empty if no error).
+    # def _set_k_numbers_to_dish(self, dish_parameters: dict) -> None:
     #     """
+    #     Set K numbers to Dish by invoking setKValue command on dish ln
+    #     Args:
+    #         dish_parameters (dict): Dish paramters
+    #             with dishid and k values
+    #     Returns:
+    #         None
+    #     """
+    #     dish_adapters = self.get_dish_adapters()
+    #     runtime_context = self.command_runtime_context
     #     try:
-    #         (
-    #             dishid_vcc_map_json,
-    #             _,
-    #         ) = self.fetch_dishid_vcc_map(dishid_vcc_map_params)
-    #     except Exception as exp:
-    #         return "", str(exp)
-    #     self.logger.debug(
-    #         "DishId Vcc Map Json: %s",
-    #         json.dumps(dishid_vcc_map_json),
-    #     )
-    #     # Validate the data
-    #     (
-    #         is_valid_dish_cfg,
-    #         message,
-    #     ) = self.load_dish_config_json_validator(dishid_vcc_map_json)
-    #
-    #     if not is_valid_dish_cfg:
-    #         return "", message
-    #     return dishid_vcc_map_json, ""
+    #         for dish_id, vcc_k_map in dish_parameters.items():
+    #             # Get Dish Number from dish id to get dish adapter
+    #             dish_adapter = [
+    #                 dish_adapter
+    #                 for dish_adapter in dish_adapters
+    #                 if dish_adapter.dev_name.endswith(dish_id.lower())
+    #             ]
+    #             if dish_adapter:
+    #                 dish_adapter = dish_adapter[0]
+    #                 k_value = vcc_k_map.get("k")
+    #                 self.logger.debug(
+    #                     "Command ID: %s | Invoking SetKValue command on: %s",
+    #                     self.context.command_id,
+    #                     dish_adapter.dev_name,
+    #                 )
+    #                 dish_adapter.proxy.command_inout_asynch(
+    #                     "SetKValue",
+    #                     k_value,
+    #                     self.async_cb(dish_adapter.dev_name),
+    #                 )
+    #                 self.context.device_commands.append(
+    #                     DeviceCommand(
+    #                         device_name=dish_adapter.dev_name,
+    #                         adapter_type=AdapterType.DISH,
+    #                         command_name="SetKValue",
+    #                         command_input=k_value,
+    #                     )
+    #                 )
+    #                 # name = dish_adapter.dev_name + "async"
+    #                 # self.context.command_device_ids.append(name)
+    #                 # Append dish dev names to track on which dish
+    #                 # SetKValue is invoked
+    #                 runtime_context.append_dish_dev_names(
+    #                     dish_adapter.dev_name
+    #                 )
+    #             else:
+    #                 error_message = (
+    #                     f"Adapter not found for dish leaf node {dish_id}"
+    #                 )
+    #                 runtime_context.update_kval_aggregator(
+    #                     dish_id, error_message
+    #                 )
+    #                 self.logger.error(error_message)
+    #     except Exception as e:
+    #         self.logger.exception(
+    #             "Exception occured in calling setKvalue command on %s, "
+    #             + "Exception: %s",
+    #             dish_id,
+    #             str(e),
+    #         )
+    #         raise SetKValueError(
+    #             f"Error in calling setKvalue command on dish adapter {e}"
+    #         ) from e
 
     def async_cb(self, device_name: str):
         """Invoke LRC callback.
