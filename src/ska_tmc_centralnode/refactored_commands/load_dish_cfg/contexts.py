@@ -31,7 +31,7 @@ class DeviceContext:
 
 
 @dataclass(slots=True, kw_only=True)
-class CommandContext:
+class LoadDishCfgCommandContext:
     """Generic command execution services."""
 
     # Command execution
@@ -66,7 +66,7 @@ class LoadDishCfgRuntimeContext(CommandRuntimeContext):
     """
 
     device_ctx: DeviceContext
-    command_ctx: CommandContext
+    command_ctx: LoadDishCfgCommandContext
     append_dish_dev_names: Callable[[list[str]], None]
     update_kval_aggregator: Callable[[str, Any], None]
     dish_kvalue_validation_aggregator: Any

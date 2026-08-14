@@ -90,6 +90,12 @@ class LoadDishCfg(BaseTMCCommand):
             self.context.command_id,
         )
         super().invoke()
+        self._execute_on_dish()
+
+    def _execute_on_dish(self):
+        """
+        Execute kvalue on Dish
+        """
         dish_adapters = self.get_dish_adapters()
         kval_aggregator = self.command_runtime_context.update_kval_aggregator
         dish_kvalue_executor = DishKValueExecutor(
@@ -102,7 +108,6 @@ class LoadDishCfg(BaseTMCCommand):
             logger=self.logger,
         )
         dish_kvalue_executor.execute(self.plan.dish_parameters)
-        # self._set_k_numbers_to_dish(self.plan.dish_parameters)
 
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""

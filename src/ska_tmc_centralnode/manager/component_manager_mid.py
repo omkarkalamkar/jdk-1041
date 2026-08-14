@@ -48,8 +48,8 @@ from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.refactored_commands.load_dish_cfg.contexts import (
-    CommandContext,
     DeviceContext,
+    LoadDishCfgCommandContext,
     LoadDishCfgRuntimeContext,
 )
 
@@ -993,7 +993,7 @@ class CNComponentManagerMid(CNComponentManager):
             dish_leaf_node_dev_names=self.get_dish_leaf_node_device_names(),
             get_dev=self.get_device,
         )
-        command_ctx = CommandContext(
+        command_ctx = LoadDishCfgCommandContext(
             command_timeout=self.command_timeout,
             update_command_in_progress_id=lambda command_name: setattr(
                 self, "command_in_progress", command_name
