@@ -54,7 +54,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues["adminMode"].put(
+        self._component_manager.event_processor.event_queues["adminMode"].put(
             event
         )
 
@@ -69,7 +69,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues["adminMode"].put(
+        self._component_manager.event_processor.event_queues["adminMode"].put(
             event
         )
 
@@ -84,7 +84,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues["adminMode"].put(
+        self._component_manager.event_processor.event_queues["adminMode"].put(
             event
         )
 
@@ -98,7 +98,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues[
+        self._component_manager.event_processor.event_queues[
             "healthState"
         ].put(event)
 
@@ -112,7 +112,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues["adminMode"].put(
+        self._component_manager.event_processor.event_queues["adminMode"].put(
             event
         )
 
@@ -126,7 +126,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues["state"].put(
+        self._component_manager.event_processor.event_queues["state"].put(
             event
         )
 
@@ -139,7 +139,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues[
+        self._component_manager.event_processor.event_queues[
             "assignedResources"
         ].put(event)
 
@@ -152,7 +152,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues["obsState"].put(
+        self._component_manager.event_processor.event_queues["obsState"].put(
             event
         )
 
@@ -166,7 +166,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues["dishMode"].put(
+        self._component_manager.event_processor.event_queues["dishMode"].put(
             event
         )
 
@@ -182,7 +182,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues[
+        self._component_manager.event_processor.event_queues[
             "kValueValidationResult"
         ].put(event)
 
@@ -197,7 +197,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues[
+        self._component_manager.event_processor.event_queues[
             "DishVccMapValidationResult"
         ].put(event)
 
@@ -213,7 +213,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues[
+        self._component_manager.event_processor.event_queues[
             "isSubsystemAvailable"
         ].put(event)
 
@@ -229,7 +229,7 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues[
+        self._component_manager.event_processor.event_queues[
             "isSubarrayAvailable"
         ].put(event)
 
@@ -242,6 +242,6 @@ class CentralNodeEventManager(EventManager):
                 change in event.
 
         """
-        self._component_manager._event_processor.event_queues[
-            "gpmVersion"
-        ].put(event)
+        self._component_manager.event_processor.event_queues["gpmVersion"].put(
+            event
+        )

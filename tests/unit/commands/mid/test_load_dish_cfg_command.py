@@ -222,7 +222,7 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     # Validate Dish Config status flag
     cm.check_if_csp_all_dish_ready = mock.Mock()
     cm.check_if_csp_all_dish_ready.return_value = True
-    cm._config.dish_config.invoke_command_callback = mock.Mock()
+    cm.config.dish_config.invoke_command_callback = mock.Mock()
     cm._event_cb_manager.handle_dish_vcc_validation_result(
         MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
     )

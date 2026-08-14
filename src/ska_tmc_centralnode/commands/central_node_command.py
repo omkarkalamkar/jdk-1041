@@ -289,7 +289,7 @@ class CentralNodeCommand(TMCCommand):
                 callback = self.invoke_command_lrc_cb
             lrc_data = invoke_lrc(
                 callback(adapter.dev_name),
-                adapter._proxy,
+                adapter.proxy,
                 command_name,
                 command_args=(command_input,) if command_input else None,
                 logger=self.logger,
@@ -318,7 +318,7 @@ class CentralNodeCommand(TMCCommand):
     ):
         """This Method wait for desired obs state"""
         all_results_ok = False
-        timeout = self.component_manager._config.timeout_config.command_timeout
+        timeout = self.component_manager.config.timeout_config.command_timeout
         end_time = time.monotonic() + timeout
         self.logger.debug(
             "Command subscription list %s", self.command_subs_list
@@ -677,7 +677,7 @@ class AssignReleaseResources(CentralNodeCommand):
         """
 
         subarray_adapter_dev_name = (
-            self.component_manager._config.subarray_trl_prefix
+            self.component_manager.config.subarray_trl_prefix
             + str(subarray_id).zfill(2)
         )
 

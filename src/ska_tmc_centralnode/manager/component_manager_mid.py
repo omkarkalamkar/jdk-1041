@@ -95,7 +95,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         super().__init__(config)
-        self._config = config
+        self.config = config
         self.subarray_availability = {
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names
@@ -133,7 +133,7 @@ class CNComponentManagerMid(CNComponentManager):
         )
         self.stow_mode_aggregated_result: bool = True
         self.dishln_stow_mode_cmd_exe_data: dict = {}
-        self._event_processor: MidEventProcessor = MidEventProcessor(
+        self.event_processor: MidEventProcessor = MidEventProcessor(
             stop_event=self._stop_thread,
             logger=config.logger,
             on_error=self.update_event_failure,
@@ -142,7 +142,7 @@ class CNComponentManagerMid(CNComponentManager):
             self._get_event_cb_manager()
         )
         self._register_event_handlers(self._get_event_handlers())
-        self._event_processor.start()
+        self.event_processor.start()
         # start the aggregation process
         self.aggregation_process = HealthStateAggregationProcessor(
             self.event_data_queue,
@@ -158,8 +158,8 @@ class CNComponentManagerMid(CNComponentManager):
             retry_attempts=config.retry_attempts,
             retry_delay=config.retry_delay,
             adapter_factory=self.adapter_factory,
-            get_op_state_model=lambda: self._config.op_state_model,
-            dish_vcc_init_enabled=self._config.dish_config.enable_init,
+            get_op_state_model=lambda: self.config.op_state_model,
+            dish_vcc_init_enabled=self.config.dish_config.enable_init,
             get_dish_vcc_config_set=lambda: self.is_dish_vcc_config_set,
             get_device=self.get_device,
         )
@@ -189,10 +189,10 @@ class CNComponentManagerMid(CNComponentManager):
                 self, "sdp_mln_availability", availability
             ),
             gpm_invoke_command_callback=(
-                self._config.gpm_config.invoke_command_callback
+                self.config.gpm_config.invoke_command_callback
             ),
             get_dish_vcc_command_status=lambda: self.dish_vcc_command_status,
-            dish_vcc_init_timeout=self._config.dish_config.init_timeout,
+            dish_vcc_init_timeout=self.config.dish_config.init_timeout,
             get_command_in_progress=lambda: self.command_in_progress,
             set_command_in_progress=lambda cmd: setattr(
                 self, "command_in_progress", cmd
@@ -208,7 +208,7 @@ class CNComponentManagerMid(CNComponentManager):
             ),
             gpm_unknown_dishes=self.gpm_unknown_dishes,
             dish_vcc_command_invoke_cb=(
-                self._config.dish_config.invoke_command_callback
+                self.config.dish_config.invoke_command_callback
             ),
             adapter_factory=self.adapter_factory,
             check_if_csp_all_dish_ready=self.check_if_csp_all_dish_ready,
@@ -432,7 +432,7 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         count = 0
-        while count <= self._config.dish_config.init_timeout:
+        while count <= self.config.dish_config.init_timeout:
             try:
                 count += 2
                 time.sleep(2)
@@ -448,7 +448,7 @@ class CNComponentManagerMid(CNComponentManager):
                 )
                 self.logger.debug(
                     "CSP MLN version: %s CSP master state: %s",
-                    csp_mln_adapter._proxy.GetVersionInfo(),
+                    csp_mln_adapter.proxy.GetVersionInfo(),
                     csp_master_adapter.state,
                 )
 
@@ -527,8 +527,8 @@ class CNComponentManagerMid(CNComponentManager):
         """
         return {
             "interface": DISH_VCC_CONFIG_INTERFACE_VERSION,
-            "tm_data_sources": [self._config.dish_config.uri],
-            "tm_data_filepath": self._config.dish_config.file_path,
+            "tm_data_sources": [self.config.dish_config.uri],
+            "tm_data_filepath": self.config.dish_config.file_path,
         }
 
     def get_default_gpm_version_params(self) -> dict:
@@ -540,10 +540,10 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
         return {
-            "version": self._config.gpm_config.version,
-            "interface": self._config.gpm_config.interface,
-            "tm_data_sources": [self._config.gpm_config.data_sources_prefix],
-            "tm_data_filepath": self._config.gpm_config.file_path_prefix,
+            "version": self.config.gpm_config.version,
+            "interface": self.config.gpm_config.interface,
+            "tm_data_sources": [self.config.gpm_config.data_sources_prefix],
+            "tm_data_filepath": self.config.gpm_config.file_path_prefix,
         }
 
     def check_if_csp_all_dish_ready(self) -> bool:
@@ -560,14 +560,14 @@ class CNComponentManagerMid(CNComponentManager):
         # This loop keep checking for kvalueValidationResult values
         # from all dishes which confirm that event is received from
         # all dishes
-        while count <= self._config.dish_config.init_timeout:
+        while count <= self.config.dish_config.init_timeout:
             try:
                 for dish_name in self.input_parameter.dish_leaf_node_dev_names:
                     if dish_name not in num_of_dish_values:
                         adapter = self.adapter_factory.get_or_create_adapter(
                             dish_name, adapter_type=AdapterType.DISH
                         )
-                        k_val_result = adapter._proxy.kValueValidationResult
+                        k_val_result = adapter.proxy.kValueValidationResult
                         if k_val_result != "1":
                             num_of_dish_values[dish_name] = k_val_result
 
@@ -762,11 +762,8 @@ class CNComponentManagerMid(CNComponentManager):
 
     def _check_init_and_invoke_gpm(self):
         """If TMC is in initalization phase then invoke gpm"""
-        if (
-            self.is_gpm_init
-            and self._config.gpm_config.invoke_command_callback
-        ):
-            self._config.gpm_config.invoke_command_callback()
+        if self.is_gpm_init and self.config.gpm_config.invoke_command_callback:
+            self.config.gpm_config.invoke_command_callback()
             self.is_gpm_init = False
 
     def reset_gpm_data(self) -> None:
@@ -878,9 +875,9 @@ class CNComponentManagerMid(CNComponentManager):
                 available_subarrays_list,
                 available_dish_leaf_node_devices,
                 self.logger,
-                self._config.mkt_extension_id,
-                self._config.ska_dish_ranges,
-                self._config.mkt_dish_ranges,
+                self.config.mkt_extension_id,
+                self.config.ska_dish_ranges,
+                self.config.mkt_dish_ranges,
             )
 
             assign_validator.loads(argin)
@@ -1068,19 +1065,19 @@ class CNComponentManagerMid(CNComponentManager):
             dish_id = dish_id.upper()
             if dish_id.startswith("SKA"):
                 dish_suffix = int(dish_id[3:])
-                if (self._config.ska_dish_ranges[1] < dish_suffix) or (
-                    dish_suffix < self._config.ska_dish_ranges[0]
+                if (self.config.ska_dish_ranges[1] < dish_suffix) or (
+                    dish_suffix < self.config.ska_dish_ranges[0]
                 ):
                     return False, f"Dish id {dish_id} not in range (1,999)"
             elif dish_id.startswith("MKT"):
                 dish_suffix = int(dish_id[3:])
-                if (self._config.mkt_dish_ranges[1] < dish_suffix) or (
-                    dish_suffix < self._config.mkt_dish_ranges[0]
+                if (self.config.mkt_dish_ranges[1] < dish_suffix) or (
+                    dish_suffix < self.config.mkt_dish_ranges[0]
                 ):
                     return False, f"MKT id {dish_id} not in range (1,63)"
             elif not (
-                self._config.mkt_extension_id
-                and dish_id.startswith(self._config.mkt_extension_id)
+                self.config.mkt_extension_id
+                and dish_id.startswith(self.config.mkt_extension_id)
             ):
                 return False, f"Invalid Dish id {dish_id} provided in Json"
         return True, ""

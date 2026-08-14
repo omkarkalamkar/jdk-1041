@@ -68,7 +68,7 @@ class CNComponentManagerLow(CNComponentManager):
         """
 
         super().__init__(config=config)
-        self._config = config
+        self.config = config
         self._telescope_availability_aggregator = None
         self.subarray_availability = {
             subarray: False
@@ -88,17 +88,17 @@ class CNComponentManagerLow(CNComponentManager):
             self.logger,
             self.get_device,
             self.input_parameter,
-            self._config.subarray_trl_prefix,
-            self._config.retry_attempts,
-            self._config.retry_delay,
+            self.config.subarray_trl_prefix,
+            self.config.retry_attempts,
+            self.config.retry_delay,
             adapter_factory=self.adapter_factory,
-            get_op_state_model=lambda: self._config.op_state_model,
+            get_op_state_model=lambda: self.config.op_state_model,
         )
         self._event_cb_manager: LowEventCallbackManager = (
             self._get_event_cb_manager()
         )
         self._register_event_handlers(self._get_event_handlers())
-        self._event_processor.start()
+        self.event_processor.start()
         # start the aggregation process
         self.aggregation_process = HealthStateAggregationProcessor(
             self.event_data_queue,
@@ -307,7 +307,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self,
                 adapter_factory=self.adapter_factory,
                 logger=self.logger,
-                is_auto_recovery_enabled=self._config.is_auto_recovery_enabled,
+                is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
             )
             subarray_id = self.get_subarray_id(argin)
             assign_resources_command_object.subarray_id = str(subarray_id)
@@ -394,7 +394,7 @@ class CNComponentManagerLow(CNComponentManager):
                 self,
                 adapter_factory=self.adapter_factory,
                 logger=self.logger,
-                is_auto_recovery_enabled=self._config.is_auto_recovery_enabled,
+                is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
             )
 
             self.check_availability_for_release(argin)

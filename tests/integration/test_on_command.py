@@ -27,9 +27,6 @@ from tests.integration.conftest import ensure_checked_devices
 from tests.settings import DISH_DEFECT, RESET_DEFECT
 
 
-# pylint:disable=c-extension-no-member
-# this linting warning is suppressed cause its not able to recognise
-# tango._tango.Devstate which is c-extension member
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 def test_on_command_mid(
@@ -79,7 +76,7 @@ def test_on_command_mid(
     )
 
     change_event_callbacks["telescopeState"].assert_change_event(
-        tango._tango.DevState.ON, lookahead=12
+        tango.DevState.ON, lookahead=12
     )
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown
@@ -227,7 +224,7 @@ def test_on_command_low(
     )
 
     change_event_callbacks["telescopeState"].assert_change_event(
-        tango._tango.DevState.ON, lookahead=4
+        tango.DevState.ON, lookahead=4
     )
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown

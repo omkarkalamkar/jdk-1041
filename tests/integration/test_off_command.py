@@ -91,7 +91,7 @@ def test_off_command_mid(
     )
 
     change_event_callbacks["telescopeState"].assert_change_event(
-        tango._tango.DevState.OFF, lookahead=12
+        tango.DevState.OFF, lookahead=12
     )
 
 
@@ -320,7 +320,7 @@ def test_off_command_low(
     mccs_master = dev_factory.get_device(MCCS_MASTER_DEVICE)
     mccs_master.SetDirectState(tango.DevState.OFF)
     csp_master = dev_factory.get_device(LOW_CSP_MASTER_DEVICE)
-    csp_master.SetDirectState(tango._tango.DevState.OFF)
+    csp_master.SetDirectState(tango.DevState.OFF)
 
     csp_master.subscribe_event(
         "State",
@@ -328,12 +328,12 @@ def test_off_command_low(
         change_event_callbacks["State"],
     )
     change_event_callbacks["State"].assert_change_event(
-        tango._tango.DevState.OFF,
+        tango.DevState.OFF,
         lookahead=5,
     )
 
     sdp_master = dev_factory.get_device(LOW_SDP_MASTER_DEVICE)
-    sdp_master.SetDirectState(tango._tango.DevState.OFF)
+    sdp_master.SetDirectState(tango.DevState.OFF)
 
     sdp_master.subscribe_event(
         "State",
@@ -341,7 +341,7 @@ def test_off_command_low(
         change_event_callbacks["State"],
     )
     change_event_callbacks["State"].assert_change_event(
-        tango._tango.DevState.OFF,
+        tango.DevState.OFF,
         lookahead=3,
     )
     assert wait_and_validate_device_attribute_value(

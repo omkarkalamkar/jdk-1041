@@ -38,7 +38,7 @@ class SetStowMode(SetDishGPM):
         self.receptors = []
         self.receptors_with_stow_mode_set = []
         self.timekeeper = TimeKeeper(
-            self.component_manager._config.timeout_config.command_timeout,
+            self.component_manager.config.timeout_config.command_timeout,
             logger,
         )
 

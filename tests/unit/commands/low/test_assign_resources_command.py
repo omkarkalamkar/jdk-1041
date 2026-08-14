@@ -240,7 +240,7 @@ def test_telescope_low_assign_resources_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), str(elapsed_time)
     )
-    cm._config.op_state_model._op_state = DevState.FAULT
+    cm.config.op_state_model.op_state = DevState.FAULT
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
 

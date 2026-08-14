@@ -5,7 +5,6 @@ import logging
 import os
 import threading
 import time
-from typing import List
 
 import pytest
 import tango
@@ -325,13 +324,18 @@ class BusManager:
     def __init__(self):
         self.bus = _SignalBus()
 
-    def _get_bus(self):
+    def get_bus(self):
+        """Provides signal bus."""
         return self.bus
 
-    def _start_bus(self):
+    # pylint:disable=protected-access
+    def start_bus(self):
+        """Starts the signal bus for testing."""
         if self.bus._thread.is_alive():
             self.bus.shutdown_thread()
         self.bus.start_thread()
+
+    # pylint:enable=protected-access
 
 
 def create_cm(
@@ -342,7 +346,7 @@ def create_cm(
     """Creates component manager instance"""
     # Creating component manager
     bus_manager = BusManager()
-    bus_manager._start_bus()
+    bus_manager.start_bus()
     if isinstance(_input_parameter, InputParameterMid):
         cm = CNComponentManagerMid(
             config=_get_cm_mid_config(p_liveliness_probe, p_event_manager)
@@ -352,8 +356,8 @@ def create_cm(
         # run because this unit test is explicitly calling load dish config
         # command.
         DEVICE_LIST = DEVICE_LIST_MID
-        cm.component.shared_bus = bus_manager._get_bus()
-        cm.shared_bus = bus_manager._get_bus()
+        cm.component.shared_bus = bus_manager.get_bus()
+        cm.shared_bus = bus_manager.get_bus()
         cm.is_dish_vcc_config_set = True
         cm.dish_vcc_command_status = DishConfigStatus.COMPLETED
     else:
@@ -361,8 +365,8 @@ def create_cm(
             config=_get_cm_low_config(p_liveliness_probe, p_event_manager)
         )
         DEVICE_LIST = DEVICE_LIST_LOW
-        cm.component.shared_bus = bus_manager._get_bus()
-        cm.shared_bus = bus_manager._get_bus()
+        cm.component.shared_bus = bus_manager.get_bus()
+        cm.shared_bus = bus_manager.get_bus()
     for dev in DEVICE_LIST:
         cm.add_device(dev)
     start_time = time.time()
@@ -531,20 +535,6 @@ def check_mccsmln_availability(cm, expected_status):
                 "Timeout occurred while checking the Mccs Master Leaf Node"
                 + " availability."
             )
-
-
-def event_remover(group_callback, attributes: List[str]) -> None:
-    """Removes residual events from the queue."""
-    for attribute in attributes:
-        try:
-            iterable = group_callback._mock_consumer_group._views[
-                attribute
-            ]._iterable
-            for node in iterable:
-                logger.debug("Event payload removed: %s", repr(node.payload))
-                node.drop()
-        except KeyError:
-            pass
 
 
 def export_device(db, db_info):

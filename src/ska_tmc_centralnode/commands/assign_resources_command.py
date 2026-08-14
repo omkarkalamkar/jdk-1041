@@ -46,7 +46,7 @@ class AssignResources(AssignReleaseResources):
         self.timeout_callback = TimeoutCallback(self.timeout_id, self.logger)
         self.subarray_id = ""
         self.timekeeper = TimeKeeper(
-            self.component_manager._config.timeout_config.command_timeout,
+            self.component_manager.config.timeout_config.command_timeout,
             logger,
         )
 

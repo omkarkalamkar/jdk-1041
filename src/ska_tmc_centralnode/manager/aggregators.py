@@ -70,7 +70,7 @@ class TelescopeStateAggregatorMid(Aggregator):
             self._component_manager.is_dish_vcc_config_set,
         )
         # If Dish VCC config is not set then set telescope state to UNKNOWN
-        if self._component_manager._config.dish_config.enable_init:
+        if self._component_manager.config.dish_config.enable_init:
             if not self._component_manager.is_dish_vcc_config_set:
                 return DevState.UNKNOWN
 
@@ -368,7 +368,7 @@ class DishAttrValueAggregator:
                 total_events
                 / len(self.input_parameter_obj.dish_leaf_node_dev_names)
             ) * 100
-            config = self._component_manager._config.dish_config
+            config = self._component_manager.config.dish_config
             if (
                 percent_event_received
                 >= config.dishKvalueAggregationAllowedPercent

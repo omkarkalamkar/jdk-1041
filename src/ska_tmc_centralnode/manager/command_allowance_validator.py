@@ -263,18 +263,18 @@ class CommandAllowanceValidator:
         :raises CommandNotAllowed: Raises command not allowed if the
         operational is invalid.
         """
-        if self.get_op_state_model()._op_state in [
+        if self.get_op_state_model().op_state in [
             DevState.FAULT,
             DevState.UNKNOWN,
             DevState.DISABLE,
         ]:
             self.logger.warning(
                 f"{command_name} command is not supported "
-                + f"in {self.get_op_state_model()._op_state} for CentralNode"
+                + f"in {self.get_op_state_model().op_state} for CentralNode"
             )
             raise CommandNotAllowed(
                 "Command is not allowed in current state :"
-                + f"{str(self.get_op_state_model()._op_state)}",
+                + f"{str(self.get_op_state_model().op_state)}",
             )
 
 
@@ -435,7 +435,7 @@ class MidCommandAllowanceValidator(CommandAllowanceValidator):
                     "Dish Vcc Config not Set. Please set using LoadDishCfg"
                     " command. "
                     "Current Telescope State is :"
-                    + f"{str(self.get_op_state_model()._op_state)}",
+                    + f"{str(self.get_op_state_model().op_state)}",
                 )
         self._check_op_state(command_name)
         return True

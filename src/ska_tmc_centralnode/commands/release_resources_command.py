@@ -48,7 +48,7 @@ class ReleaseResources(AssignReleaseResources):
         self.subarray_id = ""
         self.subarray_devname = ""
         self.timekeeper = TimeKeeper(
-            self.component_manager._config.timeout_config.command_timeout,
+            self.component_manager.config.timeout_config.command_timeout,
             logger,
         )
 

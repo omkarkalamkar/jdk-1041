@@ -163,6 +163,7 @@ def pytest_addoption(parser):
     )
 
 
+# pylint:disable=protected-access
 @pytest.fixture
 def tango_context(devices_to_load, request):
     """Tango context fixture"""
@@ -180,6 +181,9 @@ def tango_context(devices_to_load, request):
             logging.error(exception)
     else:
         yield None
+
+
+# pylint:enable=protected-access
 
 
 @pytest.fixture

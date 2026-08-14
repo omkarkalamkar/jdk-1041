@@ -162,7 +162,7 @@ class CentralComponent(SharingObserver, TmcComponent):
         else:
             index = self._devices.index(dev_info)
             self._devices[index] = dev_info
-        self._last_device_info_changed = dev_info.to_json()
+        self.last_device_info_changed = dev_info
 
     def update_device_exception(
         self, device_info: DeviceInfo, exception: str
@@ -176,13 +176,28 @@ class CentralComponent(SharingObserver, TmcComponent):
         if device_info not in self._devices:
             device_info.update_unresponsive(True, exception)
             self._devices.append(device_info)
-            self._last_device_info_changed = device_info.to_json()
+            self.last_device_info_changed = device_info
         else:
             index = self._devices.index(device_info)
             intdev_info = self._devices[index]
             intdev_info.state = DevState.UNKNOWN
             intdev_info.update_unresponsive(True, exception)
-            self._last_device_info_changed = device_info.to_json()
+            self.last_device_info_changed = device_info
+
+    @property
+    def last_device_info_changed(self) -> str:
+        """Provides last device information that has been changed."""
+        return self._last_device_info_changed
+
+    @last_device_info_changed.setter
+    def last_device_info_changed(self, dev_info: DeviceInfo) -> None:
+        """Updates the last device information changed attribute.
+
+        :param dev_info: Device Information.
+        :type dev_info: DeviceInfo
+        """
+        dev_info_str = dev_info.to_json()
+        self._last_device_info_changed = dev_info_str
 
     @property
     def telescope_state(self) -> tango.DevState:

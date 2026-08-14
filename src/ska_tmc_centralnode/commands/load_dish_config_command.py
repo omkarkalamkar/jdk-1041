@@ -637,7 +637,7 @@ class LoadDishCfg(LoadDishCfgCommand):
             and `string` representing `message`
 
         """
-        dish_config = self.component_manager._config.dish_config
+        dish_config = self.component_manager.config.dish_config
         config_json_validator = DishConfigValidator(
             argin,
             dish_config.k_value_valid_range_lower_limit,

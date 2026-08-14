@@ -102,11 +102,11 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             ),
             liveliness_check_period=config.liveliness_check_period,
         )
-        self._config = config
+        self.config = config
         self.logger = config.logger
         self.component = config.component or CentralComponent(config.logger)
-        self.event_manager = self._config.event_manager_enabled
-        self.input_parameter = self._config.input_parameter
+        self.event_manager = self.config.event_manager_enabled
+        self.input_parameter = self.config.input_parameter
         self.adapter_factory = AdapterFactory()
         self.event_data_manager = EventDataManager(self)
         self.process_lock = ProcessLock()
@@ -114,7 +114,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             Union[TelescopeStateAggregatorLow, TelescopeStateAggregatorMid]
         ] = None
         self._health_state_aggregator = None
-        self._op_state_aggregator = None
+        self.op_state_aggregator = None
         self.command_in_progress: str = ""
         self.command_mapping: Dict[str, str | list[dict]] = {}
         self.rlock = threading.RLock()
@@ -123,7 +123,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         )
         self._stop_thread: threading.Event = threading.Event()
         self._liveliness_probe = None
-        self._event_processor: EventProcessor = EventProcessor(
+        self.event_processor: EventProcessor = EventProcessor(
             stop_event=self._stop_thread,
             logger=config.logger,
             on_error=self.update_event_failure,
@@ -155,7 +155,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         super().on_new_shared_bus()
         self._array_layout_url = {}
         self._default_array_layout_url: dict = (
-            self._config.array_layout_config.default_url
+            self.config.array_layout_config.default_url
         )
 
     def _get_event_handlers(self) -> dict:
@@ -179,7 +179,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         event handler.
         """
         for attr, method in event_handlers.items():
-            self._event_processor.register_handler(attr, method)
+            self.event_processor.register_handler(attr, method)
 
     def setup_event_subscription(self) -> None:
         """
@@ -191,7 +191,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         self.start_event_manager(
             _device_attr_map_builder.build(self.devices), timeout=1000
         )
-        if self._config.event_manager_enabled:
+        if self.config.event_manager_enabled:
             self.event_manager_object.init_timeout(self.event_thread_id)
         self.logger.debug("Successfully subscribed the events")
 
@@ -272,7 +272,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
 
     def stop_event_manager(self) -> None:
         """Stops the Event Receiver"""
-        if self._config.event_manager_enabled:
+        if self.config.event_manager_enabled:
             self.event_manager_object.cancel_subscription_thread(
                 self.event_thread_id
             )
@@ -327,7 +327,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """Sets Aggregators callback"""
         self._telescope_state_aggregator = _telescope_state_aggregator
         self._health_state_aggregator = _health_state_aggregator
-        self._op_state_aggregator = _op_state_aggregator
+        self.op_state_aggregator = _op_state_aggregator
 
     @property
     def devices(self):
@@ -553,7 +553,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         with self.rlock:
             devInfo = self.get_device(device_name)
             devInfo.last_event_arrived = time.time()
-            self.component._last_device_info_changed = devInfo.to_json()
+            self.component.last_device_info_changed = devInfo
 
     def is_already_assigned(self, dish_id: str) -> bool:
         """
@@ -607,10 +607,10 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """
         Aggregates TMC devices states
         """
-        if self._op_state_aggregator is None:
-            self._op_state_aggregator = TMCOpStateAggregator(self, self.logger)
+        if self.op_state_aggregator is None:
+            self.op_state_aggregator = TMCOpStateAggregator(self, self.logger)
         with self.lock:
-            self.component.tmc_op_state = self._op_state_aggregator.aggregate()
+            self.component.tmc_op_state = self.op_state_aggregator.aggregate()
 
     def get_tmc_op_state(self):
         """Getter method for TMC Op State Model"""
@@ -837,7 +837,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         :raises Exception: Raises Exception if subarray is not available.
         """
         subarray_id = self.get_subarray_id(argin)
-        subarray = self._config.subarray_trl_prefix + str(subarray_id).zfill(2)
+        subarray = self.config.subarray_trl_prefix + str(subarray_id).zfill(2)
         telescope_availability = self.get_telescope_availability()
         subarray_availability = telescope_availability.get(subarray)
         if subarray_availability is False:

@@ -86,7 +86,7 @@ class EventCallbackManager:
                 with self.command_completion_cond:
                     self.command_completion_cond.notify_all()
                 devInfo.last_event_arrived = time.time()
-                self.component._last_device_info_changed = devInfo.to_json()
+                self.component.last_device_info_changed = devInfo
 
     def _get_sdp_subarray_name(self, device_name: str):
         """Provides SDP subarray device name which is stored in device
@@ -123,7 +123,7 @@ class EventCallbackManager:
             if dev_info is not None:
                 dev_info.resources = assign_resources
                 dev_info.last_event_arrived = time.time()
-                self.component._last_device_info_changed = dev_info.to_json()
+                self.component.last_device_info_changed = dev_info
 
     def _get_master_device_name(self, device_name: str):
         """Provides Master device name which is stored in device info.
@@ -177,7 +177,7 @@ class EventCallbackManager:
                     received_timestamp=timestamp,
                     data_type="HealthState",
                 )
-                self.component._last_device_info_changed = devInfo.to_json()
+                self.component.last_device_info_changed = devInfo
 
     def update_device_admin_mode(
         self, device_name: str, admin_mode: AdminMode, timestamp
@@ -216,9 +216,7 @@ class EventCallbackManager:
                         data_type="AdminMode",
                         received_timestamp=timestamp,
                     )
-                    self.component._last_device_info_changed = (
-                        device_info.to_json()
-                    )
+                    self.component.last_device_info_changed = device_info
 
     def update_device_state(self, device_name, state):
         """
@@ -241,5 +239,5 @@ class EventCallbackManager:
                     "Updated State of %s: %s ", devInfo.dev_name, devInfo.state
                 )
                 devInfo.last_event_arrived = time.time()
-                self.component._last_device_info_changed = devInfo.to_json()
+                self.component.last_device_info_changed = devInfo
         self._aggregate_state()
