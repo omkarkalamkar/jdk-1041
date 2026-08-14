@@ -1458,9 +1458,9 @@ class CNComponentManagerMid(CNComponentManager):
                     result=(ResultCode.NOT_ALLOWED, err_msg),
                 )
             assign_resources_command_object = AssignResourcesMid(
-                self,
                 adapter_provider=self.adapter_factory,
                 logger=self.logger,
+                command_runtime_context=self._get_assign_context(),
             )
             assign_resources_command_object.subarray_id = self.get_subarray_id(
                 argin
@@ -1545,7 +1545,9 @@ class CNComponentManagerMid(CNComponentManager):
         """
         try:
             release_resources_command_object = ReleaseResourcesMid(
-                self, adapter_provider=self.adapter_factory, logger=self.logger
+                adapter_provider=self.adapter_factory,
+                logger=self.logger,
+                command_runtime_context=self._get_release_context(),
             )
 
             self.check_availability_for_release(argin)

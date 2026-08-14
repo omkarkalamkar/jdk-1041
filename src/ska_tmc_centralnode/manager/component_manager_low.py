@@ -605,9 +605,9 @@ class CNComponentManagerLow(CNComponentManager):
         """
         try:
             assign_resources_command_object = AssignResourcesLow(
-                self,
                 adapter_provider=self.adapter_factory,
                 logger=self.logger,
+                command_runtime_context=self._get_assign_context(),
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )
             assign_resources_command_object.subarray_id = self.get_subarray_id(
@@ -693,9 +693,9 @@ class CNComponentManagerLow(CNComponentManager):
         """
         try:
             release_resources_command_object = ReleaseResourcesLow(
-                self,
                 adapter_provider=self.adapter_factory,
                 logger=self.logger,
+                command_runtime_context=self._get_release_context(),
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )
 
