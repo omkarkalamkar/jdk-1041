@@ -1,31 +1,46 @@
 """ReleaseResourcesLow command class for CentralNode."""
 
+import logging
+
+from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
 
 from .release_resources_command import BaseReleaseResourcesCN
 from .release_resources_context import LowReleaseResourcesContext
+from .release_resources_plan import LowReleaseResourcesPlan
 from .release_resources_preparation import ReleaseResourcesPreparation
+from .release_resources_strategy import LowReleaseResourcesStrategy
 
 
 class ReleaseResourcesLow(BaseReleaseResourcesCN):
     """Release Resources command class for telescope Low."""
 
-    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
-        component_manager,
-        adapter_factory=None,
-        *args,
-        is_auto_recovery_enabled: bool = True,
-        logger=None,
-        **kwargs,
-    ):
-        super().__init__(
-            component_manager, adapter_factory, *args, logger=logger, **kwargs
-        )
+        command_runtime_context: LowReleaseResourcesContext,
+        adapter_provider: AdapterFactory,
+        logger: logging.Logger,
+        is_auto_recovery_enabled: bool,
+    ) -> None:
+        """Initializes the BaseAssignResources command class.
+
+        :param command_runtime_context: AssignResources command context
+            to manage data from assign resources json.
+        :type command_runtime_context: AssignResourcesContext
+        :param adapter_provider: Instance of adapter factory to fetch
+            requried adapters.
+        :type adapter_provider: AdapterFactory
+        :param logger: Instance of logger.
+        :type logger: logging.Logger
+        """
+        super().__init__(command_runtime_context, adapter_provider, logger)
+        self.subarray_id: int | None = None
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
         self._assigned_subsystem: list = []
+        self._strategy: LowReleaseResourcesStrategy = (
+            command_runtime_context.make_strategy(logger)
+        )
 
     def pre_process(self, argin=None) -> None:
         """Log entry into ReleaseResources."""
@@ -37,15 +52,14 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
     def prepare_command(self) -> None:
         """Parse and normalize input data, build the plan, for LOW."""
         request = ReleaseResourcesPreparation(
-            self.component_manager, self.logger
+            self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
 
-        ctx = self._build_context()
-        plan = ctx.make_strategy(self.logger).build_plan(request)
-
-        self.subarray_id = plan.subarray_id
-        ctx.apply_plan(plan)
-        self._plan = plan
+        self._plan: LowReleaseResourcesPlan = self._strategy.build_plan(
+            request
+        )
+        self.command_runtime_context.apply_plan(self._plan)
+        self.subarray_id = self._plan.subarray_id
 
     def build_device_commands(self) -> None:
         """Resolve adapters and populate the device command list for LOW.
@@ -59,7 +73,6 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         trivially by 0 results == 0 device_commands, and completion still
         hinges on is_state_complete() reaching ObsState.EMPTY.
         """
-        self.prepare_subarray_command_target()
 
         if self._plan.release_all:
             self.logger.info(
@@ -71,7 +84,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             )
 
             self._assigned_subsystem = (
-                self.component_manager.subsystem_assigned_per_subarray[
+                self.command_runtime_context.subsystem_assigned_per_subarray[
                     self.subarray_id
                 ]
             )
@@ -116,7 +129,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         """Whether MCCS should be released as part of this command."""
         return (
             "mccs"
-            in self.component_manager.subsystem_assigned_per_subarray[
+            in self.command_runtime_context.subsystem_assigned_per_subarray[
                 self.subarray_id
             ]
             and not self.is_auto_recovery_enabled
@@ -134,17 +147,13 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             self.mccs_mln_adapter is not None
             and cmd_ctx.device_name == self.mccs_mln_adapter.dev_name
         ):
-            self.component_manager.subsystem_assigned_per_command_id[
+            self.command_runtime_context.subsystem_assigned_per_command_id[
                 self.context.command_id
             ] = self._assigned_subsystem
 
     def update_task_status(self, **kwargs) -> None:
         """Update task status for ReleaseResourcesLow."""
         super().update_task_status(**kwargs)
-        self.component_manager.subsystem_assigned_per_command_id.pop(
+        self.command_runtime_context.subsystem_assigned_per_command_id.pop(
             self.context.command_id, None
         )
-
-    def _build_context(self) -> LowReleaseResourcesContext:
-        """Delegate context construction to the component manager."""
-        return self.component_manager._get_release_context(command=self)

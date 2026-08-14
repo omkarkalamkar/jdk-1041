@@ -45,10 +45,6 @@ class ReleaseResourcesContext(CommandRuntimeContext):
     input_parameter: InputParameterMid | InputParameterLow
     get_evt_data_manager: Callable
 
-    def make_strategy(self, logger: logging.Logger):
-        """Create a telescope-specific ReleaseResources strategy."""
-        raise NotImplementedError
-
 
 @dataclass(kw_only=True)
 class MidReleaseResourcesContext(ReleaseResourcesContext):

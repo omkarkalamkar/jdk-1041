@@ -606,7 +606,7 @@ class CNComponentManagerLow(CNComponentManager):
         try:
             assign_resources_command_object = AssignResourcesLow(
                 self,
-                adapter_factory=self.adapter_factory,
+                adapter_provider=self.adapter_factory,
                 logger=self.logger,
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )
@@ -694,7 +694,7 @@ class CNComponentManagerLow(CNComponentManager):
         try:
             release_resources_command_object = ReleaseResourcesLow(
                 self,
-                adapter_factory=self.adapter_factory,
+                adapter_provider=self.adapter_factory,
                 logger=self.logger,
                 is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             )

@@ -1459,7 +1459,7 @@ class CNComponentManagerMid(CNComponentManager):
                 )
             assign_resources_command_object = AssignResourcesMid(
                 self,
-                adapter_factory=self.adapter_factory,
+                adapter_provider=self.adapter_factory,
                 logger=self.logger,
             )
             assign_resources_command_object.subarray_id = self.get_subarray_id(
@@ -1544,9 +1544,8 @@ class CNComponentManagerMid(CNComponentManager):
         :rtype: tuple
         """
         try:
-            # pylint:disable=abstract-class-instantiated
             release_resources_command_object = ReleaseResourcesMid(
-                self, adapter_factory=self.adapter_factory, logger=self.logger
+                self, adapter_provider=self.adapter_factory, logger=self.logger
             )
 
             self.check_availability_for_release(argin)

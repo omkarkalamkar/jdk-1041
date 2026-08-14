@@ -1,6 +1,9 @@
 """AssignResourcesLow Command class for CentralNode."""
 
+import logging
+
 from ska_control_model import ResultCode, TaskStatus
+from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
 
@@ -9,7 +12,11 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     LowAssignResourcesContext,
 )
 
-from .assign_resources_command import BaseAssignResourcesCN
+from .assign_resources_command import (
+    BaseAssignResourcesCN,
+    LowAssignResourcesPlan,
+)
+from .assign_resources_strategy import LowAssignResourcesStrategy
 
 
 class AssignResourcesLow(BaseAssignResourcesCN):
@@ -19,15 +26,28 @@ class AssignResourcesLow(BaseAssignResourcesCN):
 
     def __init__(
         self,
-        component_manager,
-        *args,
-        adapter_factory=None,
-        logger=None,
-        is_auto_recovery_enabled=False,
-        **kwargs,
-    ):
-        super().__init__(
-            component_manager, adapter_factory, *args, logger=logger, **kwargs
+        command_runtime_context: LowAssignResourcesContext,
+        adapter_provider: AdapterFactory,
+        is_auto_recovery_enabled: bool,
+        logger: logging.Logger,
+    ) -> None:
+        """Initializes the AssignResources command class for Low telescope.
+
+        :param command_runtime_context: AssignResources command context
+            to manage low telescope specific data from assign resources
+            json.
+        :type command_runtime_context: LowAssignResourcesContext
+        :param adapter_provider: Instance of adapter factory to fetch
+            requried adapters.
+        :type adapter_provider: AdapterFactory
+        :param logger: Instance of logger.
+        :type logger: logging.Logger
+        """
+        super().__init__(command_runtime_context, adapter_provider, logger)
+        self.adapter_provider = adapter_provider
+        self.error_message: str | Exception = ""
+        self._strategy: LowAssignResourcesStrategy = (
+            command_runtime_context.make_strategy(logger)
         )
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
         self._assigned_subsystem: list = []
@@ -42,18 +62,15 @@ class AssignResourcesLow(BaseAssignResourcesCN):
     def prepare_command(self) -> None:
         """Parse input and build the execution plan/context for LOW."""
         request = AssignResourcesPreparation(
-            self.component_manager, self.logger
+            self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
 
-        ctx = self._build_context()
-        plan = ctx.make_strategy(self.logger).build_plan(request)
-
-        self.subarray_id = plan.subarray_id
+        self._plan: LowAssignResourcesPlan = self._strategy.build_plan(request)
+        self.command_runtime_context.apply_plan(self._plan)
+        self.subarray_id = self._plan.subarray_id
         # apply_plan propagates subarray_id to context and subsystems to cm.
-        ctx.apply_plan(plan)
 
-        self._plan = plan
-        self._assigned_subsystem = list(plan.subsystems)
+        self._assigned_subsystem = list(self._plan.subsystems)
         self.logger.debug(
             "Command %s: Subsystems assigned for subarray %s: %s",
             self.context.command_id,
@@ -69,14 +86,13 @@ class AssignResourcesLow(BaseAssignResourcesCN):
     def build_device_commands(self) -> None:
         """Resolve target subarray/MCCS adapters and populate the device
         command list for this invocation."""
-        self.prepare_subarray_command_target()
 
         self.context.device_commands.append(
             self._build_subarray_device_command()
         )
 
         if self._mccs_required():
-            self.component_manager.log_state(
+            self.command_runtime_context.log_state(
                 "Device states before executing AssignResources command"
             )
             self.logger.info(
@@ -107,7 +123,7 @@ class AssignResourcesLow(BaseAssignResourcesCN):
         """Whether MCCS should be assigned as part of this command."""
         return (
             "mccs"
-            in self.component_manager.subsystem_assigned_per_subarray[
+            in self.command_runtime_context.subsystem_assigned_per_subarray[
                 self.subarray_id
             ]
             and not self.is_auto_recovery_enabled
@@ -126,7 +142,7 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             self.mccs_mln_adapter is not None
             and cmd_ctx.device_name == self.mccs_mln_adapter.dev_name
         ):
-            self.component_manager.subsystem_assigned_per_command_id[
+            self.command_runtime_context.subsystem_assigned_per_command_id[
                 self.context.command_id
             ] = self._assigned_subsystem
 
@@ -148,10 +164,6 @@ class AssignResourcesLow(BaseAssignResourcesCN):
                 result=result, status=status, exception=exception
             )
 
-        self.component_manager.subsystem_assigned_per_command_id.pop(
+        self.command_runtime_context.subsystem_assigned_per_command_id.pop(
             self.context.command_id, None
         )
-
-    def _build_context(self) -> LowAssignResourcesContext:
-        """Delegate context construction to the component manager."""
-        return self.component_manager._get_assign_context(command=self)

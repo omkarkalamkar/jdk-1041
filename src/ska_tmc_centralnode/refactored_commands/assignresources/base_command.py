@@ -18,7 +18,11 @@ from ska_tmc_common.v4.command_context import (
 )
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
 
-from ska_tmc_centralnode.model.input import InputParameterMid
+from ..assignresources import AssignResourcesContext
+from .assign_resources_plan import (
+    LowAssignResourcesPlan,
+    MidAssignResourcesPlan,
+)
 
 LOGGER = logging.getLogger(__name__)
 ADAPTER_INIT_ERROR = "Exception in creating adapter for %s, Exception: %s"
@@ -27,30 +31,34 @@ ADAPTER_INIT_ERROR = "Exception in creating adapter for %s, Exception: %s"
 class BaseCNCommand(BaseTMCCommand):
     """Base class for refactored CentralNode commands."""
 
-    # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
-        component_manager,
-        adapter_factory=None,
-        *args,
-        logger=LOGGER,
-        **kwargs,
-    ):
-        self.component_manager = component_manager
-        self._adapter_factory = adapter_factory or AdapterFactory()
-
-        super().__init__(
-            self._build_command_runtime_context(),
-            self._adapter_factory,
-            logger or LOGGER,
+        command_runtime_context: AssignResourcesContext,
+        adapter_provider: AdapterFactory,
+        logger: logging.Logger,
+    ) -> None:
+        """Initializes the BaseCNCommand class.
+        :param command_runtime_context: AssignResources command context
+            to manage data from assign resources json.
+        :type command_runtime_context: AssignResourcesContext
+        :param adapter_provider: Instance of adapter factory to fetch
+            requried adapters.
+        :type adapter_provider: AdapterFactory
+        :param logger: Instance of logger.
+        :type logger: logging.Logger
+        """
+        super().__init__(command_runtime_context, adapter_provider, logger)
+        self.subarray_id: int | None = None
+        self.assign_resources_data: dict = {}
+        self._plan: LowAssignResourcesPlan | MidAssignResourcesPlan | None = (
+            None
         )
 
         self.mccs_mln_adapter = None
         self.tm_subarray_adapter = None
         self.subarray_devname = ""
-        self.dish_adapters = []
-        self.subarray_adapters = []
-        self.subarray_id: int | str = 0
+        self.dish_adapters: list[AdapterType] = []
+        self.subarray_adapters: list[AdapterType] = []
 
     def _build_command_runtime_context(self) -> CommandRuntimeContext:
         """Build (or fetch) the runtime context for this command.
@@ -150,155 +158,20 @@ class BaseCNCommand(BaseTMCCommand):
             {"component_obsfault": None}
         )
 
-    def init_adapters(self) -> None:
-        """Initialise adapters for MID or LOW command execution."""
-        if isinstance(
-            self.component_manager.input_parameter, InputParameterMid
-        ):
-            self.init_adapters_mid()
-        else:
-            self.init_adapters_low()
-
-    def get_subarray_adapter(self, subarray_id: int) -> None:
+    def get_subarray_name(self, subarray_id: int) -> str:
         """Resolve and store the adapter for the target subarray.
 
         :raises ValueError: if the subarray does not exist or has no
             responsive adapter.
         """
         subarray_adapter_dev_name = (
-            self.component_manager.subarray_trl_prefix
+            self.command_runtime_context.subarray_trl_prefix
             + str(subarray_id).zfill(2)
         )
-        self.logger.debug(
-            "Command ID: %s | Attempting to get adapter for Subarray: %s",
-            self.context.command_id,
-            subarray_adapter_dev_name,
-        )
-
-        for adapter in self.subarray_adapters:
-            if adapter.dev_name == subarray_adapter_dev_name:
-                self.tm_subarray_adapter = adapter
-                self.subarray_devname = adapter.dev_name
-                return
-
-        raise ValueError(
-            f"Subarray Id {subarray_id}({subarray_adapter_dev_name}) is"
-            " not existing!"
-        )
-
-    def prepare_subarray_command_target(self) -> None:
-        """Initialise adapters and resolve the target subarray adapter."""
-        self.init_adapters()
-        self.get_subarray_adapter(int(self.subarray_id))
+        return subarray_adapter_dev_name
 
     def get_subarray_obsstate(self) -> ObsState:
         """Return current obsState of the target subarray."""
-        return self.component_manager.get_subarray_obsstate(
+        return self.command_runtime_context.get_subarray_obsstate(
             self.subarray_devname
         )
-
-    def init_adapters_mid(self) -> None:
-        """Initialise MID adapters required for command execution.
-
-        :raises ValueError: if no working subarray or dish adapters
-            could be created.
-        """
-        self.dish_adapters = []
-        self.subarray_adapters = []
-        error_dev_names = []
-        num_working = 0
-
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.subarray_dev_names:
-            dev_info = self.component_manager.get_device(dev_name)
-            if not dev_info.unresponsive:
-                try:
-                    self.subarray_adapters.append(
-                        self._adapter_factory.get_or_create_adapter(
-                            dev_name, AdapterType.SUBARRAY
-                        )
-                    )
-                    num_working += 1
-                    self.logger.debug(
-                        "Adapter is created for subarray: %s ", dev_name
-                    )
-                except Exception as exception:
-                    self.logger.exception(
-                        ADAPTER_INIT_ERROR, dev_name, str(exception)
-                    )
-                    error_dev_names.append(dev_name)
-
-        if num_working == 0:
-            faulty_dev = ".".join(error_dev_names)
-            raise ValueError(
-                f"Error in creating tm subarray adapters {faulty_dev},"
-            )
-
-        error_dev_names = []
-        num_working = 0
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            dev_info = self.component_manager.get_device(dev_name)
-            if not dev_info.unresponsive:
-                try:
-                    self.dish_adapters.append(
-                        self._adapter_factory.get_or_create_adapter(
-                            dev_name, AdapterType.DISH
-                        )
-                    )
-                    num_working += 1
-                    self.logger.debug(
-                        "Adapter is created for DishLeafNode: %s", dev_name
-                    )
-                except Exception as exception:
-                    self.logger.exception(
-                        ADAPTER_INIT_ERROR, dev_name, str(exception)
-                    )
-                    error_dev_names.append(dev_name)
-
-        if num_working == 0:
-            raise ValueError(
-                f"Error in creating dish adapters {'.'.join(error_dev_names)}"
-            )
-
-    def init_adapters_low(self) -> None:
-        """Initialise LOW adapters required for command execution.
-
-        :raises ValueError: if adapters could not be created.
-        """
-        self.mccs_mln_adapter = None
-        self.subarray_adapters = []
-
-        self.mccs_mln_adapter = self._adapter_factory.get_or_create_adapter(
-            self.component_manager.input_parameter.mccs_mln_dev_name,
-            AdapterType.MCCS_MASTER_LEAF_NODE,
-        )
-
-        error_dev_names = []
-        num_working = 0
-
-        for (
-            dev_name
-        ) in self.component_manager.input_parameter.subarray_dev_names:
-            dev_info = self.component_manager.get_device(dev_name)
-            if not dev_info.unresponsive:
-                try:
-                    self.subarray_adapters.append(
-                        self._adapter_factory.get_or_create_adapter(
-                            dev_name, AdapterType.SUBARRAY
-                        )
-                    )
-                    num_working += 1
-                except Exception as exception:
-                    self.logger.exception(
-                        ADAPTER_INIT_ERROR, dev_name, str(exception)
-                    )
-                    error_dev_names.append(dev_name)
-
-        if num_working == 0:
-            faulty_dev = ".".join(error_dev_names)
-            raise ValueError(
-                f"Error in creating tm subarray adapters {faulty_dev},"
-            )

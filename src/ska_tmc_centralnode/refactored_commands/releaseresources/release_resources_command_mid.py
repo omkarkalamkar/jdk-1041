@@ -1,12 +1,40 @@
 """ReleaseResourcesMid command class for CentralNode."""
+import logging
+
+from ska_tmc_common import AdapterFactory
 
 from .release_resources_command import BaseReleaseResourcesCN
 from .release_resources_context import MidReleaseResourcesContext
+from .release_resources_plan import MidReleaseResourcesPlan
 from .release_resources_preparation import ReleaseResourcesPreparation
+from .release_resources_strategy import MidReleaseResourcesStrategy
 
 
 class ReleaseResourcesMid(BaseReleaseResourcesCN):
     """Release Resources command class for Mid."""
+
+    def __init__(
+        self,
+        command_runtime_context: MidReleaseResourcesContext,
+        adapter_provider: AdapterFactory,
+        logger: logging.Logger,
+    ) -> None:
+        """Initializes the BaseAssignResources command class.
+
+        :param command_runtime_context: AssignResources command context
+            to manage data from assign resources json.
+        :type command_runtime_context: AssignResourcesContext
+        :param adapter_provider: Instance of adapter factory to fetch
+            requried adapters.
+        :type adapter_provider: AdapterFactory
+        :param logger: Instance of logger.
+        :type logger: logging.Logger
+        """
+        super().__init__(command_runtime_context, adapter_provider, logger)
+        self.subarray_id: int | None = None
+        self._strategy: MidReleaseResourcesStrategy = (
+            command_runtime_context.make_strategy(logger)
+        )
 
     def pre_process(self, argin=None) -> None:
         """Log entry into ReleaseResources."""
@@ -18,15 +46,13 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
     def prepare_command(self) -> None:
         """Parse and validate input data, build the plan, for MID."""
         request = ReleaseResourcesPreparation(
-            self.component_manager, self.logger
+            self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
-
-        ctx = self._build_context()
-        plan = ctx.make_strategy(self.logger).build_plan(request)
-
-        self.subarray_id = plan.subarray_id
-        ctx.apply_plan(plan)
-        self._plan = plan
+        self._plan: MidReleaseResourcesPlan = self._strategy.build_plan(
+            request
+        )
+        self.command_runtime_context.apply_plan(self._plan)
+        self.subarray_id = self._plan.subarray_id
 
     def build_device_commands(self) -> None:
         """Resolve the target subarray adapter and populate the device
@@ -39,7 +65,6 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
 
         :raises ValueError: if release_all is False.
         """
-        self.prepare_subarray_command_target()
 
         if not self._plan.release_all:
             raise ValueError("Partial release resources not supported!")
@@ -58,6 +83,9 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
             self.tm_subarray_adapter,
         )
 
-    def _build_context(self) -> MidReleaseResourcesContext:
-        """Delegate context construction to the component manager."""
-        return self.component_manager._get_release_context(command=self)
+    def update_task_status(self, **kwargs) -> None:
+        """Update task status for ReleaseResourcesLow."""
+        super().update_task_status(**kwargs)
+        self.command_runtime_context.subsystem_assigned_per_command_id.pop(
+            self.context.command_id, None
+        )

@@ -1,13 +1,20 @@
 """AssignResourcesMid Command class for CentralNode."""
 
+import logging
+
 from ska_control_model import ResultCode, TaskStatus
+from ska_tmc_common import AdapterFactory
 
 from ska_tmc_centralnode.refactored_commands.assignresources import (
     AssignResourcesPreparation,
     MidAssignResourcesContext,
 )
 
-from .assign_resources_command import BaseAssignResourcesCN
+from .assign_resources_command import (
+    BaseAssignResourcesCN,
+    MidAssignResourcesPlan,
+)
+from .assign_resources_strategy import MidAssignResourcesStrategy
 
 
 class AssignResourcesMid(BaseAssignResourcesCN):
@@ -17,14 +24,27 @@ class AssignResourcesMid(BaseAssignResourcesCN):
 
     def __init__(
         self,
-        component_manager,
-        *args,
-        adapter_factory=None,
-        logger=None,
-        **kwargs,
-    ):
-        super().__init__(
-            component_manager, adapter_factory, *args, logger=logger, **kwargs
+        command_runtime_context: MidAssignResourcesContext,
+        adapter_provider: AdapterFactory,
+        logger: logging.Logger,
+    ) -> None:
+        """Initializes the AssignResources command class for Mid telescope.
+
+        :param command_runtime_context: AssignResources command context
+            to manage mid telescope specific data from assign resources
+            json.
+        :type command_runtime_context: MidAssignResourcesContext
+        :param adapter_provider: Instance of adapter factory to fetch
+            requried adapters.
+        :type adapter_provider: AdapterFactory
+        :param logger: Instance of logger.
+        :type logger: logging.Logger
+        """
+        super().__init__(command_runtime_context, adapter_provider, logger)
+        self.adapter_provider = adapter_provider
+        self.error_message: str | Exception = ""
+        self._strategy: MidAssignResourcesStrategy = (
+            command_runtime_context.make_strategy(logger)
         )
         self.receptor_ids: list = []
 
@@ -38,17 +58,14 @@ class AssignResourcesMid(BaseAssignResourcesCN):
     def prepare_command(self) -> None:
         """Parse input and build the execution plan/context for MID."""
         request = AssignResourcesPreparation(
-            self.component_manager, self.logger
+            self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin, remove_transaction_id=True)
 
-        ctx = self._build_context()
-        plan = ctx.make_strategy(self.logger).build_plan(request)
+        self._plan: MidAssignResourcesPlan = self._strategy.build_plan(request)
+        self.command_runtime_context.apply_plan(self._plan)
+        self.subarray_id = self._plan.subarray_id
 
-        self.subarray_id = plan.subarray_id
-        ctx.apply_plan(plan)
-
-        self._plan = plan
-        self.receptor_ids = plan.receptor_ids
+        self.receptor_ids = self._plan.receptor_ids
         self._validate_receptors()
 
     def _validate_receptors(self) -> None:
@@ -63,20 +80,19 @@ class AssignResourcesMid(BaseAssignResourcesCN):
             self.receptor_ids,
         )
         for receptor_id in self.receptor_ids:
-            if self.component_manager.is_already_assigned(receptor_id):
+            if self.command_runtime_context.is_already_assigned(receptor_id):
                 raise ValueError(f"Dish {receptor_id} is already allocated")
             self.logger.debug(
                 "Command ID: %s | Dish %s is available for assignment.",
                 self.context.command_id,
-                self.receptor_ids,
+                receptor_id,
             )
 
     def build_device_commands(self) -> None:
         """Resolve the target subarray adapter and populate the device
         command list for this invocation."""
-        self.prepare_subarray_command_target()
 
-        self.component_manager.log_state(
+        self.command_runtime_context.log_state(
             "Device states before executing AssignResources command"
         )
         self.logger.info(
@@ -106,7 +122,3 @@ class AssignResourcesMid(BaseAssignResourcesCN):
             self.context.task_callback(
                 result=result, status=status, exception=exception
             )
-
-    def _build_context(self) -> MidAssignResourcesContext:
-        """Delegate context construction to the component manager."""
-        return self.component_manager._get_assign_context(command=self)

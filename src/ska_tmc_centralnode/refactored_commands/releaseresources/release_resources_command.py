@@ -12,6 +12,7 @@ from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
 
+from ..assignresources.assign_resources_command import AssignResourcesContext
 from ..assignresources.base_command import BaseCNCommand
 from .release_resources_plan import LowReleaseResourcesPlan as LRP
 from .release_resources_plan import MidReleaseResourcesPlan as MRP
@@ -23,24 +24,23 @@ class BaseReleaseResourcesCN(BaseCNCommand):
     # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
-        component_manager,
-        adapter_factory: AdapterFactory = None,
-        *args,
-        logger: logging.Logger = None,
-        **kwargs,
+        command_runtime_context: AssignResourcesContext,
+        adapter_provider: AdapterFactory,
+        logger: logging.Logger,
     ) -> None:
-        """Initializes the BaseReleaseResourcesCN command class.
+        """Initializes the BaseAssignResources command class.
 
-        :param component_manager: CentralNode component manager instance.
-        :param adapter_factory: Instance of adapter factory to fetch
-            required adapters.
-        :type adapter_factory: AdapterFactory
+        :param command_runtime_context: AssignResources command context
+            to manage data from assign resources json.
+        :type command_runtime_context: AssignResourcesContext
+        :param adapter_provider: Instance of adapter factory to fetch
+            requried adapters.
+        :type adapter_provider: AdapterFactory
         :param logger: Instance of logger.
         :type logger: logging.Logger
         """
-        super().__init__(
-            component_manager, adapter_factory, *args, logger=logger, **kwargs
-        )
+        super().__init__(command_runtime_context, adapter_provider, logger)
+        self.subarray_id: int | None = None
         self._plan: LRP | MRP | None = None
 
     def is_state_complete(self) -> bool:
