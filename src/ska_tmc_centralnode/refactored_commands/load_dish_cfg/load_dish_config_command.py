@@ -23,7 +23,6 @@ from .errors import DishAdapterError
 from .load_dish_cfg_stragegy import LoadDishCfgStrategy
 
 
-# pylint:disable =abstract-method
 class LoadDishCfg(BaseTMCCommand):
     """
     A class for CentralNode's LoadDishConfig command.
@@ -141,8 +140,6 @@ class LoadDishCfg(BaseTMCCommand):
         else:
             self.process_loaddishcfg_as_per_k_val_results(k_val_results)
             self.update_memorized_attribute()
-        # if self.component_manager.command_mapping.get(self.command_id):
-        #     self.component_manager.command_mapping.pop(self.command_id)
         self.command_runtime_context.command_ctx.set_dish_vcc_command_status(
             DishConfigStatus.COMPLETED
         )
@@ -476,72 +473,6 @@ class LoadDishCfg(BaseTMCCommand):
                 f"Error in creating dish adapters {'.'.join(error_dev_names)}"
             )
         return dish_adapters
-
-    # def _set_k_numbers_to_dish(self, dish_parameters: dict) -> None:
-    #     """
-    #     Set K numbers to Dish by invoking setKValue command on dish ln
-    #     Args:
-    #         dish_parameters (dict): Dish paramters
-    #             with dishid and k values
-    #     Returns:
-    #         None
-    #     """
-    #     dish_adapters = self.get_dish_adapters()
-    #     runtime_context = self.command_runtime_context
-    #     try:
-    #         for dish_id, vcc_k_map in dish_parameters.items():
-    #             # Get Dish Number from dish id to get dish adapter
-    #             dish_adapter = [
-    #                 dish_adapter
-    #                 for dish_adapter in dish_adapters
-    #                 if dish_adapter.dev_name.endswith(dish_id.lower())
-    #             ]
-    #             if dish_adapter:
-    #                 dish_adapter = dish_adapter[0]
-    #                 k_value = vcc_k_map.get("k")
-    #                 self.logger.debug(
-    #                     "Command ID: %s | Invoking SetKValue command on: %s",
-    #                     self.context.command_id,
-    #                     dish_adapter.dev_name,
-    #                 )
-    #                 dish_adapter.proxy.command_inout_asynch(
-    #                     "SetKValue",
-    #                     k_value,
-    #                     self.async_cb(dish_adapter.dev_name),
-    #                 )
-    #                 self.context.device_commands.append(
-    #                     DeviceCommand(
-    #                         device_name=dish_adapter.dev_name,
-    #                         adapter_type=AdapterType.DISH,
-    #                         command_name="SetKValue",
-    #                         command_input=k_value,
-    #                     )
-    #                 )
-    #                 # name = dish_adapter.dev_name + "async"
-    #                 # self.context.command_device_ids.append(name)
-    #                 # Append dish dev names to track on which dish
-    #                 # SetKValue is invoked
-    #                 runtime_context.append_dish_dev_names(
-    #                     dish_adapter.dev_name
-    #                 )
-    #             else:
-    #                 error_message = (
-    #                     f"Adapter not found for dish leaf node {dish_id}"
-    #                 )
-    #                 runtime_context.update_kval_aggregator(
-    #                     dish_id, error_message
-    #                 )
-    #                 self.logger.error(error_message)
-    #     except Exception as e:
-    #         self.logger.exception(
-    #             "Exception occured in calling setKvalue command on %s, "
-    #             + "Exception: %s",
-    #             dish_id,
-    #             str(e),
-    #         )
-    #         raise SetKValueError(
-    #             f"Error in calling setKvalue command on dish adapter {e}"
-    #         ) from e
 
     def async_cb(self, device_name: str):
         """Invoke LRC callback.
