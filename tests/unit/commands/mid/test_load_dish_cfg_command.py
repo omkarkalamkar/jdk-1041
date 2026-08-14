@@ -5,7 +5,6 @@ import threading
 from unittest.mock import patch
 
 import mock
-import pytest
 import tango
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
@@ -236,26 +235,30 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     assert cm.dish_vcc_command_status == DishConfigStatus.FAILED
 
 
-@pytest.mark.skip
 def test_load_dish_cnfg_command_fail_csp_master(
     tango_context, json_factory, set_mid_sdp_csp_admin_modes
 ):
     cm, _ = create_cm()
     adapter_factory = HelperAdapterFactory()
-    attrs = {"LoadDishCfg.side_effect": Exception}
-    cspmastermock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(
-        MID_CSP_MLN_DEVICE, proxy=cspmastermock
+    sub_mock = mock.Mock(
+        **{"invoke_command.side_effect": Exception("command failed")}
     )
+    adapter_factory.get_or_create_adapter(MID_CSP_MLN_DEVICE, proxy=sub_mock)
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
-    load_dish_cnfg_command = LoadDishCfg(cm, adapter_factory, logger=logger)
-    (
-        load_dish_cnfg_command.dish_vcc_config_json,
-        _,
-    ) = load_dish_cnfg_command.check_and_validate_dish_vcc_data(
-        dish_cfg_input_str
+    load_dish_cnfg_command = LoadDishCfg(
+        cm._get_load_dish_cfg_context(), adapter_factory, logger=logger
     )
-    (res_code, _) = load_dish_cnfg_command.do(dish_cfg_input_str)
+    # (
+    #     load_dish_cnfg_command.dish_vcc_config_json,
+    #     _,
+    # ) = load_dish_cnfg_command.check_and_validate_dish_vcc_data(
+    #     dish_cfg_input_str
+    # )
+    (res_code, _) = load_dish_cnfg_command.execute(
+        dish_cfg_input_str,
+        task_callback=mock.Mock(),
+        task_abort_event=mock.Mock(),
+    )
     assert res_code == ResultCode.FAILED
 
 
