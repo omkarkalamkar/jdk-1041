@@ -34,6 +34,7 @@ from ska_tmc_centralnode.manager.component_manager_low import (
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
@@ -377,7 +378,11 @@ def _get_cm_mid_config(
     def cb(*_args, **_kwargs):
         pass
 
+    bus_manager = BusManager()
+    component = CentralComponent(logger)
+    component.shared_bus = bus_manager.get_bus()
     config = MidCentralNodeComponentManagerConfig(
+        component=component,
         op_state_model=TMCOpStateModel(logger),
         input_parameter=InputParameterMid(None),
         logger=logger,
@@ -424,7 +429,11 @@ def _get_cm_low_config(
         ],
         "array_layout_path": ("instrument/ska1_low/layout/low-layout.json"),
     }
+    bus_manager = BusManager()
+    component = CentralComponent(logger)
+    component.shared_bus = bus_manager.get_bus()
     config = LowCentralNodeComponentManagerConfig(
+        component=component,
         op_state_model=TMCOpStateModel(logger),
         input_parameter=InputParameterLow(None),
         logger=logger,
