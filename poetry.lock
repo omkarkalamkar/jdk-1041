@@ -1120,6 +1120,7 @@ optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
+    {file = "junit-xml-2-1.9.tar.gz", hash = "sha256:3b8d9635c5215f754c7807104f6493e3ea3bc9481e2d33db294560da3a1b00f7"},
     {file = "junit_xml_2-1.9-py2.py3-none-any.whl", hash = "sha256:05093d75fe11120ccd51293884b5ee334ff3bc4b5106647c2bcc928486600588"},
 ]
 
@@ -2861,6 +2862,7 @@ files = [
     {file = "sgp4-2.27-cp311-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:63d30826ebd303e66f184b1e3feba30524d01a379e50baacd47732dd447d97ab"},
     {file = "sgp4-2.27-cp311-abi3-win32.whl", hash = "sha256:951ec95ea7f0fe0b5307fc2cd9d28c8923048bcf376b11c6cd93739e15b4722d"},
     {file = "sgp4-2.27-cp311-abi3-win_amd64.whl", hash = "sha256:827c63feb60987ad177c2c80f3a927e721ead2f444d6560cd2a4337ca90d2490"},
+    {file = "sgp4-2.27-py3-none-any.whl", hash = "sha256:5f3f5716649988b638fbe7fcda592830e0956f548ca273b93cfa5f75917b9087"},
     {file = "sgp4-2.27.tar.gz", hash = "sha256:06d37247c6985739b707b8b39b6b83e06e8af783b2531e31965501ba983985f9"},
 ]
 
@@ -3139,14 +3141,14 @@ reference = "ska-nexus"
 
 [[package]]
 name = "ska-tmc-common"
-version = "1.6.0"
+version = "1.15.2"
 description = "SKA TMC common contains common classes required for Telescope Monitoring and Control(TMC)."
 optional = false
 python-versions = ">=3.10,<4.0"
 groups = ["main"]
 files = [
-    {file = "ska_tmc_common-1.6.0-py3-none-any.whl", hash = "sha256:8492399e8a5fc6074963d2eaf0ecf9251879822ebb6723cd51d4fd07de3de64f"},
-    {file = "ska_tmc_common-1.6.0.tar.gz", hash = "sha256:e6c6a6e001be978adb4829743b5a29fc7ef3dec0e6327ef913c915c8cc8ce89c"},
+    {file = "ska_tmc_common-1.15.2-py3-none-any.whl", hash = "sha256:9bbeab4c6f2124392d6aceed1b95532ffdeb3f0cdeedb558fa669e494d4006e0"},
+    {file = "ska_tmc_common-1.15.2.tar.gz", hash = "sha256:9497cd233c22e3d2410beaf41202cf6212b44779631b74067ce6680ff12a1892"},
 ]
 
 [package.dependencies]
@@ -3158,7 +3160,7 @@ katpoint = ">=1.0a2,<2.0"
 marshmallow = ">=3.14.1,<4.0.0"
 mock = ">=4.0.3,<5.0.0"
 numpy = {version = ">=1.21.6", markers = "python_version == \"3.10\""}
-pytango = ">=9.5.0"
+pytango = "10.3.0"
 referencing = "*"
 rpds-py = "*"
 ska-control-model = "*"
@@ -3792,4 +3794,4 @@ reference = "PyPI-public"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.11"
-content-hash = "729c551951d48694d206b73346215363550abfd770eeae2fe3e98b590b4659d3"
+content-hash = "721c429c8fc3b3c2873c967a62f7c405f1cf0cd5695ec51a500021feff2d4cd5"
