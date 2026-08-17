@@ -142,6 +142,12 @@ class LoadDishCfg(BaseTMCCommand):
         else:
             self.process_loaddishcfg_as_per_k_val_results(k_val_results)
             self.update_memorized_attribute()
+
+    def post_process(
+        self,
+    ) -> None:
+        """Perform CM attribute clean up"""
+        runtime_context = self.command_runtime_context
         runtime_context.command_ctx.set_dish_vcc_command_status(
             DishConfigStatus.COMPLETED
         )
