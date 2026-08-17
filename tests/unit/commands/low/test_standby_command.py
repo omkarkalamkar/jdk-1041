@@ -154,7 +154,10 @@ def test_low_telescope_standby_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
+    cm.config.op_state_model.perform_action("init_invoked")
+    cm.config.op_state_model.perform_action("component_on")
     cm.config.op_state_model.perform_action("component_fault")
+    cm.config.op_state_model.perform_action("init_completed")
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("TelescopeStandby")
 

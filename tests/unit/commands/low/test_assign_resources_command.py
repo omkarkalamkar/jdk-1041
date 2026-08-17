@@ -230,6 +230,7 @@ def test_low_assign_resources_command_missing_station_ids(
     assert "station_id" in message[0]
 
 
+@pytest.mark.new
 @pytest.mark.SKA_low
 def test_telescope_low_assign_resources_fail_check_allowed(
     tango_context, set_low_sdp_csp_mccs_admin_modes
@@ -239,7 +240,10 @@ def test_telescope_low_assign_resources_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), str(elapsed_time)
     )
+    cm.config.op_state_model.perform_action("init_invoked")
+    cm.config.op_state_model.perform_action("component_on")
     cm.config.op_state_model.perform_action("component_fault")
+    cm.config.op_state_model.perform_action("init_completed")
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("AssignResources")
 
