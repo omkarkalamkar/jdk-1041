@@ -39,5 +39,5 @@ def test_all_low_devices_faulty(tango_context):
     logger.info(f"Component manager faulty devices{cm.checked_devices}")
     logger.info(f"Component total devices{cm.devices}")
 
-    for devInfo in cm.devices:
-        assert devInfo.unresponsive
+    for dev_info in cm.devices:
+        assert dev_info.unresponsive

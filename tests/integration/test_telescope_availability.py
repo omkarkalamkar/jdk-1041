@@ -23,21 +23,6 @@ from tests.settings import (
     logger,
 )
 
-# TODO: For future reference.
-# def check_subarray_availability(central_node, subarray_fqdn,
-# expected_status):
-#     start_time = time.time()
-#     elapsed_time = 0
-#     while (json.loads(central_node.telescopeAvailability))["tmc_subarrays"][
-#         subarray_fqdn
-#     ] != expected_status:
-#         elapsed_time = time.time() - start_time
-#         time.sleep(0.1)
-#         if elapsed_time > TIMEOUT:
-#             pytest.fail(
-#             "Timeout occurred while checking the SubarrayNode availability."
-#             )
-
 
 def check_cspmln_availability(central_node, expected_status):
     """checks cspmln availablity"""
@@ -87,7 +72,7 @@ def check_mccsmln_availability(central_node, expected_status):
             )
 
 
-def telescope_availability(central_node_fqdn, change_event_callbacks):
+def telescope_availability(central_node_fqdn):
     """Checks telescope availability"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_fqdn)
@@ -160,19 +145,15 @@ def telescope_availability(central_node_fqdn, change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_telescope_availability_mid(change_event_callbacks):
+def test_telescope_availability_mid():
     """Tests telescope availability mid"""
-    telescope_availability(
-        CENTRALNODE_MID,
-        change_event_callbacks,
-    )
+    telescope_availability(CENTRALNODE_MID)
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_telescope_availability_low(change_event_callbacks):
+def test_telescope_availability_low():
     """Tests telescope availability mid"""
     telescope_availability(
         CENTRALNODE_LOW,
-        change_event_callbacks,
     )

@@ -123,7 +123,7 @@ def test_telescope_health_state_low(change_event_callbacks):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_telescope_command_timeout(change_event_callbacks):
+def test_telescope_command_timeout():
     """test telescope health state mid"""
 
     dev_factory = DevFactory()

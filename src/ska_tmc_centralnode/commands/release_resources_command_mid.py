@@ -33,42 +33,13 @@ class ReleaseResourcesMid(ReleaseResources):
             For Example: (ResultCode.OK, "")
 
         """
-        self.set_command_id(self.__class__.__name__)
-        self.logger.debug(
-            "Command %s: Executing ReleaseResources command",
-            self.command_id,
-        )
-        ret_code, message = self.init_adapters()
+        ret_code, msg = super().do(argin)
         if ret_code == ResultCode.FAILED:
-            return ret_code, message
-
-        try:
-            json_argument = json.loads(argin)
-        except Exception as exception:
-            return (
-                ResultCode.FAILED,
-                f"Error while loading the Assign JSON string: {exception}",
-            )
+            return ret_code, msg
+        json_argument = json.loads(argin)
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
-
-        if "subarray_id" not in json_argument:
-            return (
-                ResultCode.FAILED,
-                "subarray_id key is not present in the input json argument.",
-            )
-
-        result_code, message = self.get_subarray_adapter(self.subarray_id)
-        if result_code == ResultCode.FAILED:
-            return result_code, message
-
-        if self.tm_subarray_adapter is None:
-            return (
-                ResultCode.FAILED,
-                ("Subarray Id %s is not existing!", self.subarray_id),
-            )
-
-        if json_argument["release_all"] is True:
+        if json_argument.get("release_all") is True:
             self.logger.info(
                 "Invoking ReleaseAllResources on subarray | device=%s",
                 self.tm_subarray_adapter.dev_name,

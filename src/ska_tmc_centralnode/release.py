@@ -8,7 +8,7 @@
 # See LICENSE for more info.
 
 """Release information for Python Package"""
-
+# pylint:disable=invalid-name
 name = """ska-tmc-centralnode"""
 version = "1.7.1"
 version_info = version.split(".")
@@ -16,3 +16,4 @@ description = """Central Node is a coordinator of the complete M&C system."""
 author = "Team Sahyadri, Team Himalaya"
 author_email = "telmgt-internal@googlegroups.com"
 url = """https://www.skao.int/"""
+# pylint:enable=invalid-name

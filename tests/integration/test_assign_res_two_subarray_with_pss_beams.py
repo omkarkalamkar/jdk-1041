@@ -6,67 +6,36 @@ import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tmc_common.dev_factory import DevFactory
 
 from ska_tmc_centralnode.utils.constants import CENTRALNODE_LOW
-from tests.integration.conftest import ensure_checked_devices
-from tests.settings import (
-    LOW_SUBARRAY2_DEVICE,
-    LOW_SUBARRAY_DEVICE,
-    check_subarray_availability,
-    logger,
-)
+from tests.integration.conftest import get_cn_sn
+from tests.settings import telescope_off, telescope_on
 
 
 def assign_resources_low(
-    tango_context,
     central_node_name,
     assign_input_str,
     release_input_string,
     pss_beams,
     change_event_callbacks,
-    subarray_device,
-    subarray2_device,
     second_assign_rejected=True,
 ):
     """AssignResources Test method."""
-    dev_factory = DevFactory()
-    central_node = dev_factory.get_device(central_node_name)
-    subarray_proxy = dev_factory.get_device(subarray_device)
-    subarray2_proxy = dev_factory.get_device(subarray2_device)
-
-    ensure_checked_devices(central_node)
+    central_node, subarray_proxy, _ = get_cn_sn(central_node_name, 2)
     central_node.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    logger.info(
-        "Telescope On Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
+    telescope_on(central_node, change_event_callbacks)
 
     assign_input_str1 = assign_input_str
     assign_input = json.loads(assign_input_str)
     assign_input["subarray_id"] = 2
-    assign_input["sdp"]["execution_block"]["eb_id"] = "eb-test-20220917-00000"
+    assign_input["sdp"]["execution_block"]["eb_id"] = "eb-test-20220917-00001"
     assigned_pss_beams = assign_input["csp"]["pss"]["pss_beam_ids"]
     assign_input["csp"]["pss"]["pss_beam_ids"] = pss_beams
     assign_input_str2 = json.dumps(assign_input)
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    subarray2_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, subarray_device, True)
 
     result1, unique_id1 = central_node.AssignResources(assign_input_str1)
     result2, unique_id2 = central_node.AssignResources(assign_input_str2)
@@ -121,10 +90,9 @@ def assign_resources_low(
             ),
             lookahead=4,
         )
-    tmc_subarray = dev_factory.get_device(subarray_device)
-    tmc_subarray.SetDirectObsState(ObsState.EMPTY)
+    subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
-    result, unique_id = central_node.TelescopeOff()
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
@@ -137,26 +105,24 @@ def assign_resources_low(
         (CENTRALNODE_LOW, "assign_resource_low", [1]),
     ],
 )
+@pytest.mark.usefixtures(
+    "set_low_devices_availability_for_aggregation",
+    "set_low_sdp_csp_mccs_admin_modes",
+)
 def test_assign_res_with_two_subarray_low_same_pss_beam(
-    tango_context,
     central_node_name,
     input_json,
     pss_beams,
     change_event_callbacks,
     json_factory,
-    set_low_devices_availability_for_aggregation,
-    set_low_sdp_csp_mccs_admin_modes,
 ):
     """Test assign Resources command for low with same pss beams"""
     assign_resources_low(
-        tango_context,
         central_node_name,
         json_factory(input_json),
         json_factory("release_resource_low"),
         pss_beams,
         change_event_callbacks,
-        LOW_SUBARRAY_DEVICE,
-        LOW_SUBARRAY2_DEVICE,
         second_assign_rejected=True,
     )
 
@@ -170,25 +136,23 @@ def test_assign_res_with_two_subarray_low_same_pss_beam(
         (CENTRALNODE_LOW, "assign_resource_low", [4]),
     ],
 )
+@pytest.mark.usefixtures(
+    "set_low_devices_availability_for_aggregation",
+    "set_low_sdp_csp_mccs_admin_modes",
+)
 def test_assign_res_with_two_subarray_low_different_pss_beam(
-    tango_context,
     central_node_name,
     input_json,
     pss_beams,
     change_event_callbacks,
     json_factory,
-    set_low_devices_availability_for_aggregation,
-    set_low_sdp_csp_mccs_admin_modes,
 ):
     """Test assign Resources command for low with different pss beams"""
     assign_resources_low(
-        tango_context,
         central_node_name,
         json_factory(input_json),
         json_factory("release_resource_low"),
         pss_beams,
         change_event_callbacks,
-        LOW_SUBARRAY_DEVICE,
-        LOW_SUBARRAY2_DEVICE,
         second_assign_rejected=False,
     )

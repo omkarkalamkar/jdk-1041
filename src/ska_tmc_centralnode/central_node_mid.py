@@ -31,7 +31,6 @@ from ska_tmc_centralnode.manager.component_manager_config import (
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
-from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import DishConfigStatus, ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.json_validator_decorator import (
@@ -39,6 +38,8 @@ from ska_tmc_centralnode.utils.json_validator_decorator import (
 )
 
 __all__ = ["MidTmcCentralNode", "main"]
+
+# pylint:disable=invalid-name #Due to tango camel case
 
 
 class MidTmcCentralNode(AbstractCentralNode):
@@ -232,7 +233,6 @@ class MidTmcCentralNode(AbstractCentralNode):
         :return: Instance of MidCentralNodeComponentManagerConfig.
         :rtype: MidCentralNodeComponentManagerConfig
         """
-        self._component = CentralComponent(logger=self.logger)
         self._component.shared_bus = self.shared_bus
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
@@ -354,7 +354,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         )
 
     def is_LoadDishCfg_allowed(
-        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, _request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> bool:
         """
         Checks whether LoadDishCfg command is allowed to be run
@@ -399,7 +399,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         return task
 
     def is_SetGlobalPointingModel_allowed(
-        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, _request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> bool:
         """
         Checks whether setGlobalPointingModel command is allowed to be run
@@ -455,7 +455,7 @@ class MidTmcCentralNode(AbstractCentralNode):
         return task
 
     def is_SetStowMode_allowed(
-        self, request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, _request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
     ) -> bool:
         """
         Checks whether setStowMode command is allowed to be run
@@ -490,6 +490,8 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         return task
 
+
+# pylint:enable=invalid-name
 
 # ----------
 # Run server

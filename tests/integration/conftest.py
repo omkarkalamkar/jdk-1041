@@ -11,9 +11,14 @@ from tango import Database
 
 from tests.settings import (
     LOW_CENTRAL_NODE,
+    LOW_SUBARRAY2_DEVICE,
+    LOW_SUBARRAY_DEVICE,
     MID_CENTRAL_NODE,
+    MID_SUBARRAY2_DEVICE,
+    MID_SUBARRAY_DEVICE,
     SLEEP_TIME,
     TIMEOUT,
+    check_subarray_availability,
     logger,
 )
 
@@ -122,3 +127,25 @@ def set_default_array_layout_url_attribute():
             central_node.arrayLayoutFileProvided,
         )
         assert central_node.arrayLayoutFileProvided is True
+
+
+def get_cn_sn(central_node_name: str, subarray_count=1) -> tuple:
+    """Provides the Central and subarray node device proxies"""
+    subarray_node_name = LOW_SUBARRAY_DEVICE
+    subarray_node2_name = LOW_SUBARRAY2_DEVICE
+    subarray_node2 = None
+    if "mid-tmc" in central_node_name:
+        subarray_node_name = MID_SUBARRAY_DEVICE
+        subarray_node2_name = MID_SUBARRAY2_DEVICE
+    dev_factory = DevFactory()
+    central_node = dev_factory.get_device(central_node_name)
+    subarray_node = dev_factory.get_device(subarray_node_name)
+
+    ensure_checked_devices(central_node)
+    subarray_node.SetisSubarrayAvailable(True)
+    check_subarray_availability(central_node, subarray_node_name, True)
+    if subarray_count == 2:
+        subarray_node2 = dev_factory.get_device(subarray_node2_name)
+        subarray_node2.SetisSubarrayAvailable(True)
+        check_subarray_availability(central_node, subarray_node2_name, True)
+    return central_node, subarray_node, subarray_node2

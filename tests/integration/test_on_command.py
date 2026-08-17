@@ -6,7 +6,6 @@ import pytest
 import tango
 from ska_control_model import HealthState
 from ska_tango_base.commands import ResultCode
-from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.enum import DishMode
 
@@ -24,15 +23,20 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import DISH_DEFECT, RESET_DEFECT
+from tests.settings import (
+    DISH_DEFECT,
+    RESET_DEFECT,
+    check_dish_mode_event,
+    check_exception,
+    telescope_off,
+    telescope_on,
+)
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_on_command_mid(
-    change_event_callbacks,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-):
+@pytest.mark.usefixtures("set_mid_sdp_csp_mln_availability_for_aggregation")
+def test_on_command_mid(change_event_callbacks):
     """Test cases for ON command"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
@@ -58,17 +62,10 @@ def test_on_command_mid(
         (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
         lookahead=4,
     )
+    check_dish_mode_event(
+        DISH_LEAF_NODE_1, DishMode.STANDBY_FP, change_event_callbacks
+    )
 
-    dish_leaf_node = dev_factory.get_device(DISH_LEAF_NODE_1)
-    dish_leaf_node.subscribe_event(
-        "dishMode",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["dishMode"],
-    )
-    change_event_callbacks["dishMode"].assert_change_event(
-        (DishMode.STANDBY_FP),
-        lookahead=2,
-    )
     central_node.subscribe_event(
         "telescopeState",
         tango.EventType.CHANGE_EVENT,
@@ -80,11 +77,7 @@ def test_on_command_mid(
     )
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown
-    result, unique_id = central_node.TelescopeOff()
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=8,
-    )
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
@@ -123,70 +116,31 @@ def test_on_command_dish_fail(
     sdp_master = dev_factory.get_device(MID_SDP_MASTER_DEVICE)
     sdp_master.SetDirectState(tango.DevState.ON)
 
-    event_data = change_event_callbacks[
-        "longRunningCommandResult"
-    ].assert_change_event(
-        (unique_id[0], Anything),
-        lookahead=4,
+    check_exception(
+        change_event_callbacks,
+        unique_id,
+        device_name,
+        "Error in calling command for dish devices",
     )
 
-    exception_message = "Error in calling command for dish devices"
-
-    assert exception_message in event_data["attribute_value"][1]
-    assert device_name in event_data["attribute_value"][1]
-
-    dish_leaf_node36 = dev_factory.get_device(DISH_LEAF_NODE_36)
-    dish_leaf_node36.subscribe_event(
-        "dishMode",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["dishMode"],
-    )
-
-    change_event_callbacks["dishMode"].assert_change_event(
-        (DishMode.STANDBY_FP),
-        lookahead=2,
-    )
-
-    dish_leaf_node63 = dev_factory.get_device(DISH_LEAF_NODE_63)
-    dish_leaf_node63.subscribe_event(
-        "dishMode",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["dishMode"],
-    )
-
-    change_event_callbacks["dishMode"].assert_change_event(
-        (DishMode.STANDBY_FP),
-        lookahead=2,
-    )
-
-    dish_leaf_node100 = dev_factory.get_device(DISH_LEAF_NODE_100)
-    dish_leaf_node100.subscribe_event(
-        "dishMode",
-        tango.EventType.CHANGE_EVENT,
-        change_event_callbacks["dishMode"],
-    )
-
-    change_event_callbacks["dishMode"].assert_change_event(
-        (DishMode.STANDBY_FP),
-        lookahead=2,
-    )
+    for dish_ln in [DISH_LEAF_NODE_36, DISH_LEAF_NODE_63, DISH_LEAF_NODE_100]:
+        check_dish_mode_event(
+            dish_ln, DishMode.STANDBY_LP, change_event_callbacks
+        )
 
     tmc_dish.SetDefective(RESET_DEFECT)
 
     # Teardown
-    _, unique_id = central_node.TelescopeOff()
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=8,
-    )
+    telescope_off(central_node, change_event_callbacks)
+
     tmc_dish.ClearCommandCallInfo()
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
+@pytest.mark.usefixtures("set_low_devices_availability_for_aggregation")
 def test_on_command_low(
     change_event_callbacks,
-    set_low_devices_availability_for_aggregation,
 ):
     """Test cases for ON command for low"""
     dev_factory = DevFactory()
@@ -198,15 +152,7 @@ def test_on_command_low(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
+    telescope_on(central_node, change_event_callbacks)
 
     mccs_master = dev_factory.get_device(MCCS_MASTER_DEVICE)
     mccs_master.SetDirectState(tango.DevState.ON)
@@ -228,17 +174,13 @@ def test_on_command_low(
     )
     assert central_node.telescopeState == tango.DevState.ON
     # Teardown
-    result, unique_id = central_node.TelescopeOff()
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
+    telescope_off(central_node, change_event_callbacks)
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
-    "dish_modes, expected_state, expected_health",
+    "dish_modes, expected_state",
     [
         # Partial availability (degraded scenario)
         (
@@ -248,7 +190,6 @@ def test_on_command_low(
                 "dish3": DishMode.SHUTDOWN,
             },
             tango.DevState.ON,
-            HealthState.OK,
         ),
         # All usable (healthy scenario)
         (
@@ -258,7 +199,6 @@ def test_on_command_low(
                 "dish3": DishMode.STANDBY_FP,
             },
             tango.DevState.ON,
-            HealthState.OK,
         ),  # Mixed modes but still usable (healthy scenario)
         (
             {
@@ -267,7 +207,6 @@ def test_on_command_low(
                 "dish3": DishMode.CONFIG,
             },
             tango.DevState.ON,
-            HealthState.OK,
         ),
         (
             {
@@ -276,7 +215,6 @@ def test_on_command_low(
                 "dish3": DishMode.SHUTDOWN,
             },
             tango.DevState.ON,
-            HealthState.OK,
         ),
         (
             {
@@ -285,16 +223,14 @@ def test_on_command_low(
                 "dish3": DishMode.CONFIG,
             },
             tango.DevState.ON,
-            HealthState.OK,
         ),
     ],
 )
+@pytest.mark.usefixtures("set_mid_sdp_csp_mln_availability_for_aggregation")
 def test_on_command_mid_dish_availability_parametrized(
     dish_modes,
     expected_state,
-    expected_health,
     change_event_callbacks,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test ON command with different dish availability scenarios"""
     dev_factory = DevFactory()
@@ -354,9 +290,4 @@ def test_on_command_mid_dish_availability_parametrized(
     # -------------------------------
     # Teardown
     # -------------------------------
-    result, unique_id = central_node.TelescopeOff()
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=8,
-    )
+    telescope_off(central_node, change_event_callbacks)

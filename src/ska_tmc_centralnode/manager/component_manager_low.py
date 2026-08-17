@@ -11,12 +11,9 @@ import json
 from collections import defaultdict
 from typing import Callable, Dict, Tuple
 
-from ska_control_model import ResultCode, TaskStatus
 from ska_schemas.schema import validate
 from ska_tango_base.base import TaskCallbackType
-from ska_tango_base.faults import StateModelError
 from ska_tango_base.software_bus import Signal
-from ska_tmc_common.exceptions import CommandNotAllowed
 
 from ska_tmc_centralnode.commands.assign_resources_command_low import (
     AssignResourcesLow,
@@ -43,6 +40,7 @@ from ska_tmc_centralnode.utils.constants import (
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
 )
 
+from ..utils.exception_decorator import exception_handler
 from .event_callback_manager.low_event_callback_manager import (
     LowEventCallbackManager,
 )
@@ -287,6 +285,7 @@ class CNComponentManagerLow(CNComponentManager):
         return argin, exception_msg
 
     # pylint: disable=unexpected-keyword-arg
+    @exception_handler("AssignResources")
     def assign_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
     ) -> None:
@@ -302,44 +301,24 @@ class CNComponentManagerLow(CNComponentManager):
         :return: task_status
         :rtype: tuple
         """
-        try:
-            assign_resources_command_object = AssignResourcesLow(
-                self,
-                adapter_factory=self.adapter_factory,
-                logger=self.logger,
-                is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
-            )
-            subarray_id = self.get_subarray_id(argin)
-            assign_resources_command_object.subarray_id = str(subarray_id)
-            # Validate command is allowed
-            self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
-                subarray_id=subarray_id,
-                command_name="AssignResources",
-            )
-            assign_resources_command_object.assign_resources(
-                argin=argin,
-                task_callback=task_callback,
-                task_abort_event=task_abort_event,
-            )
-
-        except (StateModelError, CommandNotAllowed) as exception:
-            self.logger.exception(
-                "Exception occurred while processing  assignresource: %s ",
-                exception,
-            )
-            task_callback(
-                status=TaskStatus.REJECTED,
-                result=(ResultCode.NOT_ALLOWED, str(exception)),
-            )
-        except Exception as exception:
-            self.logger.exception(
-                "Exception occurred while processing assignresource: %s ",
-                exception,
-            )
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, str(exception)),
-            )
+        assign_resources_command_object = AssignResourcesLow(
+            self,
+            adapter_factory=self.adapter_factory,
+            logger=self.logger,
+            is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
+        )
+        subarray_id = self.get_subarray_id(argin)
+        assign_resources_command_object.subarray_id = str(subarray_id)
+        # Validate command is allowed
+        self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            subarray_id=subarray_id,
+            command_name="AssignResources",
+        )
+        assign_resources_command_object.assign_resources(
+            argin=argin,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     # pylint: enable=unexpected-keyword-arg
 
@@ -374,6 +353,7 @@ class CNComponentManagerLow(CNComponentManager):
         return argin, exception_msg
 
     # pylint: disable=unexpected-keyword-arg
+    @exception_handler("ReleaseResources")
     def release_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
     ) -> None:
@@ -389,49 +369,26 @@ class CNComponentManagerLow(CNComponentManager):
         :return: task_status
         :rtype: tuple
         """
-        try:
-            release_resources_command_object = ReleaseResourcesLow(
-                self,
-                adapter_factory=self.adapter_factory,
-                logger=self.logger,
-                is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
-            )
+        release_resources_command_object = ReleaseResourcesLow(
+            self,
+            adapter_factory=self.adapter_factory,
+            logger=self.logger,
+            is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
+        )
 
-            self.check_availability_for_release(argin)
-            subarray_id = self.get_subarray_id(argin)
-            release_resources_command_object.subarray_id = str(subarray_id)
-            # Validate command is allowed
-            self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
-                subarray_id=subarray_id,
-                command_name="ReleaseResources",
-            )
-            release_resources_command_object.release_resources(
-                argin=argin,
-                task_callback=task_callback,
-                task_abort_event=task_abort_event,
-            )
-
-        except (StateModelError, CommandNotAllowed) as exception:
-            self.logger.exception(
-                "Exception occurred while processing "
-                + "releaseresource: %s ",
-                exception,
-            )
-            task_callback(
-                status=TaskStatus.REJECTED,
-                result=(ResultCode.NOT_ALLOWED, str(exception)),
-            )
-
-        except Exception as exception:
-            self.logger.exception(
-                "Exception occurred while processing "
-                + "releaseresource: %s ",
-                exception,
-            )
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, str(exception)),
-            )
+        self.check_availability_for_release(argin)
+        subarray_id = self.get_subarray_id(argin)
+        release_resources_command_object.subarray_id = str(subarray_id)
+        # Validate command is allowed
+        self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            subarray_id=subarray_id,
+            command_name="ReleaseResources",
+        )
+        release_resources_command_object.release_resources(
+            argin=argin,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     # pylint: enable=unexpected-keyword-arg
 

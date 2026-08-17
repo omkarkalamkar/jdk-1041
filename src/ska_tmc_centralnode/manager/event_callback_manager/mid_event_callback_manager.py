@@ -162,9 +162,9 @@ class MidEventCallbackManager(EventCallbackManager):
             is_dish_state_on = self._is_dish_state_on()
             csp_state = self._get_csp_master_state()
             if csp_state == DevState.ON and is_dish_state_on:
-                self.component.imaging = ModesAvailability.available
+                self.component.imaging = ModesAvailability.AVAILABLE
             else:
-                self.component.imaging = ModesAvailability.not_available
+                self.component.imaging = ModesAvailability.NOT_AVAILABLE
 
     def _get_dish_leaf_node_name(self, device_name: str) -> str:
         """Provides Dish Leaf Node name as per device information
@@ -353,7 +353,9 @@ class MidEventCallbackManager(EventCallbackManager):
         super().update_device_state(device_name, state)
         self._update_imaging()
 
-    def handle_gpm_version_event(self, dev_name: str, gpmVersion: str) -> None:
+    def handle_gpm_version_event(
+        self, dev_name: str, gpm_version: str
+    ) -> None:
         """
         Handle the GPM version
         Based on following table Result codes handled and attributes updated\n
@@ -373,12 +375,12 @@ class MidEventCallbackManager(EventCallbackManager):
 
         """
         self.logger.debug(
-            "GPM versions received %s from %s", gpmVersion, dev_name
+            "GPM versions received %s from %s", gpm_version, dev_name
         )
         with self.dishln_gpm_lock:
             dish_id = dev_name.split("/")[-1]
             self.get_global_pointing_model_status()[dish_id] = json.loads(
-                gpmVersion
+                gpm_version
             )
             if self.check_if_csp_all_dish_ready():
                 self.gpm_unknown_dishes = self.gpm_aggregator.aggregate_gpm()

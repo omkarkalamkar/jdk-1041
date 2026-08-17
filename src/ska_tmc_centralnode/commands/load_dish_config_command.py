@@ -36,8 +36,6 @@ class LoadDishCfg(LoadDishCfgCommand):
         self,
         component_manager,
         adapter_factory=None,
-        timeout_subarrays=3,
-        step_sleep=0.1,
         logger=None,
         *args,
         **kwargs,
@@ -45,8 +43,6 @@ class LoadDishCfg(LoadDishCfgCommand):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self._timeout_subarrays = timeout_subarrays
-        self._step_sleep = step_sleep
         self.dish_cfg = self.component_manager.event_manager_object
         self.dish_cfg_params: str = ""
         self.dish_vcc_config_json: dict = {}
@@ -118,6 +114,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         self.update_task_status(result=(result, message), exception=message)
         return result, message
 
+    # pylint:disable=arguments-differ
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
@@ -158,6 +155,7 @@ class LoadDishCfg(LoadDishCfgCommand):
         )
         self.component_manager.reset_load_dish_cfg_data()
 
+    # pylint:enable=arguments-differ
     def process_loaddishcfg_as_per_k_val_results(
         self, k_val_results: dict
     ) -> None:

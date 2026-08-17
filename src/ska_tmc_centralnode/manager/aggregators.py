@@ -1,7 +1,7 @@
 """Aggregation method for telescope state Aggregating for Mid"""
 
 import logging
-from typing import Dict
+from typing import Dict, cast
 
 from ska_ser_logging import configure_logging
 from ska_tango_base.commands import ResultCode
@@ -9,6 +9,7 @@ from ska_tmc_common.aggregators import Aggregator
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
+from ska_tmc_centralnode.manager.component_manager_config import DishVccConfig
 from ska_tmc_centralnode.utils.constants import (
     DISH_KVALUE_VALIDATION_RESULT_STATUS,
 )
@@ -70,7 +71,9 @@ class TelescopeStateAggregatorMid(Aggregator):
             self._component_manager.is_dish_vcc_config_set,
         )
         # If Dish VCC config is not set then set telescope state to UNKNOWN
-        if self._component_manager.config.dish_config.enable_init:
+        if cast(
+            DishVccConfig, self._component_manager.config.dish_config
+        ).enable_init:
             if not self._component_manager.is_dish_vcc_config_set:
                 return DevState.UNKNOWN
 
@@ -127,7 +130,7 @@ class TelescopeStateAggregatorLow(Aggregator):
             DevState: Aggregates TeleScopeState for low
 
         """
-        telescopeStateList = []
+        telescope_state_list = []
         mccs_master = False
         csp_master = False
         sdp_master = False
@@ -139,24 +142,24 @@ class TelescopeStateAggregatorLow(Aggregator):
                 name
                 == self._component_manager.input_parameter.mccs_master_dev_name
             ):
-                telescopeStateList.append(device.state)
+                telescope_state_list.append(device.state)
                 mccs_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.csp_master_dev_name
             ):
-                telescopeStateList.append(device.state)
+                telescope_state_list.append(device.state)
                 csp_master = True
             elif (
                 name
                 == self._component_manager.input_parameter.sdp_master_dev_name
             ):
-                telescopeStateList.append(device.state)
+                telescope_state_list.append(device.state)
                 sdp_master = True
 
-        telescopeSetStateList = set(telescopeStateList)
+        telescope_set_state = set(telescope_state_list)
         self._logger.debug(
-            "Telescope state list is : %s", str(telescopeStateList)
+            "Telescope state list is : %s", str(telescope_state_list)
         )
         if not sdp_master and not csp_master and not mccs_master:
             self._logger.debug(
@@ -172,15 +175,15 @@ class TelescopeStateAggregatorLow(Aggregator):
                 mccs_master,
             )
             return DevState.UNKNOWN
-        if telescopeSetStateList == set([DevState.ON]):
+        if telescope_set_state == set([DevState.ON]):
             return DevState.ON
-        if telescopeSetStateList == set([DevState.OFF]):
+        if telescope_set_state == set([DevState.OFF]):
             return DevState.OFF
-        if DevState.INIT in telescopeSetStateList:
+        if DevState.INIT in telescope_set_state:
             return DevState.INIT
-        if DevState.FAULT in telescopeSetStateList:
+        if DevState.FAULT in telescope_set_state:
             return DevState.FAULT
-        if DevState.STANDBY in telescopeSetStateList:
+        if DevState.STANDBY in telescope_set_state:
             return DevState.STANDBY
         return DevState.UNKNOWN
 
@@ -200,7 +203,7 @@ class TMCOpStateAggregator(Aggregator):
             DevState: Aggregates TMC Op state
 
         """
-        tmcStateList = []
+        tmc_state_list = []
         # get states of all TM devices
         # what if one of them is not working? i.e. tm subarray
         # number of devices is also variable, how to handle that number
@@ -209,17 +212,17 @@ class TMCOpStateAggregator(Aggregator):
             if "tm" in name:
                 if device.unresponsive:
                     continue
-                tmcStateList.append(device.state)
+                tmc_state_list.append(device.state)
 
-        tmcSetStateList = set(tmcStateList)
-        if tmcSetStateList == set([DevState.ON]):
+        tmc_set_state = set(tmc_state_list)
+        if tmc_set_state == set([DevState.ON]):
             return DevState.ON
-        if tmcSetStateList == set([DevState.OFF]):
+        if tmc_set_state == set([DevState.OFF]):
             #  Untill all TMC devices are refactored, devices report Off state.
             return DevState.OFF
-        if DevState.INIT in tmcSetStateList:
+        if DevState.INIT in tmc_set_state:
             return DevState.INIT
-        if DevState.FAULT in tmcSetStateList:
+        if DevState.FAULT in tmc_set_state:
             return DevState.FAULT
         return DevState.UNKNOWN
 
@@ -368,10 +371,10 @@ class DishAttrValueAggregator:
                 total_events
                 / len(self.input_parameter_obj.dish_leaf_node_dev_names)
             ) * 100
-            config = self._component_manager.config.dish_config
+            config: DishVccConfig = self._component_manager.config.dish_config
             if (
                 percent_event_received
-                >= config.dishKvalueAggregationAllowedPercent
+                >= config.dish_k_value_aggregation_allowed_precent
             ):
                 return True
         return False

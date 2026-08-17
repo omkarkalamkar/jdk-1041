@@ -83,6 +83,7 @@ class AssignResources(AssignReleaseResources):
         self.update_task_status(result=(result, message), exception=message)
         return result, message
 
+    # pylint:disable=arguments-differ
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
@@ -107,6 +108,8 @@ class AssignResources(AssignReleaseResources):
             self.task_callback(result=result, status=TaskStatus.COMPLETED)
         if self.component_manager.command_mapping.get(self.command_id):
             self.component_manager.command_mapping.pop(self.command_id)
+
+    # pylint:enable=arguments-differ
 
     def do_mid(self, *args):
         """Temporary, will be removed after all command refactoring"""

@@ -81,8 +81,8 @@ def test_one_working_other_faulty(tango_context):
     set_devices_unresponsive(cm, dishes)
 
     subarrayDevInfo = cm.get_device(MID_SUBARRAY_DEVICE)
-    for devInfo in cm.devices:
-        if devInfo == subarrayDevInfo:
-            assert not devInfo.unresponsive
+    for dev_info in cm.devices:
+        if dev_info == subarrayDevInfo:
+            assert not dev_info.unresponsive
         else:
-            assert devInfo.unresponsive
+            assert dev_info.unresponsive

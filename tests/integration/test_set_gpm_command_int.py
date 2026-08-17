@@ -21,7 +21,7 @@ from tests.settings import (
 )
 
 
-def set_gpm_command(tango_context, central_node_name, change_event_callbacks):
+def set_gpm_command(central_node_name, change_event_callbacks):
     """Test cases for SetGlobalPointing command"""
 
     dev_factory = DevFactory()
@@ -101,7 +101,7 @@ def set_gpm_command(tango_context, central_node_name, change_event_callbacks):
 
 
 def set_gpm_command_negative_scenarios(
-    tango_context, central_node_name, change_event_callbacks
+    central_node_name, change_event_callbacks
 ):
     """Test cases for SetGlobalPointing command"""
 
@@ -182,9 +182,7 @@ def set_gpm_command_negative_scenarios(
     assert gpm_status["ska036"]["Band_2"] == "1.0"
 
 
-def gpm_restart_scenarios(
-    tango_context, central_node_name, change_event_callbacks
-):
+def gpm_restart_scenarios(central_node_name, change_event_callbacks):
     """Test case to test GPM CN and DLN restart scenarios"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(central_node_name)
@@ -300,13 +298,11 @@ def gpm_restart_scenarios(
     [CENTRALNODE_MID],
 )
 def test_set_gpm_command_negative_scenarios_all(
-    tango_context,
     central_node_name,
     change_event_callbacks,
 ):
     """Test cases for set gpm command"""
     return set_gpm_command_negative_scenarios(
-        tango_context,
         central_node_name,
         change_event_callbacks,
     )
@@ -319,13 +315,11 @@ def test_set_gpm_command_negative_scenarios_all(
     [CENTRALNODE_MID],
 )
 def test_set_gpm_command(
-    tango_context,
     central_node_name,
     change_event_callbacks,
 ):
     """Test cases for set gpm command"""
     return set_gpm_command(
-        tango_context,
         central_node_name,
         change_event_callbacks,
     )
@@ -341,13 +335,11 @@ def test_set_gpm_command(
     [CENTRALNODE_MID],
 )
 def test_set_gpm_command_restart_scenarios(
-    tango_context,
     central_node_name,
     change_event_callbacks,
 ):
     """Test cases set gpm command"""
     return gpm_restart_scenarios(
-        tango_context,
         central_node_name,
         change_event_callbacks,
     )

@@ -28,12 +28,14 @@ from tango import ApiUtil, AttrWriteType, Database, DebugIt
 from tango.server import command, device_property
 
 from ska_tmc_centralnode import release
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     assign_validate_json_args,
     release_validate_json_args,
 )
 
 
+# pylint:disable=invalid-name #Due to tango camel case
 class AbstractCentralNode(TMCBaseDevice):
     """
     Central Node is a coordinator of the complete Telescope system.
@@ -232,7 +234,7 @@ class AbstractCentralNode(TMCBaseDevice):
         access=AttrWriteType.READ,
     )
 
-    # ---------------
+    # -------- -------
     # General methods
     # ---------------
 
@@ -241,6 +243,8 @@ class AbstractCentralNode(TMCBaseDevice):
         Initializes the CentralNode device.
         """
         super().init_device()
+        self._component = CentralComponent(logger=self.logger)
+
         self._build_state = (
             f"{release.name},{release.version},{release.description}"
         )
@@ -408,6 +412,7 @@ class AbstractCentralNode(TMCBaseDevice):
 
         return task
 
+    # pylint:disable=arguments-differ
     def is_On_allowed(self):
         """
         Checks whether this command is allowed to be run in current device
@@ -420,6 +425,8 @@ class AbstractCentralNode(TMCBaseDevice):
 
         """
         return self.component_manager.is_command_allowed("On")
+
+    # pylint:enable=arguments-differ
 
     @command(
         dtype_out="DevVarLongStringArray",
@@ -434,6 +441,7 @@ class AbstractCentralNode(TMCBaseDevice):
         result_code, unique_id = handler()
         return [[result_code], [str(unique_id)]]
 
+    # pylint:disable=arguments-differ
     def is_Off_allowed(self):
         """
         Checks whether this command is allowed to be run in current device
@@ -445,6 +453,8 @@ class AbstractCentralNode(TMCBaseDevice):
         :rtype: boolean
         """
         return self.component_manager.is_command_allowed("Off")
+
+    # pylint:enable=arguments-differ
 
     @command(
         dtype_out="DevVarLongStringArray",
@@ -459,6 +469,7 @@ class AbstractCentralNode(TMCBaseDevice):
         result_code, unique_id = handler()
         return [[result_code], [str(unique_id)]]
 
+    # pylint:disable=arguments-differ
     def is_Standby_allowed(self):
         """
         Checks whether this command is allowed to be run in current device
@@ -471,6 +482,7 @@ class AbstractCentralNode(TMCBaseDevice):
         """
         return self.component_manager.is_command_allowed("Standby")
 
+    # pylint:enable=arguments-differ
     @command(
         dtype_out="DevVarLongStringArray",
     )
@@ -567,5 +579,6 @@ class AbstractCentralNode(TMCBaseDevice):
 
         return task
 
+    # pylint:enable=invalid-name
     def create_component_manager(self):
         """Create component manager object for command invocation."""

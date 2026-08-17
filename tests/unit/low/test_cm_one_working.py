@@ -71,8 +71,8 @@ def test_low_one_working_other_faulty(
     set_devices_unresponsive(cm, FAULTY_LIST)
 
     subarrayDevInfo = cm.get_device("low-tmc/subarray/01")
-    for devInfo in cm.devices:
-        if devInfo == subarrayDevInfo:
-            assert not devInfo.unresponsive
+    for dev_info in cm.devices:
+        if dev_info == subarrayDevInfo:
+            assert not dev_info.unresponsive
         else:
-            assert devInfo.unresponsive
+            assert dev_info.unresponsive

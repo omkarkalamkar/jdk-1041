@@ -14,11 +14,10 @@ from typing import Callable, Dict, List, Tuple, cast
 from ska_control_model import TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
-from ska_tango_base.faults import StateModelError
 from ska_tango_base.software_bus import Signal
 from ska_tmc_common import AdapterType, DeviceInfo
 from ska_tmc_common.enum import DishMode
-from ska_tmc_common.exceptions import CommandNotAllowed, InvalidReceptorIdError
+from ska_tmc_common.exceptions import InvalidReceptorIdError
 from tango import DevState
 
 from ska_tmc_centralnode.commands.assign_resources_command_mid import (
@@ -60,6 +59,7 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
 )
 
+from ..utils.exception_decorator import exception_handler
 from .event_callback_manager.mid_event_callback_manager import (
     MidEventCallbackManager,
 )
@@ -693,7 +693,6 @@ class CNComponentManagerMid(CNComponentManager):
 
             return set_gpm_version_command_object.apply_gpm(
                 dish_gpm_params=argin,
-                logger=self.logger,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
@@ -890,6 +889,7 @@ class CNComponentManagerMid(CNComponentManager):
         return argin, exception_msg
 
     # pylint: disable=unexpected-keyword-arg
+    @exception_handler(command_name="AssignResources")
     def assign_resources(
         self, argin, task_callback: TaskCallbackType, task_abort_event
     ) -> None:
@@ -905,75 +905,52 @@ class CNComponentManagerMid(CNComponentManager):
         :return: task_status
         :rtype: tuple
         """
-        try:
-            k_value_failed_dishes = {}
-            # Execute the command if the input JSON is valid
+
+        k_value_failed_dishes = {}
+        # Execute the command if the input JSON is valid
+        self.logger.debug("Calling component manager assign_resources method")
+        receptors = json.loads(argin).get("dish", {}).get("receptor_ids", [])
+        k_value_status = json.loads(self.dish_vcc_validation_status)
+
+        for d in receptors:
+            dish = d.lower()
+            if dish in k_value_status:
+                k_value_failed_dishes[dish] = k_value_status[dish]
+
+        if k_value_failed_dishes:
+            err_msg = (
+                "Can't assign receptors with k-value issues:"
+                f" {k_value_failed_dishes}"
+            )
             self.logger.debug(
-                "Calling component manager assign_resources method"
-            )
-            receptors = (
-                json.loads(argin).get("dish", {}).get("receptor_ids", [])
-            )
-            k_value_status = json.loads(self.dish_vcc_validation_status)
-
-            for d in receptors:
-                dish = d.lower()
-                if dish in k_value_status:
-                    k_value_failed_dishes[dish] = k_value_status[dish]
-
-            if k_value_failed_dishes:
-                err_msg = (
-                    "Can't assign receptors with k-value issues:"
-                    f" {k_value_failed_dishes}"
-                )
-                self.logger.debug(
-                    "Dish k-value STATUS: %s, receptors assigned: %s",
-                    k_value_status,
-                    receptors,
-                )
-                task_callback(
-                    status=TaskStatus.REJECTED,
-                    result=(ResultCode.NOT_ALLOWED, err_msg),
-                )
-                return
-            assign_resources_command_object = AssignResourcesMid(
-                self,
-                adapter_factory=self.adapter_factory,
-                logger=self.logger,
-            )
-            assign_resources_command_object.subarray_id = self.get_subarray_id(
-                argin
-            )
-            # Validate command is allowed
-            self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
-                subarray_id=assign_resources_command_object.subarray_id,
-                command_name="AssignResources",
-            )
-
-            assign_resources_command_object.assign_resources(
-                argin=argin,
-                task_callback=task_callback,
-                task_abort_event=task_abort_event,
-            )
-
-        except (StateModelError, CommandNotAllowed) as exception:
-            self.logger.exception(
-                "Exception occurred while processing " + "assignresource: %s ",
-                exception,
+                "Dish k-value STATUS: %s, receptors assigned: %s",
+                k_value_status,
+                receptors,
             )
             task_callback(
                 status=TaskStatus.REJECTED,
-                result=(ResultCode.NOT_ALLOWED, str(exception)),
+                result=(ResultCode.NOT_ALLOWED, err_msg),
             )
-        except Exception as exception:
-            self.logger.exception(
-                "Exception occurred while processing " + "assignresource: %s ",
-                exception,
-            )
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, str(exception)),
-            )
+            return
+        assign_resources_command_object = AssignResourcesMid(
+            self,
+            adapter_factory=self.adapter_factory,
+            logger=self.logger,
+        )
+        assign_resources_command_object.subarray_id = self.get_subarray_id(
+            argin
+        )
+        # Validate command is allowed
+        self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            subarray_id=assign_resources_command_object.subarray_id,
+            command_name="AssignResources",
+        )
+
+        assign_resources_command_object.assign_resources(
+            argin=argin,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     # pylint: enable=unexpected-keyword-arg
 
@@ -1002,6 +979,7 @@ class CNComponentManagerMid(CNComponentManager):
         return argin, exception_msg
 
     # pylint: disable=unexpected-keyword-arg
+    @exception_handler(command_name="ReleaseResources")
     def release_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
     ) -> None:
@@ -1017,45 +995,23 @@ class CNComponentManagerMid(CNComponentManager):
         :return: task_status
         :rtype: tuple
         """
-        try:
-            release_resources_command_object = ReleaseResourcesMid(
-                self, adapter_factory=self.adapter_factory, logger=self.logger
-            )
+        release_resources_command_object = ReleaseResourcesMid(
+            self, adapter_factory=self.adapter_factory, logger=self.logger
+        )
 
-            self.check_availability_for_release(argin)
-            subarray_id = self.get_subarray_id(argin)
-            release_resources_command_object.subarray_id = str(subarray_id)
-            # Validate command is allowed
-            self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
-                subarray_id=subarray_id,
-                command_name="ReleaseResources",
-            )
-            release_resources_command_object.release_resources(
-                argin=argin,
-                task_callback=task_callback,
-                task_abort_event=task_abort_event,
-            )
-        except (StateModelError, CommandNotAllowed) as exception:
-            self.logger.exception(
-                "Exception occurred while processing "
-                + "releaseresource: %s ",
-                exception,
-            )
-            task_callback(
-                status=TaskStatus.REJECTED,
-                result=(ResultCode.NOT_ALLOWED, str(exception)),
-            )
-
-        except Exception as exception:
-            self.logger.exception(
-                "Exception occurred while processing "
-                + "releaseresource: %s ",
-                exception,
-            )
-            task_callback(
-                status=TaskStatus.COMPLETED,
-                result=(ResultCode.FAILED, str(exception)),
-            )
+        self.check_availability_for_release(argin)
+        subarray_id = self.get_subarray_id(argin)
+        release_resources_command_object.subarray_id = str(subarray_id)
+        # Validate command is allowed
+        self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            subarray_id=subarray_id,
+            command_name="ReleaseResources",
+        )
+        release_resources_command_object.release_resources(
+            argin=argin,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
     # pylint: enable=unexpected-keyword-arg
 

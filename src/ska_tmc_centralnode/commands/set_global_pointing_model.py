@@ -41,7 +41,6 @@ class SetGlobalPointingModel(SetDishGPM):
     def apply_gpm(
         self,
         dish_gpm_params: str,
-        logger,
         task_callback: Callable,
         task_abort_event: Optional[threading.Event],
     ) -> Tuple[ResultCode, str]:
@@ -97,6 +96,7 @@ class SetGlobalPointingModel(SetDishGPM):
         self.update_task_status(result=(result, message), exception=message)
         return result, message
 
+    # pylint:disable=arguments-differ
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
@@ -126,6 +126,7 @@ class SetGlobalPointingModel(SetDishGPM):
         )
         self.component_manager.reset_gpm_data()
 
+    # pylint:enable=arguments-differ
     def process_update_task_for_command_failure(
         self, error_message: str
     ) -> None:
@@ -519,7 +520,9 @@ class SetGlobalPointingModel(SetDishGPM):
                 self.component_manager.command_id
             ].append(command_id_band_dict)
 
-    def update_set_gpm_results(self, dev_name: str, band_value: str) -> None:
+    def update_set_gpm_results(
+        self, dev_name: str, band_value: str
+    ) -> Callable:
         """
         This method is used to update the result returned
         from Dish leaf nodes as part of SetGlobalPointingModel
@@ -533,7 +536,8 @@ class SetGlobalPointingModel(SetDishGPM):
             value (tuple): longRunningCommandResult attribute event.
         """
 
-        def callback(result=None, **kwargs):
+        def callback(**kwargs):
+            result = kwargs.get("result")
             self.logger.info(
                 "GPM longRunningCommandResult event for device: "
                 "%s, with value: %s",

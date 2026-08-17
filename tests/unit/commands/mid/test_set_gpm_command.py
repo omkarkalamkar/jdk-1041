@@ -162,7 +162,6 @@ def test_set_gpm_command_with_ok(
         ):
             result, message = set_gpm_command.apply_gpm(
                 dish_gpm_params=json.dumps(gpm_input),
-                logger=logger,
                 task_callback=task_callback,
                 task_abort_event=threading.Event(),
             )
@@ -199,7 +198,6 @@ def test_apply_gpm_no_receptors_and_empty_gpm_files():
     with patch.object(instance, "get_gpm_files", return_value=[]):
         instance.apply_gpm(
             json.dumps(dish_gpm_params),
-            logger,
             task_callback=task_callback,
             task_abort_event=threading.Event(),
         )
@@ -348,7 +346,7 @@ def test_handle_gpm_version():
     cm.command_in_progress = ""
     cm.is_gpm_init = False
     cm._event_cb_manager.handle_gpm_version_event(
-        dev_name=f"mid-tmc/leaf-node-dish/{dish_id}", gpmVersion=gpm_version
+        dev_name=f"mid-tmc/leaf-node-dish/{dish_id}", gpm_version=gpm_version
     )
     cm._event_cb_manager.gpm_invoke_command_callback.assert_called()
 

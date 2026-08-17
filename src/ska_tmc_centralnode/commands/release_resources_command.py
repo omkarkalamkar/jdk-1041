@@ -2,6 +2,7 @@
 ReleaseResources class for CentralNode.
 """
 
+import json
 import time
 from typing import Optional, Tuple
 
@@ -81,6 +82,7 @@ class ReleaseResources(AssignReleaseResources):
         self.update_task_status(result=(result, message), exception=message)
         return result, message
 
+    # pylint:disable=arguments-differ
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
@@ -115,6 +117,7 @@ class ReleaseResources(AssignReleaseResources):
                 self.subarray_id, None
             )
 
+    # pylint:enable=arguments-differ
     def release_all_resources(
         self, adapter
     ) -> Tuple[list[ResultCode], list[str]]:
@@ -141,3 +144,27 @@ class ReleaseResources(AssignReleaseResources):
 
     def do_low(self, *args):
         """Temporary, will be removed after all command refactoring"""
+
+    # pylint:disable=signature-differs
+    def do(self, argin: str) -> Tuple[ResultCode, str]:
+        """Common do functionality for mid and low."""
+        self.set_command_id(self.__class__.__name__)
+        self.logger.debug(
+            "Command %s: Executing ReleaseResources command",
+            self.command_id,
+        )
+        ret_code, message = self.init_adapters()
+        if ret_code == ResultCode.FAILED:
+            return ret_code, message
+        try:
+            _ = json.loads(argin)
+        except Exception as exception:
+            return (
+                ResultCode.FAILED,
+                ("Problem in loading the JSON string: %s", exception),
+            )
+        result_code, message = self.get_subarray_adapter(self.subarray_id)
+        if result_code == ResultCode.FAILED:
+            return result_code, message
+
+        return ResultCode.OK, ""

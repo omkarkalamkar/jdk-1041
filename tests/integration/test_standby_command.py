@@ -18,14 +18,14 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MASTER_DEVICE,
 )
 from tests.integration.conftest import ensure_checked_devices
-from tests.settings import logger
+from tests.settings import logger, telescope_on
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
+@pytest.mark.usefixtures("set_mid_sdp_csp_mln_availability_for_aggregation")
 def test_standby_command_mid(
     change_event_callbacks,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
 ):
     """Test standby command for mid"""
     dev_factory = DevFactory()
@@ -36,18 +36,7 @@ def test_standby_command_mid(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    # Check whether the command ResultCode is OK
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=8,
-    )
-    logger.info(
-        "longRunningCommandResult: %s",
-        str(central_node.longRunningCommandResult),
-    )
-
+    telescope_on(central_node, change_event_callbacks)
     result, unique_id = central_node.TelescopeStandby()
     logger.info("Result is: %s", str(result))
     logger.info("Unique id: %s", unique_id)
@@ -97,10 +86,8 @@ def test_standby_command_mid(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_standby_command_low(
-    change_event_callbacks,
-    set_low_devices_availability_for_aggregation,
-):
+@pytest.mark.usefixtures("set_low_devices_availability_for_aggregation")
+def test_standby_command_low(change_event_callbacks):
     """Test standby command for low"""
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
@@ -111,17 +98,7 @@ def test_standby_command_low(
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-    result, unique_id = central_node.TelescopeOn()
-    # Check whether the command ResultCode is OK
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=8,
-    )
-    logger.info(
-        "longRunningCommandResult: %s",
-        str(central_node.longRunningCommandResult),
-    )
+    telescope_on(central_node, change_event_callbacks)
 
     result, unique_id = central_node.TelescopeStandby()
     logger.info("Result is: %s. Unique ID is %s", str(result), unique_id)

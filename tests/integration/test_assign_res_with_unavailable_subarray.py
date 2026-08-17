@@ -1,26 +1,29 @@
 """Test module for assign resources unavailability"""
 
-import json
+
 import time
 
 import pytest
 import tango
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
-from ska_tmc_common.dev_factory import DevFactory
 from tango.db import Database
 
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
     CENTRALNODE_MID,
 )
-from tests.integration.conftest import ensure_checked_devices
+from tests.integration.conftest import get_cn_sn
 from tests.settings import (
     LOW_SUBARRAY_DEVICE,
+    LOW_SUBARRAY_NOT_AVAILABLE,
     MID_SUBARRAY_DEVICE,
+    assert_exception,
     check_subarray_availability,
     export_device,
     logger,
+    telescope_off,
+    telescope_on,
 )
 
 
@@ -31,34 +34,14 @@ def assign_resources(
     subarray_fqdn,
 ):
     """Assign Resources command method."""
-    dev_factory = DevFactory()
-    central_node_proxy = dev_factory.get_device(central_node_fqdn)
-    subarray_proxy = dev_factory.get_device(subarray_fqdn)
+    central_node_proxy, subarray_proxy, _ = get_cn_sn(central_node_fqdn)
 
-    ensure_checked_devices(central_node_proxy)
     central_node_proxy.subscribe_event(
         "longRunningCommandResult",
         tango.EventType.CHANGE_EVENT,
         change_event_callbacks["longRunningCommandResult"],
     )
-
-    result, unique_id = central_node_proxy.TelescopeOn()
-    logger.info(
-        "AssignResources Command ID: %s Returned result: %s",
-        unique_id,
-        str(result),
-    )
-
-    assert unique_id[0].endswith("TelescopeOn")
-    assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
-        lookahead=4,
-    )
-
-    subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node_proxy, subarray_fqdn, True)
+    telescope_on(central_node_proxy, change_event_callbacks)
 
     subarray_proxy.SetisSubarrayAvailable(False)
     check_subarray_availability(central_node_proxy, subarray_fqdn, False)
@@ -85,19 +68,10 @@ def assign_resources(
 
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
-
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (
-            unique_id[0],
-            json.dumps(
-                (
-                    int(ResultCode.FAILED),
-                    "Subarray devices not available: ['low-tmc/subarray/01']",
-                )
-            ),
-        ),
-        lookahead=4,
+    assert_exception(
+        unique_id, LOW_SUBARRAY_NOT_AVAILABLE, change_event_callbacks
     )
+
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
     export_device(db, db_device_info)
@@ -107,23 +81,20 @@ def assign_resources(
     check_subarray_availability(central_node_proxy, subarray_fqdn, True)
 
     # Teardown
-    result, unique_id = central_node_proxy.TelescopeOff()
+    telescope_off(central_node_proxy, change_event_callbacks)
 
 
-@pytest.mark.skip(
-    reason="This functionality is not present in the current version"
-)
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
 @pytest.mark.parametrize(
     "central_node_name",
     [CENTRALNODE_MID],
 )
+@pytest.mark.usefixtures("set_mid_sdp_csp_admin_modes")
 def test_assign_res_command_mid_unavailable_subarray(
     central_node_name,
     change_event_callbacks,
     json_factory,
-    set_mid_sdp_csp_admin_modes,
 ):
     """Test Assign Resources command for low unavailable subarray for mid"""
     return assign_resources(
@@ -140,11 +111,11 @@ def test_assign_res_command_mid_unavailable_subarray(
     "central_node_name",
     [CENTRALNODE_LOW],
 )
+@pytest.mark.usefixtures("set_low_sdp_csp_mccs_admin_modes")
 def test_assign_res_command_low_unavailable_subarray(
     central_node_name,
     change_event_callbacks,
     json_factory,
-    set_low_sdp_csp_mccs_admin_modes,
 ):
     """Test Assign Resources command for low unavailable subarray"""
     return assign_resources(

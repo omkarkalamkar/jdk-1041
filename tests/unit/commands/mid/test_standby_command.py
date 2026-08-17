@@ -90,9 +90,7 @@ def test_telescope_standby_command_task_completed(
     task_callback = MockCallable(unique_id)
 
     standby_command = TelescopeStandby(cm, my_adapter_factory, logger=logger)
-    standby_command.telescope_standby(
-        logger=logger, task_callback=task_callback
-    )
+    standby_command.telescope_standby(task_callback=task_callback)
     time.sleep(0.1)
     assert task_callback.status == TaskStatus.COMPLETED
 
@@ -134,9 +132,7 @@ def test_telescope_standby_command_fail_subarray(
 
     standby_command = TelescopeStandby(cm, my_adapter_factory, logger=logger)
     cm.adapter_factory = my_adapter_factory
-    standby_command.telescope_standby(
-        logger=logger, task_callback=task_callback
-    )
+    standby_command.telescope_standby(task_callback=task_callback)
     assert task_callback.status == TaskStatus.COMPLETED
     assert task_callback.result[0] == ResultCode.FAILED
 
@@ -181,9 +177,7 @@ def test_telescope_standby_command_fail_dish(
 
     standby_command = TelescopeStandby(cm, my_adapter_factory, logger=logger)
     cm.adapter_factory = my_adapter_factory
-    standby_command.telescope_standby(
-        logger=logger, task_callback=task_callback
-    )
+    standby_command.telescope_standby(task_callback=task_callback)
     assert task_callback.status == TaskStatus.COMPLETED
     assert task_callback.result[0] == ResultCode.FAILED
 

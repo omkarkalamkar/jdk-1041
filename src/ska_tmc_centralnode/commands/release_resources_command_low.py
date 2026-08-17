@@ -11,7 +11,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tmc_centralnode.commands.release_resources_command import (
     ReleaseResources,
 )
-from ska_tmc_centralnode.utils.constants import mccs_release_interface
+from ska_tmc_centralnode.utils.constants import MCCS_RELEASE_INTERFACE
 
 
 class ReleaseResourcesLow(ReleaseResources):
@@ -81,36 +81,12 @@ class ReleaseResourcesLow(ReleaseResources):
             SubarrayNode is not successful
 
         """
-        self.set_command_id(self.__class__.__name__)
-        self.logger.debug(
-            "Command %s: Executing ReleaseResources command",
-            self.command_id,
-        )
-        ret_code, message = self.init_adapters()
+        ret_code, msg = super().do(argin)
         if ret_code == ResultCode.FAILED:
-            return ret_code, message
-
-        try:
-            json_argument = json.loads(argin)
-        except Exception as exception:
-            return (
-                ResultCode.FAILED,
-                ("Problem in loading the JSON string: %s", exception),
-            )
-
+            return ret_code, msg
+        json_argument = json.loads(argin)
         if "transaction_id" in json_argument:
             del json_argument["transaction_id"]
-
-        result_code, message = self.get_subarray_adapter(self.subarray_id)
-        if result_code == ResultCode.FAILED:
-            return result_code, message
-
-        if self.tm_subarray_adapter is None:
-            return (
-                ResultCode.FAILED,
-                ("Subarray Id %s is not existing!", self.subarray_id),
-            )
-
         if json_argument["release_all"] is True:
             self.logger.info(
                 "Invoking ReleaseAllResources on subarray | device=%s",
@@ -233,7 +209,7 @@ class ReleaseResourcesLow(ReleaseResources):
         try:
             if "interface" in json_argument:
                 del json_argument["interface"]
-            json_argument["interface"] = mccs_release_interface
+            json_argument["interface"] = MCCS_RELEASE_INTERFACE
             return json_argument
         except Exception as exception:
             raise Exception(

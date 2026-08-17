@@ -8,17 +8,20 @@ from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_LOW,
     CENTRALNODE_MID,
 )
-from tests.integration.conftest import ensure_checked_devices
+from tests.conftest import set_mid_sdp_csp_mln_availability_for_aggregation
+from tests.integration.conftest import (
+    ensure_checked_devices,
+    set_default_array_layout_url_attribute,
+)
+from tests.settings import set_low_devices_availability
 
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_mid
-def test_array_layout_file_provided_updates(
-    change_event_callbacks,
-    set_mid_sdp_csp_mln_availability_for_aggregation,
-    set_default_array_layout_url_attribute,
-):
+def test_array_layout_file_provided_updates():
     """Test case to verify"""
+    set_mid_sdp_csp_mln_availability_for_aggregation()
+    set_default_array_layout_url_attribute()
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_MID)
     assert central_node.HealthState == HealthState.OK
@@ -41,12 +44,10 @@ def test_array_layout_file_provided_updates(
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
-def test_on_command_low(
-    change_event_callbacks,
-    set_low_devices_availability_for_aggregation,
-    set_default_array_layout_url_attribute,
-):
+def test_on_command_low():
     """Test cases for ON command for low"""
+    set_low_devices_availability()
+    set_default_array_layout_url_attribute()
     dev_factory = DevFactory()
     central_node = dev_factory.get_device(CENTRALNODE_LOW)
     assert central_node.HealthState == HealthState.OK

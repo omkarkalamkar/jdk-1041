@@ -464,11 +464,11 @@ def test_assign_resources_command_already_assigned(
 
     assign_res_command = AssignResourcesMid(cm, adapter_factory, logger=logger)
     # SKA001 is assigned to Subarray1
-    for devInfo in cm.devices:
-        if isinstance(devInfo, SubArrayDeviceInfo):
-            if devInfo.dev_name == MID_SUBARRAY_DEVICE:
-                devInfo.resources.append("SKA001")
-                logger.info("devInfo is: %s", devInfo.resources)
+    for dev_info in cm.devices:
+        if isinstance(dev_info, SubArrayDeviceInfo):
+            if dev_info.dev_name == MID_SUBARRAY_DEVICE:
+                dev_info.resources.append("SKA001")
+                logger.info("dev_info is: %s", dev_info.resources)
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()

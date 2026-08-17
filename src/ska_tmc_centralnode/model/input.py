@@ -355,9 +355,9 @@ class InputParameterLow(InputParameter):
             component_manager.add_device(dev_name)
             list_dev_names.append(dev_name)
 
-        for devInfo in component_manager.devices:
-            if devInfo.dev_name not in list_dev_names:
-                component_manager.component.remove_device(devInfo.dev_name)
+        for dev_info in component_manager.devices:
+            if dev_info.dev_name not in list_dev_names:
+                component_manager.component.remove_device(dev_info.dev_name)
 
 
 class InputParameterMid(InputParameter):
@@ -505,6 +505,6 @@ class InputParameterMid(InputParameter):
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
 
-        for devInfo in component_manager.devices:
-            if devInfo.dev_name not in list_dev_names:
-                component_manager.component.remove_device(devInfo.dev_name)
+        for dev_info in component_manager.devices:
+            if dev_info.dev_name not in list_dev_names:
+                component_manager.component.remove_device(dev_info.dev_name)

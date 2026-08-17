@@ -30,6 +30,7 @@ class AssignResourcesLow(AssignResources):
         )
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
 
+    # pylint:disable=arguments-differ
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = ""
     ) -> None:
@@ -49,6 +50,8 @@ class AssignResourcesLow(AssignResources):
         self.component_manager.subsystem_assigned_per_command_id.pop(
             self.command_id, None
         )
+
+    # pylint:enable=arguments-differ
 
     # pylint:disable=signature-differs
     def do(self, argin: str) -> Tuple[ResultCode, str]:

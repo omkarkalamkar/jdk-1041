@@ -65,8 +65,7 @@ pytest-xdist = "^2.4.0"
 pytest-repeat = "^0.9.1"
 ska-tmc-simulators = "1.9.5"
 ska-tango-testing = "0.8.0"
-mypy = "*"
-
+mypy = "2.3.0"
 
 [tool.poetry.group.docs.dependencies]
 docutils = "^0.18.1"

@@ -17,11 +17,11 @@ from tests.settings import (
     LOW_SUBARRAY2_DEVICE,
     LOW_SUBARRAY_DEVICE,
     MCCS_MLN_DEVICE,
+    assign_resources,
     check_subarray_availability,
 )
 
 
-@pytest.fixture()
 def subscribe_mccs_lrc_event():
     """subscribe event"""
     pytest.unique_id1 = ""
@@ -67,9 +67,9 @@ def invoke_assignresources_on_subarrays(
     central_node,
     json_factory,
     change_event_callbacks,
-    subscribe_mccs_lrc_event,
 ):
     """Method invokes assign resources on two subarrays."""
+    subscribe_mccs_lrc_event()
     subarray_proxy = DeviceProxy(LOW_SUBARRAY_DEVICE)
     subarray_proxy.SetisSubarrayAvailable(True)
     subarray_proxy2 = DeviceProxy(LOW_SUBARRAY2_DEVICE)
@@ -84,21 +84,13 @@ def invoke_assignresources_on_subarrays(
 
     assign_res_string = json_factory("assign_resource_low")
     assign_data = json.loads(assign_res_string)
-    _, unique_id = central_node.AssignResources(assign_res_string)
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
-        lookahead=4,
-    )
+    assign_resources(central_node, assign_res_string, change_event_callbacks)
 
     assign_data["subarray_id"] = 2
     # pss_beam_ids can not be shared between subarrays
     assign_data["csp"]["pss"]["pss_beam_ids"] = [4, 5, 6]
     assign_res_string = json.dumps(assign_data)
-    _, unique_id = central_node.AssignResources(assign_res_string)
-    change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
-        lookahead=4,
-    )
+    assign_resources(central_node, assign_res_string, change_event_callbacks)
 
 
 @when("resources are released from both the subarrays")

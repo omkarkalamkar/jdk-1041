@@ -44,10 +44,10 @@ def test_attributes(central_node_device):
     central_node_device.simulationMode = SimulationMode.FALSE
     assert central_node_device.testMode == SimulationMode.FALSE
     assert central_node_device.telescopeState == DevState.UNKNOWN
-    assert central_node_device.imaging == ModesAvailability.not_available
-    assert central_node_device.pss == ModesAvailability.not_available
-    assert central_node_device.pst == ModesAvailability.not_available
-    assert central_node_device.vlbi == ModesAvailability.not_available
+    assert central_node_device.imaging == ModesAvailability.NOT_AVAILABLE
+    assert central_node_device.pss == ModesAvailability.NOT_AVAILABLE
+    assert central_node_device.pst == ModesAvailability.NOT_AVAILABLE
+    assert central_node_device.vlbi == ModesAvailability.NOT_AVAILABLE
     central_node_device.controlMode = ControlMode.REMOTE
     assert central_node_device.controlMode == ControlMode.REMOTE
     assert central_node_device.desiredTelescopeState == DevState.ON

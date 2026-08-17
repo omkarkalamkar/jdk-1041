@@ -18,14 +18,12 @@ from ska_tmc_centralnode.manager.component_manager_config import (
 from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
 )
-from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.input import InputParameterLow
 
 __all__ = ["LowTmcCentralNode", "main"]
 
-# pylint:disable = attribute-defined-outside-init
 
-
+# pylint:disable=invalid-name #Due to tango camel case
 class LowTmcCentralNode(AbstractCentralNode):
     """
     Central Node is a coordinator of the complete Telescope system
@@ -87,7 +85,6 @@ class LowTmcCentralNode(AbstractCentralNode):
         :return: Instance of LowCentralNodeComponentManagerConfig.
         :rtype: LowCentralNodeComponentManagerConfig
         """
-        self._component = CentralComponent(logger=self.logger)
         self._component.shared_bus = self.shared_bus
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
@@ -134,6 +131,8 @@ class LowTmcCentralNode(AbstractCentralNode):
         cm.input_parameter.csp_mln_dev_name = self.CspMasterLeafNodeFQDN or ""
         cm.input_parameter.csp_subarray_dev_names = self.CspSubarrayLeafNodes
         cm.input_parameter.sdp_subarray_dev_names = self.SdpSubarrayLeafNodes
+
+    # pylint:enable=invalid-name
 
     def create_component_manager(self):
         cm = CNComponentManagerLow(config=self._get_component_manager_config())

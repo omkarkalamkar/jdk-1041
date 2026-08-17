@@ -304,7 +304,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             self.input_parameter.update(self)
 
     def reset(
-        self: CNComponentManager, task_callback: Optional[Callable] = None
+        self: CNComponentManager, _task_callback: Optional[Callable] = None
     ) -> tuple[TaskStatus, str]:
         """
         Placeholder method for reset command.
@@ -487,21 +487,21 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
 
         """
         if "subarray" in device_name.lower():
-            devInfo = SubArrayDeviceInfo(device_name, False)
+            dev_info = SubArrayDeviceInfo(device_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterMid)
             and device_name in self.get_dish_leaf_node_device_names()
         ):
-            devInfo = DishDeviceInfo(device_name, False)
+            dev_info = DishDeviceInfo(device_name, False)
         elif (
             isinstance(self.input_parameter, InputParameterLow)
             and device_name.lower()
             in self.get_mccs_master_leaf_node_dev_name()
         ):
-            devInfo = MCCSDeviceInfo(device_name, False)
+            dev_info = MCCSDeviceInfo(device_name, False)
         else:
-            devInfo = DeviceInfo(device_name, False)
-        self.component.update_device(devInfo)
+            dev_info = DeviceInfo(device_name, False)
+        self.component.update_device(dev_info)
         if self.liveliness_probe_object:
             self.liveliness_probe_object.add_device(device_name)
 
@@ -551,9 +551,9 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
 
         """
         with self.rlock:
-            devInfo = self.get_device(device_name)
-            devInfo.last_event_arrived = time.time()
-            self.component.last_device_info_changed = devInfo
+            dev_info = self.get_device(device_name)
+            dev_info.last_event_arrived = time.time()
+            self.component.last_device_info_changed = dev_info
 
     def is_already_assigned(self, dish_id: str) -> bool:
         """
@@ -567,16 +567,16 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         self.logger.debug(
             "Checking if dish with ID %s is already assigned", dish_id
         )
-        for devInfo in self.devices:
-            if isinstance(devInfo, SubArrayDeviceInfo):
+        for dev_info in self.devices:
+            if isinstance(dev_info, SubArrayDeviceInfo):
                 self.logger.debug(
                     "Subarray Device resources for device %s: %s",
-                    devInfo.dev_name,
-                    str(devInfo.resources),
+                    dev_info.dev_name,
+                    str(dev_info.resources),
                 )
-                if devInfo.resources is None:
+                if dev_info.resources is None:
                     return False
-                if dish_id in devInfo.resources:
+                if dish_id in dev_info.resources:
                     return True
         return False
 
@@ -649,7 +649,6 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         )
 
         return telescope_on_command_object.telescope_on(
-            logger=self.logger,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
         )
@@ -667,7 +666,6 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         )
 
         return telescope_off_command_object.telescope_off(
-            logger=self.logger,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
         )
@@ -685,7 +683,6 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         )
 
         return telescopestandby_command_object.telescope_standby(
-            logger=self.logger,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
         )

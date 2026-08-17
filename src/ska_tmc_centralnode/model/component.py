@@ -71,7 +71,7 @@ class CentralComponent(SharingObserver, TmcComponent):
     )
     _last_device_info_changed: Signal[str] = Signal[str](stored=True)
     _imaging: Signal[ModesAvailability] = Signal[ModesAvailability](
-        stored=True, initial_value=ModesAvailability.not_available
+        stored=True, initial_value=ModesAvailability.NOT_AVAILABLE
     )
 
     def __init__(self, logger):
@@ -81,9 +81,9 @@ class CentralComponent(SharingObserver, TmcComponent):
         self.logger = logger
         # _health_state is never changing. Setter not implemented
         self._health_state = HealthState.OK
-        self._vlbi = ModesAvailability.not_available
-        self._pss = ModesAvailability.not_available
-        self._pst = ModesAvailability.not_available
+        self._vlbi = ModesAvailability.NOT_AVAILABLE
+        self._pss = ModesAvailability.NOT_AVAILABLE
+        self._pst = ModesAvailability.NOT_AVAILABLE
         self.lock = threading.Lock()
 
     def on_new_shared_bus(self):
@@ -94,7 +94,7 @@ class CentralComponent(SharingObserver, TmcComponent):
         self._telescope_availability = {}
         self._telescope_health_state = HealthState.UNKNOWN
         self._last_device_info_changed = ""
-        self._imaging = ModesAvailability.not_available
+        self._imaging = ModesAvailability.NOT_AVAILABLE
 
     @property
     def desired_telescope_state(self) -> tango.DevState:

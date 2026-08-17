@@ -7,7 +7,7 @@ import threading
 import time
 from typing import Any, List, Optional, Tuple, Union
 
-from ska_control_model import TaskStatus
+from ska_control_model import ObsState, TaskStatus
 from ska_ser_logging import configure_logging
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
@@ -86,7 +86,7 @@ class CentralNodeCommand(TMCCommand):
 
         return result, message
 
-    def do(self, argin: Optional[str] = None) -> ResultCode:
+    def do(self, argin: Optional[str] = None) -> Tuple[ResultCode, str]:
         """Do method for central node command class"""
         if isinstance(
             self.component_manager.input_parameter, InputParameterMid
@@ -395,7 +395,8 @@ class CentralNodeCommand(TMCCommand):
             callback: function object to provided to invoke_lrc
         """
 
-        def callback(result=None, **kwargs):
+        def callback(**kwargs):
+            result = kwargs.get("result", None)
             LOGGER.debug(
                 "Received command result %s from device %s",
                 result,
@@ -418,6 +419,8 @@ class TelescopeOnOff(CentralNodeCommand):
         self,
         component_manager,
         adapter_factory=None,
+        timeout_subarrays: int = 3,
+        step_sleep: float = 0.1,
         *args,
         logger=None,
         **kwargs,
@@ -426,8 +429,10 @@ class TelescopeOnOff(CentralNodeCommand):
         self._adapter_factory = adapter_factory or AdapterFactory()
         self.csp_mln_adapter = None
         self.sdp_mln_adapter = None
-        self.subarray_adapters = []
-        self.dish_adapters = []
+        self.subarray_adapters: list = []
+        self.dish_adapters: list = []
+        self._timeout_subarrays = timeout_subarrays
+        self._step_sleep = step_sleep
 
     def init_adapters_mid(self) -> Tuple[ResultCode, str]:
         """
@@ -477,8 +482,8 @@ class TelescopeOnOff(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.subarray_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -510,8 +515,8 @@ class TelescopeOnOff(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     # import debugpy; debugpy.debug_this_thread()
                     self.dish_adapters.append(
@@ -603,8 +608,8 @@ class TelescopeOnOff(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.subarray_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -629,6 +634,88 @@ class TelescopeOnOff(CentralNodeCommand):
             )
 
         return ResultCode.OK, ""
+
+    def wait_for_subarray_empty(self) -> Tuple[ResultCode, str]:
+        """Waits for subarray to move to Observation state EMPTY."""
+        self.logger.debug(
+            "Waiting for all subarray devices to reach the EMPTY "
+            "observation state."
+        )
+        all_empty = False
+        start_time = time.time()
+        while not all_empty:
+            all_empty = True
+            for adapter in self.subarray_adapters:
+                obs_state = self.component_manager.get_device(
+                    adapter.dev_name
+                ).obs_state
+                if obs_state != ObsState.EMPTY:
+                    self.logger.debug(
+                        "Subarray current ObsState %s, while "
+                        "waiting for ObsState.EMPTY. ",
+                        str(obs_state),
+                    )
+                    all_empty = False
+            elapsed_time = time.time() - start_time
+            if elapsed_time > self._timeout_subarrays:
+                return (
+                    ResultCode.FAILED,
+                    "Timeout in waiting for subarrays devices to be empty",
+                )
+            time.sleep(self._step_sleep)
+        return ResultCode.OK, ""
+
+    def return_result(
+        self, unavailable_devices: list
+    ) -> Tuple[ResultCode, str]:
+        """Return relevant result code and message."""
+        if unavailable_devices:
+            self.logger.info(
+                "Unavailable devices are %s ", unavailable_devices
+            )
+            return (
+                ResultCode.OK,
+                f"Unavailable devices are {unavailable_devices}",
+            )
+
+        return (ResultCode.OK, "Command Completed")
+
+    def process_resultcode_devices(
+        self,
+        unavailable_devices: list,
+        return_codes: list,
+        message_or_unique_ids: list,
+    ) -> Tuple[ResultCode, str]:
+        """Process the device resultcodes after command invocation."""
+        for return_code, message_or_unique_id in zip(
+            return_codes, message_or_unique_ids
+        ):
+            # condition for exception raised during invoking command
+            if return_code in [ResultCode.FAILED]:
+                return ResultCode.FAILED, message_or_unique_id
+            # condition for unavailable devices
+            if return_code in [ResultCode.REJECTED]:
+                unavailable_devices.append(message_or_unique_id.split(" ")[0])
+        return ResultCode.OK, ""
+
+    def update_callback(
+        self,
+        task_callback: TaskCallbackType,
+        result_code: ResultCode,
+        message: str,
+    ) -> None:
+        """Update taskcallback based on resultcode and message"""
+        if result_code == ResultCode.FAILED:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.FAILED, message),
+                exception=Exception(message),
+            )
+        else:
+            task_callback(
+                status=TaskStatus.COMPLETED,
+                result=(ResultCode.OK, message),
+            )
 
 
 class AssignReleaseResources(CentralNodeCommand):
@@ -716,8 +803,8 @@ class AssignReleaseResources(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.subarray_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -749,8 +836,8 @@ class AssignReleaseResources(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -808,8 +895,8 @@ class AssignReleaseResources(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.subarray_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.subarray_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -922,8 +1009,8 @@ class LoadDishCfgCommand(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
@@ -981,8 +1068,8 @@ class SetDishGPM(CentralNodeCommand):
         for (
             dev_name
         ) in self.component_manager.input_parameter.dish_leaf_node_dev_names:
-            devInfo = self.component_manager.get_device(dev_name)
-            if not devInfo.unresponsive:
+            dev_info = self.component_manager.get_device(dev_name)
+            if not dev_info.unresponsive:
                 try:
                     self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(

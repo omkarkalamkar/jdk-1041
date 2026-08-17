@@ -16,7 +16,7 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tango_testing.mock.tango.event_callback import (
     MockTangoEventCallbackGroup,
 )
-from ska_tmc_common import FaultType, LivelinessProbeType
+from ska_tmc_common import DishMode, FaultType, LivelinessProbeType
 from ska_tmc_common.dev_factory import DevFactory
 from ska_tmc_common.op_state_model import TMCOpStateModel
 
@@ -149,6 +149,136 @@ DISH_VCC_VALIDATION_RESULT_STATUS = {
     "dish": "ALL DISH OK",
 }
 
+TIMEOUT_MSG = "Timeout has occurred, command failed"
+LOW_SUBARRAY_NOT_AVAILABLE = (
+    "Subarray devices not available: ['low-tmc/subarray/01']"
+)
+
+
+def telescope_on(
+    central_node: tango.DeviceProxy,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+) -> None:
+    """Invokes telescope on"""
+    result, unique_id = central_node.TelescopeOn()
+    logger.info(
+        "Telescope On Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+
+    assert unique_id[0].endswith("TelescopeOn")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+
+
+def telescope_off(
+    central_node: tango.DeviceProxy,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+) -> None:
+    """Invokes telescope off"""
+
+    result, unique_id = central_node.TelescopeOff()
+    logger.info(
+        "AssignResources Command ID: %s Returned result: %s",
+        unique_id,
+        str(result),
+    )
+
+    assert unique_id[0].endswith("TelescopeOff")
+    assert result[0] == ResultCode.QUEUED
+
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        lookahead=4,
+    )
+
+
+def clean_up_subarray(subarray: tango.DeviceProxy) -> None:
+    """Cleans the mock subarray."""
+    subarray.SetDefective(RESET_DEFECT)
+    subarray.SetDirectObsState(ObsState.EMPTY)
+    subarray.ClearCommandCallInfo()
+
+
+def assign_resources(
+    central_node: tango.DeviceProxy,
+    assign_input_str: str,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+):
+    """Invoke assign reosurces command"""
+    _, unique_id_assign = central_node.AssignResources(assign_input_str)
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (
+            unique_id_assign[0],
+            json.dumps((int(ResultCode.OK), "Command Completed")),
+        ),
+        lookahead=6,
+    )
+
+
+def check_exception(
+    change_event_callbacks: MockTangoEventCallbackGroup,
+    unique_id: tuple,
+    device_name: str,
+    exception_msg: str,
+) -> None:
+    """Checks the exception present in LRCR attribute."""
+    event_data = change_event_callbacks[
+        "longRunningCommandResult"
+    ].assert_change_event(
+        (unique_id[0], Anything),
+        lookahead=4,
+    )
+
+    assert exception_msg in event_data["attribute_value"][1]
+    assert device_name in event_data["attribute_value"][1]
+
+
+def check_dish_mode_event(
+    dish_name: str,
+    dish_mode: DishMode,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+):
+    """Checks the DishMode in the attribute event."""
+    dev_factory = DevFactory()
+    dish_leaf_node = dev_factory.get_device(dish_name)
+    evt_id = dish_leaf_node.subscribe_event(
+        "dishMode",
+        tango.EventType.CHANGE_EVENT,
+        change_event_callbacks["dishMode"],
+    )
+
+    change_event_callbacks["dishMode"].assert_change_event(
+        (dish_mode),
+        lookahead=2,
+    )
+    dish_leaf_node.unsubscribe_event(evt_id)
+
+
+def assert_exception(
+    unique_id: tuple,
+    exception_msg: str,
+    change_event_callbacks: MockTangoEventCallbackGroup,
+):
+    """Assert exceptions in LRCR attribute event."""
+    change_event_callbacks["longRunningCommandResult"].assert_change_event(
+        (
+            unique_id[0],
+            json.dumps(
+                (
+                    int(ResultCode.FAILED),
+                    exception_msg,
+                )
+            ),
+        ),
+        lookahead=4,
+    )
+
 
 def set_devices_unresponsive(cm, device_names: list):
     """Sets devices unresponsive
@@ -166,8 +296,8 @@ def set_devices_unresponsive(cm, device_names: list):
 def count_faulty_devices(cm):
     """Counts faulty devices"""
     result = 0
-    for devInfo in cm.checked_devices:
-        if devInfo.unresponsive:
+    for dev_info in cm.checked_devices:
+        if dev_info.unresponsive:
             result += 1
     return result
 
@@ -187,9 +317,9 @@ def dish_vcc_process_callback(event):
     logger.debug("Dish Vcc process callback called with event %s", str(event))
 
 
-def mock_update_device_callback(devInfo):
+def mock_update_device_callback(dev_info):
     """Dummy method for Update device callabacks"""
-    logger.debug("Update device callabacks devInfo: %s", devInfo)
+    logger.debug("Update device callabacks dev_info: %s", dev_info)
 
 
 def mock_update_telescope_state_callback(telescope_state):
@@ -244,7 +374,7 @@ def _get_cm_mid_config(
         "array_layout_path": ("instrument/ska1_low/layout/low-layout.json"),
     }
 
-    def cb(*args, **kwargs):
+    def cb(*_args, **_kwargs):
         pass
 
     config = MidCentralNodeComponentManagerConfig(
@@ -355,7 +485,7 @@ def create_cm(
         # device
         # run because this unit test is explicitly calling load dish config
         # command.
-        DEVICE_LIST = DEVICE_LIST_MID
+        device_list = DEVICE_LIST_MID
         cm.component.shared_bus = bus_manager.get_bus()
         cm.shared_bus = bus_manager.get_bus()
         cm.is_dish_vcc_config_set = True
@@ -364,13 +494,13 @@ def create_cm(
         cm = CNComponentManagerLow(
             config=_get_cm_low_config(p_liveliness_probe, p_event_manager)
         )
-        DEVICE_LIST = DEVICE_LIST_LOW
+        device_list = DEVICE_LIST_LOW
         cm.component.shared_bus = bus_manager.get_bus()
         cm.shared_bus = bus_manager.get_bus()
-    for dev in DEVICE_LIST:
+    for dev in device_list:
         cm.add_device(dev)
     start_time = time.time()
-    num_devices = len(DEVICE_LIST)
+    num_devices = len(device_list)
     if not p_liveliness_probe:
         cm.setup_event_subscription()
         return cm, start_time
@@ -448,24 +578,24 @@ def ensure_imaging(cm, value, expected_elapsed_time):
     assert elapsed_time < expected_elapsed_time
 
 
-def set_devices_state(devices, state, devFactory):
+def set_devices_state(devices, state, dev_factory):
     """Sets Devices state."""
     for device in devices:
-        proxy = devFactory.get_device(device)
+        proxy = dev_factory.get_device(device)
         proxy.SetDirectState(state)
         assert proxy.State() == state
 
 
-def set_device_state(device, state, devFactory):
+def set_device_state(device, state, dev_factory):
     """Sets device state"""
-    proxy = devFactory.get_device(device)
+    proxy = dev_factory.get_device(device)
     proxy.SetDirectState(state)
     assert proxy.State() == state
 
 
-def set_dish_mode(device, dishmode, devFactory):
+def set_dish_mode(device, dishmode, dev_factory):
     """sets Dish mode"""
-    proxy = devFactory.get_device(device)
+    proxy = dev_factory.get_device(device)
     proxy.SetDirectDishMode(dishmode)
     assert proxy.dishmode == dishmode
 
@@ -566,9 +696,9 @@ def check_lrcr_events(
         Defaults to ResultCode.OK.
         retries (int):number of events to check. Defaults to 10.
     """
-    COUNT = 0
+    count = 0
     flag = False
-    while not flag and COUNT <= retries:
+    while not flag and count <= retries:
         assertion_data = change_event_callback[
             callback_name
         ].assert_change_event(
@@ -585,7 +715,7 @@ def check_lrcr_events(
             ):
                 logger.debug("%s_UID: %s", command_name, unique_id)
                 flag = True
-        COUNT = COUNT + 1
+        count = count + 1
         time.sleep(1)
     if flag:
         return True

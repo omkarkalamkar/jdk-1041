@@ -75,18 +75,18 @@ class EventCallbackManager:
             #     if dev_name in csp_subarray:
             #         dev_name = csp_subarray
 
-            devInfo = self.component.get_device(dev_name)
-            if devInfo is not None:
-                devInfo.obs_state = obs_state
+            dev_info = self.component.get_device(dev_name)
+            if dev_info is not None:
+                dev_info.obs_state = obs_state
                 self.logger.debug(
                     "Updated ObsState of %s: %s",
-                    devInfo.dev_name,
-                    ObsState(devInfo.obs_state).name,
+                    dev_info.dev_name,
+                    ObsState(dev_info.obs_state).name,
                 )
                 with self.command_completion_cond:
                     self.command_completion_cond.notify_all()
-                devInfo.last_event_arrived = time.time()
-                self.component.last_device_info_changed = devInfo
+                dev_info.last_event_arrived = time.time()
+                self.component.last_device_info_changed = dev_info
 
     def _get_sdp_subarray_name(self, device_name: str):
         """Provides SDP subarray device name which is stored in device
@@ -162,22 +162,22 @@ class EventCallbackManager:
                 + f"{HealthState(health_state).name}"
             )
             device_name = self._get_master_device_name(device_name)
-            devInfo = self.component.get_device(device_name)
-            if devInfo is not None:
-                devInfo.health_state = health_state
+            dev_info = self.component.get_device(device_name)
+            if dev_info is not None:
+                dev_info.health_state = health_state
                 self.logger.debug(
                     "Updated healthState of %s: %s",
-                    devInfo.dev_name,
-                    HealthState(devInfo.health_state).name,
+                    dev_info.dev_name,
+                    HealthState(dev_info.health_state).name,
                 )
-                devInfo.last_event_arrived = time.time()
+                dev_info.last_event_arrived = time.time()
                 self.event_data_manager.update_event_data(
                     device=device_name,
                     data=health_state,
                     received_timestamp=timestamp,
                     data_type="HealthState",
                 )
-                self.component.last_device_info_changed = devInfo
+                self.component.last_device_info_changed = dev_info
 
     def update_device_admin_mode(
         self, device_name: str, admin_mode: AdminMode, timestamp
@@ -232,12 +232,14 @@ class EventCallbackManager:
         with self.rlock:
             self.logger.debug("State event for %s: %s", device_name, state)
             device_name = self._get_master_device_name(device_name)
-            devInfo = self.component.get_device(device_name)
-            if devInfo is not None:
-                devInfo.state = state
+            dev_info = self.component.get_device(device_name)
+            if dev_info is not None:
+                dev_info.state = state
                 self.logger.debug(
-                    "Updated State of %s: %s ", devInfo.dev_name, devInfo.state
+                    "Updated State of %s: %s ",
+                    dev_info.dev_name,
+                    dev_info.state,
                 )
-                devInfo.last_event_arrived = time.time()
-                self.component.last_device_info_changed = devInfo
+                dev_info.last_event_arrived = time.time()
+                self.component.last_device_info_changed = dev_info
         self._aggregate_state()

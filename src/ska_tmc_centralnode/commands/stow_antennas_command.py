@@ -1,7 +1,7 @@
 """Command Class for Setting Stow command on Dishes"""
 
 import json
-from typing import Tuple
+from typing import Callable, Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
@@ -67,6 +67,7 @@ class SetStowMode(SetDishGPM):
         self.update_task_status(result=(result, message), exception=message)
         return result, message
 
+    # pylint:disable=arguments-differ
     def update_task_status(
         self, result: Tuple[ResultCode, str], exception: str = None
     ) -> None:
@@ -117,6 +118,7 @@ class SetStowMode(SetDishGPM):
         )
         self.component_manager.reset_stow_mode_data()
 
+    # pylint:enable=arguments-differ
     def process_update_task_for_command_failure(
         self, error_message: str
     ) -> str:
@@ -336,7 +338,7 @@ class SetStowMode(SetDishGPM):
             "ERROR: " + error_message
         )
 
-    def update_stow_results(self, dev_name: str) -> None:
+    def update_stow_results(self, dev_name: str) -> Callable:
         """
         This method is used to update the result returned
         from Dish leaf nodes as part of SetGlobalPointingModel
@@ -350,7 +352,8 @@ class SetStowMode(SetDishGPM):
             value (tuple): longRunningCommandResult attribute event.
         """
 
-        def callback(result=None, **kwargs):
+        def callback(**kwargs):
+            result = kwargs.get("result", None)
             stow_mode_cmd_exe_data = (
                 self.component_manager.dishln_stow_mode_cmd_exe_data
             )

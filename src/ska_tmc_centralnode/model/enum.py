@@ -7,8 +7,8 @@ from enum import IntEnum, unique
 class ModesAvailability(IntEnum):
     """Avilable models enum class"""
 
-    not_available = 0
-    available = 1
+    NOT_AVAILABLE = 0
+    AVAILABLE = 1
 
 
 class DishConfigStatus(IntEnum):

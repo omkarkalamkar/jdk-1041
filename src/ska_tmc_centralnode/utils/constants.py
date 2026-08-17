@@ -33,7 +33,7 @@ LOW_CSP_SUBARRAY = "low-csp/subarray/01"
 LOW_SDP_SUBARRAY = "low-sdp/subarray/01"
 DISH_DEVICE_PREFIX = "mid-dish/dish-manager"
 DISH_MASTER_1 = "mid-dish/dish-manager/ska001"
-mccs_release_interface = (
+MCCS_RELEASE_INTERFACE = (
     "https://schema.skatelescope.org/ska-low-mccs-controller-release/2.0"
 )
 
