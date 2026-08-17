@@ -5,7 +5,6 @@ from typing import Tuple
 
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
-from ska_telmodel.data import TMData
 from ska_tmc_common.adapter_type import AdapterType
 from ska_tmc_common.v4.command_context import CommandResult, DeviceCommand
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
@@ -399,47 +398,6 @@ class LoadDishCfg(BaseTMCCommand):
         runtime_ctx.command_ctx.update_memorized_attribute(
             self.plan.dish_cfg_params
         )
-        # self.csp_mln_adapter.memorizedDishVccMap = self.dish_cfg_params
-
-    def get_dishid_vcc_map_json(
-        self, initial_params: dict
-    ) -> Tuple[dict, str]:
-        """
-        Get DishId-VCC map json from initial params
-
-        Args:
-            initial_param (dict): this param containg tm
-                data source uri and file path which is used
-                for extracting vcc_map json file
-
-        Returns:
-            Tuple(dict, str): tuple having `DishId-VCC map json` and
-            `Error message` if any
-
-        """
-        data_sources = initial_params.get("tm_data_sources", None)
-        tm_data_filepath = initial_params.get("tm_data_filepath", None)
-        self.logger.debug(
-            "Command ID: %s | The initial params are : %s",
-            self.context.command_id,
-            json.dumps(initial_params),
-        )
-        if data_sources and tm_data_filepath:
-            try:
-                data = TMData(data_sources)
-                return data[tm_data_filepath].get_dict(), ""
-            except Exception as exception:
-                self.logger.exception(
-                    "Command ID: %s |  Error in Loading Dish VCC map "
-                    + "json file %s, retrying",
-                    self.context.command_id,
-                    exception,
-                )
-                return (
-                    {},
-                    f"Error in Loading Dish VCC map json file {exception}",
-                )
-        return {}, "tm_data_sources and tm_data_filepath not provided in json"
 
     def get_dish_adapters(self) -> list:
         """
