@@ -284,7 +284,6 @@ class CNComponentManagerLow(CNComponentManager):
             )
         return argin, exception_msg
 
-    # pylint: disable=unexpected-keyword-arg
     @exception_handler("AssignResources")
     def assign_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
@@ -320,8 +319,6 @@ class CNComponentManagerLow(CNComponentManager):
             task_abort_event=task_abort_event,
         )
 
-    # pylint: enable=unexpected-keyword-arg
-
     def validate_release_json(self, argin: str) -> Tuple[str, str]:
         """Validates the release resource json.
 
@@ -352,7 +349,6 @@ class CNComponentManagerLow(CNComponentManager):
             )
         return argin, exception_msg
 
-    # pylint: disable=unexpected-keyword-arg
     @exception_handler("ReleaseResources")
     def release_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
@@ -389,8 +385,6 @@ class CNComponentManagerLow(CNComponentManager):
             task_callback=task_callback,
             task_abort_event=task_abort_event,
         )
-
-    # pylint: enable=unexpected-keyword-arg
 
     def update_subarray_pss_beams_mapping(self, json_argument: dict) -> None:
         """

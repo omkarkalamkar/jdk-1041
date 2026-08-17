@@ -591,7 +591,6 @@ class CNComponentManagerMid(CNComponentManager):
 
         return False
 
-    # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(
         self, argin: str, task_callback: Callable, task_abort_event
     ) -> Tuple[ResultCode, str]:
@@ -888,7 +887,6 @@ class CNComponentManagerMid(CNComponentManager):
             )
         return argin, exception_msg
 
-    # pylint: disable=unexpected-keyword-arg
     @exception_handler(command_name="AssignResources")
     def assign_resources(
         self, argin, task_callback: TaskCallbackType, task_abort_event
@@ -952,8 +950,6 @@ class CNComponentManagerMid(CNComponentManager):
             task_abort_event=task_abort_event,
         )
 
-    # pylint: enable=unexpected-keyword-arg
-
     def validate_release_json(self, argin: str) -> Tuple[str, str]:
         """Validates the release resource json.
 
@@ -978,7 +974,6 @@ class CNComponentManagerMid(CNComponentManager):
             )
         return argin, exception_msg
 
-    # pylint: disable=unexpected-keyword-arg
     @exception_handler(command_name="ReleaseResources")
     def release_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
@@ -1012,8 +1007,6 @@ class CNComponentManagerMid(CNComponentManager):
             task_callback=task_callback,
             task_abort_event=task_abort_event,
         )
-
-    # pylint: enable=unexpected-keyword-arg
 
     def validate_dish_ids(self, receptors: list[str]) -> Tuple[bool, str]:
         """Validates dish ids."""

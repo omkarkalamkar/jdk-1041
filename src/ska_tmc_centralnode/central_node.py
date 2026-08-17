@@ -514,12 +514,9 @@ class AbstractCentralNode(TMCBaseDevice):
 
         return True
 
-    # pylint: disable=unnecessary-pass
     def completed_AssignResources(self) -> None:
         """AssignResources command completed callback."""
-        pass
 
-    # pylint: enable=unnecessary-pass
     @assign_validate_json_args
     @long_running_command
     @DebugIt()
