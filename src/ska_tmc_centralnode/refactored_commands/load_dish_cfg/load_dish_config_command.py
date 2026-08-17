@@ -218,6 +218,7 @@ class LoadDishCfg(BaseTMCCommand):
             return message, ResultCode.OK, True
 
         message = f"LoadDishCfg failed: {failed_data}"
+        self.logger.debug("command result %s", message)
         return message, ResultCode.FAILED, False
 
     def process_loaddishcfg_as_per_err_message_or_exception(
