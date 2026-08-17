@@ -18,6 +18,7 @@ from ska_tmc_centralnode.manager.component_manager_config import (
 from ska_tmc_centralnode.manager.component_manager_low import (
     CNComponentManagerLow,
 )
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.input import InputParameterLow
 
 __all__ = ["LowTmcCentralNode", "main"]
@@ -85,7 +86,8 @@ class LowTmcCentralNode(AbstractCentralNode):
         :return: Instance of LowCentralNodeComponentManagerConfig.
         :rtype: LowCentralNodeComponentManagerConfig
         """
-        self._component.shared_bus = self.shared_bus
+        _component = CentralComponent(logger=self.logger)
+        _component.shared_bus = self.shared_bus
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )
@@ -95,7 +97,7 @@ class LowTmcCentralNode(AbstractCentralNode):
             "array_layout_path": self.DefaultArrayLayoutPath,
         }
         return LowCentralNodeComponentManagerConfig(
-            component=self._component,
+            component=_component,
             op_state_model=self.op_state_model,
             input_parameter=InputParameterLow(None),
             logger=self.logger,

@@ -28,7 +28,6 @@ from tango import ApiUtil, AttrWriteType, Database, DebugIt
 from tango.server import command, device_property
 
 from ska_tmc_centralnode import release
-from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     assign_validate_json_args,
     release_validate_json_args,
@@ -243,7 +242,6 @@ class AbstractCentralNode(TMCBaseDevice):
         Initializes the CentralNode device.
         """
         super().init_device()
-        self._component = CentralComponent(logger=self.logger)
 
         self._build_state = (
             f"{release.name},{release.version},{release.description}"

@@ -31,6 +31,7 @@ from ska_tmc_centralnode.manager.component_manager_config import (
 from ska_tmc_centralnode.manager.component_manager_mid import (
     CNComponentManagerMid,
 )
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.enum import DishConfigStatus, ModesAvailability
 from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.json_validator_decorator import (
@@ -233,7 +234,9 @@ class MidTmcCentralNode(AbstractCentralNode):
         :return: Instance of MidCentralNodeComponentManagerConfig.
         :rtype: MidCentralNodeComponentManagerConfig
         """
-        self._component.shared_bus = self.shared_bus
+        _component = CentralComponent(logger=self.logger)
+
+        _component.shared_bus = self.shared_bus
         self.op_state_model = TMCOpStateModel(
             logger=self.logger, callback=super()._update_state
         )
@@ -242,7 +245,7 @@ class MidTmcCentralNode(AbstractCentralNode):
             "array_layout_path": self.DefaultArrayLayoutPath,
         }
         return MidCentralNodeComponentManagerConfig(
-            component=self._component,
+            component=_component,
             op_state_model=self.op_state_model,
             input_parameter=InputParameterMid(None),
             logger=self.logger,
