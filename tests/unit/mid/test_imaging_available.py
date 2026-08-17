@@ -57,7 +57,7 @@ def test_imaging_available(tango_context):
             MID_CSP_MASTER_DEVICE,
             DISH_MASTER_DEVICE,
         ],
-        devFactory=DevFactory(),
+        dev_factory=DevFactory(),
         state=tango.DevState.ON,
     )
     ensure_imaging(cm, ModesAvailability.AVAILABLE, expected_elapsed_time=30)

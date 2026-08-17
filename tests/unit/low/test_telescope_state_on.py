@@ -74,14 +74,14 @@ def devices_to_load():
     )
 
 
-def set_devices_on(cm, devFactory, expected_elapsed_time):
+def set_devices_on(cm, dev_factory, expected_elapsed_time):
     set_devices_state(
         devices=[
             LOW_SDP_MASTER_DEVICE,
             LOW_CSP_MASTER_DEVICE,
             MCCS_CONTROLLER,
         ],
-        devFactory=devFactory,
+        dev_factory=dev_factory,
         state=tango.DevState.ON,
     )
     ensure_telescope_state(
@@ -91,10 +91,10 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
 
 @pytest.mark.SKA_low
 def test_telescope_state_on(tango_context):
-    devFactory = DevFactory()
+    dev_factory = DevFactory()
 
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
-    set_devices_on(cm, devFactory, 2)
+    set_devices_on(cm, dev_factory, 2)
     assert cm.component.telescope_state == tango.DevState.ON

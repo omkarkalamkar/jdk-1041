@@ -63,7 +63,7 @@ def devices_to_load():
     )
 
 
-def set_devices_on(cm, devFactory, expected_elapsed_time):
+def set_devices_on(cm, dev_factory, expected_elapsed_time):
     """sets devices to On"""
     set_devices_state(
         devices=[
@@ -74,7 +74,7 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
             LOW_CSP_SLN_DEVICE,
             LOW_SDP_SLN_DEVICE,
         ],
-        devFactory=devFactory,
+        dev_factory=dev_factory,
         state=tango.DevState.ON,
     )
     ensure_tmc_op_state(cm, tango.DevState.ON, expected_elapsed_time)
@@ -83,12 +83,12 @@ def set_devices_on(cm, devFactory, expected_elapsed_time):
 @pytest.mark.SKA_low
 def test_tmc_state_on(tango_context):
     """test tmc state on"""
-    devFactory = DevFactory()
+    dev_factory = DevFactory()
     cm = create_cm_no_faulty_devices(
         tango_context, True, True, InputParameterLow(None)
     )
     set_devices_on(
-        cm, devFactory, 30
+        cm, dev_factory, 30
     )  # Here expected elapsed time is set to 25 since
     # set_state() API is taking more time to set the state and
     # hence actual elapsed time is increasing

@@ -71,7 +71,7 @@ def test_telescope_state_on_with_dishmode_standbyfp(tango_context):
             MID_SDP_MASTER_DEVICE,
         ],
         state=tango.DevState.ON,
-        devFactory=DevFactory(),
+        dev_factory=DevFactory(),
     )
 
     dish_master = DevFactory().get_device(DISH_LEAF_NODE_DEVICE)
@@ -89,7 +89,7 @@ def test_telescope_state_on_with_dishmode_operate(tango_context):
             MID_SDP_MASTER_DEVICE,
         ],
         state=tango.DevState.ON,
-        devFactory=DevFactory(),
+        dev_factory=DevFactory(),
     )
 
     dish_master = DevFactory().get_device(DISH_LEAF_NODE_DEVICE)
@@ -107,7 +107,7 @@ def test_telescope_state_on_with_dishmode_config(tango_context):
             MID_SDP_MASTER_DEVICE,
         ],
         state=tango.DevState.ON,
-        devFactory=DevFactory(),
+        dev_factory=DevFactory(),
     )
 
     dish_master = DevFactory().get_device(DISH_LEAF_NODE_DEVICE)

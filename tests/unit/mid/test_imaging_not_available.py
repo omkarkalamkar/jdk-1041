@@ -57,7 +57,7 @@ def test_imaging_not_available(tango_context):
             MID_CSP_MLN_DEVICE,
             DISH_MASTER_DEVICE,
         ],
-        devFactory=DevFactory(),
+        dev_factory=DevFactory(),
         state=tango.DevState.OFF,
     )
     ensure_imaging(
