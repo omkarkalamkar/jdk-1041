@@ -137,17 +137,15 @@ class LoadDishCfg(BaseTMCCommand):
         self.logger.info("Result is %s", result)
         if result[0] == ResultCode.FAILED or result[2]:
             error_message = result[1] + " LoadDishCfg command failed: "
-            self.command_runtime_context.command_ctx.update_dish_vcc_flag(
-                False
-            )
+            runtime_context.command_ctx.update_dish_vcc_flag(False)
             self.process_update_task_for_loaddishcfg_failure(error_message)
         else:
             self.process_loaddishcfg_as_per_k_val_results(k_val_results)
             self.update_memorized_attribute()
-        self.command_runtime_context.command_ctx.set_dish_vcc_command_status(
+        runtime_context.command_ctx.set_dish_vcc_command_status(
             DishConfigStatus.COMPLETED
         )
-        # self.component_manager.reset_load_dish_cfg_data()
+        runtime_context.command_ctx.reset_load_dish_cfg_data()
 
     def process_loaddishcfg_as_per_k_val_results(
         self, k_val_results: dict

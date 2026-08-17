@@ -1010,6 +1010,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self, "dish_vcc_validation_status", status
             ),
             update_memorized_attribute=self.update_memorized_attribute,
+            reset_load_dish_cfg_data=self.reset_load_dish_cfg_data,
         )
         return LoadDishCfgRuntimeContext(
             command_completion_condition=self.command_completion_cond,

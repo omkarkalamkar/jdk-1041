@@ -52,11 +52,7 @@ class LoadDishCfgCommandContext:
 
     update_memorized_attribute: Callable
 
-    # # Task / execution lifecycle
-    # upd_abort_evt: Callable = None
-    #
-    # # Cleanup
-    # clear_device_events: Callable = None
+    reset_load_dish_cfg_data: Callable
 
 
 @dataclass(kw_only=True)
