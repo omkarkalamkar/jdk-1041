@@ -8,6 +8,7 @@ from queue import Empty, Queue
 from typing import Callable, Dict
 
 import tango
+from tango.utils import PyTangoThread
 
 
 class EventProcessor:
@@ -73,7 +74,7 @@ class EventProcessor:
     def start(self) -> None:
         """Start one daemon worker thread per event queue."""
         for attribute in self.event_queues:
-            threading.Thread(
+            PyTangoThread(
                 target=self._process_event,
                 args=[attribute],
                 name=attribute,
@@ -133,38 +134,37 @@ class EventProcessor:
         Args:
             attribute_name: The attribute whose queue to consume.
         """
-        with tango.EnsureOmniThread():
-            while not self._stop_event.is_set():
-                try:
-                    event_data = self.event_queues[attribute_name].get(
-                        block=True, timeout=0.1
+        while not self._stop_event.is_set():
+            try:
+                event_data = self.event_queues[attribute_name].get(
+                    block=True, timeout=0.1
+                )
+                if self._check_event_error(
+                    event_data, f"{attribute_name}_Callback"
+                ):
+                    continue
+                if not self._validate_event_structure(
+                    attribute_name, event_data
+                ):
+                    continue
+                handler = self._handlers.get(attribute_name)
+                if not handler:
+                    continue
+                if attribute_name in ("healthState", "adminMode"):
+                    handler(
+                        event_data.device.dev_name(),
+                        event_data.attr_value.value,
+                        event_data.attr_value.time.todatetime(),
                     )
-                    if self._check_event_error(
-                        event_data, f"{attribute_name}_Callback"
-                    ):
-                        continue
-                    if not self._validate_event_structure(
-                        attribute_name, event_data
-                    ):
-                        continue
-                    handler = self._handlers.get(attribute_name)
-                    if not handler:
-                        continue
-                    if attribute_name in ("healthState", "adminMode"):
-                        handler(
-                            event_data.device.dev_name(),
-                            event_data.attr_value.value,
-                            event_data.attr_value.time.todatetime(),
-                        )
-                    else:
-                        handler(
-                            event_data.device.dev_name(),
-                            event_data.attr_value.value,
-                        )
-                except Empty:
-                    pass
-                except Exception as exception:
-                    self.logger.error("%s", str(exception))
+                else:
+                    handler(
+                        event_data.device.dev_name(),
+                        event_data.attr_value.value,
+                    )
+            except Empty:
+                pass
+            except Exception as exception:
+                self.logger.error("%s", str(exception))
         self.logger.debug("Process event thread stopped")
 
 

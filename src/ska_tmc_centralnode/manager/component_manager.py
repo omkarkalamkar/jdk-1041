@@ -26,6 +26,7 @@ from ska_tmc_common import (
     SubArrayDeviceInfo,
 )
 from ska_tmc_common.v2.tmc_component_manager import TmcComponentManager
+from tango.utils import PyTangoThread
 
 from ska_tmc_centralnode.commands.telescope_off_command import TelescopeOff
 from ska_tmc_centralnode.commands.telescope_on_command import TelescopeOn
@@ -134,7 +135,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             [""]
         )
         self.aggregate_value_update_event = Event()
-        self.aggregate_process_monitor_thread = threading.Thread(
+        self.aggregate_process_monitor_thread = PyTangoThread(
             target=self.aggregate_process_monitor
         )
         self.aggregate_process_monitor_thread.start()
@@ -240,7 +241,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             if self.aggregate_value_update_event.wait(0.3):
                 self.aggregate_value_update_event.clear()
                 current_health_state = self.aggregated_health_state[0]
-                if current_health_state:
+                if current_health_state is not None:
                     self.component.telescope_health_state = (
                         current_health_state
                     )
@@ -248,6 +249,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
                         "Aggregate telescope health state called %s",
                         str(current_health_state),
                     )
+
         self.logger.debug("aggregation process monitor thread stopped")
 
     def stop_aggregation_process(self):
