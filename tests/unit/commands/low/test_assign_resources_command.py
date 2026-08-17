@@ -230,7 +230,6 @@ def test_low_assign_resources_command_missing_station_ids(
     assert "station_id" in message[0]
 
 
-@pytest.mark.new
 @pytest.mark.SKA_low
 def test_telescope_low_assign_resources_fail_check_allowed(
     tango_context, set_low_sdp_csp_mccs_admin_modes

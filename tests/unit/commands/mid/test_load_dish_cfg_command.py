@@ -223,17 +223,18 @@ def test_dish_vcc_validation_status(task_callback, json_factory):
     cm.check_if_csp_all_dish_ready = mock.Mock()
     cm.check_if_csp_all_dish_ready.return_value = True
     cm.config.dish_config.invoke_command_callback = mock.Mock()
+    cm._event_cb_manager.check_if_csp_all_dish_ready = mock.Mock()
+
     cm._event_cb_manager.handle_dish_vcc_validation_result(
         MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
     )
     assert cm.dish_vcc_command_status == DishConfigStatus.INIT
 
-    cm.check_if_csp_all_dish_ready.return_value = False
+    cm._event_cb_manager.check_if_csp_all_dish_ready.return_value = False
     cm.command_in_progress = ""
     cm._event_cb_manager.handle_dish_vcc_validation_result(
         MID_CSP_MLN_DEVICE, ResultCode.UNKNOWN
     )
-
     assert cm.dish_vcc_command_status == DishConfigStatus.FAILED
 
 
