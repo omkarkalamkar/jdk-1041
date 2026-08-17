@@ -1040,7 +1040,7 @@ class CNComponentManagerMid(CNComponentManager):
                 get_name=lambda: self.command_in_progress,
                 obj_update_cmd=lambda *a, **kw: None,
             ),
-            gpm_unknown_dishes=["SKA001", "SKA011"],
+            gpm_unknown_dishes=self.gpm_unknown_dishes,
             dishln_gpm_cmd_exe_data=self.dishln_gpm_cmd_exe_data,
             is_already_assigned=self.is_already_assigned,
             get_default_gpm_version_params=self.get_default_gpm_version_params,
