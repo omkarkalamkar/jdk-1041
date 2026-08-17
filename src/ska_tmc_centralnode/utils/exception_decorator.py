@@ -3,7 +3,7 @@ import functools
 import threading
 
 from ska_control_model import ResultCode, TaskStatus
-from ska_control_model.faults import StateModelError
+from ska_tango_base.faults import StateModelError
 from ska_tango_base.type_hints import TaskCallbackType
 from ska_tmc_common import CommandNotAllowed
 
