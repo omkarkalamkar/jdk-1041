@@ -9,7 +9,6 @@ from ska_tmc_common.exceptions import CommandNotAllowed
 from ska_tmc_common.test_helpers.helper_adapter_factory import (
     HelperAdapterFactory,
 )
-from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
 from ska_tmc_centralnode.utils.constants import LOW_TMC_SUBARRAY
@@ -155,7 +154,7 @@ def test_low_telescope_standby_fail_check_allowed(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), elapsed_time
     )
-    cm.config.op_state_model.op_state = DevState.FAULT
+    cm.config.op_state_model.perform_action("component_fault")
     with pytest.raises(CommandNotAllowed):
         cm.is_command_allowed("TelescopeStandby")
 
