@@ -356,8 +356,9 @@ class MidTmcCentralNode(AbstractCentralNode):
             json.dumps(self.component_manager.get_default_gpm_version_params())
         )
 
+    # pylint: disable=unused-argument
     def is_LoadDishCfg_allowed(
-        self, _request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, request_type: LRCReqType | None = None
     ) -> bool:
         """
         Checks whether LoadDishCfg command is allowed to be run
@@ -366,6 +367,8 @@ class MidTmcCentralNode(AbstractCentralNode):
         :rtype: boolean
         """
         return True
+
+    # pylint: enable=unused-argument
 
     @validate_dish_vcc_command_status
     @long_running_command
@@ -401,8 +404,9 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         return task
 
+    # pylint: disable=unused-argument
     def is_SetGlobalPointingModel_allowed(
-        self, _request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, request_type: LRCReqType | None = None
     ) -> bool:
         """
         Checks whether setGlobalPointingModel command is allowed to be run
@@ -411,6 +415,8 @@ class MidTmcCentralNode(AbstractCentralNode):
         :rtype: boolean
         """
         return True
+
+    # pylint: enable=unused-argument
 
     @long_running_command
     @DebugIt()
@@ -457,8 +463,9 @@ class MidTmcCentralNode(AbstractCentralNode):
 
         return task
 
+    # pylint: disable=unused-argument
     def is_SetStowMode_allowed(
-        self, _request_type: LRCReqType = LRCReqType.ENQUEUE_REQ
+        self, request_type: LRCReqType | None = None
     ) -> bool:
         """
         Checks whether setStowMode command is allowed to be run
@@ -467,6 +474,8 @@ class MidTmcCentralNode(AbstractCentralNode):
         :rtype: boolean
         """
         return True
+
+    # pylint: enable=unused-argument
 
     @long_running_command
     @DebugIt()
