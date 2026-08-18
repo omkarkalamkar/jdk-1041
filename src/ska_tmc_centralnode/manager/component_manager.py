@@ -4,6 +4,7 @@ This module provided an implementation of the Central Node ComponentManager.
 
 from __future__ import annotations
 
+import copy
 import json
 import threading
 import time
@@ -591,7 +592,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
 
     def get_telescope_availability(self) -> dict:
         """Getter method for Telescope Availability"""
-        return self.component.telescope_availability.copy()
+        return copy.deepcopy(self.component.telescope_availability)
 
     def set_telescope_availability(self, telescope_availability) -> None:
         """Setter method for telescope availability"""
