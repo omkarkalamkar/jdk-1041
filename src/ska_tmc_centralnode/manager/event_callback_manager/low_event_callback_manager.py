@@ -26,7 +26,9 @@ class LowEventCallbackManager(EventCallbackManager):
         set_csp_mln_availability: Callable,
         set_sdp_mln_availability: Callable,
         set_mccs_mln_availability: Callable,
-        _telescope_availability_aggregator: TelescopeAvailabilityAggregatorLow,
+        get_telescope_availability_aggregator: Callable[
+            [], TelescopeAvailabilityAggregatorLow
+        ],
     ):
         super().__init__(
             logger,
@@ -40,8 +42,8 @@ class LowEventCallbackManager(EventCallbackManager):
         self.set_csp_mln_availability = set_csp_mln_availability
         self.set_sdp_mln_availability = set_sdp_mln_availability
         self.set_mccs_mln_availability = set_mccs_mln_availability
-        self._telescope_availability_aggregator = (
-            _telescope_availability_aggregator
+        self.get_telescope_availability_aggregator = (
+            get_telescope_availability_aggregator
         )
 
     def update_telescope_availability(self, device_name, event_value):
@@ -58,4 +60,4 @@ class LowEventCallbackManager(EventCallbackManager):
                 self.set_sdp_mln_availability(event_value)
             elif self.input_parameter.mccs_mln_dev_name == device_name:
                 self.set_mccs_mln_availability(event_value)
-            self._telescope_availability_aggregator.aggregate()
+            self.get_telescope_availability_aggregator().aggregate()

@@ -100,7 +100,9 @@ class CNComponentManagerMid(CNComponentManager):
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names
         }
-
+        telescope_availability = self.get_telescope_availability()
+        telescope_availability["tmc_subarrays"] = self.subarray_availability
+        self.set_telescope_availability(telescope_availability)
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
 
@@ -162,12 +164,6 @@ class CNComponentManagerMid(CNComponentManager):
             get_device=self.get_device,
         )
 
-    def on_new_shared_bus(self) -> None:
-        super().on_new_shared_bus()
-        telescope_availability = self.get_telescope_availability()
-        telescope_availability["tmc_subarrays"] = self.subarray_availability
-        self.set_telescope_availability(telescope_availability)
-
     def _get_event_cb_manager(self) -> MidEventCallbackManager:
         """Provides Instance Event Callaback Manager"""
         return MidEventCallbackManager(
@@ -182,8 +178,8 @@ class CNComponentManagerMid(CNComponentManager):
             ),
             gpm_aggregator=self.gpm_aggregator,
             update_dish_vcc_flag=self.update_dish_vcc_flag,
-            _telescope_availability_aggregator=(
-                self._telescope_availability_aggregator
+            get_telescope_availability_aggregator=(
+                lambda: self._telescope_availability_aggregator
             ),
             subarray_availability=self.subarray_availability,
             set_csp_mln_availability=lambda availability: setattr(
