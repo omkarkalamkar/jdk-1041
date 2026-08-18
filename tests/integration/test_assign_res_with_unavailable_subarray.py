@@ -18,6 +18,7 @@ from tests.settings import (
     LOW_SUBARRAY_DEVICE,
     LOW_SUBARRAY_NOT_AVAILABLE,
     MID_SUBARRAY_DEVICE,
+    MID_SUBARRAY_NOT_AVAILABLE,
     assert_exception,
     check_subarray_availability,
     export_device,
@@ -51,6 +52,7 @@ def assign_resources(
 
     # Waiting for event from central node
     time.sleep(3)
+    msg = MID_SUBARRAY_NOT_AVAILABLE
 
     if "mid-tmc" in central_node_fqdn:
         result, unique_id = central_node_proxy.AssignResources(
@@ -60,6 +62,7 @@ def assign_resources(
         result, unique_id = central_node_proxy.AssignResources(
             assign_input_str
         )
+        msg = LOW_SUBARRAY_NOT_AVAILABLE
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,
@@ -68,9 +71,7 @@ def assign_resources(
 
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
-    assert_exception(
-        unique_id, LOW_SUBARRAY_NOT_AVAILABLE, change_event_callbacks
-    )
+    assert_exception(unique_id, msg, change_event_callbacks)
 
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 

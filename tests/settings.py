@@ -154,6 +154,9 @@ TIMEOUT_MSG = "Timeout has occurred, command failed"
 LOW_SUBARRAY_NOT_AVAILABLE = (
     "Subarray devices not available: ['low-tmc/subarray/01']"
 )
+MID_SUBARRAY_NOT_AVAILABLE = (
+    "Subarray devices not available: ['mid-tmc/subarray/01']"
+)
 
 
 def telescope_on(
