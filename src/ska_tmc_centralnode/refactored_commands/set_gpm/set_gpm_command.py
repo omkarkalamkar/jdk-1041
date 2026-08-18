@@ -20,7 +20,8 @@ from ska_tmc_centralnode.refactored_commands.set_gpm.gpm_json_model import (
 )
 
 from .base_command import BaseCNCommand
-from .contexts import GPMContext, GPMPlan, GPMRequest
+from .contexts import GPMContext, GPMRequest
+from .strategy import GPMPlan
 
 
 class SetGlobalPointingModel(BaseCNCommand):
@@ -201,36 +202,22 @@ class SetGlobalPointingModel(BaseCNCommand):
         )
         if not isinstance(self.context.argin, str):
             raise ValueError("GPM input argument is required")
-        gpm_paths = (
-            self.command_runtime_context.get_default_gpm_version_params()
-        )
+        gpm_paths = self.command_runtime_context.default_gpm_version_params
         if any(value in (None, "") for value in gpm_paths.values()):
-            self.logger.exception(
-                "GPM Telmodel paths not set. : %s", gpm_paths
-            )
-            raise ValueError("GPM Telmodel paths not set.")
+            self.error_message = "GPM Telmodel paths not set."
+            self.logger.exception("%s:  %s", self.error_message, gpm_paths)
+            raise ValueError(self.error_message)
         request = GPMRequest.from_json(self.context.argin)
         if "receptors" not in request:
-            try:
-                ctx = self.command_runtime_context
-                self.error_message = (
-                    "No GPM files found on set GPM parameters."
-                )
-                gpm_files = self.get_gpm_files(
-                    ctx.get_default_gpm_version_params()
-                )
-                if not gpm_files:
-                    self.logger.error("Error message: %s", self.error_message)
-                    self.result_code = ResultCode.FAILED
-                    self._plan.apm_payload = {}
-                else:
-                    self._plan: GPMPlan = self._build_gpm_plan(
-                        request, gpm_files
-                    )
-            except Exception:
-                self.logger.exception(
-                    "Exception occurred while preparing GPM command."
-                )
+            ctx = self.command_runtime_context
+            self.error_message = "No GPM files found on set GPM parameters."
+            gpm_files = self.get_gpm_files(ctx.default_gpm_version_params)
+            if not gpm_files:
+                self.logger.error("Error message: %s", self.error_message)
+                self.result_code = ResultCode.FAILED
+                self._plan.apm_payload = {}
+            else:
+                self._plan: GPMPlan = self._build_gpm_plan(request, gpm_files)
         else:
             self._plan: GPMPlan = self._build_gpm_plan(request)
         self.validate_dishes(self._plan.apm_payload)
@@ -328,7 +315,7 @@ class SetGlobalPointingModel(BaseCNCommand):
                 ) or ctx.is_already_assigned(dish_id.lower()):
                     error_message = "Dish is assigned to subarray"
             except Exception:
-                error_message = "Dish is unreachable"
+                error_message = "Dish is unreachable ?????"
                 self.logger.exception(error_message)
             if error_message:
                 self.result_code = ResultCode.FAILED
@@ -378,7 +365,7 @@ class SetGlobalPointingModel(BaseCNCommand):
         """
         msg: str = message or exception
         self.logger.info(
-            "Command ID: %s | Updating task status with Result: %s",
+            "Command ID: %s | Received task status with Result: %s",
             self.command_runtime_context.cmd_inprogress_ctx.get_id(),
             (result, status, msg),
         )
@@ -386,38 +373,14 @@ class SetGlobalPointingModel(BaseCNCommand):
         self.process_update_task_status()
 
     def process_update_task_status(self) -> None:
-        """Method to update the task callback and GPM status
-        with the failure data
-        """
-
-        message = ""
+        """Update the task callback and GPM status with the failure data."""
         ctx = self.command_runtime_context
-        if ctx.dishln_gpm_cmd_exe_data:
-            for (
-                dish_id,
-                result,
-            ) in ctx.dishln_gpm_cmd_exe_data.items():
-                if isinstance(result, str):
-                    if (
-                        "Dish is assigned to subarray" not in result
-                        and "Dish is unreachable" not in result
-                    ):
-                        ctx.global_pointing_model_status[dish_id] = result
 
-            self.logger.info(">>>>>>>>>>>>>> %s", self.result_code)
-            filtered_dishes = self.filter_failed_dish_data(
-                ctx.dishln_gpm_cmd_exe_data
-            )
-            self.logger.info(
-                ">>>>>>>>>>>>>> %s %s", self.result_code, filtered_dishes
-            )
-            if not filtered_dishes:
-                filtered_dishes = ctx.dishln_gpm_cmd_exe_data
-            if self.result_code != ResultCode.OK:
-                message = "SetGPM failed on: "
-            message = message + str(filtered_dishes)
-        else:
-            message = self.error_message
+        message = (
+            self._build_gpm_status_message(ctx)
+            if ctx.dishln_gpm_cmd_exe_data
+            else self.error_message
+        )
 
         if self.error_message:
             self.result_code = ResultCode.FAILED
@@ -428,15 +391,47 @@ class SetGlobalPointingModel(BaseCNCommand):
             self.context.command_id,
             result,
         )
+
+        callback_kwargs = {"result": result, "status": TaskStatus.COMPLETED}
         if self.result_code != ResultCode.OK:
-            self.context.task_callback(
-                result=result, status=TaskStatus.COMPLETED, exception=message
-            )
-        else:
-            self.context.task_callback(
-                result=result, status=TaskStatus.COMPLETED
-            )
-        self.command_runtime_context.reset_gpm_data()
+            callback_kwargs["exception"] = message
+        self.context.task_callback(**callback_kwargs)
+
+        ctx.reset_gpm_data()
+
+    def _build_gpm_status_message(self, ctx) -> str:
+        """Update GPM status and build the failure message.
+
+        Skips statuses for unreachable or assigned dishes.
+
+        :param ctx: Runtime context containing GPM execution data.
+        :type ctx: CommandRuntimeContext
+        :return: GPM status or failure message.
+        :rtype: str
+        """
+
+        _SKIP_STATUS_MARKERS = (
+            "Dish is assigned to subarray",
+            "Dish is unreachable",
+        )
+
+        for dish_id, result in ctx.dishln_gpm_cmd_exe_data.items():
+            if isinstance(result, str) and not any(
+                marker in result for marker in _SKIP_STATUS_MARKERS
+            ):
+                ctx.global_pointing_model_status[dish_id] = result
+
+        filtered_dishes = (
+            self.filter_failed_dish_data(ctx.dishln_gpm_cmd_exe_data)
+            or ctx.dishln_gpm_cmd_exe_data
+        )
+
+        prefix = (
+            "SetGPM failed on: " if self.result_code != ResultCode.OK else ""
+        )
+        if prefix:
+            return prefix + str(filtered_dishes)
+        return filtered_dishes
 
     def filter_failed_dish_data(self, data: dict) -> dict:
         """Filter failed dish data.

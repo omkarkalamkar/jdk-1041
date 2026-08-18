@@ -1031,7 +1031,7 @@ class CNComponentManagerMid(CNComponentManager):
             gpm_unknown_dishes=self.gpm_unknown_dishes,
             dishln_gpm_cmd_exe_data=self.dishln_gpm_cmd_exe_data,
             is_already_assigned=self.is_already_assigned,
-            get_default_gpm_version_params=self.get_default_gpm_version_params,
+            default_gpm_version_params=self.get_default_gpm_version_params(),
             update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
             get_dish_leaf_node_device_names=(
                 self.get_dish_leaf_node_device_names
