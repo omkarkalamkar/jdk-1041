@@ -2,6 +2,7 @@
 
 import json
 import threading
+from collections import defaultdict
 from typing import List, Optional
 
 import tango
@@ -64,7 +65,7 @@ class CentralComponent(SharingObserver, TmcComponent):
         stored=True, initial_value=tango.DevState.UNKNOWN
     )
     _telescope_availability: Signal[dict] = Signal[dict](
-        stored=True, initial_value={}
+        stored=True, initial_value={"tmc_subarrays": defaultdict(bool)}
     )
     _telescope_health_state: Signal[HealthState] = Signal[HealthState](
         stored=True, initial_value=HealthState.UNKNOWN
@@ -228,9 +229,7 @@ class CentralComponent(SharingObserver, TmcComponent):
         :param value: the new telescope availability
         :type value: DevState
         """
-        self.logger.debug("setting telescope availability %s", value)
         if self._telescope_availability != value:
-            self.logger.debug("setting telescope availability %s", value)
             self._telescope_availability = value
 
     @property
