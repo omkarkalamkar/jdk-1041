@@ -63,5 +63,5 @@ def test_on_command_low():
         + '"instrument/ska1_low/layout/low-layout.json"}'
     )
     central_node.DefaultArrayLayoutURL = url
-    
+
     assert central_node.arrayLayoutFileProvided is True
