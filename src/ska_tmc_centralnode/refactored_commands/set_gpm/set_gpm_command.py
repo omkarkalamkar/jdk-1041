@@ -223,7 +223,10 @@ class SetGlobalPointingModel(BaseCNCommand):
                     self.logger.error("Error message: %s", self.error_message)
                     self.result_code = ResultCode.FAILED
                     self._plan.apm_payload = {}
-                self._plan: GPMPlan = self._build_gpm_plan(request, gpm_files)
+                else:
+                    self._plan: GPMPlan = self._build_gpm_plan(
+                        request, gpm_files
+                    )
             except Exception:
                 self.logger.exception(
                     "Exception occurred while preparing GPM command."
@@ -415,6 +418,10 @@ class SetGlobalPointingModel(BaseCNCommand):
             message = message + str(filtered_dishes)
         else:
             message = self.error_message
+
+        if self.error_message:
+            self.result_code = ResultCode.FAILED
+
         result = (self.result_code, message)
         self.logger.info(
             "Command ID: %s | Updating task status with Result: %s",
