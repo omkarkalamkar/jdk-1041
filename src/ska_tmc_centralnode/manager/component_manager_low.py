@@ -115,15 +115,6 @@ class CNComponentManagerLow(CNComponentManager):
             list
         )
 
-    def on_new_shared_bus(self) -> None:
-        super().on_new_shared_bus()
-        self._assign_resources_schema_version = (
-            LOW_ASSIGN_RESOURCES_SCHEMA_VERSION
-        )
-        self._release_resources_schema_version = (
-            LOW_RELEASE_RESOURCES_SCHEMA_VERSION
-        )
-
     def _get_event_cb_manager(self) -> LowEventCallbackManager:
         """Provides Instance Event Callaback Manager"""
         return LowEventCallbackManager(

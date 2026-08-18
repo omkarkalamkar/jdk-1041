@@ -86,17 +86,6 @@ class CentralComponent(SharingObserver, TmcComponent):
         self._pst = ModesAvailability.NOT_AVAILABLE
         self.lock = threading.Lock()
 
-    def on_new_shared_bus(self):
-        super().on_new_shared_bus()
-        self.logger.debug("Setting on_new_shared_bus")
-        self._desired_telescope_state = tango.DevState.ON
-        self._telescope_state = tango.DevState.UNKNOWN
-        self._tmc_op_state = tango.DevState.UNKNOWN
-        self._telescope_availability = {}
-        self._telescope_health_state = HealthState.UNKNOWN
-        self._last_device_info_changed = ""
-        self._imaging = ModesAvailability.NOT_AVAILABLE
-
     @property
     def desired_telescope_state(self) -> tango.DevState:
         """
