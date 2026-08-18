@@ -58,14 +58,13 @@ include:
 k8s-test-runner:
   variables:
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA"
-    TANGO_HOST: "tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
   before_script:
     - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT
     - make k8s-install-chart
     - make k8s-wait
   script:
-    - make k8s-test-runner
-    - make k8s-test-runner MARK=restart_device_server
+    - make k8s-test-runner TANGO_HOST="tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
+    - make k8s-test-runner MARK=restart_device_server TANGO_HOST="tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
     - |
       if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
         make k8s-uninstall-chart || true
@@ -83,15 +82,14 @@ k8s-test-low:
     CONFIG: "low"
     KUBE_NAMESPACE: "ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
-    TANGO_HOST: "tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
   before_script:
     - echo $TELESCOPE
     - make cred SERVICE_ACCOUNT=$SERVICE_ACCOUNT
     - make k8s-install-chart
     - make k8s-wait
   script:
-    - make k8s-test-runner
-    - make k8s-test-runner MARK=auto_recovery
+    - make k8s-test-runner TANGO_HOST="tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
+    - make k8s-test-runner MARK=auto_recovery TANGO_HOST="tango-databaseds.$KUBE_NAMESPACE.svc.techops.internal.skao.int:10000"
     - |
       if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
         make k8s-uninstall-chart || true
