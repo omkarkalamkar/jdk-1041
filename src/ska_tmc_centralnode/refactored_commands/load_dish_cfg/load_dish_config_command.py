@@ -173,6 +173,8 @@ class LoadDishCfg(BaseTMCCommand):
             all_ok, partial_ok
         )
 
+        self.logger.debug("load dish cfg message is %s", message)
+
         self.context.task_callback(
             status=TaskStatus.COMPLETED,
             result=(result_code, message),
