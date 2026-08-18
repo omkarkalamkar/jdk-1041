@@ -238,7 +238,9 @@ class CentralComponent(SharingObserver, TmcComponent):
         :param value: the new telescope availability
         :type value: DevState
         """
+        self.logger.debug("setting telescope availability %s", value)
         if self._telescope_availability != value:
+            self.logger.debug("setting telescope availability %s", value)
             self._telescope_availability = value
 
     @property
