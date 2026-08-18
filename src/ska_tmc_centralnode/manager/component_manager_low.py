@@ -500,8 +500,6 @@ class CNComponentManagerLow(CNComponentManager):
         :return: Runtime context for AssignResources command execution.
         :rtype: LowAssignResourcesContext
         """
-        assigned_cmd_id_getter = self.subsystem_assigned_per_command_id
-        assigned_cmd_id_setter = self.set_subsystem_assigned_per_command_id
         return LowAssignResourcesContext(
             command_completion_condition=self.command_completion_cond,
             command_timeout=self.command_timeout,
@@ -526,13 +524,16 @@ class CNComponentManagerLow(CNComponentManager):
             set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
             log_state=self.log_state,
             subarray_trl_prefix=self.subarray_trl_prefix,
-            get_subsystem_assigned_cmd_id=assigned_cmd_id_getter,
-            set_subsystem_assigned_cmd_id=assigned_cmd_id_setter,
+            get_subsystem_assigned_cmd_id=(
+                self.subsystem_assigned_per_command_id
+            ),
+            set_subsystem_assigned_cmd_id=(
+                self.set_subsystem_assigned_per_command_id,
+            ),
         )
 
     def _get_release_context(self) -> LowReleaseResourcesContext:
         """Build LowReleaseResourcesContext bound to this component manager."""
-
         return LowReleaseResourcesContext(
             command_completion_condition=self.command_completion_cond,
             cmd_inprogress_ctx=CommandInProgressContext(
@@ -548,8 +549,18 @@ class CNComponentManagerLow(CNComponentManager):
                 get=self.get_subarray_obsstate,
             ),
             get_pss_assigned=self.pss_beams_assigned_per_subarray,
+            is_auto_recovery_enabled=self.is_auto_recovery_enabled,
             set_pss_assigned=self.set_pss_beams_assigned_per_subarray,
             update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            get_subsystem_assigned_cmd_id=(
+                self.subsystem_assigned_per_command_id
+            ),
+            set_subsystem_assigned_cmd_id=(
+                self.set_subsystem_assigned_per_command_id
+            ),
+            subarray_trl_prefix=self.subarray_trl_prefix,
+            get_assigned_subsystems=self.subsystem_assigned_per_subarray,
+            set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
         )
 
     # pylint: disable=unexpected-keyword-arg

@@ -12,8 +12,8 @@ from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
 
-from ..assignresources.assign_resources_command import AssignResourcesContext
 from ..assignresources.base_command import BaseCNCommand
+from .release_resources_context import ReleaseResourcesContext
 from .release_resources_plan import LowReleaseResourcesPlan as LRP
 from .release_resources_plan import MidReleaseResourcesPlan as MRP
 
@@ -24,7 +24,7 @@ class BaseReleaseResourcesCN(BaseCNCommand):
     # pylint:disable=keyword-arg-before-vararg
     def __init__(
         self,
-        command_runtime_context: AssignResourcesContext,
+        command_runtime_context: ReleaseResourcesContext,
         adapter_provider: AdapterFactory,
         logger: logging.Logger,
     ) -> None:
@@ -43,15 +43,22 @@ class BaseReleaseResourcesCN(BaseCNCommand):
         self.subarray_id: int | None = None
         self._plan: LRP | MRP | None = None
 
+    def get_subarray_obsstate(self) -> ObsState:
+        """
+        This method returns obsstate of subarray.
+        """
+        return self.command_runtime_context.obs_state_ctx.get(
+            self.get_subarray_name(int(self.subarray_id))
+        )
+
     def is_state_complete(self) -> bool:
         """Method to check the state completion for the command.
 
         :return: Returns True when the state is completed else False.
         :rtype: bool
         """
-        return (
-            self.command_runtime_context.obs_state_ctx.get() == ObsState.EMPTY
-        )
+
+        return self.get_subarray_obsstate() == ObsState.EMPTY
 
     def _build_subarray_device_command(self) -> DeviceCommand:
         """Method to build the TM Subarray device command.
@@ -59,10 +66,9 @@ class BaseReleaseResourcesCN(BaseCNCommand):
         Shared by Mid and Low: in both telescopes the single assembled
         plan payload is sent to the target Subarray device.
         """
-        command_input = self._plan.payload if self._plan else ""
+
         return DeviceCommand(
-            self.tm_subarray_adapter.dev_name,
+            self.get_subarray_name(int(self.subarray_id)),
             self.command_name,
             AdapterType.SUBARRAY,
-            command_input,
         )

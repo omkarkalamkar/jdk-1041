@@ -7,7 +7,7 @@ from dataclasses import dataclass
 class ReleaseResourcesPlan:
     """Data carrier for ReleaseResources command execution parameters."""
 
-    payload: dict
+    payload: str
     subarray_id: int
     release_all: bool
 

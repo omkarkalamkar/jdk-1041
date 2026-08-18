@@ -36,6 +36,7 @@ class ReleaseResourcesContext(CommandRuntimeContext):
     input_parameter: InputParameterMid | InputParameterLow
     obs_state_ctx: ObsStateContext
     cmd_inprogress_ctx: CommandInProgressContext
+    subarray_trl_prefix: str
 
 
 @dataclass(kw_only=True)
@@ -55,6 +56,11 @@ class LowReleaseResourcesContext(ReleaseResourcesContext):
 
     get_pss_assigned: Callable
     set_pss_assigned: Callable
+    get_subsystem_assigned_cmd_id: Callable
+    set_subsystem_assigned_cmd_id: Callable
+    is_auto_recovery_enabled: bool
+    get_assigned_subsystems: Callable
+    set_assigned_subsystems: Callable
 
     def make_strategy(
         self, logger: logging.Logger

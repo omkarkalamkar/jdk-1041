@@ -9,7 +9,6 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from ska_control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
@@ -141,9 +140,3 @@ class BaseCNCommand(BaseTMCCommand):
             + str(subarray_id).zfill(2)
         )
         return subarray_adapter_dev_name
-
-    def get_subarray_obsstate(self) -> ObsState:
-        """Return current obsState of the target subarray."""
-        return self.command_runtime_context.get_subarray_obsstate(
-            self.subarray_devname
-        )

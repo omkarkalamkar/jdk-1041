@@ -88,7 +88,7 @@ class LowReleaseResourcesStrategy(ReleaseResourcesStrategy):
             ) from exception
 
         return LowReleaseResourcesPlan(
-            payload=payload,
+            payload=json.dumps(payload),
             subarray_id=subarray_id,
             release_all=release_all,
             mccs_payload=json.dumps(mccs_payload),

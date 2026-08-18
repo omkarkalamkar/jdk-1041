@@ -1342,6 +1342,7 @@ class CNComponentManagerMid(CNComponentManager):
             input_parameter=self.input_parameter,
             update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
             obs_state_ctx=ObsStateContext(get=self.get_subarray_obsstate),
+            subarray_trl_prefix=self.subarray_trl_prefix,
         )
 
     # pylint: disable=unexpected-keyword-arg

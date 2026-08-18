@@ -2,6 +2,7 @@
 
 import logging
 
+from ska_control_model import ResultCode, TaskStatus
 from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
@@ -16,6 +17,8 @@ from .release_resources_strategy import LowReleaseResourcesStrategy
 class ReleaseResourcesLow(BaseReleaseResourcesCN):
     """Release Resources command class for telescope Low."""
 
+    command_name = "ReleaseAllResources"
+
     def __init__(
         self,
         command_runtime_context: LowReleaseResourcesContext,
@@ -23,11 +26,11 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         logger: logging.Logger,
         is_auto_recovery_enabled: bool,
     ) -> None:
-        """Initializes the BaseAssignResources command class.
+        """Initializes the ReleaseAllResources command class.
 
-        :param command_runtime_context: AssignResources command context
+        :param command_runtime_context: ReleaseAllResources command context
             to manage data from assign resources json.
-        :type command_runtime_context: AssignResourcesContext
+        :type command_runtime_context: LowReleaseResourcesContext
         :param adapter_provider: Instance of adapter factory to fetch
             requried adapters.
         :type adapter_provider: AdapterFactory
@@ -77,14 +80,14 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         if self._plan.release_all:
             self.logger.info(
                 "Invoking ReleaseAllResources on subarray | device=%s",
-                self.tm_subarray_adapter.dev_name,
+                self.get_subarray_name(int(self.subarray_id)),
             )
             self.context.device_commands.append(
                 self._build_subarray_device_command()
             )
 
             self._assigned_subsystem = (
-                self.command_runtime_context.subsystem_assigned_per_subarray[
+                self.command_runtime_context.get_assigned_subsystems[
                     self.subarray_id
                 ]
             )
@@ -103,7 +106,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             "Command ID: %s | Release Resources "
             "completed successfully on: %s",
             self.context.command_id,
-            self.tm_subarray_adapter,
+            self.get_subarray_name(int(self.subarray_id)),
         )
 
     def _build_mccs_device_command(self) -> DeviceCommand:
@@ -128,7 +131,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         """Whether MCCS should be released as part of this command."""
         return (
             "mccs"
-            in self.command_runtime_context.subsystem_assigned_per_subarray[
+            in self.command_runtime_context.get_assigned_subsystems[
                 self.subarray_id
             ]
             and not self.is_auto_recovery_enabled
@@ -152,7 +155,18 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
 
     def update_task_status(self, **kwargs) -> None:
         """Update task status for ReleaseResourcesLow."""
-        super().update_task_status(**kwargs)
-        self.command_runtime_context.get_subsystem_assigned_cmd_id(
-            self.context.command_id
-        ).clear()
+        result = kwargs.get("result")
+        status = kwargs.get("status", TaskStatus.COMPLETED)
+        exception = kwargs.get("exception", "")
+
+        if status == TaskStatus.ABORTED:
+            self.context.task_callback(
+                result=(ResultCode.ABORTED, "Command has been aborted"),
+                status=status,
+            )
+        elif result[0] == ResultCode.OK:
+            self.context.task_callback(result=result, status=status)
+        else:
+            self.context.task_callback(
+                result=result, status=status, exception=exception
+            )
