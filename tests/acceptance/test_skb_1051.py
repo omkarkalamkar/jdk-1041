@@ -5,7 +5,7 @@ import json
 
 import pytest
 import tango
-from pytest_bdd import given, parsers, scenarios, then, when
+from pytest_bdd import given, parsers, then, when
 from ska_control_model import AdminMode
 from ska_tango_base.commands import ResultCode
 from tango import DeviceProxy

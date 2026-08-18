@@ -6,7 +6,7 @@ import json
 import numpy as np
 import pytest
 import tango
-from pytest_bdd import given, parsers, scenarios, then, when
+from pytest_bdd import given, parsers, then, when
 from ska_control_model import AdminMode, ResultCode
 from ska_tango_base.control_model import HealthState, ObsState
 from ska_tmc_common.dev_factory import DevFactory
