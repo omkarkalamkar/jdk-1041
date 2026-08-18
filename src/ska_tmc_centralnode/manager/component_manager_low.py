@@ -72,9 +72,6 @@ class CNComponentManagerLow(CNComponentManager):
             subarray: False
             for subarray in self.input_parameter.subarray_dev_names
         }
-        telescope_availability = self.get_telescope_availability()
-        telescope_availability["tmc_subarrays"] = self.subarray_availability
-        self.set_telescope_availability(telescope_availability)
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
         self.mccs_mln_availability = False
@@ -124,8 +121,8 @@ class CNComponentManagerLow(CNComponentManager):
             input_parameter=self.input_parameter,
             event_data_manager=self.event_data_manager,
             _aggregate_state=self._aggregate_state,
-            get_telescope_availability_aggregator=(
-                lambda: self._telescope_availability_aggregator
+            _telescope_availability_aggregator=(
+                self._telescope_availability_aggregator
             ),
             subarray_availability=self.subarray_availability,
             set_csp_mln_availability=lambda availability: setattr(

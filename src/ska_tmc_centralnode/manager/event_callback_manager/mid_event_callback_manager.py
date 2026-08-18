@@ -42,9 +42,7 @@ class MidEventCallbackManager(EventCallbackManager):
         gpm_aggregator: DishAttrValueAggregator,
         update_dish_vcc_flag: Callable,
         dish_vcc_command_invoke_cb: Callable,
-        get_telescope_availability_aggregator: Callable[
-            [], TelescopeAvailabilityAggregatorMid
-        ],
+        _telescope_availability_aggregator: TelescopeAvailabilityAggregatorMid,
         subarray_availability: dict,
         set_csp_mln_availability: Callable,
         set_sdp_mln_availability: Callable,
@@ -72,8 +70,8 @@ class MidEventCallbackManager(EventCallbackManager):
         self.kvalue_validation_aggregator = kvalue_validation_aggregator
         self.update_dish_vcc_flag = update_dish_vcc_flag
         self.dish_vcc_command_invoke_cb = dish_vcc_command_invoke_cb
-        self.get_telescope_availability_aggregator = (
-            get_telescope_availability_aggregator
+        self._telescope_availability_aggregator = (
+            _telescope_availability_aggregator
         )
         self.subarray_availability = subarray_availability
         self.set_csp_mln_availability = set_csp_mln_availability
@@ -339,7 +337,7 @@ class MidEventCallbackManager(EventCallbackManager):
                 self.set_csp_mln_availability(event_value)
             elif self.input_parameter.sdp_mln_dev_name == device_name:
                 self.set_sdp_mln_availability(event_value)
-            self.get_telescope_availability_aggregator().aggregate()
+            self._telescope_availability_aggregator.aggregate()
 
     def update_device_state(self, device_name: str, state: DevState) -> None:
         """
