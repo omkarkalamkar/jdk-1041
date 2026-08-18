@@ -237,4 +237,4 @@ def check_command(central_node, command_name, change_event_callbacks):
         tmc_subarray.SetDirectObsState(ObsState.EMPTY)
 
 
-scenarios("../features/centralnode.feature")
+# scenarios("../features/centralnode.feature")

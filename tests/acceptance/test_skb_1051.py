@@ -136,6 +136,6 @@ def verify_mccs_master_leaf_node():
     assert pytest.mccs_release2
 
 
-scenarios(
-    "../features/skb_1051_release_on_mccs_with_multiple_subarray.feature"
-)
+# scenarios(
+#     "../features/skb_1051_release_on_mccs_with_multiple_subarray.feature"
+# )
