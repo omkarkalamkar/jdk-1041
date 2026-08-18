@@ -47,15 +47,21 @@ class BaseAssignResourcesCN(BaseCNCommand):
             None
         )
 
+    def get_subarray_obsstate(self) -> ObsState:
+        """
+        This method returns obsstate of subarray.
+        """
+        return self.command_runtime_context.obs_state_ctx.get(
+            self.get_subarray_name(int(self.subarray_id))
+        )
+
     def is_state_complete(self) -> bool:
         """Method to check the state completion for the command.
 
         :return: Returns True when the state is completed else False.
         :rtype: bool
         """
-        return (
-            self.command_runtime_context.obs_state_ctx.get() == ObsState.IDLE
-        )
+        return self.get_subarray_obsstate() == ObsState.IDLE
 
     def _build_subarray_device_command(self) -> DeviceCommand:
         """Method to build the TM Subarray device command.
@@ -69,5 +75,4 @@ class BaseAssignResourcesCN(BaseCNCommand):
             self.command_name,
             AdapterType.SUBARRAY,
             command_input,
-            self._update_event_callback,
         )

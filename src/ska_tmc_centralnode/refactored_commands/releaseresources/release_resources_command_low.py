@@ -51,6 +51,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse and normalize input data, build the plan, for LOW."""
+        self.context.command_invoked_callback = self.command_invoked_callback
         request = ReleaseResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
@@ -58,7 +59,6 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         self._plan: LowReleaseResourcesPlan = self._strategy.build_plan(
             request
         )
-        self.command_runtime_context.apply_plan(self._plan)
         self.subarray_id = self._plan.subarray_id
 
     def build_device_commands(self) -> None:
@@ -122,7 +122,6 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             self.command_name,
             AdapterType.MCCS_MASTER_LEAF_NODE,
             command_input,
-            self._update_event_callback,
         )
 
     def _mccs_required(self) -> bool:
@@ -142,18 +141,18 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         subsystem_assigned_per_command_id right after invoke_command
         returned an accepted result for MCCS.
         """
-        super().command_invoked_callback(cmd_ctx)
+
         if (
             self.mccs_mln_adapter is not None
             and cmd_ctx.device_name == self.mccs_mln_adapter.dev_name
         ):
-            self.command_runtime_context.subsystem_assigned_per_command_id[
+            self.command_runtime_context.get_subsystem_assigned_cmd_id(
                 self.context.command_id
-            ] = self._assigned_subsystem
+            ).update(self._assigned_subsystem)
 
     def update_task_status(self, **kwargs) -> None:
         """Update task status for ReleaseResourcesLow."""
         super().update_task_status(**kwargs)
-        self.command_runtime_context.subsystem_assigned_per_command_id.pop(
-            self.context.command_id, None
-        )
+        self.command_runtime_context.get_subsystem_assigned_cmd_id(
+            self.context.command_id
+        ).clear()

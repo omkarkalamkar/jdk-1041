@@ -5,17 +5,13 @@ helpers for refactored CentralNode commands, mirroring BaseSNCommand's
 role for SubarrayNode commands.
 """
 
-import json
 import logging
 from datetime import datetime
 from typing import Optional
 
-from ska_control_model import ObsState, ResultCode
+from ska_control_model import ObsState
 from ska_tmc_common.adapters import AdapterFactory, AdapterType
-from ska_tmc_common.v4.command_context import (
-    CommandRuntimeContext,
-    DeviceCommand,
-)
+from ska_tmc_common.v4.command_context import CommandRuntimeContext
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
 
 from ..assignresources import AssignResourcesContext
@@ -98,7 +94,6 @@ class BaseCNCommand(BaseTMCCommand):
         command_id: str,
         result: str,
         timestamp: Optional[datetime] = None,
-        data_type: str = "CommandResultData",
     ) -> None:
         """Method to update event data storage.
 
@@ -110,9 +105,7 @@ class BaseCNCommand(BaseTMCCommand):
         :type result: str
         :param timestamp: timestamp, defaults to now if not provided.
         :type timestamp: Optional[datetime]
-        :param data_type: datatype of event data storage, defaults to
-            "CommandResultData"
-        :type data_type: str, optional
+        # Removed data_type parameter as per recent changes
         """
         if timestamp is None:
             timestamp = datetime.now()
@@ -125,31 +118,10 @@ class BaseCNCommand(BaseTMCCommand):
             device=device_name,
             data=(command_id, result),
             received_timestamp=timestamp,
-            data_type=data_type,
         )
         cond = self.context.completion_condition
         with cond:
             cond.notify_all()
-
-    def command_invoked_callback(self, cmd_ctx: DeviceCommand) -> None:
-        """The callback to process the command details after invocation.
-
-        :param cmd_ctx: The device command object with details related
-            to current invoked command.
-        :type cmd_ctx: DeviceCommand
-        """
-        if self.command_runtime_context is None:
-            return
-
-        self.command_runtime_context.get_evt_data_manager().update_event_data(
-            device=cmd_ctx.device_name,
-            data=(
-                self.context.command_device_ids[cmd_ctx.device_name],
-                json.dumps([ResultCode.UNKNOWN, ""]),
-            ),
-            received_timestamp=None,
-            data_type="CommandResultData",
-        )
 
     def _set_subarray_obs_state_to_fault_on_command_timeout(self) -> None:
         """Method to set Subarray Node ObsState to FAULT when timeout

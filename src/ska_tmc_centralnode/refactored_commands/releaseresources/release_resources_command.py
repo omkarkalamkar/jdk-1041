@@ -65,5 +65,4 @@ class BaseReleaseResourcesCN(BaseCNCommand):
             self.command_name,
             AdapterType.SUBARRAY,
             command_input,
-            self._update_event_callback,
         )

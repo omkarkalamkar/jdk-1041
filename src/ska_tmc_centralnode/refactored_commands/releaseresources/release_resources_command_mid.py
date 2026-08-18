@@ -51,7 +51,6 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
         self._plan: MidReleaseResourcesPlan = self._strategy.build_plan(
             request
         )
-        self.command_runtime_context.apply_plan(self._plan)
         self.subarray_id = self._plan.subarray_id
 
     def build_device_commands(self) -> None:

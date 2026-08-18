@@ -4,6 +4,8 @@ import json
 import logging
 from abc import ABC, abstractmethod
 
+from ska_tmc_centralnode.utils.constants import mccs_release_interface
+
 from .release_resources_plan import (
     LowReleaseResourcesPlan,
     MidReleaseResourcesPlan,
@@ -60,9 +62,9 @@ class MidReleaseResourcesStrategy(ReleaseResourcesStrategy):
 class LowReleaseResourcesStrategy(ReleaseResourcesStrategy):
     """ReleaseResources strategy for SKA Low deployment."""
 
-    def __init__(self, logger: logging.Logger, mccs_interface: str) -> None:
+    def __init__(self, logger: logging.Logger) -> None:
         super().__init__(logger)
-        self.mccs_interface = mccs_interface
+        self.mccs_interface = mccs_release_interface
 
     def build_plan(
         self, request: ReleaseResourcesRequest

@@ -7,7 +7,6 @@ from .release_resources_context import (
     LowReleaseResourcesContext,
     MidReleaseResourcesContext,
     ReleaseResourcesContext,
-    SubarrayIDContext,
 )
 from .release_resources_plan import (
     LowReleaseResourcesPlan,
@@ -36,7 +35,6 @@ __all__ = [
     "ReleaseResourcesContext",
     "MidReleaseResourcesContext",
     "LowReleaseResourcesContext",
-    "SubarrayIDContext",
     "ReleaseResourcesRequest",
     "ReleaseResourcesRequestError",
     "ReleaseResourcesPreparation",

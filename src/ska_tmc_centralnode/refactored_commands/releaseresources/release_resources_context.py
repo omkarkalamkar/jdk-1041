@@ -11,23 +11,14 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 
-from .release_resources_plan import (
-    LowReleaseResourcesPlan,
-    MidReleaseResourcesPlan,
+from ..assignresources.common_context import (
+    CommandInProgressContext,
+    ObsStateContext,
 )
 from .release_resources_strategy import (
     LowReleaseResourcesStrategy,
     MidReleaseResourcesStrategy,
 )
-
-
-@dataclass
-class SubarrayIDContext:
-    """Context to maintain subarray ID state."""
-
-    set: Callable
-    get: Callable
-    reset: Callable
 
 
 @dataclass(kw_only=True)
@@ -41,9 +32,10 @@ class ReleaseResourcesContext(CommandRuntimeContext):
     event-callback methods require.
     """
 
-    subarray_id_ctx: SubarrayIDContext
+    update_abort_evt: Callable
     input_parameter: InputParameterMid | InputParameterLow
-    get_evt_data_manager: Callable
+    obs_state_ctx: ObsStateContext
+    cmd_inprogress_ctx: CommandInProgressContext
 
 
 @dataclass(kw_only=True)
@@ -56,23 +48,16 @@ class MidReleaseResourcesContext(ReleaseResourcesContext):
         """Create MID ReleaseResources strategy."""
         return MidReleaseResourcesStrategy(logger)
 
-    def apply_plan(self, plan: MidReleaseResourcesPlan) -> None:
-        """Apply MID plan values into context callbacks."""
-        self.subarray_id_ctx.set(plan.subarray_id)
-
 
 @dataclass(kw_only=True)
 class LowReleaseResourcesContext(ReleaseResourcesContext):
     """LOW-specific ReleaseResources runtime context."""
 
-    mccs_release_interface: str
+    get_pss_assigned: Callable
+    set_pss_assigned: Callable
 
     def make_strategy(
         self, logger: logging.Logger
     ) -> LowReleaseResourcesStrategy:
         """Create LOW ReleaseResources strategy."""
-        return LowReleaseResourcesStrategy(logger, self.mccs_release_interface)
-
-    def apply_plan(self, plan: LowReleaseResourcesPlan) -> None:
-        """Apply LOW plan values into context callbacks."""
-        self.subarray_id_ctx.set(plan.subarray_id)
+        return LowReleaseResourcesStrategy(logger)

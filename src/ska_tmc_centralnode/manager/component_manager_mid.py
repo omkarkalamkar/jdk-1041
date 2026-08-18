@@ -48,21 +48,13 @@ from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.refactored_commands.assignresources import (
     ArrayLayoutContext,
-    AssignedResourcesAttributeContext,
     CommandInProgressContext,
-    DishContext,
-    DishLeafNodeContext,
     MidAssignResourcesContext,
     ObsStateContext,
-    SbIDContext,
-    SubarrayIDContext,
 )
 from ska_tmc_centralnode.refactored_commands.releaseresources import (
     MidReleaseResourcesContext,
     ReleaseResourcesMid,
-)
-from ska_tmc_centralnode.refactored_commands.releaseresources import (
-    SubarrayIDContext as ReleaseSubarrayIDContext,
 )
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
@@ -1307,108 +1299,49 @@ class CNComponentManagerMid(CNComponentManager):
             )
         return argin, exception_msg
 
-    def _get_assign_context(self, command=None) -> MidAssignResourcesContext:
+    def _get_assign_context(self) -> MidAssignResourcesContext:
         """Build MidAssignResourcesContext bound to this component manager.
 
         :return: Runtime context for AssignResources command execution.
         :rtype: MidAssignResourcesContext
         """
-        cm = self
         return MidAssignResourcesContext(
-            command_timeout=cm.command_timeout,
+            command_completion_condition=self.command_completion_cond,
+            command_timeout=self.command_timeout,
             cmd_inprogress_ctx=CommandInProgressContext(
-                get_id=lambda: cm.command_in_progress,
-                update_id=lambda name: setattr(
-                    cm, "command_in_progress", name
-                ),
                 update_name=lambda name: setattr(
-                    cm, "command_in_progress", name
+                    self, "command_in_progress", name
                 ),
-                clear=lambda _: setattr(cm, "command_in_progress", ""),
-                get_name=lambda: cm.command_in_progress,
-                obj_update_cmd=lambda *a, **kw: None,
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
             ),
             array_layout_ctx=ArrayLayoutContext(
-                download=lambda *a, **kw: ({}, ""),
-                validate_schema=lambda *a, **kw: (True, ""),
-                update_url=lambda url: setattr(cm, "array_layout_url", url),
-                set=lambda _: None,
+                update_url=lambda url: setattr(self, "array_layout_url", url),
+                get_default_url=lambda: self.default_array_layout_url,
             ),
-            subarray_id_ctx=SubarrayIDContext(
-                set=(
-                    lambda sid: setattr(command, "subarray_id", sid)
-                    if command is not None
-                    else None
-                ),
-                get=(
-                    lambda: getattr(command, "subarray_id", None)
-                    if command is not None
-                    else None
-                ),
-                reset=(
-                    lambda: setattr(command, "subarray_id", "")
-                    if command is not None
-                    else None
-                ),
-            ),
-            sb_id_ctx=SbIDContext(
-                set=lambda _: None,
-                reset=lambda: None,
-            ),
-            obs_state_ctx=ObsStateContext(
-                get=(
-                    lambda: cm.get_subarray_obsstate(command.subarray_devname)
-                    if command is not None and command.subarray_devname
-                    else None
-                ),
-                change_callback=lambda *a, **kw: None,
-            ),
-            csp_assign_interface="",
-            get_evt_data_manager=lambda: cm.event_data_manager,
-            input_parameter=cm.input_parameter,
-            update_abort_evt=lambda evt: setattr(cm, "abort_event", evt),
-            get_dev_info=cm.get_device,
-            dishln_ctx=DishLeafNodeContext(
-                set_device_names=lambda *a, **kw: None,
-                unsubscribe_events=lambda *a, **kw: None,
-                get_fqdn=lambda *a, **kw: None,
-            ),
-            dish_ctx=DishContext(
-                set_device_names=lambda *a, **kw: None,
-            ),
-            assigned_resources_attr_ctx=AssignedResourcesAttributeContext(
-                set=lambda *a, **kw: None,
-                clear=lambda *a, **kw: None,
-            ),
-            set_sdpqc_fqdn=lambda *a, **kw: None,
-            remove_device_lp=lambda *a, **kw: None,
-            remove_dish=lambda *a, **kw: None,
+            obs_state_ctx=ObsStateContext(get=self.get_subarray_obsstate),
+            input_parameter=self.input_parameter,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            log_state=self.log_state,
+            subarray_trl_prefix=self.subarray_trl_prefix,
+            is_already_assigned=self.is_already_assigned,
         )
 
-    def _get_release_context(self, command=None) -> MidReleaseResourcesContext:
+    def _get_release_context(self) -> MidReleaseResourcesContext:
         """Build MidReleaseResourcesContext bound to this component manager."""
-        cm = self
         return MidReleaseResourcesContext(
-            command_timeout=cm.command_timeout,
-            get_evt_data_manager=lambda: cm.event_data_manager,
-            subarray_id_ctx=ReleaseSubarrayIDContext(
-                set=(
-                    lambda sid: setattr(command, "subarray_id", sid)
-                    if command is not None
-                    else None
+            command_completion_condition=self.command_completion_cond,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
                 ),
-                get=(
-                    lambda: getattr(command, "subarray_id", None)
-                    if command is not None
-                    else None
-                ),
-                reset=(
-                    lambda: setattr(command, "subarray_id", "")
-                    if command is not None
-                    else None
-                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
             ),
-            input_parameter=cm.input_parameter,
+            command_timeout=self.command_timeout,
+            input_parameter=self.input_parameter,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            obs_state_ctx=ObsStateContext(get=self.get_subarray_obsstate),
         )
 
     # pylint: disable=unexpected-keyword-arg

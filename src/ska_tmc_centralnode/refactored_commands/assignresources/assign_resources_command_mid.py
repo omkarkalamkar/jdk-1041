@@ -62,7 +62,6 @@ class AssignResourcesMid(BaseAssignResourcesCN):
         ).prepare_request(self.context.argin, remove_transaction_id=True)
 
         self._plan: MidAssignResourcesPlan = self._strategy.build_plan(request)
-        self.command_runtime_context.apply_plan(self._plan)
         self.subarray_id = self._plan.subarray_id
 
         self.receptor_ids = self._plan.receptor_ids

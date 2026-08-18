@@ -35,25 +35,17 @@ from ska_tmc_centralnode.manager.aggregators import (
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.refactored_commands.assignresources import (
     ArrayLayoutContext,
-    AssignedSubsystemContext,
     CommandInProgressContext,
     LowAssignResourcesContext,
     ObsStateContext,
-    RecoveryContext,
-    SbIDContext,
-    SubarrayIDContext,
 )
 from ska_tmc_centralnode.refactored_commands.releaseresources import (
     LowReleaseResourcesContext,
     ReleaseResourcesLow,
 )
-from ska_tmc_centralnode.refactored_commands.releaseresources import (
-    SubarrayIDContext as ReleaseSubarrayIDContext,
-)
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
-    mccs_release_interface,
 )
 
 from ..refactored_commands.assignresources import assign_resources_command_low
@@ -189,7 +181,7 @@ class CNComponentManagerLow(CNComponentManager):
         self.subsystem_assigned_per_subarray: Dict[int, list] = defaultdict(
             list
         )
-        self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
+        self.subsystem_assigned_per_command_id: Dict[str, list] = defaultdict(
             list
         )
         self.pss_beams_assigned_per_subarray: Dict[int, list] = defaultdict(
@@ -466,125 +458,98 @@ class CNComponentManagerLow(CNComponentManager):
             )
         return argin, exception_msg
 
-    def _get_assign_context(self, command=None) -> LowAssignResourcesContext:
+    def set_subsystem_assigned_per_subarray(
+        self, subarray_id: int, subsystems: list
+    ) -> None:
+        """Sets the assigned subsystems for a given subarray.
+
+        :param subarray_id: The ID of the subarray.
+        :type subarray_id: int
+        :param subsystems: List of subsystems assigned to the subarray.
+        :type subsystems: list
+        """
+        self.subsystem_assigned_per_subarray[subarray_id] = subsystems
+
+    def set_subsystem_assigned_per_command_id(
+        self, command_id: str, subsystems: list
+    ) -> None:
+        """Sets the assigned subsystems for a given command ID.
+
+        :param command_id: The ID of the command.
+        :type command_id: str
+        :param subsystems: List of subsystems assigned to the command.
+        :type subsystems: list
+        """
+        self.subsystem_assigned_per_command_id[command_id] = subsystems
+
+    def set_pss_beams_assigned_per_subarray(
+        self, subarray_id: int, pss_beams: list
+    ) -> None:
+        """Sets the assigned PSS beams for a given subarray.
+
+        :param subarray_id: The ID of the subarray.
+        :type subarray_id: int
+        :param pss_beams: List of PSS beams assigned to the subarray.
+        :type pss_beams: list
+        """
+        self.pss_beams_assigned_per_subarray[subarray_id] = pss_beams
+
+    def _get_assign_context(self) -> LowAssignResourcesContext:
         """Build LowAssignResourcesContext bound to this component manager.
 
         :return: Runtime context for AssignResources command execution.
         :rtype: LowAssignResourcesContext
         """
-        cm = self
+        assigned_cmd_id_getter = self.subsystem_assigned_per_command_id
+        assigned_cmd_id_setter = self.set_subsystem_assigned_per_command_id
         return LowAssignResourcesContext(
-            command_timeout=cm.command_timeout,
+            command_completion_condition=self.command_completion_cond,
+            command_timeout=self.command_timeout,
             cmd_inprogress_ctx=CommandInProgressContext(
-                get_id=lambda: cm.command_in_progress,
-                update_id=lambda name: setattr(
-                    cm, "command_in_progress", name
-                ),
                 update_name=lambda name: setattr(
-                    cm, "command_in_progress", name
+                    self, "command_in_progress", name
                 ),
-                clear=lambda _: setattr(cm, "command_in_progress", ""),
-                get_name=lambda: cm.command_in_progress,
-                obj_update_cmd=lambda *a, **kw: None,
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
             ),
             array_layout_ctx=ArrayLayoutContext(
-                download=lambda *a, **kw: ({}, ""),
-                validate_schema=lambda *a, **kw: (True, ""),
-                update_url=lambda url: setattr(cm, "array_layout_url", url),
-                set=lambda _: None,
-            ),
-            subarray_id_ctx=SubarrayIDContext(
-                set=(
-                    lambda sid: setattr(command, "subarray_id", sid)
-                    if command is not None
-                    else None
-                ),
-                get=(
-                    lambda: getattr(command, "subarray_id", None)
-                    if command is not None
-                    else None
-                ),
-                reset=(
-                    lambda: setattr(command, "subarray_id", "")
-                    if command is not None
-                    else None
-                ),
-            ),
-            sb_id_ctx=SbIDContext(
-                set=lambda _: None,
-                reset=lambda: None,
+                update_url=lambda url: setattr(self, "array_layout_url", url),
+                get_default_url=lambda: self.default_array_layout_url,
             ),
             obs_state_ctx=ObsStateContext(
-                get=(
-                    lambda: cm.get_subarray_obsstate(command.subarray_devname)
-                    if command is not None and command.subarray_devname
-                    else None
-                ),
-                change_callback=lambda *a, **kw: None,
+                get=self.get_subarray_obsstate,
             ),
-            csp_assign_interface="",
-            get_evt_data_manager=lambda: cm.event_data_manager,
-            input_parameter=cm.input_parameter,
-            update_abort_evt=lambda evt: setattr(cm, "abort_event", evt),
-            get_dev_info=cm.get_device,
-            recovery_ctx=RecoveryContext(
-                update_progress=lambda *a, **kw: None,
-                is_enabled=cm.is_auto_recovery_enabled,
-                check_time_duration=0,
-                set_device_list=lambda *a, **kw: None,
-                mccs_release_interface="",
-                is_in_progress=lambda: False,
-            ),
-            assigned_subsystem_ctx=AssignedSubsystemContext(
-                update=(
-                    lambda subsystems: (
-                        cm.subsystem_assigned_per_subarray.__setitem__(
-                            command.subarray_id, list(subsystems)
-                        )
-                    )
-                    if command is not None
-                    else None
-                ),
-                get=(
-                    lambda: cm.subsystem_assigned_per_subarray.get(
-                        command.subarray_id, []
-                    )
-                    if command is not None
-                    else []
-                ),
-                set_configured=lambda *a, **kw: None,
-            ),
-            set_subarray_empty=lambda: None,
-            set_cmd_fail_info=lambda *a, **kw: None,
-            clear_cmd_fail_info=lambda: None,
-            set_subarr_to_be_cfgd=lambda *a, **kw: None,
+            input_parameter=self.input_parameter,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            is_auto_recovery_enabled=self.is_auto_recovery_enabled,
+            get_assigned_subsystems=self.subsystem_assigned_per_subarray,
+            set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
+            log_state=self.log_state,
+            subarray_trl_prefix=self.subarray_trl_prefix,
+            get_subsystem_assigned_cmd_id=assigned_cmd_id_getter,
+            set_subsystem_assigned_cmd_id=assigned_cmd_id_setter,
         )
 
-    def _get_release_context(self, command=None) -> LowReleaseResourcesContext:
+    def _get_release_context(self) -> LowReleaseResourcesContext:
         """Build LowReleaseResourcesContext bound to this component manager."""
-        cm = self
+
         return LowReleaseResourcesContext(
-            command_timeout=cm.command_timeout,
-            get_evt_data_manager=lambda: cm.event_data_manager,
-            subarray_id_ctx=ReleaseSubarrayIDContext(
-                set=(
-                    lambda sid: setattr(command, "subarray_id", sid)
-                    if command is not None
-                    else None
+            command_completion_condition=self.command_completion_cond,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
                 ),
-                get=(
-                    lambda: getattr(command, "subarray_id", None)
-                    if command is not None
-                    else None
-                ),
-                reset=(
-                    lambda: setattr(command, "subarray_id", "")
-                    if command is not None
-                    else None
-                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
             ),
-            input_parameter=cm.input_parameter,
-            mccs_release_interface=mccs_release_interface,
+            command_timeout=self.command_timeout,
+            input_parameter=self.input_parameter,
+            obs_state_ctx=ObsStateContext(
+                get=self.get_subarray_obsstate,
+            ),
+            get_pss_assigned=self.pss_beams_assigned_per_subarray,
+            set_pss_assigned=self.set_pss_beams_assigned_per_subarray,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
         )
 
     # pylint: disable=unexpected-keyword-arg

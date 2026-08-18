@@ -61,12 +61,12 @@ class AssignResourcesLow(BaseAssignResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse input and build the execution plan/context for LOW."""
+        self.context.command_invoked_callback = self.command_invoked_callback
         request = AssignResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
 
         self._plan: LowAssignResourcesPlan = self._strategy.build_plan(request)
-        self.command_runtime_context.apply_plan(self._plan)
         self.subarray_id = self._plan.subarray_id
         # apply_plan propagates subarray_id to context and subsystems to cm.
 
@@ -116,14 +116,13 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             self.command_name,
             AdapterType.MCCS_MASTER_LEAF_NODE,
             command_input,
-            self._update_event_callback,
         )
 
     def _mccs_required(self) -> bool:
         """Whether MCCS should be assigned as part of this command."""
         return (
             "mccs"
-            in self.command_runtime_context.subsystem_assigned_per_subarray[
+            in self.command_runtime_context.get_assigned_subsystems[
                 self.subarray_id
             ]
             and not self.is_auto_recovery_enabled
@@ -137,14 +136,13 @@ class AssignResourcesLow(BaseAssignResourcesCN):
         returned an accepted (non-FAILED) result for MCCS, not after the
         device's final LRC result.
         """
-        super().command_invoked_callback(cmd_ctx)
         if (
             self.mccs_mln_adapter is not None
             and cmd_ctx.device_name == self.mccs_mln_adapter.dev_name
         ):
-            self.command_runtime_context.subsystem_assigned_per_command_id[
+            self.command_runtime_context.get_subsystem_assigned_cmd_id(
                 self.context.command_id
-            ] = self._assigned_subsystem
+            ).update(self._assigned_subsystem)
 
     def update_task_status(self, **kwargs) -> None:
         """Update task status and clear per-command subsystem bookkeeping."""
@@ -163,7 +161,3 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             self.context.task_callback(
                 result=result, status=status, exception=exception
             )
-
-        self.command_runtime_context.subsystem_assigned_per_command_id.pop(
-            self.context.command_id, None
-        )
