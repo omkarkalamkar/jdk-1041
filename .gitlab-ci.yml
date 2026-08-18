@@ -63,8 +63,8 @@ k8s-test-runner:
     - make k8s-install-chart
     - make k8s-wait
   script:
-    - make k8s-test
-    - make k8s-test MARK=restart_device_server
+    - make k8s-test-runner
+    - make k8s-test-runner MARK=restart_device_server
     - |
       if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
         make k8s-uninstall-chart || true
@@ -88,8 +88,8 @@ k8s-test-low:
     - make k8s-install-chart
     - make k8s-wait
   script:
-    - make k8s-test
-    - make k8s-test MARK=auto_recovery
+    - make k8s-test-runner
+    - make k8s-test-runner MARK=auto_recovery
     - |
       if [[ "$CI_KEEP_NAMESPACE" != "true" ]]; then
         make k8s-uninstall-chart || true
@@ -105,7 +105,7 @@ k8s-test-low:
 
 stop-k8s-test-low:
   extends:
-    - stop-k8s-test
+    - stop-k8s-test-runner
   variables:
     CONFIG: "low"
     KUBE_NAMESPACE: "ci-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA-$CONFIG"
