@@ -52,8 +52,10 @@ include:
   # https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/finaliser.gitlab-ci.yml"
+  - project: "ska-telescope/templates-repository"
+    file: "gitlab-ci/includes/k8s-test-runner.gitlab-ci.yml"
 
-k8s-test:
+k8s-test-runner:
   variables:
     SERVICE_ACCOUNT: "ci-svc-$CI_PROJECT_NAME-$CI_COMMIT_SHORT_SHA"
   before_script:
@@ -73,7 +75,7 @@ k8s-test:
 
 k8s-test-low:
   extends:
-    - k8s-test
+    - k8s-test-runner
   variables:
     PYTANGO_GREEN_MODE: "futures"
     TELESCOPE: "SKA-low"
