@@ -57,6 +57,8 @@ from ska_tmc_centralnode.refactored_commands.load_dish_cfg.contexts import (
 from ska_tmc_centralnode.refactored_commands.load_dish_cfg.load_dish_config_command import (
     LoadDishCfg,
 )
+
+# pylint:enable=line-too-long
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -955,6 +957,9 @@ class CNComponentManagerMid(CNComponentManager):
         """
         Update the k-value validation aggregator with the error message
         for the given dish ID.
+        Args:
+            dish_id: Dish Id
+            error_message: error message
         """
         with self.dish_vcc_validation_attr_lock:
             aggregator = self.dish_kvalue_validation_aggregator
@@ -1005,7 +1010,9 @@ class CNComponentManagerMid(CNComponentManager):
                 self, "dish_vcc_command_status", status
             ),
             update_dish_vcc_flag=self.update_dish_vcc_flag,
-            get_dish_vcc_validation_status=lambda: self.dish_vcc_validation_status,
+            get_dish_vcc_validation_status=(
+                lambda: self.dish_vcc_validation_status
+            ),
             set_dish_vcc_validation_status=lambda status: setattr(
                 self, "dish_vcc_validation_status", status
             ),
@@ -1018,9 +1025,15 @@ class CNComponentManagerMid(CNComponentManager):
             command_ctx=command_ctx,
             append_dish_dev_names=self.append_dish_dev_names,
             update_kval_aggregator=self.update_kval_aggregator,
-            dish_kvalue_validation_aggregator=self.dish_kvalue_validation_aggregator,
-            k_value_valid_range_lower_limit=self.k_value_valid_range_lower_limit,
-            k_value_valid_range_upper_limit=self.k_value_valid_range_upper_limit,
+            dish_kvalue_validation_aggregator=(
+                self.dish_kvalue_validation_aggregator
+            ),
+            k_value_valid_range_lower_limit=(
+                self.k_value_valid_range_lower_limit
+            ),
+            k_value_valid_range_upper_limit=(
+                self.k_value_valid_range_upper_limit
+            ),
             validate_dish_ids=self.validate_dish_ids,
         )
 
