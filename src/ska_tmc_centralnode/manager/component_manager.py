@@ -598,7 +598,6 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """Setter method for telescope availability"""
         availability = self.get_telescope_availability()
         availability.update(telescope_availability)
-        self.logger.info("Updating availability %s", availability)
         self.component.telescope_availability = availability
 
     def _aggregate_state(self) -> None:

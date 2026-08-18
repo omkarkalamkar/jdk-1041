@@ -135,7 +135,10 @@ def test_assign_res_command_mid(
         (CENTRALNODE_LOW, "assign_resource_low_without_sdp_4_2"),
     ],
 )
-@pytest.mark.usefixtures("set_low_devices_availability_for_aggregation")
+@pytest.mark.usefixtures(
+    "set_low_devices_availability_for_aggregation",
+    "set_low_sdp_csp_mccs_admin_modes",
+)
 def test_assign_res_command_low(
     central_node_name, input_json, change_event_callbacks, json_factory
 ):
