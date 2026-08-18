@@ -591,7 +591,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
 
     def get_telescope_availability(self) -> dict:
         """Getter method for Telescope Availability"""
-        return self.component.telescope_availability
+        return self.component.telescope_availability.copy()
 
     def set_telescope_availability(self, telescope_availability) -> None:
         """Setter method for telescope availability"""
