@@ -19,7 +19,7 @@ from ska_tmc_centralnode.utils.constants import (
 from .contexts import LoadDishCfgRuntimeContext
 from .dish_k_executor import DishKValueExecutor
 from .errors import DishAdapterError
-from .load_dish_cfg_stragegy import LoadDishCfgStrategy
+from .load_dish_cfg_strategy import LoadDishCfgStrategy
 
 
 class LoadDishCfg(BaseTMCCommand):

@@ -72,14 +72,6 @@ ska\_tmc\_centralnode.commands.telescope\_standby\_command module
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.commands.load\_dish\_config\_command module
------------------------------------------------------------------
-
-.. automodule:: ska_tmc_centralnode.commands.load_dish_config_command
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 ska\_tmc\_centralnode.commands.set\_global\_pointing\_model module
 ------------------------------------------------------------------
 
