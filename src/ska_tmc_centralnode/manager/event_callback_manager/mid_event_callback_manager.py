@@ -53,7 +53,7 @@ class MidEventCallbackManager(EventCallbackManager):
         set_command_in_progress: Callable,
         set_dish_vcc_command_status: Callable,
         set_dish_vcc_cmd_validation_status: Callable,
-        get_global_pointing_model_status: Callable,
+        global_pointing_model_status: dict,
         gpm_unknown_dishes: list,
         adapter_factory: AdapterFactory,
         check_if_csp_all_dish_ready: Callable,
@@ -86,9 +86,7 @@ class MidEventCallbackManager(EventCallbackManager):
         self.set_dish_vcc_cmd_validation_status = (
             set_dish_vcc_cmd_validation_status
         )
-        self.get_global_pointing_model_status = (
-            get_global_pointing_model_status
-        )
+        self.global_pointing_model_status = global_pointing_model_status
         self.gpm_unknown_dishes = gpm_unknown_dishes
         self.adapter_factory = adapter_factory
         self.gpm_aggregator = gpm_aggregator
@@ -379,9 +377,9 @@ class MidEventCallbackManager(EventCallbackManager):
         )
         with self.dishln_gpm_lock:
             dish_id = dev_name.split("/")[-1]
-            self.get_global_pointing_model_status()[dish_id] = json.loads(
-                gpm_version
-            )
+            self.global_pointing_model_status = {
+                dish_id: json.loads(gpm_version)
+            }
             if self.check_if_csp_all_dish_ready():
                 self.gpm_unknown_dishes = self.gpm_aggregator.aggregate_gpm()
                 self.logger.debug(

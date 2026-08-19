@@ -6,6 +6,7 @@ It is component Manager for Mid Telecope.
 It is provided for explanatory purposes, and to support testing of this
 package.
 """
+import copy
 import json
 import threading
 import time
@@ -201,7 +202,7 @@ class CNComponentManagerMid(CNComponentManager):
                 self, "dish_vcc_command_status", status
             ),
             get_global_pointing_model_status=(
-                lambda: self.global_pointing_model_status
+                self.global_pointing_model_status
             ),
             gpm_unknown_dishes=self.gpm_unknown_dishes,
             dish_vcc_command_invoke_cb=(
@@ -408,7 +409,7 @@ class CNComponentManagerMid(CNComponentManager):
             dish: dish GPM version status
 
         """
-        return self._global_pointing_model_status
+        return copy.deepcopy(self._global_pointing_model_status)
 
     @global_pointing_model_status.setter
     def global_pointing_model_status(self, gpm_version: dict):
@@ -416,7 +417,9 @@ class CNComponentManagerMid(CNComponentManager):
         This method does the aggregation from Dish
         and sets the updated GPM version.
         """
-        self._global_pointing_model_status = gpm_version
+        model_status = self.global_pointing_model_status
+        model_status.update(gpm_version)
+        self._global_pointing_model_status = model_status
 
     def is_csp_mln_csp_master_ready(self) -> ResultCode:
         """

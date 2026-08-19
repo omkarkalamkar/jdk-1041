@@ -147,9 +147,9 @@ class SetGlobalPointingModel(SetDishGPM):
                         "Dish is assigned to subarray" not in result
                         and "Dish is unreachable" not in result
                     ):
-                        self.component_manager.global_pointing_model_status[
-                            dish_id
-                        ] = result
+                        self.component_manager.global_pointing_model_status = {
+                            dish_id: result
+                        }
 
             error_message = error_message + str(
                 self.filter_failed_dish_data(
