@@ -41,6 +41,9 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
 
     def pre_process(self, argin=None) -> None:
         """Log entry into ReleaseResources."""
+        self.command_runtime_context.cmd_inprogress_ctx.update_name(
+            self.__class__.__name__
+        )
         self.logger.debug(
             "Executing ReleaseResources command for MID with arguments: %s",
             argin,
@@ -101,5 +104,7 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
             self.context.task_callback(result=result, status=status)
         else:
             self.context.task_callback(
-                result=result, status=status, exception=exception
+                result=(ResultCode.FAILED, result[1]),
+                status=status,
+                exception=exception,
             )

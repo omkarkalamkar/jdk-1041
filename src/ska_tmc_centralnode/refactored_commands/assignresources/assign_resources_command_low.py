@@ -54,6 +54,10 @@ class AssignResourcesLow(BaseAssignResourcesCN):
 
     def pre_process(self, argin=None) -> None:
         """Log entry into AssignResources."""
+
+        self.command_runtime_context.cmd_inprogress_ctx.update_name(
+            self.__class__.__name__
+        )
         self.logger.debug(
             "Executing AssignResources command for LOW with arguments: %s",
             argin,
