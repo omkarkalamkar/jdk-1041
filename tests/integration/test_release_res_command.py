@@ -79,7 +79,7 @@ def test_release_resources_mid_timeout(
 
     assign_resources(
         central_node,
-        json_factory("Command_AssignResources"),
+        json_factory("command_AssignResources"),
         change_event_callbacks,
     )
 
