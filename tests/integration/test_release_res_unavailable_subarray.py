@@ -15,6 +15,7 @@ from ska_tmc_centralnode.utils.constants import (
 from tests.integration.conftest import get_cn_sn
 from tests.settings import (
     LOW_SUBARRAY_NOT_AVAILABLE,
+    MID_SUBARRAY_NOT_AVAILABLE,
     assert_exception,
     assign_resources,
     check_subarray_availability,
@@ -56,10 +57,10 @@ def release_resources_unavailable_subarray(
 
     assert result[0] == ResultCode.QUEUED
 
-    # subarray_id = json.loads(assign_input_str).get("subarray_id")
-    assert_exception(
-        unique_id, LOW_SUBARRAY_NOT_AVAILABLE, change_event_callbacks
-    )
+    msg = LOW_SUBARRAY_NOT_AVAILABLE
+    if "mid-tmc" in central_node_fqdn:
+        msg = MID_SUBARRAY_NOT_AVAILABLE
+    assert_exception(unique_id, msg, change_event_callbacks)
     export_device(db, db_device_info)
     time.sleep(3)
 
