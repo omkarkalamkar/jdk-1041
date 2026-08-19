@@ -545,6 +545,7 @@ class CNComponentManagerLow(CNComponentManager):
             pop_subsystem_assigned_per_subarray_id=(
                 self.pop_subsystem_assigned_per_subarray_id
             ),
+            get_assigned_subsystems=self.subsystem_assigned_per_subarray,
         )
 
     # pylint: disable=unexpected-keyword-arg
