@@ -1,7 +1,9 @@
 """Module to test GPM json model"""
 import pytest
 
-from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
+from ska_tmc_centralnode.refactored_commands.set_gpm.gpm_json_model import (
+    GPMJsonModel,
+)
 
 
 def test_gpm():

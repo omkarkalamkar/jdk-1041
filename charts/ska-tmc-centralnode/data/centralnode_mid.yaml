@@ -108,9 +108,6 @@ server:
         - name: "GPMVersion"
           values:
           - "{{.Values.deviceServers.centralnode.mid.global_pointing_model.version}}"
-        - name: "GPMInterface"
-          values:
-          - "{{.Values.deviceServers.centralnode.mid.global_pointing_model.interface}}"
         - name: "GPMFilePathPrefix"
           values:
           - "{{.Values.deviceServers.centralnode.mid.global_pointing_model.file_path_prefix}}"
