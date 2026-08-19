@@ -16,6 +16,7 @@ See the :ref:`commands` section for details about TMC command workflows.
    ska_tmc_centralnode.utils
    ska_tmc_centralnode.input_validator
    ska_tmc_centralnode.manager
+   ska_tmc_centralnode.refactored_commands.load_dish_cfg
 
 
 .. toctree::

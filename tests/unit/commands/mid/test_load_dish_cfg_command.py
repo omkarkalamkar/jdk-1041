@@ -1,10 +1,10 @@
 """Test module for command load dish cfg"""
-
 import json
 import threading
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import mock
+import pytest
 import tango
 from ska_control_model import TaskStatus
 from ska_tango_base.commands import ResultCode
@@ -15,8 +15,13 @@ from ska_tmc_common.test_helpers.helper_adapter_factory import (
 )
 from tango import ApiUtil
 
-from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.model.enum import DishConfigStatus
+from ska_tmc_centralnode.refactored_commands.load_dish_cfg.errors import (
+    DishAdapterError,
+)
+from ska_tmc_centralnode.refactored_commands.load_dish_cfg.load_dish_config_command import (
+    LoadDishCfg,
+)
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     validate_dish_vcc_command_status,
 )
@@ -33,9 +38,9 @@ from tests.settings import (
 # Patch this particular method which mock return value from SetKValue command
 
 
-@patch.object(LoadDishCfg, "_set_k_numbers_to_dish")
+@patch.object(LoadDishCfg, "_execute_on_dish")
 def test_load_dish_cfg_command(
-    _set_k_numbers_to_dish,
+    execute_on_dish,
     tango_context,
     task_callback,
     json_factory,
@@ -48,7 +53,7 @@ def test_load_dish_cfg_command(
     cm, _ = create_cm()
     cm.is_csp_mln_csp_master_ready = mock.MagicMock(return_value=ResultCode.OK)
     dln = tango.DeviceProxy("mid-tmc/leaf-node-dish/ska001")
-    _set_k_numbers_to_dish.return_value = ([ResultCode.QUEUED], [""])
+    execute_on_dish.return_value = ([ResultCode.QUEUED], [""])
     dln.SetDirectkValueValidationResult("0")
     cm.is_dish_vcc_config_set = True
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
@@ -238,20 +243,25 @@ def test_load_dish_cnfg_command_fail_csp_master(
 ):
     cm, _ = create_cm()
     adapter_factory = HelperAdapterFactory()
-    attrs = {"LoadDishCfg.side_effect": Exception}
-    cspmastermock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(
-        MID_CSP_MLN_DEVICE, proxy=cspmastermock
+    sub_mock = mock.Mock(
+        **{"invoke_command.side_effect": Exception("command failed")}
     )
+    adapter_factory.get_or_create_adapter(MID_CSP_MLN_DEVICE, proxy=sub_mock)
     dish_cfg_input_str = json_factory("command_load_dish_cfg")
-    load_dish_cnfg_command = LoadDishCfg(cm, adapter_factory, logger=logger)
-    (
-        load_dish_cnfg_command.dish_vcc_config_json,
-        _,
-    ) = load_dish_cnfg_command.check_and_validate_dish_vcc_data(
-        dish_cfg_input_str
+    load_dish_cnfg_command = LoadDishCfg(
+        cm._get_load_dish_cfg_context(), adapter_factory, logger=logger
     )
-    (res_code, _) = load_dish_cnfg_command.do(dish_cfg_input_str)
+    # (
+    #     load_dish_cnfg_command.dish_vcc_config_json,
+    #     _,
+    # ) = load_dish_cnfg_command.check_and_validate_dish_vcc_data(
+    #     dish_cfg_input_str
+    # )
+    (res_code, _) = load_dish_cnfg_command.execute(
+        dish_cfg_input_str,
+        task_callback=mock.Mock(),
+        task_abort_event=mock.Mock(),
+    )
     assert res_code == ResultCode.FAILED
 
 
@@ -275,3 +285,194 @@ def test_load_dish_config_command_fail(
         message[0]
         == "Dish Vcc Configuration is in Progress. Dish Vcc command status: IN_PROGRESS"
     )
+
+
+# ---------------------------------------------------------------------------
+# get_dish_adapters
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "device_states, adapter_side_effect, expected_names, expected_calls",
+    [
+        pytest.param(
+            # All devices are responsive and adapters are created.
+            [False, False],
+            [
+                MagicMock(dev_name="dish/leaf/001"),
+                MagicMock(dev_name="dish/leaf/002"),
+            ],
+            ["dish/leaf/001", "dish/leaf/002"],
+            2,
+            id="all-responsive",
+        ),
+        pytest.param(
+            # Second device is unresponsive, so no adapter is created for it.
+            [False, True],
+            [
+                MagicMock(dev_name="dish/leaf/001"),
+            ],
+            ["dish/leaf/001"],
+            1,
+            id="one-unresponsive",
+        ),
+        pytest.param(
+            # First adapter creation fails, second one succeeds.
+            [False, False],
+            [
+                RuntimeError("adapter creation failed"),
+                MagicMock(dev_name="dish/leaf/002"),
+            ],
+            ["dish/leaf/002"],
+            2,
+            id="one-adapter-creation-fails",
+        ),
+    ],
+)
+def test_get_dish_adapters(
+    configure_runtime_context,
+    adapter_factory,
+    device_states,
+    adapter_side_effect,
+    expected_names,
+    expected_calls,
+):
+    """Test get_dish_adapters for different device conditions."""
+
+    command = LoadDishCfg(
+        command_runtime_context=configure_runtime_context,
+        adapter_factory=adapter_factory,
+        logger=mock.Mock(),
+    )
+
+    device_names = [
+        f"dish/leaf/{index:03d}" for index in range(1, len(device_states) + 1)
+    ]
+
+    configure_runtime_context.device_ctx.dish_leaf_node_dev_names = (
+        device_names
+    )
+
+    configure_runtime_context.device_ctx.get_dev.side_effect = [
+        MagicMock(unresponsive=state) for state in device_states
+    ]
+
+    adapter_factory.get_or_create_adapter.side_effect = adapter_side_effect
+
+    result = command.get_dish_adapters()
+
+    assert [adapter.dev_name for adapter in result] == expected_names
+
+    assert adapter_factory.get_or_create_adapter.call_count == expected_calls
+
+
+def test_get_dish_adapters_raises_when_no_adapter_created(
+    configure_runtime_context,
+    adapter_factory,
+):
+    """Test DishAdapterError when no adapter can be created."""
+
+    command = LoadDishCfg(
+        command_runtime_context=configure_runtime_context,
+        adapter_factory=adapter_factory,
+        logger=mock.Mock(),
+    )
+
+    configure_runtime_context.device_ctx.dish_leaf_node_dev_names = [
+        "dish/leaf/001",
+        "dish/leaf/002",
+    ]
+
+    configure_runtime_context.device_ctx.get_dev.side_effect = [
+        MagicMock(unresponsive=False),
+        MagicMock(unresponsive=False),
+    ]
+
+    adapter_factory.get_or_create_adapter.side_effect = RuntimeError(
+        "adapter creation failed"
+    )
+
+    with pytest.raises(DishAdapterError):
+        command.get_dish_adapters()
+
+
+def test_get_dish_adapters_all_devices_unresponsive(
+    configure_runtime_context,
+    adapter_factory,
+):
+    """Test DishAdapterError when all devices are unresponsive."""
+
+    command = LoadDishCfg(
+        command_runtime_context=configure_runtime_context,
+        adapter_factory=adapter_factory,
+        logger=mock.Mock(),
+    )
+
+    configure_runtime_context.device_ctx.dish_leaf_node_dev_names = [
+        "dish/leaf/001",
+        "dish/leaf/002",
+    ]
+
+    configure_runtime_context.device_ctx.get_dev.side_effect = [
+        MagicMock(unresponsive=True),
+        MagicMock(unresponsive=True),
+    ]
+
+    with pytest.raises(DishAdapterError):
+        command.get_dish_adapters()
+
+    adapter_factory.get_or_create_adapter.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# _execute_on_dish
+# ---------------------------------------------------------------------------
+
+
+def test_execute_on_dish(
+    configure_runtime_context,
+    adapter_factory,
+):
+    """Test execution of SetKValue commands on dish adapters."""
+
+    command = LoadDishCfg(
+        command_runtime_context=configure_runtime_context,
+        adapter_factory=adapter_factory,
+        logger=mock.Mock(),
+    )
+
+    dish_adapters = [
+        MagicMock(dev_name="dish/leaf/001"),
+        MagicMock(dev_name="dish/leaf/002"),
+    ]
+
+    command.plan = MagicMock()
+    command.plan.dish_parameters = {
+        "001": {"k": 10},
+        "002": {"k": 20},
+    }
+
+    command.get_dish_adapters = MagicMock(return_value=dish_adapters)
+
+    with patch(
+        "ska_tmc_centralnode.refactored_commands.load_dish_cfg.load_dish_config_command.DishKValueExecutor"
+    ) as executor_cls:
+        executor = executor_cls.return_value
+
+        command._execute_on_dish()
+
+        command.get_dish_adapters.assert_called_once_with()
+
+        executor_cls.assert_called_once_with(
+            dish_adapters=dish_adapters,
+            command_id=command.context.command_id,
+            invoke_callback_factory=command.async_cb,
+            add_device_command=command.context.device_commands.append,
+            add_device_name=(configure_runtime_context.append_dish_dev_names),
+            update_kvalue_aggregator=(
+                configure_runtime_context.update_kval_aggregator
+            ),
+            logger=command.logger,
+        )
+
+        executor.execute.assert_called_once_with(command.plan.dish_parameters)

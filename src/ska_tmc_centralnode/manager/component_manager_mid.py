@@ -26,7 +26,6 @@ from ska_tmc_common.exceptions import (
 )
 from tango import DevState
 
-from ska_tmc_centralnode.commands.load_dish_config_command import LoadDishCfg
 from ska_tmc_centralnode.commands.set_global_pointing_model import (
     SetGlobalPointingModel,
 )
@@ -52,10 +51,22 @@ from ska_tmc_centralnode.refactored_commands.assignresources import (
     MidAssignResourcesContext,
     ObsStateContext,
 )
+from ska_tmc_centralnode.refactored_commands.load_dish_cfg.contexts import (
+    DeviceContext,
+    LoadDishCfgCommandContext,
+    LoadDishCfgRuntimeContext,
+)
+
+# pylint:disable=line-too-long
+from ska_tmc_centralnode.refactored_commands.load_dish_cfg.load_dish_config_command import (
+    LoadDishCfg,
+)
 from ska_tmc_centralnode.refactored_commands.releaseresources import (
     MidReleaseResourcesContext,
     ReleaseResourcesMid,
 )
+
+# pylint:enable=line-too-long
 from ska_tmc_centralnode.utils.constants import (
     CENTRALNODE_MID,
     DISH_VCC_CONFIG_INTERFACE_VERSION,
@@ -954,6 +965,90 @@ class CNComponentManagerMid(CNComponentManager):
             with self.command_completion_cond:
                 self.command_completion_cond.notify_all()
 
+    def update_kval_aggregator(self, dish_id: str, error_message: str) -> None:
+        """
+        Update the k-value validation aggregator with the error message
+        for the given dish ID.
+        Args:
+            dish_id: Dish Id
+            error_message: error message
+        """
+        with self.dish_vcc_validation_attr_lock:
+            aggregator = self.dish_kvalue_validation_aggregator
+            val_results = aggregator.dln_kvalue_validation_results
+            val_results[dish_id.lower()] = error_message
+
+    def append_dish_dev_names(self, dish_dev_name: str) -> None:
+        """
+        Append dish device names to the list of dishes for LoadDishCfg command
+
+        Args:
+            dish_dev_name (str): Dish device name
+
+        """
+        if dish_dev_name not in self.dev_names_for_load_dish_cfg:
+            self.dev_names_for_load_dish_cfg.append(dish_dev_name)
+
+    def update_memorized_attribute(self, dish_vcc_config):
+        """
+        Update the memorized attribute for the component manager
+        """
+        csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
+            self.input_parameter.csp_mln_dev_name,
+            AdapterType.CSP_MASTER_LEAF_NODE,
+        )
+        csp_mln_adapter.memorizedDishVccMap = dish_vcc_config
+
+    def _get_load_dish_cfg_context(self) -> LoadDishCfgRuntimeContext:
+        """
+        Get the context for LoadDishCfg command
+        Returns:
+            dict: LoadDishCfg command context
+        """
+        device_ctx = DeviceContext(
+            csp_mln_device_name=self.input_parameter.csp_mln_dev_name,
+            dish_leaf_node_dev_names=self.get_dish_leaf_node_device_names(),
+            get_dev=self.get_device,
+        )
+        command_ctx = LoadDishCfgCommandContext(
+            command_timeout=self.command_timeout,
+            update_command_in_progress_id=lambda command_name: setattr(
+                self, "command_in_progress", command_name
+            ),
+            set_load_dish_cfg_aggregated_result=lambda result: setattr(
+                self, "load_dish_cfg_aggregated_result", result
+            ),
+            set_dish_vcc_command_status=lambda status: setattr(
+                self, "dish_vcc_command_status", status
+            ),
+            update_dish_vcc_flag=self.update_dish_vcc_flag,
+            get_dish_vcc_validation_status=(
+                lambda: self.dish_vcc_validation_status
+            ),
+            set_dish_vcc_validation_status=lambda status: setattr(
+                self, "dish_vcc_validation_status", status
+            ),
+            update_memorized_attribute=self.update_memorized_attribute,
+            reset_load_dish_cfg_data=self.reset_load_dish_cfg_data,
+        )
+        return LoadDishCfgRuntimeContext(
+            command_completion_condition=self.command_completion_cond,
+            device_ctx=device_ctx,
+            command_ctx=command_ctx,
+            append_dish_dev_names=self.append_dish_dev_names,
+            update_kval_aggregator=self.update_kval_aggregator,
+            dish_kvalue_validation_aggregator=(
+                self.dish_kvalue_validation_aggregator
+            ),
+            k_value_valid_range_lower_limit=(
+                self.k_value_valid_range_lower_limit
+            ),
+            k_value_valid_range_upper_limit=(
+                self.k_value_valid_range_upper_limit
+            ),
+            validate_dish_ids=self.validate_dish_ids,
+        )
+
     # pylint: disable=unexpected-keyword-arg
     def load_dish_cfg(
         self, argin: str, task_callback: Callable, task_abort_event
@@ -987,7 +1082,9 @@ class CNComponentManagerMid(CNComponentManager):
                 result=(ResultCode.NOT_ALLOWED, err_msg),
             )
         loadishcfg_command_object = LoadDishCfg(
-            self, adapter_factory=self.adapter_factory, logger=self.logger
+            self._get_load_dish_cfg_context(),
+            adapter_factory=self.adapter_factory,
+            logger=self.logger,
         )
         self.logger.debug(
             "Command Status: %s ",
@@ -1007,7 +1104,7 @@ class CNComponentManagerMid(CNComponentManager):
                 result=(ResultCode.NOT_ALLOWED, message),
             )
 
-        return loadishcfg_command_object.load_dish_cfg(
+        return loadishcfg_command_object.execute(
             argin=argin,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
