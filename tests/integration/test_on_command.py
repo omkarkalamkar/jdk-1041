@@ -125,7 +125,7 @@ def test_on_command_dish_fail(
 
     for dish_ln in [DISH_LEAF_NODE_36, DISH_LEAF_NODE_63, DISH_LEAF_NODE_100]:
         check_dish_mode_event(
-            dish_ln, DishMode.STANDBY_LP, change_event_callbacks
+            dish_ln, DishMode.STANDBY_FP, change_event_callbacks
         )
 
     tmc_dish.SetDefective(RESET_DEFECT)

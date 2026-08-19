@@ -258,7 +258,7 @@ def check_dish_mode_event(
     )
 
     change_event_callbacks["dishMode"].assert_change_event(
-        (dish_mode),
+        dish_mode,
         lookahead=2,
     )
     dish_leaf_node.unsubscribe_event(evt_id)
