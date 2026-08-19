@@ -218,19 +218,22 @@ def test_low_release_resources_bad_json(
 ):
     """Test release resources with bad JSON"""
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    adapter_factory = HelperAdapterFactory()
 
     release_input_str = "{ invalid json"
-    assign_res_command = ReleaseResourcesLow(
-        cm, adapter_factory=adapter_factory, logger=logger
-    )
-    (res_code, message) = assign_res_command.release_resources(
+
+    cm.release_resources(
         release_input_str,
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-    assert res_code == ResultCode.FAILED
-    assert "Problem in loading the JSON string" in str(message)
+
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=(
+            ResultCode.FAILED,
+            "Expecting property name enclosed in double quotes: line 1 column 3 (char 2)",
+        ),
+    )
 
 
 @pytest.mark.SKA_low

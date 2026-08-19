@@ -101,7 +101,6 @@ def test_assign_resources_missing_sdp_csp_subarray_id_mccs_key(
     assert missing_key in message[0]
 
 
-@pytest.mark.akis
 def test_low_assign_resources_command_fail_subarray(
     tango_context,
     task_callback,
@@ -299,7 +298,6 @@ def test_low_assign_resources_raises_state_model_exception(
     )
 
 
-@pytest.mark.aki
 @pytest.mark.SKA_low
 def test_low_assign_resources_bad_json(
     tango_context,
@@ -328,7 +326,6 @@ def test_low_assign_resources_bad_json(
     # assert "Problem in loading the JSON string" in str(message)
 
 
-@pytest.mark.aki
 @pytest.mark.SKA_low
 def test_low_assign_resources_subarray_not_found(
     tango_context,

@@ -450,9 +450,7 @@ def test_assign_resources_command_already_assigned(
 
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
-    adapter_factory = HelperAdapterFactory()
 
-    assign_res_command = AssignResourcesMid(cm, adapter_factory, logger=logger)
     # SKA001 is assigned to Subarray1
     for devInfo in cm.devices:
         if isinstance(devInfo, SubArrayDeviceInfo):
@@ -462,12 +460,18 @@ def test_assign_resources_command_already_assigned(
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
-    (res_code, _) = assign_res_command.assign_resources(
+    cm.assign_resources(
         assign_input_str,
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-    assert res_code == ResultCode.FAILED
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=(ResultCode.FAILED, "Dish SKA001 is already allocated"),
+    )
 
 
 def check_if_subarray_is_available(cm):
