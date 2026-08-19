@@ -14,17 +14,17 @@ from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapter_type import AdapterType
 from ska_tmc_common.exceptions import InvalidReceptorIdError
 from ska_tmc_common.v4.command_context import CommandResult, DeviceCommand
+from ska_tmc_common.v4.tmc_command import BaseTMCCommand
 
 from ska_tmc_centralnode.refactored_commands.set_gpm.gpm_json_model import (
     GPMJsonModel,
 )
 
-from .base_command import BaseCNCommand
 from .contexts import GPMContext, GPMRequest
 from .strategy import GPMPlan
 
 
-class SetGlobalPointingModel(BaseCNCommand):
+class SetGlobalPointingModel(BaseTMCCommand):
     """A class to execute the SetGlobalPointingModel command for MID.
 
     Executes ApplyPointingModel command on Dish.
