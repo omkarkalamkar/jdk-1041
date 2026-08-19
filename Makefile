@@ -14,6 +14,7 @@ CAR_OCI_REGISTRY_HOST ?= artefact.skao.int
 PROJECT = ska-tmc-centralnode
 KUBE_APP = ska-tmc-centralnode
 TELESCOPE ?= SKA-mid
+EXIT_AT_FAIL ?= true
 
 # KUBE_NAMESPACE defines the Kubernetes Namespace that will be deployed to
 # using Helm.  If this does not already exist it will be created
@@ -71,11 +72,16 @@ ADD_ARGS ?= ## Additional args to pass to pytest
 
 CI_REGISTRY ?= gitlab.com
 CUSTOM_VALUES = --set central_node.centralnode.image.tag=$(VERSION)
-K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/ska-build-python:0.3.2
+K8S_TEST_IMAGE_TO_TEST=$(CAR_OCI_REGISTRY_HOST)/ska-build-python:1.0.0
 ifneq ($(CI_JOB_ID),)
 CUSTOM_VALUES = --set central_node.centralnode.image.image=$(PROJECT) \
 	--set central_node.centralnode.image.registry=$(CI_REGISTRY)/ska-telescope/ska-tmc/$(PROJECT) \
 	--set central_node.centralnode.image.tag=$(VERSION)-dev.c$(CI_COMMIT_SHORT_SHA)
+endif
+
+PYTEST_FAIL_FAST :=
+ifeq ($(EXIT_AT_FAIL),true)
+PYTEST_FAIL_FAST := -x
 endif
 
 # override for python-test - must not have the above --true-context
@@ -83,12 +89,12 @@ ifeq ($(MAKECMDGOALS),python-test)
 ADD_ARGS += -n8 --forked
 MARK = not post_deployment and not acceptance
 endif
-ifeq ($(MAKECMDGOALS), k8s-test-runner)
+ifeq ($(MAKECMDGOALS),k8s-test-runner)
 ADD_ARGS +=  --true-context
 MARK = $(shell echo $(TELESCOPE) | sed s/-/_/) and (post_deployment or acceptance)
 endif
 
-PYTHON_VARS_AFTER_PYTEST ?= -m '$(MARK)' $(ADD_ARGS) $(FILE)
+PYTHON_VARS_AFTER_PYTEST ?= -vv -m '$(MARK)' $(PYTEST_FAIL_FAST) $(ADD_ARGS) $(FILE)
 
 K8S_TEST_TEST_COMMAND = $(PYTHON_VARS_BEFORE_PYTEST) $(PYTHON_RUNNER) \
 						pytest \
