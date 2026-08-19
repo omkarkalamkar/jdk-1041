@@ -127,7 +127,9 @@ class SetGlobalPointingModel(BaseTMCCommand):
                 " for SetGlobalPointingModel command"
             )
 
-    def update_set_gpm_results(self, band_value: str) -> callable:
+    def update_set_gpm_results(
+        self, band_value: str
+    ) -> Callable[[str, str, str], None]:
         """Create a callback to update SetGlobalPointingModel results.
 
         :param band_value: Band value associated with the callback.
@@ -136,7 +138,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
         :rtype: callable
         """
 
-        def callback(dev_name: str, command_id: str, result: str):
+        def callback(dev_name: str, command_id: str, result: str) -> None:
             result = json.loads(result)
             if self.context.results.get(dev_name):
                 del self.context.results[dev_name]

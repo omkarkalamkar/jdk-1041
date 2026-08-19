@@ -115,7 +115,7 @@ class LoadDishCfgStrategy:
         ) = self.load_dish_config_json_validator(dishid_vcc_map_json)
 
         if not is_valid_dish_cfg:
-            return "", message
+            return {}, message
         return dishid_vcc_map_json, ""
 
     def load_dish_config_json_validator(self, argin) -> tuple[bool, str]:

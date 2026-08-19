@@ -180,10 +180,9 @@ cred:
 	curl -s https://gitlab.com/ska-telescope/templates-repository/-/raw/master/scripts/namespace_auth.sh | bash -s $(SERVICE_ACCOUNT) $(KUBE_NAMESPACE) || true
 
 
-TARGET ?= "src/ska_tmc_centralnode/manager"
 
 typecheck:
-	mypy $(TARGET)
+	mypy
 
 python-post-lint: typecheck
 

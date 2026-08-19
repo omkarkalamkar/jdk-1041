@@ -90,3 +90,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 disable_error_code = ["import-untyped"]
+files = ["src/ska_tmc_centralnode/manager", "src/ska_tmc_centralnode/refactored_commands"]
