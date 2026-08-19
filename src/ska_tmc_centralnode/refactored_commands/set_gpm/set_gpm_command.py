@@ -315,7 +315,7 @@ class SetGlobalPointingModel(BaseCNCommand):
                 ) or ctx.is_already_assigned(dish_id.lower()):
                     error_message = "Dish is assigned to subarray"
             except Exception:
-                error_message = "Dish is unreachable ?????"
+                error_message = "Dish is unreachable"
                 self.logger.exception(error_message)
             if error_message:
                 self.result_code = ResultCode.FAILED
