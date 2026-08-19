@@ -341,8 +341,11 @@ def test_low_assign_resources_subarray_not_found(
     )
     task_callback.assert_against_call(
         status=TaskStatus.IN_PROGRESS,
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
         result=(
             ResultCode.FAILED,
-            "Expecting property name enclosed in double quotes: line 1 column 3 (char 2)",
+            "Subarray Id 99 is not existing!",
         ),
     )

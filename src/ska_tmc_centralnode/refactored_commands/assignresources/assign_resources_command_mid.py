@@ -57,6 +57,7 @@ class AssignResourcesMid(BaseAssignResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse input and build the execution plan/context for MID."""
+        self.validate_subarray_id(self.subarray_id)
         request = AssignResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin, remove_transaction_id=True)
@@ -90,7 +91,6 @@ class AssignResourcesMid(BaseAssignResourcesCN):
     def build_device_commands(self) -> None:
         """Resolve the target subarray adapter and populate the device
         command list for this invocation."""
-
         self.command_runtime_context.log_state(
             "Device states before executing AssignResources command"
         )

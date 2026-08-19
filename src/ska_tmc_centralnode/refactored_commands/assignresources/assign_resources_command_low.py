@@ -62,6 +62,7 @@ class AssignResourcesLow(BaseAssignResourcesCN):
     def prepare_command(self) -> None:
         """Parse input and build the execution plan/context for LOW."""
         self.context.command_invoked_callback = self.command_invoked_callback
+        self.validate_subarray_id(self.subarray_id)
         request = AssignResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
@@ -159,5 +160,7 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             self.context.task_callback(result=result, status=status)
         else:
             self.context.task_callback(
-                result=result, status=status, exception=exception
+                result=(ResultCode.FAILED, result[1]),
+                status=status,
+                exception=exception,
             )

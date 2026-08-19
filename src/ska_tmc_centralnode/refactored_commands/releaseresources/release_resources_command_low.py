@@ -54,6 +54,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse and normalize input data, build the plan, for LOW."""
+        self.validate_subarray_id(self.subarray_id)
         self.context.command_invoked_callback = self.command_invoked_callback
         request = ReleaseResourcesPreparation(
             self.command_runtime_context, self.logger

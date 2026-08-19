@@ -140,3 +140,15 @@ class BaseCNCommand(BaseTMCCommand):
             + str(subarray_id).zfill(2)
         )
         return subarray_adapter_dev_name
+
+    def validate_subarray_id(self, subarray_id: int) -> None:
+        """Validate the subarray id.
+
+        :raises ValueError: if the subarray id is not valid.
+        """
+        name = self.command_runtime_context.input_parameter.subarray_dev_names
+        subarray_name = self.get_subarray_name(int(self.subarray_id))
+        if subarray_name not in name:
+            raise ValueError(
+                f"Subarray Id {self.subarray_id} is not existing!"
+            )

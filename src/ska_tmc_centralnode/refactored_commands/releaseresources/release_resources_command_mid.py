@@ -48,6 +48,7 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse and validate input data, build the plan, for MID."""
+        self.validate_subarray_id(self.subarray_id)
         request = ReleaseResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)

@@ -1,7 +1,6 @@
 import json
 import threading
 import time
-from collections.abc import Set
 
 import mock
 import pytest
@@ -10,15 +9,9 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.test_helpers.helper_adapter_factory import (
-    HelperAdapterFactory,
-)
 from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
-from ska_tmc_centralnode.refactored_commands.releaseresources import (
-    ReleaseResourcesLow,
-)
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     release_validate_json_args,
 )
@@ -253,7 +246,6 @@ def test_low_release_resources_subarray_not_found(
 ):
     """Test release resources when subarray adapter not found"""
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    adapter_factory = HelperAdapterFactory()
 
     # Create a command with subarray_id=99 which won't be in adapters
     release_input_str = json_factory("release_resource_low")
@@ -267,5 +259,13 @@ def test_low_release_resources_subarray_not_found(
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-    assert res_code == ResultCode.FAILED
-    assert "is not existing" in message
+    task_callback.assert_against_call(
+        status=TaskStatus.IN_PROGRESS,
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=(
+            ResultCode.FAILED,
+            "Subarray Id 99 is not existing!",
+        ),
+    )
