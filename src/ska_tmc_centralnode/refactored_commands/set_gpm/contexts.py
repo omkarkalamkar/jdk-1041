@@ -16,36 +16,36 @@ from ska_tmc_centralnode.refactored_commands.set_gpm.strategy import (
 )
 
 
-@dataclass
-class CommandInProgressContext:
-    """Context to maintain command in progress data.
+@dataclass(kw_only=True)
+class GPMContext(CommandRuntimeContext):
+    """Runtime context containing parameters for GPM command execution.
 
-    Attributes:
-        get_id: Callable to fetch current command in progress id.
-        update_id: Callable to update current command in progress id.
-        update_name: Callable to update current command in progress name.
-        clear: Callable to clear the command object from
-        in progress object list.
-        get_name: Callable to get command in progress.
-        obj_update_cmd: Callable to update command in progress
-        object with current command.
+    command_timeout: Timeout for the GPM command.
+    get_id: Callback to get the command ID.
+    update_id: Callback to update the command ID.
+    update_name: Callback to update the command name.
+    clear: Callback to clear command data.
+    get_name: Callback to get the command name.
+    gpm_unknown_dishes: List of dishes with unknown GPM data.
+    dishln_gpm_cmd_exe_data: GPM command execution data by dish.
+    is_already_assigned: Callback to check dish assignment.
+    update_abort_evt: Callback to update the abort event.
+    get_dish_leaf_node_device_names: Callback to get dish device names.
+    default_gpm_version_params: Default GPM version parameters.
+    get_device: Callback to retrieve a device.
+    dish_leaf_node_prefix: Prefix used for dish leaf node devices.
+    get_evt_data_manager: Callback to get the event data manager.
+    dishln_gpm_lock: Lock protecting dish GPM data.
+    global_pointing_model_status: GPM status for each dish.
+    reset_gpm_data: Callback to reset GPM command data.
     """
 
+    command_timeout: float
     get_id: Callable
     update_id: Callable
     update_name: Callable
     clear: Callable
     get_name: Callable
-    obj_update_cmd: Callable
-
-
-@dataclass(kw_only=True)
-class GPMContext(CommandRuntimeContext):
-    """GPM context containing runtime parameters for the Mid telescope
-    Subarray."""
-
-    command_timeout: float
-    cmd_inprogress_ctx: CommandInProgressContext
     gpm_unknown_dishes: list
     dishln_gpm_cmd_exe_data: dict
     is_already_assigned: Callable

@@ -53,10 +53,7 @@ from ska_tmc_centralnode.refactored_commands.load_dish_cfg.contexts import (
 from ska_tmc_centralnode.refactored_commands.load_dish_cfg.load_dish_config_command import (
     LoadDishCfg,
 )
-from ska_tmc_centralnode.refactored_commands.set_gpm.contexts import (
-    CommandInProgressContext,
-    GPMContext,
-)
+from ska_tmc_centralnode.refactored_commands.set_gpm.contexts import GPMContext
 from ska_tmc_centralnode.refactored_commands.set_gpm.set_gpm_command import (
     SetGlobalPointingModel,
 )
@@ -1120,14 +1117,13 @@ class CNComponentManagerMid(CNComponentManager):
         return GPMContext(
             command_completion_condition=self.command_completion_cond,
             command_timeout=self.command_timeout,
-            cmd_inprogress_ctx=CommandInProgressContext(
-                get_id=lambda: self.command_in_progress,
-                update_id=lambda name: self.command_in_progress,
-                update_name=lambda name: self.command_in_progress,
-                clear=lambda _: setattr(self, "command_in_progress", ""),
-                get_name=lambda: self.command_in_progress,
-                obj_update_cmd=lambda *a, **kw: None,
+            get_id=lambda: self.command_in_progress,
+            update_id=lambda name: setattr(self, "command_in_progress", name),
+            update_name=lambda name: setattr(
+                self, "command_in_progress", name
             ),
+            clear=lambda _: setattr(self, "command_in_progress", ""),
+            get_name=lambda: self.command_in_progress,
             gpm_unknown_dishes=self.gpm_unknown_dishes,
             dishln_gpm_cmd_exe_data=self.dishln_gpm_cmd_exe_data,
             is_already_assigned=self.is_already_assigned,

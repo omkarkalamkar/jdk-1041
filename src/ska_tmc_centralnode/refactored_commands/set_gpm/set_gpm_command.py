@@ -61,12 +61,8 @@ class SetGlobalPointingModel(BaseTMCCommand):
         :return: None
         :rtype: None
         """
-        self.command_runtime_context.cmd_inprogress_ctx.update_name(
-            self.__class__.__name__
-        )
-        self.command_runtime_context.cmd_inprogress_ctx.update_id(
-            self.__class__.__name__
-        )
+        self.command_runtime_context.update_name(self.__class__.__name__)
+        self.command_runtime_context.update_id(self.__class__.__name__)
         self.logger.debug("Received GPM Input: %s", argin)
 
     def _build_device_command(
@@ -368,7 +364,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
         msg: str = message or exception
         self.logger.info(
             "Command ID: %s | Received task status with Result: %s",
-            self.command_runtime_context.cmd_inprogress_ctx.get_id(),
+            self.command_runtime_context.get_id(),
             (result, status, msg),
         )
         self.result_code = list(result)[0]
@@ -461,13 +457,13 @@ class SetGlobalPointingModel(BaseTMCCommand):
 
     def post_process(self) -> None:
         """Post-processing of scan command."""
-        self.command_runtime_context.cmd_inprogress_ctx.clear(
-            self.command_runtime_context.cmd_inprogress_ctx.get_name()
+        self.command_runtime_context.clear(
+            self.command_runtime_context.get_name()
         )
 
     def clear_device_events(self) -> None:
         """Method to clean up the device event data."""
-        self.command_runtime_context.cmd_inprogress_ctx.clear(self)
+        self.command_runtime_context.clear(self)
         event_data_manager = (
             self.command_runtime_context.get_evt_data_manager()
         )
