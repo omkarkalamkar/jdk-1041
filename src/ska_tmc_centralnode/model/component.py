@@ -110,7 +110,7 @@ class CentralComponent(SharingObserver, TmcComponent):
             self._desired_telescope_state = value
 
     @property
-    def devices(self) -> List[DevState]:
+    def devices(self) -> List[DeviceInfo]:
         """
         Return the monitored devices.
 

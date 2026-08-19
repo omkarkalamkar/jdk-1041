@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import threading
 import time
+from datetime import datetime
 from logging import Logger
-from typing import Callable, Union
+from typing import Callable, Generic, TypeVar
 
 from ska_control_model import AdminMode, HealthState, ObsState
+from tango import DevState
 
 from ska_tmc_centralnode.utils.constants import (
     LOW_CSP_MLN_DEVICE,
@@ -17,28 +19,45 @@ from ska_tmc_centralnode.utils.constants import (
     MID_SDP_MLN_DEVICE,
 )
 
-from ...model.component import TmcComponent
+from ...model.component import CentralComponent
 from ...model.input import InputParameterLow, InputParameterMid
 from ..event_data_manager import EventDataManager
 
+T = TypeVar("T", InputParameterMid, InputParameterLow)
 
-class EventCallbackManager:
+
+class EventCallbackManager(Generic[T]):
     """Class to manage change event callbacks for both Mid and
     Low telescope."""
 
     def __init__(
         self,
         logger: Logger,
-        component: TmcComponent,
+        component: CentralComponent,
         command_completion_cond: threading.Condition,
-        input_parameter: Union[InputParameterMid, InputParameterLow],
+        input_parameter: T,
         event_data_manager: EventDataManager,
-        _aggregate_state: Callable,
+        _aggregate_state: Callable[[], None],
     ):
+        """Initialization of EventCallbackManager
+
+        :param logger: Instance of Logger.
+        :type logger: Logger
+        :param component: instance of CentralComponent.
+        :type component: TmcComponent
+        :param command_completion_cond: completion condition.
+        :type command_completion_cond: threading.Condition
+        :param input_parameter: Instance of InputParameter.
+        :type input_parameter: Union[InputParameterMid, InputParameterLow]
+        :param event_data_manager: Instance of EventDataManager
+        :type event_data_manager: EventDataManager
+        :param _aggregate_state: Callable to aggregate states.
+        :type _aggregate_state:  Callable[[],None]
+        """
         self.logger = logger
         self.component = component
         self.command_completion_cond = command_completion_cond
-        self.input_parameter = input_parameter
+        self.input_parameter: T = input_parameter
         self.event_data_manager = event_data_manager
         self.rlock = threading._RLock()
         self.lock = threading.Lock()
@@ -144,7 +163,7 @@ class EventCallbackManager:
         return device_name
 
     def update_device_health_state(
-        self, device_name: str, health_state: HealthState, timestamp
+        self, device_name: str, health_state: HealthState, timestamp: datetime
     ) -> None:
         """
         Update a monitored device health state
@@ -180,8 +199,8 @@ class EventCallbackManager:
                 self.component.last_device_info_changed = dev_info
 
     def update_device_admin_mode(
-        self, device_name: str, admin_mode: AdminMode, timestamp
-    ):
+        self, device_name: str, admin_mode: AdminMode, timestamp: datetime
+    ) -> None:
         """
         Update a monitored device admin mode
 
@@ -218,7 +237,7 @@ class EventCallbackManager:
                     )
                     self.component.last_device_info_changed = device_info
 
-    def update_device_state(self, device_name, state):
+    def update_device_state(self, device_name: str, state: DevState) -> None:
         """
         Update a monitored device state,
         aggregate the states available

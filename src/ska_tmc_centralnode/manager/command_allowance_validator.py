@@ -1,8 +1,8 @@
 """Command allowance validation collaborator for CentralNode."""
 from logging import Logger
-from typing import Any, Callable, List, Union, cast
+from typing import Any, Callable, Generic, List, TypeVar, cast
 
-from ska_control_model import AdminMode, ObsState
+from ska_control_model import AdminMode, ObsState, OpStateModel
 from ska_tango_base.faults import StateModelError
 from ska_tmc_common import (
     AdapterFactory,
@@ -24,26 +24,48 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 
+T = TypeVar("T", InputParameterMid, InputParameterLow)
 
-class CommandAllowanceValidator:
+
+class CommandAllowanceValidator(Generic[T]):
     """Validates whether a command is allowed for a CentralNode."""
 
     def __init__(
         self,
         logger: Logger,
         get_device: Callable[[str], DeviceInfo],
-        input_parameter: Union[InputParameterMid, InputParameterLow],
+        input_parameter: T,
         subarray_trl_prefix: str,
         retry_attempts: int,
         retry_delay: float,
         adapter_factory: AdapterFactory,
-        get_op_state_model: Callable,
+        get_op_state_model: Callable[[], OpStateModel],
     ) -> None:
-        self.input_parameter = input_parameter
+        """Initialization of CommandAllowanceValidator class.
+
+        :param logger: Instance of Logger.
+        :type logger: Logger
+        :param get_device: Callable to get DeviceInfo instance.
+        :type get_device: Callable[[str], DeviceInfo]
+        :param input_parameter: Instance of InputParameter.
+        :type input_parameter: Union[InputParameterMid, InputParameterLow]
+        :param subarray_trl_prefix: Subarray TRL prefix.
+        :type subarray_trl_prefix: str
+        :param retry_attempts: Number of retry attempts for availability.
+        :type retry_attempts: int
+        :param retry_delay: Delay in between retry attempts of availability
+        check.
+        :type retry_delay: float
+        :param adapter_factory: Instance of AdapterFactory.
+        :type adapter_factory: AdapterFactory
+        :param get_op_state_model: Callable to get OpstateModel.
+        :type get_op_state_model: Callable[[], OpStateModel]
+        """
+        self.input_parameter: T = input_parameter
         self.get_device: Callable[[str], DeviceInfo] = get_device
         self.logger = logger
         self.subarray_trl_prefix = subarray_trl_prefix
-        self.supported_commands_for_responsive_check = [
+        self.supported_commands_for_responsive_check: List[str] = [
             "TelescopeOn",
             "TelescopeOff",
             "TelescopeStandby",
@@ -80,7 +102,7 @@ class CommandAllowanceValidator:
         self,
         subarray_id: int = 0,
         command_name: str = "",
-    ):
+    ) -> bool:
         """This method checks if command is allowed before LRC start
 
         Args:
@@ -147,7 +169,7 @@ class CommandAllowanceValidator:
             for name in device_names
         )
 
-    def _get_unresponsive_devices(self, device_names: list) -> list[str]:
+    def _get_unresponsive_devices(self, device_names: list) -> List[str]:
         """Provides list of unresponsive devices.
 
         :param device_names: List of devices.
@@ -175,7 +197,7 @@ class CommandAllowanceValidator:
         ),
         reraise=True,
     )
-    def _check_if_device_is_responsive(self, dev_names: List[str]):
+    def _check_if_device_is_responsive(self, dev_names: List[str]) -> None:
         """checks if the device is responsive"""
 
         cast(
@@ -278,7 +300,9 @@ class CommandAllowanceValidator:
             )
 
 
-class LowCommandAllowanceValidator(CommandAllowanceValidator):
+class LowCommandAllowanceValidator(
+    CommandAllowanceValidator[InputParameterLow]
+):
     """Validates whether a command is allowed for a CentralNode in Low
     telescope."""
 
@@ -294,9 +318,9 @@ class LowCommandAllowanceValidator(CommandAllowanceValidator):
         super().check_device_responsiveness_command(subarray_id)
         self.check_if_mccs_mln_is_responsive()
 
-    def check_if_mccs_mln_is_responsive(self):
+    def check_if_mccs_mln_is_responsive(self) -> None:
         """Checks whether mccs mln is responsive"""
-        return self._check_if_device_is_responsive(
+        self._check_if_device_is_responsive(
             [self.input_parameter.mccs_mln_dev_name]
         )
 
@@ -309,9 +333,8 @@ class LowCommandAllowanceValidator(CommandAllowanceValidator):
             TMC mccs controller leaf Node.
 
         """
-        input_param = cast(InputParameterLow, self.input_parameter)
         mccs_mln_adapter = self.adapter_factory.get_or_create_adapter(
-            input_param.mccs_mln_dev_name,
+            self.input_parameter.mccs_mln_dev_name,
             adapter_type=AdapterType.MCCS_MASTER_LEAF_NODE,
         )
         return mccs_mln_adapter.mccsControllerAdminMode
@@ -348,23 +371,50 @@ class LowCommandAllowanceValidator(CommandAllowanceValidator):
         return True
 
 
-class MidCommandAllowanceValidator(CommandAllowanceValidator):
+class MidCommandAllowanceValidator(
+    CommandAllowanceValidator[InputParameterMid]
+):
     """Validates whether a command is allowed for a CentralNode in Mid
     telescope."""
 
     def __init__(
         self,
-        logger,
-        get_device,
-        input_parameter,
-        subarray_trl_prefix,
-        retry_attempts,
-        retry_delay,
-        adapter_factory,
-        get_op_state_model,
-        dish_vcc_init_enabled,
-        get_dish_vcc_config_set,
+        logger: Logger,
+        get_device: Callable[[str], DeviceInfo],
+        input_parameter: InputParameterMid,
+        subarray_trl_prefix: str,
+        retry_attempts: int,
+        retry_delay: float,
+        adapter_factory: AdapterFactory,
+        get_op_state_model: Callable[[], OpStateModel],
+        dish_vcc_init_enabled: bool,
+        get_dish_vcc_config_set: Callable[[], bool],
     ) -> None:
+        """Initialization of MidCommandAllowanceValidator class.
+
+        :param logger: Instance of Logger.
+        :type logger: Logger
+        :param get_device: Callable to get DeviceInfo instance.
+        :type get_device: Callable[[str], DeviceInfo]
+        :param input_parameter: Instance of InputParameter.
+        :type input_parameter: Union[InputParameterMid, InputParameterLow]
+        :param subarray_trl_prefix: Subarray TRL prefix.
+        :type subarray_trl_prefix: str
+        :param retry_attempts: Number of retry attempts for availability.
+        :type retry_attempts: int
+        :param retry_delay: Delay in between retry attempts of availability
+        check.
+        :type retry_delay: float
+        :param adapter_factory: Instance of AdapterFactory.
+        :type adapter_factory: AdapterFactory
+        :param get_op_state_model: Callable to get OpstateModel.
+        :type get_op_state_model: Callable[[], OpStateModel]
+        :param dish_vcc_init_enabled: Flag to check id Dish Vcc
+        functionality is enabled during init.
+        :type dish_vcc_init_enabled: bool
+        :param get_dish_vcc_config_set: Callable to if configuration is set.
+        :type get_dish_vcc_config_set: Callable[[], bool]
+        """
         super().__init__(
             logger,
             get_device,
@@ -376,7 +426,9 @@ class MidCommandAllowanceValidator(CommandAllowanceValidator):
             get_op_state_model,
         )
         self.dish_vcc_init_enabled: bool = dish_vcc_init_enabled
-        self.get_dish_vcc_config_set: Callable = get_dish_vcc_config_set
+        self.get_dish_vcc_config_set: Callable[
+            [], bool
+        ] = get_dish_vcc_config_set
 
     def check_device_responsiveness_command(self, subarray_id: int) -> None:
         """
@@ -390,7 +442,7 @@ class MidCommandAllowanceValidator(CommandAllowanceValidator):
         super().check_device_responsiveness_command(subarray_id)
         self.check_if_dishes_are_responsive()
 
-    def check_if_dishes_are_responsive(self) -> bool:
+    def check_if_dishes_are_responsive(self) -> None:
         """
         Checks whether dishes are responsive
 
@@ -399,10 +451,9 @@ class MidCommandAllowanceValidator(CommandAllowanceValidator):
             False otherwise
 
         """
-        input_param = cast(InputParameterMid, self.input_parameter)
         self.logger.debug("Checking if dishes are responsive")
-        return self._check_if_device_is_responsive(
-            input_param.dish_leaf_node_dev_names
+        self._check_if_device_is_responsive(
+            self.input_parameter.dish_leaf_node_dev_names
         )
 
     def is_command_allowed(self, command_name=None) -> bool:

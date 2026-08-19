@@ -6,7 +6,10 @@ from typing import Dict, List
 
 from ska_tmc_common import DeviceInfo
 
-from ska_tmc_centralnode.model.input import InputParameterMid
+from ska_tmc_centralnode.model.input import (
+    InputParameterLow,
+    InputParameterMid,
+)
 from ska_tmc_centralnode.utils.constants import (
     LOW_CSP_MLN_DEVICE,
     LOW_SDP_MLN_DEVICE,
@@ -47,7 +50,18 @@ _MID_CSP_MLN_ATTRIBUTES = [
 class DeviceAttributeMapBuilder:
     """Builds device-to-attributes subscription mapping."""
 
-    def __init__(self, logger: Logger, input_parameter):
+    def __init__(
+        self,
+        logger: Logger,
+        input_parameter: InputParameterLow | InputParameterMid,
+    ):
+        """Initialise DeviceAttributeMapBuilder class.
+
+        :param logger: Instance of Logger
+        :type logger: Logger
+        :param input_parameter: Instance of InputParameter.
+        :type input_parameter: InputParameterLow | InputParameterMid
+        """
         self.logger = logger
         self.input_parameter = input_parameter
 

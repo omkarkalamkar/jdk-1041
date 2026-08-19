@@ -27,7 +27,7 @@ class GPMConfig:
     interface: str
     data_sources_prefix: str
     file_path_prefix: str
-    invoke_command_callback: Callable
+    invoke_command_callback: Callable[[], None]
 
 
 @dataclass(kw_only=True)
@@ -54,7 +54,7 @@ class DishVccConfig:
     file_path: str
     init_timeout: float = 120
     enable_init: bool
-    invoke_command_callback: Callable
+    invoke_command_callback: Callable[[], None]
     k_value_valid_range_upper_limit: int = 1177
     k_value_valid_range_lower_limit: int = 1
     dish_k_value_aggregation_allowed_precent: float = 100.0
@@ -62,7 +62,12 @@ class DishVccConfig:
 
 @dataclass(kw_only=True)
 class ArrayLayoutConfig:
-    """Configuration to store ArrayLayoutConfig related data."""
+    """Configuration to store ArrayLayoutConfig related data.
+
+    Attributes:
+        default_url: Default array layout URL.
+
+    """
 
     default_url: dict
 
@@ -73,6 +78,14 @@ class CentralNodeComponentManagerConfig(TmcComponentManagerConfig):
 
     Extends common node-level manager configuration with central node-specific
     inputs used by MID and LOW component manager.
+
+    Attributes:
+        op_state_model: Instance of OpStateModel.
+        array_layout_config: Instance of ArrayLayoutConfig.
+        timeout_config: Instance of TimeoutConfig.
+        subarray_trl_prefix: Subarray FQDN prefix.
+        retry_attempts: Number of retry attempts for availability check.
+        retry_delay: Delay in retries for availability check.
     """
 
     op_state_model: OpStateModel
@@ -89,6 +102,13 @@ class MidCentralNodeComponentManagerConfig(CentralNodeComponentManagerConfig):
 
     Extends common node-level manager configuration with central node-specific
     inputs used by MID component manager.
+
+    Attributes:
+        mkt_extension_id: Meerkat Extension ID.
+        ska_dish_ranges: Range of SKA dishes.
+        mkt_dish_ranges: Range of MKT dishes.
+        dish_config: Instance of DishVccConfig.
+        gpm_config: Instance of GPMConfig.
     """
 
     mkt_extension_id: str
@@ -104,6 +124,10 @@ class LowCentralNodeComponentManagerConfig(CentralNodeComponentManagerConfig):
 
     Extends common node-level manager configuration with central node-specific
     inputs used by LOW component manager.
+
+    Attributes:
+        is_auto_recovery_enabled: Flag to check whether auto recovery is
+        enabled.
     """
 
     is_auto_recovery_enabled: bool

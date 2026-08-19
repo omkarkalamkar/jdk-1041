@@ -4,10 +4,10 @@ import json
 import threading
 import time
 from logging import Logger
-from typing import Callable
+from typing import Callable, cast
 
 from ska_control_model import ResultCode
-from ska_tmc_common import AdapterFactory
+from ska_tmc_common import AdapterFactory, DishDeviceInfo
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
@@ -21,43 +21,111 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
 )
 
-from ...model.component import TmcComponent
+from ...model.component import CentralComponent
 from ...model.input import InputParameterMid
 from ..event_data_manager import EventDataManager
 from .event_callback_manager import EventCallbackManager
 
 
-class MidEventCallbackManager(EventCallbackManager):
+class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
     """Class to manage change event callbacks for Low telescope."""
 
     def __init__(
         self,
         logger: Logger,
-        component: TmcComponent,
+        component: CentralComponent,
         command_completion_cond: threading.Condition,
         input_parameter: InputParameterMid,
         event_data_manager: EventDataManager,
-        _aggregate_state: Callable,
+        _aggregate_state: Callable[[], None],
         kvalue_validation_aggregator: DishAttrValueAggregator,
         gpm_aggregator: DishAttrValueAggregator,
-        update_dish_vcc_flag: Callable,
-        dish_vcc_command_invoke_cb: Callable,
+        update_dish_vcc_flag: Callable[[bool], None],
+        dish_vcc_command_invoke_cb: Callable[[], None],
         _telescope_availability_aggregator: TelescopeAvailabilityAggregatorMid,
-        subarray_availability: dict,
-        set_csp_mln_availability: Callable,
-        set_sdp_mln_availability: Callable,
-        gpm_invoke_command_callback: Callable,
-        get_dish_vcc_command_status: Callable,
+        subarray_availability: dict[str, bool],
+        set_csp_mln_availability: Callable[[bool], None],
+        set_sdp_mln_availability: Callable[[bool], None],
+        gpm_invoke_command_callback: Callable[[], None],
+        get_dish_vcc_command_status: Callable[[], DishConfigStatus],
         dish_vcc_init_timeout: float,
-        get_command_in_progress: Callable,
-        set_command_in_progress: Callable,
-        set_dish_vcc_command_status: Callable,
-        set_dish_vcc_cmd_validation_status: Callable,
-        set_global_pointing_model_status: Callable,
-        gpm_unknown_dishes: list,
+        get_command_in_progress: Callable[[], str],
+        set_command_in_progress: Callable[[str], None],
+        set_dish_vcc_command_status: Callable[[DishConfigStatus], None],
+        set_dish_vcc_cmd_validation_status: Callable[[dict], None],
+        set_global_pointing_model_status: Callable[[dict], None],
+        gpm_unknown_dishes: list[str],
         adapter_factory: AdapterFactory,
-        check_if_csp_all_dish_ready: Callable,
+        check_if_csp_all_dish_ready: Callable[[], bool],
     ):
+        """Initialization of MidEventCallbackManager
+
+        :param logger: Instance of Logger.
+        :type logger: Logger
+        :param component: instance of CentralComponent.
+        :type component: TmcComponent
+        :param command_completion_cond: completion condition.
+        :type command_completion_cond: threading.Condition
+        :param input_parameter: Instance of InputParameter.
+        :type input_parameter: Union[InputParameterMid, InputParameterLow]
+        :param event_data_manager: Instance of EventDataManager
+        :type event_data_manager: EventDataManager
+        :param _aggregate_state: Callable to aggregate states.
+        :type _aggregate_state:  Callable[[],None]
+        :param kvalue_validation_aggregator: Instance of
+        DishAttrValueAggregator.
+        :type kvalue_validation_aggregator: DishAttrValueAggregator
+        :param gpm_aggregator: instance of DishAttrValueAggregator.
+        :type gpm_aggregator: DishAttrValueAggregator
+        :param update_dish_vcc_flag: Callable to update dish vcc
+          configuration sucess flag.
+        :type update_dish_vcc_flag: Callable[[bool],None]
+        :param dish_vcc_command_invoke_cb: Callable to invoke LoadDishCfg
+        command.
+        :type dish_vcc_command_invoke_cb: Callable[[],None]
+        :param _telescope_availability_aggregator: instance of
+        TelescopeAvailabilityAggregatorMid.
+        :type _telescope_availability_aggregator:
+        TelescopeAvailabilityAggregatorMid.
+        :param subarray_availability: Dictionary with subarray
+        availability status.
+        :type subarray_availability: dict[str,bool]
+        :param set_csp_mln_availability: Callable to set CSP Master Leaf Node
+        avaiability.
+        :type set_csp_mln_availability: Callable[[bool],None]
+        :param set_sdp_mln_availability: Callable to set SDP Master Leaf Node
+        avaiability.
+        :type set_sdp_mln_availability: Callable[[bool],None]
+        :param gpm_invoke_command_callback: Callable to invoke SetGPM command.
+        :type gpm_invoke_command_callback: Callable[[],None]
+        :param get_dish_vcc_command_status: callable to get dish vcc command
+        status.
+        :type get_dish_vcc_command_status: Callable[[],DishConfigStatus]
+        :param dish_vcc_init_timeout: Command timeout for LoadDishCfg
+        commmand during initialization.
+        :type dish_vcc_init_timeout: float
+        :param get_command_in_progress: Callable to get command in progress.
+        :type get_command_in_progress: Callable[[],str]
+        :param set_command_in_progress: Callable to set command in progress.
+        :type set_command_in_progress: Callable[[str],None]
+        :param set_dish_vcc_command_status: Callable to set LoadDishCfg command
+        status.
+        :type set_dish_vcc_command_status: Callable[[DishConfigStatus],None]
+        :param set_dish_vcc_cmd_validation_status: Callable to set LoadDishCfg
+        command validation status.
+        :type set_dish_vcc_cmd_validation_status: Callable[[dict],None]
+        :param set_global_pointing_model_status: Callable to set global
+        pointing model status.
+        :type set_global_pointing_model_status: Callable[[dict],None]
+        :param gpm_unknown_dishes: List of unknown dishes during
+        execution of SetGPM command.
+        :type gpm_unknown_dishes: list[str]
+        :param adapter_factory: Instance of Adapter Factory.
+        :type adapter_factory: AdapterFactory
+        :param check_if_csp_all_dish_ready: Callable to check CSP and DISH
+        readiness.
+        :type check_if_csp_all_dish_ready: Callable[[],bool]
+        """
         super().__init__(
             logger,
             component,
@@ -66,7 +134,6 @@ class MidEventCallbackManager(EventCallbackManager):
             event_data_manager,
             _aggregate_state,
         )
-        self.input_parameter: InputParameterMid = input_parameter
         self.kvalue_validation_aggregator = kvalue_validation_aggregator
         self.update_dish_vcc_flag = update_dish_vcc_flag
         self.dish_vcc_command_invoke_cb = dish_vcc_command_invoke_cb
@@ -94,7 +161,7 @@ class MidEventCallbackManager(EventCallbackManager):
         self.gpm_aggregator = gpm_aggregator
         self.check_if_csp_all_dish_ready = check_if_csp_all_dish_ready
 
-    def _get_master_device_name(self, device_name: str):
+    def _get_master_device_name(self, device_name: str) -> str:
         """Provides Master device name which is stored in device info.
 
         :param device_name: Device FQDN received in event.
@@ -202,7 +269,9 @@ class MidEventCallbackManager(EventCallbackManager):
             )
             # Update Dish leaf node device name with full FQDN for real Dish
             dev_name = self._get_dish_leaf_node_name(dev_name)
-            dev_info = self.component.get_device(dev_name)
+            dev_info = cast(
+                DishDeviceInfo, self.component.get_device(dev_name)
+            )
             dev_info.dish_mode = dish_mode
             self.logger.debug(
                 "Updated DishMode of %s: %s",
@@ -320,7 +389,7 @@ class MidEventCallbackManager(EventCallbackManager):
                 self.command_completion_cond.notify_all()
 
     def update_telescope_availability(
-        self, device_name: str, event_value
+        self, device_name: str, event_value: bool
     ) -> None:
         """
         Updates telescope availablity status

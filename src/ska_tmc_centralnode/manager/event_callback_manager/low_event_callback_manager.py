@@ -5,29 +5,60 @@ from logging import Logger
 from typing import Callable
 
 from ...manager.aggregators import TelescopeAvailabilityAggregatorLow
-from ...model.component import TmcComponent
+from ...model.component import CentralComponent
 from ...model.input import InputParameterLow
 from ..event_data_manager import EventDataManager
 from .event_callback_manager import EventCallbackManager
 
 
-class LowEventCallbackManager(EventCallbackManager):
+class LowEventCallbackManager(EventCallbackManager[InputParameterLow]):
     """Class to manage change event callbacks for Low telescope."""
 
     def __init__(
         self,
         logger: Logger,
-        component: TmcComponent,
+        component: CentralComponent,
         command_completion_cond: threading.Condition,
         input_parameter: InputParameterLow,
         event_data_manager: EventDataManager,
-        _aggregate_state: Callable,
-        subarray_availability: dict,
-        set_csp_mln_availability: Callable,
-        set_sdp_mln_availability: Callable,
-        set_mccs_mln_availability: Callable,
+        _aggregate_state: Callable[[], None],
+        subarray_availability: dict[str, bool],
+        set_csp_mln_availability: Callable[[bool], None],
+        set_sdp_mln_availability: Callable[[bool], None],
+        set_mccs_mln_availability: Callable[[bool], None],
         _telescope_availability_aggregator: TelescopeAvailabilityAggregatorLow,
     ):
+        """Initialization of LowEventCallbackManager
+
+        :param logger: Instance of Logger.
+        :type logger: Logger
+        :param component: instance of CentralComponent.
+        :type component: TmcComponent
+        :param command_completion_cond: completion condition.
+        :type command_completion_cond: threading.Condition
+        :param input_parameter: Instance of InputParameter.
+        :type input_parameter: Union[InputParameterMid, InputParameterLow]
+        :param event_data_manager: Instance of EventDataManager
+        :type event_data_manager: EventDataManager
+        :param _aggregate_state: Callable to aggregate states.
+        :type _aggregate_state:  Callable[[],None]
+        :param subarray_availability: Dictionary with subarray
+        availability status.
+        :type subarray_availability: dict
+        :param set_csp_mln_availability: Callable to set CSP Master Leaf Node
+        availability.
+        :type set_csp_mln_availability: Callable[[bool],None]
+        :param set_sdp_mln_availability: Callable to set SDP Master Leaf Node
+        availability.
+        :type set_sdp_mln_availability: Callable[[bool],None]
+        :param set_mccs_mln_availability: Callable to set MCCS Master Leaf Node
+        availability.
+        :type set_mccs_mln_availability: Callable[[bool],None]
+        :param _telescope_availability_aggregator: Instance of
+        TelescopeAvailabilityAggregatorLow.
+        :type _telescope_availability_aggregator:
+        TelescopeAvailabilityAggregatorLow.
+        """
         super().__init__(
             logger,
             component,
@@ -44,7 +75,9 @@ class LowEventCallbackManager(EventCallbackManager):
             _telescope_availability_aggregator
         )
 
-    def update_telescope_availability(self, device_name, event_value):
+    def update_telescope_availability(
+        self, device_name: str, event_value: bool
+    ) -> None:
         """Updates telescope availability"""
         with self.rlock:
             self.logger.debug("Device name is: %s", device_name)

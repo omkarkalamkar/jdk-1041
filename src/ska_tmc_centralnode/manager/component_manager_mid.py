@@ -16,7 +16,12 @@ from ska_control_model import TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.commands import ResultCode
 from ska_tango_base.software_bus import Signal
-from ska_tmc_common import AdapterType, DeviceInfo
+from ska_tmc_common import (
+    AdapterType,
+    DeviceInfo,
+    DishDeviceInfo,
+    SubArrayDeviceInfo,
+)
 from ska_tmc_common.enum import DishMode
 from ska_tmc_common.exceptions import InvalidReceptorIdError
 from tango import DevState
@@ -60,17 +65,15 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
 )
 
+from ..model.input import InputParameterMid
 from ..utils.exception_decorator import exception_handler
 from .event_callback_manager.mid_event_callback_manager import (
     MidEventCallbackManager,
 )
 from .event_processor import MidEventProcessor
 
-# pylint:disable=too-many-instance-attributes
-# pylint:disable=too-many-arguments
 
-
-class CNComponentManagerMid(CNComponentManager):
+class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
     """Component manager class for central node mid"""
 
     _is_dish_vcc_config_set: Signal[bool] = Signal[bool](
@@ -86,13 +89,12 @@ class CNComponentManagerMid(CNComponentManager):
         stored=True, initial_value={}
     )
 
-    # pylint:disable=keyword-arg-before-vararg
     def __init__(self, config: MidCentralNodeComponentManagerConfig) -> None:
         """
         Initialise a new ComponentManager instance for mid.
 
         Args:
-           config:
+           config: Instance of MidCentralNodeComponentManagerConfig.
 
         """
         super().__init__(config)
@@ -212,6 +214,40 @@ class CNComponentManagerMid(CNComponentManager):
             check_if_csp_all_dish_ready=self.check_if_csp_all_dish_ready,
         )
 
+    def create_device_info(
+        self, device_name: str
+    ) -> SubArrayDeviceInfo | DishDeviceInfo | DeviceInfo:
+        """Creates the device information for device.
+
+        :param device_name: Name of device.
+        :type device_name: str
+        :return: DeviceInfo Instance
+        :rtype: SubArrayDeviceInfo or DeviceInfo or DishDeviceInfo
+        """
+        dev_info: SubArrayDeviceInfo = super().create_device_info(device_name)
+        if (
+            not dev_info
+            and device_name in self.get_dish_leaf_node_device_names()
+        ):
+            dev_info = DishDeviceInfo(device_name, False)
+        elif not dev_info:
+            dev_info = DeviceInfo(device_name, False)
+
+        return dev_info
+
+    def get_dish_device_names(self) -> List[str]:
+        """
+        Return Dish Master device names
+        """
+
+        return self.input_parameter.dish_dev_names
+
+    def get_dish_leaf_node_device_names(self) -> List[str]:
+        """
+        Return Dish leaf node device names
+        """
+        return self.input_parameter.dish_leaf_node_dev_names
+
     def _get_event_handlers(self) -> dict:
         """Returns event handlers with addition of mid specific.
 
@@ -261,23 +297,23 @@ class CNComponentManagerMid(CNComponentManager):
         return self.stow_mode_command_aggregated_result
 
     @property
-    def dish_vcc_command_status(self):
+    def dish_vcc_command_status(self) -> DishConfigStatus:
         """Return dish vcc command status"""
         return self._dish_vcc_command_status
 
     @dish_vcc_command_status.setter
-    def dish_vcc_command_status(self, value: DishConfigStatus):
+    def dish_vcc_command_status(self, value: DishConfigStatus) -> None:
         """Set dish vcc command status and invoke callback"""
         self.logger.debug("Setting dish config status %s", str(value))
         self._dish_vcc_command_status = value
 
     @property
-    def is_dish_vcc_config_set(self):
+    def is_dish_vcc_config_set(self) -> bool:
         """Getter method for is_dish_vcc_config_set"""
         return self._is_dish_vcc_config_set
 
     @is_dish_vcc_config_set.setter
-    def is_dish_vcc_config_set(self, value):
+    def is_dish_vcc_config_set(self, value: bool) -> None:
         """Setter method for is_dish_vcc_config_set"""
         self._is_dish_vcc_config_set = value
 
@@ -293,7 +329,7 @@ class CNComponentManagerMid(CNComponentManager):
         return self._dish_vcc_validation_status
 
     @dish_vcc_validation_status.setter
-    def dish_vcc_validation_status(self, validation_status: dict):
+    def dish_vcc_validation_status(self, validation_status: dict) -> None:
         """
         This method does the aggregation from Dish and CSPMLN
         and sets the updated validation result.
@@ -412,7 +448,7 @@ class CNComponentManagerMid(CNComponentManager):
         return copy.deepcopy(self._global_pointing_model_status)
 
     @global_pointing_model_status.setter
-    def global_pointing_model_status(self, gpm_version: dict):
+    def global_pointing_model_status(self, gpm_version: dict) -> None:
         """
         This method does the aggregation from Dish
         and sets the updated GPM version.
@@ -458,16 +494,6 @@ class CNComponentManagerMid(CNComponentManager):
             except Exception as e:
                 self.logger.exception("Error %s", str(e))
         return ResultCode.FAILED
-
-    def get_dish_leaf_node_device_names(self) -> tuple:
-        """
-        Return Dish leaf node device names
-
-        Returns:
-            A tuple of dish leaf node devices names
-
-        """
-        return self.input_parameter.dish_leaf_node_dev_names
 
     def add_dishes(self, dln_prefix: str, num_dishes: int) -> list:
         """
@@ -748,8 +774,6 @@ class CNComponentManagerMid(CNComponentManager):
                 result=(ResultCode.NOT_ALLOWED, str(exception)),
             )
 
-    # pylint: enable=unexpected-keyword-arg
-
     def reset_load_dish_cfg_data(self) -> None:
         """Reset all data which is set for aggregating LoadDisgCfg command"""
         self.logger.debug("Resetting LoadDishCfg aggregated data")
@@ -758,7 +782,7 @@ class CNComponentManagerMid(CNComponentManager):
         self.command_in_progress = ""
         self._check_init_and_invoke_gpm()
 
-    def _check_init_and_invoke_gpm(self):
+    def _check_init_and_invoke_gpm(self) -> None:
         """If TMC is in initalization phase then invoke gpm"""
         if self.is_gpm_init and self.config.gpm_config.invoke_command_callback:
             self.config.gpm_config.invoke_command_callback()

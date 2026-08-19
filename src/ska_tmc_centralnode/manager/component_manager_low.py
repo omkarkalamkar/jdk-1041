@@ -14,6 +14,7 @@ from typing import Callable, Dict, Tuple
 from ska_schemas.schema import validate
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.software_bus import Signal
+from ska_tmc_common import DeviceInfo, SubArrayDeviceInfo
 
 from ska_tmc_centralnode.commands.assign_resources_command_low import (
     AssignResourcesLow,
@@ -40,13 +41,15 @@ from ska_tmc_centralnode.utils.constants import (
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
 )
 
+from ..model.component import MCCSDeviceInfo
+from ..model.input import InputParameterLow
 from ..utils.exception_decorator import exception_handler
 from .event_callback_manager.low_event_callback_manager import (
     LowEventCallbackManager,
 )
 
 
-class CNComponentManagerLow(CNComponentManager):
+class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
     """Component Manager class for low central node"""
 
     _assign_resources_schema_version: Signal = Signal[str](
@@ -214,6 +217,40 @@ class CNComponentManagerLow(CNComponentManager):
         with self.rlock:
             new_state = self._telescope_state_aggregator.aggregate()
             self.component.telescope_state = new_state
+
+    def get_mccs_master_dev_name(self) -> str:
+        """
+        Return Sdp Master device name
+        """
+        return self.input_parameter.mccs_master_dev_name
+
+    def get_mccs_master_leaf_node_dev_name(self) -> str:
+        """
+        Return MCCS master leaf node device name
+        """
+        return self.input_parameter.mccs_mln_dev_name
+
+    def create_device_info(
+        self, device_name: str
+    ) -> SubArrayDeviceInfo | MCCSDeviceInfo | DeviceInfo:
+        """Creates the device information for device.
+
+        :param device_name: Name of device.
+        :type device_name: str
+        :return: DeviceInfo Instance
+        :rtype: SubArrayDeviceInfo or DeviceInfo or MCCSDeviceInfo
+        """
+        dev_info: SubArrayDeviceInfo = super().create_device_info(device_name)
+        if (
+            not dev_info
+            and device_name.lower()
+            in self.get_mccs_master_leaf_node_dev_name()
+        ):
+            dev_info = MCCSDeviceInfo(device_name, False)
+        elif not dev_info:
+            dev_info = DeviceInfo(device_name, False)
+
+        return dev_info
 
     def stop_aggregation_process(self):
         """Stop aggregation process"""

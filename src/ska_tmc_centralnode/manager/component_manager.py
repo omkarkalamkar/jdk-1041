@@ -11,9 +11,20 @@ import time
 from multiprocessing import Event
 from multiprocessing import Lock as ProcessLock
 from multiprocessing import Manager
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import pandas as pd
+import tango
 from ska_control_model import HealthState, TaskStatus
 from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.control_model import ObsState
@@ -22,7 +33,6 @@ from ska_tmc_common import (
     AdapterFactory,
     Aggregator,
     DeviceInfo,
-    DishDeviceInfo,
     InvalidJSONError,
     SubArrayDeviceInfo,
 )
@@ -41,10 +51,7 @@ from ska_tmc_centralnode.manager.component_manager_config import (
 from ska_tmc_centralnode.manager.event_data_manager import EventDataManager
 from ska_tmc_centralnode.manager.event_manager import CentralNodeEventManager
 from ska_tmc_centralnode.manager.event_processor import EventProcessor
-from ska_tmc_centralnode.model.component import (
-    CentralComponent,
-    MCCSDeviceInfo,
-)
+from ska_tmc_centralnode.model.component import CentralComponent
 from ska_tmc_centralnode.model.input import (
     InputParameterLow,
     InputParameterMid,
@@ -57,8 +64,10 @@ from .aggregators import (
 from .device_attribute_map_builder import DeviceAttributeMapBuilder
 from .event_callback_manager.event_callback_manager import EventCallbackManager
 
+T = TypeVar("T", InputParameterMid, InputParameterLow)
 
-class CNComponentManager(SharingObserver, TmcComponentManager):
+
+class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
     """
     A component manager for The Central Node component.
 
@@ -74,23 +83,11 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
     _array_layout_url: Signal = Signal[dict](stored=True)
     _default_array_layout_url: Signal = Signal[dict](stored=True)
 
-    # pylint:disable=keyword-arg-before-vararg
     def __init__(self, config: CentralNodeComponentManagerConfig):
         """
         Initialise a new ComponentManager instance.
 
-        :param op_state_model: the operational state model used
-            by this component manager
-        :param _input_parameter: allows to specify InputParameter
-            class for TMC Mid or Low
-        :param logger: a logger for this component manager
-        :param _component: allows setting of the component to be
-            managed; for testing purposes only
-        :param _liveliness_probe: allows to enable/disable
-            LivelinessProbe usage
-        :param _event_manager: allows to enable/disable
-            EventManager usage
-
+        :config: Instance of CentralNodeComponentManagerConfig.
         """
         super().__init__(
             config.input_parameter,
@@ -107,20 +104,19 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         self.config = config
         self.logger = config.logger
         self.component = config.component or CentralComponent(config.logger)
-        self.event_manager = self.config.event_manager_enabled
-        self.input_parameter = self.config.input_parameter
-        self.adapter_factory = AdapterFactory()
-        self.event_data_manager = EventDataManager(self)
+        self.event_manager: bool = self.config.event_manager_enabled
+        self.input_parameter: T = self.config.input_parameter
+        self.adapter_factory: AdapterFactory = AdapterFactory()
+        self.event_data_manager: EventDataManager = EventDataManager(self)
         self.process_lock = ProcessLock()
         self._telescope_state_aggregator: Optional[
             Union[TelescopeStateAggregatorLow, TelescopeStateAggregatorMid]
         ] = None
-        self._health_state_aggregator = None
-        self.op_state_aggregator = None
+        self.op_state_aggregator: TMCOpStateAggregator | None = None
         self.command_in_progress: str = ""
         self.command_mapping: Dict[str, str | list[dict]] = {}
         self.rlock = threading.RLock()
-        self._telescope_availability_aggregator = Aggregator(
+        self._telescope_availability_aggregator: Aggregator = Aggregator(
             self, logger=config.logger
         )
         self._stop_thread: threading.Event = threading.Event()
@@ -144,7 +140,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             CentralNodeEventManager(self, logger=config.logger)
         )
         self.command_completion_cond = threading.Condition()
-        self._event_cb_manager = EventCallbackManager(
+        self._event_cb_manager: EventCallbackManager[T] = EventCallbackManager(
             logger=self.logger,
             component=self.component,
             command_completion_cond=self.command_completion_cond,
@@ -154,6 +150,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         )
 
     def on_new_shared_bus(self) -> None:
+        """Initialise signal values."""
         super().on_new_shared_bus()
         self._array_layout_url = {}
         self._default_array_layout_url: dict = (
@@ -234,7 +231,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         self._default_array_layout_url = url
         self.logger.info("Default array layout URL set to: %s", url)
 
-    def aggregate_process_monitor(self):
+    def aggregate_process_monitor(self) -> None:
         """This method keep tracking aggregate health state changed
         from aggregation process
         """
@@ -253,11 +250,11 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
 
         self.logger.debug("aggregation process monitor thread stopped")
 
-    def stop_aggregation_process(self):
+    def stop_aggregation_process(self) -> None:
         """Override this method in mid and low"""
         raise NotImplementedError
 
-    def stop_all_process(self):
+    def stop_all_process(self) -> None:
         """This stop aggregation process"""
         with self.process_lock:
             self.stop_aggregation_process()
@@ -266,13 +263,13 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             self.aggregate_process_manager.shutdown()
             self.logger.debug("Aggregation process stopped")
 
-    def __del__(self):
+    def __del__(self) -> None:
         """shutdown aggregation process"""
         self.logger.debug("Component destructor called")
         self.stop_all_process()
         self.stop()
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         self.stop_all_process()
         self.stop()
 
@@ -324,19 +321,8 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """
         return TaskStatus.REJECTED, "Reset command is not implemented"
 
-    def set_aggregators(
-        self,
-        _telescope_state_aggregator,
-        _health_state_aggregator,
-        _op_state_aggregator,
-    ) -> None:
-        """Sets Aggregators callback"""
-        self._telescope_state_aggregator = _telescope_state_aggregator
-        self._health_state_aggregator = _health_state_aggregator
-        self.op_state_aggregator = _op_state_aggregator
-
     @property
-    def devices(self):
+    def devices(self) -> List[DeviceInfo]:
         """
         Return the list of the monitored devices
 
@@ -345,7 +331,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         return self.component.devices
 
     @property
-    def checked_devices(self):
+    def checked_devices(self) -> List[DeviceInfo]:
         """
         Return the list of the checked monitored devices
 
@@ -353,7 +339,6 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """
         return self.component.devices
 
-    # pylint:disable =inconsistent-return-statements
     def get_subarray_obsstate(self, subarray_devname: str) -> ObsState:
         """
         Get Current device obsState
@@ -366,7 +351,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """
         return self.get_device(subarray_devname).obs_state
 
-    def get_device(self, device_name):
+    def get_device(self, device_name) -> DeviceInfo:
         """
         Return the device info with device name dev_name
 
@@ -377,7 +362,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """
         return self.component.get_device(device_name)
 
-    def get_sdp_subarray_dev_names(self) -> list:
+    def get_sdp_subarray_dev_names(self) -> List[str]:
         """
         Return Sdp Subarray device names
         """
@@ -395,7 +380,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """
         return self.input_parameter.csp_mln_dev_name
 
-    def get_csp_subarray_dev_names(self) -> list:
+    def get_csp_subarray_dev_names(self) -> List[str]:
         """
         Return Csp Subarray device names
         """
@@ -407,35 +392,11 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """
         return self.input_parameter.sdp_master_dev_name
 
-    def get_mccs_master_dev_name(self) -> str:
-        """
-        Return Sdp Master device name
-        """
-        return self.input_parameter.mccs_master_dev_name
-
-    def get_mccs_master_leaf_node_dev_name(self) -> str:
-        """
-        Return MCCS master leaf node device name
-        """
-        return self.input_parameter.mccs_mln_dev_name
-
     def get_csp_master_dev_name(self) -> str:
         """
         Return Csp Master device name
         """
         return self.input_parameter.csp_master_dev_name
-
-    def get_dish_device_names(self) -> tuple:
-        """
-        Return Dish Master device names
-        """
-        return self.input_parameter.dish_dev_names
-
-    def get_dish_leaf_node_device_names(self) -> tuple:
-        """
-        Return Dish leaf node device names
-        """
-        return self.input_parameter.dish_leaf_node_dev_names
 
     def check_if_csp_mln_is_available(self) -> bool:
         """
@@ -484,6 +445,21 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             result.append(dev_name)
         return result
 
+    def create_device_info(
+        self, device_name: str
+    ) -> SubArrayDeviceInfo | None:
+        """Creates the device information for device.
+
+        :param device_name: Name of device.
+        :type device_name: str
+        :return: DeviceInfo Instance
+        :rtype: SubArrayDeviceInfo or DeviceInfo
+        """
+        dev_info = None
+        if "subarray" in device_name.lower():
+            dev_info = SubArrayDeviceInfo(device_name, False)
+        return dev_info
+
     def add_device(self, device_name: str) -> None:
         """
         Add device to the liveliness probe function
@@ -492,21 +468,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
             dev_name (str): device name
 
         """
-        if "subarray" in device_name.lower():
-            dev_info = SubArrayDeviceInfo(device_name, False)
-        elif (
-            isinstance(self.input_parameter, InputParameterMid)
-            and device_name in self.get_dish_leaf_node_device_names()
-        ):
-            dev_info = DishDeviceInfo(device_name, False)
-        elif (
-            isinstance(self.input_parameter, InputParameterLow)
-            and device_name.lower()
-            in self.get_mccs_master_leaf_node_dev_name()
-        ):
-            dev_info = MCCSDeviceInfo(device_name, False)
-        else:
-            dev_info = DeviceInfo(device_name, False)
+        dev_info = self.create_device_info(device_name)
         self.component.update_device(dev_info)
         if self.liveliness_probe_object:
             self.liveliness_probe_object.add_device(device_name)
@@ -594,7 +556,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         """Getter method for Telescope Availability"""
         return copy.deepcopy(self.component.telescope_availability)
 
-    def set_telescope_availability(self, telescope_availability) -> None:
+    def set_telescope_availability(self, telescope_availability: dict) -> None:
         """Setter method for telescope availability"""
         availability = self.get_telescope_availability()
         availability.update(telescope_availability)
@@ -607,11 +569,11 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         self._aggregate_telescope_state()
         self._aggregate_tm_op_state()
 
-    def get_telescope_state(self):
+    def get_telescope_state(self) -> tango.DevState:
         """Getter method for telescope state"""
         return self.component.telescope_state
 
-    def _aggregate_tm_op_state(self):
+    def _aggregate_tm_op_state(self) -> None:
         """
         Aggregates TMC devices states
         """
@@ -809,11 +771,11 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         )
         return TaskStatus.REJECTED, message
 
-    def start_communicating(self):
+    def start_communicating(self) -> None:
         """This method needs to be overridden by the child classes
         to have this functionality"""
 
-    def stop_communicating(self):
+    def stop_communicating(self) -> None:
         """This method needs to be overridden by the child classes
         to have this functionality"""
 
@@ -828,7 +790,7 @@ class CNComponentManager(SharingObserver, TmcComponentManager):
         )
         return TaskStatus.REJECTED, message
 
-    def _aggregate_telescope_state(self):
+    def _aggregate_telescope_state(self) -> None:
         """
         Aggregates telescope state
         """
