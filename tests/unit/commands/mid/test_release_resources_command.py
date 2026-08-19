@@ -63,7 +63,7 @@ def test_mid_release_resources_command_with_ok(
 
 
 def test_mid_release_resources_command_fail_subarray(
-    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+    tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
     cm, start_time = create_cm(_input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
@@ -73,22 +73,29 @@ def test_mid_release_resources_command_fail_subarray(
     dev_factory = DevFactory()
     subarray_device = dev_factory.get_device(MID_SUBARRAY_DEVICE)
     subarray_device.SetDirectObsState(ObsState.IDLE)
-    adapter_factory = HelperAdapterFactory()
-    attrs = {"ReleaseAllResources.side_effect": Exception}
-    subarrayMock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(
-        MID_SUBARRAY_DEVICE, proxy=subarrayMock
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+    sub_mock = mock.Mock(
+        **{"invoke_command.side_effect": Exception("command failed")}
     )
-    release_input_str = get_release_input_str()
-    assign_res_command = ReleaseResourcesMid(
-        cm, adapter_factory=adapter_factory, logger=logger
-    )
-    (res_code, _) = assign_res_command.release_resources(
+    attrs = {"get_or_create_adapter.return_value": sub_mock}
+
+    helper_adapter_factory = mock.Mock(**attrs)
+
+    # include exception in ReleaseResources command
+    release_input_str = json_factory("release_resource_low")
+    cm.adapter_factory = helper_adapter_factory
+    cm.release_resources(
         release_input_str,
         task_callback=task_callback,
         task_abort_event=threading.Event(),
     )
-    assert res_code == ResultCode.FAILED
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    result = task_callback.assert_against_call(status=TaskStatus.COMPLETED)
+    assert ResultCode.FAILED == result["result"][0]
+    assert "command failed" in result["result"][1]
 
 
 def test_mid_release_resources_command_empty_input_json(

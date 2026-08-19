@@ -9,10 +9,6 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
-
-# from ska_tmc_common.test_helpers.helper_adapter_factory import (
-#     HelperAdapterFactory,
-# )
 from tango import DevState
 
 from ska_tmc_centralnode.model.input import InputParameterLow
@@ -131,12 +127,9 @@ def test_low_assign_resources_command_fail_subarray(
     task_callback.assert_against_call(
         call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    task_callback.assert_against_call(
-        call_kwargs={
-            "status": TaskStatus.COMPLETED,
-            "result": (ResultCode.OK, "Command Completed"),
-        }
-    )
+    result = task_callback.assert_against_call(status=TaskStatus.COMPLETED)
+    assert ResultCode.FAILED == result["result"][0]
+    assert "command failed" in result["result"][1]
 
 
 def test_low_assign_resources_command_missing_subarray_beam_ids_key(
@@ -322,8 +315,6 @@ def test_low_assign_resources_bad_json(
             "Expecting property name enclosed in double quotes: line 1 column 3 (char 2)",
         ),
     )
-    # assert res_code == ResultCode.FAILED
-    # assert "Problem in loading the JSON string" in str(message)
 
 
 @pytest.mark.SKA_low
