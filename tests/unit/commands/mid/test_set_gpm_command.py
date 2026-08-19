@@ -34,7 +34,7 @@ gpm_input = {
 gpm_default_paths = {
     "version": "1.0.0",
     "tm_data_sources": [
-        "car://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
+        "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
     ],
     "tm_data_filepath": "instrument/ska_mid1/global_pointing_model_data",
 }
