@@ -201,7 +201,9 @@ class CNComponentManagerMid(CNComponentManager):
             set_dish_vcc_command_status=lambda status: setattr(
                 self, "dish_vcc_command_status", status
             ),
-            global_pointing_model_status=(self.global_pointing_model_status),
+            get_global_pointing_model_status=(
+                lambda: self.global_pointing_model_status
+            ),
             gpm_unknown_dishes=self.gpm_unknown_dishes,
             dish_vcc_command_invoke_cb=(
                 self.config.dish_config.invoke_command_callback
