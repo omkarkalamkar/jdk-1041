@@ -69,11 +69,13 @@ class LowAssignResourcesContext(AssignResourcesContext):
     get_assigned_subsystems: Callable
     set_assigned_subsystems: Callable
     is_auto_recovery_enabled: bool
-    get_subsystem_assigned_cmd_id: Callable
-    set_subsystem_assigned_cmd_id: Callable
 
     def make_strategy(
         self, logger: logging.Logger
     ) -> LowAssignResourcesStrategy:
         """Create LOW AssignResources strategy."""
         return LowAssignResourcesStrategy(logger)
+
+    def apply_plan(self, plan):
+        """Apply the plan to the context."""
+        self.set_assigned_subsystems(plan.subarray_id, plan.subsystems)

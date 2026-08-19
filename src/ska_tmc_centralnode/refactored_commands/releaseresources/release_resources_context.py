@@ -52,13 +52,8 @@ class MidReleaseResourcesContext(ReleaseResourcesContext):
 class LowReleaseResourcesContext(ReleaseResourcesContext):
     """LOW-specific ReleaseResources runtime context."""
 
-    get_pss_assigned: Callable
-    set_pss_assigned: Callable
-    get_subsystem_assigned_cmd_id: Callable
-    set_subsystem_assigned_cmd_id: Callable
     is_auto_recovery_enabled: bool
-    get_assigned_subsystems: Callable
-    set_assigned_subsystems: Callable
+    pop_subsystem_assigned_per_subarray_id: Callable
 
     def make_strategy(
         self, logger: logging.Logger

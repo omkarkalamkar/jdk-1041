@@ -181,9 +181,7 @@ class CNComponentManagerLow(CNComponentManager):
         self.subsystem_assigned_per_subarray: Dict[int, list] = defaultdict(
             list
         )
-        self.subsystem_assigned_per_command_id: Dict[str, list] = defaultdict(
-            list
-        )
+
         self.pss_beams_assigned_per_subarray: Dict[int, list] = defaultdict(
             list
         )
@@ -470,18 +468,6 @@ class CNComponentManagerLow(CNComponentManager):
         """
         self.subsystem_assigned_per_subarray[subarray_id] = subsystems
 
-    def set_subsystem_assigned_per_command_id(
-        self, command_id: str, subsystems: list
-    ) -> None:
-        """Sets the assigned subsystems for a given command ID.
-
-        :param command_id: The ID of the command.
-        :type command_id: str
-        :param subsystems: List of subsystems assigned to the command.
-        :type subsystems: list
-        """
-        self.subsystem_assigned_per_command_id[command_id] = subsystems
-
     def set_pss_beams_assigned_per_subarray(
         self, subarray_id: int, pss_beams: list
     ) -> None:
@@ -493,6 +479,17 @@ class CNComponentManagerLow(CNComponentManager):
         :type pss_beams: list
         """
         self.pss_beams_assigned_per_subarray[subarray_id] = pss_beams
+
+    def pop_subsystem_assigned_per_subarray_id(self, subarray_id: int) -> None:
+        """Pops the assigned subsystems for a given subarray ID.
+
+        :param subarray_id: The ID of the subarray.
+        :type subarray_id: int
+        :return: List of subsystems assigned to the subarray.
+        :rtype: list
+        """
+        self.subsystem_assigned_per_subarray.pop(subarray_id, None)
+        self.pss_beams_assigned_per_subarray.pop(subarray_id, None)
 
     def _get_assign_context(self) -> LowAssignResourcesContext:
         """Build LowAssignResourcesContext bound to this component manager.
@@ -524,12 +521,6 @@ class CNComponentManagerLow(CNComponentManager):
             set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
             log_state=self.log_state,
             subarray_trl_prefix=self.subarray_trl_prefix,
-            get_subsystem_assigned_cmd_id=(
-                self.subsystem_assigned_per_command_id
-            ),
-            set_subsystem_assigned_cmd_id=(
-                self.set_subsystem_assigned_per_command_id,
-            ),
         )
 
     def _get_release_context(self) -> LowReleaseResourcesContext:
@@ -548,19 +539,12 @@ class CNComponentManagerLow(CNComponentManager):
             obs_state_ctx=ObsStateContext(
                 get=self.get_subarray_obsstate,
             ),
-            get_pss_assigned=self.pss_beams_assigned_per_subarray,
             is_auto_recovery_enabled=self.is_auto_recovery_enabled,
-            set_pss_assigned=self.set_pss_beams_assigned_per_subarray,
             update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
-            get_subsystem_assigned_cmd_id=(
-                self.subsystem_assigned_per_command_id
-            ),
-            set_subsystem_assigned_cmd_id=(
-                self.set_subsystem_assigned_per_command_id
-            ),
             subarray_trl_prefix=self.subarray_trl_prefix,
-            get_assigned_subsystems=self.subsystem_assigned_per_subarray,
-            set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
+            pop_subsystem_assigned_per_subarray_id=(
+                self.pop_subsystem_assigned_per_subarray_id
+            ),
         )
 
     # pylint: disable=unexpected-keyword-arg

@@ -58,7 +58,6 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
     def prepare_command(self) -> None:
         """Parse and normalize input data, build the plan, for LOW."""
         self.validate_subarray_id(self.subarray_id)
-        self.context.command_invoked_callback = self.command_invoked_callback
         request = ReleaseResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
@@ -141,22 +140,6 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             and not self.is_auto_recovery_enabled
         )
 
-    def command_invoked_callback(self, cmd_ctx: DeviceCommand) -> None:
-        """Restore the generic event-manager placeholder update, then
-        additionally record subsystem assignment once the MCCS invocation
-        is accepted — mirrors the original, which set
-        subsystem_assigned_per_command_id right after invoke_command
-        returned an accepted result for MCCS.
-        """
-
-        if (
-            self.mccs_mln_adapter is not None
-            and cmd_ctx.device_name == self.mccs_mln_adapter.dev_name
-        ):
-            self.command_runtime_context.get_subsystem_assigned_cmd_id(
-                self.context.command_id
-            ).update(self._assigned_subsystem)
-
     def update_task_status(self, **kwargs) -> None:
         """Update task status for ReleaseResourcesLow."""
         result = kwargs.get("result")
@@ -176,3 +159,6 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
                 status=status,
                 exception=exception,
             )
+        self.command_runtime_context.pop_subsystem_assigned_per_subarray_id(
+            self.subarray_id
+        )

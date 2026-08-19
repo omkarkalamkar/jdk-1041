@@ -65,7 +65,6 @@ class AssignResourcesLow(BaseAssignResourcesCN):
 
     def prepare_command(self) -> None:
         """Parse input and build the execution plan/context for LOW."""
-        self.context.command_invoked_callback = self.command_invoked_callback
         self.validate_subarray_id(self.subarray_id)
         request = AssignResourcesPreparation(
             self.command_runtime_context, self.logger
@@ -132,22 +131,6 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             ]
             and not self.is_auto_recovery_enabled
         )
-
-    def command_invoked_callback(self, cmd_ctx: DeviceCommand) -> None:
-        """Restore the generic event-manager placeholder update from
-        BaseCNCommand, then additionally record subsystem assignment once
-        the MCCS invocation is accepted — mirrors the original code, which
-        set subsystem_assigned_per_command_id right after invoke_command
-        returned an accepted (non-FAILED) result for MCCS, not after the
-        device's final LRC result.
-        """
-        if (
-            self.mccs_mln_adapter is not None
-            and cmd_ctx.device_name == self.mccs_mln_adapter.dev_name
-        ):
-            self.command_runtime_context.get_subsystem_assigned_cmd_id(
-                self.context.command_id
-            ).update(self._assigned_subsystem)
 
     def update_task_status(self, **kwargs) -> None:
         """Update task status and clear per-command subsystem bookkeeping."""
