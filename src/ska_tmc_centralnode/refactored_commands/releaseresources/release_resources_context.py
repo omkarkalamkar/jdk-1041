@@ -27,9 +27,7 @@ class ReleaseResourcesContext(CommandRuntimeContext):
 
     Inherits CommandRuntimeContext so that command_completion_condition
     and command_timeout are available to BaseTMCCommand — same fix
-    applied to AssignResourcesContext. Also adds get_evt_data_manager,
-    which the original dataclass didn't declare but BaseCNCommand's
-    event-callback methods require.
+    applied to AssignResourcesContext.
     """
 
     update_abort_evt: Callable

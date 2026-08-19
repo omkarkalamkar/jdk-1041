@@ -24,8 +24,10 @@ class InvalidArrayLayoutError(Exception):
 class AssignResourcesPreparation:
     """Request parsing and array layout handling for AssignResources."""
 
-    def __init__(self, component_manager, logger: logging.Logger) -> None:
-        self.component_manager = component_manager
+    def __init__(
+        self, command_runtime_context, logger: logging.Logger
+    ) -> None:
+        self.command_runtime_context = command_runtime_context
         self.logger = logger
 
     def prepare_request(
@@ -53,15 +55,16 @@ class AssignResourcesPreparation:
     def _apply_array_layout(self, request_data: dict) -> None:
         if "telmodel" in request_data:
             array_url = request_data["telmodel"]
-            self.component_manager.array_layout_url = array_url
+            self.command_runtime_context.array_layout_ctx.update_url(array_url)
             self.logger.debug("array_layout_url in argin: %s", array_url)
             return
 
-        default_url = getattr(
-            self.component_manager,
-            "default_array_layout_url",
-            "",
-        )
+        try:
+            default_url = (
+                self.command_runtime_context.array_layout_ctx.get_default_url()
+            )
+        except AttributeError:
+            default_url = ""
         if not default_url:
             self.logger.debug(
                 "No array_layout_url in argin and no "
@@ -71,7 +74,7 @@ class AssignResourcesPreparation:
 
         if not isinstance(default_url, dict):
             if isinstance(
-                self.component_manager.input_parameter,
+                self.command_runtime_context.input_parameter,
                 InputParameterMid,
             ):
                 message = "Invalid default 'telmodel': expected a dictionary."
@@ -82,7 +85,7 @@ class AssignResourcesPreparation:
             raise InvalidArrayLayoutError(message)
 
         request_data["telmodel"] = default_url
-        self.component_manager.array_layout_url = default_url
+        self.command_runtime_context.array_layout_ctx.update_url(default_url)
         self.logger.debug(
             "array_layout_url not provided, using default: %s",
             default_url,

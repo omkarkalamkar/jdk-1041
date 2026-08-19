@@ -13,8 +13,8 @@ class ReleaseResourcesPreparationError(Exception):
 class ReleaseResourcesPreparation:
     """Request parsing helper for ReleaseResources."""
 
-    def __init__(self, component_manager, logger) -> None:
-        self.component_manager = component_manager
+    def __init__(self, command_runtime_context, logger) -> None:
+        self.command_runtime_context = command_runtime_context
         self.logger = logger
 
     def prepare_request(
