@@ -86,6 +86,7 @@ class CentralComponent(SharingObserver, TmcComponent):
         self._pss = ModesAvailability.NOT_AVAILABLE
         self._pst = ModesAvailability.NOT_AVAILABLE
         self.lock = threading.Lock()
+        self.rlock = threading._RLock()
 
     @property
     def desired_telescope_state(self) -> tango.DevState:
@@ -198,7 +199,8 @@ class CentralComponent(SharingObserver, TmcComponent):
         :return: the telescope state
         :rtype: DevState
         """
-        return self._telescope_state
+        with self.rlock:
+            return self._telescope_state
 
     @telescope_state.setter
     def telescope_state(self, value: tango.DevState) -> None:
@@ -208,8 +210,9 @@ class CentralComponent(SharingObserver, TmcComponent):
         :param value: the new telescope state
         :type value: DevState
         """
-        if self._telescope_state != value:
-            self._telescope_state = value
+        with self.rlock:
+            if self._telescope_state != value:
+                self._telescope_state = value
 
     @property
     def telescope_availability(self) -> dict:
@@ -219,7 +222,8 @@ class CentralComponent(SharingObserver, TmcComponent):
         :return: the telescope availability
         :rtype: DevVarStringArray
         """
-        return self._telescope_availability
+        with self.rlock:
+            return self._telescope_availability
 
     @telescope_availability.setter
     def telescope_availability(self, value: dict) -> None:
@@ -229,8 +233,9 @@ class CentralComponent(SharingObserver, TmcComponent):
         :param value: the new telescope availability
         :type value: DevState
         """
-        if self._telescope_availability != value:
-            self._telescope_availability = value
+        with self.rlock:
+            if self._telescope_availability != value:
+                self._telescope_availability = value
 
     @property
     def telescope_health_state(self) -> HealthState:
@@ -240,7 +245,8 @@ class CentralComponent(SharingObserver, TmcComponent):
         :return: the telescope health state
         :rtype: HealthState
         """
-        return self._telescope_health_state
+        with self.rlock:
+            return self._telescope_health_state
 
     @telescope_health_state.setter
     def telescope_health_state(self, value: HealthState) -> None:
@@ -250,8 +256,9 @@ class CentralComponent(SharingObserver, TmcComponent):
         :param value: the new telescope health state
         :type value: HealthState
         """
-        if self._telescope_health_state != value:
-            self._telescope_health_state = value
+        with self.rlock:
+            if self._telescope_health_state != value:
+                self._telescope_health_state = value
 
     @property
     def tmc_op_state(self) -> tango.DevState:
@@ -261,7 +268,8 @@ class CentralComponent(SharingObserver, TmcComponent):
         :return: the TMC operational State
         :rtype: DevState
         """
-        return self._tmc_op_state
+        with self.rlock:
+            return self._tmc_op_state
 
     @tmc_op_state.setter
     def tmc_op_state(self, value: tango.DevState) -> None:
@@ -271,8 +279,9 @@ class CentralComponent(SharingObserver, TmcComponent):
         :param value: the TMC operational State
         :type value: DevState
         """
-        if self._tmc_op_state != value:
-            self._tmc_op_state = value
+        with self.rlock:
+            if self._tmc_op_state != value:
+                self._tmc_op_state = value
 
     @property
     def vlbi(self) -> ModesAvailability:

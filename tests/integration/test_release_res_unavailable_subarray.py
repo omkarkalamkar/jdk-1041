@@ -43,11 +43,11 @@ def release_resources_unavailable_subarray(
     assign_resources(central_node, assign_input_str, change_event_callbacks)
 
     subarray_proxy.SetisSubarrayAvailable(False)
-    check_subarray_availability(central_node, subarray_proxy.dev_name, False)
+    check_subarray_availability(central_node, subarray_proxy.dev_name(), False)
 
     db = Database()
-    db_device_info = db.get_device_info(subarray_proxy.dev_name)
-    db.unexport_device(subarray_proxy.dev_name)
+    db_device_info = db.get_device_info(subarray_proxy.dev_name())
+    db.unexport_device(subarray_proxy.dev_name())
 
     # Waiting for event from central node
     time.sleep(3)
@@ -64,7 +64,7 @@ def release_resources_unavailable_subarray(
     time.sleep(3)
 
     subarray_proxy.SetisSubarrayAvailable(True)
-    check_subarray_availability(central_node, subarray_proxy.dev_name, True)
+    check_subarray_availability(central_node, subarray_proxy.dev_name(), True)
 
     result, unique_id = central_node.ReleaseResources(release_input_string)
 
