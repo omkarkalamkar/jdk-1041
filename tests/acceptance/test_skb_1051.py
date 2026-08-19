@@ -18,6 +18,7 @@ from tests.settings import (
     LOW_SUBARRAY_DEVICE,
     MCCS_MLN_DEVICE,
     check_subarray_availability,
+    logger,
 )
 
 
@@ -31,7 +32,11 @@ def subscribe_mccs_lrc_event():
 
     def cb(event):
         unique_id, result = event.attr_value.value
-
+        logger.info(
+            "MCCS long running command result event received: %s, %s",
+            unique_id,
+            result,
+        )
         if unique_id.endswith("ReleaseAllResources") and result == json.dumps(
             [ResultCode.OK, "Command Completed"]
         ):
