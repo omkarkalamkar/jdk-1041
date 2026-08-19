@@ -74,7 +74,7 @@ k8s-test:
 
 k8s-test-low:
   extends:
-    - k8s-test-runner
+    - k8s-test
   variables:
     PYTANGO_GREEN_MODE: "futures"
     TELESCOPE: "SKA-low"
