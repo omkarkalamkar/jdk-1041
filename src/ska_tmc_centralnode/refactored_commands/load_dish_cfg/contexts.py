@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
+
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 
 

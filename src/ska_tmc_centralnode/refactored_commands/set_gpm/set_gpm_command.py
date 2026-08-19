@@ -6,7 +6,7 @@ on the Dishes.
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any, Callable, List, Optional, Tuple
 
 from ska_control_model import ResultCode, TaskStatus
 from ska_telmodel.data import TMData
@@ -50,7 +50,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
         self.adapter_provider: AdapterFactory = adapter_provider
         self.result_code: ResultCode = ResultCode.UNKNOWN
         self.command_name: str = self.__class__.__name__
-        self._plan: GPMPlan = None
+        self._plan: GPMPlan = GPMPlan({})
         self.error_message: str = ""
 
     def pre_process(self, argin: Optional[Any] = None) -> None:
@@ -62,13 +62,12 @@ class SetGlobalPointingModel(BaseTMCCommand):
         :rtype: None
         """
         self.command_runtime_context.update_name(self.__class__.__name__)
-        self.command_runtime_context.update_id(self.__class__.__name__)
         self.logger.debug("Received GPM Input: %s", argin)
 
     def _build_device_command(
         self,
         device_name: str,
-        callback: callable,
+        callback: Callable,
         command_input: str | None = None,
     ) -> DeviceCommand:
         """Build a device-specific command.
@@ -206,18 +205,17 @@ class SetGlobalPointingModel(BaseTMCCommand):
             self.logger.exception("%s:  %s", self.error_message, gpm_paths)
             raise ValueError(self.error_message)
         request = GPMRequest.from_json(self.context.argin)
-        if "receptors" not in request:
+        if "receptors" not in request.data:
             ctx = self.command_runtime_context
             self.error_message = "No GPM files found on set GPM parameters."
             gpm_files = self.get_gpm_files(ctx.default_gpm_version_params)
             if not gpm_files:
                 self.logger.error("Error message: %s", self.error_message)
                 self.result_code = ResultCode.FAILED
-                self._plan.apm_payload = {}
             else:
-                self._plan: GPMPlan = self._build_gpm_plan(request, gpm_files)
+                self._plan = self._build_gpm_plan(request, gpm_files)
         else:
-            self._plan: GPMPlan = self._build_gpm_plan(request)
+            self._plan = self._build_gpm_plan(request)
         self.validate_dishes(self._plan.apm_payload)
 
     def validate_gpm_keys(self, request: dict) -> None:
@@ -258,9 +256,9 @@ class SetGlobalPointingModel(BaseTMCCommand):
         :rtype: list
         """
 
-        gpm_files = []
-        data_sources = initial_params.get("tm_data_sources", None)[0]
-        tm_data_filepath = initial_params.get("tm_data_filepath", None)
+        gpm_files: List[str | None] = []
+        data_sources = initial_params.get("tm_data_sources", [])[0]
+        tm_data_filepath = initial_params.get("tm_data_filepath", "")
         data_sources = (
             data_sources
             + "?"
@@ -285,11 +283,12 @@ class SetGlobalPointingModel(BaseTMCCommand):
                     self.context.command_id,
                     exception,
                 )
-                return (
-                    {},
-                    f"Error in fetching GPM file {exception}",
-                )
-        return {}, "tm_data_sources and tm_data_filepath not provided in json"
+                self.error_message = f"Error in fetching GPM file {exception}"
+
+        self.error_message = (
+            "tm_data_sources and tm_data_filepath not provided in json"
+        )
+        return gpm_files
 
     def validate_dishes(self, gpm_data: dict) -> None:
         """Validate dish availability and subarray assignment.
@@ -341,6 +340,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
             "ERROR: " + error_message
         )
 
+    # pylint: disable=arguments-differ
     def update_task_status(
         self,
         result: tuple = (),
@@ -364,7 +364,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
         msg: str = message or exception
         self.logger.info(
             "Command ID: %s | Received task status with Result: %s",
-            self.command_runtime_context.get_id(),
+            self.command_runtime_context.get_name(),
             (result, status, msg),
         )
         self.result_code = list(result)[0]
@@ -397,6 +397,8 @@ class SetGlobalPointingModel(BaseTMCCommand):
 
         ctx.reset_gpm_data()
 
+    # pylint: enable=arguments-differ
+
     def _build_gpm_status_message(self, ctx) -> str:
         """Update GPM status and build the failure message.
 
@@ -408,14 +410,14 @@ class SetGlobalPointingModel(BaseTMCCommand):
         :rtype: str
         """
 
-        _SKIP_STATUS_MARKERS = (
+        skip_status_markers: Tuple[str, str] = (
             "Dish is assigned to subarray",
             "Dish is unreachable",
         )
 
         for dish_id, result in ctx.dishln_gpm_cmd_exe_data.items():
             if isinstance(result, str) and not any(
-                marker in result for marker in _SKIP_STATUS_MARKERS
+                marker in result for marker in skip_status_markers
             ):
                 ctx.global_pointing_model_status[dish_id] = result
 
@@ -429,7 +431,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
         )
         if prefix:
             return prefix + str(filtered_dishes)
-        return filtered_dishes
+        return str(filtered_dishes)
 
     def filter_failed_dish_data(self, data: dict) -> dict:
         """Filter failed dish data.
@@ -457,15 +459,8 @@ class SetGlobalPointingModel(BaseTMCCommand):
 
     def post_process(self) -> None:
         """Post-processing of scan command."""
-        self.command_runtime_context.clear(
-            self.command_runtime_context.get_name()
-        )
+        self.command_runtime_context.clear()
 
     def clear_device_events(self) -> None:
         """Method to clean up the device event data."""
-        self.command_runtime_context.clear(self)
-        event_data_manager = (
-            self.command_runtime_context.get_evt_data_manager()
-        )
-        with event_data_manager.eventlock:
-            event_data_manager.clear_lrcr()
+        self.command_runtime_context.clear()

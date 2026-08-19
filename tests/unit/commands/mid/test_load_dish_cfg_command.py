@@ -33,7 +33,6 @@ from tests.settings import (
     set_ldcfg_aggr_result,
 )
 
-
 # Helper Dish LN device is using Database API and in Unit test Database API
 # is not callable
 # Patch this particular method which mock return value from SetKValue command

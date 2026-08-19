@@ -24,8 +24,6 @@ class SetStowMode(SetDishGPM):
         self,
         component_manager,
         adapter_factory=None,
-        timeout_subarrays=3,
-        step_sleep=0.1,
         logger=None,
         *args,
         **kwargs,
@@ -33,8 +31,6 @@ class SetStowMode(SetDishGPM):
         super().__init__(
             component_manager, adapter_factory, logger=logger, *args, **kwargs
         )
-        self._timeout_subarrays = timeout_subarrays
-        self._step_sleep = step_sleep
         self.receptors = []
         self.receptors_with_stow_mode_set = []
         self.timekeeper = TimeKeeper(

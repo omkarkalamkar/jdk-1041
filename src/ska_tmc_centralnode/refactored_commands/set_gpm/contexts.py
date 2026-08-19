@@ -6,8 +6,9 @@ import json
 import logging
 from dataclasses import dataclass
 from json import JSONDecodeError
-from threading import RLock, Event
+from threading import Event, RLock
 from typing import Callable
+
 from ska_tmc_common import DeviceInfo
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
 
@@ -15,7 +16,7 @@ from ska_tmc_centralnode.refactored_commands.set_gpm.strategy import (
     GPMStrategy,
 )
 
-from ska_tmc_centralnode.manager.event_data_manager import EventDataManager
+
 @dataclass(kw_only=True)
 class GPMContext(CommandRuntimeContext):
     """Runtime context containing parameters for GPM command execution.
@@ -34,25 +35,23 @@ class GPMContext(CommandRuntimeContext):
     default_gpm_version_params: Default GPM version parameters.
     get_device: Callback to retrieve a device.
     dish_leaf_node_prefix: Prefix used for dish leaf node devices.
-    get_evt_data_manager: Callback to get the event data manager.
     dishln_gpm_lock: Lock protecting dish GPM data.
     global_pointing_model_status: GPM status for each dish.
     reset_gpm_data: Callback to reset GPM command data.
     """
 
     command_timeout: float
-    update_name: Callable[[str],None]
-    clear: Callable[[],None]
-    get_name: Callable[[],str]
+    update_name: Callable[[str], None]
+    clear: Callable[[], None]
+    get_name: Callable[[], str]
     gpm_unknown_dishes: list[str]
     dishln_gpm_cmd_exe_data: dict
-    is_already_assigned: Callable[[str],bool]
+    is_already_assigned: Callable[[str], bool]
     update_abort_evt: Callable[[Event], None]
-    get_dish_leaf_node_device_names: Callable[[],list]
+    get_dish_leaf_node_device_names: Callable[[], list]
     default_gpm_version_params: dict
-    get_device: Callable[[str],DeviceInfo]
+    get_device: Callable[[str], DeviceInfo]
     dish_leaf_node_prefix: str
-    get_evt_data_manager: Callable[[],EventDataManager]
     dishln_gpm_lock: RLock
     global_pointing_model_status: dict
     reset_gpm_data: Callable[[], None]

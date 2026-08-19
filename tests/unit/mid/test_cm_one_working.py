@@ -80,9 +80,9 @@ def test_one_working_other_faulty(tango_context):
     set_devices_unresponsive(cm, FAULTY_LIST)
     set_devices_unresponsive(cm, dishes)
 
-    subarrayDevInfo = cm.get_device(MID_SUBARRAY_DEVICE)
+    subarray_dev_info = cm.get_device(MID_SUBARRAY_DEVICE)
     for dev_info in cm.devices:
-        if dev_info == subarrayDevInfo:
+        if dev_info == subarray_dev_info:
             assert not dev_info.unresponsive
         else:
             assert dev_info.unresponsive
