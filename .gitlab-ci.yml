@@ -29,6 +29,9 @@ include:
   # - project: 'ska-telescope/templates-repository'
   #   file: 'gitlab-ci/includes/helm-chart.gitlab-ci.yml'
   # # Python packages build,lint, test and publish
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/sonar-scan.gitlab-ci.yml'
+
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/python.gitlab-ci.yml"
 
