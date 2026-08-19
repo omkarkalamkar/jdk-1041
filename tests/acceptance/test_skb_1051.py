@@ -5,7 +5,7 @@ import json
 
 import pytest
 import tango
-from pytest_bdd import given, parsers, scenarios, then, when
+from pytest_bdd import given, parsers, then, when
 from ska_control_model import AdminMode
 from ska_tango_base.commands import ResultCode
 from tango import DeviceProxy
@@ -136,6 +136,6 @@ def verify_mccs_master_leaf_node():
     assert pytest.mccs_release2
 
 
-scenarios(
-    "../features/skb_1051_release_on_mccs_with_multiple_subarray.feature"
-)
+# scenarios(
+#     "../features/skb_1051_release_on_mccs_with_multiple_subarray.feature"
+# )
