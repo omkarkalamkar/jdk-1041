@@ -136,10 +136,10 @@ class GPMStrategy:
 
         for dish_id, bands in receptors:
             dish_id = dish_id.lower()
+            if dish_id not in gpm_data:
+                gpm_data[dish_id] = []
             for band in bands:
-                file_name = f"gpm-{dish_id.lower()}-{band}.json"
-                if dish_id not in gpm_data:
-                    gpm_data[dish_id] = []
+                file_name = f"gpm-{dish_id}-{band}.json"
                 tm_data_filepath = (
                     default_params.get("tm_data_filepath", None)
                     + "/"

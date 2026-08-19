@@ -57,7 +57,7 @@ class SetGlobalPointingModel(BaseCNCommand):
         """Pre-process the SetGlobalPointingModel command.
 
         :param argin: Command input data.
-        :type argin: str
+        :type argin: Optional[Any]
         :return: None
         :rtype: None
         """
@@ -176,11 +176,13 @@ class SetGlobalPointingModel(BaseCNCommand):
     def _build_gpm_plan(
         self, gpm_request: GPMRequest, gpm_files=None
     ) -> GPMPlan:
-        """Build a GPM plan from the request.
+        """Build the SetGlobalPointingModel execution plan.
 
-        :param gpm_request: GPM request containing the required parameters.
+        :param gpm_request: SetGlobalPointingModel request data.
         :type gpm_request: GPMRequest
-        :return: Generated GPM plan.
+        :param gpm_files: List of GPM files.
+        :type gpm_files: list, optional
+        :return: SetGlobalPointingModel execution plan.
         :rtype: GPMPlan
         """
         strategy = self.command_runtime_context.make_strategy(self.logger)

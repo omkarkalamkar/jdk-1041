@@ -1015,8 +1015,11 @@ class CNComponentManagerMid(CNComponentManager):
         )
 
     def _get_gpm_context(self) -> GPMContext:
-        """Method to get the SetGlobalPointingModel command context"""
+        """Get the SetGlobalPointingModel command context.
 
+        :return: SetGlobalPointingModel command context.
+        :rtype: GPMContext
+        """
         return GPMContext(
             command_completion_condition=self.command_completion_cond,
             command_timeout=self.command_timeout,

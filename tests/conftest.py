@@ -171,11 +171,7 @@ def tango_context(devices_to_load, request):
     if not true_context:
         try:
             with MultiDeviceTestContext(
-                devices_to_load,
-                process=True,
-                timeout=100,
-                host="tango-databaseds",
-                port=10000,
+                devices_to_load, process=True, timeout=100
             ) as context:
                 DevFactory._test_context = context
                 logging.info("test context set")

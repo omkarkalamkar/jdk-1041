@@ -98,16 +98,32 @@ def test_set_gpm_command_with_ok(
         return_value=gpm_default_paths
     )
     cm.get_default_gpm_version_params()
+    adapter = MagicMock(dev_name="mid-tmc/leaf-node-dish/ska001")
+
+    def invoke_command(callback, *_args, **_kwargs):
+        threading.Timer(
+            0,
+            callback,
+            kwargs={"result": (ResultCode.OK, "Command Completed")},
+        ).start()
+        return MagicMock(command_id="command-id")
+
+    adapter.invoke_command.side_effect = invoke_command
     with mock.patch.object(
         SetGlobalPointingModel,
         "validate_dishes",
         side_effect=lambda gpm_data: gpm_data,
     ):
-        cm.set_gpm_version(
-            argin=json.dumps(gpm_input),
-            task_callback=task_callback,
-            task_abort_event=threading.Event(),
-        )
+        with mock.patch.object(
+            cm.adapter_factory,
+            "get_or_create_adapter",
+            return_value=adapter,
+        ):
+            cm.set_gpm_version(
+                argin=json.dumps(gpm_input),
+                task_callback=task_callback,
+                task_abort_event=threading.Event(),
+            )
         # Verify task callback was called with correct status transitions
         task_callback.assert_against_call(
             call_kwargs={"status": TaskStatus.IN_PROGRESS}
@@ -135,27 +151,45 @@ def test_apply_gpm_no_receptors_and_empty_gpm_files(
     cm.get_default_gpm_version_params = mock.Mock(
         return_value=gpm_default_paths
     )
-    cm.get_default_gpm_version_params()
+    adapter = MagicMock(dev_name="mid-tmc/leaf-node-dish/ska001")
+
+    def invoke_command(callback, *_args, **_kwargs):
+        threading.Timer(
+            0,
+            callback,
+            kwargs={"result": (ResultCode.OK, "Command Completed")},
+        ).start()
+        return MagicMock(command_id="command-id")
+
+    adapter.invoke_command.side_effect = invoke_command
+    # cm.get_default_gpm_version_params()
     with mock.patch.object(
         SetGlobalPointingModel,
         "validate_dishes",
         side_effect=lambda gpm_data: gpm_data,
     ):
-        cm.set_gpm_version(
-            argin=json.dumps(gpm_input),
-            task_callback=task_callback,
-            task_abort_event=threading.Event(),
-        )
-        # Verify task callback was called with correct status transitions
-        task_callback.assert_against_call(
-            call_kwargs={"status": TaskStatus.IN_PROGRESS}
-        )
-        result = task_callback.assert_against_call(status=TaskStatus.COMPLETED)
-        err_msg = "No GPM files found on set GPM parameters."
-        exception_msg = result["exception"]
-        assert ResultCode.FAILED == result["result"][0]
-        assert err_msg in result["result"][1]
-        assert err_msg in exception_msg
+        with mock.patch.object(
+            cm.adapter_factory,
+            "get_or_create_adapter",
+            return_value=adapter,
+        ):
+            cm.set_gpm_version(
+                argin=json.dumps(gpm_input),
+                task_callback=task_callback,
+                task_abort_event=threading.Event(),
+            )
+            # Verify task callback was called with correct status transitions
+            task_callback.assert_against_call(
+                call_kwargs={"status": TaskStatus.IN_PROGRESS}
+            )
+            result = task_callback.assert_against_call(
+                status=TaskStatus.COMPLETED
+            )
+            err_msg = "No GPM files found on set GPM parameters."
+            exception_msg = result["exception"]
+            assert ResultCode.FAILED == result["result"][0]
+            assert err_msg in result["result"][1]
+            assert err_msg in exception_msg
 
 
 def test_process_update_task_for_command_failure():
