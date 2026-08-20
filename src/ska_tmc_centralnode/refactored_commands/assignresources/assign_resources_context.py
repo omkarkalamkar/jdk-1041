@@ -66,7 +66,7 @@ class MidAssignResourcesContext(AssignResourcesContext):
 class LowAssignResourcesContext(AssignResourcesContext):
     """LOW-specific AssignResources runtime context."""
 
-    get_assigned_subsystems: Callable
+    get_assigned_subsystems: dict
     set_assigned_subsystems: Callable
     is_auto_recovery_enabled: bool
 

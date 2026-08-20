@@ -55,7 +55,7 @@ class LowReleaseResourcesContext(ReleaseResourcesContext):
     is_auto_recovery_enabled: bool
     pop_subsystem_assigned_per_subarray_id: Callable
     set_assigned_subsystems: Callable
-    get_assigned_subsystems: Callable
+    get_assigned_subsystems: dict
 
     def make_strategy(
         self, logger: logging.Logger
