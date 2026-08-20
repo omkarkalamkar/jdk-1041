@@ -24,11 +24,6 @@ join_linting_reports:
     when: always
 
 include:
-  # # # Helm Chart linting and Publish
-  # Note: Commenting this part to Disable helm chart linting and Publish job from the pipeline
-  # - project: 'ska-telescope/templates-repository'
-  #   file: 'gitlab-ci/includes/helm-chart.gitlab-ci.yml'
-  # # Python packages build,lint, test and publish
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/sonar-scan.gitlab-ci.yml'
 
@@ -51,12 +46,8 @@ include:
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/release.gitlab-ci.yml"
 
-  # Create Gitlab CI badges from CI metrics
-  # https://developer.skatelescope.org/en/latest/tools/continuousintegration.html#automated-collection-of-ci-health-metrics-as-part-of-the-ci-pipeline
   - project: "ska-telescope/templates-repository"
     file: "gitlab-ci/includes/finaliser.gitlab-ci.yml"
-
-
 
 k8s-test:
   variables:
@@ -115,7 +106,3 @@ stop-k8s-test-low:
     - make k8s-uninstall-chart
     - kubectl -n $KUBE_NAMESPACE delete pods,svc,daemonsets,deployments,replicasets,statefulsets,cronjobs,jobs,ingresses,configmaps --all
     - make k8s-delete-namespace
-
-docs-build-rtd:
-  rules:
-    - when: never
