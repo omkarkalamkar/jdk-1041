@@ -45,6 +45,7 @@ from ..model.component import MCCSDeviceInfo
 from ..model.input import InputParameterLow
 from ..utils.exception_decorator import exception_handler
 from .event_callback_manager.low_event_callback_manager import (
+    LowEventCallbackContext,
     LowEventCallbackManager,
 )
 
@@ -71,10 +72,6 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         super().__init__(config=config)
         self.config = config
         self._telescope_availability_aggregator = None
-        self.subarray_availability = {
-            subarray: False
-            for subarray in self.input_parameter.subarray_dev_names
-        }
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
         self.mccs_mln_availability = False
@@ -118,25 +115,22 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
     def _get_event_cb_manager(self) -> LowEventCallbackManager:
         """Provides Instance Event Callaback Manager"""
         return LowEventCallbackManager(
-            logger=self.logger,
-            component=self.component,
-            command_completion_cond=self.command_completion_cond,
-            input_parameter=self.input_parameter,
-            event_data_manager=self.event_data_manager,
-            _aggregate_state=self._aggregate_state,
-            _telescope_availability_aggregator=(
-                self._telescope_availability_aggregator
-            ),
-            subarray_availability=self.subarray_availability,
-            set_csp_mln_availability=lambda availability: setattr(
-                self, "csp_mln_availability", availability
-            ),
-            set_sdp_mln_availability=lambda availability: setattr(
-                self, "sdp_mln_availability", availability
-            ),
-            set_mccs_mln_availability=lambda availability: setattr(
-                self, "mccs_mln_availability", availability
-            ),
+            context=LowEventCallbackContext(
+                **self.get_event_cb_manager_context(),
+                _telescope_availability_aggregator=(
+                    self._telescope_availability_aggregator
+                ),
+                update_subarray_availability=self.update_subarray_availability,
+                set_csp_mln_availability=lambda availability: setattr(
+                    self, "csp_mln_availability", availability
+                ),
+                set_sdp_mln_availability=lambda availability: setattr(
+                    self, "sdp_mln_availability", availability
+                ),
+                set_mccs_mln_availability=lambda availability: setattr(
+                    self, "mccs_mln_availability", availability
+                ),
+            )
         )
 
     def _get_event_handlers(self) -> Dict[str, Callable]:
@@ -267,10 +261,7 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
 
         """
         telescope_availability = self.get_telescope_availability()
-        if (
-            not telescope_availability.get("mccs_master_leaf_node", False)
-            is True
-        ):
+        if not telescope_availability.get("mccs_master_leaf_node", False):
             self.logger.debug(
                 "MccsMasterLeafNode is not available to receive command"
             )
@@ -461,4 +452,9 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
             self.pss_beams_assigned_per_subarray[subarray_id] = pss_beam_ids
 
         except Exception as exception:
-            raise exception
+            error_msg = (
+                "Exception occurred while updating subarray"
+                f"and pss beams mapping: {exception}"
+            )
+            self.logger.error(error_msg)
+            raise Exception(error_msg) from exception

@@ -48,12 +48,6 @@ class LowTmcCentralNode(AbstractCentralNode):
     # Attributes
     # ----------
 
-    # def communication_state_callback(self):
-    #     """communication state callabacks"""
-
-    # def component_state_callback(self):
-    #     """component state callbacks"""
-
     # ---------------
     # General methods
     # ---------------

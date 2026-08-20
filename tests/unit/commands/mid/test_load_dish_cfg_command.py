@@ -257,12 +257,6 @@ def test_load_dish_cnfg_command_fail_csp_master(
     load_dish_cnfg_command = LoadDishCfg(
         cm._get_load_dish_cfg_context(), adapter_factory, logger=logger
     )
-    # (
-    #     load_dish_cnfg_command.dish_vcc_config_json,
-    #     _,
-    # ) = load_dish_cnfg_command.check_and_validate_dish_vcc_data(
-    #     dish_cfg_input_str
-    # )
     (res_code, _) = load_dish_cnfg_command.execute(
         dish_cfg_input_str,
         task_callback=mock.Mock(),

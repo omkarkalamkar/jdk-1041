@@ -12,7 +12,8 @@ COPY --from=buildenv /root/.local/ /root/.local/
 ENV PATH=$PATH:/root/.local/bin
 RUN apt-get update && \
       apt-get install -y --no-install-recommends \
-      ca-certificates
+      ca-certificates \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 ENV SETUPTOOLS_USE_DISTUTILS=stdlib
 
 RUN poetry config virtualenvs.create false
@@ -21,6 +22,6 @@ WORKDIR /app
 
 COPY --chown=tango:tango . /app
 # Install runtime dependencies and the app
-RUN poetry install --only main
-RUN rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python
+RUN poetry install --only main \
+ && rm /usr/bin/python && ln -s /usr/bin/python3 /usr/bin/python
 USER tango

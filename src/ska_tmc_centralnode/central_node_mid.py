@@ -58,7 +58,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     DishIDs = device_property(
         dtype=("str",),
         doc="List of the available dish ids",
-        default_value=tuple(),
+        default_value=(),
     )
 
     DishLeafNodePrefix = device_property(
@@ -70,7 +70,7 @@ class MidTmcCentralNode(AbstractCentralNode):
     DishMasterFQDNs = device_property(
         dtype=("str",),
         doc="List of Dish Master devices",
-        default_value=tuple(),
+        default_value=(),
     )
 
     DishMasterIdentifier = device_property(

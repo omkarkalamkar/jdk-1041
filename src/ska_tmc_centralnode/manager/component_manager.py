@@ -14,6 +14,7 @@ from multiprocessing import Manager
 from typing import (
     Any,
     Callable,
+    ClassVar,
     Dict,
     Generic,
     List,
@@ -62,7 +63,10 @@ from .aggregators import (
     TelescopeStateAggregatorMid,
 )
 from .device_attribute_map_builder import DeviceAttributeMapBuilder
-from .event_callback_manager.event_callback_manager import EventCallbackManager
+from .event_callback_manager.event_callback_manager import (
+    EventCallbackContext,
+    EventCallbackManager,
+)
 
 T = TypeVar("T", InputParameterMid, InputParameterLow)
 
@@ -80,6 +84,9 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
     the TMC and telescope state aggregation
     """
 
+    COMMAND_NOT_IMPLEMENTED: ClassVar[
+        str
+    ] = "Command is not Implemented in Central Node."
     _array_layout_url: Signal = Signal[dict](stored=True)
     _default_array_layout_url: Signal = Signal[dict](stored=True)
 
@@ -106,6 +113,9 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         self.component = config.component or CentralComponent(config.logger)
         self.event_manager: bool = self.config.event_manager_enabled
         self.input_parameter: T = self.config.input_parameter
+        self.subarray_availability = dict.fromkeys(
+            self.input_parameter.subarray_dev_names, False
+        )
         self.adapter_factory: AdapterFactory = AdapterFactory()
         self.event_data_manager: EventDataManager = EventDataManager(self)
         self.process_lock = ProcessLock()
@@ -141,13 +151,19 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         )
         self.command_completion_cond = threading.Condition()
         self._event_cb_manager: EventCallbackManager[T] = EventCallbackManager(
-            logger=self.logger,
-            component=self.component,
-            command_completion_cond=self.command_completion_cond,
-            input_parameter=self.input_parameter,
-            event_data_manager=self.event_data_manager,
-            _aggregate_state=self._aggregate_state,
+            context=EventCallbackContext(**self.get_event_cb_manager_context())
         )
+
+    def get_event_cb_manager_context(self) -> Dict[str, Any]:
+        """Provides event callback manager context"""
+        return {
+            "logger": self.logger,
+            "component": self.component,
+            "command_completion_cond": self.command_completion_cond,
+            "event_data_manager": self.event_data_manager,
+            "_aggregate_state": self._aggregate_state,
+            "input_parameter": self.input_parameter,
+        }
 
     def on_new_shared_bus(self) -> None:
         """Initialise signal values."""
@@ -404,10 +420,7 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         which ultimately indicated availability of CspMasterNode
         """
         telescope_availability = self.get_telescope_availability()
-        if (
-            not telescope_availability.get("csp_master_leaf_node", False)
-            is True
-        ):
+        if not telescope_availability.get("csp_master_leaf_node", False):
             self.logger.debug(
                 "CspMasterLeafNode is not available to receive command"
             )
@@ -421,10 +434,7 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         which ultimately indicated availability of SdpMasterNode
         """
         telescope_availability = self.get_telescope_availability()
-        if (
-            not telescope_availability.get("sdp_master_leaf_node", False)
-            is True
-        ):
+        if not telescope_availability.get("sdp_master_leaf_node", False):
             self.logger.debug(
                 "SdpMasterLeafNode is not available to receive command"
             )
@@ -586,24 +596,6 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         """Getter method for TMC Op State Model"""
         return self.component.tmc_op_state
 
-    # TODO: Kept it for reference. Not getting called anywhere.
-    def _update_resources(self, subarray_dev_info: DeviceInfo) -> None:
-        """
-        Updates resources for a subarray
-        the relative callback if available
-
-        :param subarray_dev_name: name of the subarray device
-        :type subarray_dev_name: str
-        """
-        if self._liveliness_probe is not None:
-            self._liveliness_probe.add_device(subarray_dev_info.dev_name)
-        else:
-            # If the monitoring loop is not active
-            # I must assume that the subarray is reporting the correct value
-            # and I need to update the assigned resources in the device info
-            if subarray_dev_info.obs_state == ObsState.EMPTY:
-                subarray_dev_info.resources = []
-
     def telescope_on(
         self,
         task_callback: TaskCallbackType,
@@ -755,8 +747,7 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         """This method needs to be overridden by the child classes
         in order to check have functionality under off command"""
         message = (
-            "Command is not Implemented in Central Node."
-            + " Please use TelescopeOff command"
+            self.COMMAND_NOT_IMPLEMENTED + " Please use TelescopeOff command"
         )
         return TaskStatus.REJECTED, message
 
@@ -766,8 +757,7 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         """This method needs to be overridden by the child classes
         in order to check have functionality under off command"""
         message = (
-            "Command is not Implemented in Central Node."
-            + " Please use TelescopeOn command"
+            self.COMMAND_NOT_IMPLEMENTED + " Please use TelescopeOn command"
         )
         return TaskStatus.REJECTED, message
 
@@ -785,7 +775,7 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         """This method needs to be overridden by the child classes
         in order to check have functionality under off command"""
         message = (
-            "Command is not Implemented in Central Node."
+            self.COMMAND_NOT_IMPLEMENTED
             + " Please use TelescopeStandby command"
         )
         return TaskStatus.REJECTED, message
@@ -830,3 +820,9 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         if hasattr(self, "cmd_allowed_validator"):
             return self.cmd_allowed_validator.is_command_allowed(command_name)
         return False
+
+    def update_subarray_availability(
+        self, subarray_device: str, availability: bool
+    ) -> None:
+        """Updates subarray availability."""
+        self.subarray_availability[subarray_device] = availability

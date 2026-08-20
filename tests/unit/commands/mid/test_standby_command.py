@@ -211,8 +211,8 @@ def test_telescope_standby_command_rejected(
     dev_info_dishln.update_unresponsive(True)
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("TelescopeStandby")
-    with pytest.raises(Exception) as exception:
-        cm.is_command_allowed_before_lrc_start(command_name="TelescopeStandby")
-        assert "'mid-tmc/leaf-node-dish/ska001' not available" in str(
-            exception
+    error_msg = r"\['mid-tmc/leaf-node-dish/ska001'\] not available"
+    with pytest.raises(Exception, match=error_msg):
+        cm.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            command_name="TelescopeStandby"
         )

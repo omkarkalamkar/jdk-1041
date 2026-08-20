@@ -176,6 +176,8 @@ def test_telescope_on_command_rejected(
         timeout += 1
         time.sleep(0.5)
     cm.is_command_allowed("TelescopeOn")
-    with pytest.raises(Exception) as exception:
-        cm.is_command_allowed_before_lrc_start(command_name="TelescopeOn")
-        assert "'low-tmc/leaf-node-mccs/0' not available" in str(exception)
+    error_msg = r"\['low-tmc/leaf-node-mccs/0'\] not available"
+    with pytest.raises(Exception, match=error_msg):
+        cm.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            command_name="TelescopeOn"
+        )

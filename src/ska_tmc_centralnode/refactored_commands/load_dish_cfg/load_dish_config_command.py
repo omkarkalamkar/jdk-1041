@@ -287,7 +287,6 @@ class LoadDishCfg(BaseTMCCommand):
         """
         failed_count = 0
         is_cmd_failed_on_csp = False
-        # cm = self.component_manager
         for device, result in self.context.results.items():
             dev_id = device.split("/")[2].lower()
             if result.result_code not in [

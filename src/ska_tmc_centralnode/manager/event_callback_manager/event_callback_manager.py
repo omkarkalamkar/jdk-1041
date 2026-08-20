@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import threading
 import time
+from dataclasses import dataclass
 from datetime import datetime
 from logging import Logger
 from typing import Callable, Generic, TypeVar
@@ -26,42 +27,45 @@ from ..event_data_manager import EventDataManager
 T = TypeVar("T", InputParameterMid, InputParameterLow)
 
 
+@dataclass
+class EventCallbackContext(Generic[T]):
+    """Context to manage common event callbacks.
+
+    Attributes:
+        logger: Instance of Logger.
+        component: instance of CentralComponent.
+        command_completion_cond: completion condition.
+        input_parameter: Instance of InputParameter.
+        event_data_manager: Instance of EventDataManager
+        _aggregate_state: Callable to aggregate states.
+    """
+
+    logger: Logger
+    component: CentralComponent
+    command_completion_cond: threading.Condition
+    input_parameter: T
+    event_data_manager: EventDataManager
+    _aggregate_state: Callable[[], None]
+
+
 class EventCallbackManager(Generic[T]):
     """Class to manage change event callbacks for both Mid and
     Low telescope."""
 
-    def __init__(
-        self,
-        logger: Logger,
-        component: CentralComponent,
-        command_completion_cond: threading.Condition,
-        input_parameter: T,
-        event_data_manager: EventDataManager,
-        _aggregate_state: Callable[[], None],
-    ):
+    def __init__(self, context: EventCallbackContext):
         """Initialization of EventCallbackManager
 
-        :param logger: Instance of Logger.
-        :type logger: Logger
-        :param component: instance of CentralComponent.
-        :type component: TmcComponent
-        :param command_completion_cond: completion condition.
-        :type command_completion_cond: threading.Condition
-        :param input_parameter: Instance of InputParameter.
-        :type input_parameter: Union[InputParameterMid, InputParameterLow]
-        :param event_data_manager: Instance of EventDataManager
-        :type event_data_manager: EventDataManager
-        :param _aggregate_state: Callable to aggregate states.
-        :type _aggregate_state:  Callable[[],None]
+        :param context: Instance of EventCallbackContext.
+        :type context: EventCallbackContext
         """
-        self.logger = logger
-        self.component = component
-        self.command_completion_cond = command_completion_cond
-        self.input_parameter: T = input_parameter
-        self.event_data_manager = event_data_manager
+        self.logger = context.logger
+        self.component = context.component
+        self.command_completion_cond = context.command_completion_cond
+        self.input_parameter: T = context.input_parameter
+        self.event_data_manager = context.event_data_manager
         self.rlock = threading._RLock()
         self.lock = threading.Lock()
-        self._aggregate_state = _aggregate_state
+        self._aggregate_state = context._aggregate_state
         self.dish_vcc_validation_attr_lock = threading.Lock()
 
     def update_device_obs_state(

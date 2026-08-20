@@ -106,7 +106,7 @@ class CentralComponent(SharingObserver, TmcComponent):
         :param value: desired telescope state
         :type value: DevState
         """
-        if not value == self._desired_telescope_state:
+        if value != self._desired_telescope_state:
             self._desired_telescope_state = value
 
     @property
@@ -322,9 +322,8 @@ class CentralComponent(SharingObserver, TmcComponent):
         :param value: vlbi ModesAvailability
         :type value: ModesAvailability
         """
-        if isinstance(value, ModesAvailability):
-            if self._imaging != value:
-                self._imaging = value
+        if isinstance(value, ModesAvailability) and self._imaging != value:
+            self._imaging = value
 
     @property
     def pss(self) -> ModesAvailability:

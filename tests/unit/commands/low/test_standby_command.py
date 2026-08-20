@@ -179,7 +179,9 @@ def test_telescope_standby_command_rejected(
         dev_info_mccsmln.update_unresponsive(True)
         timeout += 1
         time.sleep(0.5)
+    error_msg = r"\['low-tmc/leaf-node-mccs/0'\] not available"
     cm.is_command_allowed("TelescopeStandby")
-    with pytest.raises(Exception) as exception:
-        cm.is_command_allowed_before_lrc_start(command_name="TelescopeStandby")
-        assert "'low-tmc/leaf-node-mccs/0' not available" in str(exception)
+    with pytest.raises(Exception, match=error_msg):
+        cm.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            command_name="TelescopeStandby"
+        )

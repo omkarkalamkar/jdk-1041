@@ -46,11 +46,7 @@ def assign_resources(
         change_event_callbacks["longRunningCommandResult"],
     )
     telescope_on(central_node, change_event_callbacks)
-
-    if "mid-tmc" in central_node_name:
-        result, unique_id = central_node.AssignResources(assign_input_str)
-    else:
-        result, unique_id = central_node.AssignResources(assign_input_str)
+    result, unique_id = central_node.AssignResources(assign_input_str)
     logger.info(
         "AssignResources Command ID: %s Returned result: %s",
         unique_id,

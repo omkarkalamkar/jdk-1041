@@ -4,9 +4,10 @@ This module provides functions to execute the SetGlobalPointing command
 on the Dishes.
 """
 
+import copy
 import json
 import logging
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, ClassVar, List, Optional, Tuple
 
 from ska_control_model import ResultCode, TaskStatus
 from ska_telmodel.data import TMData
@@ -29,6 +30,15 @@ class SetGlobalPointingModel(BaseTMCCommand):
 
     Executes ApplyPointingModel command on Dish.
     """
+
+    DISH_UNREACHABLE: ClassVar[str] = "Dish is unreachable"
+    GPM_INVALID_INPUT: ClassVar[str] = "GPM input argument is required"
+    GPM_NO_FILE_FOUND: ClassVar[
+        str
+    ] = "No GPM files found on set GPM parameters."
+    SOURCE_FILEPATH_MISSING: ClassVar[
+        str
+    ] = "tm_data_sources and tm_data_filepath not provided in json"
 
     def __init__(
         self,
@@ -158,15 +168,12 @@ class SetGlobalPointingModel(BaseTMCCommand):
             with self.command_runtime_context.dishln_gpm_lock:
                 ctx = self.command_runtime_context
                 dishln_id = dev_name.split("/")[-1]
-                if result:
-                    if dishln_id in ctx.dishln_gpm_cmd_exe_data:
-                        ctx.dishln_gpm_cmd_exe_data[dishln_id][
-                            band_value
-                        ] = result
-                        self.logger.debug(
-                            "Dishln gpm current status: %s",
-                            ctx.dishln_gpm_cmd_exe_data,
-                        )
+                if result and dishln_id in ctx.dishln_gpm_cmd_exe_data:
+                    ctx.dishln_gpm_cmd_exe_data[dishln_id][band_value] = result
+                    self.logger.debug(
+                        "Dishln gpm current status: %s",
+                        ctx.dishln_gpm_cmd_exe_data,
+                    )
 
         return callback
 
@@ -198,7 +205,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
             self.context.task_abort_event
         )
         if not isinstance(self.context.argin, str):
-            raise ValueError("GPM input argument is required")
+            raise ValueError(self.GPM_INVALID_INPUT)
         gpm_paths = self.command_runtime_context.default_gpm_version_params
         if any(value in (None, "") for value in gpm_paths.values()):
             self.error_message = "GPM Telmodel paths not set."
@@ -207,7 +214,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
         request: dict = GPMRequest.from_json(self.context.argin)
         if "receptors" not in request:
             ctx = self.command_runtime_context
-            self.error_message = "No GPM files found on set GPM parameters."
+            self.error_message = self.GPM_NO_FILE_FOUND
             gpm_files = self.get_gpm_files(ctx.default_gpm_version_params)
             if not gpm_files:
                 self.logger.error("Error message: %s", self.error_message)
@@ -285,9 +292,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
                 )
                 self.error_message = f"Error in fetching GPM file {exception}"
 
-        self.error_message = (
-            "tm_data_sources and tm_data_filepath not provided in json"
-        )
+        self.error_message = self.SOURCE_FILEPATH_MISSING
         return gpm_files
 
     def validate_dishes(self, gpm_data: dict) -> None:
@@ -300,19 +305,20 @@ class SetGlobalPointingModel(BaseTMCCommand):
         """
 
         ctx = self.command_runtime_context
-        for dish_id in list(gpm_data):
+        gpm_data_copy = copy.deepcopy(gpm_data)
+        for dish_id in gpm_data_copy:
             error_message = None
             dish_trl = f"{ctx.dish_leaf_node_prefix}/{dish_id}"
             try:
                 dish_info = ctx.get_device(dish_trl)
                 if not dish_info or dish_info.unresponsive:
-                    error_message = "Dish is unreachable"
+                    error_message = self.DISH_UNREACHABLE
                 elif ctx.is_already_assigned(
                     dish_id.upper()
                 ) or ctx.is_already_assigned(dish_id.lower()):
                     error_message = "Dish is assigned to subarray"
             except Exception:
-                error_message = "Dish is unreachable"
+                error_message = self.DISH_UNREACHABLE
                 self.logger.exception(error_message)
             if error_message:
                 self.result_code = ResultCode.FAILED
@@ -398,8 +404,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
         ctx.reset_gpm_data()
 
     # pylint: enable=arguments-differ
-
-    def _build_gpm_status_message(self, ctx) -> dict | str:
+    def _build_gpm_status_message(self, ctx: GPMContext) -> dict | str:
         """Update GPM status and build the failure message.
 
         Skips statuses for unreachable or assigned dishes.
@@ -412,7 +417,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
 
         skip_status_markers: Tuple[str, str] = (
             "Dish is assigned to subarray",
-            "Dish is unreachable",
+            self.DISH_UNREACHABLE,
         )
 
         for dish_id, result in ctx.dishln_gpm_cmd_exe_data.items():

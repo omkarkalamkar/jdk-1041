@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Any, Callable, Dict, List, Tuple
 
 
 class DishConfigValidator:
@@ -6,10 +6,10 @@ class DishConfigValidator:
 
     def __init__(
         self,
-        dish_config_json: dict,
-        k_value_valid_range_lower_limit,
-        k_value_valid_range_upper_limit,
-        validate_dish_ids: Callable,
+        dish_config_json: Dict[str, Any],
+        k_value_valid_range_lower_limit: int,
+        k_value_valid_range_upper_limit: int,
+        validate_dish_ids: Callable[[List[str]], Tuple[bool, str]],
     ):
         """
         params:
@@ -20,7 +20,7 @@ class DishConfigValidator:
         self.dish_config_json = dish_config_json
         self.validate_dish_ids = validate_dish_ids
 
-    def _get_vcc_k_values(self) -> tuple:
+    def _get_vcc_k_values(self) -> Tuple[List[int], List[int]]:
         """Extract vcc and k values from dish config"""
         vcc_ids, k_values = [], []
         for _, vcc_k_map in self.dish_config_json["dish_parameters"].items():
@@ -30,7 +30,7 @@ class DishConfigValidator:
             k_values.append(k_value)
         return vcc_ids, k_values
 
-    def _is_valid_k_values(self, k_values: list) -> tuple:
+    def _is_valid_k_values(self, k_values: list) -> Tuple[bool, str]:
         """Check if k values are within 1, 1177 range
         :params k_values: List of k values to validate
         """
@@ -48,7 +48,7 @@ class DishConfigValidator:
                 f"{self.k_value_valid_range_upper_limit})",
             )
 
-    def _is_valid_vcc_ids(self, vcc_ids: list) -> bool:
+    def _is_valid_vcc_ids(self, vcc_ids: list[int]) -> Tuple[bool, str]:
         """
         params:
         vcc_ids(list): List of VCC ids
@@ -58,7 +58,7 @@ class DishConfigValidator:
         else:
             return False, "Duplicate Vcc ids found in json"
 
-    def _is_valid_dish_ids(self, dish_id_list: list) -> tuple:
+    def _is_valid_dish_ids(self, dish_id_list: List[str]) -> Tuple[bool, str]:
         """Validate Dish Ids are unique and validate
         Dish Id are within valid range
         """
@@ -69,7 +69,7 @@ class DishConfigValidator:
         # Check if dish id are within valid range
         return self.validate_dish_ids(dish_id_list)
 
-    def is_json_valid(self) -> tuple[bool, str]:
+    def is_json_valid(self) -> Tuple[bool, str]:
         """
         This method validate json as per following rules\n
         1. DishIDs are valid dishIDs (SKA001-133, MKT000-063)\n
@@ -105,7 +105,7 @@ class DishConfigValidator:
             json is valid, `False`, `message` otherwise
 
         """
-        dish_parameters = self.dish_config_json.get("dish_parameters")
+        dish_parameters = self.dish_config_json.get("dish_parameters", {})
         dish_ids = dish_parameters.keys()
         vcc_ids, k_values = self._get_vcc_k_values()
 

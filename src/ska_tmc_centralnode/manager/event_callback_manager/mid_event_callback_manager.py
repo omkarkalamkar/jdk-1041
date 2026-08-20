@@ -3,7 +3,7 @@
 import json
 import threading
 import time
-from logging import Logger
+from dataclasses import dataclass
 from typing import Callable, cast
 
 from ska_control_model import ResultCode
@@ -13,7 +13,7 @@ from tango import DevState
 
 from ska_tmc_centralnode.manager.aggregators import (
     DishAttrValueAggregator,
-    TelescopeAvailabilityAggregatorMid,
+    TelescopeAvailabilityAggregator,
 )
 from ska_tmc_centralnode.model.enum import DishConfigStatus, ModesAvailability
 from ska_tmc_centralnode.utils.constants import (
@@ -21,145 +21,139 @@ from ska_tmc_centralnode.utils.constants import (
     MID_CSP_MLN_DEVICE,
 )
 
-from ...model.component import CentralComponent
 from ...model.input import InputParameterMid
-from ..event_data_manager import EventDataManager
-from .event_callback_manager import EventCallbackManager
+from .event_callback_manager import EventCallbackContext, EventCallbackManager
+
+
+@dataclass
+class MidEventCallbackContext(EventCallbackContext[InputParameterMid]):
+    """Context to manage MID event callbacks.
+
+    Attributes:
+        kvalue_validation_aggregator: Instance of
+        DishAttrValueAggregator.
+        gpm_aggregator: instance of DishAttrValueAggregator.
+        update_dish_vcc_flag: Callable to update dish vcc
+          configuration sucess flag.
+        dish_vcc_command_invoke_cb: Callable to invoke LoadDishCfg
+        command.
+        _telescope_availability_aggregator: instance of
+        TelescopeAvailabilityAggregator.
+        update_subarray_availability: Callable to update subarray
+        availability status.
+        set_csp_mln_availability: Callable to set CSP Master Leaf Node
+        avaiability.
+        set_sdp_mln_availability: Callable to set SDP Master Leaf Node
+        avaiability.
+        gpm_invoke_command_callback: Callable to invoke SetGPM command.
+        get_dish_vcc_command_status: callable to get dish vcc command
+        status.
+        dish_vcc_init_timeout: Command timeout for LoadDishCfg
+        commmand during initialization.
+        get_command_in_progress: Callable to get command in progress.
+        set_command_in_progress: Callable to set command in progress.
+        set_dish_vcc_command_status: Callable to set LoadDishCfg command
+        status.
+        set_dish_vcc_cmd_validation_status: Callable to set LoadDishCfg
+        command validation status.
+        set_global_pointing_model_status: Callable to set global
+        pointing model status.
+        gpm_unknown_dishes: List of unknown dishes during
+        execution of SetGPM command.
+        adapter_factory: Instance of Adapter Factory.
+        check_if_csp_all_dish_ready: Callable to check CSP and DISH
+        readiness.
+    """
+
+    kvalue_validation_aggregator: DishAttrValueAggregator
+    gpm_aggregator: DishAttrValueAggregator
+    update_dish_vcc_flag: Callable[[bool], None]
+    dish_vcc_command_invoke_cb: Callable[[], None]
+    _telescope_availability_aggregator: TelescopeAvailabilityAggregator
+    update_subarray_availability: Callable[[str, bool], None]
+    set_csp_mln_availability: Callable[[bool], None]
+    set_sdp_mln_availability: Callable[[bool], None]
+    gpm_invoke_command_callback: Callable[[], None]
+    get_dish_vcc_command_status: Callable[[], DishConfigStatus]
+    dish_vcc_init_timeout: float
+    get_command_in_progress: Callable[[], str]
+    set_command_in_progress: Callable[[str], None]
+    set_dish_vcc_command_status: Callable[[DishConfigStatus], None]
+    set_dish_vcc_cmd_validation_status: Callable[[dict], None]
+    set_global_pointing_model_status: Callable[[dict], None]
+    gpm_unknown_dishes: list[str]
+    adapter_factory: AdapterFactory
+    check_if_csp_all_dish_ready: Callable[[], bool]
 
 
 class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
     """Class to manage change event callbacks for Low telescope."""
 
-    def __init__(
-        self,
-        logger: Logger,
-        component: CentralComponent,
-        command_completion_cond: threading.Condition,
-        input_parameter: InputParameterMid,
-        event_data_manager: EventDataManager,
-        _aggregate_state: Callable[[], None],
-        kvalue_validation_aggregator: DishAttrValueAggregator,
-        gpm_aggregator: DishAttrValueAggregator,
-        update_dish_vcc_flag: Callable[[bool], None],
-        dish_vcc_command_invoke_cb: Callable[[], None],
-        _telescope_availability_aggregator: TelescopeAvailabilityAggregatorMid,
-        subarray_availability: dict[str, bool],
-        set_csp_mln_availability: Callable[[bool], None],
-        set_sdp_mln_availability: Callable[[bool], None],
-        gpm_invoke_command_callback: Callable[[], None],
-        get_dish_vcc_command_status: Callable[[], DishConfigStatus],
-        dish_vcc_init_timeout: float,
-        get_command_in_progress: Callable[[], str],
-        set_command_in_progress: Callable[[str], None],
-        set_dish_vcc_command_status: Callable[[DishConfigStatus], None],
-        set_dish_vcc_cmd_validation_status: Callable[[dict], None],
-        set_global_pointing_model_status: Callable[[dict], None],
-        gpm_unknown_dishes: list[str],
-        adapter_factory: AdapterFactory,
-        check_if_csp_all_dish_ready: Callable[[], bool],
-    ):
+    def __init__(self, context: MidEventCallbackContext):
         """Initialization of MidEventCallbackManager
 
-        :param logger: Instance of Logger.
-        :type logger: Logger
-        :param component: instance of CentralComponent.
-        :type component: TmcComponent
-        :param command_completion_cond: completion condition.
-        :type command_completion_cond: threading.Condition
-        :param input_parameter: Instance of InputParameter.
-        :type input_parameter: Union[InputParameterMid, InputParameterLow]
-        :param event_data_manager: Instance of EventDataManager
-        :type event_data_manager: EventDataManager
-        :param _aggregate_state: Callable to aggregate states.
-        :type _aggregate_state:  Callable[[],None]
-        :param kvalue_validation_aggregator: Instance of
-        DishAttrValueAggregator.
-        :type kvalue_validation_aggregator: DishAttrValueAggregator
-        :param gpm_aggregator: instance of DishAttrValueAggregator.
-        :type gpm_aggregator: DishAttrValueAggregator
-        :param update_dish_vcc_flag: Callable to update dish vcc
-          configuration sucess flag.
-        :type update_dish_vcc_flag: Callable[[bool],None]
-        :param dish_vcc_command_invoke_cb: Callable to invoke LoadDishCfg
-        command.
-        :type dish_vcc_command_invoke_cb: Callable[[],None]
-        :param _telescope_availability_aggregator: instance of
-        TelescopeAvailabilityAggregatorMid.
-        :type _telescope_availability_aggregator:
-        TelescopeAvailabilityAggregatorMid.
-        :param subarray_availability: Dictionary with subarray
-        availability status.
-        :type subarray_availability: dict[str,bool]
-        :param set_csp_mln_availability: Callable to set CSP Master Leaf Node
-        avaiability.
-        :type set_csp_mln_availability: Callable[[bool],None]
-        :param set_sdp_mln_availability: Callable to set SDP Master Leaf Node
-        avaiability.
-        :type set_sdp_mln_availability: Callable[[bool],None]
-        :param gpm_invoke_command_callback: Callable to invoke SetGPM command.
-        :type gpm_invoke_command_callback: Callable[[],None]
-        :param get_dish_vcc_command_status: callable to get dish vcc command
-        status.
-        :type get_dish_vcc_command_status: Callable[[],DishConfigStatus]
-        :param dish_vcc_init_timeout: Command timeout for LoadDishCfg
-        commmand during initialization.
-        :type dish_vcc_init_timeout: float
-        :param get_command_in_progress: Callable to get command in progress.
-        :type get_command_in_progress: Callable[[],str]
-        :param set_command_in_progress: Callable to set command in progress.
-        :type set_command_in_progress: Callable[[str],None]
-        :param set_dish_vcc_command_status: Callable to set LoadDishCfg command
-        status.
-        :type set_dish_vcc_command_status: Callable[[DishConfigStatus],None]
-        :param set_dish_vcc_cmd_validation_status: Callable to set LoadDishCfg
-        command validation status.
-        :type set_dish_vcc_cmd_validation_status: Callable[[dict],None]
-        :param set_global_pointing_model_status: Callable to set global
-        pointing model status.
-        :type set_global_pointing_model_status: Callable[[dict],None]
-        :param gpm_unknown_dishes: List of unknown dishes during
-        execution of SetGPM command.
-        :type gpm_unknown_dishes: list[str]
-        :param adapter_factory: Instance of Adapter Factory.
-        :type adapter_factory: AdapterFactory
-        :param check_if_csp_all_dish_ready: Callable to check CSP and DISH
-        readiness.
-        :type check_if_csp_all_dish_ready: Callable[[],bool]
+        :param context: Instance of MidEventCallbackContext.
+        :type context: MidEventCallbackContext
         """
-        super().__init__(
-            logger,
-            component,
-            command_completion_cond,
-            input_parameter,
-            event_data_manager,
-            _aggregate_state,
+        super().__init__(context)
+        self.kvalue_validation_aggregator = (
+            context.kvalue_validation_aggregator
         )
-        self.kvalue_validation_aggregator = kvalue_validation_aggregator
-        self.update_dish_vcc_flag = update_dish_vcc_flag
-        self.dish_vcc_command_invoke_cb = dish_vcc_command_invoke_cb
+        self.update_dish_vcc_flag = context.update_dish_vcc_flag
+        self.dish_vcc_command_invoke_cb = context.dish_vcc_command_invoke_cb
         self._telescope_availability_aggregator = (
-            _telescope_availability_aggregator
+            context._telescope_availability_aggregator
         )
-        self.subarray_availability = subarray_availability
-        self.set_csp_mln_availability = set_csp_mln_availability
-        self.set_sdp_mln_availability = set_sdp_mln_availability
-        self.gpm_invoke_command_callback = gpm_invoke_command_callback
-        self.get_dish_vcc_command_status = get_dish_vcc_command_status
-        self.set_dish_vcc_command_status = set_dish_vcc_command_status
+        self.update_subarray_availability = (
+            context.update_subarray_availability
+        )
+        self.set_csp_mln_availability = context.set_csp_mln_availability
+        self.set_sdp_mln_availability = context.set_sdp_mln_availability
+        self.gpm_invoke_command_callback = context.gpm_invoke_command_callback
+        self.get_dish_vcc_command_status = context.get_dish_vcc_command_status
+        self.set_dish_vcc_command_status = context.set_dish_vcc_command_status
         self.dishln_gpm_lock = threading.RLock()
-        self.dish_vcc_init_timeout = dish_vcc_init_timeout
-        self.get_command_in_progress = get_command_in_progress
-        self.set_command_in_progress = set_command_in_progress
+        self.dish_vcc_init_timeout = context.dish_vcc_init_timeout
+        self.get_command_in_progress = context.get_command_in_progress
+        self.set_command_in_progress = context.set_command_in_progress
         self.set_dish_vcc_cmd_validation_status = (
-            set_dish_vcc_cmd_validation_status
+            context.set_dish_vcc_cmd_validation_status
         )
         self.set_global_pointing_model_status = (
-            set_global_pointing_model_status
+            context.set_global_pointing_model_status
         )
-        self.gpm_unknown_dishes = gpm_unknown_dishes
-        self.adapter_factory = adapter_factory
-        self.gpm_aggregator = gpm_aggregator
-        self.check_if_csp_all_dish_ready = check_if_csp_all_dish_ready
+        self.gpm_unknown_dishes = context.gpm_unknown_dishes
+        self.adapter_factory = context.adapter_factory
+        self.gpm_aggregator = context.gpm_aggregator
+        self.check_if_csp_all_dish_ready = context.check_if_csp_all_dish_ready
+
+    def _get_dishln_dev_name(self, device_name: str) -> str:
+        """Provides Dish Leaf Node device name which is
+        stored in device info.
+
+        :param device_name: Device FQDN received in event.
+        :type device_name: str
+        """
+        dev_name = ""
+        dln_dev_names = self.input_parameter.dish_leaf_node_dev_names
+        for dish in dln_dev_names:
+            if device_name in dish.lower():
+                dev_name = dish
+        return dev_name
+
+    def _get_dish_master_dev_name(self, device_name: str) -> str:
+        """Provides Dish Master device name which is
+        stored in device info.
+
+        :param device_name: Device FQDN received in event.
+        :type device_name: str
+        """
+        dev_name = ""
+        dish_master_dev_names = self.input_parameter.dish_dev_names
+        for dish in dish_master_dev_names:
+            if device_name in dish.lower():
+                dev_name = dish
+        return dev_name
 
     def _get_master_device_name(self, device_name: str) -> str:
         """Provides Master device name which is stored in device info.
@@ -170,17 +164,11 @@ class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
         dev_name = super()._get_master_device_name(device_name)
         if not dev_name:
             if self.input_parameter.dish_leaf_node_prefix in device_name:
-                dln_dev_names = self.input_parameter.dish_leaf_node_dev_names
-                for dish in dln_dev_names:
-                    if device_name in dish.lower():
-                        dev_name = dish
+                dev_name = self._get_dishln_dev_name(device_name)
             elif self.input_parameter.dish_master_identifier in device_name:
                 # Update Dish Master device name with full FQDN in case of
                 # real Dish
-                dish_master_dev_names = self.input_parameter.dish_dev_names
-                for dish in dish_master_dev_names:
-                    if device_name in dish.lower():
-                        dev_name = dish
+                dev_name = self._get_dish_master_dev_name(device_name)
         return dev_name
 
     def _is_dish_state_on(self) -> bool:
@@ -296,6 +284,46 @@ class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
         """
         self.kvalue_validation_aggregator.aggregate(dev_name, kvalue)
 
+    def _update_status_and_invoke_command(self) -> None:
+        """Updates Dish Vcc Command status to INIT and
+        invokes LoadDishCfg command.
+
+        If the readiness check fails sets command status to FAILED.
+        """
+        self.set_command_in_progress("LoadDishCfg")
+        if self.check_if_csp_all_dish_ready():
+            self.set_dish_vcc_command_status(DishConfigStatus.INIT)
+            self.dish_vcc_command_invoke_cb()
+        else:
+            self.logger.warning(
+                "Time Out while waiting for Dishes to be ready"
+            )
+            self.set_command_in_progress("")
+            # Initialization Failed so mark
+            # process status as failed
+            self.set_dish_vcc_command_status(DishConfigStatus.FAILED)
+
+    def _process_result_and_update_status(
+        self, csp_validation_result: ResultCode
+    ):
+        """Processes the CSP validation result code and updates dish vcc
+        command status.
+
+        :param csp_validation_result: CSP validation result code.
+        :type csp_validation_result: ResultCode
+        """
+        if csp_validation_result == ResultCode.OK:
+            # Update dish config status to completed only
+            # during central node initialization.
+            # This handle scenario when dish vcc already set
+            # and central node restart
+            if self.get_dish_vcc_command_status() == DishConfigStatus.STAGING:
+                self.set_dish_vcc_command_status(DishConfigStatus.COMPLETED)
+            self.update_dish_vcc_flag(True)
+        else:
+            self.set_dish_vcc_command_status(DishConfigStatus.FAILED)
+            self.update_dish_vcc_flag(False)
+
     def handle_dish_vcc_validation_result(
         self, dev_name: str, result: ResultCode
     ) -> None:
@@ -331,7 +359,7 @@ class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
         with self.dish_vcc_validation_attr_lock:
             if self.input_parameter.csp_mln_dev_name in dev_name:
                 # Handle Csp Master Leaf Node event
-                csp_validation_result = int(result)
+                csp_validation_result = ResultCode(int(result))
                 self.logger.debug(
                     "Csp Validation Result is %s",
                     ResultCode(csp_validation_result).name,
@@ -342,49 +370,19 @@ class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
                 ):
                     # Unknown Result code sent when no dish vcc set
                     # so invoke LoadDishCfg
-
-                    self.set_command_in_progress("LoadDishCfg")
-                    if self.check_if_csp_all_dish_ready():
-                        self.set_dish_vcc_command_status(DishConfigStatus.INIT)
-                        self.dish_vcc_command_invoke_cb()
-                    else:
-                        self.logger.warning(
-                            "Time Out while waiting for Dishes to be ready"
-                        )
-                        self.set_command_in_progress("")
-                        # Initialization Failed so mark
-                        # process status as failed
-                        self.set_dish_vcc_command_status(
-                            DishConfigStatus.FAILED
-                        )
+                    self._update_status_and_invoke_command()
                 elif (
                     csp_validation_result in DISH_VCC_VALIDATION_RESULT_STATUS
                 ):
-                    if csp_validation_result == ResultCode.OK:
-                        # Update dish config status to completed only
-                        # during central node initialization.
-                        # This handle scenario when dish vcc already set
-                        # and central node restart
-                        if (
-                            self.get_dish_vcc_command_status()
-                            == DishConfigStatus.STAGING
-                        ):
-                            self.set_dish_vcc_command_status(
-                                DishConfigStatus.COMPLETED
-                            )
-                        self.update_dish_vcc_flag(True)
-                    else:
-                        self.set_dish_vcc_command_status(
-                            DishConfigStatus.FAILED
-                        )
-                        self.update_dish_vcc_flag(False)
+                    self._process_result_and_update_status(
+                        csp_validation_result
+                    )
                     validation_result = DISH_VCC_VALIDATION_RESULT_STATUS.get(
-                        ResultCode(csp_validation_result)
+                        csp_validation_result
                     )
                     self.set_dish_vcc_cmd_validation_status(
                         {MID_CSP_MLN_DEVICE: validation_result}
                     )
-
             with self.command_completion_cond:
                 self.command_completion_cond.notify_all()
 
@@ -401,7 +399,7 @@ class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
         """
         with self.rlock:
             if device_name in self.input_parameter.subarray_dev_names:
-                self.subarray_availability[device_name] = event_value
+                self.update_subarray_availability(device_name, event_value)
             elif self.input_parameter.csp_mln_dev_name == device_name:
                 self.set_csp_mln_availability(event_value)
             elif self.input_parameter.sdp_mln_dev_name == device_name:
@@ -462,13 +460,11 @@ class MidEventCallbackManager(EventCallbackManager[InputParameterMid]):
                 if (
                     self.gpm_unknown_dishes
                     and not self.get_command_in_progress()
+                    and self.get_dish_vcc_command_status()
+                    == DishConfigStatus.COMPLETED
                 ):
-                    if (
-                        self.get_dish_vcc_command_status()
-                        == DishConfigStatus.COMPLETED
-                    ):
-                        self.logger.info(
-                            "Restart phase: Invoking Set GPM command on:  %s",
-                            self.gpm_unknown_dishes,
-                        )
-                        self.gpm_invoke_command_callback()
+                    self.logger.info(
+                        "Restart phase: Invoking Set GPM command on:  %s",
+                        self.gpm_unknown_dishes,
+                    )
+                    self.gpm_invoke_command_callback()

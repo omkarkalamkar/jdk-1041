@@ -119,7 +119,7 @@ class AbstractCentralNode(TMCBaseDevice):
     TMCSubarrayNodes = device_property(
         dtype=("str",),
         doc="List of TMC Mid Subarray Node devices",
-        default_value=tuple(),
+        default_value=(),
     )
     CspMasterLeafNodeFQDN = device_property(dtype="str", default_value="")
 
@@ -132,13 +132,13 @@ class AbstractCentralNode(TMCBaseDevice):
     CspSubarrayLeafNodes = device_property(
         dtype=("str",),
         doc="List of CspSubarrayLeafNode devices",
-        default_value=tuple(),
+        default_value=(),
     )
 
     SdpSubarrayLeafNodes = device_property(
         dtype=("str",),
         doc="List of SdpSubarrayLeafNode devices",
-        default_value=tuple(),
+        default_value=(),
     )
 
     ProxyTimeout = device_property(dtype="DevUShort", default_value=500)

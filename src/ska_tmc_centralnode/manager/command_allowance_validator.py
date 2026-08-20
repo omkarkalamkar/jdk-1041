@@ -456,6 +456,25 @@ class MidCommandAllowanceValidator(
             self.input_parameter.dish_leaf_node_dev_names
         )
 
+    def _is_not_allowed_dishvcc_init_enabled(self, command_name: str) -> bool:
+        """Is command allowed when dish vcc init is enabled.
+
+        :param command_name: Command Name
+        :type command_name: str
+        :return: Returns True if command allowed.
+        :rtype: bool
+        """
+        return (
+            self.dish_vcc_init_enabled
+            and not self.get_dish_vcc_config_set()
+            and command_name
+            not in [
+                "TelescopeOff",
+                "TelescopeStandby",
+                "LoadDishCfg",
+            ]
+        )
+
     def is_command_allowed(self, command_name=None) -> bool:
         """
         Checks whether this command is allowed
@@ -476,17 +495,12 @@ class MidCommandAllowanceValidator(
                 "adminMode OFFLINE or NOT-FITTED"
             )
 
-        if self.dish_vcc_init_enabled:
-            if not self.get_dish_vcc_config_set() and command_name not in [
-                "TelescopeOff",
-                "TelescopeStandby",
-                "LoadDishCfg",
-            ]:
-                raise CommandNotAllowed(
-                    "Dish Vcc Config not Set. Please set using LoadDishCfg"
-                    " command. "
-                    "Current Telescope State is :"
-                    + f"{str(self.get_op_state_model().op_state)}",
-                )
+        if self._is_not_allowed_dishvcc_init_enabled(command_name):
+            raise CommandNotAllowed(
+                "Dish Vcc Config not Set. Please set using LoadDishCfg"
+                " command. "
+                "Current Telescope State is :"
+                + f"{str(self.get_op_state_model().op_state)}",
+            )
         self._check_op_state(command_name)
         return True

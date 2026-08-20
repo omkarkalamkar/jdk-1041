@@ -228,42 +228,30 @@ class InputParameter:
             List: List of device names
 
         """
+
         if list_dev_names is None:
             list_dev_names = []
-        for dev_name in self.subarray_dev_names:
+        subarray_dev_names = [
+            *self.subarray_dev_names,
+            *self.csp_subarray_dev_names,
+            *self.sdp_subarray_dev_names,
+        ]
+        for dev_name in subarray_dev_names:
             if component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
 
-        for dev_name in self.csp_subarray_dev_names:
-            if component_manager.get_device(dev_name) is None:
+        dev_names = [
+            self.csp_master_dev_name,
+            self.csp_mln_dev_name,
+            self.sdp_master_dev_name,
+            self.sdp_mln_dev_name,
+        ]
+
+        for dev_name in dev_names:
+            if dev_name and component_manager.get_device(dev_name) is None:
                 component_manager.add_device(dev_name)
                 list_dev_names.append(dev_name)
-
-        for dev_name in self.sdp_subarray_dev_names:
-            if component_manager.get_device(dev_name) is None:
-                component_manager.add_device(dev_name)
-                list_dev_names.append(dev_name)
-
-        dev_name = self.csp_master_dev_name
-        if dev_name and component_manager.get_device(dev_name) is None:
-            component_manager.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.csp_mln_dev_name
-        if dev_name and component_manager.get_device(dev_name) is None:
-            component_manager.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.sdp_master_dev_name
-        if dev_name and component_manager.get_device(dev_name) is None:
-            component_manager.add_device(dev_name)
-            list_dev_names.append(dev_name)
-
-        dev_name = self.sdp_mln_dev_name
-        if dev_name and component_manager.get_device(dev_name) is None:
-            component_manager.add_device(dev_name)
-            list_dev_names.append(dev_name)
 
 
 class InputParameterLow(InputParameter):

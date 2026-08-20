@@ -41,7 +41,7 @@ from ska_tmc_centralnode.manager.aggregate_process import (
 )
 from ska_tmc_centralnode.manager.aggregators import (
     DishAttrValueAggregator,
-    TelescopeAvailabilityAggregatorMid,
+    TelescopeAvailabilityAggregator,
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.command_allowance_validator import (
@@ -78,6 +78,7 @@ from ska_tmc_centralnode.utils.constants import (
 from ..model.input import InputParameterMid
 from ..utils.exception_decorator import exception_handler
 from .event_callback_manager.mid_event_callback_manager import (
+    MidEventCallbackContext,
     MidEventCallbackManager,
 )
 from .event_processor import MidEventProcessor
@@ -109,15 +110,11 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         """
         super().__init__(config)
         self.config = config
-        self.subarray_availability = {
-            subarray: False
-            for subarray in self.input_parameter.subarray_dev_names
-        }
         self.csp_mln_availability = False
         self.sdp_mln_availability = False
 
         self._telescope_availability_aggregator = (
-            TelescopeAvailabilityAggregatorMid(self, self.logger)
+            TelescopeAvailabilityAggregator(self, self.logger)
         )
         self.dish_kvalue_validation_aggregator = DishAttrValueAggregator(
             self, self.logger
@@ -177,51 +174,50 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
     def _get_event_cb_manager(self) -> MidEventCallbackManager:
         """Provides Instance Event Callaback Manager"""
         return MidEventCallbackManager(
-            logger=self.logger,
-            component=self.component,
-            command_completion_cond=self.command_completion_cond,
-            input_parameter=self.input_parameter,
-            event_data_manager=self.event_data_manager,
-            _aggregate_state=self._aggregate_state,
-            kvalue_validation_aggregator=(
-                self.dish_kvalue_validation_aggregator
-            ),
-            gpm_aggregator=self.gpm_aggregator,
-            update_dish_vcc_flag=self.update_dish_vcc_flag,
-            _telescope_availability_aggregator=(
-                self._telescope_availability_aggregator
-            ),
-            subarray_availability=self.subarray_availability,
-            set_csp_mln_availability=lambda availability: setattr(
-                self, "csp_mln_availability", availability
-            ),
-            set_sdp_mln_availability=lambda availability: setattr(
-                self, "sdp_mln_availability", availability
-            ),
-            gpm_invoke_command_callback=(
-                self.config.gpm_config.invoke_command_callback
-            ),
-            get_dish_vcc_command_status=lambda: self.dish_vcc_command_status,
-            dish_vcc_init_timeout=self.config.dish_config.init_timeout,
-            get_command_in_progress=lambda: self.command_in_progress,
-            set_command_in_progress=lambda cmd: setattr(
-                self, "command_in_progress", cmd
-            ),
-            set_dish_vcc_cmd_validation_status=lambda status: setattr(
-                self, "dish_vcc_validation_status", status
-            ),
-            set_dish_vcc_command_status=lambda status: setattr(
-                self, "dish_vcc_command_status", status
-            ),
-            set_global_pointing_model_status=lambda status: setattr(
-                self, "global_pointing_model_status", status
-            ),
-            gpm_unknown_dishes=self.gpm_unknown_dishes,
-            dish_vcc_command_invoke_cb=(
-                self.config.dish_config.invoke_command_callback
-            ),
-            adapter_factory=self.adapter_factory,
-            check_if_csp_all_dish_ready=self.check_if_csp_all_dish_ready,
+            context=MidEventCallbackContext(
+                **self.get_event_cb_manager_context(),
+                kvalue_validation_aggregator=(
+                    self.dish_kvalue_validation_aggregator
+                ),
+                gpm_aggregator=self.gpm_aggregator,
+                update_dish_vcc_flag=self.update_dish_vcc_flag,
+                _telescope_availability_aggregator=(
+                    self._telescope_availability_aggregator
+                ),
+                update_subarray_availability=self.update_subarray_availability,
+                set_csp_mln_availability=lambda availability: setattr(
+                    self, "csp_mln_availability", availability
+                ),
+                set_sdp_mln_availability=lambda availability: setattr(
+                    self, "sdp_mln_availability", availability
+                ),
+                gpm_invoke_command_callback=(
+                    self.config.gpm_config.invoke_command_callback
+                ),
+                get_dish_vcc_command_status=(
+                    lambda: self.dish_vcc_command_status
+                ),
+                dish_vcc_init_timeout=self.config.dish_config.init_timeout,
+                get_command_in_progress=lambda: self.command_in_progress,
+                set_command_in_progress=lambda cmd: setattr(
+                    self, "command_in_progress", cmd
+                ),
+                set_dish_vcc_cmd_validation_status=lambda status: setattr(
+                    self, "dish_vcc_validation_status", status
+                ),
+                set_dish_vcc_command_status=lambda status: setattr(
+                    self, "dish_vcc_command_status", status
+                ),
+                set_global_pointing_model_status=lambda status: setattr(
+                    self, "global_pointing_model_status", status
+                ),
+                gpm_unknown_dishes=self.gpm_unknown_dishes,
+                dish_vcc_command_invoke_cb=(
+                    self.config.dish_config.invoke_command_callback
+                ),
+                adapter_factory=self.adapter_factory,
+                check_if_csp_all_dish_ready=self.check_if_csp_all_dish_ready,
+            )
         )
 
     def create_device_info(

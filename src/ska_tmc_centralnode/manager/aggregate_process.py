@@ -73,24 +73,24 @@ class HealthStateAggregationProcessor(AggregationProcess):
         """Extract relevant fields from event data into a dictionary."""
         event_data_dict = {
             "all_unique_health_states": list(
-                set(
+                {
                     health_data.health_state
                     for health_data in event_data.health_state_data.values()
                     if not health_data.is_dish_leaf_node
-                )
+                }
             ),
             "all_unique_dish_leaf_node_health_states": list(
-                set(
+                {
                     healthdata.health_state
                     for healthdata in event_data.health_state_data.values()
                     if healthdata.is_dish_leaf_node
-                )
+                }
             ),
             "all_unique_admin_modes": list(
-                set(
+                {
                     admin_mode.admin_mode
                     for admin_mode in event_data.admin_mode_data.values()
-                )
+                }
             ),
         }
         return event_data_dict

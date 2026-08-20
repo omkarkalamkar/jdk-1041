@@ -153,7 +153,6 @@ def test_get_current_dish_mode_of_dln():
     cm.component.get_device.return_value = mock_device
     result = cm.get_current_dish_mode_of_dln(dish_id)
     cm.get_dish_leaf_node_device_names.assert_called_once()
-    cm.component.get_device.call_count >= 1
     assert result == expected_mode
 
 

@@ -111,7 +111,118 @@ class AssignResourceValidator:
         )
         return non_existing_receptors
 
-    def loads(self, input_string) -> dict:
+    def _validate_and_get_assign_json(self, input_string: str) -> str:
+        """Validates the assign input with CDM and provides the
+        json if the format is correct.
+
+        :param input_string: Input string.
+        :type input_string: str
+        :return: Assign json.
+        :rtype: str
+        """
+        try:
+            assign_request = CODEC.loads(AssignResourcesRequest, input_string)
+            assign_json = CODEC.dumps(assign_request)
+        except (
+            JsonValidationError,
+            SchemaNotFound,
+            Exception,
+        ) as json_error:
+            self.logger.exception(
+                "Exception occured while validating the json with cdm: %s",
+                str(json_error),
+            )
+            exception_message = (
+                "Malformed input string. Please check the JSON format."
+                + "Full exception info: "
+                + str(json_error)
+            )
+            raise InvalidJSONError(exception_message) from json_error
+        return assign_json
+
+    def _validate_subarray_id(self, subarray_id: int) -> None:
+        """Validates if subarray exists.
+
+        :param subarray_id: _description_
+        :type subarray_id: int
+        """
+        if not self._subarray_exists(subarray_id):
+            exception_message = (
+                "The Subarray '" + str(subarray_id) + "' does not exist."
+            )
+            raise SubarrayNotPresentError(exception_message)
+        self.logger.debug("SubarrayID validation successful.")
+
+    def _syntatic_validation_dish_id(self, dish_id: str) -> None:
+        """Performs syntatic validation of dish ID.
+
+        :param dish_id: Dish ID.
+        :type dish_id: str
+        """
+        if len(dish_id) != 6:
+            exception_message = (
+                f"The dish id {dish_id} is not of the correct length."
+            )
+            raise InvalidReceptorIdError(exception_message)
+        if not dish_id[3:].isdigit():
+            exp_msg = "The dish id {dish_id} not in correct format."
+            raise InvalidReceptorIdError(exp_msg)
+        if dish_id[:3] not in ["SKA", "MKT", self.mkt_extension_id]:
+            exception_message = f"The dish prefix {dish_id} is invalid."
+            raise InvalidReceptorIdError(exception_message)
+
+    def _validate_dish_range(self, dish_id: str, dish_range: tuple) -> None:
+        """Validates dish range as per range defined.
+
+        :param dish_id: Dish ID.
+        :type dish_id: str
+        :param range: dish ID range tuple with (start, end)
+        :type dish_id: str
+        """
+        dishid = int(dish_id[3:])
+        if (dishid > dish_range[1]) or (dishid < dish_range[0]):
+            exception_message = (
+                f"The {dish_id[:3]} dish id {dish_id} is invalid."
+            )
+            raise InvalidReceptorIdError(exception_message)
+
+    def _validate_receptors_not_empty(self, receptor_list: list[str]) -> None:
+        """Validates if the receptor list is not empty.
+
+        :param receptor_list: List of receptors
+        :type receptor_list: list[str]
+        """
+        if not receptor_list:
+            raise ValueError("Empty receptorIDList")
+
+    def _validate_receptor_ids(self, receptor_list: list[str]) -> None:
+        """Validate receptors IDs.
+        :param receptor_list: List of receptors
+        :type receptor_list: list[str]
+        """
+        for leaf_id in receptor_list:
+            self._syntatic_validation_dish_id(leaf_id)
+            if leaf_id.startswith("SKA"):
+                self._validate_dish_range(leaf_id, self.ska_dish_ranges)
+            if leaf_id.startswith("MKT"):
+                self._validate_dish_range(leaf_id, self.mkt_dish_ranges)
+
+    def _validate_receptors(self, receptor_list: list[str]) -> None:
+        """Validates the receptors
+
+        :param receptor_list: List of receptors
+        :type receptor_list: list[str]
+        """
+        non_existing_receptors = self._search_invalid_receptors(receptor_list)
+        if non_existing_receptors:
+            exception_message = (
+                "The following Receptor id(s) do not exist: "
+                + str(non_existing_receptors)
+            )
+            raise ResourceNotPresentError(exception_message)
+        self.logger.debug("Receptor ID list validation successful.")
+
+    def loads(self, input_string: str) -> dict:
         """
         Validates the input string received as an argument of AssignResources
         command. If the request is correct, returns the deserialized JSON
@@ -132,93 +243,17 @@ class AssignResourceValidator:
                 receptor_id_list is not present.
 
         """
-
-        try:
-            assign_request = CODEC.loads(AssignResourcesRequest, input_string)
-            assign_json = CODEC.dumps(assign_request)
-        except (
-            JsonValidationError,
-            SchemaNotFound,
-            ValueError,
-            Exception,
-        ) as json_error:
-            self.logger.exception(
-                "Exception occured while validating the json with cdm: %s",
-                str(json_error),
-            )
-            exception_message = (
-                "Malformed input string. Please check the JSON format."
-                + "Full exception info: "
-                + str(json_error)
-            )
-            raise InvalidJSONError(exception_message) from json_error
-
-        # Validate subarray ID
-        # TODO: Use the object returned by cdm library instead of parsing
-        # JSON string.
+        assign_json = self._validate_and_get_assign_json(input_string)
         assign_request = json.loads(assign_json)
-        if not self._subarray_exists(assign_request["subarray_id"]):
-            exception_message = (
-                "The Subarray '"
-                + str(assign_request["subarray_id"])
-                + "' does not exist."
-            )
-            raise SubarrayNotPresentError(exception_message)
-        self.logger.debug("SubarrayID validation successful.")
-
-        # Validate receptorIDList
-        try:
-            receptor_list = assign_request["dish"]["receptor_ids"]
-            assert len(receptor_list) > 0
-        except AssertionError as assertion_error:
-            raise ValueError("Empty receptorIDList") from assertion_error
-
+        self._validate_subarray_id(assign_request["subarray_id"])
+        receptor_list = assign_request["dish"]["receptor_ids"]
+        self._validate_receptors_not_empty(receptor_list)
         # Validate the receptor IDs to be in the correct format.
         # The expected format is 'SKAnnn' or 'MKTnnn'.
         # SKA nnn is a 3 digit number in range 001 to 133.
         # MKT nnn is a 3 digit number in range 000 to 063.
-        for leaf_id in receptor_list:
-            if len(leaf_id) != 6:
-                exception_message = (
-                    f"The dish id {leaf_id} is not of the correct length."
-                )
-                raise InvalidReceptorIdError(exception_message)
-            if not leaf_id[3:].isdigit():
-                exp_msg = "The dish id {leaf_id} not in correct format."
-                raise InvalidReceptorIdError(exp_msg)
-            if leaf_id[:3] not in ["SKA", "MKT", self.mkt_extension_id]:
-                exception_message = f"The dish prefix {leaf_id} is invalid."
-                raise InvalidReceptorIdError(exception_message)
-            if leaf_id[:3] == "SKA":
-                dishid = int(leaf_id[3:])
-                if (dishid > self.ska_dish_ranges[1]) or (
-                    dishid < self.ska_dish_ranges[0]
-                ):
-                    exception_message = (
-                        f"The SKA dish id {leaf_id} is invalid."
-                    )
-                    raise InvalidReceptorIdError(exception_message)
-            if leaf_id[:3] == "MKT":
-                dishid = int(leaf_id[3:])
-                if (dishid > self.mkt_dish_ranges[1]) or (
-                    dishid < self.mkt_dish_ranges[0]
-                ):
-                    exception_message = (
-                        f"The MKT dish id {leaf_id} is invalid."
-                    )
-                    raise InvalidReceptorIdError(exception_message)
-
-        non_existing_receptors = self._search_invalid_receptors(
-            assign_request["dish"]["receptor_ids"]
-        )
-        if non_existing_receptors:
-            exception_message = (
-                "The following Receptor id(s) do not exist: "
-                + str(non_existing_receptors)
-            )
-            raise ResourceNotPresentError(exception_message)
-        self.logger.debug("Receptor ID list validation successful.")
-
+        self._validate_receptor_ids(receptor_list)
+        self._validate_receptors(receptor_list)
         return assign_request
 
 
@@ -229,7 +264,7 @@ class ReleaseResourceValidator:
     def __init__(self, logger=module_logger):
         self.logger = logger
 
-    def loads(self, input_string):
+    def loads(self, input_string: str):
         """
         Validates the input string received as an argument of ReleaseResources
         command.
@@ -260,7 +295,6 @@ class ReleaseResourceValidator:
         except (
             JsonValidationError,
             SchemaNotFound,
-            ValueError,
             Exception,
         ) as json_error:
             self.logger.exception(
