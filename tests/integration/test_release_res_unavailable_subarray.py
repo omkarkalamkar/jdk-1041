@@ -95,6 +95,7 @@ def test_release_res_command_mid(change_event_callbacks, json_factory):
 
 @pytest.mark.post_deployment
 @pytest.mark.SKA_low
+@pytest.mark.usefixtures("set_low_sdp_csp_mccs_admin_modes")
 def test_release_res_command_low(change_event_callbacks, json_factory):
     """Test release resources command for low"""
     return release_resources_unavailable_subarray(

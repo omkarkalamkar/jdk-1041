@@ -14,22 +14,31 @@ ska\_tmc\_centralnode.commands.central\_node\_command module
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.commands.assign\_resources\_command module
-----------------------------------------------------------------
+ska\_tmc\_centralnode.refactored_commands.base\_command module
+------------------------------------------------------------
 
-.. _assign_resources:
-
-.. automodule:: ska_tmc_centralnode.commands.assign_resources_command
+.. automodule:: ska_tmc_centralnode.refactored_commands.base_command
    :members:
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.commands.release\_resources\_command module
+
+ska\_tmc\_centralnode.refactored_commands.assignresources.assign\_resources\_command module
+----------------------------------------------------------------
+
+.. _assign_resources:
+
+.. automodule:: ska_tmc_centralnode.refactored_commands.assignresources.assign_resources_command
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ska\_tmc\_centralnode.refactored_commands.releaseresources.release\_resources\_command module
 -----------------------------------------------------------------
 
 .. _release_resources:
 
-.. automodule:: ska_tmc_centralnode.commands.release_resources_command
+.. automodule:: ska_tmc_centralnode.refactored_commands.releaseresources.release_resources_command
    :members:
    :undoc-members:
    :show-inheritance:

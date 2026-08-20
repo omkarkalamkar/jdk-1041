@@ -25,12 +25,6 @@ from ska_tmc_common import (
 from ska_tmc_common.enum import DishMode
 from tango import DevState
 
-from ska_tmc_centralnode.commands.assign_resources_command_mid import (
-    AssignResourcesMid,
-)
-from ska_tmc_centralnode.commands.release_resources_command_mid import (
-    ReleaseResourcesMid,
-)
 from ska_tmc_centralnode.commands.stow_antennas_command import SetStowMode
 from ska_tmc_centralnode.input_validator import (
     AssignResourceValidator,
@@ -52,6 +46,12 @@ from ska_tmc_centralnode.manager.component_manager_config import (
     MidCentralNodeComponentManagerConfig,
 )
 from ska_tmc_centralnode.model.enum import DishConfigStatus
+from ska_tmc_centralnode.refactored_commands.assignresources import (
+    ArrayLayoutContext,
+    CommandInProgressContext,
+    MidAssignResourcesContext,
+    ObsStateContext,
+)
 from ska_tmc_centralnode.refactored_commands.load_dish_cfg.contexts import (
     DeviceContext,
     LoadDishCfgCommandContext,
@@ -61,6 +61,10 @@ from ska_tmc_centralnode.refactored_commands.load_dish_cfg.contexts import (
 # pylint:disable=line-too-long
 from ska_tmc_centralnode.refactored_commands.load_dish_cfg.load_dish_config_command import (
     LoadDishCfg,
+)
+from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    MidReleaseResourcesContext,
+    ReleaseResourcesMid,
 )
 from ska_tmc_centralnode.refactored_commands.set_gpm.contexts import GPMContext
 from ska_tmc_centralnode.refactored_commands.set_gpm.set_gpm_command import (
@@ -76,12 +80,18 @@ from ska_tmc_centralnode.utils.constants import (
 )
 
 from ..model.input import InputParameterMid
+from ..refactored_commands.assignresources import assign_resources_command_mid
 from ..utils.exception_decorator import exception_handler
 from .event_callback_manager.mid_event_callback_manager import (
     MidEventCallbackContext,
     MidEventCallbackManager,
 )
 from .event_processor import MidEventProcessor
+
+AssignResourcesMid = assign_resources_command_mid.AssignResourcesMid
+
+# pylint:disable=too-many-instance-attributes
+# pylint:disable=too-many-arguments
 
 
 class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
@@ -1003,6 +1013,52 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             )
         return argin, exception_msg
 
+    def _get_assign_context(self) -> MidAssignResourcesContext:
+        """Build MidAssignResourcesContext bound to this component manager.
+
+        :return: Runtime context for AssignResources command execution.
+        :rtype: MidAssignResourcesContext
+        """
+        return MidAssignResourcesContext(
+            command_completion_condition=self.command_completion_cond,
+            command_timeout=self.config.timeout_config.command_timeout,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
+            ),
+            array_layout_ctx=ArrayLayoutContext(
+                update_url=lambda url: setattr(self, "array_layout_url", url),
+                get_default_url=lambda: self.default_array_layout_url,
+            ),
+            obs_state_ctx=ObsStateContext(get=self.get_subarray_obsstate),
+            input_parameter=self.input_parameter,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            log_state=self.log_state,
+            subarray_trl_prefix=self.config.subarray_trl_prefix,
+            is_already_assigned=self.is_already_assigned,
+        )
+
+    def _get_release_context(self) -> MidReleaseResourcesContext:
+        """Build MidReleaseResourcesContext bound to this component manager."""
+        return MidReleaseResourcesContext(
+            command_completion_condition=self.command_completion_cond,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
+            ),
+            command_timeout=self.config.timeout_config.command_timeout,
+            input_parameter=self.input_parameter,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            obs_state_ctx=ObsStateContext(get=self.get_subarray_obsstate),
+            subarray_trl_prefix=self.config.subarray_trl_prefix,
+        )
+
     @exception_handler(command_name="AssignResources")
     def assign_resources(
         self, argin, task_callback: TaskCallbackType, task_abort_event
@@ -1045,11 +1101,10 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, err_msg),
             )
-            return
         assign_resources_command_object = AssignResourcesMid(
-            self,
-            adapter_factory=self.adapter_factory,
+            adapter_provider=self.adapter_factory,
             logger=self.logger,
+            command_runtime_context=self._get_assign_context(),
         )
         assign_resources_command_object.subarray_id = self.get_subarray_id(
             argin
@@ -1060,7 +1115,44 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             command_name="AssignResources",
         )
 
-        assign_resources_command_object.assign_resources(
+        assign_resources_command_object.execute(
+            argin=argin,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
+
+    @exception_handler(command_name="ReleaseResources")
+    def release_resources(
+        self, argin: str, task_callback: TaskCallbackType, task_abort_event
+    ) -> None:
+        """
+        Submit the ReleaseResource command in queue.
+
+        :param argin: input json string for release resource command
+        :type argin: str
+        :param task_callback: Updates task status
+        :type task_callback: TaskCallbackType
+        :param task_abort_event: Event to abort the task
+        :type task_abort_event: Event
+        :return: task_status
+        :rtype: tuple
+        """
+        release_resources_command_object = ReleaseResourcesMid(
+            adapter_provider=self.adapter_factory,
+            logger=self.logger,
+            command_runtime_context=self._get_release_context(),
+        )
+
+        self.check_availability_for_release(argin)
+        release_resources_command_object.subarray_id = self.get_subarray_id(
+            argin
+        )
+        # Validate command is allowed
+        self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
+            subarray_id=release_resources_command_object.subarray_id,
+            command_name="ReleaseResources",
+        )
+        release_resources_command_object.execute(
             argin=argin,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
@@ -1089,40 +1181,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 exception_msg,
             )
         return argin, exception_msg
-
-    @exception_handler(command_name="ReleaseResources")
-    def release_resources(
-        self, argin: str, task_callback: TaskCallbackType, task_abort_event
-    ) -> None:
-        """
-        Submit the ReleaseResource command in queue.
-
-        :param argin: input json string for release resource command
-        :type argin: str
-        :param task_callback: Updates task status
-        :type task_callback: TaskCallbackType
-        :param task_abort_event: Event to abort the task
-        :type task_abort_event: Event
-        :return: task_status
-        :rtype: tuple
-        """
-        release_resources_command_object = ReleaseResourcesMid(
-            self, adapter_factory=self.adapter_factory, logger=self.logger
-        )
-
-        self.check_availability_for_release(argin)
-        subarray_id = self.get_subarray_id(argin)
-        release_resources_command_object.subarray_id = str(subarray_id)
-        # Validate command is allowed
-        self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
-            subarray_id=subarray_id,
-            command_name="ReleaseResources",
-        )
-        release_resources_command_object.release_resources(
-            argin=argin,
-            task_callback=task_callback,
-            task_abort_event=task_abort_event,
-        )
 
     def validate_dish_ids(self, receptors: list[str]) -> Tuple[bool, str]:
         """Validates dish ids."""

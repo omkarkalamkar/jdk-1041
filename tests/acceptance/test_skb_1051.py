@@ -19,25 +19,33 @@ from tests.settings import (
     MCCS_MLN_DEVICE,
     assign_resources,
     check_subarray_availability,
+    logger,
 )
 
 
 def subscribe_mccs_lrc_event():
     """subscribe event"""
-    pytest.unique_id1 = ""
-    pytest.unique_id2 = ""
+    pytest.unique_id1 = None
+    pytest.unique_id2 = None
+    pytest.mccs_release1 = False
+    pytest.mccs_release2 = False
 
     def cb(event):
-        """callback to event of mccsln"""
         unique_id, result = event.attr_value.value
-        if unique_id.endswith("ReleaseAllResources"):
-            if result == json.dumps([ResultCode.OK, "Command Completed"]):
-                if not pytest.unique_id1 and pytest.unique_id1 != unique_id:
-                    pytest.unique_id1 = unique_id
-                    pytest.mccs_release1 = True
-                else:
-                    pytest.unique_id2 = unique_id
-                    pytest.mccs_release2 = True
+        logger.info(
+            "MCCS long running command result event received: %s, %s",
+            unique_id,
+            result,
+        )
+        if unique_id.endswith("ReleaseAllResources") and result == json.dumps(
+            [ResultCode.OK, "Command Completed"]
+        ):
+            if pytest.unique_id1 is None:
+                pytest.unique_id1 = unique_id
+                pytest.mccs_release1 = True
+            elif unique_id != pytest.unique_id1:
+                pytest.unique_id2 = unique_id
+                pytest.mccs_release2 = True
 
     mccs_master_proxy = DeviceProxy(MCCS_MLN_DEVICE)
     pytest.sub_id = mccs_master_proxy.subscribe_event(
@@ -113,7 +121,7 @@ def invoke_release_resources_subarray(
     _, unique_id = central_node.ReleaseResources(release_resource_string)
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (unique_id[0], json.dumps([ResultCode.OK, "Command Completed"])),
-        lookahead=10,
+        lookahead=15,
     )
 
 

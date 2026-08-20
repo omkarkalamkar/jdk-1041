@@ -16,12 +16,6 @@ from ska_tango_base.base import TaskCallbackType
 from ska_tango_base.software_bus import Signal
 from ska_tmc_common import DeviceInfo, SubArrayDeviceInfo
 
-from ska_tmc_centralnode.commands.assign_resources_command_low import (
-    AssignResourcesLow,
-)
-from ska_tmc_centralnode.commands.release_resources_command_low import (
-    ReleaseResourcesLow,
-)
 from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
@@ -36,6 +30,16 @@ from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.manager.component_manager_config import (
     LowCentralNodeComponentManagerConfig,
 )
+from ska_tmc_centralnode.refactored_commands.assignresources import (
+    ArrayLayoutContext,
+    CommandInProgressContext,
+    LowAssignResourcesContext,
+    ObsStateContext,
+)
+from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    LowReleaseResourcesContext,
+    ReleaseResourcesLow,
+)
 from ska_tmc_centralnode.utils.constants import (
     LOW_ASSIGN_RESOURCES_SCHEMA_VERSION,
     LOW_RELEASE_RESOURCES_SCHEMA_VERSION,
@@ -43,11 +47,14 @@ from ska_tmc_centralnode.utils.constants import (
 
 from ..model.component import MCCSDeviceInfo
 from ..model.input import InputParameterLow
+from ..refactored_commands.assignresources import assign_resources_command_low
 from ..utils.exception_decorator import exception_handler
 from .event_callback_manager.low_event_callback_manager import (
     LowEventCallbackContext,
     LowEventCallbackManager,
 )
+
+AssignResourcesLow = assign_resources_command_low.AssignResourcesLow
 
 
 class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
@@ -105,9 +112,7 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         self.subsystem_assigned_per_subarray: Dict[int, list] = defaultdict(
             list
         )
-        self.subsystem_assigned_per_command_id: Dict[int, list] = defaultdict(
-            list
-        )
+
         self.pss_beams_assigned_per_subarray: Dict[int, list] = defaultdict(
             list
         )
@@ -300,6 +305,105 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
             )
         return argin, exception_msg
 
+    def set_subsystem_assigned_per_subarray(
+        self, subarray_id: int, subsystems: list
+    ) -> None:
+        """Sets the assigned subsystems for a given subarray.
+
+        :param subarray_id: The ID of the subarray.
+        :type subarray_id: int
+        :param subsystems: List of subsystems assigned to the subarray.
+        :type subsystems: list
+        """
+        self.subsystem_assigned_per_subarray[subarray_id] = subsystems
+
+    def set_pss_beams_assigned_per_subarray(
+        self, subarray_id: int, pss_beams: list
+    ) -> None:
+        """Sets the assigned PSS beams for a given subarray.
+
+        :param subarray_id: The ID of the subarray.
+        :type subarray_id: int
+        :param pss_beams: List of PSS beams assigned to the subarray.
+        :type pss_beams: list
+        """
+        self.pss_beams_assigned_per_subarray[subarray_id] = pss_beams
+
+    def pop_subsystem_assigned_per_subarray_id(self, subarray_id: int) -> None:
+        """Pops the assigned subsystems for a given subarray ID.
+
+        :param subarray_id: The ID of the subarray.
+        :type subarray_id: int
+        :return: List of subsystems assigned to the subarray.
+        :rtype: list
+        """
+        self.subsystem_assigned_per_subarray.pop(subarray_id, None)
+        self.pss_beams_assigned_per_subarray.pop(subarray_id, None)
+
+    def _get_assign_context(self) -> LowAssignResourcesContext:
+        """Build LowAssignResourcesContext bound to this component manager.
+
+        :return: Runtime context for AssignResources command execution.
+        :rtype: LowAssignResourcesContext
+        """
+        return LowAssignResourcesContext(
+            command_completion_condition=self.command_completion_cond,
+            command_timeout=self.config.timeout_config.command_timeout,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
+            ),
+            array_layout_ctx=ArrayLayoutContext(
+                update_url=lambda url: setattr(self, "array_layout_url", url),
+                get_default_url=lambda: self.default_array_layout_url,
+            ),
+            obs_state_ctx=ObsStateContext(
+                get=self.get_subarray_obsstate,
+            ),
+            input_parameter=self.input_parameter,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
+            get_assigned_subsystems=(
+                lambda: self.subsystem_assigned_per_subarray
+            ),
+            set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
+            log_state=self.log_state,
+            subarray_trl_prefix=self.config.subarray_trl_prefix,
+            mccs_mln_dev_name=self.input_parameter.mccs_mln_dev_name,
+        )
+
+    def _get_release_context(self) -> LowReleaseResourcesContext:
+        """Build LowReleaseResourcesContext bound to this component manager."""
+        return LowReleaseResourcesContext(
+            command_completion_condition=self.command_completion_cond,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
+            ),
+            command_timeout=self.config.timeout_config.command_timeout,
+            input_parameter=self.input_parameter,
+            obs_state_ctx=ObsStateContext(
+                get=self.get_subarray_obsstate,
+            ),
+            is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            subarray_trl_prefix=self.config.subarray_trl_prefix,
+            pop_subsystem_assigned_per_subarray_id=(
+                self.pop_subsystem_assigned_per_subarray_id
+            ),
+            get_assigned_subsystems=(
+                lambda: self.subsystem_assigned_per_subarray
+            ),
+            set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
+            mccs_mln_dev_name=self.input_parameter.mccs_mln_dev_name,
+        )
+
     @exception_handler("AssignResources")
     def assign_resources(
         self, argin: str, task_callback: TaskCallbackType, task_abort_event
@@ -317,19 +421,20 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         :rtype: tuple
         """
         assign_resources_command_object = AssignResourcesLow(
-            self,
-            adapter_factory=self.adapter_factory,
+            adapter_provider=self.adapter_factory,
             logger=self.logger,
+            command_runtime_context=self._get_assign_context(),
             is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
         )
-        subarray_id = self.get_subarray_id(argin)
-        assign_resources_command_object.subarray_id = str(subarray_id)
+        assign_resources_command_object.subarray_id = self.get_subarray_id(
+            argin
+        )
         # Validate command is allowed
         self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
-            subarray_id=subarray_id,
+            subarray_id=assign_resources_command_object.subarray_id,
             command_name="AssignResources",
         )
-        assign_resources_command_object.assign_resources(
+        assign_resources_command_object.execute(
             argin=argin,
             task_callback=task_callback,
             task_abort_event=task_abort_event,
@@ -382,21 +487,22 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         :rtype: tuple
         """
         release_resources_command_object = ReleaseResourcesLow(
-            self,
-            adapter_factory=self.adapter_factory,
+            adapter_provider=self.adapter_factory,
             logger=self.logger,
+            command_runtime_context=self._get_release_context(),
             is_auto_recovery_enabled=self.config.is_auto_recovery_enabled,
         )
 
         self.check_availability_for_release(argin)
-        subarray_id = self.get_subarray_id(argin)
-        release_resources_command_object.subarray_id = str(subarray_id)
+        release_resources_command_object.subarray_id = self.get_subarray_id(
+            argin
+        )
         # Validate command is allowed
         self.cmd_allowed_validator.is_command_allowed_before_lrc_start(
-            subarray_id=subarray_id,
+            subarray_id=release_resources_command_object.subarray_id,
             command_name="ReleaseResources",
         )
-        release_resources_command_object.release_resources(
+        release_resources_command_object.execute(
             argin=argin,
             task_callback=task_callback,
             task_abort_event=task_abort_event,

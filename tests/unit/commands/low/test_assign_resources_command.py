@@ -9,13 +9,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.test_helpers.helper_adapter_factory import (
-    HelperAdapterFactory,
-)
 
-from ska_tmc_centralnode.commands.assign_resources_command_low import (
-    AssignResourcesLow,
-)
 from ska_tmc_centralnode.model.input import InputParameterLow
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     assign_validate_json_args,
@@ -113,21 +107,28 @@ def test_low_assign_resources_command_fail_subarray(
     logger.info(
         "checked %s devices in %s", len(cm.checked_devices), str(elapsed_time)
     )
+    sub_mock = mock.Mock(
+        **{"invoke_command.side_effect": Exception("command failed")}
+    )
+    attrs = {"get_or_create_adapter.return_value": sub_mock}
 
-    adapter_factory = HelperAdapterFactory()
+    helper_adapter_factory = mock.Mock(**attrs)
 
     # include exception in AssignResources command
     attrs = {"AssignResources.side_effect": Exception}
-    subarrayMock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(
-        LOW_SUBARRAY_DEVICE, proxy=subarrayMock
-    )
     assign_input_str = json_factory("assign_resource_low")
-    assign_res_command = AssignResourcesLow(
-        cm, adapter_factory=adapter_factory, logger=logger
+    cm.adapter_factory = helper_adapter_factory
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
-    (res_code, _) = assign_res_command.do(assign_input_str)
-    assert res_code == ResultCode.FAILED
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    result = task_callback.assert_against_call(status=TaskStatus.COMPLETED)
+    assert ResultCode.FAILED == result["result"][0]
+    assert "command failed" in result["result"][1]
 
 
 def test_low_assign_resources_command_missing_subarray_beam_ids_key(
@@ -303,15 +304,22 @@ def test_low_assign_resources_bad_json(
 ):
     """Test assign resources with bad JSON"""
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    adapter_factory = HelperAdapterFactory()
 
     assign_input_str = "{ invalid json"
-    assign_res_command = AssignResourcesLow(
-        cm, adapter_factory=adapter_factory, logger=logger
+
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
-    (res_code, message) = assign_res_command.do(assign_input_str)
-    assert res_code == ResultCode.FAILED
-    assert "Problem in loading the JSON string" in str(message)
+
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=(
+            ResultCode.FAILED,
+            "Expecting property name enclosed in double quotes: line 1 column 3 (char 2)",
+        ),
+    )
 
 
 @pytest.mark.SKA_low
@@ -323,17 +331,26 @@ def test_low_assign_resources_subarray_not_found(
 ):
     """Test assign resources when subarray adapter not found"""
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    adapter_factory = HelperAdapterFactory()
+    # adapter_factory = HelperAdapterFactory()
 
     assign_input_str = json_factory("assign_resource_low")
     json_arg = json.loads(assign_input_str)
     json_arg["subarray_id"] = 99
     assign_input_str = json.dumps(json_arg)
 
-    assign_res_command = AssignResourcesLow(
-        cm, adapter_factory=adapter_factory, logger=logger
+    cm.subarray_id = 99
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
-    assign_res_command.subarray_id = 99
-    (res_code, message) = assign_res_command.do(assign_input_str)
-    assert res_code == ResultCode.FAILED
-    assert "is not existing" in message
+    task_callback.assert_against_call(
+        status=TaskStatus.IN_PROGRESS,
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=(
+            ResultCode.FAILED,
+            "Subarray Id 99 is not existing!",
+        ),
+    )

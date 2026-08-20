@@ -9,13 +9,7 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.control_model import ObsState
 from ska_tmc_common import DevFactory
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.test_helpers.helper_adapter_factory import (
-    HelperAdapterFactory,
-)
 
-from ska_tmc_centralnode.commands.release_resources_command_low import (
-    ReleaseResourcesLow,
-)
 from ska_tmc_centralnode.model.input import InputParameterLow
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     release_validate_json_args,
@@ -64,26 +58,37 @@ def test_low_release_resources_command_fail_subarray(
     json_factory,
     set_low_sdp_csp_mccs_admin_modes,
 ):
-    cm, start_time = create_cm(_input_parameter=InputParameterLow(None))
+    cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     cm.subsystems_to_config = ["mccs", "csp", "sdp"]
-    elapsed_time = time.time() - start_time
-    logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+    cm.is_command_allowed("ReleaseResources")
+
+    dev_factory = DevFactory()
+    subarray_device = dev_factory.get_device(LOW_SUBARRAY_DEVICE)
+    subarray_device.SetDirectObsState(ObsState.IDLE)
+    subarray_device.SetisSubarrayAvailable(True)
+    check_if_subarray_is_available(cm)
+
+    sub_mock = mock.Mock(
+        **{"invoke_command.side_effect": Exception("command failed")}
     )
-    adapter_factory = HelperAdapterFactory()
+    attrs = {"get_or_create_adapter.return_value": sub_mock}
+
+    helper_adapter_factory = mock.Mock(**attrs)
 
     # include exception in ReleaseResources command
-    attrs = {"ReleaseAllResources.side_effect": Exception}
-    subarrayMock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(
-        LOW_SUBARRAY_DEVICE, proxy=subarrayMock
-    )
     release_input_str = json_factory("release_resource_low")
-    assign_res_command = ReleaseResourcesLow(
-        cm, adapter_factory=adapter_factory, logger=logger
+    cm.adapter_factory = helper_adapter_factory
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
-    (res_code, _) = assign_res_command.do(release_input_str)
-    assert res_code == ResultCode.FAILED
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    result = task_callback.assert_against_call(status=TaskStatus.COMPLETED)
+    assert ResultCode.FAILED == result["result"][0]
+    assert "command failed" in result["result"][1]
 
 
 @pytest.mark.SKA_low
@@ -216,15 +221,22 @@ def test_low_release_resources_bad_json(
 ):
     """Test release resources with bad JSON"""
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    adapter_factory = HelperAdapterFactory()
 
     release_input_str = "{ invalid json"
-    assign_res_command = ReleaseResourcesLow(
-        cm, adapter_factory=adapter_factory, logger=logger
+
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
-    (res_code, message) = assign_res_command.do(release_input_str)
-    assert res_code == ResultCode.FAILED
-    assert "Problem in loading the JSON string" in str(message)
+
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=(
+            ResultCode.FAILED,
+            "Expecting property name enclosed in double quotes: line 1 column 3 (char 2)",
+        ),
+    )
 
 
 @pytest.mark.SKA_low
@@ -236,19 +248,26 @@ def test_low_release_resources_subarray_not_found(
 ):
     """Test release resources when subarray adapter not found"""
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    adapter_factory = HelperAdapterFactory()
 
     # Create a command with subarray_id=99 which won't be in adapters
     release_input_str = json_factory("release_resource_low")
     json_arg = json.loads(release_input_str)
     json_arg["subarray_id"] = 99
     release_input_str = json.dumps(json_arg)
-
-    release_resources_command = ReleaseResourcesLow(
-        cm, adapter_factory=adapter_factory, logger=logger
-    )
     # Set subarray_id to match the JSON
-    release_resources_command.subarray_id = 99
-    (res_code, message) = release_resources_command.do(release_input_str)
-    assert res_code == ResultCode.FAILED
-    assert "is not existing" in message
+    cm.subarray_id = 99
+    cm.release_resources(
+        release_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.IN_PROGRESS,
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=(
+            ResultCode.FAILED,
+            "Subarray Id 99 is not existing!",
+        ),
+    )
