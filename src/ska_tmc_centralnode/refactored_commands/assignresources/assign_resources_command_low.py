@@ -22,8 +22,6 @@ from .assign_resources_strategy import LowAssignResourcesStrategy
 class AssignResourcesLow(BaseAssignResourcesCN):
     """A class for CentralNode's AssignResources() command for low."""
 
-    command_name = "AssignResources"
-
     def __init__(
         self,
         command_runtime_context: LowAssignResourcesContext,
@@ -50,7 +48,6 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             command_runtime_context.make_strategy(logger)
         )
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
-        self._assigned_subsystem: list = []
 
     def pre_process(self, argin=None) -> None:
         """Log entry into AssignResources."""
@@ -77,12 +74,11 @@ class AssignResourcesLow(BaseAssignResourcesCN):
         self.subarray_id = self._plan.subarray_id
         # apply_plan propagates subarray_id to context and subsystems to cm.
 
-        self._assigned_subsystem = list(self._plan.subsystems)
         self.logger.debug(
             "Command %s: Subsystems assigned for subarray %s: %s",
             self.context.command_id,
             self.subarray_id,
-            self._assigned_subsystem,
+            self._plan.subsystems,
         )
         self.logger.info(
             "Command ID: %s | AssignResources started for subarray %s",
@@ -105,7 +101,7 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             self.logger.info(
                 "Command ID: %s | Invoking AssignResources on MCCS %s",
                 self.context.command_id,
-                self.mccs_mln_adapter,
+                self.command_runtime_context.mccs_mln_dev_name,
             )
             self.context.device_commands.append(
                 self._build_mccs_device_command()

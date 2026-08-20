@@ -17,11 +17,13 @@ from ..assignresources import (
     LowAssignResourcesPlan,
     MidAssignResourcesPlan,
 )
-from .base_command import BaseCNCommand
+from ..common.base_command import BaseCNCommand
 
 
 class BaseAssignResourcesCN(BaseCNCommand):
     """Shared AssignResources command behaviour for CentralNode."""
+
+    command_name = "AssignResources"
 
     # pylint:disable=keyword-arg-before-vararg
     def __init__(
@@ -46,6 +48,7 @@ class BaseAssignResourcesCN(BaseCNCommand):
         self._plan: LowAssignResourcesPlan | MidAssignResourcesPlan | None = (
             None
         )
+        self.tm_subarray_adapter = None
 
     def get_subarray_obsstate(self) -> ObsState:
         """

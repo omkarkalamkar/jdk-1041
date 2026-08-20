@@ -9,15 +9,11 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from ska_tmc_common.adapters import AdapterFactory, AdapterType
+from ska_tmc_common import AdapterFactory
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
 
 from ..assignresources import AssignResourcesContext
-from .assign_resources_plan import (
-    LowAssignResourcesPlan,
-    MidAssignResourcesPlan,
-)
 
 LOGGER = logging.getLogger(__name__)
 ADAPTER_INIT_ERROR = "Exception in creating adapter for %s, Exception: %s"
@@ -44,16 +40,6 @@ class BaseCNCommand(BaseTMCCommand):
         """
         super().__init__(command_runtime_context, adapter_provider, logger)
         self.subarray_id: int | None = None
-        self.assign_resources_data: dict = {}
-        self._plan: LowAssignResourcesPlan | MidAssignResourcesPlan | None = (
-            None
-        )
-
-        self.mccs_mln_adapter = None
-        self.tm_subarray_adapter = None
-        self.subarray_devname = ""
-        self.dish_adapters: list[AdapterType] = []
-        self.subarray_adapters: list[AdapterType] = []
 
     def _build_command_runtime_context(self) -> CommandRuntimeContext:
         """Build (or fetch) the runtime context for this command.

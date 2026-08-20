@@ -7,12 +7,12 @@ behaviour shared between the Mid and Low telescope commands
 
 import logging
 
-from ska_control_model import ObsState
+from ska_control_model import ObsState, ResultCode, TaskStatus
 from ska_tmc_common import AdapterFactory
 from ska_tmc_common.adapters import AdapterType
 from ska_tmc_common.v4.command_context import DeviceCommand
 
-from ..assignresources.base_command import BaseCNCommand
+from ..common.base_command import BaseCNCommand
 from .release_resources_context import ReleaseResourcesContext
 from .release_resources_plan import LowReleaseResourcesPlan as LRP
 from .release_resources_plan import MidReleaseResourcesPlan as MRP
@@ -20,6 +20,8 @@ from .release_resources_plan import MidReleaseResourcesPlan as MRP
 
 class BaseReleaseResourcesCN(BaseCNCommand):
     """Shared ReleaseResources command behaviour for CentralNode."""
+
+    command_name = "ReleaseAllResources"
 
     # pylint:disable=keyword-arg-before-vararg
     def __init__(
@@ -72,3 +74,23 @@ class BaseReleaseResourcesCN(BaseCNCommand):
             self.command_name,
             AdapterType.SUBARRAY,
         )
+
+    def update_task_status(self, **kwargs) -> None:
+        """Update task status for ReleaseResourcesLow."""
+        result = kwargs.get("result")
+        status = kwargs.get("status", TaskStatus.COMPLETED)
+        exception = kwargs.get("exception", "")
+
+        if status == TaskStatus.ABORTED:
+            self.context.task_callback(
+                result=(ResultCode.ABORTED, "Command has been aborted"),
+                status=status,
+            )
+        elif result[0] == ResultCode.OK:
+            self.context.task_callback(result=result, status=status)
+        else:
+            self.context.task_callback(
+                result=(ResultCode.FAILED, result[1]),
+                status=status,
+                exception=exception,
+            )

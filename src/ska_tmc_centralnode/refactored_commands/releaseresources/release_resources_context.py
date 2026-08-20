@@ -11,10 +11,7 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 
-from ..assignresources.common_context import (
-    CommandInProgressContext,
-    ObsStateContext,
-)
+from ..common.common_context import CommandInProgressContext, ObsStateContext
 from .release_resources_strategy import (
     LowReleaseResourcesStrategy,
     MidReleaseResourcesStrategy,

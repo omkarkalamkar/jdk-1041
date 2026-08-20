@@ -11,11 +11,11 @@ from ska_tmc_centralnode.model.input import (
     InputParameterMid,
 )
 
+from ..common.common_context import CommandInProgressContext, ObsStateContext
 from .assign_resources_strategy import (
     LowAssignResourcesStrategy,
     MidAssignResourcesStrategy,
 )
-from .common_context import CommandInProgressContext, ObsStateContext
 
 
 @dataclass

@@ -1,7 +1,6 @@
 """ReleaseResourcesMid command class for CentralNode."""
 import logging
 
-from ska_control_model import ResultCode, TaskStatus
 from ska_tmc_common import AdapterFactory
 
 from .release_resources_command import BaseReleaseResourcesCN
@@ -13,8 +12,6 @@ from .release_resources_strategy import MidReleaseResourcesStrategy
 
 class ReleaseResourcesMid(BaseReleaseResourcesCN):
     """Release Resources command class for Mid."""
-
-    command_name = "ReleaseAllResources"
 
     def __init__(
         self,
@@ -34,7 +31,6 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
         :type logger: logging.Logger
         """
         super().__init__(command_runtime_context, adapter_provider, logger)
-        self.subarray_id: int | None = None
         self._strategy: MidReleaseResourcesStrategy = (
             command_runtime_context.make_strategy(logger)
         )
@@ -91,23 +87,3 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
             self.context.command_id,
             self.get_subarray_name(int(self.subarray_id)),
         )
-
-    def update_task_status(self, **kwargs) -> None:
-        """Update task status for ReleaseResourcesLow."""
-        result = kwargs.get("result")
-        status = kwargs.get("status", TaskStatus.COMPLETED)
-        exception = kwargs.get("exception", "")
-
-        if status == TaskStatus.ABORTED:
-            self.context.task_callback(
-                result=(ResultCode.ABORTED, "Command has been aborted"),
-                status=status,
-            )
-        elif result[0] == ResultCode.OK:
-            self.context.task_callback(result=result, status=status)
-        else:
-            self.context.task_callback(
-                result=(ResultCode.FAILED, result[1]),
-                status=status,
-                exception=exception,
-            )

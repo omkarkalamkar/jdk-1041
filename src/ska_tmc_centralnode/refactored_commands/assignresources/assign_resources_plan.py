@@ -1,7 +1,6 @@
 """Data classes used by CentralNode AssignResources refactor."""
 
 from dataclasses import dataclass
-from typing import Dict, List, Set
 
 
 @dataclass
@@ -18,7 +17,7 @@ class AssignResourcesPlan:
 
     payload: str
     sb_id: str
-    telmodel: Dict
+    telmodel: dict
     subarray_id: int
 
 
@@ -28,7 +27,7 @@ class MidAssignResourcesPlan(AssignResourcesPlan):
 
     scan_type_id: str
     visibilities_beam_id: str
-    receptor_ids: List
+    receptor_ids: list
 
 
 @dataclass
@@ -42,4 +41,4 @@ class LowAssignResourcesPlan(AssignResourcesPlan):
     """
 
     mccs_payload: str
-    subsystems: Set[str]
+    subsystems: set[str]

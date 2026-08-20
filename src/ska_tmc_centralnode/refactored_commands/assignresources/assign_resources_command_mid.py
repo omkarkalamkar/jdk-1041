@@ -20,8 +20,6 @@ from .assign_resources_strategy import MidAssignResourcesStrategy
 class AssignResourcesMid(BaseAssignResourcesCN):
     """A class for CentralNode's AssignResources() command for Mid."""
 
-    command_name = "AssignResources"
-
     def __init__(
         self,
         command_runtime_context: MidAssignResourcesContext,
@@ -41,8 +39,6 @@ class AssignResourcesMid(BaseAssignResourcesCN):
         :type logger: logging.Logger
         """
         super().__init__(command_runtime_context, adapter_provider, logger)
-        self.adapter_provider = adapter_provider
-        self.error_message: str | Exception = ""
         self._strategy: MidAssignResourcesStrategy = (
             command_runtime_context.make_strategy(logger)
         )
@@ -70,7 +66,6 @@ class AssignResourcesMid(BaseAssignResourcesCN):
         self._plan: MidAssignResourcesPlan = self._strategy.build_plan(request)
         self.subarray_id = self._plan.subarray_id
 
-        self.receptor_ids = self._plan.receptor_ids
         self._validate_receptors()
 
     def _validate_receptors(self) -> None:
@@ -84,7 +79,7 @@ class AssignResourcesMid(BaseAssignResourcesCN):
             self.context.command_id,
             self.receptor_ids,
         )
-        for receptor_id in self.receptor_ids:
+        for receptor_id in self._plan.receptor_ids:
             if self.command_runtime_context.is_already_assigned(receptor_id):
                 raise ValueError(f"Dish {receptor_id} is already allocated")
             self.logger.debug(

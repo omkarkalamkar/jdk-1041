@@ -6,6 +6,7 @@ import logging
 
 from ska_tmc_centralnode.model.input import InputParameterMid
 
+from .assign_resources_context import AssignResourcesContext
 from .assign_resources_request import (
     AssignResourcesRequest,
     AssignResourcesRequestError,
@@ -25,7 +26,9 @@ class AssignResourcesPreparation:
     """Request parsing and array layout handling for AssignResources."""
 
     def __init__(
-        self, command_runtime_context, logger: logging.Logger
+        self,
+        command_runtime_context: AssignResourcesContext,
+        logger: logging.Logger,
     ) -> None:
         self.command_runtime_context = command_runtime_context
         self.logger = logger

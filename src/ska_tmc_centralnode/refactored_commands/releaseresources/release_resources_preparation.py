@@ -1,5 +1,8 @@
 """Shared preparation helpers for CentralNode ReleaseResources."""
 
+import logging
+
+from .release_resources_context import ReleaseResourcesContext
 from .release_resources_request import (
     ReleaseResourcesRequest,
     ReleaseResourcesRequestError,
@@ -13,8 +16,14 @@ class ReleaseResourcesPreparationError(Exception):
 class ReleaseResourcesPreparation:
     """Request parsing helper for ReleaseResources."""
 
-    def __init__(self, command_runtime_context, logger) -> None:
-        self.command_runtime_context = command_runtime_context
+    def __init__(
+        self,
+        command_runtime_context: ReleaseResourcesContext,
+        logger: logging.Logger,
+    ) -> None:
+        self.command_runtime_context: ReleaseResourcesContext = (
+            command_runtime_context
+        )
         self.logger = logger
 
     def prepare_request(
