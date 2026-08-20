@@ -132,6 +132,15 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
 
     def _mccs_required(self) -> bool:
         """Whether MCCS should be released as part of this command."""
+        self.logger.debug(
+            "Command %s: MCCS required for subarray %s? %s",
+            self.context.command_id,
+            self.subarray_id,
+            "mccs"
+            in self.command_runtime_context.get_assigned_subsystems[
+                self.subarray_id
+            ],
+        )
         return (
             "mccs"
             in self.command_runtime_context.get_assigned_subsystems[
