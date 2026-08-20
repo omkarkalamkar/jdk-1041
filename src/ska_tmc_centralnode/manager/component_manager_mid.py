@@ -21,19 +21,10 @@ from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
 from ska_tmc_common.exceptions import (
     CommandNotAllowed,
-    InvalidReceptorIdError,
     SubarrayNotPresentError,
 )
 from tango import DevState
 
-from ska_tmc_centralnode.commands.set_global_pointing_model import (
-    SetGlobalPointingModel,
-)
-from ska_tmc_centralnode.commands.stow_antennas_command import SetStowMode
-from ska_tmc_centralnode.input_validator import (
-    AssignResourceValidator,
-    ReleaseResourceValidator,
-)
 from ska_tmc_centralnode.manager.aggregate_process import (
     HealthStateAggregationProcessor,
 )
@@ -43,7 +34,6 @@ from ska_tmc_centralnode.manager.aggregators import (
     TelescopeStateAggregatorMid,
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
-from ska_tmc_centralnode.manager.gpm_json_model import GPMJsonModel
 from ska_tmc_centralnode.model.enum import DishConfigStatus
 from ska_tmc_centralnode.refactored_commands.assignresources import (
     ArrayLayoutContext,
@@ -64,6 +54,10 @@ from ska_tmc_centralnode.refactored_commands.load_dish_cfg.load_dish_config_comm
 from ska_tmc_centralnode.refactored_commands.releaseresources import (
     MidReleaseResourcesContext,
     ReleaseResourcesMid,
+)
+from ska_tmc_centralnode.refactored_commands.set_gpm.contexts import GPMContext
+from ska_tmc_centralnode.refactored_commands.set_gpm.set_gpm_command import (
+    SetGlobalPointingModel,
 )
 
 # pylint:enable=line-too-long
@@ -236,11 +230,8 @@ class CNComponentManagerMid(CNComponentManager):
             self, self.logger
         )
         self.dev_names_for_load_dish_cfg = []
-        self.dishln_gpm_cmd_exe_data = (
-            {}
-        )  # dishln_gpm_data_created_during_command_execution
+        self.dishln_gpm_cmd_exe_data = {}
         self.load_dish_cfg_aggregated_result = None
-        self.gpm_version_aggregated_result = ResultCode.UNKNOWN
         self.gpm_aggregated_result = True
         self.load_dish_cfg_command_id = None
         self._dish_vcc_validation_status = "{}"
@@ -258,7 +249,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.dish_vcc_command_status_callback = (
             _dish_vcc_command_status_callback
         )
-        self.number_of_gpm_executed = 0
         self.gpm_unknown_dishes = []
         self.gpm_version = gpm_version
         self.gpm_interface = gpm_interface
@@ -309,7 +299,6 @@ class CNComponentManagerMid(CNComponentManager):
         self.aggregation_process.start_aggregation_process()
 
     # pylint:enable=too-many-arguments
-
     def check_if_dishes_are_responsive(self) -> bool:
         """
         Checks whether dishes are responsive
@@ -323,16 +312,6 @@ class CNComponentManagerMid(CNComponentManager):
         return self._check_if_device_is_responsive(
             self.input_parameter.dish_leaf_node_dev_names
         )
-
-    def get_set_gpm_version_resultcode(self) -> ResultCode:
-        """
-        Return Aggregated command result for Set GPM Version command
-
-        Returns:
-            Aggregated command result for Set GPM Version command
-
-        """
-        return self.gpm_version_aggregated_result
 
     def get_set_stow_mode_resultcode(self) -> ResultCode:
         """
@@ -828,7 +807,6 @@ class CNComponentManagerMid(CNComponentManager):
         """
         return {
             "version": self.gpm_version,
-            "interface": self.gpm_interface,
             "tm_data_sources": [self.gpm_data_sources_prefix],
             "tm_data_filepath": self.gpm_file_path_prefix,
         }
@@ -1124,45 +1102,49 @@ class CNComponentManagerMid(CNComponentManager):
 
         """
 
-        keys_to_allow_skip = [
-            "version",
-            "tm_data_filepath",
-            "tm_data_sources",
-            "interface",
-        ]
         set_gpm_version_command_object = SetGlobalPointingModel(
-            self, adapter_factory=self.adapter_factory, logger=self.logger
+            command_runtime_context=self._get_gpm_context(),
+            adapter_provider=self.adapter_factory,
+            logger=self.logger,
         )
 
-        try:
-            gpm_input = json.loads(argin)
-            self.logger.debug(
-                "GPM JSON argin is in correct format. %s", gpm_input
-            )
-            if not all(key in gpm_input for key in keys_to_allow_skip):
-                GPMJsonModel(**gpm_input)
-                if not self.validate_dish_ids(gpm_input["receptors"].keys()):
-                    raise InvalidReceptorIdError(
-                        f"Incorrect receptor id in json: {gpm_input}"
-                    )
-            else:
-                self.logger.debug(
-                    "Executing initialization/restart SetGPM on %s",
-                    self.gpm_unknown_dishes,
-                )
+        return set_gpm_version_command_object.execute(
+            argin=argin,
+            task_callback=task_callback,
+            task_abort_event=task_abort_event,
+        )
 
-            return set_gpm_version_command_object.apply_gpm(
-                dish_gpm_params=argin,
-                logger=self.logger,
-                task_callback=task_callback,
-                task_abort_event=task_abort_event,
-            )
-        except Exception as exception:
-            self.logger.exception("Exception occured %s", exception)
-            return task_callback(
-                status=TaskStatus.REJECTED,
-                result=(ResultCode.NOT_ALLOWED, str(exception)),
-            )
+    def _get_gpm_context(self) -> GPMContext:
+        """Get the SetGlobalPointingModel command context.
+
+        :return: SetGlobalPointingModel command context.
+        :rtype: GPMContext
+        """
+        return GPMContext(
+            command_completion_condition=self.command_completion_cond,
+            command_timeout=self.command_timeout,
+            get_id=lambda: self.command_in_progress,
+            update_id=lambda name: setattr(self, "command_in_progress", name),
+            update_name=lambda name: setattr(
+                self, "command_in_progress", name
+            ),
+            clear=lambda _: setattr(self, "command_in_progress", ""),
+            get_name=lambda: self.command_in_progress,
+            gpm_unknown_dishes=self.gpm_unknown_dishes,
+            dishln_gpm_cmd_exe_data=self.dishln_gpm_cmd_exe_data,
+            is_already_assigned=self.is_already_assigned,
+            default_gpm_version_params=self.get_default_gpm_version_params(),
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            get_dish_leaf_node_device_names=(
+                self.get_dish_leaf_node_device_names
+            ),
+            get_device=self.get_device,
+            dish_leaf_node_prefix=self.input_parameter.dish_leaf_node_prefix,
+            get_evt_data_manager=lambda: self.event_data_manager,
+            dishln_gpm_lock=self.dishln_gpm_lock,
+            global_pointing_model_status=self.global_pointing_model_status,
+            reset_gpm_data=self.reset_gpm_data,
+        )
 
     def set_stow_mode(
         self, argin: str, task_callback: Callable, task_abort_event
@@ -1263,23 +1245,35 @@ class CNComponentManagerMid(CNComponentManager):
                     self.command_in_progress,
                     self._dish_vcc_command_status,
                 )
-                if self.gpm_unknown_dishes and not self.command_in_progress:
+            # pylint: disable=consider-using-with
+            if not self.dishln_gpm_lock.acquire(blocking=False):
+                self.logger.debug(
+                    "dishln_gpm_lock is already acquired."
+                    " Skipping Set GPM execution."
+                )
+                return
+
+            try:
+                if (
+                    self.gpm_unknown_dishes
+                    and not self.dishln_gpm_cmd_exe_data
+                ):
                     if (
                         self._dish_vcc_command_status
                         == DishConfigStatus.COMPLETED
                     ):
                         self.logger.info(
-                            "Restart phase: Invoking Set GPM command on:  %s",
+                            "Restart phase: Invoking Set GPM command on: %s",
                             self.gpm_unknown_dishes,
                         )
                         self.invoke_set_gpm_command_callback()
+            finally:
+                self.dishln_gpm_lock.release()
 
     def reset_gpm_data(self) -> None:
         """Reset GPM data"""
 
         self.logger.debug("Resetting SetGlobalPointingModel data")
-        self.gpm_version_aggregated_result = ResultCode.UNKNOWN
-        self.number_of_gpm_executed = 0
         self.dishln_gpm_cmd_exe_data = {}
         self.gpm_unknown_dishes = []
         self.command_in_progress = ""

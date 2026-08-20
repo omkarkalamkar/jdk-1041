@@ -81,10 +81,10 @@ ska\_tmc\_centralnode.commands.telescope\_standby\_command module
    :undoc-members:
    :show-inheritance:
 
-ska\_tmc\_centralnode.commands.set\_global\_pointing\_model module
-------------------------------------------------------------------
+ska\_tmc\_centralnode.refactored_commands.set\_gpm.set\_gpm\_command module
+---------------------------------------------------------------------------
 
-.. automodule:: ska_tmc_centralnode.commands.set_global_pointing_model
+.. automodule:: ska_tmc_centralnode.refactored_commands.set_gpm.set_gpm_command
    :members:
    :undoc-members:
    :show-inheritance:
