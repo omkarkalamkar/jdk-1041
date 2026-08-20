@@ -15,14 +15,9 @@ from ska_tango_testing.mock.placeholders import Anything
 from ska_tmc_common import DevFactory, FaultType
 from ska_tmc_common.device_info import SubArrayDeviceInfo
 from ska_tmc_common.exceptions import CommandNotAllowed
-from ska_tmc_common.test_helpers.helper_adapter_factory import (
-    HelperAdapterFactory,
-)
 from tango import DevState
 
-from ska_tmc_centralnode.commands.assign_resources_command_mid import (
-    AssignResourcesMid,
-)
+from ska_tmc_centralnode.model.input import InputParameterMid
 from ska_tmc_centralnode.utils.json_validator_decorator import (
     assign_validate_json_args,
 )
@@ -324,29 +319,35 @@ def test_assign_resources_command_with_mkt_ids_ok(
 
 
 def test_assign_resources_command_fail_subarray(
-    tango_context, task_callback, set_mid_sdp_csp_admin_modes
+    tango_context, task_callback, json_factory, set_mid_sdp_csp_admin_modes
 ):
-    cm, start_time = create_cm()
+    cm, start_time = create_cm(_input_parameter=InputParameterMid(None))
     elapsed_time = time.time() - start_time
     logger.info(
-        "checked %s devices in %s", len(cm.checked_devices), elapsed_time
+        "checked %s devices in %s", len(cm.checked_devices), str(elapsed_time)
     )
+    sub_mock = mock.Mock(
+        **{"invoke_command.side_effect": Exception("command failed")}
+    )
+    attrs = {"get_or_create_adapter.return_value": sub_mock}
 
-    adapter_factory = HelperAdapterFactory()
+    helper_adapter_factory = mock.Mock(**attrs)
 
     # include exception in AssignResources command
     attrs = {"AssignResources.side_effect": Exception}
-    subarrayMock = mock.Mock(**attrs)
-    adapter_factory.get_or_create_adapter(
-        MID_SUBARRAY_DEVICE, proxy=subarrayMock
+    assign_input_str = json_factory("command_AssignResources")
+    cm.adapter_factory = helper_adapter_factory
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
     )
-
-    assign_input_str = get_assign_input_str()
-    assign_res_command = AssignResourcesMid(
-        cm, adapter_factory=adapter_factory, logger=logger
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
     )
-    (res_code, _) = assign_res_command.do(assign_input_str)
-    assert res_code == ResultCode.FAILED
+    result = task_callback.assert_against_call(status=TaskStatus.COMPLETED)
+    assert ResultCode.FAILED == result["result"][0]
+    assert "command failed" in result["result"][1]
 
 
 def test_telescope_assign_resources_command_empty_input_json(
@@ -446,9 +447,7 @@ def test_assign_resources_command_already_assigned(
 
     cm.is_dish_vcc_config_set = True
     cm.is_command_allowed("AssignResources")
-    adapter_factory = HelperAdapterFactory()
 
-    assign_res_command = AssignResourcesMid(cm, adapter_factory, logger=logger)
     # SKA001 is assigned to Subarray1
     for devInfo in cm.devices:
         if isinstance(devInfo, SubArrayDeviceInfo):
@@ -458,8 +457,18 @@ def test_assign_resources_command_already_assigned(
 
     # Invoke AssignResources to assign already allocated resource - dish0001
     assign_input_str = get_assign_input_str()
-    (res_code, _) = assign_res_command.do(assign_input_str)
-    assert res_code == ResultCode.FAILED
+    cm.assign_resources(
+        assign_input_str,
+        task_callback=task_callback,
+        task_abort_event=threading.Event(),
+    )
+    task_callback.assert_against_call(
+        call_kwargs={"status": TaskStatus.IN_PROGRESS}
+    )
+    task_callback.assert_against_call(
+        status=TaskStatus.COMPLETED,
+        result=(ResultCode.FAILED, "Dish SKA001 is already allocated"),
+    )
 
 
 def check_if_subarray_is_available(cm):

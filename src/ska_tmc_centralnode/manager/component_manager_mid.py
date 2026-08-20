@@ -19,15 +19,12 @@ from ska_tango_base.commands import ResultCode
 from ska_tango_base.faults import StateModelError
 from ska_tmc_common import AdapterType
 from ska_tmc_common.enum import DishMode, LivelinessProbeType
-from ska_tmc_common.exceptions import CommandNotAllowed
+from ska_tmc_common.exceptions import (
+    CommandNotAllowed,
+    SubarrayNotPresentError,
+)
 from tango import DevState
 
-from ska_tmc_centralnode.commands.assign_resources_command_mid import (
-    AssignResourcesMid,
-)
-from ska_tmc_centralnode.commands.release_resources_command_mid import (
-    ReleaseResourcesMid,
-)
 from ska_tmc_centralnode.commands.stow_antennas_command import SetStowMode
 from ska_tmc_centralnode.input_validator import (
     AssignResourceValidator,
@@ -43,6 +40,12 @@ from ska_tmc_centralnode.manager.aggregators import (
 )
 from ska_tmc_centralnode.manager.component_manager import CNComponentManager
 from ska_tmc_centralnode.model.enum import DishConfigStatus
+from ska_tmc_centralnode.refactored_commands.assignresources import (
+    ArrayLayoutContext,
+    CommandInProgressContext,
+    MidAssignResourcesContext,
+    ObsStateContext,
+)
 from ska_tmc_centralnode.refactored_commands.load_dish_cfg.contexts import (
     DeviceContext,
     LoadDishCfgCommandContext,
@@ -52,6 +55,10 @@ from ska_tmc_centralnode.refactored_commands.load_dish_cfg.contexts import (
 # pylint:disable=line-too-long
 from ska_tmc_centralnode.refactored_commands.load_dish_cfg.load_dish_config_command import (
     LoadDishCfg,
+)
+from ska_tmc_centralnode.refactored_commands.releaseresources import (
+    MidReleaseResourcesContext,
+    ReleaseResourcesMid,
 )
 from ska_tmc_centralnode.refactored_commands.set_gpm.contexts import GPMContext
 from ska_tmc_centralnode.refactored_commands.set_gpm.set_gpm_command import (
@@ -65,6 +72,10 @@ from ska_tmc_centralnode.utils.constants import (
     DISH_VCC_VALIDATION_RESULT_STATUS,
     MID_CSP_MLN_DEVICE,
 )
+
+from ..refactored_commands.assignresources import assign_resources_command_mid
+
+AssignResourcesMid = assign_resources_command_mid.AssignResourcesMid
 
 # pylint:disable=too-many-instance-attributes
 # pylint:disable=too-many-arguments
@@ -1384,6 +1395,52 @@ class CNComponentManagerMid(CNComponentManager):
             )
         return argin, exception_msg
 
+    def _get_assign_context(self) -> MidAssignResourcesContext:
+        """Build MidAssignResourcesContext bound to this component manager.
+
+        :return: Runtime context for AssignResources command execution.
+        :rtype: MidAssignResourcesContext
+        """
+        return MidAssignResourcesContext(
+            command_completion_condition=self.command_completion_cond,
+            command_timeout=self.command_timeout,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
+            ),
+            array_layout_ctx=ArrayLayoutContext(
+                update_url=lambda url: setattr(self, "array_layout_url", url),
+                get_default_url=lambda: self.default_array_layout_url,
+            ),
+            obs_state_ctx=ObsStateContext(get=self.get_subarray_obsstate),
+            input_parameter=self.input_parameter,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            log_state=self.log_state,
+            subarray_trl_prefix=self.subarray_trl_prefix,
+            is_already_assigned=self.is_already_assigned,
+        )
+
+    def _get_release_context(self) -> MidReleaseResourcesContext:
+        """Build MidReleaseResourcesContext bound to this component manager."""
+        return MidReleaseResourcesContext(
+            command_completion_condition=self.command_completion_cond,
+            cmd_inprogress_ctx=CommandInProgressContext(
+                update_name=lambda name: setattr(
+                    self, "command_in_progress", name
+                ),
+                clear=lambda _: setattr(self, "command_in_progress", ""),
+                get_name=lambda: self.command_in_progress,
+            ),
+            command_timeout=self.command_timeout,
+            input_parameter=self.input_parameter,
+            update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
+            obs_state_ctx=ObsStateContext(get=self.get_subarray_obsstate),
+            subarray_trl_prefix=self.subarray_trl_prefix,
+        )
+
     # pylint: disable=unexpected-keyword-arg
     def assign_resources(
         self, argin, task_callback: TaskCallbackType, task_abort_event
@@ -1431,9 +1488,9 @@ class CNComponentManagerMid(CNComponentManager):
                     result=(ResultCode.NOT_ALLOWED, err_msg),
                 )
             assign_resources_command_object = AssignResourcesMid(
-                self,
-                adapter_factory=self.adapter_factory,
+                adapter_provider=self.adapter_factory,
                 logger=self.logger,
+                command_runtime_context=self._get_assign_context(),
             )
             assign_resources_command_object.subarray_id = self.get_subarray_id(
                 argin
@@ -1444,13 +1501,17 @@ class CNComponentManagerMid(CNComponentManager):
                 command_name="AssignResources",
             )
 
-            return assign_resources_command_object.assign_resources(
+            return assign_resources_command_object.execute(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
 
-        except (StateModelError, CommandNotAllowed) as exception:
+        except (
+            StateModelError,
+            CommandNotAllowed,
+            SubarrayNotPresentError,
+        ) as exception:
             self.logger.exception(
                 "Exception occurred while processing " + "assignresource: %s ",
                 exception,
@@ -1514,7 +1575,9 @@ class CNComponentManagerMid(CNComponentManager):
         """
         try:
             release_resources_command_object = ReleaseResourcesMid(
-                self, adapter_factory=self.adapter_factory, logger=self.logger
+                adapter_provider=self.adapter_factory,
+                logger=self.logger,
+                command_runtime_context=self._get_release_context(),
             )
 
             self.check_availability_for_release(argin)
@@ -1526,13 +1589,17 @@ class CNComponentManagerMid(CNComponentManager):
                 subarray_id=release_resources_command_object.subarray_id,
                 command_name="ReleaseResources",
             )
-            return release_resources_command_object.release_resources(
+            return release_resources_command_object.execute(
                 argin=argin,
                 task_callback=task_callback,
                 task_abort_event=task_abort_event,
             )
 
-        except (StateModelError, CommandNotAllowed) as exception:
+        except (
+            StateModelError,
+            CommandNotAllowed,
+            SubarrayNotPresentError,
+        ) as exception:
             self.logger.exception(
                 "Exception occurred while processing "
                 + "releaseresource: %s ",
