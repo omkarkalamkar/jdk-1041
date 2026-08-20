@@ -141,6 +141,14 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
                 self.subarray_id
             ],
         )
+        self.logger.debug(
+            "Command %s: Auto-recovery enabled? %s, %s",
+            self.context.command_id,
+            self.is_auto_recovery_enabled,
+            self.command_runtime_context.get_assigned_subsystems[
+                self.subarray_id
+            ],
+        )
         return (
             "mccs"
             in self.command_runtime_context.get_assigned_subsystems[
