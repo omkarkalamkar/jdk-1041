@@ -84,7 +84,7 @@ class GPMRequest:
         self.data = data
 
     @classmethod
-    def from_json(cls, argin: str) -> "GPMRequest":
+    def from_json(cls, argin: str) -> dict:
         """Parse JSON input into a Global pointing model request."""
         try:
             return json.loads(argin)

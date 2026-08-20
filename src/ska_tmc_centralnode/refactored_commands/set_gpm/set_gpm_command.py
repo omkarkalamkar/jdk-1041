@@ -170,9 +170,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
 
         return callback
 
-    def _build_gpm_plan(
-        self, gpm_request: GPMRequest, gpm_files=None
-    ) -> GPMPlan:
+    def _build_gpm_plan(self, gpm_request: dict, gpm_files=None) -> GPMPlan:
         """Build the SetGlobalPointingModel execution plan.
 
         :param gpm_request: SetGlobalPointingModel request data.
@@ -206,8 +204,8 @@ class SetGlobalPointingModel(BaseTMCCommand):
             self.error_message = "GPM Telmodel paths not set."
             self.logger.exception("%s:  %s", self.error_message, gpm_paths)
             raise ValueError(self.error_message)
-        request = GPMRequest.from_json(self.context.argin)
-        if "receptors" not in request.data:
+        request: dict = GPMRequest.from_json(self.context.argin)
+        if "receptors" not in request:
             ctx = self.command_runtime_context
             self.error_message = "No GPM files found on set GPM parameters."
             gpm_files = self.get_gpm_files(ctx.default_gpm_version_params)
