@@ -127,7 +127,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         """
         command_input = self._plan.mccs_payload if self._plan else ""
         return DeviceCommand(
-            self.mccs_mln_adapter.dev_name,
+            self.command_runtime_context.mccs_mln_dev_name,
             self.command_name,
             AdapterType.MCCS_MASTER_LEAF_NODE,
             command_input,

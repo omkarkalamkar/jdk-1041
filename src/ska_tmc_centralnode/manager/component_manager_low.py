@@ -523,6 +523,7 @@ class CNComponentManagerLow(CNComponentManager):
             set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
             log_state=self.log_state,
             subarray_trl_prefix=self.subarray_trl_prefix,
+            mccs_mln_dev_name=self.input_parameter.mccs_mln_dev_name,
         )
 
     def _get_release_context(self) -> LowReleaseResourcesContext:
@@ -551,6 +552,7 @@ class CNComponentManagerLow(CNComponentManager):
                 lambda: self.subsystem_assigned_per_subarray
             ),
             set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
+            mccs_mln_dev_name=self.input_parameter.mccs_mln_dev_name,
         )
 
     # pylint: disable=unexpected-keyword-arg

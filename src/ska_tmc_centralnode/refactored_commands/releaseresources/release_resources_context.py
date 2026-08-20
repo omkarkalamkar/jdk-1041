@@ -56,6 +56,7 @@ class LowReleaseResourcesContext(ReleaseResourcesContext):
     pop_subsystem_assigned_per_subarray_id: Callable
     set_assigned_subsystems: Callable
     get_assigned_subsystems: Callable
+    mccs_mln_dev_name: str
 
     def make_strategy(
         self, logger: logging.Logger

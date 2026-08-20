@@ -69,6 +69,7 @@ class LowAssignResourcesContext(AssignResourcesContext):
     get_assigned_subsystems: Callable
     set_assigned_subsystems: Callable
     is_auto_recovery_enabled: bool
+    mccs_mln_dev_name: str
 
     def make_strategy(
         self, logger: logging.Logger
