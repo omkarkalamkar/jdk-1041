@@ -29,13 +29,7 @@ from ska_tmc_centralnode.utils.constants import (
 class InputParameter:
     """Class for Input parameter this class is used to distinguish between
     between low and mid telescope"""
-    _instance = None
 
-    def __new__(cls, changed_callback: Optional[Callable]=None):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-    
     def __init__(self, changed_callback: Optional[Callable]) -> None:
         self._changed_callback: Optional[Callable] = changed_callback
         self._subarray_dev_names: List[str] = []
