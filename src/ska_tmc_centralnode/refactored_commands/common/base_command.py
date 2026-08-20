@@ -13,7 +13,7 @@ from ska_tmc_common import AdapterFactory
 from ska_tmc_common.v4.command_context import CommandRuntimeContext
 from ska_tmc_common.v4.tmc_command import BaseTMCCommand
 
-from ..assignresources import AssignResourcesContext
+from ..assignresources.assign_resources_context import AssignResourcesContext
 
 LOGGER = logging.getLogger(__name__)
 ADAPTER_INIT_ERROR = "Exception in creating adapter for %s, Exception: %s"
