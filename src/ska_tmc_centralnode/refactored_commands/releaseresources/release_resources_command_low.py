@@ -136,10 +136,13 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             "Command %s: MCCS required for subarray %s? %s",
             self.context.command_id,
             self.subarray_id,
-            "mccs"
-            in self.command_runtime_context.get_assigned_subsystems()[
-                self.subarray_id
-            ],
+            self.command_runtime_context.get_assigned_subsystems(),
+        )
+        self.logger.debug(
+            "Assigned subsystems dict: %s | subarray_id=%r (%s)",
+            dict(self.command_runtime_context.get_assigned_subsystems()),
+            self.subarray_id,
+            type(self.subarray_id),
         )
         self.logger.debug(
             "Command %s: Auto-recovery enabled? %s, %s",
