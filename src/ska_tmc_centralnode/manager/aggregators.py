@@ -406,7 +406,7 @@ class TelescopeAvailabilityAggregatorLow(TelescopeAvailabilityAggregator):
                 "mccs_master_leaf_node"
             ] = self._component_manager.mccs_mln_availability
 
-    def _update_availability(
+    def update_availability(
         self,
         device: DeviceInfo,
         telescope_availability: Dict[str, Dict[str, bool] | bool],
