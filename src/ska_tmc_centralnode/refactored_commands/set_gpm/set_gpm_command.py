@@ -399,7 +399,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
 
     # pylint: enable=arguments-differ
 
-    def _build_gpm_status_message(self, ctx) -> str:
+    def _build_gpm_status_message(self, ctx) -> dict | str:
         """Update GPM status and build the failure message.
 
         Skips statuses for unreachable or assigned dishes.
@@ -431,7 +431,7 @@ class SetGlobalPointingModel(BaseTMCCommand):
         )
         if prefix:
             return prefix + str(filtered_dishes)
-        return str(filtered_dishes)
+        return filtered_dishes
 
     def filter_failed_dish_data(self, data: dict) -> dict:
         """Filter failed dish data.
