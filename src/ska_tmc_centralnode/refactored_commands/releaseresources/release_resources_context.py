@@ -54,6 +54,7 @@ class LowReleaseResourcesContext(ReleaseResourcesContext):
 
     is_auto_recovery_enabled: bool
     pop_subsystem_assigned_per_subarray_id: Callable
+    set_assigned_subsystems: Callable
     get_assigned_subsystems: Callable
 
     def make_strategy(
@@ -61,3 +62,7 @@ class LowReleaseResourcesContext(ReleaseResourcesContext):
     ) -> LowReleaseResourcesStrategy:
         """Create LOW ReleaseResources strategy."""
         return LowReleaseResourcesStrategy(logger)
+
+    def apply_plan(self, plan):
+        """Apply the plan to the context."""
+        self.set_assigned_subsystems(plan.subarray_id, plan.subsystems)
