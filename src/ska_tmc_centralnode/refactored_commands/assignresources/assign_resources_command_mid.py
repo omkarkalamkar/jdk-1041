@@ -64,7 +64,9 @@ class AssignResourcesMid(BaseAssignResourcesCN):
         request = AssignResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin, remove_transaction_id=True)
-
+        self.command_runtime_context.update_abort_evt(
+            self.context.task_abort_event
+        )
         self._plan: MidAssignResourcesPlan = self._strategy.build_plan(request)
         self.subarray_id = self._plan.subarray_id
 

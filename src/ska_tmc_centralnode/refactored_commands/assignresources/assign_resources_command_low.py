@@ -69,8 +69,11 @@ class AssignResourcesLow(BaseAssignResourcesCN):
         request = AssignResourcesPreparation(
             self.command_runtime_context, self.logger
         ).prepare_request(self.context.argin)
-
+        self.command_runtime_context.update_abort_evt(
+            self.context.task_abort_event
+        )
         self._plan: LowAssignResourcesPlan = self._strategy.build_plan(request)
+        self.command_runtime_context.apply_plan(self._plan)
         self.subarray_id = self._plan.subarray_id
         # apply_plan propagates subarray_id to context and subsystems to cm.
 
