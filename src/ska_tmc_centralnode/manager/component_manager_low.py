@@ -517,7 +517,9 @@ class CNComponentManagerLow(CNComponentManager):
             input_parameter=self.input_parameter,
             update_abort_evt=lambda evt: setattr(self, "abort_event", evt),
             is_auto_recovery_enabled=self.is_auto_recovery_enabled,
-            get_assigned_subsystems=self.subsystem_assigned_per_subarray,
+            get_assigned_subsystems=(
+                lambda: self.subsystem_assigned_per_subarray
+            ),
             set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
             log_state=self.log_state,
             subarray_trl_prefix=self.subarray_trl_prefix,
