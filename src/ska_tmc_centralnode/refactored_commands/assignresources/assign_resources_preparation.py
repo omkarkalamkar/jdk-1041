@@ -56,6 +56,13 @@ class AssignResourcesPreparation:
         return AssignResourcesRequest(request_data)
 
     def _apply_array_layout(self, request_data: dict) -> None:
+        """Apply array layout from request or default if not provided.
+        If the request contains a 'telmodel' field, it is used to update the
+        array layout context. If not, the default array layout is fetched from
+        the context and used to update the array layout context. If neither is
+        available, no action is taken. If the default array layout is not a
+        dictionary, an InvalidArrayLayoutError is raised.
+        """
         if "telmodel" in request_data:
             array_url = request_data["telmodel"]
             self.command_runtime_context.array_layout_ctx.update_url(array_url)

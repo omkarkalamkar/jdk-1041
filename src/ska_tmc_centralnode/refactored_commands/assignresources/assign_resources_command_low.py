@@ -36,8 +36,11 @@ class AssignResourcesLow(BaseAssignResourcesCN):
             json.
         :type command_runtime_context: LowAssignResourcesContext
         :param adapter_provider: Instance of adapter factory to fetch
-            requried adapters.
+            required adapters.
         :type adapter_provider: AdapterFactory
+        :param is_auto_recovery_enabled: Flag indicating
+            if auto-recovery is enabled.
+        :type is_auto_recovery_enabled: bool
         :param logger: Instance of logger.
         :type logger: logging.Logger
         """
@@ -50,7 +53,8 @@ class AssignResourcesLow(BaseAssignResourcesCN):
         self.is_auto_recovery_enabled = is_auto_recovery_enabled
 
     def pre_process(self, argin=None) -> None:
-        """Log entry into AssignResources."""
+        """Log entry into AssignResources and update command
+        in progress context."""
 
         self.command_runtime_context.cmd_inprogress_ctx.update_name(
             self.__class__.__name__
@@ -109,9 +113,8 @@ class AssignResourcesLow(BaseAssignResourcesCN):
 
     def _build_mccs_device_command(self) -> DeviceCommand:
         """Method to build the MCCS Master Leaf Node device command.
-
-        LOW-only, so kept local rather than on the shared
-        BaseAssignResourcesCN layer.
+        return: DeviceCommand object for MCCS Master Leaf Node.
+        rtype: DeviceCommand
         """
         command_input = self._plan.mccs_payload if self._plan else ""
         return DeviceCommand(
@@ -122,7 +125,11 @@ class AssignResourcesLow(BaseAssignResourcesCN):
         )
 
     def _mccs_required(self) -> bool:
-        """Whether MCCS should be assigned as part of this command."""
+        """Whether MCCS should be assigned as part of this command.
+        :return: True if MCCS is assigned to the subarray and auto-recovery
+            is not enabled, False otherwise.
+        :rtype: bool
+        """
         return (
             "mccs"
             in self.command_runtime_context.get_assigned_subsystems()[

@@ -90,7 +90,6 @@ class BaseCNCommand(BaseTMCCommand):
         :type result: str
         :param timestamp: timestamp, defaults to now if not provided.
         :type timestamp: Optional[datetime]
-        # Removed data_type parameter as per recent changes
         """
         if timestamp is None:
             timestamp = datetime.now()
@@ -117,9 +116,8 @@ class BaseCNCommand(BaseTMCCommand):
 
     def get_subarray_name(self, subarray_id: int) -> str:
         """Resolve and store the adapter for the target subarray.
-
-        :raises ValueError: if the subarray does not exist or has no
-            responsive adapter.
+        return: The device name of the target subarray adapter.
+        rtype: str
         """
         subarray_adapter_dev_name = (
             self.command_runtime_context.subarray_trl_prefix

@@ -70,15 +70,10 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
 
     def build_device_commands(self) -> None:
         """Resolve adapters and populate the device command list for LOW.
-
-        When release_all is False, no device commands are added. This
-        matches the original code exactly: unlike MID, LOW did not fail
-        explicitly on partial release — it silently skipped invocation
-        and still proceeded to wait for the subarray to reach EMPTY. That
-        no-op-but-still-wait behaviour is preserved here: leaving
-        context.device_commands empty means is_complete() is satisfied
-        trivially by 0 results == 0 device_commands, and completion still
-        hinges on is_state_complete() reaching ObsState.EMPTY.
+        If the plan indicates that all resources should be released, this
+        method will create a DeviceCommand for the subarray and,
+        if MCCS is assigned and auto-recovery is not enabled,
+        a DeviceCommand for the MCCS Master Leaf Node.
         """
 
         if self._plan.release_all:
@@ -111,12 +106,8 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
     def _build_mccs_device_command(self) -> DeviceCommand:
         """Method to build the ReleaseAllResources device command for the
         MCCS Master Leaf Node.
-
-        Sends plan.mccs_payload directly. The original code did
-        json.loads(self._plan.mccs_payload) immediately followed by
-        json.dumps(...) with no mutation in between — a pure round trip —
-        so this sends the already-serialized string as-is, same
-        simplification already applied to AssignResources.
+        return: DeviceCommand object for MCCS Master Leaf Node.
+        rtype: DeviceCommand
         """
         command_input = self._plan.mccs_payload if self._plan else ""
         return DeviceCommand(
@@ -127,7 +118,11 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
         )
 
     def _mccs_required(self) -> bool:
-        """Whether MCCS should be released as part of this command."""
+        """Whether MCCS should be released as part of this command.
+        :return: True if MCCS is assigned to the subarray and auto-recovery
+            is not enabled, False otherwise.
+        :rtype: bool
+        """
         self.logger.debug(
             "Command %s: Auto-recovery enabled? %s, %s",
             self.context.command_id,

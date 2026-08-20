@@ -28,13 +28,7 @@ class ArrayLayoutContext:
 
 @dataclass(kw_only=True)
 class AssignResourcesContext(CommandRuntimeContext):
-    """Runtime context required for AssignResources execution.
-
-    Inherits CommandRuntimeContext so that command_completion_condition
-    and command_timeout are available to BaseTMCCommand's
-    initialize()/create_completion_context(), which read them directly
-    off command_runtime_context.
-    """
+    """Runtime context required for AssignResources execution."""
 
     cmd_inprogress_ctx: CommandInProgressContext
     array_layout_ctx: ArrayLayoutContext

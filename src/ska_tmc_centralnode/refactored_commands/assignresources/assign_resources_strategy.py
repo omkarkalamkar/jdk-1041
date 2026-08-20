@@ -112,6 +112,8 @@ class LowAssignResourcesStrategy(AssignResourcesStrategy):
     def build_plan(
         self, request: AssignResourcesRequest
     ) -> LowAssignResourcesPlan:
+        """Build a typed, fully-serialized execution plan
+        from a parsed request."""
         try:
             sb_id: str = ""
             payload_data = request.copy_data()

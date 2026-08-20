@@ -20,12 +20,7 @@ from .release_resources_strategy import (
 
 @dataclass(kw_only=True)
 class ReleaseResourcesContext(CommandRuntimeContext):
-    """Runtime context required for ReleaseResources execution.
-
-    Inherits CommandRuntimeContext so that command_completion_condition
-    and command_timeout are available to BaseTMCCommand — same fix
-    applied to AssignResourcesContext.
-    """
+    """Runtime context required for ReleaseResources execution."""
 
     update_abort_evt: Callable
     input_parameter: InputParameterMid | InputParameterLow

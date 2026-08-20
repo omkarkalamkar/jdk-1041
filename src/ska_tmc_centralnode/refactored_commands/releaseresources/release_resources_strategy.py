@@ -37,6 +37,13 @@ class MidReleaseResourcesStrategy(ReleaseResourcesStrategy):
     def build_plan(
         self, request: ReleaseResourcesRequest
     ) -> MidReleaseResourcesPlan:
+        """Build a typed, fully-serialized execution plan from a parsed request
+        :param request: Parsed ReleaseResourcesRequest object.
+        :type request: ReleaseResourcesRequest
+        :return: MidReleaseResourcesPlan object containing the execution plan.
+        :rtype: MidReleaseResourcesPlan
+        :raises ReleaseResourcesPrepError: If required keys are missing or
+            an exception occurs during plan building."""
         try:
             payload = request.copy_data()
             subarray_id = request.subarray_id
@@ -69,6 +76,14 @@ class LowReleaseResourcesStrategy(ReleaseResourcesStrategy):
     def build_plan(
         self, request: ReleaseResourcesRequest
     ) -> LowReleaseResourcesPlan:
+        """Build a typed, fully-serialized execution plan
+        from a parsed request.
+        :param request: Parsed ReleaseResourcesRequest object.
+        :type request: ReleaseResourcesRequest
+        :return: LowReleaseResourcesPlan object containing the execution plan.
+        :rtype: LowReleaseResourcesPlan
+        :raises ReleaseResourcesPrepError: If required keys are missing or
+            an exception occurs during plan building."""
         try:
             payload = request.copy_data()
             subarray_id = request.subarray_id

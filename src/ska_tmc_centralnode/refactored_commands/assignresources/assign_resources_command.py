@@ -68,9 +68,8 @@ class BaseAssignResourcesCN(BaseCNCommand):
 
     def _build_subarray_device_command(self) -> DeviceCommand:
         """Method to build the TM Subarray device command.
-
-        Shared by Mid and Low: in both telescopes the single assembled
-        plan payload is sent to the target Subarray device.
+        return: DeviceCommand object for TM Subarray.
+        rtype: DeviceCommand
         """
         command_input = self._plan.payload if self._plan else ""
         return DeviceCommand(

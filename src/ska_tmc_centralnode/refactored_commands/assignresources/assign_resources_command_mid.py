@@ -45,7 +45,8 @@ class AssignResourcesMid(BaseAssignResourcesCN):
         self.receptor_ids: list = []
 
     def pre_process(self, argin=None) -> None:
-        """Log entry into AssignResources."""
+        """Log entry into AssignResources and
+        update command in progress context."""
         self.command_runtime_context.cmd_inprogress_ctx.update_name(
             self.__class__.__name__
         )

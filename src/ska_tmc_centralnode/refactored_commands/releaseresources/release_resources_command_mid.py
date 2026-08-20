@@ -63,10 +63,6 @@ class ReleaseResourcesMid(BaseReleaseResourcesCN):
         """Resolve the target subarray adapter and populate the device
         command list.
 
-        Partial release is not supported for MID: matches the original
-        code's explicit failure when release_all is False. Raised here,
-        after adapter resolution, to preserve the original ordering
-        where an adapter failure surfaced before this check.
 
         :raises ValueError: if release_all is False.
         """
