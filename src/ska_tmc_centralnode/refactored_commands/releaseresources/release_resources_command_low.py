@@ -90,7 +90,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             )
 
             self._assigned_subsystem = (
-                self.command_runtime_context.get_assigned_subsystems[
+                self.command_runtime_context.get_assigned_subsystems()[
                     self.subarray_id
                 ]
             )
@@ -137,7 +137,7 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             self.context.command_id,
             self.subarray_id,
             "mccs"
-            in self.command_runtime_context.get_assigned_subsystems[
+            in self.command_runtime_context.get_assigned_subsystems()[
                 self.subarray_id
             ],
         )
@@ -145,13 +145,13 @@ class ReleaseResourcesLow(BaseReleaseResourcesCN):
             "Command %s: Auto-recovery enabled? %s, %s",
             self.context.command_id,
             self.is_auto_recovery_enabled,
-            self.command_runtime_context.get_assigned_subsystems[
+            self.command_runtime_context.get_assigned_subsystems()[
                 self.subarray_id
             ],
         )
         return (
             "mccs"
-            in self.command_runtime_context.get_assigned_subsystems[
+            in self.command_runtime_context.get_assigned_subsystems()[
                 self.subarray_id
             ]
             and not self.is_auto_recovery_enabled

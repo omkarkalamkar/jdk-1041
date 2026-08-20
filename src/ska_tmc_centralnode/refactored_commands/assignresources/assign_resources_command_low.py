@@ -126,7 +126,7 @@ class AssignResourcesLow(BaseAssignResourcesCN):
         """Whether MCCS should be assigned as part of this command."""
         return (
             "mccs"
-            in self.command_runtime_context.get_assigned_subsystems[
+            in self.command_runtime_context.get_assigned_subsystems()[
                 self.subarray_id
             ]
             and not self.is_auto_recovery_enabled

@@ -545,7 +545,9 @@ class CNComponentManagerLow(CNComponentManager):
             pop_subsystem_assigned_per_subarray_id=(
                 self.pop_subsystem_assigned_per_subarray_id
             ),
-            get_assigned_subsystems=self.subsystem_assigned_per_subarray,
+            get_assigned_subsystems=(
+                lambda: self.subsystem_assigned_per_subarray
+            ),
             set_assigned_subsystems=self.set_subsystem_assigned_per_subarray,
         )
 
