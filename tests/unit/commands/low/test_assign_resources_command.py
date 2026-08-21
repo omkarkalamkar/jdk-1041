@@ -331,7 +331,6 @@ def test_low_assign_resources_subarray_not_found(
 ):
     """Test assign resources when subarray adapter not found"""
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
-    # adapter_factory = HelperAdapterFactory()
 
     assign_input_str = json_factory("assign_resource_low")
     json_arg = json.loads(assign_input_str)
@@ -345,12 +344,9 @@ def test_low_assign_resources_subarray_not_found(
         task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
-        status=TaskStatus.IN_PROGRESS,
-    )
-    task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED,
+        status=TaskStatus.REJECTED,
         result=(
-            ResultCode.FAILED,
+            ResultCode.NOT_ALLOWED,
             "Subarray Id 99 is not existing!",
         ),
     )

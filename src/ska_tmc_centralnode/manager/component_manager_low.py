@@ -560,7 +560,7 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
         except Exception as exception:
             error_msg = (
                 "Exception occurred while updating subarray"
-                f"and pss beams mapping: {exception}"
+                f" and pss beams mapping: {exception}"
             )
             self.logger.error(error_msg)
             raise Exception(error_msg) from exception

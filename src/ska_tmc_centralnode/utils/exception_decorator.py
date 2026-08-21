@@ -5,7 +5,7 @@ import threading
 from ska_control_model import ResultCode, TaskStatus
 from ska_tango_base.faults import StateModelError
 from ska_tango_base.type_hints import TaskCallbackType
-from ska_tmc_common import CommandNotAllowed
+from ska_tmc_common import CommandNotAllowed, SubarrayNotPresentError
 
 from ..manager.component_manager import CNComponentManager
 
@@ -23,7 +23,11 @@ def exception_handler(command_name: str):
         ):
             try:
                 func(self, argin, task_callback, task_abort_event)
-            except (StateModelError, CommandNotAllowed) as exception:
+            except (
+                StateModelError,
+                CommandNotAllowed,
+                SubarrayNotPresentError,
+            ) as exception:
                 self.logger.exception(
                     "Exception occurred while processing " + "%s: %s ",
                     command_name,

@@ -48,6 +48,8 @@ def assign_resources_low(
             set(pss_beams).intersection(assigned_pss_beams)
         )
         assert unique_id2[0] == (
+            "Exception occurred while updating subarray "
+            "and pss beams mapping: "
             f"PSS beams: {conflicting_pss_beams} already "
             "assigned to another subarray"
         )
