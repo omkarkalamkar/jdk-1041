@@ -268,6 +268,6 @@ def test_low_release_resources_subarray_not_found(
         status=TaskStatus.COMPLETED,
         result=(
             ResultCode.FAILED,
-            "Subarray Id 99 is not existing!",
+            "Subarray devices not available: low-tmc/subarray/99",
         ),
     )

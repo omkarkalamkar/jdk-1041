@@ -268,6 +268,7 @@ def assert_exception(
     unique_id: tuple,
     exception_msg: str,
     change_event_callbacks: MockTangoEventCallbackGroup,
+    result_code: ResultCode = ResultCode.FAILED,
 ):
     """Assert exceptions in LRCR attribute event."""
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
@@ -275,7 +276,7 @@ def assert_exception(
             unique_id[0],
             json.dumps(
                 (
-                    int(ResultCode.FAILED),
+                    int(result_code),
                     exception_msg,
                 )
             ),

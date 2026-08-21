@@ -60,7 +60,12 @@ def release_resources_unavailable_subarray(
     msg = LOW_SUBARRAY_NOT_AVAILABLE
     if "mid-tmc" in central_node_fqdn:
         msg = MID_SUBARRAY_NOT_AVAILABLE
-    assert_exception(unique_id, msg, change_event_callbacks)
+    assert_exception(
+        unique_id,
+        msg,
+        change_event_callbacks,
+        result_code=ResultCode.NOT_ALLOWED,
+    )
     export_device(db, db_device_info)
     time.sleep(3)
 

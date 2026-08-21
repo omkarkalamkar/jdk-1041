@@ -71,7 +71,12 @@ def assign_resources(
 
     # assert unique_id[0].endswith("AssignResources")
     assert result[0] == ResultCode.QUEUED
-    assert_exception(unique_id, msg, change_event_callbacks)
+    assert_exception(
+        unique_id,
+        msg,
+        change_event_callbacks,
+        result_code=ResultCode.NOT_ALLOWED,
+    )
 
     subarray_proxy.SetDirectObsState(ObsState.EMPTY)
 
