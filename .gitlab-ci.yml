@@ -11,7 +11,8 @@ stages:
   - publish
   - pages
   - scan
-
+  - lifecycle
+  
 join_linting_reports:
   stage: join-reports
   script:
