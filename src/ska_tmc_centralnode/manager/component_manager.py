@@ -143,7 +143,7 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         )
         self.aggregate_value_update_event = Event()
         self.aggregate_process_monitor_thread = PyTangoThread(
-            target=self.aggregate_process_monitor
+            target=self.aggregate_process_monitor, daemon=True
         )
         self.aggregate_process_monitor_thread.start()
         self.event_manager_object: CentralNodeEventManager = (
@@ -279,12 +279,6 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
             self.aggregate_process_manager.shutdown()
             self.logger.debug("Aggregation process stopped")
 
-    def __del__(self) -> None:
-        """shutdown aggregation process"""
-        self.logger.debug("Component destructor called")
-        self.stop_all_process()
-        self.stop()
-
     def cleanup(self) -> None:
         self.stop_all_process()
         self.stop()
@@ -306,9 +300,9 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
                         self.event_manager_object.unsubscribe_event_async(
                             device
                         )
-            except Exception:
+            except Exception as exception:
                 self.logger.exception(
-                    "Failed to unsubscribe event for %s", device
+                    "Failed to unsubscribe event: %s", exception
                 )
 
     def stop(self) -> None:
@@ -696,21 +690,6 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         """
         return json.loads(argin).get("subarray_id")
 
-    def get_command_id(self, unique_id) -> Union[str, None]:
-        """
-        Returns the command id mapped to the given unique_id.
-
-        Args:
-            unique_id: unique id of the command
-
-        Returns:
-            str: command id corresponding to unique_id
-        """
-        for cmd_id, uids in self.command_mapping.items():
-            if unique_id in uids:
-                return cmd_id
-        return None
-
     def validate_subarray_id(self, json_argument: dict) -> None:
         """Validates the subarray id in the assign resources json.
 
@@ -799,15 +778,6 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         subarray_availability = telescope_availability.get(subarray)
         if subarray_availability is False:
             raise Exception(f"Subarray {subarray} is not available.")
-
-    def _publish_signal(self, name: str, value: Any) -> None:
-        """Publish a software-bus signal while
-        tolerating missing bus wiring."""
-        try:
-            setattr(self, name, value)
-        except RuntimeError:
-            # Component managers used without shared bus in tests.
-            pass
 
     def is_command_allowed(self, command_name: str = "") -> bool:
         """Check whether the given command is allowed
