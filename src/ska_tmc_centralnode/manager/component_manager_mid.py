@@ -595,12 +595,14 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             `False`, otherwise.
 
         """
-        count = 0
+        start_time = time.time()
         num_of_dish_values = {}
         # This loop keep checking for kvalueValidationResult values
         # from all dishes which confirm that event is received from
         # all dishes
-        while count <= self.config.dish_config.init_timeout:
+        while (
+            time.time() - start_time
+        ) <= self.config.dish_config.init_timeout:
             try:
                 for dish_name in self.input_parameter.dish_leaf_node_dev_names:
                     if dish_name not in num_of_dish_values:
@@ -621,9 +623,7 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                     return True
             except Exception as e:
                 self.logger.exception("Error %s", str(e))
-            count += 1
             time.sleep(1)
-
         # If Any of the dish leaf node is available
         # execute LoadDishCfg command.
         if len(num_of_dish_values):
