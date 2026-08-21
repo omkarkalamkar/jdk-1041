@@ -262,12 +262,9 @@ def test_low_release_resources_subarray_not_found(
         task_abort_event=threading.Event(),
     )
     task_callback.assert_against_call(
-        status=TaskStatus.IN_PROGRESS,
-    )
-    task_callback.assert_against_call(
-        status=TaskStatus.COMPLETED,
+        status=TaskStatus.REJECTED,
         result=(
-            ResultCode.FAILED,
+            ResultCode.NOT_ALLOWED,
             "Subarray devices not available: low-tmc/subarray/99",
         ),
     )

@@ -347,6 +347,6 @@ def test_low_assign_resources_subarray_not_found(
         status=TaskStatus.REJECTED,
         result=(
             ResultCode.NOT_ALLOWED,
-            "Subarray Id 99 is not existing!",
+            "Subarray devices not available: low-tmc/subarray/99",
         ),
     )
