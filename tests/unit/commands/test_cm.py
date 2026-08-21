@@ -72,7 +72,7 @@ def test_stop():
 
 def test_rejection():
     cm, _ = create_cm()
-    command_not_implement = "Command is not implemented"
+    command_not_implement = "Command is not Implemented"
     status, msg = cm.reset()
     assert status == TaskStatus.REJECTED
     assert msg == "Reset command is not implemented"
