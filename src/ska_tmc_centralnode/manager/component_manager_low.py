@@ -291,6 +291,7 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
                 json_argument.get("interface", None)
                 or self._assign_resources_schema_version
             )
+            json_argument["interface"] = interface
             validate(
                 version=interface,
                 config=json_argument,
@@ -454,9 +455,10 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
             json_argument = json.loads(argin)
             self.validate_subarray_id(json_argument)
             interface = (
-                json_argument.get("interface", None)
-                or self._release_resources_schema_version
+                json_argument.get("interface")
+                or self.release_resources_schema_version
             )
+            json_argument["interface"] = interface
             validate(
                 version=interface,
                 config=json_argument,

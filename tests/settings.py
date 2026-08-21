@@ -157,6 +157,11 @@ LOW_SUBARRAY_NOT_AVAILABLE = (
 MID_SUBARRAY_NOT_AVAILABLE = (
     "Subarray devices not available: ['mid-tmc/subarray/01']"
 )
+GPM_DEFAULT_DATA_SOURCE = (
+    "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
+)
+
+GPM_DEFAULT_FILEPATH = "instrument/ska_mid1/global_pointing_model_data"
 
 
 def telescope_on(
@@ -401,12 +406,8 @@ def _get_cm_mid_config(
             interface=(
                 "https://schema.skao.int/ska-mid-global-pointing-model/1.0"
             ),
-            data_sources_prefix=(
-                "gitlab://gitlab.com/ska-telescope/ska-tmc/ska-tmc-simulators"
-            ),
-            file_path_prefix=(
-                "instrument/ska_mid1/global_pointing_model_data"
-            ),
+            data_sources_prefix=(GPM_DEFAULT_DATA_SOURCE),
+            file_path_prefix=(GPM_DEFAULT_FILEPATH),
             invoke_command_callback=invoke_set_gpm_command_callback,
         ),
         timeout_config=TimeoutConfig(),

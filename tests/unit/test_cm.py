@@ -1,4 +1,4 @@
-"""Module to test common component manager functioanlity."""
+"""Module to test common component manager functionality."""
 import logging
 import time
 from unittest import mock

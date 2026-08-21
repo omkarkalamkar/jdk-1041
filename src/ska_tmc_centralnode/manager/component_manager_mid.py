@@ -425,22 +425,20 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             current_dish_vcc_validation_status.update(
                 updated_validation_status
             )
-        else:
-            # If the event from dish only
-            if MID_CSP_MLN_DEVICE not in updated_validation_status:
-                # Remove dish value from existing value
-                current_dish_vcc_validation_status.pop("dish", None)
-                # Overwrite the results
-                current_dish_vcc_validation_status = updated_validation_status
-                if csp_validation_status:
-                    current_dish_vcc_validation_status.update(
-                        csp_validation_status
-                    )
-            else:
-                # If the event from CSPMLN only
+        elif MID_CSP_MLN_DEVICE not in updated_validation_status:
+            # Remove dish value from existing value
+            current_dish_vcc_validation_status.pop("dish", None)
+            # Overwrite the results
+            current_dish_vcc_validation_status = updated_validation_status
+            if csp_validation_status:
                 current_dish_vcc_validation_status.update(
-                    updated_validation_status
+                    csp_validation_status
                 )
+        else:
+            # If the event from CSPMLN only
+            current_dish_vcc_validation_status.update(
+                updated_validation_status
+            )
         self._dish_vcc_validation_status = json.dumps(
             {
                 key: value
@@ -483,10 +481,11 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
             dish leaf nodes are ready, False otherwise
 
         """
-        count = 0
-        while count <= self.config.dish_config.init_timeout:
+        start_time = time.time()
+        while (
+            time.time() - start_time
+        ) <= self.config.dish_config.init_timeout:
             try:
-                count += 2
                 time.sleep(2)
                 csp_mln_adapter = self.adapter_factory.get_or_create_adapter(
                     self.input_parameter.csp_mln_dev_name,
