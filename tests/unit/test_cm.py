@@ -56,8 +56,7 @@ def test_stop_event_manager(tango_context, caplog):
     )
     error_msg = "Failed to unsubscribe event"
     cm.stop_event_manager()
-
-    assert error_msg in caplog.records[0].message
+    assert error_msg in caplog.records[-1].message
 
 
 def test_stop():
