@@ -34,7 +34,7 @@ def test_device_names():
     assert (
         cm.get_mccs_master_leaf_node_dev_name() == "low-tmc/leaf-node-mccs/0"
     )
-    assert cm.get_mccs_master_dev_name() == "low-mccs/control/0"
+    assert cm.get_mccs_master_dev_name() == "low-mccs/control/control"
 
 
 def test_stop_aggregation_process():
