@@ -898,24 +898,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         self.dishln_gpm_cmd_exe_data = {}
         self.gpm_unknown_dishes = []
         self.command_in_progress = ""
-        if self.command_mapping.get(self.command_id):
-            self.command_mapping.pop(self.command_id)
-
-    def _get_band_dishln_gpm_cmd_data(self, unique_id: str) -> str:
-        """Return Band for the specified dish in unique id
-        Args:
-            unique_id: command unique id
-        Returns:
-            band (str)
-        """
-        band = ""
-        command_mapping = cast(
-            Dict[str, List[Dict[str, str]]], self.command_mapping
-        )
-        for command_data in command_mapping.get(self.command_id, {}):
-            if unique_id in command_data:
-                band = command_data[unique_id]
-        return band
 
     def reset_stow_mode_data(self) -> None:
         """Reset StowMode data"""
@@ -924,8 +906,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
         self.number_of_stow_mode_executed = 0
         self.dishln_stow_mode_cmd_exe_data = {}
         self.command_in_progress = ""
-        if self.command_mapping.get(self.command_id):
-            self.command_mapping.pop(self.command_id)
 
     def get_current_dish_mode_of_dln(self, dish_id: str) -> DishMode:
         """
@@ -946,35 +926,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 break
         dev_info = cast(DeviceInfo, self.component.get_device(dish_dev_name))
         return cast(DishMode, dev_info.dish_mode)
-
-    def check_timeout_for_stow_mode_lrcr_events(self) -> bool:
-        """Check timeout error in dishln_stow_mode_cmd_exe_data dictionary"""
-        for (
-            dish_id,
-            result_code_or_exception,
-        ) in self.dishln_stow_mode_cmd_exe_data.items():
-            if isinstance(result_code_or_exception, str):
-                continue
-            result_code = result_code_or_exception.get("result_code", [])
-            _, message = result_code if len(result_code) == 2 else (None, "")
-            if "timeout" in message.lower():
-                self.logger.debug(
-                    "%s: %s",
-                    dish_id,
-                    result_code_or_exception["result_code"],
-                )
-                self.set_dish_mode_in_stow_mode_cmd_exe_data()
-                self.stow_mode_aggregated_result = False
-                return True
-        return False
-
-    def set_dish_mode_in_stow_mode_cmd_exe_data(self) -> None:
-        """ "Set dish mode in stow mode command execution data dictionary."""
-        for dish_id, data in self.dishln_stow_mode_cmd_exe_data.items():
-            if isinstance(data, dict):
-                data["dish_mode"] = DishMode(
-                    self.get_current_dish_mode_of_dln(dish_id)
-                ).name
 
     def validate_assign_json(self, argin: str) -> Tuple[str, str]:
         """Validates assign resources json
@@ -1077,7 +1028,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
 
         k_value_failed_dishes = {}
         # Execute the command if the input JSON is valid
-        self.logger.debug("Calling component manager assign_resources method")
         receptors = json.loads(argin).get("dish", {}).get("receptor_ids", [])
         k_value_status = json.loads(self.dish_vcc_validation_status)
 
@@ -1100,6 +1050,7 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 status=TaskStatus.REJECTED,
                 result=(ResultCode.NOT_ALLOWED, err_msg),
             )
+            return
         assign_resources_command_object = AssignResourcesMid(
             adapter_provider=self.adapter_factory,
             logger=self.logger,

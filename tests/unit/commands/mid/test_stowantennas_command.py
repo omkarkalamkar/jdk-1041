@@ -133,7 +133,6 @@ def test_reset_stow_mode_data():
     assert not cm.dishln_stow_mode_cmd_exe_data
     assert not cm.number_of_stow_mode_executed
     assert not cm.command_in_progress
-    assert not cm.command_mapping
     cm.logger.debug.assert_called_once()
 
 

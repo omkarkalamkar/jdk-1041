@@ -156,3 +156,40 @@ def test_stow_mode_error():
     assert (
         "Invalid input: Expected a list of dish IDs" in kwargs.get("result")[1]
     )
+
+
+def test_check_invoke_gpm_not_called():
+    cm, _ = create_cm()
+    cm.is_gpm_init = False
+    cm.config.gpm_config.invoke_command_callback = mock.Mock()
+    cm._check_init_and_invoke_gpm()
+    cm.config.gpm_config.invoke_command_callback.assert_not_called()
+    cm.is_gpm_init = True
+    cm.config.gpm_config.invoke_command_callback = None
+    cm._check_init_and_invoke_gpm()
+    cm.is_gpm_init = True
+
+
+def test_assign_k_value_failed(json_factory):
+    cm, _ = create_cm()
+    cm.dish_vcc_validation_status = {"ska001": "k-value not set"}
+
+    assign_str = json_factory("command_AssignResources")
+    task_cb = mock.Mock()
+    cm.assign_resources(assign_str, task_cb, mock.Mock())
+    kwargs = task_cb.call_args_list[-1].kwargs
+    assert kwargs.get("status") == TaskStatus.REJECTED
+    assert kwargs.get("result")[0] == ResultCode.NOT_ALLOWED
+    result = kwargs.get("result")[1]
+    assert "Can't assign receptors with k-value issues:" in result
+
+
+def test_validate_dish_id():
+    cm, _ = create_cm()
+    is_valid, msg = cm.validate_dish_ids(["asf123"])
+    assert not is_valid
+    assert "Invalid Dish id ASF123 provided in Json" in msg
+    cm.config.mkt_extension_id = "ASF"
+    is_valid, msg = cm.validate_dish_ids(["asf123"])
+    assert is_valid
+    assert "" == msg

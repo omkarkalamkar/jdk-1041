@@ -22,11 +22,11 @@ def test_assign_release_version():
     cm.assign_resources_schema_version = "assign:1.2"
     assert cm.assign_resources_schema_version == "assign:1.2"
     assert (
-        cm.assign_resources_schema_version
+        cm.release_resources_schema_version
         == LOW_RELEASE_RESOURCES_SCHEMA_VERSION
     )
-    cm.assign_resources_schema_version = "release:1.2"
-    assert cm.assign_resources_schema_version == "release:1.2"
+    cm.release_resources_schema_version = "release:1.2"
+    assert cm.release_resources_schema_version == "release:1.2"
 
 
 def test_device_names():

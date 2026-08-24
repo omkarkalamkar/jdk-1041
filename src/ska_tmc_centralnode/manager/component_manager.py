@@ -124,7 +124,6 @@ class CNComponentManager(Generic[T], SharingObserver, TmcComponentManager):
         ] = None
         self.op_state_aggregator: TMCOpStateAggregator | None = None
         self.command_in_progress: str = ""
-        self.command_mapping: Dict[str, str | list[dict]] = {}
         self.rlock = threading.RLock()
         self._telescope_availability_aggregator: Aggregator = Aggregator(
             self, logger=config.logger
