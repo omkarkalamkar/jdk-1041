@@ -342,8 +342,6 @@ def test_assign_resources_command_fail_subarray(
 
     helper_adapter_factory = mock.Mock(**attrs)
 
-    # include exception in AssignResources command
-    attrs = {"AssignResources.side_effect": Exception}
     assign_input_str = json_factory("command_AssignResources")
     cm.adapter_factory = helper_adapter_factory
     cm.assign_resources(

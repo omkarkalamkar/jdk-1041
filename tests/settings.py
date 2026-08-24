@@ -5,6 +5,7 @@ import logging
 import os
 import threading
 import time
+from unittest import mock
 
 import pytest
 import tango
@@ -95,6 +96,8 @@ DEVICE_LIST_MID = [
     DISH_MASTER_DEVICE_500,
     DISH_MASTER_DEVICE_999,
 ]
+COMMAND_COMPLETED = "Command Completed"
+TEST_TIMEOUT = "Timeout occurred while executing the test"
 DEVICE_LIST_LOW = [
     "low-tmc/leaf-node-mccs/0",
     "low-mccs/control/control",
@@ -180,7 +183,7 @@ def telescope_on(
     assert result[0] == ResultCode.QUEUED
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), COMMAND_COMPLETED))),
         lookahead=4,
     )
 
@@ -202,7 +205,7 @@ def telescope_off(
     assert result[0] == ResultCode.QUEUED
 
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
-        (unique_id[0], json.dumps((int(ResultCode.OK), "Command Completed"))),
+        (unique_id[0], json.dumps((int(ResultCode.OK), COMMAND_COMPLETED))),
         lookahead=4,
     )
 
@@ -224,7 +227,7 @@ def assign_resources(
     change_event_callbacks["longRunningCommandResult"].assert_change_event(
         (
             unique_id_assign[0],
-            json.dumps((int(ResultCode.OK), "Command Completed")),
+            json.dumps((int(ResultCode.OK), COMMAND_COMPLETED)),
         ),
         lookahead=6,
     )
@@ -383,10 +386,6 @@ def _get_cm_mid_config(
         ],
         "array_layout_path": ("instrument/ska1_low/layout/low-layout.json"),
     }
-
-    def cb(*_args, **_kwargs):
-        pass
-
     bus_manager = BusManager()
     component = CentralComponent(logger)
     component.shared_bus = bus_manager.get_bus()
@@ -398,7 +397,7 @@ def _get_cm_mid_config(
         dish_config=DishVccConfig(
             uri="",
             file_path="",
-            invoke_command_callback=cb,
+            invoke_command_callback=mock.Mock(),
             enable_init=False,
         ),
         gpm_config=GPMConfig(
@@ -522,7 +521,7 @@ def create_cm(
         time.sleep(0.2)
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
+            pytest.fail(TEST_TIMEOUT)
     cm.setup_event_subscription()
     return cm, start_time
 
@@ -565,7 +564,7 @@ def ensure_telescope_state(cm, state, expected_elapsed_time):
                 "The current telescope state is %s",
                 str(cm.component.telescope_state),
             )
-            pytest.fail("Timeout occurred while executing the test")
+            pytest.fail(TEST_TIMEOUT)
     assert elapsed_time < expected_elapsed_time
 
 
@@ -576,7 +575,7 @@ def ensure_tmc_op_state(cm, state, expected_elapsed_time):
     while cm.component.tmc_op_state != state:
         elapsed_time = time.time() - start_time
         if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
+            pytest.fail(TEST_TIMEOUT)
     assert elapsed_time < expected_elapsed_time
 
 
@@ -588,7 +587,7 @@ def ensure_imaging(cm, value, expected_elapsed_time):
         elapsed_time = time.time() - start_time
         time.sleep(0.1)
         if elapsed_time > TIMEOUT:
-            pytest.fail("Timeout occurred while executing the test")
+            pytest.fail(TEST_TIMEOUT)
     assert elapsed_time < expected_elapsed_time
 
 
@@ -696,7 +695,7 @@ def export_device(db, db_info):
 def check_lrcr_events(
     change_event_callback: MockTangoEventCallbackGroup,
     command_name: str,
-    result_to_check: str = '[0,"Command Completed"]',
+    result_to_check: str = f"[0,{COMMAND_COMPLETED}]",
     retries: int = 20,
     callback_name: str = "longRunningCommandResult",
 ):
