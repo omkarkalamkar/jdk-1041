@@ -132,9 +132,7 @@ def test_load_dish_cfg_rejection():
     task_cb = mock.Mock()
     cm.load_dish_cfg("", task_cb, mock.Mock())
     assert not cm.is_dish_vcc_config_set
-    err_msg = (
-        "LoadDishCfg command is allowed in" " CSP Master DevState.OFF only."
-    )
+    err_msg = "LoadDishCfg command is allowed in CSP Master DevState.OFF only."
     task_cb.assert_called_once_with(
         status=TaskStatus.REJECTED,
         result=(ResultCode.NOT_ALLOWED, err_msg),
@@ -143,7 +141,7 @@ def test_load_dish_cfg_rejection():
     cm.is_csp_mln_csp_master_ready.return_value = ResultCode.FAILED
     cm.load_dish_cfg("", task_cb, mock.Mock())
     err_msg = (
-        "CSP master or CSP MLN is not available for" " loaddishcfg execution"
+        "CSP master or CSP MLN is not available for loaddishcfg execution"
     )
     assert not cm.is_dish_vcc_config_set
     task_cb.assert_called_with(

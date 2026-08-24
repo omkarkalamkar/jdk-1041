@@ -57,6 +57,10 @@ from .event_callback_manager.low_event_callback_manager import (
 AssignResourcesLow = assign_resources_command_low.AssignResourcesLow
 
 
+class SubarrayPSSMappingError(Exception):
+    """Raised whenever there is an issue with PSS and subarray mapping"""
+
+
 class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
     """Component Manager class for low central node"""
 
@@ -548,7 +552,7 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
                     "PSS beams: %s already assigned to another subarray",
                     conflicting_beams,
                 )
-                raise Exception(
+                raise SubarrayPSSMappingError(
                     f"PSS beams: {conflicting_beams} already assigned"
                     f" to another subarray"
                 )
@@ -565,4 +569,4 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
                 f" and pss beams mapping: {exception}"
             )
             self.logger.error(error_msg)
-            raise Exception(error_msg) from exception
+            raise SubarrayPSSMappingError(error_msg) from exception
