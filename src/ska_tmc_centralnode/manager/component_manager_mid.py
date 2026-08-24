@@ -10,7 +10,7 @@ import copy
 import json
 import threading
 import time
-from typing import Callable, Dict, List, Tuple, cast
+from typing import Callable, Dict, List, Tuple, Union, cast
 
 from ska_control_model import TaskStatus
 from ska_tango_base.base import TaskCallbackType
@@ -232,7 +232,7 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
 
     def create_device_info(
         self, device_name: str
-    ) -> SubArrayDeviceInfo | DishDeviceInfo | DeviceInfo:
+    ) -> Union[SubArrayDeviceInfo, DishDeviceInfo, DeviceInfo]:
         """Creates the device information for device.
 
         :param device_name: Name of device.

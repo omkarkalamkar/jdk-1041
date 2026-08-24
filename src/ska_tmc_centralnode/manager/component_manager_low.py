@@ -9,7 +9,7 @@ package.
 
 import json
 from collections import defaultdict
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, Tuple, Union
 
 from ska_schemas.schema import validate
 from ska_tango_base.base import TaskCallbackType
@@ -235,7 +235,7 @@ class CNComponentManagerLow(CNComponentManager[InputParameterLow]):
 
     def create_device_info(
         self, device_name: str
-    ) -> SubArrayDeviceInfo | MCCSDeviceInfo | DeviceInfo:
+    ) -> Union[SubArrayDeviceInfo, MCCSDeviceInfo, DeviceInfo]:
         """Creates the device information for device.
 
         :param device_name: Name of device.

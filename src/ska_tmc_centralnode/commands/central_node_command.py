@@ -518,7 +518,6 @@ class TelescopeOnOff(CentralNodeCommand):
             dev_info = self.component_manager.get_device(dev_name)
             if not dev_info.unresponsive:
                 try:
-                    # import debugpy; debugpy.debug_this_thread()
                     self.dish_adapters.append(
                         self._adapter_factory.get_or_create_adapter(
                             dev_name, AdapterType.DISH

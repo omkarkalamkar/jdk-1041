@@ -233,7 +233,6 @@ class TelescopeOn(TelescopeOnOff):
             "Device states before executing TelescopeOn command"
         )
         # send commands to sub-devices
-        # import debugpy; debugpy.debug_this_thread()
         unavailable_devices: list = []
         for return_codes, message_or_unique_ids in [
             self.turn_on_mccs(),
