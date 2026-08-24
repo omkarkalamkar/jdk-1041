@@ -421,7 +421,10 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 current_dish_vcc_validation_status.update(
                     csp_validation_status
                 )
-        elif CENTRALNODE_MID in updated_validation_status:
+        elif (
+            CENTRALNODE_MID in updated_validation_status
+            or MID_CSP_MLN_DEVICE in updated_validation_status
+        ):
             current_dish_vcc_validation_status.update(
                 updated_validation_status
             )
@@ -434,11 +437,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 current_dish_vcc_validation_status.update(
                     csp_validation_status
                 )
-        else:
-            # If the event from CSPMLN only
-            current_dish_vcc_validation_status.update(
-                updated_validation_status
-            )
         self._dish_vcc_validation_status = json.dumps(
             {
                 key: value
@@ -446,9 +444,6 @@ class CNComponentManagerMid(CNComponentManager[InputParameterMid]):
                 if value != "k-value identical"
             }
         )
-        # empty the dictionaries
-        current_dish_vcc_validation_status = {}
-        updated_validation_status = {}
 
     @property
     def global_pointing_model_status(self) -> dict:

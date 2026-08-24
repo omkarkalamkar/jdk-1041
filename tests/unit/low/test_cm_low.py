@@ -32,9 +32,9 @@ def test_assign_release_version():
 def test_device_names():
     cm, _ = create_cm(_input_parameter=InputParameterLow(None))
     assert (
-        cm.get_mccs_master_leaf_node_dev_name() == "mid-tmc/leaf-node-mccs/0"
+        cm.get_mccs_master_leaf_node_dev_name() == "low-tmc/leaf-node-mccs/0"
     )
-    assert cm.get_mccs_master_dev_name() == "mid-mccs/control/0"
+    assert cm.get_mccs_master_dev_name() == "low-mccs/control/0"
 
 
 def test_stop_aggregation_process():
