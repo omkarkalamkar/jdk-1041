@@ -26,6 +26,18 @@ def test_get_dev_names():
 def test_dish_vcc_validation_status():
     cm, _ = create_cm()
     csp_master_unavailable = "CSP Master device is unavailable"
+    csp_master_ok = "TMC and CSP Master Dish Vcc Version is Same"
+    cm._dish_vcc_validation_status = json.dumps(
+        {MID_CSP_MLN_DEVICE: csp_master_ok}
+    )
+    status = {
+        "dish": "ALL DISH OK",
+        MID_CSP_MLN_DEVICE: csp_master_ok,
+    }
+    cm.dish_vcc_validation_status = status
+    assert cm.is_dish_vcc_config_set
+    assert cm._dish_vcc_validation_status == json.dumps(status)
+
     cm._dish_vcc_validation_status = json.dumps(
         {MID_CSP_MLN_DEVICE: csp_master_unavailable}
     )
@@ -193,3 +205,6 @@ def test_validate_dish_id():
     is_valid, msg = cm.validate_dish_ids(["asf123"])
     assert is_valid
     assert "" == msg
+    is_valid, msg = cm.validate_dish_ids(["MKT123"])
+    assert not is_valid
+    assert "MKT id MKT123 not in range (1,63)" in msg
